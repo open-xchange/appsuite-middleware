@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -89,6 +89,8 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.CountingOutputStream;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -342,7 +344,7 @@ public final class MailMessageParser {
              * Parse content
              */
             final ContentType contentType = mail.getContentType();
-            if (contentType.startsWith("multipart/related") && ("application/smil".equals(contentType.getParameter(com.openexchange.java.Strings.toLowerCase("type"))))) {
+            if (contentType.startsWith("multipart/related") && ("application/smil".equals(Strings.asciiLowerCase(contentType.getParameter("type"))))) {
                 parseMailContent(MimeSmilFixer.getInstance().process(mail), handler, prefix, 1);
             } else {
                 parseMailContent(mail, handler, prefix, 1);
@@ -586,17 +588,12 @@ public final class MailMessageParser {
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
-            if (true || isInline) { // Fix for bug #16461: Show every RFC822 part as a nested mail
-                if (!handler.handleNestedMessage(mailPart, getSequenceId(prefix, partCount))) {
-                    stop = true;
-                    return;
-                }
-            } else {
-                if (!handler.handleAttachment(mailPart, isInline, MimeTypes.MIME_MESSAGE_RFC822, fileName, mailPart.getSequenceId())) {
-                    stop = true;
-                    return;
-                }
+            // Fix for bug #16461: Show every RFC822 part as a nested mail
+            if (!handler.handleNestedMessage(mailPart, getSequenceId(prefix, partCount))) {
+                stop = true;
+                return;
             }
+            
         } else if (TNEFUtils.isTNEFMimeType(lcct)) {
             try {
                 /*
@@ -807,9 +804,14 @@ public final class MailMessageParser {
                                     HDR_CONTENT_DISPOSITION,
                                     MimeMessageUtility.foldContentDisposition(cd.toString()));
                             }
-                            CountingOutputStream counter = new CountingOutputStream();
-                            attachment.writeTo(counter);
-                            bodyPart.setSize((int) counter.getCount());
+                            CountingOutputStream counter = null;
+                            try {
+                                counter = new CountingOutputStream();
+                                attachment.writeTo(counter);
+                                bodyPart.setSize((int) counter.getCount());
+                            } finally {
+                                Streams.close(counter);
+                            }
                             parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         } else {
                             /*
@@ -1199,11 +1201,11 @@ public final class MailMessageParser {
     }
 
     private static boolean isSigned(String lcct, ContentType ct) {
-        return "application/pkcs7-mime".equals(lcct) && "signed-data".equals(ct.getParameter("smime-type")) && "smime.p7m".equals(ct.getNameParameter());
+        return "application/pkcs7-mime".equals(lcct) && "signed-data".equals(Strings.asciiLowerCase(ct.getParameter("smime-type"))) && "smime.p7m".equals(Strings.asciiLowerCase(ct.getNameParameter()));
     }
 
     private static boolean isMultipartSigned(String lcct, ContentType ct) {
-        return "multipart/signed".equals(lcct) && "application/pkcs7-signature".equals(ct.getParameter("protocol"));
+        return "multipart/signed".equals(lcct) && "application/pkcs7-signature".equals(Strings.asciiLowerCase(ct.getParameter("protocol")));
     }
 
     /**

@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 7
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -497,7 +497,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-for LANG in ca_ES cs_CZ da_DK de_CH de_DE el_GR en_US es_ES es_MX eu_ES fi_FI fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nb_NO nl_NL pl_PL pt_BR pt_PT ro_RO ru_RU sk_SK sv_SE tr_TR zh_CN zh_TW en_GB; do \
+for LANG in ca_ES cs_CZ da_DK de_CH de_DE el_GR en_GB en_US es_ES es_MX eu_ES fi_FI fr_CA fr_FR he_HE hu_HU it_IT ja_JP ko_KO lv_LV nb_NO nl_NL pl_PL pt_BR pt_PT ro_RO ru_RU sk_SK sv_SE tr_TR zh_CN zh_TW en_GB; do \
     ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -Dlanguage=${LANG} -f build/build.xml clean build; \
 done
 
@@ -664,6 +664,16 @@ done
 /opt/open-xchange/i18n/*en_GB*
 
 %changelog
+* Tue Jul 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.2 release
+* Wed Jul 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.8.2 release
+* Wed Jun 29 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.2 release
+* Thu Jun 16 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.8.2 release
+* Wed Apr 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.2 release
 * Wed Mar 30 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.8.1 release
 * Fri Mar 25 2016 Marcus Klein <marcus.klein@open-xchange.com>

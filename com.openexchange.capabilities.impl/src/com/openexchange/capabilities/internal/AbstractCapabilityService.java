@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -75,6 +75,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.FailureAwareCapabilityChecker;
 import com.openexchange.capabilities.CapabilityExceptionCodes;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
@@ -94,6 +95,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.service.PermissionAvailabilityService;
+import com.openexchange.java.BoolReference;
 import com.openexchange.java.ConcurrentEnumMap;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -362,14 +364,15 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         applyAutoLogin(capabilities);
         applyUserPermissions(capabilities, user, context);
         applyConfiguredCapabilities(capabilities, user, context, allowCache);
+        BoolReference putIntoCache = new BoolReference(true);
         if (session == null) {
-            applyDeclaredCapabilities(capabilities, ServerSessionAdapter.valueOf(userId, contextId)); // Code smell level: Ninja...
+            applyDeclaredCapabilities(capabilities, ServerSessionAdapter.valueOf(userId, contextId), putIntoCache); // Code smell level: Ninja...
         } else {
-            applyDeclaredCapabilities(capabilities, session);
+            applyDeclaredCapabilities(capabilities, session, putIntoCache);
         }
         applyGuestFilter(capabilities, user);
 
-        if (userId > 0 && contextId > 0 && (session == null || !session.isTransient())) {
+        if (putIntoCache.getValue() && userId > 0 && contextId > 0 && (session == null || !session.isTransient())) {
             // Put in cache
             final Cache cache = optCache();
             if (null != cache) {
@@ -675,13 +678,13 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      * Every declared capability is checked against the registered {@link CapabilityChecker}s.
      *
      * @param capabilities The capability set
-     *
      * @param session The session; either a real one or a synthetic one, but never <code>null</code>
+     * @param putIntoCache Tracks whether a put into cache is recommended
      * @throws OXException
      */
-    private void applyDeclaredCapabilities(CapabilitySet capabilities, Session session) throws OXException {
+    private void applyDeclaredCapabilities(CapabilitySet capabilities, Session session, BoolReference putIntoCache) throws OXException {
         for (String cap : declaredCapabilities.keySet()) {
-            if (check(cap, session, capabilities)) {
+            if (check(cap, session, capabilities, putIntoCache)) {
                 capabilities.add(getCapability(cap));
             } else {
                 capabilities.remove(cap);
@@ -781,23 +784,14 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         DENY_ALL, STATIC, INHERIT;
     }
 
-    private boolean check(String cap, Session session, CapabilitySet allCapabilities) throws OXException {
+    private boolean check(String cap, Session session, CapabilitySet allCapabilities, BoolReference putIntoCache) throws OXException {
         final Map<String, List<CapabilityChecker>> checkers = getCheckers();
 
         List<CapabilityChecker> list = checkers.get(cap.toLowerCase());
         if (null != list && !list.isEmpty()) {
             for (CapabilityChecker checker : list) {
-                try {
-                    if (checker instanceof DependentCapabilityChecker) {
-                        DependentCapabilityChecker dependentChecker = (DependentCapabilityChecker) checker;
-                        if (!dependentChecker.isEnabled(cap, session, allCapabilities)) {
-                            return false;
-                        }
-                    } else if (!checker.isEnabled(cap, session)) {
-                        return false;
-                    }
-                } catch (final Exception e) {
-                    LOG.warn("Could not check availability for capability '{}'. Assuming as absent this time.", cap, e);
+                if (!performCapabilityCheck(checker, cap, session, allCapabilities, putIntoCache)) {
+                    return false;
                 }
             }
         }
@@ -805,15 +799,38 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         list = checkers.get("*");
         if (null != list && !list.isEmpty()) {
             for (CapabilityChecker checker : list) {
-                if (checker instanceof DependentCapabilityChecker) {
-                    DependentCapabilityChecker dependentChecker = (DependentCapabilityChecker) checker;
-                    if (!dependentChecker.isEnabled(cap, session, allCapabilities)) {
-                        return false;
-                    }
-                } else if (!checker.isEnabled(cap, session)) {
+                if (!performCapabilityCheck(checker, cap, session, allCapabilities, putIntoCache)) {
                     return false;
                 }
             }
+        }
+
+        return true;
+    }
+
+    private boolean performCapabilityCheck(CapabilityChecker checker, String cap, Session session, CapabilitySet allCapabilities, BoolReference putIntoCache) {
+        try {
+            if (checker instanceof DependentCapabilityChecker) {
+                if (!((DependentCapabilityChecker) checker).isEnabled(cap, session, allCapabilities)) {
+                    return false;
+                }
+            } else if (checker instanceof FailureAwareCapabilityChecker) {
+                switch (((FailureAwareCapabilityChecker) checker).checkEnabled(cap, session)) {
+                    case DISABLED:
+                        return false;
+                    case FAILURE:
+                        putIntoCache.setValue(false);
+                        return false;
+                    default:
+                        break;
+                }
+            } else if (!checker.isEnabled(cap, session)) {
+                return false;
+            }
+        } catch (final Exception e) {
+            LOG.warn("Could not check availability for capability '{}'. Assuming as absent this time.", cap, e);
+            putIntoCache.setValue(false);
+            return false;
         }
 
         return true;
@@ -1043,8 +1060,9 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             // Now the declared ones
             CapabilitySet grantedCapabilities = new CapabilitySet(16);
             FakeSession fakeSession = new FakeSession(userId, contextId);
+            BoolReference dontCare = new BoolReference();
             for (String cap : declaredCapabilities.keySet()) {
-                if (check(cap, fakeSession, grantedCapabilities)) {
+                if (check(cap, fakeSession, grantedCapabilities, dontCare)) {
                     grantedCapabilities.add(getCapability(cap));
                 }
             }

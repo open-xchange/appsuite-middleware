@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,6 +50,7 @@
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import static com.openexchange.ajax.requesthandler.AJAXRequestDataTools.parseBoolParameter;
+import static com.openexchange.tools.servlet.http.Tools.getWriterFrom;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -110,14 +111,19 @@ public class APIResponseRenderer implements ResponseRenderer {
     }
 
     @Override
-    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) {
+    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         final Boolean plainJson = (Boolean) result.getParameter(PLAIN_JSON);
         final Response response = (Response) result.getResultObject();
         response.setContinuationUUID(result.getContinuationUuid());
         if (parseBoolParameter(INCLUDE_STACK_TRACE_ON_ERROR, request) ) {
             response.setIncludeStackTraceOnError(true);
         }
-        writeResponse(response, request.getAction(), req, resp, null == plainJson ? false : plainJson.booleanValue());
+
+        // Try to obtain writer instance and then output response
+        PrintWriter writer = getWriterFrom(resp);
+        if (null != writer) {
+            writeResponse(response, request.getAction(), writer, req, resp, null == plainJson ? false : plainJson.booleanValue());
+        }
     }
 
     private static final String SESSION_KEY = SessionServlet.SESSION_KEY;
@@ -169,18 +175,46 @@ public class APIResponseRenderer implements ResponseRenderer {
      * <p>
      * The response is considered as HTML callback if one of these conditions is met:
      * <ul>
-     * <li>The HTTP Servlet request indicates <i>multipart/*</i> content type</li>
-     * <li>The HTTP Servlet request has the <code>"respondWithHTML"</code> parameter set to <code>"true"</code></li>
-     * <li>The HTTP Servlet request contains non-<code>null</code> <code>"callback"</code> parameter</li>
+     * <li>The HTTP request indicates <i>multipart/*</i> content type</li>
+     * <li>The HTTP request has the <code>"respondWithHTML"</code> parameter set to <code>"true"</code></li>
+     * <li>The HTTP request contains non-<code>null</code> <code>"callback"</code> parameter</li>
      * </ul>
      *
      * @param response The response to write
      * @param action The request's action
-     * @param req The HTTP Servlet request
-     * @param resp The HTTP Servlet response
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     * @return <code>true</code> if response has been successfully written; otherwise <code>false</code>
+     * @throws IOException If an I/O error occurs
      */
-    public static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp) {
-        writeResponse(response, action, req, resp, false);
+    public static boolean writeResponse(Response response, String action, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        // Try to obtain writer instance
+        PrintWriter writer = getWriterFrom(resp);
+
+        // Write response (if writer is available)
+        return null == writer ? false : writeResponse(response, action, writer, req, resp, false);
+    }
+
+    /**
+     * Write specified response to Servlet output stream either as HTML callback or as JSON data.
+     * <p>
+     * The response is considered as HTML callback if one of these conditions is met:
+     * <ul>
+     * <li>The HTTP request indicates <i>multipart/*</i> content type</li>
+     * <li>The HTTP request has the <code>"respondWithHTML"</code> parameter set to <code>"true"</code></li>
+     * <li>The HTTP request contains non-<code>null</code> <code>"callback"</code> parameter</li>
+     * </ul>
+     *
+     * @param response The response to write
+     * @param action The request's action
+     * @param writer The writer to use
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     * @return <code>true</code> if response has been successfully written; otherwise <code>false</code>
+     * @throws IOException If an I/O error occurs
+     */
+    public static boolean writeResponse(Response response, String action, PrintWriter writer, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        return writeResponse(response, action, writer, req, resp, false);
     }
 
     private static final char[] JS_FRAGMENT_PART1 = ("<!DOCTYPE html><html><head>"
@@ -194,39 +228,37 @@ public class APIResponseRenderer implements ResponseRenderer {
     private static final char[] JS_FRAGMENT_PART3 = ")</script></head></html>".toCharArray();
 
     private static final Pattern PATTERN_QUOTE = Pattern.compile("(^|[^\\\\])\"");
-    // private static final Pattern PATTERN_SINGLE_QUOTE = Pattern.compile("(^|[^\\\\])'");
 
-    private static void writeResponse(final Response response, final String action, final HttpServletRequest req, final HttpServletResponse resp, final boolean plainJson) {
+    private static boolean writeResponse(Response response, String action, PrintWriter writer, HttpServletRequest req, HttpServletResponse resp, boolean plainJson) throws IOException {
         try {
             if (plainJson) {
-                ResponseWriter.write(response, resp.getWriter(), localeFrom(req));
+                ResponseWriter.write(response, writer, localeFrom(req));
             } else if (expectsJsCallback(req)) {
                 // Regular HTML call-back...
-                writeJsCallback(response, action, req, resp);
+                writeJsCallback(response, action, writer, req, resp);
             } else if (req.getParameter(JSONP) != null) {
                 resp.setContentType("text/javascript");
                 final String call = AJAXUtility.sanitizeParam(req.getParameter(JSONP));
                 // Write: <call> + "(" + <json> + ")"
-                final PrintWriter writer = resp.getWriter();
                 writer.write(call);
                 writer.write('(');
                 ResponseWriter.write(response, writer, localeFrom(req));
                 writer.write(')');
             } else {
-                ResponseWriter.write(response, resp.getWriter(), localeFrom(req));
+                ResponseWriter.write(response, writer, localeFrom(req));
             }
-        } catch (final JSONException e) {
+
+            // Successfully written...
+            return true;
+        } catch (JSONException e) {
             LOG.error("", e);
             try {
                 resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred: " + e.getMessage());
-            } catch (final IOException ioe) {
+            } catch (IOException ioe) {
                 LOG.error("", ioe);
             }
-        } catch (final IOException e) {
-            LOG.error("", e);
-        } catch (final IllegalStateException e) {
-            LOG.error("", e);
         }
+        return false;
     }
 
     /**
@@ -244,12 +276,29 @@ public class APIResponseRenderer implements ResponseRenderer {
      *
      * @param response The response to output JavaScript call-back for
      * @param action The associated action
+     * @param writer The writer to output to
+     * @param req The HTTP request
+     * @param resp The HTTP response
+     * @throws IOException If an I/O error occurs
+     * @throws JSONException If a JSON error occurs
+     * @throws IllegalStateException If writer instance cannot be obtained from HTTP response
+     */
+    public static void writeJsCallback(Response response, String action, HttpServletRequest req, HttpServletResponse resp) throws IOException, JSONException {
+        writeJsCallback(response, action, resp.getWriter(), req, resp);
+    }
+
+    /**
+     * Writes common JavaScript call-back for given response.
+     *
+     * @param response The response to output JavaScript call-back for
+     * @param action The associated action
+     * @param writer The writer to output to
      * @param req The HTTP request
      * @param resp The HTTP response
      * @throws IOException If an I/O error occurs
      * @throws JSONException If a JSON error occurs
      */
-    public static void writeJsCallback(Response response, String action, HttpServletRequest req, HttpServletResponse resp) throws IOException, JSONException {
+    public static void writeJsCallback(Response response, String action, Writer writer, HttpServletRequest req, HttpServletResponse resp) throws IOException, JSONException {
         resp.setStatus(HttpServletResponse.SC_OK);
         resp.setContentType(CONTENTTYPE_HTML);
         resp.setHeader("Content-Disposition", "inline");
@@ -264,7 +313,6 @@ public class APIResponseRenderer implements ResponseRenderer {
         }
         callback = AJAXUtility.sanitizeParam(callback);
 
-        final PrintWriter writer = resp.getWriter();
         writer.write(JS_FRAGMENT_PART1);
         writer.write(callback);
         writer.write(JS_FRAGMENT_PART2);

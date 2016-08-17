@@ -1,0 +1,49 @@
+/mail?action=all:
+  get:
+    operationId: getAllMails
+    tags:
+      - mail
+    summary: Gets all mails.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamMailFolder"
+      - $ref: "#/parameters/gblQueryParamMailColumns"
+      - in: query
+        name: sort
+        type: string
+        description: The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified.
+        required: false
+      - in: query
+        name: order
+        type: string
+        description: '"asc" if the response entities should be sorted in the ascending order, "desc" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.'
+        required: false
+      - in: query
+        name: left_hand_limit
+        type: integer
+        description: A positive integer number to specify the "left-hand" limit of the range to return.
+        required: false
+      - in: query
+        name: right_hand_limit
+        type: integer
+        description: A positive integer number to specify the "right-hand" limit of the range to return.
+        required: false
+      - in: query
+        name: limit
+        type: integer
+        description: A positive integer number to specify how many items shall be returned according to given sorting; overrides `left_hand_limit`/`right_hand_limit` parameters and is equal to `left_hand_limit=0` and `right_hand_limit=<limit>`.
+        required: false
+      - in: query
+        name: filter
+        type: string
+        description: The category id to filter for. If set to "general" all mails which does not belong to any other category are retrieved.
+        required: false
+    responses:
+      200:
+        description: |
+          'A JSON object containing an array with mail data. Each array element describes one mail and
+          is itself an array. The elements of each array contain the information specified by the corresponding
+          identifiers in the `columns` parameter. Not IMAP: with timestamp. In case of errors the responsible fields in the
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).'
+        schema:
+          $ref: "#/definitions/MailsResponse"

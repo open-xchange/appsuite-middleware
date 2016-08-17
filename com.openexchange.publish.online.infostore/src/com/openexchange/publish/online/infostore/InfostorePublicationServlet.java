@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -70,6 +70,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.publish.EscapeMode;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.online.infostore.util.InfostorePublicationUtils;
@@ -97,18 +98,14 @@ public class InfostorePublicationServlet extends HttpServlet {
 
     private final String DESTROY_DOCUMENT = "destroyDocument";
 
-    private volatile PublicationDataLoaderService dataLoader;
-
-    private volatile InfostoreDocumentPublicationService publisher;
-
-    private volatile ContextService context;
-
-    private volatile IDBasedFileAccessFactory fileAccessFactory;
+    private final PublicationDataLoaderService dataLoader;
+    private final InfostoreDocumentPublicationService publisher;
+    private final ContextService contextService;
+    private final IDBasedFileAccessFactory fileAccessFactory;
 
     public InfostorePublicationServlet(ContextService context, PublicationDataLoaderService dataLoader, IDBasedFileAccessFactory fileAccessFactory, InfostoreDocumentPublicationService publicationService) {
         super();
-
-        this.context = context;
+        this.contextService = context;
         this.dataLoader = dataLoader;
         this.fileAccessFactory = fileAccessFactory;
         this.publisher = publicationService;
@@ -242,7 +239,7 @@ public class InfostorePublicationServlet extends HttpServlet {
     }
 
     private InputStream loadContent(final Publication publication) throws OXException {
-        Collection<? extends Object> load = dataLoader.load(publication, null);
+        Collection<? extends Object> load = dataLoader.load(publication, EscapeMode.NONE);
         if(load == null || load.isEmpty()) {
             return new ByteArrayInputStream(new byte[0]);
         }
@@ -272,7 +269,7 @@ public class InfostorePublicationServlet extends HttpServlet {
         if(cid == -1) {
             throw new IllegalArgumentException("URL did not contain context id");
         }
-        return context.getContext(cid);
+        return contextService.getContext(cid);
     }
 
 }

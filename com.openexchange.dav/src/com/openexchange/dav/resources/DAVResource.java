@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.DAVFactory;
+import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.dav.mixins.CurrentUserPrincipal;
 import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
@@ -78,6 +79,8 @@ public abstract class DAVResource extends AbstractResource {
 
     protected final DAVFactory factory;
     protected final WebdavPath url;
+
+    private DAVUserAgent userAgent;
 
     /**
      * Initializes a new {@link DAVResource}.
@@ -113,6 +116,28 @@ public abstract class DAVResource extends AbstractResource {
             }
         }
         throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Gets the user agent derived from the request's <code>user-agent</code> header.
+     *
+     * @return The user agent, or {@link DAVUserAgent#UNKNOWN} if not set or unknown
+     */
+    protected DAVUserAgent getUserAgent() {
+        if (null == userAgent) {
+            String value = null;
+            com.openexchange.framework.request.RequestContext requestContext = RequestContextHolder.get();
+            if (null != requestContext) {
+                value = requestContext.getUserAgent();
+            } else {
+                Session session = factory.getSession();
+                if (null != session) {
+                    value = (String) session.getParameter("user-agent");
+                }
+            }
+            userAgent = DAVUserAgent.parse(value);
+        }
+        return userAgent;
     }
 
     @Override

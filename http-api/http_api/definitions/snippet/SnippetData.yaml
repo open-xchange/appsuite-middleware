@@ -1,0 +1,37 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The ID of the snippet.
+  accountid:
+    type: integer
+    description: The identifier of the account.
+  createdby:
+    type: integer
+    description: The user ID of the creator.
+  displayname:
+    type: string
+    description: The display name of the snippet.
+  type:
+    type: string
+    description: The type of the snippet, like "signature".
+  content:
+    type: string
+    description: Contains the snippet's content.
+  module:
+    type: string
+    description: The module identifier, like "com.openexchange.mail".
+  shared:
+    type: boolean
+    description: The shared flag.
+  misc:
+    type: object
+    description: Contains miscellaneous data as JSON object.
+  props:
+    type: object
+    description: Contains custom properties as JSON object.
+  files:
+    type: array
+    description: An array of attachments.
+    items:
+      $ref: "#/definitions/SnippetAttachment"

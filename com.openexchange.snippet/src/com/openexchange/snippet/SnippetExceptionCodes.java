@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -95,9 +95,9 @@ public enum SnippetExceptionCodes implements DisplayableOXExceptionCode {
      */
     MAXIMUM_IMAGES_COUNT("Maximum number of '%1$s' for signature images reached.", SnippetStrings.MAXIMUM_IMAGES_COUNT_MSG, CATEGORY_ERROR, 8),
     /**
-     * Maximum size of '%1$s' for signature image is reached.
+     * The signature image exceeds the maximum allowed size of '%1$s' (%2$s bytes).
      */
-    MAXIMUM_IMAGE_SIZE("Maximum size of '%1$s' for signature image is reached.", SnippetStrings.MAXIMUM_IMAGE_SIZE_MSG, CATEGORY_ERROR, 9),
+    MAXIMUM_IMAGE_SIZE("The signature image exceeds the maximum allowed size of '%1$s' (%2$s bytes).", SnippetStrings.MAXIMUM_IMAGE_SIZE_MSG, CATEGORY_ERROR, 9),
     /**
      * Invalid or harmful image data detected.
      */

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -296,6 +296,18 @@ public interface InfostoreFacade extends TransactionAware {
     IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, ServerSession session) throws OXException;
 
     /**
+     * Saves given document meta data and binary content (if not <code>null</code>).
+     *
+     * @param document The document meta data
+     * @param data The optional binary content or <code>null</code>
+     * @param sequenceNumber The sequence number; e.g. client most recent time stamp
+     * @param modifiedColumns The columns to modify
+     * @param session The session
+     * @throws OXException If save operation fails
+     */
+    IDTuple saveDocumentTryAddVersion(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException;
+
+    /**
      * Removes all documents contained in specified folder.
      *
      * @param folderId The identifier of the folder to clear
@@ -531,6 +543,15 @@ public interface InfostoreFacade extends TransactionAware {
     int countDocuments(long folderId, ServerSession session) throws OXException;
 
     /**
+     * Gets the total size of all document versions in a folder.
+     *
+     * @param folderId The folder identifier
+     * @param session The associated session
+     * @return The total size of all document versions in a folder
+     */
+    long getTotalSize(long folderId, ServerSession session) throws OXException;
+
+    /**
      * Signals if denoted folder contains documents not owned by specified user.
      *
      * @param folderId The folder identifier
@@ -553,12 +574,16 @@ public interface InfostoreFacade extends TransactionAware {
     /**
      * Performs necessary clean-up operations if specified user has been deleted.
      *
+     * Moves all shared files to the user specified by <code>destUserID</code>. If <code>destUserID</code> set to null the context admin will be used instead.
+     * If set to 0 or below all shared files will be deleted instead.
+     *
      * @param userId The user identifier
      * @param context The context
+     * @param destUserID The user id the public files will be assigned to.
      * @param session The session
      * @throws OXException If clean-up fails
      */
-    void removeUser(int userId, Context context, ServerSession session) throws OXException;
+    void removeUser(int userId, Context context, Integer destUserID, ServerSession session) throws OXException;
 
     /**
      * Unlocks specified document.

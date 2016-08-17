@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -93,13 +93,17 @@ public final class ReconnectingInputStreamClosure implements IFileHolder.InputSt
     @Override
     public InputStream newStream() throws OXException, IOException {
         {
-            final ThresholdFileHolder tfh = this.tfh;
+            ThresholdFileHolder tfh = this.tfh;
             if (null != tfh) {
                 return tfh.getStream();
             }
         }
+
+        InputStream partStream = null;
+        boolean close = true;
         try {
-            final PushbackInputStream in = new PushbackInputStream(mailPart.getInputStream());
+            partStream = mailPart.getInputStream();
+            PushbackInputStream in = new PushbackInputStream(partStream);
             // Check if readable...
             final int check = in.read();
             if (check < 0) {
@@ -107,26 +111,35 @@ public final class ReconnectingInputStreamClosure implements IFileHolder.InputSt
             }
             // ... then push back to stream
             in.unread(check);
+            close = false;
             return in;
         } catch (final com.sun.mail.util.FolderClosedIOException e) {
             // Need to reconnect
-            final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderPath);
-            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> ma = null;
-            try {
-                ma = MailAccess.getInstance(session, fa.getAccountId());
-                ma.connect(false);
-                final ThresholdFileHolder newTfh = new ThresholdFileHolder();
-                if (image) {
-                    newTfh.write(ma.getMessageStorage().getImageAttachment(fa.getFullName(), uid, id).getInputStream());
-                } else {
-                    newTfh.write(ma.getMessageStorage().getAttachment(fa.getFullName(), uid, id).getInputStream());
-                }
-                this.tfh = newTfh;
-                return newTfh.getStream();
-            } finally {
-                if (null != ma) {
-                    ma.close(true);
-                }
+            return reconnectAndGetStream();
+        } finally {
+            if (close) {
+                Streams.close(partStream);
+            }
+        }
+    }
+
+    private InputStream reconnectAndGetStream() throws OXException {
+        FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderPath);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> ma = null;
+        try {
+            ma = MailAccess.getInstance(session, fa.getAccountId());
+            ma.connect(false);
+            final ThresholdFileHolder newTfh = new ThresholdFileHolder();
+            if (image) {
+                newTfh.write(ma.getMessageStorage().getImageAttachment(fa.getFullName(), uid, id).getInputStream());
+            } else {
+                newTfh.write(ma.getMessageStorage().getAttachment(fa.getFullName(), uid, id).getInputStream());
+            }
+            this.tfh = newTfh;
+            return newTfh.getStream();
+        } finally {
+            if (null != ma) {
+                ma.close(true);
             }
         }
     }

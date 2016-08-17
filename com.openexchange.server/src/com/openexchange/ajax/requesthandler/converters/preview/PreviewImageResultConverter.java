@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -77,7 +77,6 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.preview.ContentTypeChecker;
-import com.openexchange.preview.Delegating;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.preview.PreviewOutput;
@@ -277,20 +276,13 @@ public class PreviewImageResultConverter extends AbstractPreviewResultConverter 
                     fileHolder = new ModifyableFileHolder(fileHolder).setContentType(mimeType);
 
                     boolean useCurrentThread = true;
-                    if (previewService instanceof Delegating) {
-                        // Determine candidate
-                        Delegating delegating = (Delegating) previewService;
-                        PreviewService candidate = delegating.getBestFitOrDelegate(mimeType, getOutput());
-                        if (null == candidate) {
-                            String name = fileHolder.getName();
-                            throw PreviewExceptionCodes.NO_PREVIEW_SERVICE2.create(null == mimeType ? "" :  mimeType, null == name ? "<unknown>" : name);
-                        }
-
-                        // Check for possible RemoteInternalPreviewService instance
-                        if (previewService instanceof RemoteInternalPreviewService) {
-                            long timeToWaitMillis = ((RemoteInternalPreviewService) previewService).getTimeToWaitMillis();
+                    {
+                        // Check if we deal with an instance of RemoteInternalPreviewService. In that case we need to limit the processing time...
+                        RemoteInternalPreviewService remoteInternalPreviewService = getRemoteInternalPreviewServiceWithMime(previewService, mimeType, getOutput());
+                        if (null != remoteInternalPreviewService) {
+                            long timeToWaitMillis = remoteInternalPreviewService.getTimeToWaitMillis();
                             if (timeToWaitMillis > 0) {
-                                // Perform with separate thread
+                             // Perform with separate thread
                                 useCurrentThread = false;
                                 InterruptibleInputStream iis = new InterruptibleInputStream(stream);
                                 try {

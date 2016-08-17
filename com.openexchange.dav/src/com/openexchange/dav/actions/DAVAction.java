@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -71,6 +71,7 @@ import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
@@ -138,6 +139,26 @@ public abstract class DAVAction extends AbstractAction {
     }
 
     /**
+     * Optionally gets the root element of the request body from the supplied WebDAV request.
+     * parsing fails.
+     *
+     * @param request The WebDAV request
+     * @param namespace The expected namespace of the root element
+     * @param name The expected name of the root element
+     * @return The root element, or <code>null</code> if there is none or no document could be parsed
+     */
+    protected Element optRootElement(WebdavRequest request, Namespace namespace, String name) throws WebdavProtocolException {
+        Document requestBody = optRequestBody(request);
+        if (null != requestBody) {
+            Element rootElement = requestBody.getRootElement();
+            if (null != rootElement && rootElement.getNamespace().equals(namespace) && rootElement.getName().equals(name)) {
+                return rootElement;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Optionally extracts the request body document from a WebDAV request.
      *
      * @param request The WebDAV request
@@ -147,7 +168,7 @@ public abstract class DAVAction extends AbstractAction {
         try {
             return request.getBodyAsDocument();
         } catch (JDOMException | IOException e) {
-            org.slf4j.LoggerFactory.getLogger(DAVAction.class).warn("Error getting WebDAV request body", e);
+            org.slf4j.LoggerFactory.getLogger(DAVAction.class).debug("Error getting WebDAV request body", e);
             return null;
         }
     }
@@ -265,7 +286,9 @@ public abstract class DAVAction extends AbstractAction {
             for (Element requestedProps : requestBody.getRootElement().getChildren("prop", DAVProtocol.DAV_NS)){
                 for (Element requestedProperty : requestedProps.getChildren()) {
                     loadingHints.addProperty(requestedProperty.getNamespaceURI(), requestedProperty.getName());
-                    responseMarshaller.addProperty(requestedProperty.getNamespaceURI(), requestedProperty.getName());
+                    WebdavProperty property = new WebdavProperty(requestedProperty.getNamespaceURI(), requestedProperty.getName());
+                    property.setChildren(requestedProperty.getChildren());
+                    responseMarshaller.addProperty(property);
                 }
             }
             marshaller = responseMarshaller;

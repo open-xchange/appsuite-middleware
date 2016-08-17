@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -71,10 +71,10 @@ public class Bug22304Test extends AbstractSanitizing {
             // "\n" +
             "<html><head>\n" +
             "    <meta charset=\"UTF-8\">\n" +
-            "</head><body><!-- [if gte mso 9]> --><xml>\n" +
+            "</head><body><!-- [if gte mso 9]><xml>\n" +
             "<o:shapelayout v:ext=\"edit\">\n" +
-            "<o:idmap v:ext=\"edit\" data=\"1\"/>\n" +
-            "</o:shapelayout></xml><!-- <![endif] --></body></html>\n ";
+            "<o:idmap v:ext=\"edit\" data=\"1\" />\n" +
+            "</o:shapelayout></xml><![endif] --></body></html>\n ";
 
         String ret = getHtmlService().getConformHTML(content, "UTF-8");
         assertEquals("Unexpected return value", expected, ret);

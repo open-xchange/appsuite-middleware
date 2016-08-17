@@ -1,0 +1,19 @@
+type: object
+description: A name-value-pair where only one name with a value must be filled out except the case when VCard data from speicified contact object(s) is obtained then the `folder` and `id` must be specified.
+properties:
+  com.openexchange.mail.conversion.fullname:
+    type: string
+    description: The folder's full name.
+  com.openexchange.mail.conversion.mailid:
+    type: string
+    description: The object ID of the mail.
+  com.openexchange.mail.conversion.sequenceid:
+    type: string
+    description: The attachment sequence ID.
+  folder:
+    type: string
+    description: A folder ID.
+  id:
+    type: string
+    description: The ID.
+    

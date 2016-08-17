@@ -1,0 +1,9 @@
+type: object
+description: A directory is uniquely identified by its full path, relative to the root folder, and the checksum of its content.
+properties:
+  path:
+    type: string
+    description: The path of the directory, including the directory's name, relative to the root folder, e.g. "/sub/test/letters."
+  checksum:
+    type: string
+    description: The MD5 hash of the directory, expressed as a lowercase hexadecimal number string, 32 characters long, e.g. "f8cacac95379527cd4fa15f0cb782a09".

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -52,6 +52,7 @@ package com.openexchange.filestore.impl;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.osgi.framework.BundleContext;
@@ -61,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.FileStorageService;
+import com.openexchange.filestore.FileStorages;
 
 /**
  * {@link CompositeFileStorageService}
@@ -85,25 +87,26 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
 
     @Override
     public FileStorage getFileStorage(URI uri) throws OXException {
-        if (null== uri) {
+        if (null == uri) {
             return null;
         }
 
+        URI fsUri = FileStorages.ensureScheme(uri);
         FileStorageProvider candidate = null;
         for (FileStorageProvider fac : providers) {
-            if (fac.supports(uri) && (null == candidate || fac.getRanking() > candidate.getRanking())) {
+            if (fac.supports(fsUri) && (null == candidate || fac.getRanking() > candidate.getRanking())) {
                 candidate = fac;
             }
         }
         if (null != candidate && candidate.getRanking() >= DEFAULT_RANKING) {
-            return new CloseableTrackingFileStorage(candidate.getFileStorage(uri));
+            return new CloseableTrackingFileStorage(candidate.getFileStorage(fsUri));
         }
 
         /*
          * Fall back to default implementation
          */
 
-        return new CloseableTrackingFileStorage(getInternalFileStorage(uri));
+        return new CloseableTrackingFileStorage(getInternalFileStorage(fsUri));
     }
 
     @Override
@@ -115,14 +118,9 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
         try {
             LocalFileStorage standardFS = new LocalFileStorage(uri);
             HashingFileStorage hashedFS = new HashingFileStorage(new File(new File(uri), "hashed"));
-
-            CompositingFileStorage cStorage = new CompositingFileStorage();
-            cStorage.addStore(standardFS);
-            cStorage.addStore("hashed", hashedFS);
-            cStorage.setSavePrefix("hashed");
-            return cStorage;
+            return new CompositingFileStorage(standardFS, "hashed", Collections.<String, FileStorage> singletonMap("hashed", hashedFS));
         } catch (IllegalArgumentException e) {
-            throw OXException.general("Cannot create file storage for URI: \"" + uri + "\". Wrong or missing FileStorage bundle for scheme " + uri.getScheme() + "?", e);
+            throw OXException.general("Cannot create file storage for URI: \"" + uri + "\". That URI does not hold the preconditions to be absolute, hierarchical with a scheme equal to \"file\", a non-empty path component, and undefined authority, query, and fragment components.", e);
         }
     }
 

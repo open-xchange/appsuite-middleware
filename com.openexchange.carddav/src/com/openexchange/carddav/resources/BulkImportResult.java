@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,7 @@
 
 package com.openexchange.carddav.resources;
 
-import com.openexchange.dav.PreconditionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 /**
@@ -60,7 +60,7 @@ import com.openexchange.webdav.protocol.WebdavPath;
  */
 public class BulkImportResult {
 
-    private PreconditionException error;
+    private OXException error;
     private String uid;
     private WebdavPath href;
 
@@ -76,7 +76,7 @@ public class BulkImportResult {
      *
      * @return The error
      */
-    public PreconditionException getError() {
+    public OXException getError() {
         return error;
     }
 
@@ -85,7 +85,7 @@ public class BulkImportResult {
      *
      * @param error The error to set
      */
-    public void setError(PreconditionException error) {
+    public void setError(OXException error) {
         this.error = error;
     }
 

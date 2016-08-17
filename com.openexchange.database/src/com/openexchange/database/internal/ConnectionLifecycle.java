@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -62,6 +62,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.Databases;
@@ -189,8 +191,8 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return DefaultInterests.builder().propertiesOfInterest("com.openexchange.database.usageThreshold").build();
             }
         });
     }
@@ -225,7 +227,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                             com.mysql.jdbc.ConnectionImpl impl = ((com.mysql.jdbc.ConnectionImpl) con);
                             Field openStatementsField = impl.getClass().getSuperclass().getDeclaredField("openStatements");
                             openStatementsField.setAccessible(true);
-                            
+
                             Map<Statement, Statement> open = (Map<Statement, Statement>) openStatementsField.get(impl);
                             for (Entry<Statement, Statement> entry : open.entrySet()) {
                                 openStatement = entry.getKey().toString();

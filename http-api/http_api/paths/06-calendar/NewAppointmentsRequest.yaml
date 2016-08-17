@@ -1,0 +1,44 @@
+/calendar?action=newappointments:
+  get:
+    operationId: getNewAppointments
+    tags:
+      - calendar
+    summary: Gets new appointments.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamCalendarColumns"
+      - in: query
+        name: start
+        type: integer
+        format: int64
+        description: Lower inclusive limit of the queried range as a Date. Only appointments which end on or after this date are returned.
+        required: true
+      - in: query
+        name: end
+        type: integer
+        format: int64
+        description: Upper exclusive limit of the queried range as a Date. Only appointments which start before this date are returned.
+        required: true
+      - in: query
+        name: limit
+        type: string
+        description: Limits the number of returned objects to the given value.
+        required: true
+      - in: query
+        name: sort
+        type: string
+        description: The identifier of a column which determines the sort order of the response. If this parameter is specified and holds a column number, then the parameter order must be also specified.
+        required: false
+      - in: query
+        name: order
+        type: string
+        description: '"asc" if the response entires should be sorted in the ascending order, "desc" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.'
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with appointment data. Appointments are represented by arrays. The elements of each array contain the
+          information specified by the corresponding identifiers in the `columns` parameter. In case of errors the
+          responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/AppointmentsResponse"

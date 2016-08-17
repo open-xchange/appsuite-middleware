@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,6 +52,7 @@ package com.openexchange.configuration.clt;
 import static com.openexchange.configuration.clt.ConvertJUL2LogbackCLT.determineOutput;
 import static com.openexchange.configuration.clt.XMLModifierCLT.createOption;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
 import org.apache.commons.cli.CommandLine;
@@ -98,9 +99,12 @@ public class ExtractJULModificationsCLT {
         if (null == properties) {
             return 1;
         }
-        Properties original = new Properties();
+
+        InputStream resourceStream = null;
         try {
-            original.load(ExtractJULModificationsCLT.class.getClassLoader().getResourceAsStream("file-logging.properties"));
+            Properties original = new Properties();
+            resourceStream = ExtractJULModificationsCLT.class.getClassLoader().getResourceAsStream("file-logging.properties");
+            original.load(resourceStream);
             Properties added = new Properties();
             added.putAll(properties);
             // new
@@ -124,6 +128,14 @@ public class ExtractJULModificationsCLT {
             System.err.println("Can not read file: " + e.getMessage());
             e.printStackTrace();
             return 1;
+        } finally {
+            if (null != resourceStream) {
+                try {
+                    resourceStream.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
         }
         return 0;
     }

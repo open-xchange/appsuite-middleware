@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 7
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -65,6 +65,12 @@ if [ ${1:-0} -eq 2 ]; then
     ox_add_property com.openexchange.http.grizzly.tcpNoDelay true $PFILE
     ox_add_property com.openexchange.http.grizzly.readTimeoutMillis 60000 $PFILE
     ox_add_property com.openexchange.http.grizzly.writeTimeoutMillis 60000 $PFILE
+
+    # SoftwareChange_Request-3248
+    ox_add_property com.openexchange.http.grizzly.hasSSLEnabled false $PFILE
+    ox_add_property com.openexchange.http.grizzly.enabledCipherSuites '' $PFILE
+    ox_add_property com.openexchange.http.grizzly.keystorePath '' $PFILE
+    ox_add_property com.openexchange.http.grizzly.keystorePassword '' $PFILE
 fi
 
 %clean
@@ -80,6 +86,16 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Jul 12 2016 Marc Arens <marc.arens@open-xchange.com>
+Second candidate for 7.8.2 release
+* Wed Jul 06 2016 Marc Arens <marc.arens@open-xchange.com>
+First candidate for 7.8.2 release
+* Wed Jun 29 2016 Marc Arens <marc.arens@open-xchange.com>
+Second candidate for 7.8.2 release
+* Thu Jun 16 2016 Marc Arens <marc.arens@open-xchange.com>
+First candidate for 7.8.2 release
+* Wed Apr 06 2016 Marc Arens <marc.arens@open-xchange.com>
+prepare for 7.8.2 release
 * Wed Mar 30 2016 Marc Arens <marc.arens@open-xchange.com>
 Second candidate for 7.8.1 release
 * Fri Mar 25 2016 Marc Arens <marc.arens@open-xchange.com>

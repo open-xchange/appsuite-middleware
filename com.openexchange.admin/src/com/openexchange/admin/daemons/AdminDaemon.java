@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -59,6 +59,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -87,9 +88,9 @@ public class AdminDaemon implements AdminDaemonService {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AdminDaemon.class);
 
-    private static PropertyHandler prop = null;
+    private static final AtomicReference<PropertyHandler> prop = new AtomicReference<PropertyHandler>(null);
 
-    private static AdminCache cache = null;
+    private static final AtomicReference<AdminCache> cache = new AtomicReference<AdminCache>(null);
 
     private static final Set<Pattern> ALLOWED_BUNDLE_NAMES;
 
@@ -284,34 +285,38 @@ public class AdminDaemon implements AdminDaemonService {
         context.addBundleListener(bl);
     }
 
-    public synchronized static void initCache(final ConfigurationService service) throws OXGenericException {
+    public synchronized static AdminCache initCache(final ConfigurationService service) throws OXGenericException {
+        AdminCache cache = AdminDaemon.cache.get();
         if (cache == null) {
             if (null == service) {
                 throw new OXGenericException("Absent service: " + ConfigurationService.class.getName());
             }
             cache = new AdminCache();
+            AdminDaemon.cache.set(cache);
             cache.initCache(service);
             ClientAdminThread.cache = cache;
-            prop = cache.getProperties();
+            prop.set(cache.getProperties());
             LOG.info("Cache and Pools initialized!");
         } else if (ClientAdminThread.cache == null) {
             ClientAdminThread.cache = cache;
         }
+        return cache;
     }
 
     public static AdminCache getCache() throws OXGenericException {
+        AdminCache cache = AdminDaemon.cache.get();
         if (cache == null) {
             ConfigurationService service = AdminServiceRegistry.getInstance().getService(ConfigurationService.class);
             if (null == service) {
                 service = AdminCache.getConfigurationService();
             }
-            initCache(service);
+            cache = initCache(service);
         }
         return cache;
     }
 
     public void initAccessCombinationsInCache() throws ClassNotFoundException, OXGenericException {
-        AdminDaemon.cache.initAccessCombinations();
+        AdminDaemon.cache.get().initAccessCombinations();
     }
 
     /**
@@ -375,7 +380,7 @@ public class AdminDaemon implements AdminDaemonService {
     }
 
     public static PropertyHandler getProp() {
-        return prop;
+        return prop.get();
     }
 
     /**

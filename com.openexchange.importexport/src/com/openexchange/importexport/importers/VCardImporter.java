@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -57,9 +57,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.similarity.ContactSimilarityService;
 import com.openexchange.contact.vcard.VCardImport;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.VCardService;
@@ -73,6 +72,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -91,6 +91,7 @@ import com.openexchange.tools.session.ServerSession;
 public class VCardImporter extends ContactImporter implements OXExceptionConstants {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VCardImporter.class);
+    private static final String MAX_SIMILARITY = "maxSimilarity";
 
     public VCardImporter(ServiceLookup services) {
         super(services);
@@ -187,6 +188,15 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
             if (false == importVCards.hasNext()) {
                 throw ImportExportExceptionCodes.NO_VCARD_FOUND.create();
             }
+            
+            String maxSimilarity = null;
+            if (optionalParams.containsKey(MAX_SIMILARITY)) {
+                String[] tmpArray = optionalParams.get(MAX_SIMILARITY);
+                if (tmpArray.length == 1) {
+                    maxSimilarity = tmpArray[0];
+                }
+            }
+            
             while (importVCards.hasNext()) {
                 ImportResult importResult = new ImportResult();
                 if (limit <= 0 || count <= limit) {
@@ -198,6 +208,14 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                         }
                         Contact contactObj = vCardImport.getContact();
                         contactObj.setParentFolderID(contactFolderId);
+                        if(maxSimilarity!=null){
+                            Contact duplicate = checkSimilarity(session, contactObj, Float.valueOf(maxSimilarity));
+                            if (duplicate != null) {
+                                importResult.setException(ImportExportExceptionCodes.CONTACT_TOO_SIMILAR.create(contactObj.getUid(), duplicate.getUid(), duplicate.getParentFolderID()));
+                                list.add(importResult);
+                                continue;
+                            }
+                        }
                         importResult.setDate(new Date());
                         try {
                             super.createContact(session, contactObj, Integer.toString(contactFolderId), vCardImport.getVCard());
@@ -233,6 +251,14 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
         }
 
         return list;
+    }
+
+    private Contact checkSimilarity(ServerSession session, Contact con, float maxSimilarity) throws OXException {
+        ContactSimilarityService similarityService = services.getOptionalService(ContactSimilarityService.class);
+        if (similarityService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContactSimilarityService.class.getSimpleName());
+        }
+        return similarityService.getSimilar(session, con, maxSimilarity);
     }
 
 }

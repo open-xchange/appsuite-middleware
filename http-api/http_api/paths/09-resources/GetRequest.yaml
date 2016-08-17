@@ -1,0 +1,20 @@
+/resource?action=get:
+  get:
+    operationId: getResource
+    tags:
+      - resources
+    summary: Gets a resource.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: integer
+        description: The ID of the resource.
+        required: true
+    responses:
+      200:
+        description: |
+          A JSON object containing the resource data. In case of errors the responsible fields in the
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/ResourceResponse"

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -62,20 +62,31 @@ import com.openexchange.session.Session;
 public interface DriveSubscriptionStore {
 
     /**
+     * Adds one ore more subscriptions for the device identified by the supplied token to the specified root folder IDs. Any previous
+     * registrations of the device in the same context using the same service ID / root folder ID combination are replaced implicitly.
+     *
+     * @param session The session
+     * @param serviceID The service ID
+     * @param token The device's registration token
+     * @param rootFolderIDs The root folder IDs
+     * @return The subscriptions
+     */
+    List<Subscription> subscribe(Session session, String serviceID, String token, List<String> rootFolderIDs) throws OXException;
+
+    /**
      * Adds a subscription for the device identified by the supplied token to the specified root folder ID. Any previous registrations
-     * of the device in the same context using the same service ID combination are removed implicitly.
+     * of the device in the same context using the same service ID / root folder ID combination are replaced implicitly.
      *
      * @param session The session
      * @param serviceID The service ID
      * @param token The device's registration token
      * @param rootFolderID The root folder ID
-     * @return The new subscription
-     * @throws OXException
+     * @return The subscription
      */
     Subscription subscribe(Session session, String serviceID, String token, String rootFolderID) throws OXException;
 
     /**
-     * Removes the subscription of the device with the given registration token.
+     * Removes all subscriptions of the device with the given registration token.
      *
      * @param session The session
      * @param serviceID The service ID
@@ -83,6 +94,17 @@ public interface DriveSubscriptionStore {
      * @return <code>true</code> if a subscription was removed, <code>false</code>, otherwise
      */
     boolean unsubscribe(Session session, String serviceID, String token) throws OXException;
+
+    /**
+     * Removes subscriptions for specific root folder IDs of the device with the given registration token.
+     *
+     * @param session The session
+     * @param serviceID The service ID
+     * @param token The device's registration token
+     * @param rootFolderIDs The root folder IDs, or <code>null</code> to remove the subscriptions for all root folders
+     * @return <code>true</code> if a subscription was removed, <code>false</code>, otherwise
+     */
+    boolean unsubscribe(Session session, String serviceID, String token, List<String> rootFolderIDs) throws OXException;
 
     /**
      * Updates the registration ID for a device.

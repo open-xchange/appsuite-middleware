@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -71,6 +71,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.BasicAuthenticator;
 import com.openexchange.admin.rmi.impl.OXCommonImpl;
+import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 
 /**
@@ -80,15 +81,15 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXReseller.class);
 
+    private final AdminCache cache;
     private final BasicAuthenticator basicauth;
-
     private final OXResellerStorageInterface oxresell;
-
     private final ResellerAuth resellerauth;
 
     public OXReseller() throws StorageException {
         super();
         log.debug("Class loaded: {}", this.getClass().getName());
+        cache = ClientAdminThread.cache;
         basicauth = new BasicAuthenticator();
         resellerauth = new ResellerAuth();
         try {
@@ -115,7 +116,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
         try {
             int pid = 0;
-            final Credentials masterCredentials = ClientAdminThread.cache.getMasterCredentials();
+            final Credentials masterCredentials = cache.getMasterCredentials();
             if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
                 basicauth.doAuthentication(creds);
             } else {
@@ -208,7 +209,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
         int pid = 0;
         try {
-            final Credentials masterCredentials = ClientAdminThread.cache.getMasterCredentials();
+            final Credentials masterCredentials = cache.getMasterCredentials();
             if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
                 basicauth.doAuthentication(creds);
             } else {
@@ -283,7 +284,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
         try {
             boolean isMaster = false;
-            final Credentials masterCredentials = ClientAdminThread.cache.getMasterCredentials();
+            final Credentials masterCredentials = cache.getMasterCredentials();
             if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
                 basicauth.doAuthentication(creds);
                 isMaster = true;
@@ -338,7 +339,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
 
         try {
-            final Credentials masterCredentials = ClientAdminThread.cache.getMasterCredentials();
+            final Credentials masterCredentials = cache.getMasterCredentials();
             if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin())) {
                 basicauth.doAuthentication(creds);
             } else {
@@ -392,7 +393,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
 
         try {
             int pid = 0;
-            final Credentials masterCredentials = ClientAdminThread.cache.getMasterCredentials();
+            final Credentials masterCredentials = cache.getMasterCredentials();
             if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
                 basicauth.doAuthentication(creds);
             } else {
@@ -512,7 +513,7 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
         }
 
         try {
-            final Credentials masterCredentials = ClientAdminThread.cache.getMasterCredentials();
+            final Credentials masterCredentials = cache.getMasterCredentials();
             if( null != masterCredentials && masterCredentials.getLogin().equals(creds.getLogin()) ) {
                 basicauth.doAuthentication(creds);
                 return oxresell.list(search_pattern);

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -69,6 +69,7 @@ import net.sourceforge.cardme.io.CompatibilityMode;
 import net.sourceforge.cardme.vcard.exceptions.VCardException;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
@@ -77,6 +78,7 @@ import org.apache.jackrabbit.webdav.client.methods.DeleteMethod;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.client.methods.PutMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.apache.jackrabbit.webdav.property.PropContainer;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -228,6 +230,25 @@ public abstract class CardDAVTest extends WebDAVTest {
             return getWebDAVClient().executeMethod(put);
         } finally {
             release(put);
+        }
+    }
+
+    protected String postVCard(String uid, String vCard, float maxSimilarity) throws Exception {
+        return postVCard(uid, vCard, "Contacts", maxSimilarity);
+    }
+
+    protected String postVCard(String uid, String vCard, String collection, float maxSimilarity) throws Exception {
+        PostMethod post = null;
+        try {
+            final String href = "/carddav/" + collection;
+            post = new PostMethod(getBaseUri() + href);
+            if (maxSimilarity > 0) {
+                post.addRequestHeader(Headers.MAX_SIMILARITY, String.valueOf(maxSimilarity));
+            }
+            post.setRequestEntity(new StringRequestEntity(vCard, "text/vcard", "UTF-8"));
+            return getWebDAVClient().doPost(post, 207);
+        } finally {
+            release(post);
         }
     }
 
@@ -392,10 +413,23 @@ public abstract class CardDAVTest extends WebDAVTest {
      * @return The vCard resources
      */
     protected List<VCardResource> addressbookMultiget(String collection, Collection<String> hrefs) throws Exception {
-        List<VCardResource> addressData = new ArrayList<VCardResource>();
         DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.GETETAG);
         props.add(PropertyNames.ADDRESS_DATA);
+        return addressbookMultiget(collection, hrefs, props);
+    }
+
+    /**
+     * Performs a REPORT method in a specific collection, requesting the address data and ETags of all elements identified by the
+     * supplied hrefs.
+     *
+     * @param collection The collection to perform the report action in
+     * @param hrefs The hrefs to request
+     * @param props The properties to request
+     * @return The vCard resources
+     */
+    protected List<VCardResource> addressbookMultiget(String collection, Collection<String> hrefs, PropContainer props) throws Exception {
+        List<VCardResource> addressData = new ArrayList<VCardResource>();
         ReportInfo reportInfo = new AddressbookMultiGetReportInfo(hrefs.toArray(new String[hrefs.size()]), props);
         MultiStatusResponse[] responses = this.getWebDAVClient().doReport(reportInfo, getBaseUri() + "/carddav/" + collection + '/');
         for (MultiStatusResponse response : responses) {

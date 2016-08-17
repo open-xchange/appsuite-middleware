@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -62,6 +62,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.apps.manifests.json.exception.ManifestsExceptionCodes;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
@@ -78,6 +79,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Some clean-up
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 @DispatcherNotes(noSession = true)
 public class ConfigAction implements AJAXActionService {
@@ -85,7 +87,7 @@ public class ConfigAction implements AJAXActionService {
     private final ServiceLookup services;
     private final ManifestBuilder manifestBuilder;
 
-    public ConfigAction(ServiceLookup services, ManifestBuilder manifestBuilder ) {
+    public ConfigAction(ServiceLookup services, ManifestBuilder manifestBuilder) {
         super();
         this.services = services;
         this.manifestBuilder = manifestBuilder;
@@ -93,15 +95,12 @@ public class ConfigAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        int userId = session.getUserId();
-        int contextId = session.getContextId();
-
         ServerConfigService serverConfigService = services.getService(ServerConfigService.class);
         HostnameService hostNameService = services.getOptionalService(HostnameService.class);
 
         String hostname;
 
-        if(hostNameService != null) {
+        if (hostNameService != null) {
             if (session.getUser().isGuest()) {
                 hostname = hostNameService.getGuestHostname(session.getUserId(), session.getContextId());
             } else {
@@ -115,7 +114,7 @@ public class ConfigAction implements AJAXActionService {
             hostname = requestData.getHostname();
         }
 
-        ServerConfig serverConfig = serverConfigService.getServerConfig(hostname, userId, contextId);
+        ServerConfig serverConfig = serverConfigService.getServerConfig(hostname, session);
         Map<String, Object> filteredConfig = serverConfig.forClient();
 
         try {
@@ -129,9 +128,17 @@ public class ConfigAction implements AJAXActionService {
 
     }
 
-    public JSONObject asJSON(Map<String, Object> serverConfig) throws JSONException, OXException {
-        Set<Capability> capabilities = (Set<Capability>) serverConfig.remove("capabilities");
-        List<SimpleEntry<String, String>> languages = (List<SimpleEntry<String, String>>) serverConfig.remove("languages");
+    /**
+     * Converts the specified {@link Map} into a {@link JSONObject}
+     * 
+     * @param serverConfig The map with the server configuration
+     * @return The converted {@link JSONObject} with the server configuration
+     * @throws JSONException if a JSON error occurs
+     * @throws OXException if an internal error occurs
+     */
+    private JSONObject asJSON(Map<String, Object> serverConfig) throws JSONException, OXException {
+        Set<Capability> capabilities = readAttributes(serverConfig, "capabilities", Set.class);
+        List<SimpleEntry<String, String>> languages = readAttributes(serverConfig, "languages", List.class);
 
         //coerce
         JSONObject serverConfigurationObject = (JSONObject) JSONCoercion.coerceToJSON(serverConfig);
@@ -147,4 +154,20 @@ public class ConfigAction implements AJAXActionService {
         return serverConfigurationObject;
     }
 
+    /**
+     * Reads the specified attributes from the specified {@link Map} and casts them into a type {@link T}
+     * 
+     * @param serverConfig The {@link Map} containing the attributes
+     * @param key The key of the attributes
+     * @param clazz The type {@link T} to cast them
+     * @return The attributes as type {@link T}
+     * @throws OXException if the attributes are not present in the {@link Map}
+     */
+    private <T> T readAttributes(Map<String, Object> serverConfig, String key, Class<T> clazz) throws OXException {
+        Object value = serverConfig.remove(key);
+        if (value == null) {
+            throw ManifestsExceptionCodes.MISSING_ATTRIBUTE_SET.create(key);
+        }
+        return clazz.cast(value);
+    }
 }

@@ -1,0 +1,46 @@
+/file?action=new:
+  post:
+    operationId: uploadFile
+    tags:
+      - file
+    summary: Uploads a file.
+    description: |
+      It can be uploaded multiple files at once. Each file must be specified in an own form field
+      (the form field name is arbitrary).
+    consumes:
+      - multipart/form-data
+    produces:
+      - text/html
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: module
+        type: string
+        description:  The module for which the file is uploaded to determine proper upload quota constraints (e.g. "mail", "infostore", etc.).
+        required: true
+      - in: query
+        name: type
+        type: string
+        description: 'The file type filter to define which file types are allowed during upload. Currently supported filters are: file (for all), text (for `text/*`), media (for image, audio or video), image (for `image/*`), audio (for `audio/*`), video (for `video/*`) and application (for `application/*`).'
+        required: true
+        enum:
+          - file
+          - text
+          - media
+          - image
+          - audio
+          - video
+          - application
+      - in: formData
+        name: file
+        type: file
+        description: The file to upload.
+        required: true
+    responses:
+      200:
+        description: |
+          A HTML page as described in [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) containing a JSON array with the IDs of
+          the uploaded files or errors if some occurred. The files are accessible through the returned IDs
+          for future use.
+        schema:
+          type: string

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -57,7 +57,11 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.activation.DataContentHandler;
@@ -79,6 +83,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -1088,6 +1093,15 @@ public final class MessageUtility {
         part.setHeader(HDR_CONTENT_TYPE, objectMimeType);
     }
 
+    /**
+     * Enriches given {@link MailMessage} instances with header information.
+     *
+     * @param fullName The full name of the folder holding the messages
+     * @param mails The instances to enrich
+     * @param headerNames The names of the headers to set
+     * @param messageStorage The message storage to use
+     * @throws OXException If querying headers fails
+     */
     public static void enrichWithHeaders(String fullName, MailMessage[] mails, String[] headerNames, IMailMessageStorage messageStorage) throws OXException {
         int length = mails.length;
         MailMessage[] headers;
@@ -1110,6 +1124,76 @@ public final class MessageUtility {
                         if (null != values) {
                             for (String value : values) {
                                 mailMessage.addHeader(headerName, value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Enriches given conversation-wise grouped {@link MailMessage} instances with header information.
+     *
+     * @param conversations The conversation-wise grouped {@link MailMessage} instances
+     * @param headerNames The names of the headers to set
+     * @param messageStorage The message storage to use
+     * @throws OXException If querying headers fails
+     */
+    public static void enrichWithHeaders(List<List<MailMessage>> conversations, String[] headerNames, IMailMessageStorage messageStorage) throws OXException {
+        Map<String, List<MailMessage>> folders = new HashMap<String, List<MailMessage>>(4);
+
+        for (List<MailMessage> conversation : conversations) {
+            for (MailMessage mail : conversation) {
+                if (null != mail) {
+                    String fullName = mail.getFolder();
+                    List<MailMessage> msgs = folders.get(fullName);
+                    if (null == msgs) {
+                        msgs = new LinkedList<MailMessage>();
+                        folders.put(fullName, msgs);
+                    }
+                    msgs.add(mail);
+                }
+            }
+        }
+
+        for (Map.Entry<String, List<MailMessage>> entry : folders.entrySet()) {
+            enrichWithHeaders(entry.getKey(), entry.getValue(), headerNames, messageStorage);
+        }
+    }
+
+    private static void enrichWithHeaders(String fullName, List<MailMessage> mails, String[] headerNames, IMailMessageStorage messageStorage) throws OXException {
+        Map<String, MailMessage> headers;
+        {
+            List<String> ids = new LinkedList<String>();
+            for (MailMessage mail : mails) {
+                if (null != mail) {
+                    ids.add(mail.getMailId());
+                }
+            }
+
+            MailMessage[] ms;
+            if (messageStorage instanceof IMailMessageStorageExt) {
+                ms = ((IMailMessageStorageExt) messageStorage).getMessages(fullName, ids.toArray(new String[ids.size()]), MailFields.toArray(MailField.ID), headerNames);
+            } else {
+                ms = messageStorage.getMessages(fullName, ids.toArray(new String[ids.size()]), MailFields.toArray(MailField.ID, MailField.HEADERS));
+            }
+
+            headers = new HashMap<String, MailMessage>(ms.length);
+            for (MailMessage header : ms) {
+                headers.put(header.getMailId(), header);
+            }
+        }
+
+        for (MailMessage mail : mails) {
+            if (null != mail) {
+                MailMessage header = headers.get(mail.getMailId());
+                if (null != header) {
+                    for (String headerName : headerNames) {
+                        String[] values = header.getHeader(headerName);
+                        if (null != values) {
+                            for (String value : values) {
+                                mail.addHeader(headerName, value);
                             }
                         }
                     }

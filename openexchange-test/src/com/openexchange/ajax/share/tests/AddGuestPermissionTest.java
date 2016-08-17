@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -54,6 +54,7 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
+import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
@@ -63,6 +64,7 @@ import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**
  * {@link AddGuestPermissionTest}
@@ -172,7 +174,13 @@ public class AddGuestPermissionTest extends ShareTest {
         Date clientLastModified = subLevel2.getLastModified();
         rootFolder.addPermission(guestPermission);
         rootFolder.setLastModified(clientLastModified);
-        rootFolder = updateFolder(api, rootFolder, true);
+        rootFolder = updateFolder(api, rootFolder, new RequestCustomizer<UpdateRequest>() {
+            @Override
+            public void customize(UpdateRequest request) {
+                request.setCascadePermissions(true);
+                request.setNotifyPermissionEntities(Transport.MAIL);
+            }
+        });
         /*
          * Reload subfolders
          */

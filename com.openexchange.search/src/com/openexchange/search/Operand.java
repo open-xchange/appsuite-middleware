@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -67,7 +67,16 @@ public interface Operand<V> {
         /**
          * A column/field within a data object.
          */
-        COLUMN("column");
+        COLUMN("column"),
+        /**
+         * A attachment operand.
+         */
+        ATTACHMENT("attachment"),
+        /**
+         * A header within a data object.
+         */
+        HEADER("header"),
+        ;
 
         private final String str;
 

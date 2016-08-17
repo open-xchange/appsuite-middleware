@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -63,7 +63,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -78,6 +80,7 @@ import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mail.utils.StorageUtility;
+import com.openexchange.mailaccount.Account;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -316,7 +319,7 @@ public abstract class MailConfig {
      * @return The mail login of specified user
      * @throws OXException If login cannot be determined
      */
-    public static final String getMailLogin(final MailAccount mailAccount, final String userLoginInfo) throws OXException {
+    public static final String getMailLogin(final Account mailAccount, final String userLoginInfo) throws OXException {
         return saneLogin(getMailLogin0(mailAccount, userLoginInfo));
     }
 
@@ -328,7 +331,7 @@ public abstract class MailConfig {
      * @return The mail login of specified user
      * @throws OXException If login cannot be determined
      */
-    private static final String getMailLogin0(final MailAccount mailAccount, final String userLoginInfo) throws OXException {
+    private static final String getMailLogin0(final Account mailAccount, final String userLoginInfo) throws OXException {
         if (!mailAccount.isDefaultAccount()) {
             return mailAccount.getLogin();
         }
@@ -627,8 +630,8 @@ public abstract class MailConfig {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.mail.partModifierImpl");
             }
         });
     }
@@ -674,20 +677,20 @@ public abstract class MailConfig {
      *
      * @param mailConfig The mail config whose login and password shall be set
      * @param sessionPassword The session password
-     * @param mailAccount The mail account
+     * @param account The mail account
      * @throws OXException If a configuration error occurs
      */
-    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final String userLoginInfo, final MailAccount mailAccount) throws OXException {
-        final String proxyDelimiter = mailAccount.isDefaultAccount() ? MailProperties.getInstance().getAuthProxyDelimiter() : null;
+    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final String userLoginInfo, final Account account) throws OXException {
+        final String proxyDelimiter = account.isDefaultAccount() ? MailProperties.getInstance().getAuthProxyDelimiter() : null;
         // Assign login
         final String slogin = session.getLoginName();
         if (proxyDelimiter != null && slogin.contains(proxyDelimiter)) {
             mailConfig.login = saneLogin(slogin);
         } else {
-            mailConfig.login = getMailLogin(mailAccount, userLoginInfo);
+            mailConfig.login = getMailLogin(account, userLoginInfo);
         }
         // Assign password
-        if (mailAccount.isDefaultAccount()) {
+        if (account.isDefaultAccount()) {
             final PasswordSource cur = MailProperties.getInstance().getPasswordSource();
             if (PasswordSource.GLOBAL.equals(cur)) {
                 final String masterPw = MailProperties.getInstance().getMasterPassword();
@@ -703,16 +706,20 @@ public abstract class MailConfig {
                 mailConfig.password = sessionPassword;
             }
         } else {
-            final String mailAccountPassword = mailAccount.getPassword();
+            final String mailAccountPassword = account.getPassword();
             if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
                 // Set to empty string
                 mailConfig.password = "";
             } else {
                 // Mail account's password
-                mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, mailAccount.getId(), mailAccount.getLogin(), mailAccount.getMailServer());
+                if (account instanceof MailAccount) {
+                    mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), ((MailAccount)account).getMailServer());
+                } else {
+                    mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), account.getTransportServer());
+                }
             }
         }
-        mailConfig.doCustomParsing(mailAccount, session);
+        mailConfig.doCustomParsing(account, session);
     }
 
     private static final int LENGTH = 6;
@@ -913,7 +920,7 @@ public abstract class MailConfig {
 
     /**
      * Checks if STARTTLS is required
-     * 
+     *
      * @return <code>true</code> if STARTTLS is required; otherwise <code>false</code>
      */
     public boolean isStartTls() {
@@ -922,7 +929,7 @@ public abstract class MailConfig {
 
     /**
      * Sets whether STARTTLS is required
-     * 
+     *
      * @param startTls <code>true</code> if STARTTLS is required; otherwise <code>false</code>
      */
     public void setStartTls(boolean startTls) {
@@ -1011,7 +1018,7 @@ public abstract class MailConfig {
      * @return <code>true</code> if custom parsing has been performed; otherwise <code>false</code>
      * @throws OXException If custom parsing fails
      */
-    protected boolean doCustomParsing(final MailAccount account, final Session session) throws OXException {
+    protected boolean doCustomParsing(final Account account, final Session session) throws OXException {
         return false;
     }
 

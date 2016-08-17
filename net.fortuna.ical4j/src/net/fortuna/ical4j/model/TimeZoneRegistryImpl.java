@@ -32,12 +32,16 @@
 package net.fortuna.ical4j.model;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
 import net.fortuna.ical4j.model.component.VTimeZone;
@@ -45,11 +49,6 @@ import net.fortuna.ical4j.model.property.TzUrl;
 import net.fortuna.ical4j.util.CompatibilityHints;
 import net.fortuna.ical4j.util.Configurator;
 import net.fortuna.ical4j.util.ResourceLoader;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap;
 
 /**
  * $Id$
@@ -65,7 +64,7 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
     private static final String DEFAULT_RESOURCE_PREFIX = "zoneinfo/";
 
     private static final Pattern TZ_ID_SUFFIX = Pattern.compile("(?<=/)[^/]*/[^/]*$");
-    
+
     private static final String UPDATE_ENABLED = "net.fortuna.ical4j.timezone.update.enabled";
 
     private static final Map DEFAULT_TIMEZONES = new ConcurrentHashMap();
@@ -79,18 +78,26 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
             LogFactory.getLog(TimeZoneRegistryImpl.class).warn(
                     "Error loading timezone aliases: " + ioe.getMessage());
         }
+
+        InputStream resourceStream = null;
         try {
-        	ALIASES.load(ResourceLoader.getResourceAsStream("tz.alias"));
+        	resourceStream = ResourceLoader.getResourceAsStream("tz.alias");
+            ALIASES.load(resourceStream);
         }
         catch (Exception e) {
         	LogFactory.getLog(TimeZoneRegistryImpl.class).debug(
         			"Error loading custom timezone aliases: " + e.getMessage());
         }
+        finally {
+            if (null != resourceStream) {
+                try { resourceStream.close(); } catch (Exception x) { /*ignore*/ }
+            }
+        }
     }
 
-    private Map timezones;
+    private final Map timezones;
 
-    private String resourcePrefix;
+    private final String resourcePrefix;
 
     /**
      * Default constructor.
@@ -111,14 +118,16 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
     /**
      * {@inheritDoc}
      */
+    @Override
     public final void register(final TimeZone timezone) {
     	// for now we only apply updates to included definitions by default..
     	register(timezone, false);
     }
-    
+
     /**
      * {@inheritDoc}
      */
+    @Override
     public final void register(final TimeZone timezone, boolean update) {
     	if (update) {
             // load any available updates for the timezone..
@@ -132,6 +141,7 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
     /**
      * {@inheritDoc}
      */
+    @Override
     public final void clear() {
         timezones.clear();
     }
@@ -139,6 +149,7 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
     /**
      * {@inheritDoc}
      */
+    @Override
     public final TimeZone getTimeZone(final String id) {
         TimeZone timezone = (TimeZone) timezones.get(id);
         if (timezone == null) {
@@ -200,7 +211,7 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
         }
         return null;
     }
-    
+
     /**
      * @param vTimeZone
      * @return
@@ -208,9 +219,14 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
     private VTimeZone updateDefinition(VTimeZone vTimeZone) {
         final TzUrl tzUrl = vTimeZone.getTimeZoneUrl();
         if (tzUrl != null) {
+            InputStream inputStream = null;
             try {
+                URLConnection connection = tzUrl.getUri().toURL().openConnection();
+                connection.setConnectTimeout(5000);
+                connection.setReadTimeout(5000);
+                inputStream = connection.getInputStream();
                 final CalendarBuilder builder = new CalendarBuilder();
-                final Calendar calendar = builder.build(tzUrl.getUri().toURL().openStream());
+                final Calendar calendar = builder.build(inputStream);
                 final VTimeZone updatedVTimeZone = (VTimeZone) calendar.getComponent(Component.VTIMEZONE);
                 if (updatedVTimeZone != null) {
                     return updatedVTimeZone;
@@ -219,6 +235,15 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
             catch (Exception e) {
                 Log log = LogFactory.getLog(TimeZoneRegistryImpl.class);
                 log.warn("Unable to retrieve updates for timezone: " + vTimeZone.getTimeZoneId().getValue(), e);
+            }
+            finally {
+                if (null != inputStream) {
+                    try {
+                        inputStream.close();
+                    } catch (IOException e) {
+                        LogFactory.getLog(TimeZoneRegistryImpl.class).debug("Error closing stream", e);
+                    }
+                }
             }
         }
         return vTimeZone;

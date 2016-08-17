@@ -1,0 +1,18 @@
+/export?action=VCARD:
+  get:
+    operationId: exportAsVCard
+    tags:
+      - export
+    summary: Exports contact data to a vCard file.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: folder
+        type: string
+        description: Object ID of the folder whose content shall be exported. This must be a contact folder.
+        required: true
+    responses:
+      200:
+        description: An input stream containing the content of the vCard file with the MIME type `text/x-vcard`.
+        schema:
+          type: string

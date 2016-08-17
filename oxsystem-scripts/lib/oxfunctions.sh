@@ -28,7 +28,7 @@
 #   http://www.open-xchange.com/EN/developer/. The contributing author shall be
 #   given Attribution for the derivative code and a license granting use.
 #
-#    Copyright (C) 2016-2020 OX Software GmbH.
+#    Copyright (C) 2016-2020 OX Software GmbH
 #    Mail: info@open-xchange.com
 #
 #
@@ -319,8 +319,8 @@ if ( $found ) {
 s;\(^$prop[[:space:]]*[:=]\).*$;\1${val};
 EOF
         else
-	    # add a newline to the last line if it doesn't exist
-	    sed -i -e '$a\' $tmp
+        # add a newline to the last line if it doesn't exist
+        sed -i -e '$a\' $tmp
             echo "${prop}=$val" >> $tmp
         fi
         if [ $? -gt 0 ]; then

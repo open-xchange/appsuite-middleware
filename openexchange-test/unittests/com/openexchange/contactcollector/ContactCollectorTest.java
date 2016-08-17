@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -62,7 +62,7 @@ import junit.framework.TestCase;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
-import com.openexchange.contactcollector.osgi.CCServiceRegistry;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -74,19 +74,26 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class ContactCollectorTest extends TestCase {
+
+    private SimpleServiceLookup services;
 
     private String user;
 
@@ -105,6 +112,17 @@ public class ContactCollectorTest extends TestCase {
     @Override
     public void setUp() throws Exception {
         Init.startServer();
+
+        services = new SimpleServiceLookup();
+        {
+            services.add(TimerService.class, Init.LOOKUP.getService(TimerService.class));
+            services.add(ThreadPoolService.class, Init.LOOKUP.getService(ThreadPoolService.class));
+            services.add(ContextService.class, Init.LOOKUP.getService(ContextService.class));
+            services.add(UserConfigurationService.class, Init.LOOKUP.getService(UserConfigurationService.class));
+            services.add(UserService.class, Init.LOOKUP.getService(UserService.class));
+            services.add(ContactService.class, Init.LOOKUP.getService(ContactService.class));
+        }
+
         final TestConfig config = new TestConfig();
         user = prepareUser(config.getUser());
 
@@ -151,7 +169,6 @@ public class ContactCollectorTest extends TestCase {
         ServerUserSetting setting = ServerUserSetting.getInstance();
         assertNotNull("No folder for contact collection", setting.getContactCollectionFolder(ctx.getContextId(), userId));
         assertTrue("No folder for contact collection", setting.getContactCollectionFolder(ctx.getContextId(), userId) > 0);
-        assertFalse("Feature should be switched off", setting.isContactCollectionEnabled(ctx.getContextId(), userId));
         assertFalse("Should not collect on incoming mail", setting.isContactCollectOnMailAccess(ctx.getContextId(), userId));
         assertFalse("Should not collect on outgoing mail", setting.isContactCollectOnMailTransport(ctx.getContextId(), userId));
     }
@@ -160,16 +177,15 @@ public class ContactCollectorTest extends TestCase {
         ServerUserSetting.getInstance().setContactCollectionFolder(ctx.getContextId(), userId, I(contactFolder.getObjectID()));
         ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), userId, true);
 
-        final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl();
+        final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl(services);
         collector.start();
         try {
             final InternetAddress address = new InternetAddress(mail);
             final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
             addresses.add(address);
-            collector.memorizeAddresses(addresses, session, false);
+            collector.memorizeAddresses(addresses, false,  session, false);
             final List<Contact> contacts = searchContact(mail);
             assertEquals("No object found", 1, contacts.size());
-            assertEquals("Count does not match", 1, contacts.get(0).getUseCount());
         } finally {
             collector.stop();
         }
@@ -179,18 +195,17 @@ public class ContactCollectorTest extends TestCase {
         ServerUserSetting.getInstance().setContactCollectionFolder(ctx.getContextId(), userId, I(contactFolder.getObjectID()));
         ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), userId, true);
 
-        final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl();
+        final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl(services);
         collector.start();
         try {
             final InternetAddress address = new InternetAddress(mail);
             final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
             addresses.add(address);
-            collector.memorizeAddresses(addresses, session, false);
-            collector.memorizeAddresses(addresses, session, false);
-            collector.memorizeAddresses(addresses, session, false);
+            collector.memorizeAddresses(addresses, false, session, false);
+            collector.memorizeAddresses(addresses, false, session, false);
+            collector.memorizeAddresses(addresses, false, session, false);
             final List<Contact> contacts = searchContact(mail);
             assertEquals("Ammount of objects found is not correct", 1, contacts.size());
-            assertEquals("Count does not match", 3, contacts.get(0).getUseCount());
         } finally {
             collector.stop();
         }
@@ -210,15 +225,14 @@ public class ContactCollectorTest extends TestCase {
 
     private List<Contact> searchContact(final String pattern) throws Exception {
 
-        ContactService contactService = CCServiceRegistry.getInstance().getService(ContactService.class);
+        ContactService contactService = services.getService(ContactService.class);
         final ContactSearchObject searchObject = new ContactSearchObject();
         searchObject.setEmail1(pattern);
         searchObject.setEmail2(pattern);
         searchObject.setEmail3(pattern);
         searchObject.setOrSearch(true);
         searchObject.addFolder(contactFolder.getObjectID());
-        ContactField[] fields = new ContactField[] { ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.OBJECT_ID,
-            ContactField.USERFIELD20 };
+        ContactField[] fields = new ContactField[] { ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.OBJECT_ID, ContactField.USERFIELD20 };
         SearchIterator<Contact> iterator = contactService.searchContacts(session, searchObject, fields);
 
         final List<Contact> contacts = new ArrayList<Contact>();
@@ -233,7 +247,7 @@ public class ContactCollectorTest extends TestCase {
 
     private void deleteContactFromFolder(final String pattern) throws Exception {
         final List<Contact> contacts = searchContact(pattern);
-        ContactService contactService = CCServiceRegistry.getInstance().getService(ContactService.class);
+        ContactService contactService = services.getService(ContactService.class);
         for (final Contact contact : contacts) {
             contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact.getObjectID()),
                 contact.getLastModified());

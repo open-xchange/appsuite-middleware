@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -114,12 +114,6 @@ public class DriveConstants {
     public static final int RETRY_BASEDELAY = 1000;
 
     /**
-     * The maximum file length of uploads to be stored directly at the target location - others are going to be written to a temporary
-     * upload file first.
-     */
-    public static final long OPTIMISTIC_UPLOAD_SIZE_THRESHOLD = 64 * 1024; // 64K
-
-    /**
      * The maximum allowed length of any synchronized path segment, i.e. the parts in a path separated by the {@link #PATH_SEPARATOR}
      * character.
      */
@@ -136,8 +130,9 @@ public class DriveConstants {
      * 2: client defined exclusion filters
      * 3: .drive-meta
      * 4: subfolders action, sharing
+     * 5: push for multiple root folders (listen/subscribe), inline .drive-meta, trash stats, empty trash
      */
-    public static final int SUPPORTED_API_VERSION = 4;
+    public static final int SUPPORTED_API_VERSION = 5;
 
     /**
      * The files module identifier.

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,12 +49,14 @@
 
 package com.openexchange.realtime.packet;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.lang.reflect.Field;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 
 /**
  * {@link IDTest}
@@ -76,11 +78,11 @@ public class IDTest {
     @Test
     public void testIDString() {
         ID newID = new ID("ox.some.component://some.user@context/resource");
-        assertEquals("ox",newID.getProtocol());
+        assertEquals("ox", newID.getProtocol());
         assertEquals("some.component", newID.getComponent());
-        assertEquals("some.user",newID.getUser());
-        assertEquals("context",newID.getContext());
-        assertEquals("resource",newID.getResource());
+        assertEquals("some.user", newID.getUser());
+        assertEquals("context", newID.getContext());
+        assertEquals("resource", newID.getResource());
         ID clonedID = new ID(newID.toString());
         assertEquals(newID, clonedID);
     }
@@ -89,11 +91,11 @@ public class IDTest {
     public void testSyntheticIDFromToString() {
         String original = "synthetic.office://operations@premium/66499.62446";
         ID realEntity = new ID(original);
-        assertEquals("synthetic",realEntity.getProtocol());
+        assertEquals("synthetic", realEntity.getProtocol());
         assertEquals("office", realEntity.getComponent());
-        assertEquals("operations",realEntity.getUser());
-        assertEquals("premium",realEntity.getContext());
-        assertEquals("66499.62446",realEntity.getResource());
+        assertEquals("operations", realEntity.getUser());
+        assertEquals("premium", realEntity.getContext());
+        assertEquals("66499.62446", realEntity.getResource());
         assertEquals(original, realEntity.toString());
         ID clonedID = new ID(realEntity.toString());
         assertEquals(realEntity, clonedID);
@@ -124,11 +126,11 @@ public class IDTest {
     public void testRealIDFromToString() {
         String original = "ox://francisco.laguna@premium/20d39asd9da93249f009d";
         ID realEntity = new ID(original);
-        assertEquals("ox",realEntity.getProtocol());
+        assertEquals("ox", realEntity.getProtocol());
         assertNull(realEntity.getComponent());
-        assertEquals("francisco.laguna",realEntity.getUser());
-        assertEquals("premium",realEntity.getContext());
-        assertEquals("20d39asd9da93249f009d",realEntity.getResource());
+        assertEquals("francisco.laguna", realEntity.getUser());
+        assertEquals("premium", realEntity.getContext());
+        assertEquals("20d39asd9da93249f009d", realEntity.getResource());
         assertEquals(original, realEntity.toString());
         ID clonedID = new ID(realEntity.toString());
         assertEquals(realEntity, clonedID);
@@ -147,10 +149,10 @@ public class IDTest {
     public void testCallIDFromToString() {
         String original = "call://356c4ad6a4af46948f9703217a1f5a2d@internal";
         ID callEntity = new ID(original);
-        assertEquals("call",callEntity.getProtocol());
+        assertEquals("call", callEntity.getProtocol());
         assertNull(callEntity.getComponent());
-        assertEquals("356c4ad6a4af46948f9703217a1f5a2d",callEntity.getUser());
-        assertEquals("internal",callEntity.getContext());
+        assertEquals("356c4ad6a4af46948f9703217a1f5a2d", callEntity.getUser());
+        assertEquals("internal", callEntity.getContext());
         assertNull(callEntity.getResource());
         assertEquals(original, callEntity.toString());
         ID clonedID = new ID(callEntity.toString());
@@ -160,11 +162,11 @@ public class IDTest {
     @Test
     public void testDefaultContext() {
         ID newID = new ID("ox.component://user/resource", "context");
-        assertEquals("ox",newID.getProtocol());
+        assertEquals("ox", newID.getProtocol());
         assertEquals("component", newID.getComponent());
-        assertEquals("user",newID.getUser());
-        assertEquals("context",newID.getContext());
-        assertEquals("resource",newID.getResource());
+        assertEquals("user", newID.getUser());
+        assertEquals("context", newID.getContext());
+        assertEquals("resource", newID.getResource());
         ID clonedID = new ID(newID.toString());
         assertEquals(newID, clonedID);
     }
@@ -173,8 +175,8 @@ public class IDTest {
     public void testIDStringObligatory() {
         ID newID = new ID("user@context");
         assertNull(newID.getProtocol());
-        assertEquals("user",newID.getUser());
-        assertEquals("context",newID.getContext());
+        assertEquals("user", newID.getUser());
+        assertEquals("context", newID.getContext());
         assertNull(newID.getResource());
         ID clonedID = new ID(newID.toString());
         assertEquals(newID, clonedID);
@@ -222,14 +224,11 @@ public class IDTest {
         assertTrue(representationInSync(id));
 
         assertEquals("changedProtocol.changedComponent://changedUser@changedContext/changedResource", id.toString());
-
-
     }
 
-     private boolean representationInSync(ID id) throws Exception {
-         Field loopMap = ID.class.getDeclaredField("stringRepresentationInSync");
-         loopMap.setAccessible(true);
-         return loopMap.getBoolean(id);
-     }
-
+    private boolean representationInSync(ID id) throws Exception {
+        Field loopMap = ID.class.getDeclaredField("cachedStringRepresentation");
+        loopMap.setAccessible(true);
+        return loopMap.get(id) != null;
+    }
 }

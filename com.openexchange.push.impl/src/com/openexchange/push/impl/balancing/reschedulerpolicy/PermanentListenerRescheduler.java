@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -286,7 +286,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
             // Plan rescheduling
             if (remotePlan) {
-                rescheduleQueue.offerOrReplaceAndReset(ReschedulePlan.getInstance(true));
+                rescheduleQueue.offerOrReplace(ReschedulePlan.getInstance(true));
                 LOG.info("Planned rescheduling including remote plan");
             } else {
                 boolean added = rescheduleQueue.offerIfAbsentElseReset(ReschedulePlan.getInstance(false));
@@ -330,11 +330,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
      * @param remotePlan Whether to plan rescheduling on remote members or not
      */
     private void doReschedule(ReschedulePolicy policy, boolean remotePlan) {
-        HazelcastInstance hzInstance = hzInstancerRef.get();
-        if (null != hzInstance) {
-            Cluster cluster = hzInstance.getCluster();
-            reschedule(cluster.getMembers(), hzInstance, policy, remotePlan);
-        }
+        reschedule(hzInstancerRef.get(), policy, remotePlan);
     }
 
     /**
@@ -345,11 +341,14 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
      * @param policy The rescheduling policy to obey
      * @param remotePlan Whether to plan rescheduling on remote members or not
      */
-    private void reschedule(Set<Member> allMembers, HazelcastInstance hzInstance, ReschedulePolicy policy, boolean remotePlan) {
+    private void reschedule(HazelcastInstance hzInstance, ReschedulePolicy policy, boolean remotePlan) {
         if (null == hzInstance) {
             LOG.warn("Aborted rescheduling of permanent listeners as passed HazelcastInstance is null.");
             return;
         }
+
+        Cluster cluster = hzInstance.getCluster();
+        Set<Member> allMembers = cluster.getMembers();
 
         // Determine push users to distribute among cluster members
         List<PushUser> allPushUsers;

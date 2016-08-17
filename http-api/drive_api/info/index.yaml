@@ -1,0 +1,816 @@
+title: OX Drive API
+description: |
+  The module `drive` of OX's HTTP API is used to synchronize files and folders between server and client, using a
+  server-centric approach to allow an easy implementation on the client-side.
+  
+  The synchronization is based on checksums for files and folders, differences between the server- and client-side are
+  determined using a three-way comparison of server, client and previously acknowledged file- and directory-versions.
+  The synchronization logic is performed by the server, who instructs the client with a set of [actions](#action-types-overview) that should be
+  executed in order to come to a synchronized state.
+  
+  Therefore, the client takes a snapshot of its local files and directories, calculates their checksums, and sends them as
+  a list to the server, along with a list of previously acknowledged checksums. The server takes a similar snapshot of
+  the files and directories on the underlying file storages and evaluates which further actions are necessary for
+  synchronization. After executing the server-side actions, the client receives a list of [actions](#action-types-overview) that should be executed
+  on the client-side. These steps are repeated until the server-state matches the client-state.
+  
+  Key concept is that the synchronization works stateless, i.e. it can be interrupted and restarted at any time, following
+  the eventual consistency model.
+  
+  Entry point for the synchronization is the `/drive?action=syncfolders` request, where the directories are compared,
+  and further actions are determined by the server, amongst others actions to synchronize the files in a specific
+  directory using the `/drive?action=syncfiles` request. After executing the actions, the client should send another
+  `/drive?action=syncfolders` request to the server and execute the retuned actions (if present), or finish the
+  synchronization if there are no more actions to execute. In pseudo-code, the synchronization routine could be
+  implemented as follows:
+  ```
+  WHILE TRUE
+  {
+    response = SYNCFOLDERS()
+    IF 0 == response.actions.length THEN
+      BREAK
+    ELSE
+      EXECUTE(response.actions)
+  }
+  ```
+  **Basically, it's up to the client how often such a synchronization cycle is initiated.** For example, he could start a
+  new synchronization cycle after a fixed interval, if he recognizes that the client directories have changed, or if he is
+  informed that something has changed on the server by an event. It's also up to the client to interrupt the synchronization
+  cycle at any time during execution of the actions and continue later on, however, it's recommended to start a new
+  synchronization cycle each time to avoid possibly outdated actions.
+  
+  ## File- and directory name restrictions
+  Regarding the case sensitivity of file and directory names, OX Drive works in a case-insensitive, but case-preserving way.
+  That means that there cannot be two files with an equal name ignoring case in the same directory, but it's still possible
+  to synchronize the names in a case-sensitive manner, as well as it's possible to change only the case of file- and directory
+  names.
+  
+  The same applies to equally named files and directories on the same level in the folder hierarchy, i.e. it's not possible to
+  create a new file in a directory where an equally (ignoring) case named subdirectory already exists and vice versa.
+  
+  There is a similar restriction regarding file and directory names in the same directory having different unicode normalization
+  forms, yet the same textual representation. OX Drive requires uniqueness regarding this textual representation of potentially
+  different encoded unicode strings. So, in case the client tries to synchronize two textually equal files or directories, he
+  is instructed to put one of them into quarantine. Internally the server performs an equals-check of the "NFC" normalization
+  forms of the strings, i.e. an unicde string is normalized using full canonical decomposition, followed by the replacement of
+  sequences with their primary composites, if possible. Details regarding unicode normalization can be found at http://www.unicode.org/reports/tr15/tr15-23.html.
+  
+  ### Invalid and ignored filenames
+  There are some filenames that are invalid or ignored and therefore not synchronized. This means that files with these names
+  should not be taken into account when sending the directory contents to the server, or when calculating the directory checksum
+  (see [below](#calculation-of-a-directory-s-checksum)). The following list describes when a filename is considered invalid:
+  * If it contains one or more of the following reserved characters:
+    * `<` (less than),
+    * `>` (greater than),
+    * `:` (colon),
+    * `"` (double quote),
+    * `/` (forward slash),
+    * `\` (backslash),
+    * `|` (vertical bar or pipe),
+    * `?` (question mark),
+    * `*` (asterisk),
+    * characters whose integer representations are in the range from 0 through 31.
+  * The last character is a `.` (dot) or ` ` (space).
+  * It's case-invariant name without an optional extension matches one of the reserved names `CON`, `PRN`, `AUX`, `NUL`, `COM1`, `COM2`,
+    `COM3`, `COM4`, `COM5`, `COM6`, `COM7`, `COM8`, `COM9`, `LPT1`, `LPT2`, `LPT3`, `LPT4`, `LPT5`, `LPT6`, `LPT7`, `LPT8`, or `LPT9`.
+  * It consits solely of whitespace characters.
+  
+  The following list gives an overview about the ignored filenames:
+  * `desktop.ini`,
+  * `Thumbs.db`,
+  * `.DS_Store`,
+  * `icon\r`,
+  * any filename ending with `.drivepart`,
+  * any filename starting with `.msngr_hstr_data_` and ending with `.log`.
+  
+  Nevertheless, if the client still insists to send a file version with an invalid or ignored filename, the file creation on the server
+  is refused with a corresponding `error` action (see [below](#error)).
+  
+  ### Invalid and ignored directory names
+  There are also similar restrictions regarding invalid directory names. Any try to include them in the list of directory versions will
+  be responded with a corresponding `error` action for the directory version. The following list describes when a path is considered
+  invalid:
+  * If it contains one or more of the following reserved characters:
+    * `<` (less than),
+    * `>` (greater than),
+    * `:` (colon),
+    * `"` (double quote),
+    * `\` (backslash),
+    * `|` (vertical bar or pipe),
+    * `?` (question mark),
+    * `*` (asterik),
+    * characters whose integer representations are in the range from 0 through 31.
+  * The last character of any subpath (i.e. the last part of the whole path or the part preceding the separator character `/`) is a `.`
+    (dot) or ` ` (space).
+  * It consists solely of whitespace characters.
+  * It not equals the root path `/`, but ends with a `/` (forward slash) character.
+  * It contains two or more consecutive `/` (forward slash) characters.
+  
+  The following list gives an overview about the ignored directory names:
+  * `/.drive`,
+  * any directory whose path ends with `/.msngr_hstr_data`.
+  
+  ### Length restrictions
+  The maximum allowed length for path segments, i.e. the parts between forward slashes (`/`) in directory- and filenames, is restricted
+  to 255 characters. Synchronizing a file or directory version that contains path segments longer than this limit leads to those versions
+  being put into quarantine.
+  
+  ## API
+  As part of the OX HTTP API, the basic conventions for exchanging messages described there are also valid for this case, especially
+  the _low level protocol_ and _error handling_. Each request against the OX Drive API assumes a valid server session that is
+  uniquely identified by the session ID and the corresponding cookies that are sent with each request. A new session can be
+  created via the _login module_.
+  
+  The root folder plays another important role for the message exchange. The root folder has a unique identifier. It is the
+  parent server folder for the synchronization. All path details for directories and files are relative to this folder.
+  This folder's ID is sent with each request. To select the root folder during initial client configuration, the client may
+  get a list of synchronizable folders with the `/drive?action=syncfolders` action.
+  
+  ### Calculation of a directory's checksum
+  The checksum of a directory is calculated based on its contents by applying the following algorithm:
+  1. Build a list containing each file in the directory (not including subfolders or files in subfolders)
+  2. Ensure a lexicographically order in the following way:
+    1. Normalize the filename using the `NFC` normalization form (canonical decomposition, followed by canonical composition) -
+       see http://www.unicode.org/reports/tr15/tr15-23.html for details
+    2. Encode the filename to an array of UTF-8 unsigned bytes (array of codepoints)
+    3. Compare the filename (encoded as byte array "fn1") to another one "fn2" using the following comparator algorithm:
+    ```
+    min_length = MIN(LENGTH(fn1), LENGTH(fn2))
+    FOR i = 0; i < min_length; i++
+    {
+      result = fn1[i] - fn2[i]
+      IF 0 != result THEN
+        RETURN result
+    }
+    RETURN LENGTH(fn1) - LENGTH(fn2)
+    ```
+  3. Calculate the aggregated MD5 checksum for the directory based on each file in the ordered list:
+    1. Append the file's NFC-normalized (see above) name, encoded as UTF-8 bytes
+    2. Append the file's MD5 checksum string, encoded as UTF-8 bytes
+    
+  ### Action types overview
+  #### acknowledge
+  Acknowledges the successful synchronization of a file- or directory versionn, i.e. the client should treat the version as sychronized
+  by updating the corresponding entry in its metadata store and including this updated information in all following `originalVersions`
+  arrays of the `/drive?action=syncfolders`/`/drive?action=syncfiles` actions. Depending on the `version` and `newVersion` parameters
+  of the action, the following acknowledge operations should be executed (exemplarily for directory versions, file versions are
+  acknowledged in the same way):
+  * Example 1: acknowledge a first time synchronized directory
+    The server sends an `acknowledge` action where the newly synchronized directory version is encoded in the `newVersion` field.
+    The client should store the version in his local checksum store and send this version in the `originalVersions` array in upcoming
+    `/drive?action=syncfolders` requests.
+    ```json
+    {
+      "action": "acknowledge",
+      "newVersion": {
+        "path": "/",
+        "checksum": "d41d8cd98f00b204e9800998ecf8427e"
+      }
+    }
+    ```
+  * Example 2: acknowledge a synchronized directory after updates
+    The server sends an `acknowledge` action where the previous directory version is encoded in the `version`, and the newly synchronized
+    directory in the `newVersion` field. The client should replace any previously stored entries of the directory version in his local checksum
+    store with the updated version, and send this version in the `originalVersions` array in upcoming `/drive?action=syncfolders` requests.
+    ```json
+    {
+      "action": "acknowledge",
+      "newVersion": {
+        "path": "/",
+        "checksum": "7bb1f1a550e9b9ab4be8a12246f9d5fb"
+      },
+      "version": {
+        "path": "/",
+        "checksum": "d41d8cd98f00b204e9800998ecf8427e"
+      }
+    }
+    ```
+  * Example 3: acknowledge the deletion of a previously synchronized directory
+    The server sends an `acknowledge` action where `newVersion` field is set to `null` to acknowledge the deletion of the previously synchronized
+    directory version as found in the `version` field. The client should remove any stored entries for this directory from his local checksum
+    store, and no longer send this version in the `originalVersions` array in upcoming `/drive?action=syncfolders` requests.
+    Note that an acknowledged deletion of a directory implicitly acknowledges the deletion of all contained files and subfolders, too, so the
+    client should also remove those `originalVersions` from his local checksum store.
+    ```json
+    {
+      "action": "acknowledge",
+      "version": {
+        "path": "/test",
+        "checksum": "3525d6f28eb8cb30eb61ab7932367c35"
+      }
+    }
+    ```
+  
+  #### edit
+  Instructs the client to edit a file- or directory version. This is used for move/rename operations. The `version` field is set to the version
+  as sent in the `clientVersions` array of the preceding `/drive?action=syncfolders`/`/drive?action=syncfiles` request. The `newVersion` contains
+  the new name/path the client should use. Unless the optional boolean parameter `acknowledge` is set to `false` and `edit` action implies that
+  the client updates its known versions store accordingly, i.e. removes the previous entry for `version` and adds a new entry for `newVersion`.
+  When editing a directory version, the client should implicitly take care to create any not existing subdiectories in the `path` of the `newVersion`
+  field. A concurrent client-side modification of the file/directory version can be detected by the client by comparing the current checksum
+  against the one in the passed `newVersion` field.
+  * Example 1: rename a file
+    The server sends an `edit` action where the source file is encoded in the `version`, and the target file in the `newVersion` field. The client should
+    rename the file identified by the `version` field to the name found in the `newVersion` field. Doing so, the stored checksum entry for the file
+    in `version` should be updated, too, to reflect the changes.
+    ```json
+    {
+      "path": "/",
+      "action": "edit",
+      "newVersion": {
+        "name": "test_1.txt",
+        "checksum": "03395a94b57eef069d248d90a9410650"
+      },
+      "version": {
+        "name": "test.txt",
+        "checksum": "03395a94b57eef069d248d90a9410650"
+      }
+    }
+    ```
+  * Example 2: move a directory
+    The server sends an `edit` action where the source directory is encoded in the `version`, and the target directory in the `newVersion` field.
+    The client should move the directory identified by the `version` field to the path found in the `newVersion` field. Doing so, the stored
+    checksum entry for the directory in `version` should be updated, too, to reflect the changes.
+    ```json
+    {
+      "action": "edit",
+      "newVersion": {
+        "path": "/test2",
+        "checksum": "3addd6de801f4a8650c5e089769bdb62"
+      },
+      "version": {
+        "path": "/test1/test2",
+        "checksum": "3addd6de801f4a8650c5e089769bdb62"
+      }
+    }
+    ```
+  * Example 3: rename a conflicting file
+    The server sends an `edit` action where the original client file is encoded in the `version`, and the target filename in the `newVersion` field. The
+    client should rename the file identified by the `version` field to the new filename found in the `newVersion` field. If the `acknowledge` field
+    is set to `true` or is not set, the stored checksum entry for the file in `version` should be updated, too, to reflect the changes, otherwise,
+    as in this example, no changes should be done to the stored checksums.
+    ```json
+    {
+      "action": "edit",
+      "version": {
+        "checksum": "fade32203220752f1fa0e168889cf289",
+        "name": "test.txt"
+      },
+      "newVersion": {
+        "checksum": "fade32203220752f1fa0e168889cf289",
+        "name": "test (TestDrive).txt"
+      },
+      "acknowledge": false,
+      "path": "/"
+    }
+    ```
+  
+  #### download
+  Contains information about a file version the client should download. For updates of existing files, the previous client version is supplied in the
+  `version` field. For new files, the `version` field is omitted. The `newVersion` holds the target file version, i.e. filename and checksum, and should
+  be used for the following `/drive?action=download` request. The `totalLength` field is set to the file size in bytes, allowing the client to recognize
+  when a download is finished. Given the supplied checksum, the client my decide on its own if the target file needs to be downloaded from the server,
+  or can be created by copying a file with the same checksum to the target location, e.g. from a trash folder. The file's content type can be retrieved
+  from the `contentType` field, similar to the file's creation and modification times that are available in the `created` and `modified` fields.
+  * Example 1: download a new file
+    The server sends a `download` action where the file version to download is encoded in the `newVersion` field. The client should download and save the file
+    as indicated by the `name` property of the `newVersion` in the directory identified by the supplied `path`. After downloading, the `newVersion` should
+    be added to the client's known file versions database.
+    ```json
+    {
+      "totalLength": 536453,
+      "path": "/",
+      "action": "download",
+      "newVersion": {
+        "name": "test.pdf",
+        "checksum": "3e0d7541b37d332c42a9c3adbe34aca2"
+      },
+      "contentType": "application/pdf",
+      "created": 1375276738232,
+      "modified": 1375343720985
+    }
+    ```
+  * Example 2: download an updated file
+    The server sends a `download` action where the previous file version is encoded in the `version`, and the file version to download in the `newVersion`
+    field. The client should download and save the file as indicated by the `name` property of the `newVersion` in the directory identified by the supplied
+    `path`, replacing the previous file. After downloading, the `newVersion` should be added to the client's known file versions database, replacing an
+    existing entry for the previous `version`.
+    ```json
+    {
+      "totalLength": 1599431,
+      "path": "/",
+      "action": "download",
+      "newVersion": {
+        "name": "test.pdf",
+        "checksum": "bb198790904f5a1785d7402b0d8c390e"
+      },
+      "contentType": "application/pdf",
+      "version": {
+        "name": "test.pdf",
+        "checksum": "3e0d7541b37d332c42a9c3adbe34aca2"
+      },
+      "created": 1375276738232,
+      "modified": 1375343720985
+    }
+    ```
+  
+  #### upload
+  Instructs the client to upload a file to the server. For updates of existing files, the previous server version is supplied in the `version` field, and
+  should be used for the following `/drive?action=upload` request. For new files, the `version` field is omitted. The `newVersion` holds the target file
+  version, i.e. filename and checksum, and should be used for the following `/drive?action=upload` request. When resuming a previously partly completed upload,
+  the `offset` field contains the offset in bytes from which the file version should be uploaded by the client. If possible, the client should set the
+  `contentType` field for the uploaded file, otherwise, the content type falls back to `application/octet-stream`.
+  
+  #### remove
+  Instructs the client to delete a file or directory version. The `version` field contains the version to delete. A deletion also implies a removal of the
+  corresponding entry in the client's known versions store. A concurrent client-side modification of the file/directory version can be detected by comparing
+  the current checksum against the one in the passed `version` field.
+  * Example 1: remove a file
+    The server sends a `remove` action where the file to be removed is encoded as `version` field. The `newVersion` field is not set int the action. The
+    client should delete the file identified by the `version` field. A stored checksum entry for the file in `version` should be removed, too, to reflect
+    the changes.
+    ```json
+    {
+      "path": "/test2",
+      "action": "remove",
+      "version": {
+        "name": "test.txt",
+        "checksum": "03395a94b57eef069d248d90a9410650"
+      }
+    }
+    ```
+  * Example 2: remove a directory
+    The server sends a `remove` action where the directory to be removed is encoded as `version` field. The `newVersion` field is not set in the action.
+    The client should delete the directory identified by the version parameter. A stored checksum entry for the directory in `version` should be removed,
+    too, to reflect the changes.
+    ```json
+    {
+      "action": "remove",
+      "version": {
+        "path": "/test1",
+        "checksum": "d41d8cd98f00b204e9800998ecf8427e"
+      }
+    }
+    ```
+  
+  #### sync
+  The client should trigger a synchronization of the files in the directory supplied in the `version` field using the `/drive?action=syncfiles` request.
+  A `sync` action implies the client-side creation of the referenced directory if it not yet exists, in case of a new directory on the server. If the
+  `version` field is not specified, a synchronization of all folders using the `/drive?action=syncfolders` request should be initiated by the client.
+  If the `reset` flag in the action is set to `true`, the client should reset his local state before synchronizing the files in the directory. This may
+  happen when the server detects a synchronization cycle, or believes something else is going wrong. Reset means that the client should invalidate any
+  stored original checksums for the directory itself and any contained files, so that they get re-calculated upon the next synchronization. If the `reset`
+  flag is set a the action without a specific directory version, the client should invalidate any stored checksums, so that all file- and directory-versions
+  get re-calculated during the following synchronizations.
+  * Example 1: synchronize folder
+    The server sends a `sync` action with a `version`. The client should trigger a `/drive?action=syncfiles` request for the specified folder.
+    ```json
+    {
+      "action": "sync",
+      "version": {
+        "path": "<folder>",
+        "checksum": "<md5>"
+      }
+    }
+    ```
+  * Example 2: synchronize all folders
+    The server sends a `sync` action without `version` (or version is `null`). The client should trigger a `/drive?action=syncfolder` request, i.e. the
+    client should synchronize all folders.
+    ```json
+    {
+      "action": "sync",
+      "version": null
+    }
+    ```
+  
+  #### error
+  With the `error` action, file- or directory versions causing a synchronization problem can be identified. The root cause of the error is encoded in
+  the `error` field as described in _error handling_ of the OX HTTP API.
+  
+  Basically, there are two scenarios where either the errorneous version affects the synchronization state or not. For instance, a file that was deleted
+  at the client without sufficient permissions on the server can just be downloaded again by the client, and afterwards, client and server are oin-sync
+  again. On the other hand, e.g. when creating a new file at the client and this file can't be uploaded to the server due to missing permissions, the client
+  is out of sync as long as the file is present. Therefore, the boolean field `quarantine` instructs the client whether the file or directory version must
+  be excluded from the synchronization or not. If it is set to `true`, the client should exclude the version from the `clientVersions` array, and indicate
+  the issue to the enduser. However, if the synchronization itself is not affected and the `quarantine` flag is set to `false`, the client may still
+  indicate the issue once to the user in the background, e.g. as a balloontip notification.
+  
+  The client may reset it's quarantined versions on it's own, e.g. if the user decides to "try again", or automatically after a configurable interval.
+  
+  The server may also decide that further synchronization should be suspended, e.g. in case of repeated synchronization problems. Such a situation is
+  indicated with the parameter `stop` set to `true`. In this case, the client should at least cancel the current synchronization cycle. If appropriate,
+  the client should also be put into a 'paused' mode, and the user should be informed accordingly.
+  
+  There may also be situations where a error or warning is sent to the client, independently of a file- or directory version, e.g. when the client version
+  is outdated and a newer version is available for download.
+  
+  The most common examples for errors are insufficient permissions or exceeded quota restrictions, see examples below.
+  * Example 1: create a file in a read-only folder
+    The server sends an `error` action where the errorneous file is encoded in the `newVersion` field and the `quarantine` flag is set to `true`. The
+    client should execlude the version from the `clientVersions` array in upcoming `/drive?action=syncfiles` requests so that it doesn't affect the
+    synchronization algorithm. The error message and further details are encoded in the `error` object of the response.
+    ```json
+    {
+      "error": {
+        "category": 3,
+        "error_params": ["/test"],
+        "error": "You are not allowed to create files at \"/test\"",
+        "error_id": "1358320776-69",
+        "categories": "PERMISSION_DENIED",
+        "code": "DRV-0012"
+      },
+      "path": "/test",
+      "quarantine": true,
+      "action": "error",
+      "newVersion": {
+        "name": "test.txt",
+        "checksum": "3f978a5a54cef77fa3a4d3fe9a7047d2"
+      }
+    }
+    ```
+  * Example 2: delete a file without sufficient permissions
+    Besides a new `download` action to restore the locally deleted file again, the server sends an `error` action where the errorneous file is encoded
+    in the `newVersion` field and the `quarantine` flag is set to `false`. Further synchronizations are not affected, but the client may still inform the
+    user about the rejected operation. The error message and further details are encoded in the `error` object of the response.
+    ```json
+    {
+      "error": {
+        "category": 3,
+        "error_params": ["test.png", "/test"],
+        "error": "You are not allowed to delete the file \"test.png\" at \"/test\"",
+        "error_id": "1358320776-74",
+        "categories": "PERMISSION_DENIED",
+        "code": "DRV-0011"
+      },
+      "path": "/test",
+      "quarantine": false,
+      "action": "error",
+      "newVersion": {
+        "name": "test.png",
+        "checksum": "438f06398ce968afdbb7f4db425aff09"
+      }
+    }
+    ```
+  * Example 3: upload a file that exceeds the quota
+    The server sends an `error` action where the errorneous file is encoded in the `newVersion` field and the `quarantine` flag is set to `true`. The client
+    should exclude the version from the `clientVersions` array in upcoming `/drive?action=syncfiles` requests so that it doesn't affect the synchronization
+    algorithm. The error message and further details are encoded in the `error` object of the response.
+    ```json
+    {
+      "error": {
+        "category": 3,
+        "error_params": [],
+        "error": "The allowed Quota is reached",
+        "error_id": "-485491844-918",
+        "categories": "PERMISSION_DENIED",
+        "code": "DRV-0016"
+      },
+      "path": "/",
+      "quarantine": true,
+      "action": "error",
+      "newVersion": {
+        "name": "test.txt",
+        "checksum": "0ca6033e2a9c2bea1586a2984bf111e6"
+      }
+    }
+    ```
+  * Example 4: synchronize with a client where the version is no longer supported
+    The server sends an `error` action with code "DRV-0028" and an appropriate error message. The `stop` flag is set to `true` to interrupt the synchronization cycle.
+    ```json
+    {
+      "stop": true,
+      "error": {
+        "category": 13,
+        "error_params": [],
+        "error": "The client application you're using is outdated and no longer supported - please upgrade to a newer version.",
+        "error_id": "103394512-13",
+        "categories": "WARNING",
+        "code": "DRV-0028",
+        "error_desc": "Client outdated - current: \"0.9.2\", required: \"0.9.10\""
+      },
+      "quarantine": false,
+      "action": "error"
+    }
+    ```
+  * Example 5: synchronize with a client where a new version of the client application is available
+    The server sends an `error` action with code "DRV-0029" and an appropriate error message. The `stop` flag is set to `false` to indicate that the synchronization can continue.
+    ```json
+    {
+      "stop": false,
+      "error": {
+        "category": 13,
+        "error_params": [],
+        "error": "A newer version of your client application is available for download.",
+        "error_id": "103394512-29",
+        "categories": "WARNING",
+        "code": "DRV-0029",
+        "error_desc": "Client update available - current: \"0.9.10\", available: \"0.9.12\""
+      },
+      "quarantine": false,
+      "action": "error"
+    }
+    ```
+  
+  ### Column identifiers
+  #### File metadata
+  | ID | Name | ID | Name | ID | Name | ID | Name |
+  |----|------|----|------|----|------|----|------|
+  | 4 | created | 5 | modified | 702 | name | 703 | contentType |
+  | 708 | checksum | 750 | previewLink | 751 | directLinkFragments | 752 | directLink |
+  | 753 | thumbnailLink |
+  
+  ## Client side filtering
+  Client-side filtering is available since API version 2.
+  
+  OX Drive clients may define a user- and/or application-defined list of file- and directory name exclusions. Those exclusion filters are then taken into account during
+  synchronization, i.e. files and directories matching a defined exclusion pattern are ignored when comparing the list of server-, client- and original versions. Also,
+  the file exclusion lists are considered for the calculation of aggergated directory checksums.
+  
+  The exclusion filters may be set, changed or unset at any time during synchronization, there are no additional requests needed to set them up. Instead, the list of
+  excluded files and directories is simply sent along with each `/drive?action=syncfolders`, `/drive?action=syncfiles` and `/drive?action=download` request.
+  
+  ### Pattern types
+  A pattern currently may be defined in two formats: `exact` or `glob`.
+  * `exact`
+    An exact pattern, matching the file- or directory version literally. For example, to exclude the file "Backup.pst" in the subfolder "Mail" below the root synchronization
+    folder, an `exact` file pattern would look like: `{"path":"/Mail","name":"Backup.pst","type":"exact"}`, or, an exact directory pattern for the directory "/Archive"
+    would be represented as `{"path":"/Archive","type":"exact"}`.
+  * `glob`
+    A simple pattern allowing to use the common wildcards \* and ? to match file- and directory versions. For example, to exclude all files ending with ".tmp" across all
+    directories, the `glob` file pattern could be defined as `{"path":"*","name":"*.tmp","type":"glob"}`, or, to exclude the directory "/Project/.git" and all its
+    subdirectories recursively, this would be expressed using a combination of the following two directory patterns:
+    `[{"path":"/Project/.git","type":"exact"},{"path":"/Project/.git*","type":"glob"}]`.
+    
+  ### Further considerations
+  * It's possible to exclude a (parent) directory with an appropriate pattern, while still subfolders below that directory being synchronized. This usually results in the
+    excluded directory being created by both client- and server-side, but no file contents within the excluded directory being exchanged. If subfolders should be excluded,
+    too, a wildcard should be used in the pattern to match any subdirectories.
+  * If the client tries to synchronize a file- or directory version that is ignored, i.e. a version that would match any of the provided exclusion filters, the server
+    behaves similarly to the handling of invalid and ignored file- and directory names (see above), i.e. the client would be instructed to put those versions into quarantine.
+  * For the calculation of directory checksums, it's important that the server and client perform exactly the same matching for ignored filenames: A * character matches zero
+    or more characters, a ? character matches exactly one character. All other characters are matched literally. Advanced glob flavors like braces to define subpattern
+    alternatives or square brackets for character sets are not used.
+  * Client-side filtering is available since API version 2. The API version that is supported by the server is included in the response of the `/drive?action=settings` request.
+  * Whenever there are active exclusion filters, the `/drive?action=syncfolders` request should contain all of both directory and file exclusion filter lists. For the
+    `/drive?action=syncfiles` request, it's sufficient to include the list of file exclusions.
+    
+  ## Metadata synchronization
+  The synchronization of metadata is available **since API version 3**.
+  ### Introduction
+  Previously, only the "raw" folders and files were synchronized between server and clients. While this is sufficient for basic synchronization, there are cases where the
+  clients could benefit from additional data - "metadata" - that is already available on the server. For example, clients could display directories that have been shared
+  or published to other people in a different way. Or, clients could consider folder permissions directly in case the user is performing a local change that would be rejected
+  by the server in the next synchronization cycle anyway.
+  
+  To supply the clients with those additional information without any influence on the existing synchronization protocol (!), `.drive-meta` files are introduced for each
+  synchronized directory. Regarding synchronization, such files are treated like any other ordinary file. Especially, those files are taken into account when it comes to
+  directory checksum calculation. Doing so, metadata updates result in a changed `.drive-meta` file, which in turn causes the parent directory checksum to change, hence
+  synchronization is triggered.
+  
+  However, some special handling applies for those files:
+  * Clients are not allowed to change metadata, so modifications of metadata files or the deletion of them is rejected. Recovery is done via the protocol here, i.e. the client
+    is instructed to re-download the file.
+  * `.drive-meta` files are actually not stored physically on the file storage backend, but created on the fly based on the actual metadata of the directory.
+  * Client applications may either store such files on the client file system, or evaluate and store the contained metadata information in a local database for later retrieval.
+    If the file is not saved physically on the client (which is actually recommended), the client is responsible to consider the metadata file in a virtual way and include
+    it's checksum for the directory checksum calculation - similar to the server's internal handling.
+  Note: Embedded metadata synchronization is enabled by default, but can be forcibly disabled by setting the `driveMeta` parameter to `false` in each request.
+  
+  ### Metadata format
+  The metadata in `.drive-meta` files is serialized in JSON format to allow easy processing at the clients. The following shows an example of the contents:
+  ```json
+  {
+    "path": "/",
+    "localized_name": "Meine Dateien",
+    "own_rights": 403710016,
+    "permissions": [{
+      "bits": 403710016,
+      "group": false,
+      "entity": 182,
+      "display_name": "Mander, Jens",
+      "email_address": "jens.mander@example.com",
+      "guest": false
+    }],
+    "shareable": true,
+    "jump": ["permissions"],
+    "files": [{
+      "name": "Koala.jpg",
+      "created": 1418024190565,
+      "modified": 1418026995663,
+      "created_by": {
+        "group": false,
+        "entity": 182,
+        "display_name": "Mander, Jens",
+        "email_address": "jens.mander@example.com",
+        "guest": false
+      },
+      "modified_by": {
+        "group": false,
+        "entity": 182,
+        "display_name": "Mander, Jens",
+        "email_address": "jens.mander@example.com",
+        "guest": false
+      },
+      "preview": "http://192.168.32.191/ajax/files?action=document&folder=268931&id=268931/297620&version=1&delivery=download&scaleType=contain&width=800&height=800&rotate=true",
+      "thumbnail": "http://192.168.32.191/ajax/files?action=document&folder=268931&id=268931/297620&version=1&delivery=download&scaleType=contain&width=100&height=100&rotate=true",
+      "object_permissions": [{
+        "bits": 1,
+        "group": false,
+        "entity": 10,
+        "display_name": "Klaus Mander",
+        "email_address": "klaus.mander@example.com",
+        "guest": false
+      },
+      {
+        "bits": 1,
+        "group": false,
+        "entity": 8338,
+        "email_address": "horst@example.com",
+        "guest": true
+      }],
+      "shareable": true,
+      "shared": true,
+      "number_of_versions": 1,
+      "version": "1",
+      "jump": ["preview",
+      "permissions",
+      "version_history"]
+    },
+    {
+      "name": "test.txt",
+      "created": 1418024198520,
+      "modified": 1418027394897,
+      "created_by": {
+        "group": false,
+        "entity": 182,
+        "display_name": "Mander, Jens",
+        "email_address": "jens.mander@example.com",
+        "guest": false
+      },
+      "modified_by": {
+        "group": false,
+        "entity": 182,
+        "display_name": "Mander, Jens",
+        "email_address": "jens.mander@example.com",
+        "guest": false
+      },
+      "preview": "http://192.168.32.191/ajax/files?action=document&format=preview_image&folder=268931&id=268931/297621&version=6&delivery=download&scaleType=contain&width=800&height=800",
+      "thumbnail": "http://192.168.32.191/ajax/files?action=document&format=preview_image&folder=268931&id=268931/297621&version=6&delivery=download&scaleType=contain&width=100&height=100",
+      "locked": true,
+      "shareable": true,
+      "number_of_versions": 4,
+      "version": "6",
+      "version_comment": "Uploaded with OX Drive (TestDrive)",
+      "versions": [{
+        "name": "test.txt",
+        "file_size": 23,
+        "created": 1418024198520,
+        "modified": 1418024202878,
+        "created_by": {
+          "group": false,
+          "entity": 182,
+          "display_name": "Mander, Jens",
+          "email_address": "jens.mander@example.com",
+          "guest": false
+        },
+        "modified_by": {
+          "group": false,
+          "entity": 182,
+          "display_name": "Mander, Jens",
+          "email_address": "jens.mander@example.com",
+          "guest": false
+        },
+        "version": "1",
+        "version_comment": "Uploaded with OX Drive (TestDrive)"
+      },
+      {
+        "name": "test.txt",
+        "file_size": 54,
+        "created": 1418024234782,
+        "modified": 1418024231522,
+        "created_by": {
+          "group": false,
+          "entity": 182,
+          "display_name": "Mander, Jens",
+          "email_address": "jens.mander@example.com",
+          "guest": false
+        },
+        "modified_by": {
+          "group": false,
+          "entity": 182,
+          "display_name": "Mander, Jens",
+          "email_address": "jens.mander@example.com",
+          "guest": false
+        },
+        "version": "2",
+        "version_comment": "Uploaded with OX Drive (TestDrive)"
+      },
+      {
+        "name": "test.txt",
+        "file_size": 120,
+        "created": 1418027349026,
+        "modified": 1418027355957,
+        "created_by": {
+          "group": false,
+          "entity": 182,
+          "display_name": "Mander, Jens",
+          "email_address": "jens.mander@example.com",
+          "guest": false
+        },
+        "modified_by": {
+          "group": false,
+          "entity": 182,
+          "display_name": "Mander, Jens",
+          "email_address": "jens.mander@example.com",
+          "guest": false
+        },
+        "version": "5"
+      },
+      {
+        "name": "test.txt",
+        "file_size": 127,
+        "created": 1418027370051,
+        "modified": 1418027366945,
+        "created_by": {
+          "group": false,
+          "entity": 182,
+          "display_name": "Mander, Jens",
+          "email_address": "jens.mander@example.com",
+          "guest": false
+        },
+        "modified_by": {
+          "group": false,
+          "entity": 182,
+          "display_name": "Mander, Jens",
+          "email_address": "jens.mander@example.com",
+          "guest": false
+        },
+        "version": "6",
+        "version_comment": "Uploaded with OX Drive (TestDrive)"
+      }],
+      "jump": ["preview",
+      "edit",
+      "permissions",
+      "version_history"]
+    },
+    {
+      "name": "Kalimba.mp3",
+      "created": 1418026529047,
+      "modified": 1247549551659,
+      "created_by": {
+        "group": false,
+        "entity": 182,
+        "display_name": "Mander, Jens",
+        "email_address": "jens.mander@example.com",
+        "guest": false
+      },
+      "modified_by": {
+        "group": false,
+        "entity": 182,
+        "display_name": "Mander, Jens",
+        "email_address": "jens.mander@example.com",
+        "guest": false
+      },
+      "preview": "http://192.168.32.191/ajax/image/file/mp3Cover?folder=268931&id=268931/297623&version=1&delivery=download&scaleType=contain&width=800&height=800",
+      "thumbnail": "http://192.168.32.191/ajax/image/file/mp3Cover?folder=268931&id=268931/297623&version=1&delivery=download&scaleType=contain&width=100&height=100",
+      "shareable": true,
+      "number_of_versions": 1,
+      "version": "1",
+      "version_comment": "Uploaded with OX Drive (TestDrive)",
+      "jump": ["preview",
+      "permissions",
+      "version_history"]
+    }]
+  }
+  ```
+  
+  ### Client-side implementation
+  In order to make use of the metadata, clients should roughly implement the following:
+  * Include the `apiVersion` parameter in each request, and set it to at least 3 in order to include `.drive-meta` during synchronization.
+  * Evaluate `.drive-meta` files and store the information, as well as the file's checksums in a local database.
+  * Include this file in the calculation of the parent directory checksum, just like an ordinary file in that directory.
+  * Do something useful with the metadata information.
+  
+  ### Additional notes
+  * The metadata synchronization via `.drive-meta` files embedded into the synchronization protocol obsoletes the previously used methods to receive metadata information
+    (see `/drive?action=fileMetadata` request and `columns` parameter in `/drive?action=syncfiles`).
+  * Depending on the underlying file storage backend, the included metadata may vary, so each information should be treated as optional.
+  * Embedded metadata synchronization is enabled by default, but can be forcibly disabled by setting the `driveMeta` parameter to `false` in each request.
+  
+  ### Possible use cases
+  * For files where the `locked` property is `true`, display some kind of "lock" icon (-overlay) in the file list / explorer view.
+  * For files or folders where the `shared` property is `true`, display some kind of "cloud" icon (-overlay) in the file list / explorer view.
+  * For files or folders where the user is not allowed to perform an action with, don't offer such actions (e.g. if a file cannot be deleted or renamed by the user due to
+    insufficient permissions, disable the corresponding options).
+  * Use the URLs in `preview` and `thumbnail` to get a preview image for the files.
+  * Display the server creation / last modification timestamps of files and folders.
+  * Embed a version history for files with multiple versions.
+  * Show to which users a file or folder is currently shared.
+  * Offer appropriate "jump" actions to the groupware web interface for more advanced options (e.g. to directly edit an .xlsx file in the spreadsheet application of the
+    web interface, or to manage a folder's permission).
+  ___
+contact:
+  name: Open-Xchange GmbH
+  email: info@open-xchange.com
+  url: https://www.open-xchange.com/
+version: 7.8.2

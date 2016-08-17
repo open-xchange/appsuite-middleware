@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -74,12 +74,9 @@ import com.openexchange.rest.services.security.AuthenticationFilter;
  */
 public class Activator implements BundleActivator {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Activator.class);
 
     private ServiceTracker<ConfigurationAdmin, ConfigurationAdmin> cmTracker;
-
     private ServiceTracker<ConfigurationService, ConfigurationService> csTracker;
-
     final AtomicBoolean authRegistered = new AtomicBoolean();
 
     /**
@@ -90,7 +87,9 @@ public class Activator implements BundleActivator {
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
+    public synchronized void start(final BundleContext context) throws Exception {
+        final Logger logger = LoggerFactory.getLogger(Activator.class);
+
         cmTracker = new ServiceTracker<ConfigurationAdmin, ConfigurationAdmin>(context, ConfigurationAdmin.class, null) {
 
             @Override
@@ -103,10 +102,10 @@ public class Activator implements BundleActivator {
                         if (properties == null) {
                             properties = new Hashtable<String, Object>(1);
                         }
-                        properties.put("root", "/preliminary");
+                        properties.put("root", "/");
                         configuration.update(properties);
                     } catch (IOException e) {
-                        LOG.error("Could not set root path for jersey servlet. REST API will not be available!", e);
+                        logger.error("Could not set root path for jersey servlet. REST API will not be available!", e);
                     }
                 }
                 return service;
@@ -132,10 +131,21 @@ public class Activator implements BundleActivator {
         context.registerService(JSONReaderWriter.class, new JSONReaderWriter(), null);
         context.registerService(OXExceptionMapper.class, new OXExceptionMapper(), null);
         context.registerService(ApplicationConfiguration.class, new JerseyConfiguration(), null);
+
+        /*-
+         * From now on all instances of registerable classes are handled/added in:
+         *  com.eclipsesource.jaxrs.publisher.internal.ResourceTracker.addingService(ResourceTracker.java:45)
+         *
+         * A registerable instance is defined as:
+         *
+         *   private boolean isRegisterableAnnotationPresent( Class<?> type ) {
+         *    return type.isAnnotationPresent( javax.ws.rs.Path.class ) || type.isAnnotationPresent( javax.ws.rs.ext.Provider.class );
+         *   }
+         */
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public synchronized void stop(BundleContext context) throws Exception {
         ServiceTracker<ConfigurationAdmin, ConfigurationAdmin> cmTracker = this.cmTracker;
         if (null != cmTracker) {
             cmTracker.close();

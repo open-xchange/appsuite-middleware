@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -521,6 +521,49 @@ public class Streams {
      */
     public static PushbackInputStream pushbackInputStreamFor(final InputStream in) {
         return in instanceof PushbackInputStream ? (PushbackInputStream) in : new PushbackInputStream(in);
+    }
+
+    /**
+     * Checks if specified stream only consists of ASCII-only bytes.
+     *
+     * @param in The stream to check
+     * @return <code>true</code> if ASCII-only; otherwise <code>false</code>
+     * @throws IOException If reading from stream yields an I/O error
+     */
+    public static boolean isAscii(InputStream in) throws IOException {
+        if (null == in) {
+            return true;
+        }
+
+        try {
+            boolean isAscci = true;
+            int buflen = 2048;
+            byte[] buf = new byte[buflen];
+            for (int read; isAscci && (read = in.read(buf, 0, buflen)) > 0;) {
+                for (int i = read; isAscci && i-- > 0;) {
+                    isAscci = (buf[i] >= 0);
+                }
+            }
+            return isAscci;
+        } finally {
+            close(in);
+        }
+    }
+
+    /**
+     * Checks if specified are ASCII-only.
+     *
+     * @param bytes The bytes to check
+     * @return <code>true</code> if ASCII-only; otherwise <code>false</code>
+     */
+    public static boolean isAscii(byte[] bytes) {
+        boolean isAscci = true;
+        if (null != bytes) {
+            for (int i = bytes.length; isAscci && (i-- > 0);) {
+                isAscci = (bytes[i] >= 0);
+            }
+        }
+        return isAscci;
     }
 
 }

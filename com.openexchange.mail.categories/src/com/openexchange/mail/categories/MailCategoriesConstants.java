@@ -62,17 +62,12 @@ public class MailCategoriesConstants {
      * General mail categories switch property name
      */
     public static final String MAIL_CATEGORIES_SWITCH = "com.openexchange.mail.categories.enabled";
-    
-    /**
-     * General user mail categories switch property name
-     */
-    public static final String MAIL_CATEGORIES_USER_SWITCH = "com.openexchange.mail.user.categories.enabled";
 
     /**
-     * The possible categories translation languages property name
+     * Read only property switch which overwrites the <code>MAIL_CATEGORIES_SWITCH</code> property.
      */
-    public static final String MAIL_CATEGORIES_LANGUAGES = "com.openexchange.mail.categories.languages";
-    
+    public static final String MAIL_CATEGORIES_FORCE_SWITCH = "com.openexchange.mail.categories.forced";
+
     /**
      * The system category identifiers property name
      */
@@ -89,9 +84,29 @@ public class MailCategoriesConstants {
     public static final String MAIL_CATEGORIES_PREFIX = "com.openexchange.mail.categories.";
 
     /**
-     * The en_US fall-back name parameter name suffix
+     * The current mail category name
      */
     public static final String MAIL_CATEGORIES_NAME = ".name";
+
+    /**
+     * The current mail category description
+     */
+    public static final String MAIL_CATEGORIES_DESCRIPTION = ".description";
+
+    /**
+     * The name language prefix
+     */
+    public static final String MAIL_CATEGORIES_NAME_LANGUAGE_PREFIX = ".name.";
+
+    /**
+     * The description language prefix
+     */
+    public static final String MAIL_CATEGORIES_DESCRIPTION_LANGUAGE_PREFIX = ".description.";
+
+    /**
+     * The fall-back name parameter name
+     */
+    public static final String MAIL_CATEGORIES_FALLBACK = ".name.fallback";
 
     /**
      * The flag parameter name suffix
@@ -107,5 +122,15 @@ public class MailCategoriesConstants {
      * The active parameter name suffix
      */
     public static final String MAIL_CATEGORIES_ACTIVE = ".active";
+
+    /**
+     * The apply ox rules property name
+     */
+    public static final String APPLY_OX_RULES_PROPERTY = "com.openexchange.mail.categories.apply.ox.rules";
+
+    /**
+     * The general category id
+     */
+    public static final String GENERAL_CATEGORY_ID = "general";
 
 }

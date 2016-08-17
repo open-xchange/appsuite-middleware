@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -255,7 +255,7 @@ public class UserTest extends AbstractTest {
         final User createduser = oxu.create(ctx, urs, access, cred);
 
         // delete user
-        oxu.delete(ctx, id(createduser), cred);
+        oxu.delete(ctx, id(createduser), null, cred);
 
         // try to load user, this MUST fail
         oxu.getData(ctx, createduser, cred);
@@ -281,7 +281,7 @@ public class UserTest extends AbstractTest {
         User createduser = oxu.create(ctx, urs, access, cred);
 
         // delete user
-        oxu.delete(ctx, createduser, cred);
+        oxu.delete(ctx, createduser, null, cred);
 
         // create same user again, this failes as described in the bug
         createduser = oxu.create(ctx, urs, access, cred);
@@ -302,7 +302,7 @@ public class UserTest extends AbstractTest {
         final User createduser = oxu.create(ctx, urs, access, cred);
 
         // delete user
-        oxu.delete(ctx, new User[0], cred);
+        oxu.delete(ctx, new User[0], null, cred);
 
         // try to load user, this MUST fail
         oxu.getData(ctx, createduser, cred);
@@ -621,7 +621,7 @@ public class UserTest extends AbstractTest {
 
             assertTrue("Expected to find added user in user list", founduser);
         } finally {
-            oxu.delete(ctx, urs, cred);
+            oxu.delete(ctx, urs, null, cred);
             if (fs != null) {
                 oxutil.unregisterFilestore(fs, master);
             }
@@ -1865,7 +1865,7 @@ public class UserTest extends AbstractTest {
             e.printStackTrace();
         }
         // delete user
-        oxu.delete(ctx, createduser, cred);
+        oxu.delete(ctx, createduser, null, cred);
 
         try {
             assertFalse("nonexisting user must not exist", oxu.exists(ctx, notexists, cred));

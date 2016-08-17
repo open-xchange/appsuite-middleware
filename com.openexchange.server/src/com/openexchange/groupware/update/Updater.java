@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -61,19 +61,22 @@ import com.openexchange.groupware.update.internal.UpdaterImpl;
 public abstract class Updater {
 
     /**
-     * Default constructor.
-     */
-    protected Updater() {
-        super();
-    }
-
-    /**
      * Factory method to get an updater.
+     *
      * @return the updater.
      * @throws OXException if instantiating the implementation fails.
      */
     public static Updater getInstance() {
-        return new UpdaterImpl();
+        return UpdaterImpl.getInstance();
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Default constructor.
+     */
+    protected Updater() {
+        super();
     }
 
     public final UpdateStatus getStatus(final Context ctx) throws OXException {
@@ -83,6 +86,16 @@ public abstract class Updater {
     public abstract UpdateStatus getStatus(int contextId) throws OXException;
 
     public abstract UpdateStatus getStatus(String schema, int writePoolId) throws OXException;
+
+    /**
+     * Unblocks specified schema (if updating for too long)
+     *
+     * @param schemaName The schema name
+     * @param poolId The pool identifier
+     * @param contextId The context identifier
+     * @throws OXException If unblocking fails
+     */
+    public abstract void unblock(String schemaName, int poolId, int contextId) throws OXException;
 
     /**
      * Starts the update process on a schema.

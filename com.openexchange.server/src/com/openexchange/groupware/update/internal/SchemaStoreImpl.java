@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -268,6 +268,54 @@ public class SchemaStoreImpl extends SchemaStore {
     }
 
     @Override
+    public boolean tryRefreshSchemaLock(Schema schema, int contextId, boolean background) throws OXException {
+        int poolId = Database.resolvePool(contextId, true);
+        CacheKey key = null;
+        if (null != cache) {
+            key = cache.newCacheKey(poolId, schema.getSchema());
+            try {
+                cache.remove(key);
+            } catch (final OXException e) {
+                LOG.error("", e);
+            }
+        }
+        boolean refreshed = tryRefreshLock(contextId, background);
+        if (null != cache && null != key) {
+            try {
+                cache.remove(key);
+            } catch (final OXException e) {
+                LOG.error("", e);
+            }
+        }
+        return refreshed;
+    }
+
+    private static boolean tryRefreshLock(int contextId, boolean background) throws OXException {
+        Connection con = Database.get(contextId, true);
+        try {
+            // Refresh lock
+            return tryRefreshLock(con, background ? BACKGROUND : LOCKED);
+        } finally {
+            Database.back(contextId, true, con);
+        }
+    }
+
+    private static boolean tryRefreshLock(Connection con, String idiom) throws OXException {
+        // Refresh lock
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("UPDATE updateTask SET lastModified = ? WHERE cid=? AND taskName=?");
+            stmt.setLong(1, System.currentTimeMillis());
+            stmt.setString(2, idiom);
+            return stmt.executeUpdate() > 0;
+        } catch (final SQLException e) {
+            throw SchemaExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
     public void unlockSchema(final Schema schema, final int contextId, final boolean background) throws OXException {
         final int poolId = Database.resolvePool(contextId, true);
         CacheKey key = null;
@@ -346,9 +394,9 @@ public class SchemaStoreImpl extends SchemaStore {
      */
     private static SchemaUpdateState loadSchemaStatus(final Connection con) throws OXException, SQLException {
         final SchemaUpdateStateImpl retval = new SchemaUpdateStateImpl();
-        loadUpdateTasks(con, retval);
         retval.setBlockingUpdatesRunning(false);
         retval.setBackgroundUpdatesRunning(false);
+        loadUpdateTasks(con, retval);
         retval.setGroupwareCompatible(true);
         retval.setAdminCompatible(true);
         retval.setServer(Database.getServerName());
@@ -360,8 +408,10 @@ public class SchemaStoreImpl extends SchemaStore {
         for (final ExecutedTask task : readUpdateTasks(con)) {
             if (LOCKED.equals(task.getTaskName())) {
                 state.setBlockingUpdatesRunning(true);
+                state.setBlockingUpdatesRunningSince(task.getLastModified());
             } else if (BACKGROUND.equals(task.getTaskName())) {
                 state.setBackgroundUpdatesRunning(true);
+                state.setBackgroundUpdatesRunningSince(task.getLastModified());
             } else {
                 state.addExecutedTask(task.getTaskName());
             }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,7 +50,6 @@
 package com.openexchange.imap.cache;
 
 import static com.openexchange.imap.IMAPCommandsCollection.canCreateSubfolder;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentMap;
@@ -61,13 +60,18 @@ import javax.mail.MessagingException;
 import javax.mail.Store;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
+import com.openexchange.imap.util.ImmutableReference;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mailaccount.MailAccount;
 import com.sun.mail.imap.DefaultFolder;
 import com.sun.mail.imap.IMAPStore;
 
@@ -122,6 +126,28 @@ public final class RootSubfoldersEnabledCache {
         map.clear();
     }
 
+    private static volatile ImmutableReference<Boolean> rootSubfoldersAllowed;
+    private static Boolean rootSubfoldersAllowed() {
+        ImmutableReference<Boolean> tmp = rootSubfoldersAllowed;
+        if (null == tmp) {
+            synchronized (RootSubfoldersEnabledCache.class) {
+                tmp = rootSubfoldersAllowed;
+                if (null == tmp) {
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
+                    Boolean defaultValue = null;
+                    if (null == service) {
+                        return defaultValue;
+                    }
+
+                    String property = service.getProperty("com.openexchange.imap.rootSubfoldersAllowed");
+                    tmp = new ImmutableReference<Boolean>(Strings.isEmpty(property) ? null : Boolean.valueOf(property.trim()));
+                    rootSubfoldersAllowed = tmp;
+                }
+            }
+        }
+        return tmp.getValue();
+    }
+
     private static volatile Boolean namespacePerUser;
     private static boolean namespacePerUser() {
         Boolean tmp = namespacePerUser;
@@ -148,11 +174,12 @@ public final class RootSubfoldersEnabledCache {
             @Override
             public void reloadConfiguration(ConfigurationService configService) {
                 namespacePerUser = null;
+                rootSubfoldersAllowed = null;
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.imap.rootSubfoldersAllowed", "com.openexchange.imap.namespacePerUser");
             }
         });
     }
@@ -173,6 +200,13 @@ public final class RootSubfoldersEnabledCache {
      * @throws OXException If a mail error occurs
      */
     public static boolean isRootSubfoldersEnabled(final IMAPConfig imapConfig, final IMAPStore imapStore) throws OXException {
+        if (MailAccount.DEFAULT_ID == imapConfig.getAccountId()) {
+            Boolean rootSubfoldersAllowed = rootSubfoldersAllowed();
+            if (null != rootSubfoldersAllowed) {
+                return rootSubfoldersAllowed.booleanValue();
+            }
+        }
+
         try {
             boolean namespacePerUser = namespacePerUser();
             return isRootSubfoldersEnabled0(getKeyFor(imapStore, imapConfig, namespacePerUser), imapConfig, (DefaultFolder) imapStore.getDefaultFolder(), namespacePerUser);
@@ -190,6 +224,13 @@ public final class RootSubfoldersEnabledCache {
      * @throws OXException If a mail error occurs
      */
     public static boolean isRootSubfoldersEnabled(final IMAPConfig imapConfig, final DefaultFolder imapDefaultFolder) throws OXException {
+        if (MailAccount.DEFAULT_ID == imapConfig.getAccountId()) {
+            Boolean rootSubfoldersAllowed = rootSubfoldersAllowed();
+            if (null != rootSubfoldersAllowed) {
+                return rootSubfoldersAllowed.booleanValue();
+            }
+        }
+
         boolean namespacePerUser = namespacePerUser();
         return isRootSubfoldersEnabled0(getKeyFor(imapDefaultFolder.getStore(), imapConfig, namespacePerUser), imapConfig, imapDefaultFolder, namespacePerUser);
     }

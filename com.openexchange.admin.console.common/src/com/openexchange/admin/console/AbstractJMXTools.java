@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -77,16 +77,22 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 
 /**
- * {@link AbstractJMXTools} can be subclassed to write a command line tool that is a JMX client.
+ * {@link AbstractJMXTools} can be extended to write a command line tool that is a JMX client.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public abstract class AbstractJMXTools extends BasicCommandlineOptions {
 
-    protected static final String JMX_SERVER_PORT = "9999";
+    private static final int DEFAULT_JMX_SERVER_PORT = 9999;
+
+    /** The default JMX port (<code>9999</code>) */
+    protected static final String JMX_SERVER_PORT = Integer.toString(DEFAULT_JMX_SERVER_PORT);
 
     protected static final char OPT_HOST_SHORT = 'H';
     protected static final String OPT_HOST_LONG = "host";
+
+    protected static final char OPT_PORT_SHORT = 'p';
+    protected static final String OPT_PORT_LONG = "port";
 
     protected static final char OPT_TIMEOUT_SHORT = 'T';
     protected static final String OPT_TIMEOUT_LONG = "timeout";
@@ -100,10 +106,12 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
     protected static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
     private CLIOption hostOption = null;
+    private CLIOption portOption = null;
     private CLIOption timeoutOption = null;
     protected CLIOption jmxpass = null;
     protected CLIOption jmxuser = null;
     protected String hostname = "localhost";
+    protected int port = DEFAULT_JMX_SERVER_PORT;
     protected int timeout = 15000;
     private JMXConnector c = null;
 
@@ -200,7 +208,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
 
     protected MBeanServerConnection initConnection(final Map<String, String[]> env) throws InterruptedException, IOException {
         // Set timeout here, it is given in ms
-        final JMXServiceURL serviceurl = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + hostname + ':' + JMX_SERVER_PORT + "/server");
+        final JMXServiceURL serviceurl = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + hostname + ':' + port + "/server");
         final IOException[] exc = new IOException[1];
         final RuntimeException[] excr = new RuntimeException[1];
         final Thread t = new Thread() {
@@ -233,6 +241,7 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
 
     protected void setOptions(final AdminParser parser) {
         this.hostOption = setShortLongOpt(parser, OPT_HOST_SHORT, OPT_HOST_LONG, "host", "specifies the host", false);
+        this.portOption = setShortLongOpt(parser, OPT_PORT_SHORT, OPT_PORT_LONG, "port", "specifies the port", false);
         this.timeoutOption = setShortLongOpt(parser, OPT_TIMEOUT_SHORT, OPT_TIMEOUT_LONG, "timeout in seconds for the connection creation to the backend (default 15s)", true, NeededQuadState.notneeded);
         this.jmxuser = setShortLongOpt(parser, OPT_JMX_AUTH_USER_SHORT, OPT_JMX_AUTH_USER_LONG, "jmx username (required when jmx authentication enabled)", true, NeededQuadState.notneeded);
         this.jmxpass = setShortLongOpt(parser, OPT_JMX_AUTH_PASSWORD_SHORT, OPT_JMX_AUTH_PASSWORD_LONG, "jmx username (required when jmx authentication enabled)", true, NeededQuadState.notneeded);
@@ -299,6 +308,17 @@ public abstract class AbstractJMXTools extends BasicCommandlineOptions {
         String value = (String) parser.getOptionValue(this.hostOption);
         if (null != value) {
             hostname = value;
+        }
+        value = (String) parser.getOptionValue(this.portOption);
+        if (null != value) {
+            try {
+                port = Integer.parseInt(value.trim());
+                if (port < 1 || port > 65535) {
+                    throw new CLIIllegalOptionValueException(portOption, value, new Throwable("Invalid port range. Valid range is 1 through 65535."));
+                }
+            } catch (NumberFormatException e) {
+                throw new CLIIllegalOptionValueException(portOption, value, e);
+            }
         }
         value = (String) parser.getOptionValue(this.timeoutOption);
         if (null != value) {

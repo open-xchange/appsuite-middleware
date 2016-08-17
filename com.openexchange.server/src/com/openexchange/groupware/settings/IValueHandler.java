@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -57,6 +57,8 @@ import com.openexchange.session.Session;
 
 /**
  * Interface for settings that are shared between GUI and server.
+ *
+ * @see IValueHandlerExtended
  */
 public interface IValueHandler {
 
@@ -74,6 +76,7 @@ public interface IValueHandler {
     /**
      * @param session Session.
      * @return <code>true</code> if this setting is available due to {@link UserConfiguration}.
+     * @see IValueHandlerExtended
      */
     boolean isAvailable(final UserConfiguration userConfig);
 

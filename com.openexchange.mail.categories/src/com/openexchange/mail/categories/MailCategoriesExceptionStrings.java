@@ -59,12 +59,11 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class MailCategoriesExceptionStrings implements LocalizableStrings {
     
-    
-    // The user category %1$s already exists.
-    public static final String USER_CATEGORY_ALREADY_EXISTS = "The user category %1$s already exists.";
-
     // The user category %1$s does not exist.
     public static final String USER_CATEGORY_DOES_NOT_EXIST = "The user category %1$s does not exist.";
+
+    // Invalid configuration: %1$s
+    public static final String INVALID_CONFIGURATION_EXTENDED = "Invalid configuration: %1$s";
 
     // Invalid configuration: %1$s
     public static final String INVALID_CONFIGURATION = "Invalid configuration: %1$s";
@@ -72,6 +71,9 @@ public class MailCategoriesExceptionStrings implements LocalizableStrings {
     // The required service %1$s is temporary not available. Please try again later.
     public static final String SERVICE_UNAVAILABLE_MSG = "The required service %1$s is temporary not available. Please try again later.";
 
-    // Unable to create category. Missing parameter %1$s.
-    public static final String MISSING_PARAMETER = "Unable to create category. Missing parameter %1$s.";
+    // You are not allowed to change the name of the category %1$s.
+    public static final String CHANGE_NAME_NOT_ALLOWED = "You are not allowed to change the name of the category %1$s.";
+
+    // You are not allowed to enable or disable the category %1$s.
+    public static final String SWITCH_NOT_ALLOWED = "You are not allowed to enable or disable the category %1$s.";
 }

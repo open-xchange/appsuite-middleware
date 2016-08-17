@@ -1,26 +1,25 @@
 package liquibase.database.core;
 
-import java.sql.*;
-
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Enumeration;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
-import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.SqlStatement;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.statement.core.InitializeDatabaseChangeLogLockTableStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.exception.DatabaseException;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
-
-import java.sql.Driver;
-import java.util.Enumeration;
 
 public class DerbyDatabase extends AbstractJdbcDatabase {
 
@@ -195,12 +194,30 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionCatalogName() throws DatabaseException {
+        PreparedStatement prepareCall = null;
+        ResultSet resultSet = null;
         try {
-            ResultSet resultSet = ((JdbcConnection) getConnection()).prepareStatement("select current schema from sysibm.sysdummy1").executeQuery();
+            prepareCall = ((JdbcConnection) getConnection()).prepareStatement("select current schema from sysibm.sysdummy1");
+            resultSet = prepareCall.executeQuery();
             resultSet.next();
             return resultSet.getString(1);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
+        } finally {
+            if (prepareCall != null) {
+                try {
+                    prepareCall.close();
+                } catch (final SQLException e) {
+                    LogFactory.getLogger().warning("", e);
+                }
+            }
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (final SQLException e) {
+                    LogFactory.getLogger().warning("", e);
+                }
+            }
         }
         return null;
     }

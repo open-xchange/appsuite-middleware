@@ -61,7 +61,6 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.mail.FullName.Type;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.session.Session;
 
 /**
@@ -71,8 +70,6 @@ import com.openexchange.session.Session;
  * @since v7.8.2
  */
 public final class MailDriveAccountAccess implements FileStorageAccountAccess, CapabilityAware {
-
-    private static final String ROOT_FULLNAME = FileStorageFolder.ROOT_FULLNAME;
 
     private final FullNameCollection fullNameCollection;
     private final Session session;
@@ -108,24 +105,8 @@ public final class MailDriveAccountAccess implements FileStorageAccountAccess, C
      * @return The associated full name or <code>null</code> if folder identifier is invalid
      */
     public static FullName optFolderId(String folderId, FullNameCollection fullNameCollection) {
-        if (ROOT_FULLNAME.equals(folderId)) {
-            return new FullName(ROOT_FULLNAME, Type.DEFAULT, folderId);
-        }
-
-        String fullName = MailFolderUtility.prepareMailFolderParam(folderId).getFullName();
-        if (0 == fullName.length()) {
-            return new FullName(fullName, Type.DEFAULT, folderId);
-        }
-        if (fullNameCollection.fullNameAll.equals(fullName)) {
-            return new FullName(fullName, Type.ALL, folderId);
-        }
-        if (fullNameCollection.fullNameReceived.equals(fullName)) {
-            return new FullName(fullName, Type.RECEIVED, folderId);
-        }
-        if (fullNameCollection.fullNameSent.equals(fullName)) {
-            return new FullName(fullName, Type.SENT, folderId);
-        }
-        return null;
+        Type type = Type.typeByFolderId(folderId);
+        return null == type ? null : fullNameCollection.getFullNameFor(type);
     }
 
     @Override

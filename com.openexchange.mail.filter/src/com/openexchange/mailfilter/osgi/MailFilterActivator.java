@@ -54,9 +54,12 @@ import java.util.Properties;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.jsieve.registry.TestCommandRegistry;
 import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
@@ -119,6 +122,11 @@ public class MailFilterActivator extends HousekeepingActivator {
 
             registerService(MailFilterService.class, new MailFilterServiceImpl());
 
+            registerTestCommandRegistry();
+
+            Logger logger = org.slf4j.LoggerFactory.getLogger(MailFilterActivator.class);
+            logger.info("Bundle successfully started: {}", context.getBundle().getSymbolicName());
+
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;
@@ -174,5 +182,21 @@ public class MailFilterActivator extends HousekeepingActivator {
             throw MailFilterExceptionCode.NO_VALID_PASSWORDSOURCE.create();
         }
 
+    }
+
+    /**
+     * Registers the {@link TestCommandParserRegistry} along with all available {@link TestCommandParser}s
+     */
+    private void registerTestCommandRegistry() {
+        TestCommandRegistry registry = new TestCommandRegistry();
+
+        // add own Tests:
+        for (Commands command : Commands.values()) {
+            registry.register(command.getCommandName(), command);
+        }
+
+        registerService(TestCommandRegistry.class, registry);
+        trackService(TestCommandRegistry.class);
+        openTrackers();
     }
 }

@@ -1,0 +1,13 @@
+type: object
+properties:
+  $ref: ./CommonResponseData.yaml
+  data:
+    type: array
+    description: Array of file metadata. Each file metadata is described as an array itself.
+    items:
+      type: array
+      items:
+        type: object
+        description: |
+          Array with elements that contain the information of athe metadata specified by the corresponding
+          identifiers in the `columns` parameter. The element types can be distinguished.

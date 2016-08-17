@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,8 +50,13 @@
 package com.openexchange.xing.access.internal;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.session.Session;
 import com.openexchange.xing.User;
 import com.openexchange.xing.XingAPI;
@@ -68,47 +73,9 @@ import com.openexchange.xing.session.WebAuthSession;
  * {@link XingOAuthAccessImpl} - Initializes and provides XING OAuth access.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class XingOAuthAccessImpl implements XingOAuthAccess {
-
-    /**
-     * Gets the XING OAuth access for given XING OAuth account.
-     *
-     * @param oauthAccount The XING OAuth account providing credentials and settings
-     * @param session The user session
-     * @return The XING OAuth access; either newly created or fetched from underlying registry
-     * @throws OXException If a XING session could not be created
-     */
-    public static XingOAuthAccessImpl accessFor(final OAuthAccount oauthAccount, final Session session) throws OXException {
-        final XingOAuthAccessRegistry registry = XingOAuthAccessRegistry.getInstance();
-        final int accountId = oauthAccount.getId();
-        XingOAuthAccessImpl xingOAuthAccess = registry.getAccess(accountId, session.getUserId(), session.getContextId());
-        if (null == xingOAuthAccess) {
-            synchronized (XingOAuthAccessImpl.class) {
-                xingOAuthAccess = registry.getAccess(accountId, session.getUserId(), session.getContextId());
-                if (null == xingOAuthAccess) {
-                    // Create & connect
-                    final XingOAuthAccessImpl newInstance = new XingOAuthAccessImpl(session, oauthAccount);
-                    // Add to registry & return
-                    registry.addAccess(newInstance, accountId, session.getUserId(), session.getContextId());
-                    xingOAuthAccess = newInstance;
-                }
-            }
-        }
-        return xingOAuthAccess;
-    }
-
-    /**
-     * @param session The users session
-     * @param token the token identifier
-     * @param secret the secret identifier
-     * @return The newly created XING OAuth access
-     * @throws OXException If a XING session could not be created
-     */
-    public static XingOAuthAccess accessFor(Session session, String token, String secret) throws OXException {
-        return new XingOAuthAccessImpl(session, token, secret);
-    }
-    // ----------------------------------------------------------------------------------------------------------------------------- //
+public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements XingOAuthAccess {
 
     /**
      * The XING user identifier.
@@ -120,71 +87,36 @@ public final class XingOAuthAccessImpl implements XingOAuthAccess {
      */
     private String xingUserName;
 
-    /**
-     * The Web-authenticating session.
-     */
-    private WebAuthSession webAuthSession;
+    private final Session session;
 
     /**
-     * The XING API reference.
-     */
-    private XingAPI<WebAuthSession> xingApi;
-
-    /**
-     * Initializes a new {@link XingOAuthAccessImpl}.
+     * Initialises a new {@link XingOAuthAccessImpl}.
      *
      * @param session The users session
      * @param oauthAccount The associated OAuth account
      * @throws OXException If connect attempt fails
      */
-    private XingOAuthAccessImpl(final Session session, final OAuthAccount oauthAccount) throws OXException {
+    public XingOAuthAccessImpl(final Session session, final OAuthAccount oauthAccount) throws OXException {
         super();
-        try {
-            final OAuthServiceMetaData xingOAuthServiceMetaData = Services.getService(OAuthServiceMetaData.class);
-            final AppKeyPair appKeys = new AppKeyPair(xingOAuthServiceMetaData.getAPIKey(session), xingOAuthServiceMetaData.getAPISecret(session));
-            webAuthSession = new WebAuthSession(appKeys, new AccessTokenPair(oauthAccount.getToken(), oauthAccount.getSecret()));
-            xingApi = new XingAPI<WebAuthSession>(webAuthSession);
-            // Get account information
-            final User accountInfo = xingApi.userInfo();
-            xingUserId = accountInfo.getId();
-            xingUserName = accountInfo.getDisplayName();
-        } catch (final XingUnlinkedException e) {
-            throw XingExceptionCodes.UNLINKED_ERROR.create();
-        } catch (final XingServerException e) {
-            if (e.getError() == XingServerException._404_NOT_FOUND) {
-                throw XingExceptionCodes.XING_SERVER_UNAVAILABLE.create(e, new Object[0]);
-            }
-            throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
-        } catch (final XingException e) {
-            throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw XingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+        this.session = session;
+        setOAuthAccount(oauthAccount);
+        init(oauthAccount.getToken(), oauthAccount.getSecret());
     }
 
-    private XingOAuthAccessImpl(final Session session, final String token, final String secret) throws OXException {
+    /**
+     * Initialises a new {@link XingOAuthAccessImpl}.
+     * 
+     * @param session
+     * @param token
+     * @param secret
+     * @throws OXException
+     */
+    // FIXME: This constructor is only being used for tests. Clean-up and introduce a new way of testing the XING
+    //        functionality.
+    public XingOAuthAccessImpl(final Session session, final String token, final String secret) throws OXException {
         super();
-        try {
-            final OAuthServiceMetaData xingOAuthServiceMetaData = Services.getService(OAuthServiceMetaData.class);
-            final AppKeyPair appKeys = new AppKeyPair(xingOAuthServiceMetaData.getAPIKey(session), xingOAuthServiceMetaData.getAPISecret(session));
-            webAuthSession = new WebAuthSession(appKeys, new AccessTokenPair(token, secret));
-            xingApi = new XingAPI<WebAuthSession>(webAuthSession);
-            // Get account information
-            final User accountInfo = xingApi.userInfo();
-            xingUserId = accountInfo.getId();
-            xingUserName = accountInfo.getDisplayName();
-        } catch (final XingUnlinkedException e) {
-            throw XingExceptionCodes.UNLINKED_ERROR.create();
-        } catch (final XingServerException e) {
-            if (e.getError() == XingServerException._404_NOT_FOUND) {
-                throw XingExceptionCodes.XING_SERVER_UNAVAILABLE.create(e, new Object[0]);
-            }
-            throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
-        } catch (final XingException e) {
-            throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw XingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+        this.session = session;
+        init(token, secret);
     }
 
     /**
@@ -192,17 +124,10 @@ public final class XingOAuthAccessImpl implements XingOAuthAccess {
      *
      * @return The XING API reference
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public XingAPI<WebAuthSession> getXingAPI() {
-        return xingApi;
-    }
-
-    /**
-     * Disposes this XING OAuth access.
-     */
-    @Override
-    public void dispose() {
-        // So far nothing known that needs to be disposed
+    public XingAPI<WebAuthSession> getXingAPI() throws OXException {
+        return (XingAPI<WebAuthSession>) getClient().client;
     }
 
     /**
@@ -223,5 +148,97 @@ public final class XingOAuthAccessImpl implements XingOAuthAccess {
     @Override
     public String getXingUserName() {
         return xingUserName;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#initialise()
+     */
+    @Override
+    public void initialise() throws OXException {
+        OAuthService oAuthService = Services.getService(OAuthService.class);
+        OAuthAccount oAuthAccount = oAuthService.getAccount(getAccountId(), session, session.getUserId(), session.getContextId());
+        
+        init(oAuthAccount.getToken(), oAuthAccount.getSecret());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#revoke()
+     */
+    @Override
+    public void revoke() throws OXException {
+        // No revoke
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
+     */
+    @Override
+    public OAuthAccess ensureNotExpired() throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#ping()
+     */
+    @Override
+    public boolean ping() throws OXException {
+        try {
+            getXingAPI().userInfo();
+            return true;
+        } catch (XingException e) {
+            throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getAccountId()
+     */
+    @Override
+    public int getAccountId() throws OXException {
+        return getOAuthAccount().getId();
+    }
+
+    /**
+     * Initialises the {@link OAuthClient} and {@link OAuthAccount}
+     * 
+     * @param token The token
+     * @param secret the secret
+     * @throws OXException if an error is occurred
+     */
+    private void init(String token, String secret) throws OXException {
+        try {
+            final OAuthServiceMetaData xingOAuthServiceMetaData = Services.getService(OAuthServiceMetaData.class);
+            final AppKeyPair appKeys = new AppKeyPair(xingOAuthServiceMetaData.getAPIKey(session), xingOAuthServiceMetaData.getAPISecret(session));
+            WebAuthSession webAuthSession = new WebAuthSession(appKeys, new AccessTokenPair(token, secret));
+            XingAPI<WebAuthSession> xingApi = new XingAPI<WebAuthSession>(webAuthSession);
+            setOAuthClient(new OAuthClient<XingAPI<WebAuthSession>>(xingApi, token));
+
+            // Get account information
+            final User accountInfo = xingApi.userInfo();
+            xingUserId = accountInfo.getId();
+            xingUserName = accountInfo.getDisplayName();
+        } catch (final XingUnlinkedException e) {
+            throw XingExceptionCodes.UNLINKED_ERROR.create();
+        } catch (final XingServerException e) {
+            if (e.getError() == XingServerException._404_NOT_FOUND) {
+                throw XingExceptionCodes.XING_SERVER_UNAVAILABLE.create(e, new Object[0]);
+            }
+            throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
+        } catch (final XingException e) {
+            throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw XingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 }

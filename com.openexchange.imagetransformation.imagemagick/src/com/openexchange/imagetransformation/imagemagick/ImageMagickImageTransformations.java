@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -67,12 +67,12 @@ import org.im4java.process.OutputConsumer;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.exception.OXException;
+import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.imagetransformation.Constants;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.imagetransformation.TransformationContext;
 import com.openexchange.imagetransformation.TransformedImage;
-import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.imagetransformation.TransformedImageCreator;
 import com.openexchange.imagetransformation.Utility;
 import com.openexchange.java.Streams;
@@ -219,6 +219,11 @@ public class ImageMagickImageTransformations implements ImageTransformations {
 
     @Override
     public ImageTransformations scale(int maxWidth, int maxHeight, ScaleType scaleType) {
+        return scale(maxHeight, maxHeight, scaleType, false);
+    }
+
+    @Override
+    public ImageTransformations scale(int maxWidth, int maxHeight, ScaleType scaleType, boolean shrinkOnly) {
         if (maxWidth > Constants.getMaxWidth()) {
             throw new IllegalArgumentException("Width " + maxWidth + " exceeds max. supported width " + Constants.getMaxWidth());
         }

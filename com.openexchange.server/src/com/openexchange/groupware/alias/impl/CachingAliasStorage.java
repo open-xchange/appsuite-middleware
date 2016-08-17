@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -99,6 +99,11 @@ public class CachingAliasStorage implements UserAliasStorage {
     }
 
     @Override
+    public Set<String> getAliases(int contextId) throws OXException {
+        return delegate.getAliases(contextId);
+    }
+
+    @Override
     public Set<String> getAliases(int contextId, int userId) throws OXException {
         CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
@@ -142,7 +147,7 @@ public class CachingAliasStorage implements UserAliasStorage {
         }
         return success;
     }
-    
+
     @Override
     public boolean updateAlias(Connection con, int contextId, int userId, String oldAlias, String newAlias) throws OXException {
         boolean success = delegate.updateAlias(con, contextId, userId, oldAlias, newAlias);

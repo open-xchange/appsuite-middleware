@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.text;
 
-import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.isWhitespace;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -58,7 +57,6 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -72,6 +70,7 @@ import javax.xml.transform.stream.StreamResult;
 import net.htmlparser.jericho.Attribute;
 import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.Element;
+import net.htmlparser.jericho.EndTag;
 import net.htmlparser.jericho.HTMLElementName;
 import net.htmlparser.jericho.OutputDocument;
 import net.htmlparser.jericho.Segment;
@@ -82,7 +81,9 @@ import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
@@ -381,8 +382,8 @@ public final class HtmlProcessing {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.mail.text.useSanitize", "com.openexchange.mail.imageHost");
             }
         });
     }
@@ -428,29 +429,6 @@ public final class HtmlProcessing {
         return str.substring(length - (maxWidth));
     }
 
-    private static void replaceBodyWithJericho0(Source source, OutputDocument outputDocument, List<Element> styleElements, String cssPrefix) {
-        List<Element> bodyElements = source.getAllElements(HTMLElementName.BODY);
-        if (null == bodyElements || bodyElements.isEmpty()) {
-            // No body
-            outputDocument.insert(0, "<div id=\"" + cssPrefix + "\">");
-            outputDocument.insert(source.length(), "</div>");
-        } else {
-            for (Element bodyElement : bodyElements) {
-                Segment content = bodyElement.getContent();
-                StringBuilder sb = new StringBuilder(content.length());
-                sb.append(getDivStartTagHTML(bodyElement.getStartTag(), cssPrefix));
-                if (null != styleElements) {
-                    for (Element element : styleElements) {
-                        sb.append(element);
-                    }
-                }
-                sb.append(content);
-                sb.append("</div>");
-                outputDocument.replace(bodyElement, sb);
-            }
-        }
-    }
-
     /**
      * Replaces &lt;body&gt; tag with an appropriate &lt;div&gt; tag.
      *
@@ -463,42 +441,95 @@ public final class HtmlProcessing {
         source.fullSequentialParse();
         OutputDocument outputDocument = new OutputDocument(source);
 
-        Element htmlElement = source.getFirstElement(HTMLElementName.HTML);
-        if (null == htmlElement) {
+        List<Element> htmlElements = source.getAllElements(HTMLElementName.HTML);
+        if (null == htmlElements || htmlElements.isEmpty()) {
             // No <html> element
-            replaceBodyWithJericho0(source, outputDocument, null, cssPrefix);
-            return outputDocument.toString();
+            replaceAllBodiesIfPresentElseSurround(source, outputDocument, null, cssPrefix);
+            return outputDocument.toString().trim();
         }
 
-        List<Element> styleElements = null;
-        {
-            Element headElement = source.getFirstElement(HTMLElementName.HEAD);
+        for (Element htmlElement : htmlElements) {
+            Element headElement = htmlElement.getFirstElement(HTMLElementName.HEAD);
+            List<Element> styleElements = null;
             if (null != headElement) {
                 styleElements = headElement.getAllElements(HTMLElementName.STYLE);
             }
-        }
 
-        replaceBodyWithJericho0(source, outputDocument, styleElements, cssPrefix);
-        return outputDocument.toString();
+            replaceAllBodiesIfPresentElseSurround(source, outputDocument, styleElements, cssPrefix);
+            outputDocument.remove(htmlElement.getStartTag());
+            if (null != headElement) {
+                outputDocument.remove(headElement);
+            }
+            EndTag endTag = htmlElement.getEndTag();
+            if (null != endTag) {
+                outputDocument.remove(endTag);
+            }
+        }
+        return outputDocument.toString().trim();
     }
 
-    private static CharSequence getDivStartTagHTML(StartTag startTag, String cssPrefix) {
-        // tidies and filters out non-approved attributes
-        StringBuilder sb = new StringBuilder(128);
-        sb.append("<div");
-        sb.append(' ').append("id=\"").append(cssPrefix).append('"');
+    private static void replaceAllBodiesIfPresentElseSurround(Source source, OutputDocument outputDocument, List<Element> styleElements, String cssPrefix) {
+        List<Element> bodyElements = source.getAllElements(HTMLElementName.BODY);
+        if (null == bodyElements) {
+            // No body
+            outputDocument.insert(0, "<div id=\"" + cssPrefix + "\">");
+            outputDocument.insert(source.length(), "</div>");
+            return;
+        }
+
+        int numOfBodies = bodyElements.size();
+        if (0 == numOfBodies) {
+            // No body
+            outputDocument.insert(0, "<div id=\"" + cssPrefix + "\">");
+            outputDocument.insert(source.length(), "</div>");
+            return;
+        }
+
+        if (1 == numOfBodies) {
+            Element bodyElement = bodyElements.get(0);
+            Segment content = bodyElement.getContent();
+            StringBuilder sb = new StringBuilder(content.length());
+            getDivStartTagHTML(bodyElement.getStartTag(), cssPrefix, sb);
+            if (null != styleElements) {
+                for (Element element : styleElements) {
+                    sb.append(element);
+                }
+            }
+            sb.append(content);
+            sb.append("</div>");
+            outputDocument.replace(bodyElement, sb);
+            return;
+        }
+
+        for (Element bodyElement : bodyElements) {
+            Segment content = bodyElement.getContent();
+            StringBuilder sb = new StringBuilder(content.length());
+            getDivStartTagHTML(bodyElement.getStartTag(), cssPrefix, sb);
+            if (null != styleElements) {
+                for (Element element : styleElements) {
+                    sb.append(element);
+                }
+            }
+            sb.append(content);
+            sb.append("</div>");
+            outputDocument.replace(bodyElement, sb);
+        }
+    }
+
+    private static void getDivStartTagHTML(StartTag startTag, String cssPrefix, StringBuilder appendTo) {
+        // Tidies and filters out non-approved attributes
+        appendTo.append("<div id=\"").append(cssPrefix).append('"');
 
         for (Attribute attribute : startTag.getAttributes()) {
             if (!"id".equals(attribute.getKey())) {
-                sb.append(' ').append(attribute.getName());
+                appendTo.append(' ').append(attribute.getName());
                 if (attribute.getValue() != null) {
-                    sb.append("=\"").append(CharacterReference.encode(attribute.getValue())).append('"');
+                    appendTo.append("=\"").append(CharacterReference.encode(attribute.getValue())).append('"');
                 }
             }
         }
 
-        sb.append('>');
-        return sb;
+        appendTo.append('>');
     }
 
     private static final Pattern PATTERN_CSS_CLASS_NAME = Pattern.compile("\\s?\\.[a-zA-Z0-9\\s:,\\.#_-]*\\s*\\{.*?\\}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -1177,6 +1208,18 @@ public final class HtmlProcessing {
         } finally {
             Streams.close(writer);
         }
+    }
+
+    private static boolean isEmpty(final CharSequence charSeq) {
+        if (null == charSeq) {
+            return true;
+        }
+        final int len = charSeq.length();
+        boolean isWhitespace = true;
+        for (int i = len; isWhitespace && i-- > 0;) {
+            isWhitespace = isWhitespace(charSeq.charAt(i));
+        }
+        return isWhitespace;
     }
 
     /**

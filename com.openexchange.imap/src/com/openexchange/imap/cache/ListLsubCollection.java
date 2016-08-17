@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -73,7 +73,9 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.config.IMAPReloadable;
@@ -472,8 +474,8 @@ final class ListLsubCollection implements Serializable {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.imap.initStatusThreshold", "com.openexchange.imap.initAclThreshold");
             }
         });
     }
@@ -1202,47 +1204,55 @@ final class ListLsubCollection implements Serializable {
      * @throws ProtocolException If a protocol error occurs
      */
     protected void doRootListCommand(final IMAPProtocol protocol) throws ProtocolException {
-        doDummyLsub(protocol);
         /*
          * Perform command: LIST "" ""
          */
         String command = "LIST \"\" \"\"";
         Response[] r = performCommand(protocol, command);
+
+        if (r.length == 1) {
+            // No LIST response for root folder. Do dummy LSUB and retry...
+            doDummyLsub(protocol);
+            r = performCommand(protocol, command);
+        }
+
         Response response = r[r.length - 1];
-        if (response.isOK()) {
-            String cmd = "LIST";
-            for (int i = 0, len = r.length; i < len; i++) {
-                if (!(r[i] instanceof IMAPResponse)) {
-                    continue;
-                }
-                final IMAPResponse ir = (IMAPResponse) r[i];
-                if (ir.keyEquals(cmd)) {
-                    final ListLsubEntryImpl listLsubEntry = parseListResponse(ir, null);
-                    {
-                        final ListLsubEntryImpl oldEntry = listMap.get(ROOT_FULL_NAME);
-                        if (null == oldEntry) {
-                            listMap.put(ROOT_FULL_NAME, listLsubEntry);
-                            lsubMap.put(ROOT_FULL_NAME, listLsubEntry);
-                        } else {
-                            oldEntry.clearChildren();
-                            oldEntry.copyFrom(listLsubEntry);
-                        }
-                    }
-                    r[i] = null;
-                }
-            }
-            /*
-             * Dispatch remaining untagged responses
-             */
-            protocol.notifyResponseHandlers(r);
-        } else {
+        if (false == response.isOK()) {
             /*
              * Dispatch remaining untagged responses
              */
             LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, command);
             protocol.notifyResponseHandlers(r);
             protocol.handleResult(response);
+            return;
         }
+
+        String cmd = "LIST";
+        for (int i = 0, k = r.length; k-- > 0; i++) {
+            if (!(r[i] instanceof IMAPResponse)) {
+                continue;
+            }
+
+            IMAPResponse ir = (IMAPResponse) r[i];
+            if (ir.keyEquals(cmd)) {
+                final ListLsubEntryImpl listLsubEntry = parseListResponse(ir, null);
+                {
+                    final ListLsubEntryImpl oldEntry = listMap.get(ROOT_FULL_NAME);
+                    if (null == oldEntry) {
+                        listMap.put(ROOT_FULL_NAME, listLsubEntry);
+                        lsubMap.put(ROOT_FULL_NAME, listLsubEntry);
+                    } else {
+                        oldEntry.clearChildren();
+                        oldEntry.copyFrom(listLsubEntry);
+                    }
+                }
+                r[i] = null;
+            }
+        }
+        /*
+         * Dispatch remaining untagged responses
+         */
+        protocol.notifyResponseHandlers(r);
     }
 
     /**
@@ -1465,6 +1475,121 @@ final class ListLsubCollection implements Serializable {
         try {
             addSingle(fullName, (IMAPFolder) imapStore.getFolder("INBOX"), doStatus, doGetAcl);
         } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Adds single entry to collection.
+     *
+     * @param fullName The full name
+     * @param subscribed <code>true</code> if subscribed; otherwise <code>false</code>
+     * @param imapFolder The IMAP folder
+     * @param doStatus Whether to perform STATUS command
+     * @param doGetAcl Whether to perform GETACL command
+     * @throws OXException If operation fails
+     */
+    public void addSingle(IMAPFolder imapFolder, boolean subscribed, boolean doStatus, boolean doGetAcl) throws OXException {
+        try {
+            ListLsubEntry.ChangeState changeState = ListLsubEntry.ChangeState.UNDEFINED;
+            boolean canOpen = true;
+            boolean hasInferiors = true;
+            Boolean hasChildren = null;
+            Set<String> attributes;
+            {
+                String[] attrs = imapFolder.getAttributes();
+                if (null == attrs || 0 == attrs.length) {
+                    attributes = Collections.<String> emptySet();
+                } else {
+                    attributes = new HashSet<String>(attrs.length);
+                    for (String attribute : attrs) {
+                        String attr = Strings.asciiLowerCase(attribute);
+                        switch (POS_MAP.get(attr)) {
+                            case 1:
+                                changeState = ListLsubEntry.ChangeState.CHANGED;
+                                break;
+                            case 2:
+                                changeState = ListLsubEntry.ChangeState.UNCHANGED;
+                                break;
+                            case 3:
+                                canOpen = false;
+                                break;
+                            case 4:
+                                hasInferiors = false;
+                                break;
+                            case 5:
+                                hasChildren = Boolean.TRUE;
+                                break;
+                            case 6:
+                                hasChildren = Boolean.FALSE;
+                                break;
+                            default:
+                                // Nothing
+                                break;
+                            }
+                        attributes.add(attr);
+                    }
+                }
+            }
+            String fullName = imapFolder.getFullName();
+            if (subscribed) {
+                ListLsubEntryImpl lsubEntry = new ListLsubEntryImpl(fullName, attributes, imapFolder.getSeparator(), changeState, hasInferiors, canOpen, hasChildren, null);
+                ConcurrentMap<String, ListLsubEntryImpl> map = lsubMap;
+                {
+                    ListLsubEntryImpl oldEntry = map.get(fullName);
+                    ListLsubEntryImpl parent;
+                    if (null != oldEntry) {
+                        for (ListLsubEntryImpl child : oldEntry.getChildrenSet()) {
+                            child.setParent(lsubEntry);
+                            lsubEntry.addChild(child);
+                        }
+                        parent = oldEntry.getParentImpl();
+                    } else {
+                        int pos = fullName.lastIndexOf(lsubEntry.getSeparator());
+                        if (pos > 0) {
+                            String parentFullName = fullName.substring(0, pos);
+                            parent = map.get(parentFullName);
+                        } else {
+                            parent = map.get(ROOT_FULL_NAME);
+                        }
+                    }
+                    if (null != parent) {
+                        lsubEntry.setParent(parent);
+                        parent.addChild(lsubEntry);
+                    }
+                }
+                map.put(fullName, lsubEntry);
+            }
+
+            ListLsubEntryImpl listEntry = new ListLsubEntryImpl(fullName, attributes, imapFolder.getSeparator(), changeState, hasInferiors, canOpen, hasChildren, lsubMap);
+            {
+                ConcurrentMap<String, ListLsubEntryImpl> map = listMap;
+                {
+                    ListLsubEntryImpl oldEntry = map.get(fullName);
+                    ListLsubEntryImpl parent;
+                    if (null != oldEntry) {
+                        for (ListLsubEntryImpl child : oldEntry.getChildrenSet()) {
+                            child.setParent(listEntry);
+                            listEntry.addChild(child);
+                        }
+                        parent = oldEntry.getParentImpl();
+                    } else {
+                        int pos = fullName.lastIndexOf(listEntry.getSeparator());
+                        if (pos > 0) {
+                            String parentFullName = fullName.substring(0, pos);
+                            parent = map.get(parentFullName);
+                        } else {
+                            parent = map.get(ROOT_FULL_NAME);
+                        }
+                    }
+                    if (null != parent) {
+                        listEntry.setParent(parent);
+                        parent.addChild(listEntry);
+                    }
+                }
+                map.put(fullName, listEntry);
+            }
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }

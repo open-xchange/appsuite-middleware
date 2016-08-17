@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -81,24 +81,21 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link NewAction}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-@Action(method = RequestMethod.PUT, name = "new", description = "Create an appointment.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
-}, requestBody = "Appointment object as described in Common object data, Detailed task and appointment data and Detailed appointment data. The field id is not present.",
-responseDescription = "If the appointment was created successfully, an object with the attribute id of the newly created appointment. If the appointment could not be created due to conflicts, the response body is an object with the field conflicts, which is an array of appointment objects which caused the conflict. Each appointment object which represents a resource conflict contains an additional field hard_conflict with the Boolean value true. If the user does not have read access to a conflicting appointment, only the fields id, start_date, end_date, shown_as and participants are present and the field participants contains only the participants which caused the conflict.")
+@Action(method = RequestMethod.PUT, name = "new", description = "Create an appointment.", parameters = { @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
+}, requestBody = "Appointment object as described in Common object data, Detailed task and appointment data and Detailed appointment data. The field id is not present.", responseDescription = "If the appointment was created successfully, an object with the attribute id of the newly created appointment. If the appointment could not be created due to conflicts, the response body is an object with the field conflicts, which is an array of appointment objects which caused the conflict. Each appointment object which represents a resource conflict contains an additional field hard_conflict with the Boolean value true. If the user does not have read access to a conflicting appointment, only the fields id, start_date, end_date, shown_as and participants are present and the field participants contains only the participants which caused the conflict.")
 @OAuthAction(AppointmentActionFactory.OAUTH_WRITE_SCOPE)
 public final class NewAction extends ChronosAction {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(NewAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewAction.class);
 
     /**
      * Initializes a new {@link NewAction}.
+     * 
      * @param services
      */
     public NewAction(final ServiceLookup services) {
@@ -122,7 +119,7 @@ public final class NewAction extends ChronosAction {
         appointmentParser.parse(appointmentObj, jData);
 
         if (!appointmentObj.containsParentFolderID()) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( AJAXServlet.PARAMETER_FOLDERID);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_FOLDERID);
         }
 
         convertExternalToInternalUsersIfPossible(appointmentObj, session.getContext(), LOG);
@@ -140,6 +137,7 @@ public final class NewAction extends ChronosAction {
         if (conflicts == null) {
             jsonResponseObj.put(DataFields.ID, appointmentObj.getObjectID());
             timestamp = appointmentObj.getLastModified();
+            countObjectUse(session, appointmentObj);
         } else {
             final JSONArray jsonConflictArray = new JSONArray(conflicts.length);
             final AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(req.getSession());

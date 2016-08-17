@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.categories.json;
 
+import java.util.Arrays;
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,12 +59,14 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.BooleanTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.UserFlagTerm;
 import com.openexchange.server.ServiceExceptionCode;
@@ -79,10 +82,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.GET, name = "unread", description = "Retrieves the unread count of all categories", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "category_ids", description = "A comma separated list of category identifiers. If set only the unread counters of this categories are retrieved.")
 }, responseDescription = "Response: A JSON Object containing the category identifiers and the corresponding unread count as key value pairs")
 public class UnreadAction extends AbstractCategoriesAction {
 
     private static final String ACTION = "categories";
+
+    private static final String PARAMETER_CATEGORY_IDS = "category_ids";
 
     /**
      * Initializes a new {@link SwitchAction}.
@@ -106,7 +112,14 @@ public class UnreadAction extends AbstractCategoriesAction {
             throw AjaxExceptionCodes.DISABLED_ACTION.create(ACTION);
         }
 
-        List<MailCategoryConfig> categories = categoriesConfigService.getAllCategories(session, true);
+        String idsString = requestData.getParameter(PARAMETER_CATEGORY_IDS);
+        List<String> idsList = null;
+        if (idsString != null) {
+            String[] ids = Strings.splitByComma(idsString);
+            idsList = Arrays.asList(ids);
+        }
+
+        List<MailCategoryConfig> categories = categoriesConfigService.getAllCategories(session, session.getUser().getLocale(), true, false);
         String[] unkeywords = categoriesConfigService.getAllFlags(requestData.getSession(), true, true);
         String[] flags = getFlagsFrom(categories);
 
@@ -120,11 +133,19 @@ public class UnreadAction extends AbstractCategoriesAction {
             SearchTerm<?> searchTerm = null;
 
             // General case
-            searchTerm = new UserFlagTerm(flags, false);
-            int unread = messageStorage.getUnreadCount("INBOX", searchTerm);
-            resultObject.put("General", unread);
+            int unread = 0;
+            if (flags != null && flags.length != 0) {
+                searchTerm = new UserFlagTerm(flags, false);
+                unread = messageStorage.getUnreadCount("INBOX", searchTerm);
+            } else {
+                unread = messageStorage.getUnreadCount("INBOX", BooleanTerm.TRUE);
+            }
+            resultObject.put("general", unread);
 
             for (MailCategoryConfig category : categories) {
+                if (idsList != null && !idsList.contains(category.getCategory())) {
+                    continue;
+                }
                 if (unkeywords != null && unkeywords.length != 0 && categoriesConfigService.isSystemCategory(category.getCategory(), session)) {
                     searchTerm = new ANDTerm(new UserFlagTerm(category.getFlag(), true), new UserFlagTerm(unkeywords, false));
                 } else {

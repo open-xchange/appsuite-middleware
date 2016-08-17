@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -67,11 +67,11 @@ import com.openexchange.session.SessionSpecificContainerRetrievalService.Lifecyc
  */
 public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> {
 
-    protected ConcurrentHashMap<SessionKey, T> delegate = new ConcurrentHashMap<SessionKey, T>();
+    protected final ConcurrentHashMap<SessionKey, T> delegate = new ConcurrentHashMap<SessionKey, T>();
 
-    protected InitialValueFactory<T> initial;
+    protected final InitialValueFactory<T> initial;
 
-    protected CleanUp<T> cleanUp;
+    protected final CleanUp<T> cleanUp;
 
     private final SessiondSessionSpecificRetrievalService manager;
 
@@ -80,6 +80,7 @@ public class SessionScopedContainerImpl<T> implements SessionScopedContainer<T> 
     private final Lifecycle lifecycle;
 
     public SessionScopedContainerImpl(String name, Lifecycle lifecycle, InitialValueFactory<T> initial, CleanUp<T> cleanUp, SessiondSessionSpecificRetrievalService manager) {
+        super();
         this.initial = initial;
         this.cleanUp = cleanUp;
         this.manager = manager;

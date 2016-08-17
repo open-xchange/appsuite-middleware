@@ -1,0 +1,137 @@
+type: object
+properties:
+  id:
+    type: integer
+    description: The account identifier.
+  name:
+    type: string
+    description: The account's display name.
+  login:
+    type: string
+    description: The login name.
+  password:
+    type: string
+    description: The (optional) password.
+  mail_url:
+    type: string
+    description: The mail server URL, e.g. "imap://imap.somewhere.com:143". **URL is preferred over single fields** (like `mail_server`, `mail_port`, etc.).
+  mail_server:
+    type: string
+    description: The mail server's hostname or IP address.
+  mail_port:
+    type: integer
+    description: The mail server's port.
+  mail_protocol:
+    type: string
+    description: The mail server's protocol. **Always use basic protocol name.** E.g. use "imap" instead of "imaps".
+  mail_secure:
+    type: boolean
+    description: Whether to establish a secure connection to mail server (SSL, TLS).
+  mail_starttls:
+    type: boolean
+    description: Whether to establish a secure connection to mail server via STARTTLS (available since v7.8.2).
+  transport_url:
+    type: string
+    description: The transport server URL, e.g. "smtp://smtp.somewhere.com:25". **URL is preferred over single fields** (like `transport_server`, `transport_port`, etc.).
+  transport_server:
+    type: string
+    description: The transport server's hostname or IP address.
+  transport_port:
+    type: integer
+    description: The transport server's port.
+  transport_protocol:
+    type: string
+    description: The transport server's protocol. **Always use basic protocol name.** E.g. use "smtp" instead of "smtps".
+  transport_secure:
+    type: boolean
+    description: Whether to establish a secure connection to transport server (SSL, TLS).
+  transport_login:
+    type: string
+    description: The transport login. **Please see `transport_auth` for the handling of this field.**
+  transport_password:
+    type: string
+    description: The transport password. **Please see `transport_auth` for the handling of this field.**
+  transport_auth:
+    type: string
+    description: 'Specifies the source for mail transport (SMTP) credentials. Possible values: mail (signals to use the same credentials as given in associated mail store, e.g. IMAP or POP3), custom (signals that individual credentials are supposed to be used (fields `transport_login` and `transport_password` are considered), none (means the mail transport does not support any authentication mechansim). (available since v7.6.1)'
+  transport_starttls:
+    type: boolean
+    description: Whether to establish a secure connection to transport server via STARTTLS (available since v7.8.2).
+  primary_address:
+    type: string
+    description: The user's primary address in account, e.g. "someone@somewhere.com".
+  spam_handler:
+    type: string
+    description: The name of the spam handler used by account.
+  trash:
+    type: string
+    description: The name of the default trash folder.
+  sent:
+    type: string
+    description: The name of the default sent folder.
+  drafts:
+    type: string
+    description: The name of the default drafts folder.
+  spam:
+    type: string
+    description: The name of the default spam folder.
+  confirmed_spam:
+    type: string
+    description: The name of the default confirmed-spam folder.
+  confirmed_ham:
+    type: string
+    description: The name of the default confirmed-ham folder.
+  unified_inbox_enabled:
+    type: boolean
+    description: Whether Unified INBOX is enabled.
+  trash_fullname:
+    type: string
+    description: Path to default trash folder. Preferred over `trash`.
+  sent_fullname:
+    type: string
+    description: Path to default sent folder. Preferred over `sent`.
+  drafts_fullname:
+    type: string
+    description: Path to default drafts folder. Preferred over `drafts`.
+  spam_fullname:
+    type: string
+    description: Path to default spam folder. Preferred over `spam`.
+  confirmed_span_fullname:
+    type: string
+    description: Path to default confirmed-spam folder. Preferred over `confirmed_spam`.
+  confirmed_ham_fullname:
+    type: string
+    description: Path to default confirmed-ham folder. Preferred over `confirmed_ham`.
+  pop3_refresh_rate:
+    type: integer
+    description: The interval in minutes the POP3 account is refreshed.
+  pop3_expunge_on_quit:
+    type: boolean
+    description: Whether POP3 messages shall be deleted on actual POP3 account after retrieval or not.
+  pop3_delete_write_through:
+    type: boolean
+    description: If option `pop3_expunge_on_quite` is disabled, this field defines whether a deleted in local INBOX also deletes affected message in actual POP3 account.
+  pop3_storage:
+    type: string
+    description: The name of POP3 storage provider, default is "mailaccount".
+  pop3_path:
+    type: string
+    description: Path to POP3's virtual root folder in storage, default name of the POP3 account beside default folders.
+  personal:
+    type: string
+    description: The customizable personal part of the email address.
+  reply_to:
+    type: string
+    description: The customizable reply-to email address.
+  addresses:
+    type: string
+    description: The comma-separated list of available email addresses including aliases (**only available for primary mail account**).
+  meta:
+    type: string
+    description: Stores arbitrary JSON data as specified by client associated with the mail account.
+  archive:
+    type: string
+    description: The name of the archive folder. **Currently not functional!**
+  archive_fullname:
+    type: string
+    description: The full name of the archive folder. **Currently not functional!**

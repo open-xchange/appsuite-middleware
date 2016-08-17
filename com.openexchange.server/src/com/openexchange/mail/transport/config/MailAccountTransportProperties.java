@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.transport.config;
 
+import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mailaccount.MailAccount;
@@ -73,12 +74,20 @@ public class MailAccountTransportProperties implements ITransportProperties {
      * @param mailAccount The mail account providing the properties
      * @throws IllegalArgumentException If provided mail account is <code>null</code>
      */
-    public MailAccountTransportProperties(final MailAccount mailAccount) {
+    public MailAccountTransportProperties(MailAccount mailAccount) {
         super();
         if (null == mailAccount) {
             throw new IllegalArgumentException("mail account is null.");
         }
         properties = mailAccount.getProperties();
+    }
+
+    /**
+     * Initializes a new {@link MailAccountTransportProperties} with empty properties.
+     */
+    protected MailAccountTransportProperties() {
+        super();
+        properties = new HashMap<String, String>(0);
     }
 
     /**

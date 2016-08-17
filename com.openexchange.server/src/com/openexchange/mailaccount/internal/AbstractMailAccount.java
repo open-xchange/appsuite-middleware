@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -117,6 +117,7 @@ public abstract class AbstractMailAccount implements MailAccount {
     protected Map<String, String> transportProperties;
     protected boolean mailStartTls;
     protected boolean transportStartTls;
+    protected String rootFolder;
 
     /**
      * Initializes a new {@link AbstractMailAccount}.
@@ -220,6 +221,11 @@ public abstract class AbstractMailAccount implements MailAccount {
     @Override
     public int getUserId() {
         return userId;
+    }
+
+    @Override
+    public String getRootFolder() {
+        return rootFolder;
     }
 
     /**
@@ -498,6 +504,15 @@ public abstract class AbstractMailAccount implements MailAccount {
     public void setTransportSecure(final boolean transportSecure) {
         transportServerUrl = null;
         this.transportSecure = transportSecure;
+    }
+
+    /**
+     * Sets the identifier for the root folder
+     *
+     * @param rootFolder The root folder identifier to set
+     */
+    public void setRootFolder(String rootFolder) {
+        this.rootFolder = rootFolder;
     }
 
     @Override

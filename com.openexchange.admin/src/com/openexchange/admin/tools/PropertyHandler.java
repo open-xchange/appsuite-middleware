@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -59,6 +59,7 @@ import java.util.Properties;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Streams;
 
 public class PropertyHandler {
 
@@ -361,7 +362,13 @@ public class PropertyHandler {
 
     protected void addpropsfromfile(final String file) throws FileNotFoundException, IOException {
         final Properties configprops  = new Properties();
-        configprops.load( new FileInputStream(file) );
+        FileInputStream in = null;
+        try {
+            in = new FileInputStream(file);
+            configprops.load(in);
+        } finally {
+            Streams.close(in);
+        }
 
         final Enumeration<?> enumi = configprops.propertyNames();
         while ( enumi.hasMoreElements() ) {
@@ -378,7 +385,12 @@ public class PropertyHandler {
 
             if ( param.toLowerCase().endsWith( "_prop" ) ) {
                 final Properties customprops = new Properties();
-                customprops.load( new FileInputStream( value ) );
+                try {
+                    in = new FileInputStream(value);
+                    customprops.load(in);
+                } finally {
+                    Streams.close(in);
+                }
                 final Enumeration<?> enuma = customprops.propertyNames();
                 Hashtable<String, String> custconfig = new Hashtable<String, String>();
                 if ( this.allPropValues.containsKey( param + "_CONFIG" ) ) {

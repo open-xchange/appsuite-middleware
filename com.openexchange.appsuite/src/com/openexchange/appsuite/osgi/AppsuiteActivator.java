@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,7 +50,6 @@
 package com.openexchange.appsuite.osgi;
 
 import java.io.File;
-import java.util.Map;
 import org.osgi.framework.BundleException;
 import org.osgi.service.http.HttpService;
 import com.openexchange.ajax.requesthandler.Dispatcher;
@@ -60,7 +59,9 @@ import com.openexchange.appsuite.FileContribution;
 import com.openexchange.appsuite.FileContributor;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.LoginRampUpService;
@@ -125,7 +126,8 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
         };
 
         // Initialize Servlet
-        AppsLoadServlet appsLoadServlet = new AppsLoadServlet(apps, zoneinfo, compositeContributor);
+        AppsLoadServlet appsLoadServlet = new AppsLoadServlet(compositeContributor);
+        appsLoadServlet.reinitialize(apps, zoneinfo);
         this.appsLoadServlet = appsLoadServlet;
 
         // Register as reloadable
@@ -199,7 +201,8 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        return null;
+    public Interests getInterests() {
+        return Reloadables.getInterestsForAll();
     }
+
 }

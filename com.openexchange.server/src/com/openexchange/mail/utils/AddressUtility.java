@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -73,21 +73,28 @@ public class AddressUtility {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AddressUtility.class);
 
-    public static Set<InternetAddress> getUnknownAddresses(final MailMessage mail, final ServerSession session) throws OXException {
+    /**
+     * Grabs the addresses from specified message.
+     *
+     * @param mail The mail message to get addresses from
+     * @param session The associated session
+     * @return The addresses
+     * @throws OXException If addresses cannot be returned
+     */
+    public static Set<InternetAddress> getAddresses(final MailMessage mail, final ServerSession session) throws OXException {
         if (mail == null) {
-            LOG.info("Provided MailMessage object is null. Cannot get unknown addresses!");
             return Collections.emptySet();
         }
 
-        final Set<InternetAddress> addrs = new HashSet<InternetAddress>();
+        Set<InternetAddress> addrs = new HashSet<InternetAddress>();
         addrs.addAll(Arrays.asList(mail.getFrom()));
         addrs.addAll(Arrays.asList(mail.getTo()));
         addrs.addAll(Arrays.asList(mail.getCc()));
         addrs.addAll(Arrays.asList(mail.getBcc()));
+
         // Strip by aliases
         try {
             if (session == null) {
-                LOG.info("Provided Session object is null. Cannot remove already known addresses!");
                 return addrs;
             }
 
@@ -102,7 +109,9 @@ public class AddressUtility {
             for (final String alias : aliases) {
                 knownAddresses.add(new QuotedInternetAddress(alias));
             }
+
             addrs.removeAll(knownAddresses);
+
         } catch (final AddressException e) {
             LOG.warn("Collected contacts could not be stripped by user's email aliases", e);
         }

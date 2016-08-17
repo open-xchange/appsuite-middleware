@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -82,6 +82,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.EnumComponent;
@@ -151,10 +152,28 @@ public final class PermissionLoaderService implements Runnable {
      */
     private static final long WAIT_TIME = 3000;
 
+    private static volatile Integer maxConcurrentTasks;
+
     /**
-     * The max. number of concurrent tasks.
+     * Gets the max. number of concurrent tasks.
+     *
+     * @return The max. number of concurrent tasks
      */
-    private static final int MAX_CONCURRENT_TASKS = -1;
+    private static int maxConcurrentTasks() {
+        Integer tmp = maxConcurrentTasks;
+        if (null == tmp) {
+            synchronized (PermissionLoaderService.class) {
+                tmp = maxConcurrentTasks;
+                if (null == tmp) {
+                    int defaultValue = -1;
+                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    tmp = Integer.valueOf(null == service ? defaultValue : service.getIntProperty("com.openexchange.tools.oxfolder.permissionLoader.maxConcurrentTasks", defaultValue));
+                    maxConcurrentTasks = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
 
     /**
      * The container for currently running concurrent filler tasks.
@@ -188,9 +207,10 @@ public final class PermissionLoaderService implements Runnable {
      */
     public PermissionLoaderService() {
         super();
-        placeHolder = MAX_CONCURRENT_TASKS > 0 ? new StampedFuture(null) : null;
+        int maxConcurrentTasks = maxConcurrentTasks();
+        placeHolder = maxConcurrentTasks > 0 ? new StampedFuture(null) : null;
         keepgoing = new AtomicBoolean(true);
-        concurrentFutures = MAX_CONCURRENT_TASKS > 0 ? new AtomicReferenceArray<StampedFuture>(MAX_CONCURRENT_TASKS) : null;
+        concurrentFutures = maxConcurrentTasks > 0 ? new AtomicReferenceArray<StampedFuture>(maxConcurrentTasks) : null;
         queue = new LinkedBlockingQueue<Pair>();
         simpleName = getClass().getSimpleName();
         gate = new Gate(-1);
@@ -478,38 +498,41 @@ public final class PermissionLoaderService implements Runnable {
             /*
              * Find a free or elapsed slot
              */
-            int index = -1;
-            while (index < 0) {
-                final long earliestStamp = System.currentTimeMillis() - MAX_RUNNING_TIME;
-                for (int i = 0; (index < 0) && (i < MAX_CONCURRENT_TASKS); i++) {
-                    final StampedFuture sf = concurrentFutures.get(i);
-                    if (null == sf) {
-                        if (concurrentFutures.compareAndSet(i, null, placeHolder)) {
-                            index = i; // Found a free slot
+            int maxConcurrentTasks = maxConcurrentTasks();
+            if (maxConcurrentTasks > 0) {
+                int index = -1;
+                while (index < 0) {
+                    final long earliestStamp = System.currentTimeMillis() - MAX_RUNNING_TIME;
+                    for (int i = 0; (index < 0) && (i < maxConcurrentTasks); i++) {
+                        final StampedFuture sf = concurrentFutures.get(i);
+                        if (null == sf) {
+                            if (concurrentFutures.compareAndSet(i, null, placeHolder)) {
+                                index = i; // Found a free slot
+                            }
+                        } else if (sf.getStamp() < earliestStamp) { // Elapsed
+                            sf.getFuture().cancel(true);
+                            LOG.debug("Cancelled elapsed task running for {}msec.", (System.currentTimeMillis() - sf.getStamp()));
+                            if (concurrentFutures.compareAndSet(i, sf, placeHolder)) {
+                                index = i; // Found a slot with an elapsed task
+                            }
                         }
-                    } else if (sf.getStamp() < earliestStamp) { // Elapsed
-                        sf.getFuture().cancel(true);
-                        LOG.debug("Cancelled elapsed task running for {}msec.", (System.currentTimeMillis() - sf.getStamp()));
-                        if (concurrentFutures.compareAndSet(i, sf, placeHolder)) {
-                            index = i; // Found a slot with an elapsed task
+                    }
+                    LOG.debug(index < 0 ? "Awaiting a free/elapsed slot..." : "Found a free/elapsed slot...");
+                    if (index < 0) {
+                        synchronized (placeHolder) {
+                            placeHolder.wait(WAIT_TIME);
                         }
                     }
                 }
-                LOG.debug(index < 0 ? "Awaiting a free/elapsed slot..." : "Found a free/elapsed slot...");
-                if (index < 0) {
-                    synchronized (placeHolder) {
-                        placeHolder.wait(WAIT_TIME);
-                    }
-                }
+                /*
+                 * Submit to a free worker thread
+                 */
+                final PairHandlerTask task = new IndexedPairHandlerTask(groupedPairsSublist, index);
+                final Future<Object> f = threadPool.submit(ThreadPools.task(task));
+                final StampedFuture sf = new StampedFuture(f);
+                concurrentFutures.set(index, sf);
+                task.start(sf);
             }
-            /*
-             * Submit to a free worker thread
-             */
-            final PairHandlerTask task = new IndexedPairHandlerTask(groupedPairsSublist, index);
-            final Future<Object> f = threadPool.submit(ThreadPools.task(task));
-            final StampedFuture sf = new StampedFuture(f);
-            concurrentFutures.set(index, sf);
-            task.start(sf);
         }
     }
 

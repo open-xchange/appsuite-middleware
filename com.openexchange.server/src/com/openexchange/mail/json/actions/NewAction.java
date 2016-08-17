@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -95,6 +95,11 @@ import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage
 import com.openexchange.mail.event.EventPool;
 import com.openexchange.mail.event.PooledEvent;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.json.compose.ComposeDraftResult;
+import com.openexchange.mail.json.compose.ComposeHandler;
+import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
+import com.openexchange.mail.json.compose.ComposeRequest;
+import com.openexchange.mail.json.compose.ComposeTransportResult;
 import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
@@ -105,12 +110,12 @@ import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.MtaStatusInfo;
-import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -152,12 +157,7 @@ public final class NewAction extends AbstractMailAction {
         try {
             long maxSize;
             long maxFileSize;
-            if (TransportProperties.getInstance().isPublishOnExceededQuota() && req.getSession().getUserPermissionBits().hasInfostore()) {
-                // No chance to check account prior to parsing multipart upload
-                // Thus w/o: (!TransportProperties.getInstance().isPublishPrimaryAccountOnly() || (MailAccount.DEFAULT_ID == accountId))
-                maxSize = -1L;
-                maxFileSize = -1L;
-            } else {
+            {
                 UserSettingMail usm = req.getSession().getUserSettingMail();
                 maxFileSize = usm.getUploadQuotaPerFile();
                 if (maxFileSize <= 0) {
@@ -217,13 +217,14 @@ public final class NewAction extends AbstractMailAction {
              *
              * Resolve "From" to proper mail account to select right transport server
              */
-            final InternetAddress from;
+            InternetAddress from;
             try {
                 final InternetAddress[] fromAddresses = MessageParser.parseAddressKey(FROM, jMail, true);
                 from = null == fromAddresses || 0 == fromAddresses.length ? null : fromAddresses[0];
             } catch (final AddressException e) {
                 throw MimeMailException.handleMessagingException(e);
             }
+
             int accountId;
             try {
                 accountId = resolveFrom2Account(session, from, true, true);
@@ -236,19 +237,30 @@ public final class NewAction extends AbstractMailAction {
                 // Send with default account's transport provider
                 accountId = MailAccount.DEFAULT_ID;
             }
+
             boolean newMessageId = AJAXRequestDataTools.parseBoolParameter(AJAXServlet.ACTION_NEW, request);
-            final MailServletInterface mailInterface = getMailInterface(req);
-            if ((jMail.optInt(FLAGS, 0) & MailMessage.FLAG_DRAFT) > 0) {
-                /*
-                 * ... and save draft
-                 */
-                ComposedMailMessage composedMail = MessageParser.parse4Draft(jMail, uploadEvent, session, accountId, csid, warnings);
+            boolean isDraft = (jMail.optInt(FLAGS, 0) & MailMessage.FLAG_DRAFT) > 0;
+
+            // Determine send type
+            ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : (isDraft ? null : ComposeType.NEW);
+
+            // Create compose request to process
+            ComposeRequest composeRequest = new ComposeRequest(accountId, jMail, sendType, uploadEvent, request, warnings);
+
+            // Determine appropriate compose handler
+            ComposeHandlerRegistry handlerRegistry = ServerServiceRegistry.getInstance().getService(ComposeHandlerRegistry.class);
+            ComposeHandler composeHandler = handlerRegistry.getComposeHandlerFor(composeRequest);
+
+            // Process compose request
+            if (isDraft) {
+                // Save as draft
+                ComposeDraftResult draftResult = composeHandler.createDraftResult(composeRequest);
+                ComposedMailMessage composedMail = draftResult.getDraftMessage();
                 UserSettingMail usm = session.getUserSettingMail();
                 usm.setNoSave(true);
                 checkAndApplyLineWrapAfter(request, usm);
                 composedMail.setMailSettings(usm);
                 MailPath msgref = composedMail.getMsgref();
-                ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : null;
                 if (null != sendType) {
                     composedMail.setSendType(sendType);
                 }
@@ -256,6 +268,7 @@ public final class NewAction extends AbstractMailAction {
                     composedMail.removeHeader("Message-ID");
                     composedMail.removeMessageId();
                 }
+                MailServletInterface mailInterface = getMailInterface(req);
                 msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId).toString();
                 if (msgIdentifier == null) {
                     throw MailExceptionCode.DRAFT_FAILED_UNKNOWN.create();
@@ -269,175 +282,177 @@ public final class NewAction extends AbstractMailAction {
                         }
                     }
 
-                    CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess(), isDraftAction(sendType));
+                    CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess(), false);
                     CompositionSpaces.destroy(csid, session);
                 }
 
                 warnings.addAll(mailInterface.getWarnings());
-            } else {
-                /*
-                 * ... and send message
-                 */
-                String protocol = request.isSecure() ? "https://" : "http://";
-                ComposedMailMessage[] composedMails = MessageParser.parse4Transport(jMail, uploadEvent, session, accountId, protocol, request.getHostname(), csid, warnings);
-                if (newMessageId) {
+
+                AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
+                result.addWarnings(warnings);
+                return result;
+            }
+
+            // As new/transport message
+            ComposeTransportResult transportResult = composeHandler.createTransportResult(composeRequest);
+            List<? extends ComposedMailMessage> composedMails = transportResult.getTransportMessages();
+            ComposedMailMessage sentMessage = transportResult.getSentMessage();
+
+            if (newMessageId) {
+                for (ComposedMailMessage composedMail : composedMails) {
+                    if (null != composedMail) {
+                        composedMail.removeHeader("Message-ID");
+                        composedMail.removeMessageId();
+                    }
+                }
+                sentMessage.removeHeader("Message-ID");
+                sentMessage.removeMessageId();
+            }
+
+            // Adjust send type if needed
+            if (null != csid) {
+                if (ComposeType.DRAFT.equals(sendType) || ComposeType.DRAFT_DELETE_ON_TRANSPORT.equals(sendType)) {
                     for (ComposedMailMessage composedMail : composedMails) {
-                        if (null != composedMail) {
-                            composedMail.removeHeader("Message-ID");
-                            composedMail.removeMessageId();
-                        }
-                    }
-                }
-
-                ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
-
-                // Adjust send type if needed
-                if (null != csid) {
-                    if (ComposeType.DRAFT.equals(sendType) || ComposeType.DRAFT_DELETE_ON_TRANSPORT.equals(sendType)) {
-                        for (ComposedMailMessage composedMail : composedMails) {
-                            MailPath msgref = composedMail.getMsgref();
-                            if (null != msgref) {
-                                CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
-                                if (space.isMarkedAsReply(msgref)) {
-                                    sendType = ComposeType.REPLY;
-                                } else if (space.isMarkedAsForward(msgref)) {
-                                    sendType = ComposeType.FORWARD;
-                                }
+                        MailPath msgref = composedMail.getMsgref();
+                        if (null != msgref) {
+                            CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
+                            if (space.isMarkedAsReply(msgref)) {
+                                sendType = ComposeType.REPLY;
+                            } else if (space.isMarkedAsForward(msgref)) {
+                                sendType = ComposeType.FORWARD;
                             }
                         }
                     }
-                }
-
-                String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
-                if (null != folder) {
-                    // Do the "fake" transport by providing poison address
-                    MailTransport mailTransport = MailTransport.getInstance(session, accountId);
-                    MailMessage mm = mailTransport.sendMailMessage(composedMails[0], sendType, new javax.mail.Address[] { MimeMessageUtility.POISON_ADDRESS });
-
-                    // Apply composition space state(s)
-                    mailInterface.openFor(folder);
-                    if (null != csid) {
-                        CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess(), isDraftAction(sendType));
-                        CompositionSpaces.destroy(csid, session);
-                    }
-
-                    // Append messages
-                    String[] ids = mailInterface.appendMessages(folder, new MailMessage[] { mm }, false);
-                    msgIdentifier = ids[0];
-                    mailInterface.updateMessageFlags(folder, ids, MailMessage.FLAG_SEEN, true);
-                    final JSONObject responseObj = new JSONObject(2);
-                    responseObj.put(FolderChildFields.FOLDER_ID, folder);
-                    responseObj.put(DataFields.ID, ids[0]);
-                    final AJAXRequestResult result = new AJAXRequestResult(responseObj, "json");
-                    return result;
-                }
-
-                // Normal transport
-                if (!newMessageId && draftTypes.contains(sendType)) {
-                    for (final ComposedMailMessage cm : composedMails) {
-                        if (null != cm) {
-                            cm.removeHeader("Message-ID");
-                            cm.removeMessageId();
-                        }
-                    }
-                }
-                if (ComposeType.DRAFT.equals(sendType)) {
-                    final String paramName = "deleteDraftOnTransport";
-                    if (jMail.hasAndNotNull(paramName)) { // Provided by JSON body
-                        final Object object = jMail.opt(paramName);
-                        if (null != object) {
-                            if (AJAXRequestDataTools.parseBoolParameter(object.toString())) {
-                                sendType = ComposeType.DRAFT_DELETE_ON_TRANSPORT;
-                            } else if (false && Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(object.toString()))) {
-                                // Explicitly deny deletion of draft message
-                                sendType = ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT;
-                            }
-                        }
-                    } else if (request.containsParameter(paramName)) { // Provided as URL parameter
-                        final String sDeleteDraftOnTransport = request.getParameter(paramName);
-                        if (null != sDeleteDraftOnTransport) {
-                            if (AJAXRequestDataTools.parseBoolParameter(sDeleteDraftOnTransport)) {
-                                sendType = ComposeType.DRAFT_DELETE_ON_TRANSPORT;
-                            } else if (false && Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(sDeleteDraftOnTransport))) {
-                                // Explicitly deny deletion of draft message
-                                sendType = ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT;
-                            }
-                        }
-                    }
-                } else if (ComposeType.DRAFT.equals(sendType)) {
-
-                }
-                for (final ComposedMailMessage cm : composedMails) {
-                    if (null != cm) {
-                        cm.setSendType(sendType);
-                    }
-                }
-
-                // User settings
-                final UserSettingMail usm = session.getUserSettingMail();
-                usm.setNoSave(true);
-                {
-                    final String paramName = "copy2Sent";
-                    if (jMail.hasAndNotNull(paramName)) { // Provided by JSON body
-                        final Object object = jMail.opt(paramName);
-                        if (null != object) {
-                            if (AJAXRequestDataTools.parseBoolParameter(object.toString())) {
-                                usm.setNoCopyIntoStandardSentFolder(false);
-                            } else if (Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(object.toString()))) {
-                                // Explicitly deny copy to sent folder
-                                usm.setNoCopyIntoStandardSentFolder(true);
-                            }
-                        }
-                    } else if (request.containsParameter(paramName)) { // Provided as URL parameter
-                        final String sCopy2Sent = request.getParameter(paramName);
-                        if (null != sCopy2Sent) {
-                            if (AJAXRequestDataTools.parseBoolParameter(sCopy2Sent)) {
-                                usm.setNoCopyIntoStandardSentFolder(false);
-                            } else if (Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(sCopy2Sent))) {
-                                // Explicitly deny copy to sent folder
-                                usm.setNoCopyIntoStandardSentFolder(true);
-                            }
-                        }
-                    }
-                }
-                checkAndApplyLineWrapAfter(request, usm);
-                for (final ComposedMailMessage cm : composedMails) {
-                    if (null != cm) {
-                        cm.setMailSettings(usm);
-                    }
-                }
-                userSettingMail = usm;
-
-                // ------------------------------------ Send the messages --------------------------------------
-                HttpServletRequest servletRequest = request.optHttpServletRequest();
-                String remoteAddress = null == servletRequest ? request.getRemoteAddress() : servletRequest.getRemoteAddr();
-                msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId, usm, new MtaStatusInfo(), remoteAddress);
-                for (int i = 1; i < composedMails.length; i++) {
-                    ComposedMailMessage cm = composedMails[i];
-                    if (null != cm) {
-                        mailInterface.sendMessage(cm, sendType, accountId, usm, new MtaStatusInfo(), remoteAddress);
-                    }
-                }
-
-                // Apply composition space state(s)
-                if (null != csid) {
-                    CompositionSpaces.applyCompositionSpace(csid, session, null, isDraftAction(sendType));
-                    CompositionSpaces.destroy(csid, session);
-                }
-
-                warnings.addAll(mailInterface.getWarnings());
-
-                // Trigger contact collector
-                try {
-                    ServerUserSetting setting = ServerUserSetting.getInstance();
-                    if (setting.isContactCollectOnMailTransport(session.getContextId(), session.getUserId()).booleanValue()) {
-                        triggerContactCollector(session, composedMails[0]);
-                    }
-                } catch (final Exception e) {
-                    LOG.warn("Contact collector could not be triggered.", e);
                 }
             }
+
+            String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+            if (null != folder) {
+                // Do the "fake" transport by providing poison address
+                MailTransport mailTransport = MailTransport.getInstance(session, accountId);
+                MailMessage mm = mailTransport.sendMailMessage(sentMessage, sendType, new javax.mail.Address[] { MimeMessageUtility.POISON_ADDRESS });
+
+                // Apply composition space state(s)
+                MailServletInterface mailInterface = getMailInterface(req);
+                mailInterface.openFor(folder);
+                if (null != csid) {
+                    CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess(), false);
+                    CompositionSpaces.destroy(csid, session);
+                }
+
+                // Append messages
+                String[] ids = mailInterface.appendMessages(folder, new MailMessage[] { mm }, false);
+                msgIdentifier = ids[0];
+                mailInterface.updateMessageFlags(folder, ids, MailMessage.FLAG_SEEN, true);
+                return new AJAXRequestResult(new JSONObject(2).put(FolderChildFields.FOLDER_ID, folder).put(DataFields.ID, ids[0]), "json");
+            }
+
+            // Normal transport
+            if (!newMessageId && draftTypes.contains(sendType)) {
+                for (ComposedMailMessage cm : composedMails) {
+                    if (null != cm) {
+                        cm.removeHeader("Message-ID");
+                        cm.removeMessageId();
+                    }
+                }
+            }
+            if (ComposeType.DRAFT.equals(sendType)) {
+                String paramName = "deleteDraftOnTransport";
+                if (jMail.hasAndNotNull(paramName)) { // Provided by JSON body
+                    Object object = jMail.opt(paramName);
+                    if (null != object) {
+                        if (AJAXRequestDataTools.parseBoolParameter(object.toString())) {
+                            sendType = ComposeType.DRAFT_DELETE_ON_TRANSPORT;
+                        } else if (false && Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(object.toString()))) {
+                            // Explicitly deny deletion of draft message
+                            sendType = ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT;
+                        }
+                    }
+                } else if (request.containsParameter(paramName)) { // Provided as URL parameter
+                    String sDeleteDraftOnTransport = request.getParameter(paramName);
+                    if (null != sDeleteDraftOnTransport) {
+                        if (AJAXRequestDataTools.parseBoolParameter(sDeleteDraftOnTransport)) {
+                            sendType = ComposeType.DRAFT_DELETE_ON_TRANSPORT;
+                        } else if (false && Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(sDeleteDraftOnTransport))) {
+                            // Explicitly deny deletion of draft message
+                            sendType = ComposeType.DRAFT_NO_DELETE_ON_TRANSPORT;
+                        }
+                    }
+                }
+            } else if (ComposeType.DRAFT.equals(sendType)) {
+
+            }
+            for (ComposedMailMessage cm : composedMails) {
+                if (null != cm) {
+                    cm.setSendType(sendType);
+                }
+            }
+
+            // User settings
+            UserSettingMail usm = session.getUserSettingMail();
+            usm.setNoSave(true);
+            {
+                final String paramName = "copy2Sent";
+                if (jMail.hasAndNotNull(paramName)) { // Provided by JSON body
+                    Object object = jMail.opt(paramName);
+                    if (null != object) {
+                        if (AJAXRequestDataTools.parseBoolParameter(object.toString())) {
+                            usm.setNoCopyIntoStandardSentFolder(false);
+                        } else if (Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(object.toString()))) {
+                            // Explicitly deny copy to sent folder
+                            usm.setNoCopyIntoStandardSentFolder(true);
+                        }
+                    }
+                } else if (request.containsParameter(paramName)) { // Provided as URL parameter
+                    String sCopy2Sent = request.getParameter(paramName);
+                    if (null != sCopy2Sent) {
+                        if (AJAXRequestDataTools.parseBoolParameter(sCopy2Sent)) {
+                            usm.setNoCopyIntoStandardSentFolder(false);
+                        } else if (Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(sCopy2Sent))) {
+                            // Explicitly deny copy to sent folder
+                            usm.setNoCopyIntoStandardSentFolder(true);
+                        }
+                    }
+                }
+            }
+            checkAndApplyLineWrapAfter(request, usm);
+            for (ComposedMailMessage cm : composedMails) {
+                if (null != cm) {
+                    cm.setMailSettings(usm);
+                }
+            }
+            if (null != sentMessage) {
+                sentMessage.setMailSettings(usm);
+            }
+            userSettingMail = usm;
+
+            // ------------------------------------ Send the messages --------------------------------------
+            MailServletInterface mailInterface = getMailInterface(req);
+
+            HttpServletRequest servletRequest = request.optHttpServletRequest();
+            String remoteAddress = null == servletRequest ? request.getRemoteAddress() : servletRequest.getRemoteAddr();
+            List<String> ids = mailInterface.sendMessages(composedMails, sentMessage, sendType, accountId, usm, new MtaStatusInfo(), remoteAddress);
+            msgIdentifier = null == ids || ids.isEmpty() ? null : ids.get(0);
+
+            // Apply composition space state(s)
+            if (null != csid) {
+                CompositionSpaces.applyCompositionSpace(csid, session, null, true);
+                CompositionSpaces.destroy(csid, session);
+            }
+
+            warnings.addAll(mailInterface.getWarnings());
+
+            // Trigger contact collector
+            try {
+                ServerUserSetting setting = ServerUserSetting.getInstance();
+                if (setting.isContactCollectOnMailTransport(session.getContextId(), session.getUserId()).booleanValue()) {
+                    triggerContactCollector(session, composedMails, true);
+                }
+            } catch (final Exception e) {
+                LOG.warn("Contact collector could not be triggered.", e);
+            }
         }
+
         if (msgIdentifier == null) {
             if (null != userSettingMail && userSettingMail.isNoCopyIntoStandardSentFolder()) {
                 final AJAXRequestResult result = new AJAXRequestResult(JSONObject.NULL, "json");
@@ -451,6 +466,7 @@ public final class NewAction extends AbstractMailAction {
             result.addWarnings(warnings);
             return result;
         }
+
         /*
          * Create JSON response object
          */
@@ -472,10 +488,6 @@ public final class NewAction extends AbstractMailAction {
                 }
             }
         }
-    }
-
-    private boolean isDraftAction(ComposeType sendType) {
-        return ComposeType.DRAFT_EDIT.equals(sendType);
     }
 
     private AJAXRequestResult performWithoutUploads(final MailRequest req, final List<OXException> warnings) throws OXException, MessagingException, JSONException {

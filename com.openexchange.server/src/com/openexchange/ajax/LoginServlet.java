@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -265,8 +265,8 @@ public class LoginServlet extends AJAXServlet {
      * @param req The HTTP request
      * @return The name of the public session cookie
      */
-    public static String getPublicSessionCookieName(final HttpServletRequest req) {
-        return new StringBuilder(PUBLIC_SESSION_PREFIX).append(HashCalculator.getInstance().getUserAgentHash(req)).toString();
+    public static String getPublicSessionCookieName(final HttpServletRequest req, String[] additionals) {
+        return new StringBuilder(PUBLIC_SESSION_PREFIX).append(HashCalculator.getInstance().getHash(req, HashCalculator.getUserAgent(req), null, additionals)).toString();
     }
 
     /**
@@ -288,7 +288,7 @@ public class LoginServlet extends AJAXServlet {
 
     public LoginServlet() {
         super();
-        handlerMap = new ConcurrentHashMap<String, LoginRequestHandler>(16, 0.9f, 1);
+        Map<String, LoginRequestHandler> handlerMap = new ConcurrentHashMap<String, LoginRequestHandler>(16, 0.9f, 1);
         handlerMap.put(ACTION_STORE, new LoginRequestHandler() {
 
             @Override
@@ -623,6 +623,7 @@ public class LoginServlet extends AJAXServlet {
                 }
             }
         });
+        this.handlerMap = handlerMap;
     }
 
     @Override
@@ -668,7 +669,8 @@ public class LoginServlet extends AJAXServlet {
         final boolean disableTrimLogin = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.DISABLE_TRIM_LOGIN.getPropertyName()));
         final boolean formLoginWithoutAuthId = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.FORM_LOGIN_WITHOUT_AUTHID.getPropertyName()));
         final boolean isRandomTokenEnabled = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.RANDOM_TOKEN.getPropertyName()));
-        LoginConfiguration conf = new LoginConfiguration(uiWebPath, sessiondAutoLogin, hashSource, httpAuthAutoLogin, defaultClient, clientVersion, errorPageTemplate, cookieExpiry, cookieForceHTTPS, insecure, ipCheck, ipCheckWhitelist, redirectIPChangeAllowed, ranges, disableTrimLogin, formLoginWithoutAuthId, isRandomTokenEnabled);
+        final boolean checkPunyCodeLoginString = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.CHECK_PUNY_CODE_LOGIN.getPropertyName()));
+        LoginConfiguration conf = new LoginConfiguration(uiWebPath, sessiondAutoLogin, hashSource, httpAuthAutoLogin, defaultClient, clientVersion, errorPageTemplate, cookieExpiry, cookieForceHTTPS, insecure, ipCheck, ipCheckWhitelist, redirectIPChangeAllowed, ranges, disableTrimLogin, formLoginWithoutAuthId, isRandomTokenEnabled, checkPunyCodeLoginString);
         confReference.set(conf);
         ShareLoginConfiguration shareConf = initShareLoginConfig(config);
         shareConfReference.set(shareConf);
@@ -950,7 +952,7 @@ public class LoginServlet extends AJAXServlet {
     private static boolean writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
-            resp.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(req), altId), secure, serverName, conf));
+            resp.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(req, new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) }), altId), secure, serverName, conf));
             return true;
         }
         return false;

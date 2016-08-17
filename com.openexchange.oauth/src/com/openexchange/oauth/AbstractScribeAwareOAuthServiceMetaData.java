@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,11 +51,11 @@ package com.openexchange.oauth;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 
@@ -72,19 +72,22 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
 
     private static final String PROP_PREFIX = "com.openexchange.oauth";
 
+    private API api;
+
     /**
      * Initializes a new {@link AbstractScribeAwareOAuthServiceMetaData}.
-     * 
+     *
      * @param services the service lookup instance
      * @param id The OAuth identifier
      * @param displayName The display name
      */
-    public AbstractScribeAwareOAuthServiceMetaData(final ServiceLookup services, String id, String displayName) {
+    public AbstractScribeAwareOAuthServiceMetaData(final ServiceLookup services, API api) {
         super();
         this.services = services;
+        this.api = api;
 
-        setId(id);
-        setDisplayName(displayName);
+        setId(api.getFullName());
+        setDisplayName(api.getShortName());
 
         // Common properties for all OAuthServiceMetaData implementations.
         propertyNames = new ArrayList<OAuthPropertyID>();
@@ -131,22 +134,25 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(getPropertyId() + "oauth.properties", getConfigurationPropertyNames());
-        return map;
+    public Interests getInterests() {
+        return Reloadables.interestsForProperties(getConfigurationPropertyNames());
+    }
+
+    @Override
+    public API getAPI() {
+        return api;
     }
 
     /**
      * Get the property identifier
-     * 
+     *
      * @return the property identifier
      */
     protected abstract String getPropertyId();
 
     /**
      * Get the extra property names
-     * 
+     *
      * @return A collection with extra property names
      */
     protected abstract Collection<OAuthPropertyID> getExtraPropertyNames();

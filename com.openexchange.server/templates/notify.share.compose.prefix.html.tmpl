@@ -1,0 +1,18 @@
+<#include "notify.common.button.tmpl">
+<p>
+  ${intro}
+  <ul>
+    <#list filenames as filename>
+    <li>${filename}</li>
+    </#list>
+  </ul>
+</p>
+<p id="view_items" style="padding:10px 0;margin:20px 0;">
+  <@styledButton link=link>${link_text}</@styledButton>
+</p>
+<#if expiration?has_content || password?has_content>
+  <p>
+    <#if expiration?has_content>${expiration}</#if>
+    <#if password?has_content>${password}</#if>
+  </p>
+</#if>

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -69,7 +69,9 @@ import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.handler.AccessShareRequest;
 import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.share.servlet.handler.ShareHandlerReply;
-import com.openexchange.share.servlet.utils.LoginLocationBuilder;
+import com.openexchange.share.servlet.utils.LoginLocation;
+import com.openexchange.share.servlet.utils.LoginLocationRegistry;
+import com.openexchange.share.servlet.utils.LoginType;
 import com.openexchange.share.servlet.utils.MessageType;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.tools.servlet.http.Tools;
@@ -189,11 +191,10 @@ public class ShareServlet extends AbstractShareServlet {
                 sendNotFound(response, translator);
             } else {
                 LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
-                String redirectUrl = new LoginLocationBuilder()
-                    .status("internal_error")
-                    .message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY))
-                    .build();
-                response.sendRedirect(redirectUrl);
+                LoginLocation location = new LoginLocation()
+                    .loginType(LoginType.MESSAGE)
+                    .message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY));
+                LoginLocationRegistry.getInstance().putAndRedirect(location, response);
             }
         }
     }
@@ -224,11 +225,10 @@ public class ShareServlet extends AbstractShareServlet {
      * @param translator The translator
      */
     private static void sendNotFound(HttpServletResponse response, Translator translator) throws IOException {
-        String redirectUrl = new LoginLocationBuilder()
-            .status("not_found")
-            .message(MessageType.ERROR, translator.translate(ShareServletStrings.SHARE_NOT_FOUND))
-            .build();
-        response.sendRedirect(redirectUrl);
+        LoginLocation location = new LoginLocation()
+            .loginType(LoginType.MESSAGE)
+            .message(MessageType.ERROR, translator.translate(ShareServletStrings.SHARE_NOT_FOUND));
+        LoginLocationRegistry.getInstance().putAndRedirect(location, response);
         return;
     }
 

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -104,6 +104,7 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderType;
+import com.openexchange.folderstorage.LockCleaningFolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
@@ -176,7 +177,7 @@ import com.openexchange.tools.sql.DBUtils;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage {
+public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage, LockCleaningFolderStorage {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DatabaseFolderStorage.class);
 
@@ -1891,7 +1892,10 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         FolderCacheManager cacheManager = FolderCacheManager.getInstance();
         if (Boolean.TRUE.equals(ignoreCache)) {
             FolderObject fo = FolderObject.loadFolderObjectFromDB(folderId, ctx, con, true, true);
-            cacheManager.putFolderObject(fo, ctx, true, null);
+            Boolean do_not_cache = storageParameters.getParameter(FolderType.GLOBAL, "DO_NOT_CACHE");
+            if (null == do_not_cache || !do_not_cache) {
+                cacheManager.putFolderObject(fo, ctx, true, null);
+            }
             return fo;
         }
 
@@ -2322,6 +2326,21 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 }
             }
         }
+    }
+
+    @Override
+    public void cleanLocksFor(Folder folder, int[] userIds, final StorageParameters storageParameters) throws OXException {
+        final ConnectionProvider provider = getConnection(Mode.WRITE, storageParameters);
+        try {
+            final Connection con = provider.getConnection();
+            final OXFolderManager folderManager = OXFolderManager.getInstance(storageParameters.getSession(), con, con);
+
+            FolderObject fo = new FolderObject(Integer.valueOf(folder.getID()));
+            folderManager.cleanLocksForFolder(fo, userIds);
+        } finally {
+            provider.close();
+        }
+
     }
 
 }

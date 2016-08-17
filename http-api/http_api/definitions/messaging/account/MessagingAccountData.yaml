@@ -1,0 +1,14 @@
+type: object
+properties:
+  id:
+    type: integer
+    description: Identifier of the messaging account.
+  messagingService:
+    type: string
+    description: The messaging service ID of the messaging service this account belongs to.
+  displayName:
+    type: string
+    description: User chosen string to identify a given account. Will also be translated into the folder name of the folder representing the accounts content.
+  configuration:
+    type: object
+    description: The configuration data according to the `formDescription` of the relevant messaging service.

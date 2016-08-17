@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -279,6 +279,9 @@ public class SearchDriverManager implements ServiceTrackerCustomizer<ModuleSearc
                 return false;
             }
             ComparableDriver other = (ComparableDriver) obj;
+            if (serviceRanking != other.serviceRanking) {
+                return false;
+            }
             if (driver == null) {
                 if (other.driver != null) {
                     return false;
@@ -286,9 +289,6 @@ public class SearchDriverManager implements ServiceTrackerCustomizer<ModuleSearc
             } else if (driver.getModule() != other.driver.getModule()) {
                 return false;
             } else if (!driver.getClass().equals(other.driver.getClass())) {
-                return false;
-            }
-            if (serviceRanking != other.serviceRanking) {
                 return false;
             }
             return true;

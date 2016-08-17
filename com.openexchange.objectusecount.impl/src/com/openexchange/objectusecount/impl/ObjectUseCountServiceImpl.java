@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -91,7 +91,8 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ObjectUseCountServiceImpl.class);
 
-    private final ServiceLookup services;
+    /** The service look-up */
+    final ServiceLookup services;
 
     /**
      * Initializes a new {@link ObjectUseCountServiceImpl}.
@@ -238,6 +239,10 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
     }
 
     private void incrementObjectUseCount(TIntIntMap object2folder, int userId, int contextId) throws OXException {
+        if (null == object2folder || object2folder.isEmpty()) {
+            return;
+        }
+
         DatabaseService dbService = services.getService(DatabaseService.class);
         if (null == dbService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class);
@@ -256,6 +261,10 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
             return;
         }
 
+        if (null == contact2folder || contact2folder.isEmpty()) {
+            return;
+        }
+
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("INSERT INTO object_use_count (cid, user, folder, object, value) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE value=value+1");
@@ -271,6 +280,9 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
                     stmt.setInt(4, iterator.key());
                     stmt.setInt(5, 1);
                     stmt.addBatch();
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", userId, iterator.value(), iterator.key(), contextId, new Throwable("use-count-trace"));
+                    }
                 }
                 stmt.executeBatch();
             } else {
@@ -279,6 +291,9 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
                 stmt.setInt(4, iterator.key());
                 stmt.setInt(5, 1);
                 stmt.executeUpdate();
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}.", userId, iterator.value(), iterator.key(), contextId, new Throwable("use-count-trace"));
+                }
             }
         } catch (SQLException e) {
             throw ObjectUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -393,6 +408,9 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
             stmt.setInt(5, value);
             stmt.setInt(6, value);
             stmt.executeUpdate();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Set object use count to {} for user {}, folder {}, object {} in context {}", value, userId, folderId, objectId, contextId, new Throwable("use-count-trace"));
+            }
         } catch (SQLException e) {
             throw ObjectUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {

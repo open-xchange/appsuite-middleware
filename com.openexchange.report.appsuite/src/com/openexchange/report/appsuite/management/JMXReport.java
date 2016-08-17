@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,6 +49,7 @@
 
 package com.openexchange.report.appsuite.management;
 
+import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -65,6 +66,7 @@ import com.openexchange.version.Version;
  * OX versioning information.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public class JMXReport {
     private final String uuid;
@@ -79,7 +81,6 @@ public class JMXReport {
      * Creates a JMX friendly version of the given report
      */
     public JMXReport(Report report) throws Exception {
-
         this.uuid = report.getUUID();
         this.pendingTasks = report.getNumberOfPendingTasks();
         this.tasks = report.getNumberOfTasks();
@@ -92,7 +93,12 @@ public class JMXReport {
             Map<String, Map<String, Object>> lData = report.getData();
             
             boolean adminMailLoginEnabled = Services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.mail.adminMailLoginEnabled", false);
-            lData.get("configs").put("com.openexchange.mail.adminMailLoginEnabled", Boolean.toString(adminMailLoginEnabled));
+            Map<String, Object> configs = lData.get("configs");
+            if (configs == null) {
+                configs = new HashMap<String, Object>();
+            }
+            configs.put("com.openexchange.mail.adminMailLoginEnabled", Boolean.toString(adminMailLoginEnabled));
+            lData.put("configs", configs);
             
             JSONObject jsonData = (JSONObject) JSONCoercion.coerceToJSON(lData);
             jsonData.put("uuid", uuid);

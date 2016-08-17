@@ -1,0 +1,54 @@
+/drive?action=syncfolders:
+  put:
+    operationId: syncFolders
+    tags:
+      - drive
+    summary: Synchronizes folders.
+    description: |
+      This request performs the synchronization of all folders, resulting in different actions that should be
+      executed on the client afterwards. This operation typically serves as an entry point for a synchronization
+      cycle.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+      - in: query
+        name: version
+        type: string
+        description: The current client version (matching the pattern `^[0-9]+(\\.[0-9]+)*$). If not set, the initial version 0 is assumed.
+        required: false
+        default: "0"
+      - in: query
+        name: apiVersion
+        type: integer
+        description: The API version that the client is using. If not set, the initial version 0 is assumed.
+        required: false
+        default: 0
+      - in: query
+        name: diagnostics
+        type: boolean
+        description: If set to `true`, an additional diagnostics trace is supplied in the response.
+        required: false
+      - in: query
+        name: pushToken
+        type: string
+        description: The client's push registration token to associate it to generated events.
+        required: false
+      - in: body
+        name: body
+        description: |
+          A JSON object containing the fields `clientVersions` and `originalVersions`, both representing JSON arrays.
+          Since API version 2, the JSON object may also contain two arrays named `fileExclusions` and `directoryExclusions`.
+        required: true
+        schema:
+          $ref: "#/definitions/DriveSyncFoldersBody"
+    responses:
+      200:
+        description: |
+          A JSON object containing an array of actions the client should execute for synchronization. If the
+          `diagnostics` parameter was set, the array is wrapped into an additional JSON object in the field
+          `actions` and the diagnostics trace is provided at `diagnostics`. In case of errors the responsible
+          fields in the response are filled.
+        schema:
+          $ref: "#/definitions/DriveActionsResponse"

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import org.glassfish.grizzly.comet.CometContext;
 import org.glassfish.grizzly.comet.CometEvent;
 import org.glassfish.grizzly.comet.DefaultCometHandler;
@@ -60,9 +61,9 @@ import org.glassfish.grizzly.http.server.Response;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.events.DriveEvent;
-import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.json.json.JsonDriveAction;
 import com.openexchange.java.Streams;
 
@@ -77,16 +78,19 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
     private static final List<DriveAction<? extends DriveVersion>> EMPTY_ACTIONS = Collections.emptyList();
 
     private final DriveSession session;
+    private final List<String> rootFolderIDs;
     private long initializationTime;
 
     /**
      * Initializes a new {@link DriveCometHandler}.
      *
-     * @param session
+     * @param session The session
+     * @param rootFolderIDs The root folder IDs to listen for changes in
      */
-    public DriveCometHandler(DriveSession session) {
+    public DriveCometHandler(DriveSession session, List<String> rootFolderIDs) {
         super();
         this.session = session;
+        this.rootFolderIDs = rootFolderIDs;
     }
 
     /**
@@ -109,9 +113,14 @@ public class DriveCometHandler extends DefaultCometHandler<DriveEvent> {
             if (CometEvent.Type.NOTIFY == event.getType()) {
                 CometEvent<DriveEvent> driveCometEvent = event;
                 DriveEvent driveEvent = driveCometEvent.attachment();
-                if (null != driveEvent && driveEvent.getContextID() == session.getServerSession().getContextId() &&
-                    driveEvent.getFolderIDs().contains(session.getRootFolderID())) {
-                    write(null != driveEvent ? driveEvent.getActions() : EMPTY_ACTIONS);
+                if (null != driveEvent && driveEvent.getContextID() == session.getServerSession().getContextId()) {
+                    Set<String> folderIDs = driveEvent.getFolderIDs();
+                    if (null != folderIDs && null != rootFolderIDs) {
+                        List<DriveAction<? extends DriveVersion>> actions = driveEvent.getActions(rootFolderIDs);
+                        if (null != actions && 0 < actions.size()) {
+                            write(actions);
+                        }
+                    }
                 }
             }
         } finally {

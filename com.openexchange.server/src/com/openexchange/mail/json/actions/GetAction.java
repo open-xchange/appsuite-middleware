@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -136,11 +136,14 @@ public final class GetAction extends AbstractMailAction {
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException, JSONException {
-        final JSONArray paths = (JSONArray) req.getRequest().getData();
-        if (null == paths) {
+        Object data = req.getRequest().getData();
+        if (null == data) {
             return performGet(req);
         }
-        return performPut(req, paths);
+        if (!(data instanceof JSONArray)) {
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+        }
+        return performPut(req, (JSONArray) data);
     }
 
     private AJAXRequestResult performPut(final MailRequest req, final JSONArray paths) throws OXException {
@@ -247,9 +250,9 @@ public final class GetAction extends AbstractMailAction {
 
                 // Direct response if possible
                 if (null == mimeFilter) {
-                    final AJAXRequestData requestData = req.getRequest();
-                    final OutputStream directOutputStream = requestData.optOutputStream();
-                    if (null != directOutputStream) {
+                    AJAXRequestData requestData = req.getRequest();
+                    HttpServletResponse resp = requestData.optHttpServletResponse();
+                    if (null != resp) {
                         if (saveToDisk) {
                             if (requestData.setResponseHeader("Content-Type", "application/octet-stream")) {
                                 final StringBuilder sb = new StringBuilder(64).append("attachment");
@@ -260,12 +263,14 @@ public final class GetAction extends AbstractMailAction {
                                 }
                                 requestData.setResponseHeader("Content-Disposition",  sb.toString());
                                 requestData.removeCachingHeader();
+                                OutputStream directOutputStream = resp.getOutputStream();
                                 mail.writeTo(directOutputStream);
                                 directOutputStream.flush();
                                 return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct");
                             }
                         } else {
                             // As JSON response: {"data":"..."}
+                            OutputStream directOutputStream = resp.getOutputStream();
                             directOutputStream.write(CHUNK1); // {"data":"...
                             {
                                 final JSONStringOutputStream jsonStringOutputStream = new JSONStringOutputStream(directOutputStream);
@@ -304,7 +309,7 @@ public final class GetAction extends AbstractMailAction {
                             final int contextId = session.getContextId();
                             final int userId = session.getUserId();
                             if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
-                                triggerContactCollector(session, mail);
+                                triggerContactCollector(session, mail, false);
                             }
                         } catch (final OXException e) {
                             LOG.warn("Contact collector could not be triggered.", e);
@@ -390,7 +395,7 @@ public final class GetAction extends AbstractMailAction {
                         final int contextId = session.getContextId();
                         final int userId = session.getUserId();
                         if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
-                            triggerContactCollector(session, mail);
+                            triggerContactCollector(session, mail, false);
                         }
                     } catch (final OXException e) {
                         LOG.warn("Contact collector could not be triggered.", e);
@@ -427,16 +432,15 @@ public final class GetAction extends AbstractMailAction {
                         fileHolder = getMimeSource(mail, mimeFilter);
                     }
                     /*
-                     * Restore \Seen flag
+                     * Check whether to trigger contact collector
                      */
-                    final boolean wasUnseen = (unseen ? !mail.isSeen() : mail.containsPrevSeen() && !mail.isPrevSeen());
-                    if (wasUnseen) {
+                    if (!unseen && (mail.containsPrevSeen() && !mail.isPrevSeen())) {
                         try {
                             final ServerUserSetting setting = ServerUserSetting.getInstance();
                             final int contextId = session.getContextId();
                             final int userId = session.getUserId();
                             if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
-                                triggerContactCollector(session, mail);
+                                triggerContactCollector(session, mail, false);
                             }
                         } catch (final OXException e) {
                             LOG.warn("Contact collector could not be triggered.", e);
@@ -470,8 +474,7 @@ public final class GetAction extends AbstractMailAction {
         } catch (final OXException e) {
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e)) {
                 LOG.debug("Requested mail could not be found. Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.", e);
-                final Object[] args = e.getDisplayArgs();
-                final String uid = null == args || 0 == args.length ? null : (null == args[0] ? null : args[0].toString());
+                final String uid = getUidFromException(e);
                 if ("undefined".equalsIgnoreCase(uid)) {
                     throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
                 }

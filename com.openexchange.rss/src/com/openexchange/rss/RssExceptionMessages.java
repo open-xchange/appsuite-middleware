@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -73,6 +73,12 @@ public final class RssExceptionMessages implements LocalizableStrings {
 
     // Failed to read RSS feed from URL: %2$s
     public static final String GENERIC_ERROR_WITH_ARG2_MSG = "Failed to read RSS feed from URL: %2$s";
+    
+    // The RSS feed is exceeding the maximum allowed size of '%1$s'
+    public static final String RSS_SIZE_EXCEEDED = "The RSS feed is exceeding the maximum allowed size of '%1$s'";
+
+    // Cannot connect to RSS with URL: %1$s. Please change URL and try again.
+    public static final String RSS_CONNECTION_ERROR_MSG = "Cannot connect to RSS with URL: %1$s. Please change URL and try again.";
 
     /**
      * Initializes a new {@link RssExceptionMessages}.

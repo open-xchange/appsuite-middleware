@@ -1,0 +1,20 @@
+/oauth/accounts?action=delete:
+  put:
+    operationId: deleteOAuthAccount
+    tags:
+      - OAuth
+    summary: Deletes an OAuth account (**available since v6.20**).
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: integer
+        description: The account identifier.
+        required: true
+    responses:
+      200:
+        description: |
+          A JSON object indicating whether the deletion was successful. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/OAuthAccountDeletionResponse"

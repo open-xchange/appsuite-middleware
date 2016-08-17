@@ -1,0 +1,23 @@
+/messaging/account?action=update:
+  put:
+    operationId: updateMessagingAccount
+    tags:
+      - messaging
+    summary: Updates a messaging account.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON object containing the modified data of the account. The fields `id` and `messagingService` must always be set.
+        required: true
+        schema:
+          $ref: "#/definitions/MessagingAccountData"
+    responses:
+      200:
+        description: |
+          A JSON object containing the number 1 if update was successful. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/MessagingAccountUpdateResponse"

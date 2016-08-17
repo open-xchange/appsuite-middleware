@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -213,7 +213,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
 
     private static List<MailAccount> getAccounts(boolean onlyEnabled, int unifiedMailAccountId, int userId, int contextId) throws OXException {
         MailAccount[] tmp = Services.getService(MailAccountStorageService.class).getUserMailAccounts(userId, contextId);
-        List<MailAccount> accounts = new ArrayList<MailAccount>(tmp.length);
+        List<MailAccount> accounts = new ArrayList<>(tmp.length);
         int thisAccountId = unifiedMailAccountId;
 
         for (MailAccount mailAccount : tmp) {
@@ -287,7 +287,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             TIntObjectMap<Map<String, List<String>>> parsed = UnifiedInboxUtility.parseMailIDs(mailIds);
             // Create completion service for simultaneous access
             Executor executor = ThreadPools.getThreadPool().getExecutor();
-            TrackingCompletionService<GetMessagesResult> completionService = new UnifiedInboxCompletionService<GetMessagesResult>(executor);
+            TrackingCompletionService<GetMessagesResult> completionService = new UnifiedInboxCompletionService<>(executor);
             // Iterate parsed map and submit a task for each iteration
             int numTasks = 0;
             TIntObjectIterator<Map<String, List<String>>> iter = parsed.iterator();
@@ -673,7 +673,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     static final MailMessageComparator COMPARATOR = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
 
     @Override
-    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, boolean cache, IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(final String fullName, final boolean includeSent, boolean cache, IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] mailFields, final SearchTerm<?> searchTerm) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
@@ -688,7 +688,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // Create completion service for simultaneous access
             int length = accounts.size();
             Executor executor = ThreadPools.getThreadPool().getExecutor();
-            TrackingCompletionService<List<List<MailMessage>>> completionService = new UnifiedInboxCompletionService<List<List<MailMessage>>>(executor);
+            TrackingCompletionService<List<List<MailMessage>>> completionService = new UnifiedInboxCompletionService<>(executor);
             final IndexRange applicableRange = null == indexRange ? null : new IndexRange(0, indexRange.end);
             for (final MailAccount mailAccount : accounts) {
                 Session session = this.session;
@@ -712,11 +712,11 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
                             if (messageStorage instanceof ISimplifiedThreadStructure) {
                                 try {
-                                    List<List<MailMessage>> list = ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fn, includeSent, false, applicableRange, max, sortField, order, checkedFields);
-                                    List<List<MailMessage>> ret = new ArrayList<List<MailMessage>>(list.size());
+                                    List<List<MailMessage>> list = ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fn, includeSent, false, applicableRange, max, sortField, order, checkedFields, searchTerm);
+                                    List<List<MailMessage>> ret = new ArrayList<>(list.size());
                                     UnifiedInboxUID helper = new UnifiedInboxUID();
                                     for (List<MailMessage> list2 : list) {
-                                        List<MailMessage> messages = new ArrayList<MailMessage>(list2.size());
+                                        List<MailMessage> messages = new ArrayList<>(list2.size());
                                         for (MailMessage accountMail : list2) {
                                             UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
                                             String accountMailFolder = accountMail.getFolder();
@@ -755,8 +755,8 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             } catch (OXException e) {
                                 msgArr = messageStorage.getAllMessages(fn, applicableRange, sortField, order, checkedFields);
                             }
-                            List<List<MailMessage>> list = new LinkedList<List<MailMessage>>();
-                            List<MailMessage> current = new LinkedList<MailMessage>();
+                            List<List<MailMessage>> list = new LinkedList<>();
+                            List<MailMessage> current = new LinkedList<>();
                             // Here we go
                             int size = msgArr.length;
                             for (int i = 0; i < size; i++) {
@@ -765,7 +765,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                     int threadLevel = mail.getThreadLevel();
                                     if (0 == threadLevel) {
                                         list.add(current);
-                                        current = new LinkedList<MailMessage>();
+                                        current = new LinkedList<>();
                                     }
                                     current.add(mail);
                                 }
@@ -799,10 +799,10 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 }
                             };
                             Collections.sort(list, listComparator);
-                            List<List<MailMessage>> ret = new ArrayList<List<MailMessage>>(list.size());
+                            List<List<MailMessage>> ret = new ArrayList<>(list.size());
                             UnifiedInboxUID helper = new UnifiedInboxUID();
                             for (List<MailMessage> list2 : list) {
-                                List<MailMessage> messages = new ArrayList<MailMessage>(list2.size());
+                                List<MailMessage> messages = new ArrayList<>(list2.size());
                                 for (MailMessage accountMail : list2) {
                                     UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
                                     String accountMailFolder = accountMail.getFolder();
@@ -836,7 +836,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
             // Wait for completion of each submitted task
             try {
-                List<List<MailMessage>> messages = new ArrayList<List<MailMessage>>(length << 2);
+                List<List<MailMessage>> messages = new ArrayList<>(length << 2);
                 for (int i = 0; i < length; i++) {
                     messages.addAll(completionService.take().get());
                 }
@@ -896,7 +896,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
             if ((messageStorage instanceof ISimplifiedThreadStructure)) {
                 try {
-                    return ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields);
+                    return ((ISimplifiedThreadStructure) messageStorage).getThreadSortedMessages(fa.getFullname(), includeSent, false, indexRange, max, sortField, order, mailFields, searchTerm);
                 } catch (OXException e) {
                     if (!MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
                         throw e;
@@ -944,7 +944,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             // Comparator
             MailMessageComparator threadComparator = COMPARATOR;
             // Sort
-            List<List<MailMessage>> list = new ArrayList<List<MailMessage>>(conversations.size());
+            List<List<MailMessage>> list = new ArrayList<>(conversations.size());
             for (Conversation conversation : conversations) {
                 list.add(conversation.getMessages(threadComparator));
             }
@@ -1072,7 +1072,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final int undelegatedAccountId = access.getAccountId();
             Executor executor = ThreadPools.getThreadPool().getExecutor();
             TrackingCompletionService<List<MailMessage>> completionService =
-                new UnifiedInboxCompletionService<List<MailMessage>>(executor);
+                new UnifiedInboxCompletionService<>(executor);
             for (final MailAccount mailAccount : accounts) {
                 Session session  = this.session;
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
@@ -1093,7 +1093,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             }
                             // Get account's messages
                             MailMessage[] accountMails =  mailAccess.getMessageStorage().getThreadSortedMessages(fn, null, MailSortField.RECEIVED_DATE, OrderDirection.DESC, searchTerm, checkedFields);
-                            List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
+                            List<MailMessage> messages = new ArrayList<>(accountMails.length);
                             UnifiedInboxUID helper = new UnifiedInboxUID();
                             for (MailMessage accountMail : accountMails) {
                                 if (null != accountMail) {
@@ -1127,7 +1127,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
             // Wait for completion of each submitted task
             try {
-                List<MailMessage> messages = new ArrayList<MailMessage>(length << 2);
+                List<MailMessage> messages = new ArrayList<>(length << 2);
                 for (int i = 0; i < length; i++) {
                     messages.addAll(completionService.take().get());
                 }
@@ -1220,7 +1220,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             int length = accounts.size();
             Executor executor = ThreadPools.getThreadPool().getExecutor();
 
-            TrackingCompletionService<Integer> completionService = new UnifiedInboxCompletionService<Integer>(executor);
+            TrackingCompletionService<Integer> completionService = new UnifiedInboxCompletionService<>(executor);
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<Integer>(session) {
 
@@ -1439,7 +1439,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                         }
                                     }
                                 }
-                                List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
+                                List<MailMessage> messages = new ArrayList<>(accountMails.length);
                                 UnifiedInboxUID helper = new UnifiedInboxUID();
                                 String name = mailAccount.getName();
                                 for (MailMessage accountMail : accountMails) {
@@ -1479,7 +1479,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
 
             // The old way
-            TrackingCompletionService<List<MailMessage>> completionService = new UnifiedInboxCompletionService<List<MailMessage>>(executor);
+            TrackingCompletionService<List<MailMessage>> completionService = new UnifiedInboxCompletionService<>(executor);
             for (final MailAccount mailAccount : accounts) {
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
 
@@ -1551,7 +1551,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 }
                             }
 
-                            List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
+                            List<MailMessage> messages = new ArrayList<>(accountMails.length);
                             UnifiedInboxUID helper = new UnifiedInboxUID();
                             String name = mailAccount.getName();
                             for (MailMessage accountMail : accountMails) {
@@ -1583,7 +1583,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
             // Wait for completion of each submitted task
             try {
-                List<MailMessage> messages = new ArrayList<MailMessage>(length << 2);
+                List<MailMessage> messages = new ArrayList<>(length << 2);
                 for (int i = 0; i < length; i++) {
                     messages.addAll(completionService.take().get());
                 }
@@ -1717,7 +1717,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             final int undelegatedAccountId = access.getAccountId();
             Executor executor = ThreadPools.getThreadPool().getExecutor();
             TrackingCompletionService<List<MailMessage>> completionService =
-                new UnifiedInboxCompletionService<List<MailMessage>>(executor);
+                new UnifiedInboxCompletionService<>(executor);
             for (final MailAccount mailAccount : accounts) {
                 Session session  = this.session;
                 completionService.submit(new LoggingCallable<List<MailMessage>>(session) {
@@ -1738,7 +1738,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                             // Get account's unread messages
                             MailMessage[] accountMails = mailAccess.getMessageStorage().getUnreadMessages(fn, sortField, order, fields, limit);
                             UnifiedInboxUID helper = new UnifiedInboxUID();
-                            List<MailMessage> messages = new ArrayList<MailMessage>(accountMails.length);
+                            List<MailMessage> messages = new ArrayList<>(accountMails.length);
                             for (MailMessage accountMail : accountMails) {
                                 if (null != accountMail) {
                                     UnifiedMailMessage umm = new UnifiedMailMessage(accountMail, undelegatedAccountId);
@@ -1760,7 +1760,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             }
             // Wait for completion of each submitted task
             try {
-                List<MailMessage> messages = new ArrayList<MailMessage>(length << 2);
+                List<MailMessage> messages = new ArrayList<>(length << 2);
                 for (int i = 0; i < length; i++) {
                     messages.addAll(completionService.take().get());
                 }
@@ -1809,7 +1809,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             int size = parsed.size();
             TIntObjectIterator<Map<String, List<String>>> iter = parsed.iterator();
             // Collection of Callables
-            Collection<Task<Object>> collection = new ArrayList<Task<Object>>(size);
+            Collection<Task<Object>> collection = new ArrayList<>(size);
             for (int i = size; i-- > 0;) {
                 iter.advance();
                 final int accountId = iter.key();
@@ -1910,7 +1910,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             int size = parsed.size();
             TIntObjectIterator<Map<String, List<String>>> iter = parsed.iterator();
             // Collection of Callables
-            Collection<Task<Object>> collection = new ArrayList<Task<Object>>(size);
+            Collection<Task<Object>> collection = new ArrayList<>(size);
             for (int i = size; i-- > 0;) {
                 iter.advance();
                 final int accountId = iter.key();
@@ -1976,7 +1976,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             int size = parsed.size();
             TIntObjectIterator<Map<String, List<String>>> iter = parsed.iterator();
             // Collection of Callables
-            Collection<Task<Object>> collection = new ArrayList<Task<Object>>(size);
+            Collection<Task<Object>> collection = new ArrayList<>(size);
             for (int i = size; i-- > 0;) {
                 iter.advance();
                 final int accountId = iter.key();
@@ -2042,7 +2042,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
             int size = parsed.size();
             TIntObjectIterator<Map<String, List<String>>> iter = parsed.iterator();
             // Collection of Callables
-            Collection<Task<Object>> collection = new ArrayList<Task<Object>>(size);
+            Collection<Task<Object>> collection = new ArrayList<>(size);
             for (int i = size; i-- > 0;) {
                 iter.advance();
                 final int accountId = iter.key();

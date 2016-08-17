@@ -1,0 +1,8 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: array
+    description: An array containing the identifiers of the mail accounts that were deleted. 
+    items:
+      type: integer

@@ -1,0 +1,28 @@
+/contacts?action=listuser:
+  put:
+    operationId: getContactListByUsers
+    tags:
+      - contacts
+    summary: Gets a list of users (**available since SP4**).
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamContactColumns"
+      - in: body
+        name: body
+        description: A JSON array with user IDs.
+        required: true
+        schema:
+          type: array
+          items:
+            type: integer
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with contact data. Each array element describes one contact and
+          is itself an array. The elements of each array contain the information specified by the corresponding
+          identifiers in the `columns` parameter. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/ContactsResponse"

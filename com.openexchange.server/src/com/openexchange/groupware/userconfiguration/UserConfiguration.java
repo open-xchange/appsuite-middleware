@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -57,7 +57,6 @@ import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.Strings;
 
 /**
  * {@link UserConfiguration} - Represents a user configuration.
@@ -771,7 +770,10 @@ public class UserConfiguration implements Serializable, Cloneable {
      * Gets the extended permissions.
      *
      * @return The extended permissions
+     * @deprecated Might return incomplete capabilities as capabilities are loaded by user/context identifier pair not providing further
+     * session attributes
      */
+    @Deprecated
     public Set<String> getExtendedPermissions() {
         return capabilities;
     }

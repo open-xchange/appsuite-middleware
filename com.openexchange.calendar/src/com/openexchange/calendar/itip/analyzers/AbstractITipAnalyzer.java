@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -112,7 +112,7 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 			Appointment.OBJECT_ID, Appointment.CREATED_BY,
 			Appointment.CREATION_DATE, Appointment.LAST_MODIFIED,
 			Appointment.LAST_MODIFIED_UTC, Appointment.MODIFIED_BY,
-			Appointment.SEQUENCE };
+			Appointment.SEQUENCE, Appointment.ALARM };
 	protected ITipIntegrationUtility util;
 	protected ServiceLookup services;
 
@@ -550,34 +550,32 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 
         if (!found) {
             final UserParticipant up = new UserParticipant(owner);
-            if (confirm != -1) {
-                up.setConfirm(confirm);
-            }
+            up.setConfirm(confirm);
             final Participant[] tmp = appointment.getParticipants();
             final List<Participant> participantList = (null == tmp) ? new ArrayList<Participant>(1) : new ArrayList<Participant>(Arrays.asList(tmp));
             participantList.add(up);
             appointment.setParticipants(participantList);
         }
 
-        found = false;
-        final UserParticipant[] users = appointment.getUsers();
-        if (users != null) {
-            for (final UserParticipant userParticipant : users) {
-                if (userParticipant.getIdentifier() == owner) {
-                    found = true;
+        if (appointment.getUsers() != null) {
+            found = false;
+            final UserParticipant[] users = appointment.getUsers();
+            if (users != null) {
+                for (final UserParticipant userParticipant : users) {
+                    if (userParticipant.getIdentifier() == owner) {
+                        found = true;
+                    }
                 }
             }
-        }
-
-        if (!found) {
-            final UserParticipant up = new UserParticipant(owner);
-            if (confirm != -1) {
+    
+            if (!found) {
+                final UserParticipant up = new UserParticipant(owner);
                 up.setConfirm(confirm);
+                final UserParticipant[] tmp = appointment.getUsers();
+                final List<UserParticipant> participantList = (tmp == null) ? new ArrayList<UserParticipant>(1) : new ArrayList<UserParticipant>(Arrays.asList(tmp));
+                participantList.add(up);
+                appointment.setUsers(participantList);
             }
-            final UserParticipant[] tmp = appointment.getUsers();
-            final List<UserParticipant> participantList = (tmp == null) ? new ArrayList<UserParticipant>(1) : new ArrayList<UserParticipant>(Arrays.asList(tmp));
-            participantList.add(up);
-            appointment.setUsers(participantList);
         }
     }
 }

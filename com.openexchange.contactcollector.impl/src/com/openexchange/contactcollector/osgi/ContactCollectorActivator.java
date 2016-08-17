@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -65,10 +65,11 @@ import com.openexchange.contactcollector.preferences.ContactCollectOnMailAccess;
 import com.openexchange.contactcollector.preferences.ContactCollectOnMailTransport;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.login.LoginHandlerService;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -90,47 +91,15 @@ public class ContactCollectorActivator extends HousekeepingActivator {
     }
 
     @Override
-    public <S> boolean addServiceAlt(Class<? extends S> clazz, S service) {
-        return super.addServiceAlt(clazz, service);
-    }
-
-    @Override
-    public <S> boolean removeService(Class<? extends S> clazz) {
-        return super.removeService(clazz);
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] {
+            ContextService.class, UserService.class, UserConfigurationService.class, ContactService.class,
+            ThreadPoolService.class, DatabaseService.class, ConfigurationService.class };
     }
 
     @Override
     public void startBundle() throws Exception {
-        /*
-         * Initialize service registry with available services
-         */
-        final ContactCollectorActivator activator = this;
-        final ServiceRegistry serviceRegistry = new ServiceRegistry() {
-
-            @Override
-            public <S> S getOptionalService(final Class<? extends S> clazz) {
-                return activator.getOptionalService(clazz);
-            }
-
-            @Override
-            public <S> S getService(final Class<? extends S> clazz) {
-                return activator.getService(clazz);
-            }
-
-            @Override
-            public <S> void addService(final Class<? extends S> clazz, final S service) {
-                activator.addServiceAlt(clazz, service);
-            }
-
-            @Override
-            public void removeService(final Class<?> clazz) {
-                activator.removeService(clazz);
-            }
-        };
-        CCServiceRegistry.SERVICE_REGISTRY.set(serviceRegistry);
-        /*
-         * Check if disabled by configuration
-         */
+        // Check if disabled by configuration
         {
             final ConfigurationService cService = getService(ConfigurationService.class);
             if (!cService.getBoolProperty("com.openexchange.contactcollector.enabled", true)) {
@@ -140,19 +109,21 @@ public class ContactCollectorActivator extends HousekeepingActivator {
                 return;
             }
         }
-        /*
-         * Initialize service
-         */
-        final ContactCollectorServiceImpl collectorInstance = new ContactCollectorServiceImpl();
+
+        // Track other services
+        trackService(ObjectUseCountService.class);
+        trackService(UserAliasStorage.class);
+        openTrackers();
+
+        // Initialize service
+        final ContactCollectorServiceImpl collectorInstance = new ContactCollectorServiceImpl(this);
         collectorInstance.start();
         this.collectorInstance = collectorInstance;
-
         Dictionary<String, Object> props = new Hashtable<String, Object>(2);
         props.put(Constants.SERVICE_RANKING, ContactCollectorServiceImpl.RANKING); //Default
-        /*
-         * Register all
-         */
-        registerService(LoginHandlerService.class, new ContactCollectorFolderCreator());
+
+        // Register services
+        registerService(LoginHandlerService.class, new ContactCollectorFolderCreator(this));
         registerService(ContactCollectorService.class, collectorInstance, props);
         registerPreferenceItems();
     }
@@ -163,34 +134,24 @@ public class ContactCollectorActivator extends HousekeepingActivator {
         registerService(PreferencesItemService.class, new ContactCollectEnabled());
         registerService(PreferencesItemService.class, new ContactCollectOnMailAccess());
         registerService(PreferencesItemService.class, new ContactCollectOnMailTransport());
-        registerService(PreferencesItemService.class, new ContactCollectFolderDeleteDenied());
+        registerService(PreferencesItemService.class, new ContactCollectFolderDeleteDenied(this));
     }
 
     @Override
     public void stopBundle() throws Exception {
         /*
-         * Unregister all
-         */
-        cleanUp();
-        /*
          * Stop service
          */
-        final ContactCollectorServiceImpl collectorInstance = this.collectorInstance;
+        ContactCollectorServiceImpl collectorInstance = this.collectorInstance;
         if (null != collectorInstance) {
             collectorInstance.stop();
             this.collectorInstance = null;
         }
-        /*
-         * Clear service registry
-         */
-        CCServiceRegistry.SERVICE_REGISTRY.set(null);
-    }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            ContextService.class, UserService.class, UserConfigurationService.class, ContactService.class,
-            ThreadPoolService.class, DatabaseService.class, ConfigurationService.class };
+        /*
+         * Unregister all
+         */
+        super.stopBundle();
     }
 
 }

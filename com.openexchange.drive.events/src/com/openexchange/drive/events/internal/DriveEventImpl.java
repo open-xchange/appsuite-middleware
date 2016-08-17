@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -63,13 +63,6 @@ import com.openexchange.drive.events.DriveEvent;
  */
 public class DriveEventImpl implements DriveEvent {
 
-    /** The only resulting action from events for now */
-    private static final List<DriveAction<? extends DriveVersion>> SYNC_DIRECTORIES_ACTION;
-    static {
-        SYNC_DIRECTORIES_ACTION = new ArrayList<DriveAction<? extends DriveVersion>>(1);
-        SYNC_DIRECTORIES_ACTION.add(new SyncDirectoriesAction());
-    }
-
     private final int contextID;
     private final Set<String> folderIDs;
     private final boolean remote;
@@ -103,8 +96,14 @@ public class DriveEventImpl implements DriveEvent {
     }
 
     @Override
-    public List<DriveAction<? extends DriveVersion>> getActions() {
-        return SYNC_DIRECTORIES_ACTION;
+    public List<DriveAction<? extends DriveVersion>> getActions(List<String> rootFolderIDs) {
+        List<DriveAction<? extends DriveVersion>> actions = new ArrayList<DriveAction<? extends DriveVersion>>(rootFolderIDs.size());
+        for (String rootFolderID : rootFolderIDs) {
+            if (folderIDs.contains(rootFolderID)) {
+                actions.add(new SyncDirectoriesAction(rootFolderID));
+            }
+        }
+        return actions;
     }
 
     @Override

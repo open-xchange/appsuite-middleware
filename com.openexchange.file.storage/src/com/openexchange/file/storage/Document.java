@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -205,6 +205,15 @@ public abstract class Document {
     public Document setLastModified(long lastModified) {
         this.lastModified = lastModified;
         return this;
+    }
+
+    /**
+     * Gets whether the InputStream returned by {@link getData()} is repetitive or not.
+     *
+     * @return Whether {@link getData()} returns a repetitive InputStream or not
+     */
+    public boolean isRepetitive() {
+        return true;
     }
 
     /**

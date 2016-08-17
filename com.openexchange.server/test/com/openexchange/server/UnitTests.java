@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -76,7 +76,6 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.tools.net.URIParserTest.class,
     com.openexchange.mail.utils.MsisdnUtilityTest.class,
     com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTableTest.class,
-    com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
     com.openexchange.groupware.userconfiguration.AllowAllUserConfigurationTest.class,
     com.openexchange.groupware.userconfiguration.UserConfigurationTest.class,
     com.openexchange.mail.api.MailConfigTest.class,
@@ -105,7 +104,10 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     OAuthDispatcherServletTest.class,
     com.openexchange.passwordchange.DefaultBasicPasswordChangeServiceTest.class,
     com.openexchange.mail.config.Bug38266Test.class,
-    com.openexchange.mailaccount.UnifiedInboxUIDTest.class
+    com.openexchange.mailaccount.UnifiedInboxUIDTest.class,
+    com.openexchange.mailaccount.utils.HostListTest.class,
+    com.openexchange.sessiond.impl.IPRangeTest.class,
+    com.openexchange.ajax.requesthandler.AJAXRequestDataTest.class
 })
 public class UnitTests {
 

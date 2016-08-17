@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,6 +49,7 @@
 
 package com.openexchange.caldav.resources;
 
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.TimeZone;
@@ -60,7 +61,6 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.dav.resources.CommonResource;
 import com.openexchange.dav.resources.DAVCollection;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.ProblematicAttribute;
@@ -117,7 +117,7 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
             try {
                 iCal = this.generateICal();
             } catch (OXException e) {
-                throw protocolException(e);
+                throw protocolException(getUrl(), e);
             }
             if (null != iCal) {
                 this.iCalFile = iCal.getBytes(Charsets.UTF_8);
@@ -212,25 +212,25 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
 
     @Override
     public CalDAVResource<T> move(WebdavPath dest, boolean noroot, boolean overwrite) throws WebdavProtocolException {
-        WebdavResource destinationResource = factory.getState().resolveResource(dest);
+        WebdavResource destinationResource = factory.resolveResource(dest);
         DAVCollection destinationCollection = destinationResource.isCollection() ?
-            (DAVCollection)destinationResource : factory.getState().resolveCollection(dest.parent());
+            (DAVCollection) destinationResource : factory.resolveCollection(dest.parent());
         if (false == parent.getClass().isInstance(destinationCollection)) {
-            throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+            throw protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
         CalDAVFolderCollection<T> targetCollection = null;
         try {
             targetCollection = (CalDAVFolderCollection<T>) destinationCollection;
         } catch (ClassCastException e) {
-            throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
+            throw protocolException(getUrl(), e, HttpServletResponse.SC_FORBIDDEN);
         }
         try {
-            this.move(targetCollection);
+            move(targetCollection);
         } catch (OXException e) {
             if (handle(e)) {
                 return move(dest, noroot, overwrite);
             } else {
-                throw protocolException(e);
+                throw protocolException(getUrl(), e);
             }
         }
         this.parent = targetCollection;
@@ -267,34 +267,24 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
             /*
              * 'Moving a recurring appointment to another folder is not supported.'
              */
-            throw protocolException(e, HttpServletResponse.SC_CONFLICT);
+            throw protocolException(getUrl(), e, HttpServletResponse.SC_CONFLICT);
         } else if (e.equalsCode(100, "APP")) { // APP-0100
             /*
              * 'Cannot insert appointment ABC. An appointment with the unique identifier (123) already exists.'
              */
-            throw protocolException(e, HttpServletResponse.SC_CONFLICT);
+            throw protocolException(getUrl(), e, HttpServletResponse.SC_CONFLICT);
         } else if (e.equalsCode(70, "APP")) { // APP-0070
             /*
              * 'You can not use the private flag in a non private folder.'
              */
-            throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
-        } else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
+            throw protocolException(getUrl(), e, HttpServletResponse.SC_FORBIDDEN);
+        } else if (e.equalsCode(99, "APP")) { // APP-0099
             /*
-             * throw appropriate protocol exception
+             * Changing an exception into a series is not supported.
              */
-            throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
-        } else if (Category.CATEGORY_CONFLICT.equals(e.getCategory())) {
-            /*
-             * throw appropriate protocol exception
-             */
-            throw protocolException(e, HttpServletResponse.SC_CONFLICT);
-        } else if (Category.CATEGORY_SERVICE_DOWN.equals(e.getCategory())) {
-            /*
-             * throw appropriate protocol exception
-             */
-            throw protocolException(e, HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            throw protocolException(getUrl(), e, HttpServletResponse.SC_FORBIDDEN);
         } else {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
 
         if (!retry) {
@@ -341,7 +331,7 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
     @Override
     public void create() throws WebdavProtocolException {
         if (exists()) {
-            throw protocolException(HttpServletResponse.SC_CONFLICT);
+            throw protocolException(getUrl(), HttpServletResponse.SC_CONFLICT);
         }
         try {
             this.createObject();
@@ -349,7 +339,7 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
             if (handle(e)) {
                 create();
             } else {
-                throw protocolException(e);
+                throw protocolException(getUrl(), e);
             }
         }
     }
@@ -357,7 +347,7 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
     @Override
     public void delete() throws WebdavProtocolException {
         if (false == exists()) {
-            throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+            throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
         }
         try {
             deleteObject();
@@ -365,7 +355,7 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
             if (handle(e)) {
                 delete();
             } else {
-                throw protocolException(e);
+                throw protocolException(getUrl(), e);
             }
         }
     }
@@ -373,7 +363,7 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
     @Override
     public void save() throws WebdavProtocolException {
         if (false == exists()) {
-            throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+            throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
         }
         try {
             saveObject();
@@ -381,7 +371,7 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
             if (handle(e)) {
                 save();
             } else {
-                throw protocolException(e);
+                throw protocolException(getUrl(), e);
             }
         }
     }

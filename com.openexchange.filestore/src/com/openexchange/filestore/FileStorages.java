@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -204,7 +204,7 @@ public final class FileStorages {
     // -------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Gets the fully qualifying URI for given context.
+     * Gets the fully qualifying URI for given context; sets returned URI's scheme to <code>"file"</code> if absent in base URI.
      *
      * @param contextId The context identifier
      * @param baseUri The file storage's base URI
@@ -212,7 +212,8 @@ public final class FileStorages {
      */
     public static URI getFullyQualifyingUriForContext(int contextId, URI baseUri) {
         try {
-            return new URI(baseUri.getScheme(), baseUri.getAuthority(), ensureEndingSlash(baseUri.getPath()) + getContextAppendix(contextId), baseUri.getQuery(), baseUri.getFragment());
+            String scheme = baseUri.getScheme();
+            return new URI(null == scheme ? "file" : scheme, baseUri.getAuthority(), ensureEndingSlash(baseUri.getPath()) + getContextAppendix(contextId), baseUri.getQuery(), baseUri.getFragment());
         } catch (URISyntaxException e) {
             // Cannot occur
             return null;
@@ -220,7 +221,7 @@ public final class FileStorages {
     }
 
     /**
-     * Gets the fully qualifying URI for given user.
+     * Gets the fully qualifying URI for given user; sets returned URI's scheme to <code>"file"</code> if absent in base URI.
      *
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -229,7 +230,8 @@ public final class FileStorages {
      */
     public static URI getFullyQualifyingUriForUser(int userId, int contextId, URI baseUri) {
         try {
-            return new URI(baseUri.getScheme(), baseUri.getAuthority(), ensureEndingSlash(baseUri.getPath()) + getUserAppendix(userId, contextId), baseUri.getQuery(), baseUri.getFragment());
+            String scheme = baseUri.getScheme();
+            return new URI(null == scheme ? "file" : scheme, baseUri.getAuthority(), ensureEndingSlash(baseUri.getPath()) + getUserAppendix(userId, contextId), baseUri.getQuery(), baseUri.getFragment());
         } catch (URISyntaxException e) {
             // Cannot occur
             return null;
@@ -237,6 +239,29 @@ public final class FileStorages {
     }
 
     // -------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Checks specified URI for having a non-<code>null</code> scheme; falls-back to <code>"file"</code>.
+     *
+     * @param uri The URI to check
+     * @return An URI with a scheme set
+     */
+    public static URI ensureScheme(URI uri) {
+        if (null == uri) {
+            return uri;
+        }
+
+        if (null == uri.getScheme()) {
+            try {
+                return new URI("file", uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), uri.getQuery(), uri.getFragment());
+            } catch (URISyntaxException e) {
+                // Cannot occur...
+                throw new IllegalArgumentException("URI syntax error.", e);
+            }
+        }
+
+        return uri;
+    }
 
     /**
      * Ensures URI's path component does end with a slash <code>'/'</code> character

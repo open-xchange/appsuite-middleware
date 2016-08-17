@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -86,9 +86,9 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.TransportAuth;
-import com.openexchange.mailaccount.json.fields.MailAccountFields;
-import com.openexchange.mailaccount.json.parser.MailAccountParser;
-import com.openexchange.mailaccount.json.writer.MailAccountWriter;
+import com.openexchange.mailaccount.json.MailAccountFields;
+import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
+import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -125,7 +125,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
 
         MailAccountDescription accountDescription = new MailAccountDescription();
         List<OXException> warnings = new LinkedList<OXException>();
-        Set<Attribute> availableAttributes = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
+        Set<Attribute> availableAttributes = DefaultMailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
 
         if (!availableAttributes.contains(Attribute.TRANSPORT_AUTH_LITERAL)) {
             accountDescription.setTransportAuth(TransportAuth.MAIL);
@@ -164,7 +164,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
         if (!pop3) {
             session.setParameter("mail-account.validate.type", "create");
             try {
-                if (!ValidateAction.actionValidateBoolean(accountDescription, session, false, warnings).booleanValue()) {
+                if (!ValidateAction.actionValidateBoolean(accountDescription, session, false, warnings, true).booleanValue()) {
                     valid = false;
                     final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
                     warning.setCategory(Category.CATEGORY_WARNING);
@@ -289,9 +289,9 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             if (null == loadedMailAccount) {
                 throw MailAccountExceptionCodes.NOT_FOUND.create(id, session.getUserId(), session.getContextId());
             }
-            jsonAccount = MailAccountWriter.write(checkFullNames(loadedMailAccount, storageService, session));
+            jsonAccount = DefaultMailAccountWriter.write(checkFullNames(loadedMailAccount, storageService, session));
         } else {
-            jsonAccount = MailAccountWriter.write(newAccount);
+            jsonAccount = DefaultMailAccountWriter.write(newAccount);
         }
 
         return new AJAXRequestResult(jsonAccount).addWarnings(warnings);

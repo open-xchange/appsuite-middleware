@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -48,6 +48,8 @@
  */
 
 package com.openexchange.calendar.itip.generators;
+
+import org.apache.commons.lang.StringEscapeUtils;
 
 import com.openexchange.calendar.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.groupware.container.Appointment;
@@ -95,7 +97,7 @@ public class HTMLWrapper extends PassthroughWrapper {
         if (argument == null) {
             return "";
         }
-        return "<em>"+argument.toString()+"</em>";
+        return "<em>"+escapeHtml(argument.toString())+"</em>";
     }
 
     @Override
@@ -117,7 +119,7 @@ public class HTMLWrapper extends PassthroughWrapper {
         if (argument == null) {
             return "";
         }
-        return "<span class='"+string+"'>"+argument.toString()+"</span>";
+        return "<span class='"+string+"'>"+escapeHtml(argument.toString())+"</span>";
     }
 
     @Override
@@ -125,8 +127,12 @@ public class HTMLWrapper extends PassthroughWrapper {
         if (argument == null) {
             return "";
         }
-        String string = argument.toString();
+        String string = escapeHtml(argument.toString());
     	return "<a href=\""+string+"\">"+string+"</a>";
+    }
+
+    private String escapeHtml(String string) {
+        return StringEscapeUtils.escapeHtml(string);
     }
 
 

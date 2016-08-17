@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -62,12 +62,12 @@ import com.openexchange.html.AbstractSanitizing;
 public class Bug21532Test extends AbstractSanitizing {
     @Test
     public void testConvertConditionalCommentsWihoutWhitespaces() {
-        String content = getHtmlService().getConformHTML("<!--[if !supportLists]-->", "UTF-8");
+        String content = getHtmlService().getConformHTML("</head><body><![if !supportLists]><p>You should see this</p><![endif]></body></html>", "UTF-8");
 
         String expected = "<!DOCTYPE html>\n" +
             "<html><head>\n" +
             "    <meta charset=\"UTF-8\">\n" +
-            "</head><body><!-- [if !supportLists]--></body><!-- <![endif] --></html>\n ";
+            "</head><body><p>You should see this</p></body></html>\n ";
 
         assertEquals("Unexpected return value", expected, content);
     }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,8 +49,7 @@
 
 package com.openexchange.tools.webdav;
 
-import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
-import static com.openexchange.tools.servlet.http.Tools.sendEmptyErrorResponse;
+import static com.openexchange.tools.servlet.http.Tools.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -328,6 +327,7 @@ public abstract class OXServlet extends WebDavServlet {
         HostData hostData = Tools.createHostData(req, contextId, userId, false);
         DefaultRequestContext context = new DefaultRequestContext();
         context.setHostData(hostData);
+        context.setUserAgent(req.getHeader("user-agent"));
         return context;
     }
 

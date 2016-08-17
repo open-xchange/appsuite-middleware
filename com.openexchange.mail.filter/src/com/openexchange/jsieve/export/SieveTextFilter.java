@@ -234,7 +234,7 @@ public final class SieveTextFilter {
 
     private static final Pattern PATTERN = Pattern.compile("^" + FLAG_TAG + MATCH_STRING + SEPARATOR_REGEX + UNIQUE_ID + MATCH_STRING + SEPARATOR_REGEX + RULENAME_TAG + "(.*?)$");
 
-    private static final Pattern REQUIRE_PATTERN = Pattern.compile("(\"[a-z0-9]+\")+");
+    private static final Pattern REQUIRE_PATTERN = Pattern.compile("(\"[a-z0-9\\.\\-]+\")+");
 
     // ------------------------------------------------------------------------------------------------------------------------------ //
 
@@ -365,9 +365,10 @@ public final class SieveTextFilter {
             }
             if (error) {
                 retval = new ClientRulesAndRequire(requires, flagged);
+            } else {
+                retval = new ClientRulesAndRequire(new HashSet<String>(), flagged);
             }
 
-            retval = new ClientRulesAndRequire(new HashSet<String>(), flagged);
         } else {
             for (final Rule rule : rules) {
                 final RequireCommand requireCommand = rule.getRequireCommand();
@@ -379,9 +380,10 @@ public final class SieveTextFilter {
             }
             if (error) {
                 retval = new ClientRulesAndRequire(requires, listOfRules);
+            } else {
+                retval = new ClientRulesAndRequire(new HashSet<String>(), listOfRules);
             }
 
-            retval = new ClientRulesAndRequire(new HashSet<String>(), listOfRules);
         }
         return retval;
     }
@@ -956,7 +958,7 @@ public final class SieveTextFilter {
 
     /**
      * Rewrites the require part of the sieve script, retaining the previous and the current require sets.
-     * 
+     *
      * @param writeback The writeback after the CRUD operation
      * @param oldScript The old script before the CRUD operation
      * @param sieveTextFilter The {@link SieveTextFilter}
@@ -990,7 +992,7 @@ public final class SieveTextFilter {
 
     /**
      * Reads the require line from the specified script and returns it as a set with strings with '"' quotes
-     * 
+     *
      * @param sieveScript The sieve script to read the require line from
      * @return The set with the requires, or an empty set if no require line is present.
      */
@@ -1012,7 +1014,7 @@ public final class SieveTextFilter {
 
     /**
      * Assemble the require line
-     * 
+     *
      * @param require The require set
      * @return The require line as a string, or an empty string if the specified set is empty
      */
@@ -1035,7 +1037,7 @@ public final class SieveTextFilter {
 
     /**
      * Injects the specified require line to the specified split write back string array
-     * 
+     *
      * @param splitWriteBack The split write back string array
      * @param requireLine The require line
      * @return The new writeback
@@ -1049,7 +1051,7 @@ public final class SieveTextFilter {
             splitWriteBack[1] = requireLine;
             writeBack = splitWriteBack;
         } else {
-            // Or add. Create a new array with size equals to the previous array + 2, to accommodate the require line plus an empty line 
+            // Or add. Create a new array with size equals to the previous array + 2, to accommodate the require line plus an empty line
             writeBack = new String[splitWriteBack.length + 2];
             // The top comment line
             writeBack[0] = splitWriteBack[0];
@@ -1064,7 +1066,7 @@ public final class SieveTextFilter {
 
     /**
      * Re-assemble the 'writeback' script from the array
-     * 
+     *
      * @param writeback
      * @return
      */

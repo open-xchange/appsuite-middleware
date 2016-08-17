@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,10 +49,9 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.tools.servlet.http.Tools.getWriterFrom;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -64,7 +63,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
-import com.openexchange.annotation.NonNull;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -73,7 +71,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Reply;
@@ -84,7 +81,6 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.http.MIMEParse;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
@@ -105,9 +101,6 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /** White-list file identifier */
     public static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
-
-    /** The <code>"Accept"</code> header */
-    private static final @NonNull String ACCEPT = "Accept";
 
     // ------------------------------------------------------------------------------------------------------------------------------
 
@@ -268,19 +261,22 @@ public abstract class SessionServlet extends AJAXServlet {
     protected void writeErrorAsJsCallback(OXException e, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         if (httpResponse.isCommitted()) {
             // Cannot do anything about it as response is already committed. Just log that OXException...
-            LOG.error("", e);
             return;
         }
 
-        try {
-            // As API response
-            APIResponseRenderer.writeJsCallback(new Response().setException(e), Dispatchers.getActionFrom(httpRequest), httpRequest, httpResponse);
-        } catch (JSONException je) {
-            LOG.error("", e);
+        // First, try to obtain the writer
+        PrintWriter writer = getWriterFrom(httpResponse);
+        if (null != writer) {
             try {
-                httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred: " + e.getMessage());
-            } catch (IOException ioe) {
-                LOG.error("", ioe);
+                // As API response
+                APIResponseRenderer.writeJsCallback(new Response().setException(e), Dispatchers.getActionFrom(httpRequest), writer, httpRequest, httpResponse);
+            } catch (JSONException je) {
+                LOG.error("", je);
+                try {
+                    httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred: " + je.getMessage());
+                } catch (IOException ioe) {
+                    LOG.error("", ioe);
+                }
             }
         }
     }
@@ -330,7 +326,7 @@ public abstract class SessionServlet extends AJAXServlet {
             // An upload failed
             LOG.debug("", e);
             String sLoc = e.getProperty(OXExceptionConstants.PROPERTY_LOCALE);
-            resp.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getDisplayMessage(null == sLoc ? Locale.US : LocaleTools.getLocale(sLoc)));
+            writeErrorPage(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getDisplayMessage(null == sLoc ? Locale.US : LocaleTools.getLocale(sLoc)), resp);
         } else if (sessionErrorPrefix.equals(e.getPrefix())) {
             LOG.debug("", e);
             handleSessiondException(e, req, resp);
@@ -367,19 +363,30 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private void outputOXException(OXException e, int statusCode, String reasonPhrase, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         // Check expected output format
-        if (isJsonResponseExpected(req, true) && Dispatchers.isApiOutputExpectedFor(req)) {
+        if (isJsonResponseExpected(req, true) || Dispatchers.isApiOutputExpectedFor(req)) {
+            // First, try to obtain the writer
+            PrintWriter writer = getWriterFrom(resp);
+
             // API response
-            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-            resp.setHeader("Content-Disposition", "inline");
-            APIResponseRenderer.writeResponse(new Response().setException(e), Dispatchers.getActionFrom(req), req, resp);
+            if (null != writer) {
+                resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+                resp.setHeader("Content-Disposition", "inline");
+                APIResponseRenderer.writeResponse(new Response().setException(e), Dispatchers.getActionFrom(req), writer, req, resp);
+            }
         } else {
             // No JSON response; either JavaScript call-back or regular HTML error (page)
             if (USM_USER_AGENT.equals(req.getHeader("User-Agent"))) {
                 writeErrorAsJsCallback(e, req, resp);
             } else {
-                String desc = null == reasonPhrase ? "An error occurred inside the server which prevented it from fulfilling the request." : reasonPhrase;
-                resp.setStatus(statusCode);
-                writeErrorPage(statusCode, desc, resp);
+                // First, try to obtain the writer
+                PrintWriter writer = getWriterFrom(resp);
+
+                // Write error page
+                if (null != writer) {
+                    String desc = null == reasonPhrase ? "An error occurred inside the server which prevented it from fulfilling the request." : reasonPhrase;
+                    resp.setStatus(statusCode);
+                    writeErrorPage(statusCode, desc, resp);
+                }
             }
         }
     }
@@ -423,8 +430,6 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
-    private static final List<String> JSON_TYPES = Arrays.asList("application/json", "text/javascript");
-
     /**
      * Checks if the <code>"Accept"</code> header of specified HTTP request signals to expect JSON data.
      *
@@ -433,18 +438,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return <code>true</code> if JSON data is expected; otherwise <code>false</code>
      */
     public static boolean isJsonResponseExpected(HttpServletRequest request, boolean interpretMissingAsTrue) {
-        if (null == request) {
-            return false;
-        }
-
-        // E.g. "Accept: application/json, text/javascript, ..."
-        String acceptHdr = request.getHeader(ACCEPT);
-        if (Strings.isEmpty(acceptHdr)) {
-            return interpretMissingAsTrue;
-        }
-
-        float[] qualities = MIMEParse.qualities(JSON_TYPES, acceptHdr);
-        return qualities[0] == 1.0f || qualities[1] == 1.0f;
+        return Tools.isJsonResponseExpected(request, interpretMissingAsTrue);
     }
 
     /**
@@ -456,11 +450,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @throws IOException If an I/O error occurs
      */
     public static void writeErrorPage(int statusCode, String desc, HttpServletResponse resp) throws IOException {
-        resp.setContentType("text/html; charset=UTF-8");
-        resp.setHeader("Content-Disposition", "inline");
-        PrintWriter writer = resp.getWriter();
-        writer.write(getErrorPage(statusCode, null, desc));
-        writer.flush();
+        Tools.sendErrorPage(resp, statusCode, desc);
     }
 
     /**

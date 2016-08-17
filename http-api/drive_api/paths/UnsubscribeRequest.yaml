@@ -1,0 +1,29 @@
+/drive?action=unsubscribe:
+  get:
+    operationId: unsubscribePushEvents
+    tags:
+      - drive
+    summary: Unsubscribes from push events.
+    description: |
+      Unregisters a previously registered client device to stop receiving push notifications from the server. The
+      same parameters that were used to perform the subscription need to be passed again, which includes the root
+      folder ID, the device token and the service name.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+      - in: query
+        name: service
+        type: string
+        description: The name of the underlying push service to use, currently one of gcm, apn, or apn.macos.
+        required: true
+      - in: query
+        name: token
+        type: string
+        description: The device's registration token as assigned by the service.
+        required: true
+    responses:
+      200:
+        description: |
+          An empty JSON result. In case of errors the responsible fields in the response are filled.
+        schema:
+          $ref: "#/definitions/CommonResponse"

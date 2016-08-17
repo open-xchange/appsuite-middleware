@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,6 +49,7 @@
 
 package com.openexchange.caldav.resources;
 
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -163,7 +164,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                     factory.getAppointmentInterface().getObjectById(appointment.getObjectID());
             return applyPatches ? patch(cdo) : cdo;
         } catch (SQLException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -173,7 +174,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             try {
                 lastModified = Tools.getLatestModified(new Date(factory.getAppointmentInterface().getSequenceNumber(folderID)), folder);
             } catch (OXException e) {
-                throw protocolException(e);
+                throw protocolException(getUrl(), e);
             }
         }
         return lastModified;
@@ -222,7 +223,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                     throw e;
                 }
             } catch (SQLException e) {
-                throw protocolException(e);
+                throw protocolException(getUrl(), e);
             }
         }
         return null;
@@ -252,7 +253,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                 folderID, BASIC_COLUMNS, intervalStart, intervalEnd, -1, Order.NO_ORDER);
             return getSignificantAppointments(searchIterator);
         } catch (SQLException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         } finally {
             SearchIterators.close(searchIterator);
         }
@@ -266,7 +267,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                 folderID, getIntervalStart(), getIntervalEnd(), BASIC_COLUMNS, since);
             return getSignificantAppointments(searchIterator);
         } catch (SQLException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         } finally {
             SearchIterators.close(searchIterator);
         }
@@ -279,7 +280,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             searchIterator = factory.getAppointmentInterface().getDeletedAppointmentsInFolder(folderID, BASIC_COLUMNS, since);
             return getSignificantAppointments(searchIterator);
         } catch (SQLException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         } finally {
             SearchIterators.close(searchIterator);
         }
@@ -293,7 +294,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                 folderID, BASIC_COLUMNS, getIntervalStart(), getIntervalEnd(), -1, Order.NO_ORDER);
             return getSignificantAppointments(searchIterator);
         } catch (SQLException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         } finally {
             SearchIterators.close(searchIterator);
         }
@@ -340,10 +341,10 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                     try {
                         return factory.getAppointmentInterface().getObjectById(objectId, folderId);
                     } catch (SQLException e) {
-                        throw protocolException(e);
+                        throw protocolException(getUrl(), e);
                     } catch (OXException e) {
                         if ("APP-0059".equals(e.getErrorCode()) || "OX-0001".equals(e.getErrorCode())) {
-                            throw protocolException(e, HttpServletResponse.SC_NOT_FOUND);
+                            throw protocolException(getUrl(), e, HttpServletResponse.SC_NOT_FOUND);
                         }
                     }
                 }

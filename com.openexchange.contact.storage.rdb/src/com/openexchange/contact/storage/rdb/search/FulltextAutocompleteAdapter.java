@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -57,7 +57,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -68,6 +67,7 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
@@ -280,8 +280,8 @@ public class FulltextAutocompleteAdapter extends DefaultSearchAdapter {
         }
 
         @Override
-        public Map<String, String[]> getConfigFileNames() {
-            return null;
+        public com.openexchange.config.Interests getInterests() {
+            return DefaultInterests.builder().propertiesOfInterest("com.openexchange.contact.fulltextAutocomplete", "com.openexchange.contact.fulltextIndexFields").build();
         }
     };
 

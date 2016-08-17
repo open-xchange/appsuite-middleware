@@ -1,0 +1,24 @@
+/passwordchange?action=update:
+  put:
+    operationId: updatePassword
+    tags:
+      - passwordchange
+    summary: Updates or changes the password of the current use.
+    description: |
+      #### Note
+      The new password will be set without any checks. The client must ensure that it is the password the user wants to set.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON object containing the old and the new password.
+        required: true
+        schema:
+          $ref: "#/definitions/PasswordChangeBody"
+    responses:
+      200:
+        description: In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/CommonResponse"

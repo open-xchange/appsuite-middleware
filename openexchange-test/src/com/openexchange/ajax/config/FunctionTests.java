@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -199,11 +199,6 @@ public class FunctionTests extends AbstractAJAXSession {
     public void testMinimumSearchCharacters() throws Throwable {
         final GetResponse response = client.execute(new GetRequest(Tree.MinimumSearchCharacters));
         LOG.info("Minimum of characters for a search pattern: " + response.getInteger());
-    }
-
-    public void testMaximumNumberParticipants() throws Throwable {
-        final GetResponse response = client.execute(new GetRequest(Tree.MAXIMUM_NUMBER_PARTICIPANTS));
-        LOG.info("Maximum number of participants for appointments and tasks: " + response.getInteger());
     }
 
     public void testSingleFolderSearch() throws Throwable {

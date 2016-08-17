@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -101,7 +101,6 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.search.FieldCollectorVisitor;
@@ -122,7 +121,7 @@ import com.openexchange.tx.TransactionException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a> - Exceptions
  */
-public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess implements FileStorageIgnorableVersionFileAccess, FileStorageLockedFileAccess, FileStorageAdvancedSearchFileAccess {
+public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess implements FileStorageLockedFileAccess, FileStorageAdvancedSearchFileAccess {
 
     private static final class LockTokenKey {
 
@@ -785,12 +784,6 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     @Override
     public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
-        return saveDocument0(file, data, modifiedFields);
-    }
-
-    @Override
-    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields, final boolean ignoreVersion) throws OXException {
-        // Versioning is not supported by WebDAV
         return saveDocument0(file, data, modifiedFields);
     }
 

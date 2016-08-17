@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,8 @@
 package com.openexchange.drive;
 
 import java.util.List;
+import java.util.Map;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -207,11 +209,37 @@ public interface DriveUtility {
     /**
      * (Re-)Sends a notification message tom one or more existing entities of a shared file or folder.
      *
-     * @param session The session The target
+     * @param session The session
      * @param target The target
      * @param entityIDs The user- or group identifiers to notify
      * @param parameters The notification parameters
      */
     void notify(DriveSession session, DriveShareTarget target, int[] entityIDs, NotificationParameters parameters) throws OXException;
+
+    /**
+     * Searches for contacts, groups and users, driving the typical "auto-completion" scenario in clients when inviting guests.
+     *
+     * @param session The session
+     * @param query The query
+     * @param parameters Additional auto-complete specific parameters
+     * @return A JSON array holding the results, ready to be consumed by clients
+     */
+    JSONArray autocomplete(DriveSession session, String query, Map<String, Object> parameters) throws OXException;
+
+    /**
+     * Gets statistics about the trash folder contents.
+     *
+     * @param session The session
+     * @return The statistics, or <code>null</code> if no trash folder available
+     */
+    FolderStats getTrashFolderStats(DriveSession session) throws OXException;
+
+    /**
+     * Empties the trash folder.
+     *
+     * @param session The session
+     * @return Updated statistics of the trash folder after emptying, or <code>null</code> if no trash folder available
+     */
+    FolderStats emptyTrash(DriveSession session) throws OXException;
 
 }

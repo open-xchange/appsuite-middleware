@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -65,6 +65,8 @@ import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.ResultReply;
 import com.openexchange.client.onboarding.Scenario;
+import com.openexchange.client.onboarding.net.HostAndPort;
+import com.openexchange.client.onboarding.net.NetUtility;
 import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
 import com.openexchange.client.onboarding.plist.PlistResult;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -215,14 +217,25 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.setPayloadIdentifier("com.open-xchange.eas");
         payloadContent.addStringValue("UserName", OnboardingUtility.getUserLogin(userId, contextId));
         payloadContent.addStringValue("EmailAddress", OnboardingUtility.getUserMail(userId, contextId));
-        String easUrl = getEASUrl(null, false, userId, contextId);
-        payloadContent.addStringValue("Host", easUrl);
-        payloadContent.addBooleanValue("SSL", easUrl.startsWith("https://"));
+
+        {
+            String easUrl = getEASUrl(null, false, userId, contextId);
+            boolean isSsl = NetUtility.impliesSsl(easUrl);
+            HostAndPort hostAndPort = NetUtility.parseHostNameString(easUrl);
+
+            payloadContent.addStringValue("Host", hostAndPort.getHost());
+            if (hostAndPort.getPort() > 0) {
+                payloadContent.addIntegerValue("Port", hostAndPort.getPort());
+            }
+            payloadContent.addBooleanValue("SSL", isSsl);
+        }
+
         {
             String description = OnboardingUtility.getProductName(hostName, userId, contextId) + " Exchange ActiveSync";
             payloadContent.setPayloadDisplayName(description);
             payloadContent.setPayloadDescription(description);
         }
+
         payloadContent.setPayloadVersion(1);
 
         // Add payload content dictionary to top-level dictionary
@@ -250,7 +263,7 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
             throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
         }
 
-        return value;
+        return value.trim();
     }
 
 }

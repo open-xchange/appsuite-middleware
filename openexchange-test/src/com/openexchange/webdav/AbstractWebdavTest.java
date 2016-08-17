@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,8 +50,11 @@
 package com.openexchange.webdav;
 
 import java.util.Properties;
+import javax.xml.parsers.SAXParserFactory;
 import junit.framework.TestCase;
 import org.jdom2.Namespace;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.input.sax.XMLReaders;
 import com.meterware.httpunit.Base64;
 import com.meterware.httpunit.WebConversation;
 import com.meterware.httpunit.WebRequest;
@@ -126,6 +129,15 @@ public abstract class AbstractWebdavTest extends TestCase {
 
         hostName = AbstractConfigWrapper.parseProperty(webdavProps, "hostname", "localhost");
 
+        try {
+            SAXParserFactory fac = SAXParserFactory.newInstance();
+            fac.setNamespaceAware(true);
+            fac.setValidating(false);
+            XMLReaders nonvalidating = XMLReaders.NONVALIDATING;
+            new SAXBuilder();
+        } catch (Throwable t) {
+            throw new Exception(t);
+        }
         userId = GroupUserTest.getUserId(getWebConversation(), PROTOCOL + getHostName(), getLogin(), getPassword(), context);
         assertTrue("user not found", userId != -1);
 

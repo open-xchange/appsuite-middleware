@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -51,8 +51,6 @@ package com.openexchange.authentication.kerberos.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -76,8 +74,6 @@ public final class RenewalLoginHandlerRegisterer implements ServiceTrackerCustom
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RenewalLoginHandlerRegisterer.class);
 
     private final BundleContext context;
-    private final Lock lock = new ReentrantLock();
-
     private KerberosService kerberosService;
     private TimerService timerService;
     private ServiceRegistration<?> registration;
@@ -89,11 +85,10 @@ public final class RenewalLoginHandlerRegisterer implements ServiceTrackerCustom
     }
 
     @Override
-    public Object addingService(ServiceReference<Object> reference) {
+    public synchronized Object addingService(ServiceReference<Object> reference) {
         final Object obj = context.getService(reference);
         final boolean needsRegistration;
-        lock.lock();
-        try {
+        {
             if (obj instanceof KerberosService) {
                 kerberosService = (KerberosService) obj;
             }
@@ -101,8 +96,6 @@ public final class RenewalLoginHandlerRegisterer implements ServiceTrackerCustom
                 timerService = (TimerService) obj;
             }
             needsRegistration = null != kerberosService && null != timerService && registration == null;
-        } finally {
-            lock.unlock();
         }
         if (needsRegistration) {
             LOG.info("Registering delegation ticket renewal service.");
@@ -120,10 +113,9 @@ public final class RenewalLoginHandlerRegisterer implements ServiceTrackerCustom
     }
 
     @Override
-    public void removedService(ServiceReference<Object> reference, Object service) {
+    public synchronized void removedService(ServiceReference<Object> reference, Object service) {
         ServiceRegistration<?> unregister = null;
-        lock.lock();
-        try {
+        {
             if (service instanceof TimerService) {
                 timerService = null;
             }
@@ -134,8 +126,6 @@ public final class RenewalLoginHandlerRegisterer implements ServiceTrackerCustom
                 unregister = registration;
                 registration = null;
             }
-        } finally {
-            lock.unlock();
         }
         if (null != unregister) {
             LOG.info("Unregistering delegation ticket renewal service.");

@@ -1,0 +1,22 @@
+/folders?action=get:
+  get:
+    operationId: getFolder
+    tags:
+      - folders
+    summary: Gets a folder.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: Object ID of the requested folder.
+        required: true
+      - $ref: "#/parameters/gblQueryParamFolderTree"
+      - $ref: "#/parameters/gblQueryParamAllowedModules"
+    responses:
+      200:
+        description: |
+          A JSON object containing the data of the requested folder. In case of errors the responsible
+          fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/FolderResponse"

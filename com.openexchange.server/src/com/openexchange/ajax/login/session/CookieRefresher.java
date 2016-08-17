@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -123,9 +123,9 @@ public class CookieRefresher implements SessionServletInterceptor {
         if (null == stamp) {
             // No time stamp available, yet
             if (session instanceof PutIfAbsent) {
-                ((PutIfAbsent) session).setParameterIfAbsent(PARAM_COOKIE_REFRESH_TIMESTAMP, Long.valueOf(System.currentTimeMillis()));
+                ((PutIfAbsent) session).setParameterIfAbsent(PARAM_COOKIE_REFRESH_TIMESTAMP, createNewStamp());
             } else {
-                session.setParameter(PARAM_COOKIE_REFRESH_TIMESTAMP, Long.valueOf(System.currentTimeMillis()));
+                session.setParameter(PARAM_COOKIE_REFRESH_TIMESTAMP, createNewStamp());
             }
             return false;
         }
@@ -134,16 +134,14 @@ public class CookieRefresher implements SessionServletInterceptor {
         long now = System.currentTimeMillis();
         if ((now - intervalMillis) > stamp.longValue()) {
             // Needs refresh
-            if (session instanceof PutIfAbsent) {
-                if (null == ((PutIfAbsent) session).setParameterIfAbsent(PARAM_COOKIE_REFRESH_TIMESTAMP, Long.valueOf(System.currentTimeMillis()))) {
-                    // Successfully put as session parameter
-                    if (conf.isSessiondAutoLogin()) {
-                        session.setParameter(PARAM_REFRESH_SESSION_COOKIE_FLAG, Boolean.TRUE);
-                    }
-                    return true;
+            synchronized (stamp) {
+                Long check = (Long) session.getParameter(PARAM_COOKIE_REFRESH_TIMESTAMP);
+                if (stamp != check) {
+                    // Concurrent update. Another thread already initiated cookie refresh
+                    return false;
                 }
-            } else {
-                session.setParameter(PARAM_COOKIE_REFRESH_TIMESTAMP, Long.valueOf(System.currentTimeMillis()));
+
+                session.setParameter(PARAM_COOKIE_REFRESH_TIMESTAMP, createNewStamp());
                 if (conf.isSessiondAutoLogin()) {
                     session.setParameter(PARAM_REFRESH_SESSION_COOKIE_FLAG, Boolean.TRUE);
                 }
@@ -151,6 +149,11 @@ public class CookieRefresher implements SessionServletInterceptor {
             }
         }
         return false;
+    }
+
+    private Long createNewStamp() {
+        // Explicitly use "new Long()" constructor!
+        return new Long(System.currentTimeMillis());
     }
 
     private boolean needsSessionCookieRefresh(Session session) {

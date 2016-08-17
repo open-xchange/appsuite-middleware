@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -97,12 +97,13 @@ public class Strings {
         if (null == s) {
             return false;
         }
-        boolean startsWith = false;
-        for (int i = prefixes.length; !startsWith && i-- > 0;) {
+        for (int i = prefixes.length; i-- > 0;) {
             String prefix = prefixes[i];
-            startsWith = null == prefix ? false : s.startsWith(prefix, 0);
+            if (null != prefix && s.startsWith(prefix, 0)) {
+                return true;
+            }
         }
-        return startsWith;
+        return false;
     }
 
     /**
@@ -160,8 +161,7 @@ public class Strings {
         StringBuilder sb = new StringBuilder(2048);
         sb.append(objects[0] == null ? "null" : objects[0].toString());
         for (int i = 1; i < length; i++) {
-            sb.append(delimiter);
-            sb.append(objects[i] == null ? "null" : objects[i].toString());
+            sb.append(delimiter).append(objects[i] == null ? "null" : objects[i].toString());
         }
         return sb.toString();
     }
@@ -187,8 +187,7 @@ public class Strings {
         StringBuilder sb = new StringBuilder(2048);
         sb.append(strings[0] == null ? "null" : strings[0]);
         for (int i = 1; i < length; i++) {
-            sb.append(delimiter);
-            sb.append(strings[i] == null ? "null" : strings[i]);
+            sb.append(delimiter).append(strings[i] == null ? "null" : strings[i]);
         }
         return sb.toString();
     }
@@ -557,17 +556,17 @@ public class Strings {
     /**
      * Checks for an empty string.
      *
-     * @param string The string
-     * @return <code>true</code> if input is null or empty; else <code>false</code>
+     * @param str The string
+     * @return <code>true</code> if input is <code>null</code>, empty or only consists of white-space characters; else <code>false</code>
      */
-    public static boolean isEmpty(final String string) {
-        if (null == string) {
+    public static boolean isEmpty(final String str) {
+        if (null == str) {
             return true;
         }
-        final int len = string.length();
+        final int len = str.length();
         boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = isWhitespace(string.charAt(i));
+        for (int i = len; isWhitespace && i-- > 0;) {
+            isWhitespace = isWhitespace(str.charAt(i));
         }
         return isWhitespace;
     }
@@ -580,6 +579,34 @@ public class Strings {
      */
     public static boolean isNotEmpty(final String string) {
         return !isEmpty(string);
+    }
+
+    /**
+     * Checks for an empty character sequence.
+     *
+     * @param charSeq The character sequence
+     * @return <code>true</code> if input is <code>null</code>, empty or only consists of white-space characters; else <code>false</code>
+     */
+    public static boolean isEmptyCharSequence(final CharSequence charSeq) {
+        if (null == charSeq) {
+            return true;
+        }
+        final int len = charSeq.length();
+        boolean isWhitespace = true;
+        for (int i = len; isWhitespace && i-- > 0;) {
+            isWhitespace = isWhitespace(charSeq.charAt(i));
+        }
+        return isWhitespace;
+    }
+
+    /**
+     * Checks for a non-empty character sequence.
+     *
+     * @param charSeq The character sequence
+     * @return <code>true</code> if input is a non-empty string; else <code>false</code>
+     */
+    public static boolean isNotEmptyCharSequence(final CharSequence charSeq) {
+        return !isEmptyCharSequence(charSeq);
     }
 
     /**
@@ -645,12 +672,7 @@ public class Strings {
         }
         final StringBuilder builder = new StringBuilder(size << 4);
         for (final Object obj : coll) {
-            if (obj == null) {
-                builder.append("null");
-            } else {
-                builder.append(obj.toString());
-            }
-            builder.append(connector);
+            builder.append(obj == null ? "null" : obj.toString()).append(connector);
         }
         return builder.substring(0, builder.length() - connector.length());
     }
@@ -672,12 +694,7 @@ public class Strings {
             return;
         }
         for (final Object obj : coll) {
-            if (obj == null) {
-                builder.append("null");
-            } else {
-                builder.append(obj.toString());
-            }
-            builder.append(connector);
+            builder.append(obj == null ? "null" : obj.toString()).append(connector);
         }
         builder.setLength(builder.length() - connector.length());
     }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -100,7 +100,7 @@ public class UpdatesTest extends AbstractTaskTest {
         //keep track of the modified ids to verify the updates request
         final Set<Integer> expectedUpdatedTaskIds = new HashSet<Integer>(UPDATES);
         final Set<Integer> expectedDeletedTaskIds = new HashSet<Integer>(DELETES);
-        
+
         for (int i = 0; i < inserts.length; i++) {
             final Task task = new Task();
             task.setParentFolderID(folderId);
@@ -143,8 +143,8 @@ public class UpdatesTest extends AbstractTaskTest {
 
         // Now request updates for the list
         columns = new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE,
-            Task.START_DATE, Task.END_DATE, Task.PERCENT_COMPLETED,
-            Task.PRIORITY, Task.PARTICIPANTS };
+            Task.START_DATE, Task.END_DATE, Task.NOTE, Task.ALARM, Task.PERCENT_COMPLETED,
+            Task.PRIORITY, Task.PARTICIPANTS, Task.STATUS };
         final TaskUpdatesResponse updatesR = client.execute(new UpdatesRequest(folderId, columns, 0, null, allR.getTimestamp(), Ignore.NONE));
         assertTrue("Only found " + updatesR.size()
             + " updated tasks but should be more than "

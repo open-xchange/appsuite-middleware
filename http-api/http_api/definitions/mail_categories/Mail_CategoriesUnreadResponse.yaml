@@ -1,0 +1,6 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: object
+    description: A JSON object with a field for each active category containing the number of unread messages.

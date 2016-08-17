@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -71,11 +71,11 @@ public abstract class DependentCapabilityChecker implements CapabilityChecker {
      *
      * @param capability The capability to check
      * @param session Provides the users session for which to check
-     * @param declaredCapabilities The capabilities
+     * @param capabilities The capabilities collected so far (declared capabilities are added at the very end)
      * @return Whether to award this capability or not
      * @throws OXException If check fails
      */
-    public abstract boolean isEnabled(String capability, Session session, CapabilitySet declaredCapabilities) throws OXException;
+    public abstract boolean isEnabled(String capability, Session session, CapabilitySet capabilities) throws OXException;
 
     @Override
     public boolean isEnabled(String capability, Session session) throws OXException {

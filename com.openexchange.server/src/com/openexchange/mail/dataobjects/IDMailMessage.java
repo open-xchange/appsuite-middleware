@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -66,7 +66,6 @@ public final class IDMailMessage extends MailMessage {
     private long uid;
     private long originalUid;
     private String mailId;
-    private char separator;
     private int seqnum;
     private int unreadMessages;
 
@@ -169,24 +168,6 @@ public final class IDMailMessage extends MailMessage {
         if (originalUid > 0) {
             setOriginalId(Long.toString(originalUid));
         }
-    }
-
-    /**
-     * Gets the separator.
-     *
-     * @return The separator
-     */
-    public char getSeparator() {
-        return separator;
-    }
-
-    /**
-     * Sets the separator.
-     *
-     * @param separator The separator to set
-     */
-    public void setSeparator(final char separator) {
-        this.separator = separator;
     }
 
     /**

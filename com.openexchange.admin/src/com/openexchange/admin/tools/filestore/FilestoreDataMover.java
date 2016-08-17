@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -74,6 +74,7 @@ import java.util.concurrent.ExecutionException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import com.openexchange.admin.daemons.ClientAdminThread;
+import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.osgi.FilestoreLocationUpdaterRegistry;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
@@ -81,6 +82,8 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.utils.Filestore2UserUtil;
+import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -286,6 +289,11 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @throws ProgrammErrorException If a program error occurs
      */
     private void copy() throws StorageException, IOException, InterruptedException, ProgrammErrorException {
+        // Check "filestore2user" table
+        if (Filestore2UserUtil.isNotTerminated(ClientAdminThreadExtended.cache)) {
+            throw new StorageException("Table \"filestore2user\" not yet initialized");
+        }
+
         // Pre-copy
         preDoCopy();
 
@@ -663,10 +671,11 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @throws StorageException If a database error occurs
      */
     protected static void changeUsage(DecrementUsage decUsage, IncrementUsage incUsage, int contextId) throws StorageException {
+        AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         boolean rollback = false;
         try {
-            con = ClientAdminThread.cache.getConnectionForContext(contextId);
+            con = cache.getConnectionForContext(contextId);
             Databases.startTransaction(con);
             rollback = true;
 
@@ -687,7 +696,7 @@ public abstract class FilestoreDataMover implements Callable<Void> {
 
             if (null != con) {
                 try {
-                    ClientAdminThread.cache.pushConnectionForContext(contextId, con);
+                    cache.pushConnectionForContext(contextId, con);
                 } catch (PoolException e) {
                     throw new StorageException(e);
                 }

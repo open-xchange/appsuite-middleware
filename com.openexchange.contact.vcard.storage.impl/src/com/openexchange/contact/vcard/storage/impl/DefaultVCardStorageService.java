@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,6 +57,7 @@ import com.openexchange.contact.vcard.storage.VCardStorageExceptionCodes;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
@@ -95,14 +96,22 @@ public class DefaultVCardStorageService implements VCardStorageService {
      */
     @Override
     public InputStream getVCard(String identifier, int contextId) throws OXException {
-        if (Strings.isEmpty(identifier)) {
-            LOG.warn("Identifier to get VCard for is null. Cannot return VCard.");
-            return null;
-        }
+        try {
+            if (Strings.isEmpty(identifier)) {
+                LOG.warn("Identifier to get VCard for is null. Cannot return VCard.");
+                return null;
+            }
 
-        QuotaFileStorage fileStorage = getFileStorage(contextId);
-        InputStream vCard = fileStorage.getFile(identifier);
-        return vCard;
+            QuotaFileStorage fileStorage = getFileStorage(contextId);
+            InputStream vCard = fileStorage.getFile(identifier);
+            return vCard;
+        } catch (OXException e) {
+            if (FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                LOG.error(e.getMessage());
+                return null;
+            }
+            throw e;
+        }
     }
 
     /**

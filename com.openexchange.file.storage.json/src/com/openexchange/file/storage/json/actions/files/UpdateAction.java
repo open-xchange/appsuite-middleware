@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -118,11 +118,11 @@ public class UpdateAction extends AbstractWriteAction {
             } else {
                 // Save file metadata with binary payload
                 boolean ignoreVersion = request.getBoolParameter("ignoreVersion") && fileAccess.supports(id.getService(), id.getAccountId(), FileStorageCapability.IGNORABLE_VERSION);
-                newId = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), columns, ignoreVersion, ignoreWarnings);
+                newId = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), columns, ignoreVersion, ignoreWarnings, false);
             }
         } else {
             // Save file metadata without binary payload
-            newId = fileAccess.saveFileMetadata(file, request.getTimestamp(), columns, ignoreWarnings);
+            newId = fileAccess.saveFileMetadata(file, request.getTimestamp(), columns, ignoreWarnings, false);
         }
 
         List<OXException> warnings = new ArrayList<>(fileAccess.getAndFlushWarnings());

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -101,9 +101,9 @@ public class MicroformatServlet extends OnlinePublicationServlet {
 
     private static final long serialVersionUID = 6727750981539640363L;
 
-    private static final Map<String, OXMFPublicationService> publishers = new HashMap<String, OXMFPublicationService>();
-
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MicroformatServlet.class);
+
+    private static final Map<String, OXMFPublicationService> PUBLISHERS = new ConcurrentHashMap<String, OXMFPublicationService>();
 
     private static final String MODULE = OXMFConstants.MODULE;
 
@@ -151,7 +151,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
     }
 
     public static void registerType(final String module, final OXMFPublicationService publisher, final Map<String, Object> additionalVars) {
-        publishers.put(module, publisher);
+        PUBLISHERS.put(module, publisher);
         ADDITONAL_TEMPLATE_VARIABLES.put(module, additionalVars);
     }
 
@@ -179,7 +179,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             final Map<String, String> args = getPublicationArguments(req);
             final String module = args.get(MODULE);
 
-            final OXMFPublicationService publisher = publishers.get(module);
+            final OXMFPublicationService publisher = PUBLISHERS.get(module);
             if (publisher == null) {
                 final PrintWriter writer = resp.getWriter();
                 String escaped = Publications.escape(module, EscapeMode.HTML);

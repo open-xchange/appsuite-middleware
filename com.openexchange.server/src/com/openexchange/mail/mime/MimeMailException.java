@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -156,7 +156,7 @@ public class MimeMailException extends OXException {
     private static final String STR_EMPTY = "";
 
     private static final String ERR_TMP = "temporary error, please try again later";
-    
+
     private static final String ERR_TMP_FLR = "temporary failure";
 
     private static final String ERR_AUTH_FAILED = "bad authentication failed";
@@ -434,7 +434,7 @@ public class MimeMailException extends OXException {
                     mailInterfaceMonitor.changeNumBrokenConnections(true);
                     return MimeMailExceptionCode.BROKEN_CONNECTION.create(e, mailConfig == null ? STR_EMPTY : mailConfig.getServer());
                 }
-                return MimeMailExceptionCode.SOCKET_ERROR.create(e, appendInfo(e.getMessage(), folder));
+                return MimeMailExceptionCode.SOCKET_ERROR.create(e, new Object[0]);
             } else if (nextException instanceof java.net.UnknownHostException) {
                 return MimeMailExceptionCode.UNKNOWN_HOST.create(e, appendInfo(e.getMessage(), folder));
             } else if (nextException instanceof java.net.SocketTimeoutException) {
@@ -604,6 +604,27 @@ public class MimeMailException extends OXException {
             return clazz.cast(exception);
         }
         return exception instanceof MessagingException ? lookupNested((MessagingException) exception, clazz) : null;
+    }
+
+    /**
+     * Checks for possible exists error.
+     */
+    public static boolean isExistsException(final MessagingException e) {
+        if (null == e) {
+            return false;
+        }
+        return isExistsException(e.getMessage());
+    }
+
+    /**
+     * Checks for possible exists error.
+     */
+    public static boolean isExistsException(final String msg) {
+        if (null == msg) {
+            return false;
+        }
+        final String m = com.openexchange.java.Strings.toLowerCase(msg);
+        return (m.indexOf("exists") >= 0);
     }
 
     /**

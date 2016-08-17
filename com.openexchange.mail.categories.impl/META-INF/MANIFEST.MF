@@ -2,14 +2,17 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Mail Categories
 Bundle-SymbolicName: com.openexchange.mail.categories.impl
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.config,
+Import-Package: com.openexchange.capabilities,
+ com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.exception,
+ com.openexchange.groupware.ldap,
  com.openexchange.i18n,
  com.openexchange.java,
+ com.openexchange.login,
  com.openexchange.mail,
  com.openexchange.mail.api,
  com.openexchange.mail.categories,
@@ -18,10 +21,14 @@ Import-Package: com.openexchange.config,
  com.openexchange.mail.search,
  com.openexchange.mail.utils,
  com.openexchange.osgi,
+ com.openexchange.osgi.util,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.threadpool,
+ com.openexchange.tools.session,
  org.apache.commons.lang,
  org.osgi.framework,
+ org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.mail.categories.impl.osgi.Activator
 

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -89,6 +89,7 @@ import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -160,11 +161,15 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
 
         final TasksSQLInterface tasksSQL = new TasksSQLImpl(session);
         SearchIterator<Task> si = tasksSQL.findTask(searchObject, Task.TITLE, Order.ASCENDING, fields);
-        List<Document> documents = new ArrayList<Document>();
-        while(si.hasNext()) {
-            documents.add(new TasksDocument(si.next()));
+        try {
+            List<Document> documents = new ArrayList<Document>();
+            while(si.hasNext()) {
+                documents.add(new TasksDocument(si.next()));
+            }
+            return new SearchResult(documents.size(), searchRequest.getStart(), documents, searchRequest.getActiveFacets());
+        } finally {
+            SearchIterators.close(si);
         }
-        return new SearchResult(documents.size(), searchRequest.getStart(), documents, searchRequest.getActiveFacets());
     }
 
     @Override

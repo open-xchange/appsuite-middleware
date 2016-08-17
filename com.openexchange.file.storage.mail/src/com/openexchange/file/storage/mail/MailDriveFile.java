@@ -49,18 +49,11 @@
 
 package com.openexchange.file.storage.mail;
 
-import static com.openexchange.mail.json.writer.MessageWriter.getAddressesAsArray;
-import static com.openexchange.mail.mime.converters.MimeMessageConverter.getAddressHeader;
 import java.util.Date;
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
-import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -68,6 +61,9 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.mail.osgi.Services;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mime.MimeTypeMap;
 import com.sun.mail.imap.IMAPMessage;
@@ -81,13 +77,51 @@ import com.sun.mail.imap.IMAPMessage;
 public final class MailDriveFile extends DefaultFile {
 
     /**
+     * Parses an instance of <code>MailDriveFile</code> from specified IMAP message.
+     *
+     * @param message The backing IMAP message representing the attachment
+     * @param folderId The folder identifier
+     * @param id The file identifier
+     * @param userId The user identifier
+     * @param rootFolderId The identifier of the root folder
+     * @return This parsed Mail Drive file <b>or <code>null</code> if specified IMAP message represents an invalid attachment</b>
+     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If an Open-Xchange error occurs
+     */
+    public static MailDriveFile parse(IMAPMessage message, String folderId, String id, int userId, String rootFolderId) throws MessagingException, OXException {
+        return parse(message, folderId, id, userId, rootFolderId, null);
+    }
+
+    /**
+     * Parses an instance of <code>MailDriveFile</code> from specified IMAP message.
+     *
+     * @param message The backing IMAP message representing the attachment
+     * @param folderId The folder identifier
+     * @param id The file identifier
+     * @param userId The user identifier
+     * @param rootFolderId The identifier of the root folder
+     * @param fields The fields to consider
+     * @return This parsed Mail Drive file <b>or <code>null</code> if specified IMAP message represents an invalid attachment</b>
+     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If an Open-Xchange error occurs
+     */
+    public static MailDriveFile parse(IMAPMessage message, String folderId, String id, int userId, String rootFolderId, List<Field> fields) throws MessagingException, OXException {
+        return new MailDriveFile(folderId, id, userId, rootFolderId).parseMessage(message, fields);
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------
+
+    private MailMetadata metadata;
+
+    /**
      * Initializes a new {@link MailDriveFile}.
      *
      * @param folderId The folder identifier
      * @param id The file identifier
      * @param userId The user identifier
+     * @param rootFolderId The identifier of the root folder
      */
-    public MailDriveFile(String folderId, String id, int userId, String rootFolderId) {
+    private MailDriveFile(String folderId, String id, int userId, String rootFolderId) {
         super();
         setFolderId(isRootFolder(folderId, rootFolderId) ? FileStorageFolder.ROOT_FULLNAME : folderId);
         setCreatedBy(userId);
@@ -102,6 +136,15 @@ public final class MailDriveFile extends DefaultFile {
         return "".equals(id) || rootFolderId.equals(id);
     }
 
+    /**
+     * Gets the mail metadata for this file.
+     *
+     * @return The mail metadata, or <code>null</code> if not yet parsed
+     */
+    public MailMetadata getMetadata() {
+        return metadata;
+    }
+
     @Override
     public String toString() {
         final String url = getURL();
@@ -112,27 +155,18 @@ public final class MailDriveFile extends DefaultFile {
      * Parses specified Mail Drive file.
      *
      * @param message The backing IMAP message representing the attachment
-     * @return This Mail Drive file
-     * @throws MessagingException If a messaging error occurs
-     * @throws OXException If parsing message fails
-     */
-    public MailDriveFile parseMessage(IMAPMessage message) throws MessagingException, OXException {
-        return parseMessage(message, null);
-    }
-
-    /**
-     * Parses specified Mail Drive file.
-     *
-     * @param message The backing IMAP message representing the attachment
      * @param fields The fields to consider
-     * @return This Mail Drive file with property set applied
+     * @return This Mail Drive file with property set applied <b>or <code>null</code> if specified IMAP message represents an invalid attachment</b>
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If parsing Mail Drive file fails
      */
-    public MailDriveFile parseMessage(IMAPMessage message, List<Field> fields) throws MessagingException, OXException {
+    private MailDriveFile parseMessage(IMAPMessage message, List<Field> fields) throws MessagingException, OXException {
         if (null != message) {
             try {
-                final String name = message.getSubject();
+                String name = MimeMessageConverter.getSubject(message);
+                if (Strings.isEmpty(name)) {
+                    return null;
+                }
                 setTitle(name);
                 setFileName(name);
                 final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
@@ -150,7 +184,15 @@ public final class MailDriveFile extends DefaultFile {
                     }
                 }
                 if (set.contains(Field.FILE_MIMETYPE)) {
-                    String contentType = message.getContentType();
+                    String contentType;
+                    {
+                        String[] tmp = message.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+                        if ((tmp != null) && (tmp.length > 0)) {
+                            contentType = MimeMessageUtility.decodeMultiEncodedHeader(tmp[0]);
+                        } else {
+                            contentType = MimeTypes.MIME_DEFAULT;
+                        }
+                    }
                     if (Strings.isEmpty(contentType)) {
                         MimeTypeMap map = Services.getService(MimeTypeMap.class);
                         contentType = map.getContentType(name);
@@ -168,6 +210,7 @@ public final class MailDriveFile extends DefaultFile {
                     long size = message.getSize();
                     if (size >= 0) {
                         setFileSize(size);
+                        setAccurateSize(false);
                     }
                 }
                 if (set.contains(Field.URL)) {
@@ -186,40 +229,13 @@ public final class MailDriveFile extends DefaultFile {
                     setVersionComment(null);
                 }
 
-                // Compose "meta" field
-                Map<String, Object> meta = new HashMap<String, Object>(2);
-                meta.put("mail", mailMetadata(message));
-                setMeta(meta);
+                // Prepare additional metadata
+                this.metadata = new MailMetadata(message);
             } catch (final RuntimeException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return this;
-    }
-
-    private Map<String, Object> mailMetadata(IMAPMessage message) throws MessagingException {
-        Map<String, Object> map = new LinkedHashMap<String, Object>(6);
-        {
-            String originalSubject = MimeMessageUtility.getHeader("X-Original-Subject", null, message);
-            map.put("subject", null == originalSubject ? JSONObject.NULL : MimeMessageUtility.decodeMultiEncodedHeader(originalSubject));
-        }
-        {
-            Long origUid = (Long) message.getItem("X-REAL-UID");
-            map.put("id",null == origUid ? JSONObject.NULL : origUid.toString());
-        }
-        {
-            String origFolder = (String) message.getItem("X-MAILBOX");
-            map.put("id",null == origFolder ? JSONObject.NULL : origFolder);
-        }
-        {
-            InternetAddress[] fromHeaders = getAddressHeader("From", message);
-            map.put("from", fromHeaders == null || fromHeaders.length == 0 ? JSONObject.NULL : getAddressesAsArray(fromHeaders).asList());
-        }
-        {
-            InternetAddress[] toHeaders = getAddressHeader("To", message);
-            map.put("to", toHeaders == null || toHeaders.length == 0 ? JSONObject.NULL : getAddressesAsArray(toHeaders).asList());
-        }
-        return map;
     }
 
 }

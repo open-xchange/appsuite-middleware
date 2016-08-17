@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -63,6 +63,7 @@ import com.openexchange.java.Strings;
  */
 public class Subscription {
 
+    private String uuid;
     private String serviceID;
     private String token;
     private int contextID;
@@ -74,8 +75,9 @@ public class Subscription {
         super();
     }
 
-    public Subscription(int contextID, int userID, String serviceID, String token, String rootFolderID, long timestamp) {
+    public Subscription(String uuid, int contextID, int userID, String serviceID, String token, String rootFolderID, long timestamp) {
         super();
+        this.uuid = uuid;
         this.serviceID = serviceID;
         this.token = token;
         this.contextID = contextID;
@@ -193,6 +195,24 @@ public class Subscription {
     }
 
     /**
+     * Gets the uuid
+     *
+     * @return The uuid
+     */
+    public String getUuid() {
+        return uuid;
+    }
+
+    /**
+     * Sets the uuid
+     *
+     * @param uuid The uuid to set
+     */
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    /**
      * Gets a value indicating whether this subscription's push registration token matches the supplied token value, trying to match
      * either the token itself or the md5 checksum of the token.
      *
@@ -219,7 +239,7 @@ public class Subscription {
 
     @Override
     public String toString() {
-        return "Subscription [serviceID=" + serviceID + ", token=" + token + ", contextID=" + contextID + ", userID=" + userID + ", rootFolderID=" + rootFolderID + ", timestamp=" + timestamp + "]";
+        return "Subscription [uuid=" + uuid + ", serviceID=" + serviceID + ", token=" + token + ", contextID=" + contextID + ", userID=" + userID + ", rootFolderID=" + rootFolderID + ", timestamp=" + timestamp + "]";
     }
 
 }

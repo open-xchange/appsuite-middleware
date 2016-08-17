@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -75,19 +75,25 @@ public class RemoveAliasInUserAttributesTable extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         int ctxId = params.getContextId();
         Connection conn = Database.getNoTimeout(ctxId, true);
+        Statement stmt = null;
+        boolean rollback = false;
         try {
             conn.setAutoCommit(false);
-            Statement stmt = conn.createStatement();
+            rollback = true;
+            stmt = conn.createStatement();
             stmt.execute(DELETE_ALIAS_STMT);
             conn.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(conn);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            DBUtils.rollback(conn);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                DBUtils.rollback(conn);
+            }
             DBUtils.autocommit(conn);
+            DBUtils.closeSQLStuff(stmt);
             Database.backNoTimeout(ctxId, true, conn);
         }
     }

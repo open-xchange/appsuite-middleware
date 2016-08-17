@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -67,117 +67,117 @@ import com.openexchange.groupware.container.FolderObject;
 public enum MailListField {
 
     /**
-     * The mail ID
+     * The mail ID (600)
      */
     ID(600, DataFields.ID),
     /**
-     * The folder ID
+     * The folder ID (601)
      */
     FOLDER_ID(601, FolderChildFields.FOLDER_ID),
     /**
-     * Whether message contains attachments
+     * Whether message contains attachments (602)
      */
     ATTACHMENT(602, MailJSONField.HAS_ATTACHMENTS.getKey()),
     /**
-     * From
+     * From (603)
      */
     FROM(603, MailJSONField.FROM.getKey()),
     /**
-     * To
+     * To (604)
      */
     TO(604, MailJSONField.RECIPIENT_TO.getKey()),
     /**
-     * Cc
+     * Cc (605)
      */
     CC(605, MailJSONField.RECIPIENT_CC.getKey()),
     /**
-     * Bcc
+     * Bcc (606)
      */
     BCC(606, MailJSONField.RECIPIENT_BCC.getKey()),
     /**
-     * Subject
+     * Subject (607)
      */
     SUBJECT(607, MailJSONField.SUBJECT.getKey()),
     /**
-     * Size
+     * Size (608)
      */
     SIZE(608, MailJSONField.SIZE.getKey()),
     /**
-     * Sent date
+     * Sent date (609)
      */
     SENT_DATE(609, MailJSONField.SENT_DATE.getKey()),
     /**
-     * Received date
+     * Received date (610)
      */
     RECEIVED_DATE(610, MailJSONField.RECEIVED_DATE.getKey()),
     /**
-     * Flags
+     * Flags (611)
      */
     FLAGS(611, MailJSONField.FLAGS.getKey()),
     /**
-     * Thread level
+     * Thread level (612)
      */
     THREAD_LEVEL(612, MailJSONField.THREAD_LEVEL.getKey()),
     /**
-     * <code>Disposition-Notification-To</code>
+     * <code>Disposition-Notification-To</code> (613)
      */
     DISPOSITION_NOTIFICATION_TO(613, MailJSONField.DISPOSITION_NOTIFICATION_TO.getKey()),
     /**
-     * Priority
+     * Priority (614)
      */
     PRIORITY(614, MailJSONField.PRIORITY.getKey()),
     /**
-     * Message reference
+     * Message reference (615)
      */
     MSG_REF(615, MailJSONField.MSGREF.getKey()),
     /**
-     * Color Label
+     * Color Label (102)
      */
     COLOR_LABEL(CommonObject.COLOR_LABEL, CommonFields.COLORLABEL),
     /**
-     * Folder
+     * Folder (650)
      */
     FOLDER(650, MailJSONField.FOLDER.getKey()),
     /**
-     * Flag \SEEN
+     * Flag \SEEN (651)
      */
     FLAG_SEEN(651, MailJSONField.SEEN.getKey()),
     /**
-     * Total count
+     * Total count (309)
      */
     TOTAL(FolderObject.TOTAL, MailJSONField.TOTAL.getKey()),
     /**
-     * New count
+     * New count (310)
      */
     NEW(FolderObject.NEW, MailJSONField.NEW.getKey()),
     /**
-     * Unread count
+     * Unread count (311)
      */
     UNREAD(FolderObject.UNREAD, MailJSONField.UNREAD.getKey()),
     /**
-     * Deleted count
+     * Deleted count (312)
      */
     DELETED(FolderObject.DELETED, MailJSONField.DELETED.getKey()),
     /**
-     * Account name
+     * Account name (652)
      */
     ACCOUNT_NAME(652, MailJSONField.ACCOUNT_NAME.getKey()),
     /**
-     * Account identifier
+     * Account identifier (653)
      */
     ACCOUNT_ID(653, MailJSONField.ACCOUNT_ID.getKey()),
     /**
-     * The original mail ID.
+     * The original mail ID. (654)
      * @since v7.8.0
      */
     ORIGINAL_ID(654, MailJSONField.ORIGINAL_ID.getKey()),
     /**
-     * The original folder ID
+     * The original folder ID (655)
      * @since v7.8.0
      */
     ORIGINAL_FOLDER_ID(655, MailJSONField.ORIGINAL_FOLDER_ID.getKey()),
     /**
-     * The MIME type information
+     * The MIME type information (656)
      * @since v7.8.0
      */
     MIME_TYPE(656, MailJSONField.CONTENT_TYPE.getKey()),

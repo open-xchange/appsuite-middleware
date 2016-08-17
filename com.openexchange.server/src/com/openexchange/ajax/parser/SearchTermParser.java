@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -61,8 +61,11 @@ import com.openexchange.search.SearchExceptionMessages;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.AttachmentOperand;
+import com.openexchange.search.internal.operands.AttachmentOperand.AttachmentOperandType;
 import com.openexchange.search.internal.operands.ColumnOperand;
 import com.openexchange.search.internal.operands.ConstantOperand;
+import com.openexchange.search.internal.operands.HeaderOperand;
 
 /**
  * {@link SearchTermParser}
@@ -138,10 +141,17 @@ public class SearchTermParser {
     }
 
     protected Operand<?> parseOperand(final JSONObject operand) throws OXException {
-        if (!operand.hasAndNotNull(SearchTermFields.FIELD)) {
-            throw SearchExceptionMessages.PARSING_FAILED_MISSING_FIELD.create(SearchTermFields.FIELD);
+        if (!operand.hasAndNotNull(SearchTermFields.FIELD) && !operand.hasAndNotNull(SearchTermFields.ATTACHMENT) && !operand.hasAndNotNull(SearchTermFields.HEADER)) {
+            throw SearchExceptionMessages.PARSING_FAILED_INVALID_SEARCH_TERM.create();
         }
-        return new ColumnOperand(operand.optString(SearchTermFields.FIELD));
+
+        if (operand.hasAndNotNull(SearchTermFields.FIELD)) {
+            return new ColumnOperand(operand.optString(SearchTermFields.FIELD));
+        } else if (operand.hasAndNotNull(SearchTermFields.HEADER)) {
+            return new HeaderOperand(operand.optString(SearchTermFields.HEADER));
+        } else {
+            return new AttachmentOperand(AttachmentOperandType.valueOf(operand.optString(SearchTermFields.ATTACHMENT)));
+        }
     }
 
     private boolean isInteger(final String s) {

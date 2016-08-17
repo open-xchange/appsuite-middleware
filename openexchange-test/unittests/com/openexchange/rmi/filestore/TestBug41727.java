@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -202,7 +202,7 @@ public class TestBug41727 {
         // 7) Delete master user
         try {
             long start = System.currentTimeMillis();
-            oxuser.delete(context, masterUser, getContextAdminCredentials());
+            oxuser.delete(context, masterUser, null, getContextAdminCredentials());
             System.out.println("Deleted master user '" + masterUser.getId() + "' in " + (System.currentTimeMillis() - start) + " msec.");
         } catch (Exception e) {
             e.printStackTrace();
@@ -212,7 +212,7 @@ public class TestBug41727 {
         // 8) Delete the other user
         try {
             long start = System.currentTimeMillis();
-            oxuser.delete(context, someUser, getContextAdminCredentials());
+            oxuser.delete(context, someUser, null, getContextAdminCredentials());
             System.out.println("Deleted user '" + someUser.getId() + "' in " + (System.currentTimeMillis() - start) + " msec.");
         } catch (Exception e) {
             e.printStackTrace();

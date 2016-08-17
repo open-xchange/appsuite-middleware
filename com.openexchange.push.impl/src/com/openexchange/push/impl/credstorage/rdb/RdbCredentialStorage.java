@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -120,6 +120,10 @@ public class RdbCredentialStorage implements CredentialStorage {
 
     @Override
     public void storeCredentials(Credentials credentials) throws OXException {
+        if ((null == credentials) || (false == isValid(credentials))) {
+            throw OXException.general("Invalid credentials given: " + (null == credentials ? "null" : credentials.toString()));
+        }
+
         int contextId = credentials.getContextId();
         DatabaseService service = CredStorageServices.requireService(DatabaseService.class);
         Connection connection = service.getWritable(contextId);
@@ -133,6 +137,10 @@ public class RdbCredentialStorage implements CredentialStorage {
                 service.backWritableAfterReading(contextId, connection);
             }
         }
+    }
+
+    private boolean isValid(Credentials credentials) {
+        return (null != credentials.getLogin()) && (null != credentials.getPassword());
     }
 
     private boolean storeCredentials(Credentials obfuscatedCredentials, Connection connection) throws OXException {

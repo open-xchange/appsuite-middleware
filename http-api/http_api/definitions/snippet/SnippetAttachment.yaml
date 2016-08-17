@@ -1,0 +1,18 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The ID of the attachment.
+  filename:
+    type: string
+    description: The file name of the attachment.
+  mimetype:
+    type: string
+    description: The MIME type of the attachment.
+  contentid:
+    type: string
+    description: The content ID of the attachment.
+  size:
+    type: integer
+    format: int64
+    description: The size of the attachment in bytes.

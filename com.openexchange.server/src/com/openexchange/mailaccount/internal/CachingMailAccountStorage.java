@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -83,6 +83,8 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.TransportAccount;
+import com.openexchange.mailaccount.TransportAccountDescription;
 import com.openexchange.mailaccount.UpdateProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -337,6 +339,36 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public boolean existsMailAccount(int id, int userId, int contextId) throws OXException {
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService == null) {
+            return delegate.existsMailAccount(id, userId, contextId);
+        }
+
+        Cache cache = cacheService.getCache(REGION_NAME);
+        CacheKey key = newCacheKey(cacheService, id, userId, contextId);
+        Object object = cache.get(key);
+        if (object instanceof MailAccount) {
+            return true;
+        }
+
+        // Check in listing of account IDs
+        key = accountsCacheKey(cacheService, userId, contextId);
+        object = cache.get(key);
+        if (object instanceof int[]) {
+            // Rely on listing of account IDs...
+            int[] ids = (int[]) object;
+            boolean exists = false;
+            for (int i = ids.length; !exists && i-- > 0;) {
+                exists = (ids[i] == id);
+            }
+            return exists;
+        }
+
+        return delegate.existsMailAccount(id, userId, contextId);
+    }
+
+    @Override
     public MailAccount getMailAccount(int id, int userId, int contextId) throws OXException {
         CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
@@ -385,6 +417,16 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     @Override
     public int getByPrimaryAddress(String primaryAddress, int userId, int contextId) throws OXException {
         return delegate.getByPrimaryAddress(primaryAddress, userId, contextId);
+    }
+
+    @Override
+    public int getTransportByPrimaryAddress(String primaryAddress, int userId, int contextId) throws OXException {
+        return delegate.getTransportByPrimaryAddress(primaryAddress, userId, contextId);
+    }
+
+    @Override
+    public TransportAccount getTransportByReference(String reference, int userId, int contextId) throws OXException {
+        return delegate.getTransportByReference(reference, userId, contextId);
     }
 
     @Override
@@ -658,15 +700,6 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
-    public MailAccount getTransportAccountForID(int id, int userId, int contextId) throws OXException {
-        MailAccount account = getMailAccount(id, userId, contextId);
-        if (null == account.getTransportServer()) {
-            return getDefaultMailAccount(userId, contextId);
-        }
-        return account;
-    }
-
-    @Override
     public void migratePasswords(String oldSecret, String newSecret, Session session) throws OXException {
         delegate.migratePasswords(oldSecret, newSecret, session);
         invalidateMailAccounts(session.getUserId(), session.getContextId());
@@ -685,6 +718,131 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     @Override
     public void removeUnrecoverableItems(String secret, Session session) throws OXException {
         delegate.removeUnrecoverableItems(secret, session);
+    }
+
+    @Override
+    public int insertTransportAccount(TransportAccountDescription transportAccount, int userId, Context ctx, Session session) throws OXException {
+        int id = delegate.insertTransportAccount(transportAccount, userId, ctx, session);
+        invalidateMailAccount(id, userId, ctx.getContextId());
+        return id;
+    }
+
+    @Override
+    public void deleteTransportAccount(int id, int userId, int contextId) throws OXException {
+        dropSessionParameter(userId, contextId);
+        delegate.deleteTransportAccount(id, userId, contextId);
+        invalidateMailAccount(id, userId, contextId);
+
+    }
+
+    @Override
+    public TransportAccount getTransportAccount(int accountId, int userId, int contextId, Connection con) throws OXException {
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService == null) {
+            return delegate.getTransportAccount(accountId, userId, contextId, con);
+        }
+
+        Cache cache = cacheService.getCache(REGION_NAME);
+        CacheKey key = newCacheKey(cacheService, accountId, userId, contextId);
+        Object object = cache.get(key);
+        if (object instanceof TransportAccount) {
+            return (TransportAccount) object;
+        }
+
+        LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("mailaccount-").append(contextId).append('-').append(userId).append('-').append(accountId).toString());
+        lock.lock();
+        try {
+            object = cache.get(key);
+            if (object instanceof TransportAccount) {
+                return (TransportAccount) object;
+            }
+
+            RdbMailAccountStorage d = delegate;
+            try {
+                TransportAccount transportAccount = d.getTransportAccount(accountId, userId, contextId, con);
+                cache.put(key, transportAccount, false);
+                return transportAccount;
+            } catch (OXException e) {
+                if (!MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
+                    throw e;
+                }
+                Connection wcon = Database.get(contextId, true);
+                try {
+                    TransportAccount transportAccount = d.getTransportAccount(accountId, userId, contextId, wcon);
+                    cache.put(key, transportAccount, false);
+                    return transportAccount;
+                } finally {
+                    Database.backAfterReading(contextId, wcon);
+                }
+            }
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public void updateTransportAccount(TransportAccountDescription transportAccount, int userId, int contextId, Session session) throws OXException {
+        if (null != session) {
+            session.setParameter("com.openexchange.mailaccount.unifiedMailEnabled", null);
+        }
+        dropSessionParameter(userId, contextId);
+
+        TransportAccount changedAccount = delegate.updateAndReturnTransportAccount(transportAccount, userId, contextId, session);
+        invalidateMailAccount(transportAccount.getId(), userId, contextId);
+
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService != null) {
+            Cache cache = cacheService.getCache(REGION_NAME);
+            CacheKey key = newCacheKey(cacheService, transportAccount.getId(), userId, contextId);
+            cache.put(key, changedAccount, false);
+        }
+    }
+
+    @Override
+    public TransportAccount getTransportAccount(int accountId, int userId, int contextId) throws OXException {
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService == null) {
+            return delegate.getTransportAccount(accountId, userId, contextId);
+        }
+
+        Cache cache = cacheService.getCache(REGION_NAME);
+        CacheKey key = newCacheKey(cacheService, accountId, userId, contextId);
+        Object object = cache.get(key);
+        if (object instanceof TransportAccount) {
+            return (TransportAccount) object;
+        }
+
+        LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+        Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("mailaccount-").append(contextId).append('-').append(userId).append('-').append(accountId).toString());
+        lock.lock();
+        try {
+            object = cache.get(key);
+            if (object instanceof TransportAccount) {
+                return (TransportAccount) object;
+            }
+
+            RdbMailAccountStorage d = delegate;
+            try {
+                TransportAccount transportAccount = d.getTransportAccount(accountId, userId, contextId);
+                cache.put(key, transportAccount, false);
+                return transportAccount;
+            } catch (OXException e) {
+                if (!MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
+                    throw e;
+                }
+                Connection wcon = Database.get(contextId, true);
+                try {
+                    TransportAccount transportAccount = d.getTransportAccount(accountId, userId, contextId, wcon);
+                    cache.put(key, transportAccount, false);
+                    return transportAccount;
+                } finally {
+                    Database.backAfterReading(contextId, wcon);
+                }
+            }
+        } finally {
+            lock.unlock();
+        }
     }
 
 }

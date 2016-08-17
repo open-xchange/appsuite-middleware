@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -90,6 +90,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link ContactHaloImpl} - The <code>ContactHalo</code> implementation.
@@ -197,6 +198,7 @@ public class ContactHaloImpl implements ContactHalo {
 
     private HaloContactQuery createQuery(final Contact contact, final ServerSession session, final boolean withBytes) throws OXException {
         final UserService userService = services.getService(UserService.class);
+        final UserPermissionService userPermissionService = services.getService(UserPermissionService.class);
         final ContactService contactService = services.getService(ContactService.class);
         final HaloContactQuery contactQuery = new HaloContactQuery();
         final ContactField[] fields = withBytes ? null : new ContactField[] { ContactField.OBJECT_ID, ContactField.LAST_MODIFIED, ContactField.FOLDER_ID };
@@ -206,46 +208,49 @@ public class ContactHaloImpl implements ContactHalo {
         // Look-up associated user...
         User user = null;
 
-        // Prefer look-up by user identifier
-        {
-            final int userId = resultContact.getInternalUserId();
-            if (userId > 0) {
-                user = userService.getUser(userId, session.getContext());
+        // ... if global address book is accessible
+        if (userPermissionService.getUserPermissionBits(session.getUserId(), session.getContext()).isGlobalAddressBookEnabled()) {
+            // Prefer look-up by user identifier
+            {
+                final int userId = resultContact.getInternalUserId();
+                if (userId > 0) {
+                    user = userService.getUser(userId, session.getContext());
+                }
             }
-        }
 
-        // Check by object/folder identifier
-        if (null == user) {
-            if (resultContact.getObjectID() > 0 && resultContact.getParentFolderID() > 0) {
-                Contact loaded = contactService.getContact(session, Integer.toString(resultContact.getParentFolderID()), Integer.toString(resultContact.getObjectID()), fields);
-                contactQuery.setContact(loaded);
-                contactQuery.setMergedContacts(Arrays.asList(loaded));
-                return contactQuery;
+            // Check by object/folder identifier
+            if (null == user) {
+                if (resultContact.getObjectID() > 0 && resultContact.getParentFolderID() > 0) {
+                    Contact loaded = contactService.getContact(session, Integer.toString(resultContact.getParentFolderID()), Integer.toString(resultContact.getObjectID()), fields);
+                    contactQuery.setContact(loaded);
+                    contactQuery.setMergedContacts(Arrays.asList(loaded));
+                    return contactQuery;
+                }
             }
-        }
 
-        // Try to find a user with a given eMail address
-        if (user == null && resultContact.containsEmail1()) {
-            try {
-                user = userService.searchUser(resultContact.getEmail1(), session.getContext(), false);
-            } catch (final OXException x) {
-                // Don't care. This is all best effort anyway.
+            // Try to find a user with a given eMail address
+            if (user == null && resultContact.containsEmail1()) {
+                try {
+                    user = userService.searchUser(resultContact.getEmail1(), session.getContext(), false);
+                } catch (final OXException x) {
+                    // Don't care. This is all best effort anyway.
+                }
             }
-        }
 
-        if (user == null && resultContact.containsEmail2()) {
-            try {
-                user = userService.searchUser(resultContact.getEmail2(), session.getContext(), false);
-            } catch (final OXException x) {
-                // Don't care. This is all best effort anyway.
+            if (user == null && resultContact.containsEmail2()) {
+                try {
+                    user = userService.searchUser(resultContact.getEmail2(), session.getContext(), false);
+                } catch (final OXException x) {
+                    // Don't care. This is all best effort anyway.
+                }
             }
-        }
 
-        if (user == null && resultContact.containsEmail3()) {
-            try {
-                user = userService.searchUser(resultContact.getEmail3(), session.getContext(), false);
-            } catch (final OXException x) {
-                // Don't care. This is all best effort anyway.
+            if (user == null && resultContact.containsEmail3()) {
+                try {
+                    user = userService.searchUser(resultContact.getEmail3(), session.getContext(), false);
+                } catch (final OXException x) {
+                    // Don't care. This is all best effort anyway.
+                }
             }
         }
 

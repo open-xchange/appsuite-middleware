@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -51,14 +51,14 @@ package com.openexchange.secret.osgi;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.secret.SecretEncryptionFactoryService;
@@ -83,8 +83,9 @@ public class SecretActivator extends HousekeepingActivator implements Reloadable
 
     private volatile WhiteboardSecretService whiteboardSecretService;
 
-    private final static String[] PROPERTIES = new String[] {"all properties in file"};
-
+    /**
+     * Initializes a new {@link SecretActivator}.
+     */
     public SecretActivator() {
         super();
     }
@@ -216,10 +217,8 @@ public class SecretActivator extends HousekeepingActivator implements Reloadable
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put("secret.properties", PROPERTIES);
-        return map;
+    public Interests getInterests() {
+        return Reloadables.interestsForFiles("secret.properties");
     }
 
 }

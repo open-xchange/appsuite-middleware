@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -212,5 +212,13 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     // The flag name %1$s is not valid. Flags may not begin with a leading '\\'.
     public static final String INVALID_FLAG_WITH_LEADING_BACKSLASH_MSG = "The flag name %1$s is not valid. Flags may not begin with a leading '\\'.";
+
+    public static final String USED_SHARING_FEATURE_MSG = "The attachments to this E-Mail exceeded the size limit for attachments. Instead of sending the attachments with the E-Mail, the attachments are shared and the links are added to your E-Mail. Whoever receives the E-Mail can then access the attachments.";
+
+    // User wants to compose a share message but does not hold sufficient permissions/capabilities to do so
+    public static final String SHARING_NOT_POSSIBLE_MSG = "You are not allowed to compose a message containing share links";
+
+    // User wants to compose a share message but does not specify an expiration date which is required
+    public static final String EXPIRATION_DATE_MISSING_MSG = "Please specify an expiration date in order to compose a message containing share links";
 
 }

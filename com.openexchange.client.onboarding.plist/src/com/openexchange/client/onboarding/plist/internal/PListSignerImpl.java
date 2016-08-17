@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,9 +53,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.util.Collections;
-import java.util.List;
+import java.util.Arrays;
 import org.bouncycastle.asn1.ASN1OutputStream;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
@@ -137,9 +137,9 @@ public final class PListSignerImpl implements PListSigner {
         boolean error = true;
         try {
             PrivateKey privKey = getPrivateKey(storeName, password, alias);
-            X509Certificate cert = getCertificate(storeName, password, alias);
-            List<X509Certificate> certList = Collections.singletonList(cert);
-            Store<?> certs = new JcaCertStore(certList);
+            Certificate[] certChain = getCertificateChain(storeName, password, alias);
+            X509Certificate cert = (X509Certificate) certChain[0];
+            Store<?> certs = new JcaCertStore(Arrays.asList(certChain));
 
             CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
             JcaSimpleSignerInfoGeneratorBuilder builder = new JcaSimpleSignerInfoGeneratorBuilder();
@@ -174,6 +174,8 @@ public final class PListSignerImpl implements PListSigner {
             aOut.flush();
             error = false; // Avoid preliminary closing
             return sink;
+        } catch (OXException e) {
+            throw e;
         } catch (Exception e) {
             throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -189,16 +191,26 @@ public final class PListSignerImpl implements PListSigner {
         return null == tempFile ? new CMSProcessableByteArray(tfh.toByteArray()) : new CMSProcessableFile(tempFile);
     }
 
-    private X509Certificate getCertificate(String storeName, String password, String alias) throws Exception {
+    private Certificate[] getCertificateChain(String storeName, String password, String alias) throws Exception {
         KeyStore store = KeyStore.getInstance("PKCS12");
-        store.load(new FileInputStream(storeName), password.toCharArray());
-        return (X509Certificate) store.getCertificate(alias);
+        FileInputStream fis = new FileInputStream(storeName);
+        try {
+            store.load(fis, password.toCharArray());
+            return store.getCertificateChain(alias);
+        } finally {
+            Streams.close(fis);
+        }
     }
 
     private PrivateKey getPrivateKey(String storeName, String password, String alias) throws Exception {
         KeyStore store = KeyStore.getInstance("PKCS12");
-        store.load(new FileInputStream(storeName), password.toCharArray());
-        return (PrivateKey) store.getKey(alias, password.toCharArray());
+        FileInputStream fis = new FileInputStream(storeName);
+        try {
+            store.load(fis, password.toCharArray());
+            return (PrivateKey) store.getKey(alias, password.toCharArray());
+        } finally {
+            Streams.close(fis);
+        }
     }
 
 }

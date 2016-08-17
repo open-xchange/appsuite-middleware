@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -67,7 +67,7 @@ import com.openexchange.tools.update.Tools;
 
 /**
  * {@link PrgLinksAddUuidUpdateTask}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class PrgLinksAddUuidUpdateTask extends UpdateTaskAdapter {
@@ -81,6 +81,7 @@ public class PrgLinksAddUuidUpdateTask extends UpdateTaskAdapter {
 
     /*
      * (non-Javadoc)
+     *
      * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
      */
     @Override
@@ -109,6 +110,7 @@ public class PrgLinksAddUuidUpdateTask extends UpdateTaskAdapter {
 
     /*
      * (non-Javadoc)
+     *
      * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
      */
     @Override
@@ -123,9 +125,9 @@ public class PrgLinksAddUuidUpdateTask extends UpdateTaskAdapter {
         try {
             stmt = con.prepareStatement("SELECT firstid, firstmodule, firstfolder, secondid, secondmodule, secondfolder, cid, last_modified, created_by FROM prg_links WHERE uuid IS NULL FOR UPDATE");
             rs = stmt.executeQuery();
-            PreparedStatement stmt2 = null;
-            try {
-                while (rs.next()) {
+            while (rs.next()) {
+                PreparedStatement stmt2 = null;
+                try {
                     StringBuilder sb = new StringBuilder();
                     sb.append("UPDATE prg_links SET uuid = ? WHERE firstid ");
                     oldPos = 1;
@@ -215,9 +217,9 @@ public class PrgLinksAddUuidUpdateTask extends UpdateTaskAdapter {
                         stmt2.setNull(newPos++, Types.INTEGER);
                     }
                     stmt2.execute();
+                } finally {
+                    DBUtils.closeSQLStuff(stmt2);
                 }
-            } finally {
-                DBUtils.closeSQLStuff(stmt2);
             }
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);

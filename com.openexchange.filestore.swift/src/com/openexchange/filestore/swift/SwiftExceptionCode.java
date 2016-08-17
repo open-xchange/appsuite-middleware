@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -95,6 +95,14 @@ public enum SwiftExceptionCode implements DisplayableOXExceptionCode {
      * Unable to authenticate user with provided credentials.
      */
     AUTH_FAILED("Unable to authenticate user with provided credentials", Category.CATEGORY_CONFIGURATION, 8),
+    /**
+     * Authentication token not accepted by by Swift end-point: %1$s
+     */
+    UNAUTHORIZED("Authentication token not accepted by by Swift end-point: %1$s", Category.CATEGORY_PERMISSION_DENIED, 9),
+    /**
+     * Authentication token not accepted by by Swift end-point.
+     */
+    UNAUTHORIZED_SIMPLE("Authentication token not accepted by by Swift end-point.", Category.CATEGORY_PERMISSION_DENIED, 9),
     ;
 
     private static final String PREFIX = "SWIFT";

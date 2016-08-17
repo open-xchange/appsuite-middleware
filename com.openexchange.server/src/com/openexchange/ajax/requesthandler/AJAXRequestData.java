@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -69,6 +69,9 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.fields.RequestConstants;
@@ -97,6 +100,8 @@ import com.openexchange.tools.strings.StringParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJAXRequestData {
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     /**
      * The upload {@link InputStream stream} provider.
@@ -200,7 +205,7 @@ public class AJAXRequestData {
     private @Nullable Long lastModified;
 
     /** The requests host data **/
-    private @Nullable HostData hostData;
+    private @Nullable volatile HostData hostData;
 
     /** The maximum allowed size of a single uploaded file or <code>-1</code> */
     private long maxUploadFileSize = -1L;
@@ -325,7 +330,6 @@ public class AJAXRequestData {
     public @Nullable String getUserAgent() {
         return userAgent;
     }
-
 
     /**
      * Gets the port number to which the request was sent
@@ -609,10 +613,10 @@ public class AJAXRequestData {
      * <pre>
      * long ifModifiedSince = request.getDateHeader(&quot;If-Modified-Since&quot;);
      * if (ifNoneMatch == null &amp;&amp; ifModifiedSince != -1 &amp;&amp; ifModifiedSince + 1000 &gt; lastModified) {
-     *     response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
-     *     response.setHeader(&quot;ETag&quot;, eTag); // Required in 304.
-     *     response.setDateHeader(&quot;Expires&quot;, expires); // Postpone cache with 1 week.
-     *     return;
+     * response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
+     * response.setHeader(&quot;ETag&quot;, eTag); // Required in 304.
+     * response.setDateHeader(&quot;Expires&quot;, expires); // Postpone cache with 1 week.
+     * return;
      * }
      * </pre>
      *
@@ -934,7 +938,7 @@ public class AJAXRequestData {
      * @return the coerced value
      * @throws OXException if coercion fails
      */
-    public @Nullable<T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo, final boolean optional) throws OXException {
+    public @Nullable <T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo, final boolean optional) throws OXException {
         final String value = getParameter(name);
         if (null == value) {
             if (!optional) {
@@ -1026,6 +1030,31 @@ public class AJAXRequestData {
      */
     public @Nullable Object getData() {
         return data;
+    }
+    
+    public @Nullable <T> T getData(Class<T> klazz) throws OXException {
+        final Object local = this.data;
+        if ((local == null) || (klazz == null)) {
+            return null;
+        }
+
+        if (klazz.isInstance(local)) {
+            return klazz.cast(local);
+        }
+
+        if (klazz == String.class) {
+            return (T) local.toString();
+        }
+
+        try {
+            return MAPPER.readValue(getData(String.class), klazz);
+        } catch (JsonParseException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        } catch (JsonMappingException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        } catch (IOException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage(), e);
+        }
     }
 
     /**
@@ -1353,7 +1382,7 @@ public class AJAXRequestData {
      * Constructs a URL to this server, injecting the host name and optionally the JVM route.
      *
      * <pre>
-     *  "http(s)://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt;
+     * "http(s)://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt;
      * </pre>
      *
      * @param path The path on the server. If <code>null</code> no path is inserted
@@ -1368,7 +1397,7 @@ public class AJAXRequestData {
      * Constructs a URL to this server, injecting the host name and optionally the JVM route.
      *
      * <pre>
-     *  &lt;protocol&gt; + "://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt; + "?" + &lt;query-string&gt;
+     * &lt;protocol&gt; + "://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt; + "?" + &lt;query-string&gt;
      * </pre>
      *
      * @param protocol The protocol to use (HTTP or HTTPS). If <code>null</code>, defaults to the protocol used for this request.
@@ -1418,7 +1447,7 @@ public class AJAXRequestData {
      * Constructs a URL to this server, injecting the host name and optionally the JVM route.
      *
      * <pre>
-     *  &lt;protocol&gt; + "://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt; + "?" + &lt;query-string&gt;
+     * &lt;protocol&gt; + "://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt; + "?" + &lt;query-string&gt;
      * </pre>
      *
      * @param protocol The protocol to use (HTTP or HTTPS). If <code>null</code>, defaults to the protocol used for this request.
@@ -1493,12 +1522,15 @@ public class AJAXRequestData {
      * @return The host data
      */
     public @Nullable HostData getHostData() {
+        HostData hostData = this.hostData;
         if (hostData == null) {
             synchronized (this) {
+                hostData = this.hostData;
                 if (hostData == null && hostname != null && route != null && prefix != null) {
                     String httpSesssionID = this.route;
                     String route = Tools.extractRoute(httpSesssionID);
                     hostData = new HostDataImpl(secure, hostname, serverPort, httpSesssionID, route, prefix);
+                    this.hostData = hostData;
                 }
             }
         }
@@ -1570,6 +1602,22 @@ public class AJAXRequestData {
      */
     public String getModule() {
         return module;
+    }
+
+    /**
+     * Gets the normalized module, e.g. <code>"files/myFile.txt"</code> will return <code>"files"</code>.
+     * <p>
+     * With '/' concatenated module identifiers will still be returned as they are, e. g. <code>"oauth/account"</code> will stay as it is.
+     * 
+     * @return The normalized module
+     */
+    public String getNormalizedModule() {
+        String lModule = module;
+        int pos = lModule.indexOf('/');
+        if ((pos > 0) && (pathInfo != null) && (lModule.endsWith(pathInfo))) {
+            lModule = lModule.substring(0, pos);
+        }
+        return lModule;
     }
 
     /**

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -110,8 +110,11 @@ public class SettingsAction extends AbstractDriveAction {
                 jsonObject.put("serverVersion", settings.getServerVersion());
                 jsonObject.put("supportedApiVersion", settings.getSupportedApiVersion());
                 jsonObject.put("minApiVersion", settings.getMinApiVersion());
+                jsonObject.putOpt("minUploadChunk", settings.getMinUploadChunk());
                 jsonObject.put("localizedFolderNames", settings.getLocalizedFolders());
                 jsonObject.put("capabilities", settings.getCapabilities());
+                jsonObject.put("minSearchChars", settings.getMinSearchChars());
+                jsonObject.put("hasTrashFolder", settings.hasTrashFolder());
             } catch (JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }

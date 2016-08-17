@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,7 +50,12 @@
 package com.openexchange.push.imapidle;
 
 import static com.openexchange.push.imapidle.ImapIdlePushManagerService.isTransient;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,6 +66,7 @@ import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
+import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -69,6 +75,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPProvider;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageDelegator;
@@ -85,6 +92,11 @@ import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
+import com.openexchange.pns.DefaultPushNotification;
+import com.openexchange.pns.KnownTopic;
+import com.openexchange.pns.PushNotification;
+import com.openexchange.pns.PushNotificationField;
+import com.openexchange.pns.PushNotificationService;
 import com.openexchange.push.Container;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.push.PushExceptionCodes;
@@ -267,7 +279,90 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
 
     @Override
     public void notifyNewMail() throws OXException {
-        PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(accountId, fullName), session, this.additionalProps, true, true);
+        Map<String, Object> props = this.additionalProps;
+
+        PushNotificationService pushNotificationService = services.getOptionalService(PushNotificationService.class);
+        if (null != pushNotificationService) {
+            Collection<PushNotification> notifications = createNotification(props);
+            if (null != notifications) {
+                for (PushNotification notification : notifications) {
+                    pushNotificationService.handle(notification);
+                }
+            }
+        }
+
+        if (null == props) {
+            props = new LinkedHashMap<>(2);
+        }
+        props.put(PushEventConstants.PROPERTY_NO_FORWARD, Boolean.TRUE); // Do not redistribute through com.openexchange.pns.impl.event.PushEventHandler!
+        PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(accountId, fullName), session, props, true, true);
+    }
+
+    private Collection<PushNotification> createNotification(Map<String, Object> props) {
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+
+        if (null == props) {
+            Map<String, Object> messageData = new LinkedHashMap<>(2);
+            messageData.put(PushNotificationField.FOLDER.getId(), MailFolderUtility.prepareFullname(accountId, fullName));
+            return Collections.<PushNotification> singleton(DefaultPushNotification.builder()
+                .contextId(contextId)
+                .userId(userId)
+                .topic(KnownTopic.MAIL_NEW.getName())
+                .messageData(messageData)
+                .build());
+        }
+
+        Container<MailMessage> container = (Container<MailMessage>) props.get(PushEventConstants.PROPERTY_CONTAINER);
+        if (null == container) {
+            Map<String, Object> messageData = new LinkedHashMap<>(2);
+            messageData.put(PushNotificationField.FOLDER.getId(), MailFolderUtility.prepareFullname(accountId, fullName));
+            String ids = (String) props.get(PushEventConstants.PROPERTY_IDS);
+            if (false == Strings.isEmpty(ids)) {
+                messageData.put(PushNotificationField.ID.getId(), Strings.splitByComma(ids));
+            }
+            return Collections.<PushNotification> singleton(DefaultPushNotification.builder()
+                .contextId(contextId)
+                .userId(userId)
+                .topic(KnownTopic.MAIL_NEW.getName())
+                .messageData(messageData)
+                .build());
+
+        }
+
+        // Iterate container content
+        List<PushNotification> notifications = new ArrayList<>(container.size());
+        for (MailMessage mailMessage : container) {
+            Map<String, Object> messageData = new LinkedHashMap<>(2);
+            messageData.put(PushNotificationField.FOLDER.getId(), MailFolderUtility.prepareFullname(accountId, fullName));
+            messageData.put(PushNotificationField.ID.getId(), mailMessage.getMailId());
+            {
+                InternetAddress[] from = mailMessage.getFrom();
+                if (null != from && from.length > 0) {
+                    messageData.put(PushNotificationField.MAIL_SENDER.getId(), from[0].getAddress());
+                }
+            }
+            {
+                String subject = mailMessage.getSubject();
+                if (null != subject) {
+                    messageData.put(PushNotificationField.MAIL_SUBJECT.getId(), subject);
+                }
+            }
+            {
+                int unread = mailMessage.getUnreadMessages();
+                if (unread >= 0) {
+                    messageData.put(PushNotificationField.MAIL_UNREAD.getId(), Integer.valueOf(unread));
+                }
+            }
+
+            notifications.add(DefaultPushNotification.builder()
+                .contextId(contextId)
+                .userId(userId)
+                .topic(KnownTopic.MAIL_NEW.getName())
+                .messageData(messageData)
+                .build());
+        }
+        return notifications;
     }
 
     @Override

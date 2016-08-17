@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,16 +49,11 @@
 
 package com.openexchange.config.internal;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,27 +63,28 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import org.ho.yaml.Yaml;
-import org.ho.yaml.exception.YamlException;
+import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ConfigurationServices;
 import com.openexchange.config.Filter;
 import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
 import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.config.WildcardFilter;
 import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
@@ -165,8 +161,29 @@ public final class ConfigurationImpl implements ConfigurationService {
      * -------------------------------------------------- Member stuff ---------------------------------------------------------
      */
 
-    /** Holds tracked <code>Reloadable</code> services */
-    private final ConcurrentMap<String, Reloadable> reloadableServices;
+    /** The <code>ForcedReloadable</code> services. */
+    private final List<ForcedReloadable> forcedReloadables;
+
+    /** The <code>Reloadable</code> services in this list match all properties. */
+    private final List<Reloadable> matchingAllProperties;
+
+    /**
+     * This is a map for exact property name matches. The key is the topic,
+     * the value is a list of <code>Reloadable</code> services.
+     */
+    private final Map<String, List<Reloadable>> matchingProperty;
+
+    /**
+     * This is a map for wild-card property names. The key is the prefix of the property name,
+     * the value is a list of <code>Reloadable</code> services
+     */
+    private final Map<String, List<Reloadable>> matchingPrefixProperty;
+
+    /**
+     * This is a map for file names. The key is the file name,
+     * the value is a list of <code>Reloadable</code> services
+     */
+    private final Map<String, List<Reloadable>> matchingFile;
 
     private final Map<String, String> texts;
 
@@ -181,8 +198,8 @@ public final class ConfigurationImpl implements ConfigurationService {
     /** Maps property names to the file path of the .properties file containing the property. */
     private final Map<String, String> propertiesFiles;
 
-    /** Maps objects to yaml filename, with a path */
-    private final Map<File, byte[]> yamlFiles;
+    /** Maps objects to YAML file name, with a path */
+    private final Map<File, YamlRef> yamlFiles;
 
     /** Maps filenames to whole file paths for yaml lookup */
     private final Map<String, File> yamlPaths;
@@ -209,12 +226,19 @@ public final class ConfigurationImpl implements ConfigurationService {
     public ConfigurationImpl(String[] directories, Collection<ReinitializableConfigProviderService> reinitQueue) {
         super();
         this.reinitQueue = null == reinitQueue ? Collections.<ReinitializableConfigProviderService> emptyList() : reinitQueue;
-        reloadableServices = new ConcurrentHashMap<String, Reloadable>(128, 0.9f, 1);
+
+        // Start with empty collections
+        this.forcedReloadables = new CopyOnWriteArrayList<ForcedReloadable>();
+        this.matchingAllProperties = new CopyOnWriteArrayList<Reloadable>();
+        this.matchingProperty = new ConcurrentHashMap<String, List<Reloadable>>(128, 0.9f, 1);
+        this.matchingPrefixProperty = new ConcurrentHashMap<String, List<Reloadable>>(128, 0.9f, 1);
+        this.matchingFile = new ConcurrentHashMap<String, List<Reloadable>>(128, 0.9f, 1);
+
         propertiesByFile = new HashMap<File, Properties>(256);
         texts = new ConcurrentHashMap<String, String>(1024, 0.9f, 1);
         properties = new HashMap<String, String>(2048);
         propertiesFiles = new HashMap<String, String>(2048);
-        yamlFiles = new HashMap<File, byte[]>(64);
+        yamlFiles = new HashMap<File, YamlRef>(64);
         yamlPaths = new HashMap<String, File>(64);
         dirs = new File[directories.length];
         xmlFiles = new HashMap<File, byte[]>(2048);
@@ -248,13 +272,13 @@ public final class ConfigurationImpl implements ConfigurationService {
         };
 
         final Map<String, File> yamlPaths = this.yamlPaths;
-        final Map<File, byte[]> yamlFiles = this.yamlFiles;
+        final Map<File, YamlRef> yamlFiles = this.yamlFiles;
         FileProcessor processor2 = new FileProcessor() {
 
             @Override
             public void processFile(final File file) {
                 yamlPaths.put(file.getName(), file);
-                yamlFiles.put(file, readFile(file).getBytes());
+                yamlFiles.put(file, new YamlRef(file));
             }
 
         };
@@ -273,7 +297,7 @@ public final class ConfigurationImpl implements ConfigurationService {
 
             @Override
             public void processFile(File file) {
-                byte[] hash = getHash(file);
+                byte[] hash = ConfigurationServices.getHash(file);
                 xmlFiles.put(file, hash);
             }
         };
@@ -323,7 +347,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             if (!propFile.exists() || !propFile.canRead()) {
                 return;
             }
-            Properties tmp = loadProperties(propFile);
+            Properties tmp = ConfigurationServices.loadPropertiesFrom(propFile);
             propertiesByFile.put(propFile, tmp);
 
             String propFilePath = propFile.getPath();
@@ -346,17 +370,6 @@ public final class ConfigurationImpl implements ConfigurationService {
             LOG.warn("A malformed Unicode escape sequence in .properties file \"{}\".", propFile, encodingError);
         } catch (RuntimeException e) {
             LOG.warn("An error occurred while processing .properties file \"{}\".", propFile, e);
-        }
-    }
-
-    private static Properties loadProperties(File propFile) throws IOException {
-        InputStream fis = new BufferedInputStream(new FileInputStream(propFile), 65536);
-        try {
-            Properties tmp = new Properties();
-            tmp.load(fis);
-            return tmp;
-        } finally {
-            Streams.close(fis);
         }
     }
 
@@ -718,18 +731,18 @@ public final class ConfigurationImpl implements ConfigurationService {
     String readFile(final File file) {
         Reader reader = null;
         try {
-            reader = new InputStreamReader(new FileInputStream(file));
+            reader = new FileReader(file);
 
-            final StringBuilder builder = new StringBuilder((int) file.length());
-            final int buflen = 8192;
-            final char[] cbuf = new char[buflen];
+            StringBuilder builder = new StringBuilder((int) file.length());
+            int buflen = 8192;
+            char[] cbuf = new char[buflen];
 
             for (int read; (read = reader.read(cbuf, 0, buflen)) > 0;) {
                 builder.append(cbuf, 0, read);
             }
             return builder.toString();
         } catch (final IOException x) {
-            LOG.error("Can't read file: {}", file);
+            LOG.error("Can't read file: {}", file, x);
             return null;
         } finally {
             Streams.close(reader);
@@ -745,14 +758,9 @@ public final class ConfigurationImpl implements ConfigurationService {
         boolean isPath = filename.indexOf(File.separatorChar) >= 0;
         if (isPath) {
             FileNameMatcher matcher = PATH_MATCHER;
-            for (Map.Entry<File, byte[]> entry : yamlFiles.entrySet()) {
+            for (Map.Entry<File, YamlRef> entry : yamlFiles.entrySet()) {
                 if (matcher.matches(filename, entry.getKey())) {
-                    try {
-                        return Yaml.load(Charsets.toString(entry.getValue(), Charsets.UTF_8));
-                    } catch (YamlException e) {
-                        // Failed to load .yml file
-                        throw new IllegalStateException("Failed to load YAML file '" + entry.getKey() + "'. Reason:" + e.getMessage(), e);
-                    }
+                    return entry.getValue().getValue();
                 }
             }
 
@@ -772,31 +780,21 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
         }
 
-        try {
-            return Yaml.load(Charsets.toString(yamlFiles.get(path), Charsets.UTF_8));
-        } catch (YamlException e) {
-            // Failed to load .yml file
-            throw new IllegalStateException("Failed to load YAML file '" + path + "'. Reason:" + e.getMessage(), e);
-        }
+        return yamlFiles.get(path).getValue();
     }
 
     @Override
     public Map<String, Object> getYamlInFolder(final String folderName) {
         final Map<String, Object> retval = new HashMap<String, Object>();
-        final Iterator<Entry<File, byte[]>> iter = yamlFiles.entrySet().iterator();
+        final Iterator<Entry<File, YamlRef>> iter = yamlFiles.entrySet().iterator();
         String fldName = folderName;
         for (final File dir : dirs) {
             fldName = dir.getAbsolutePath() + File.separatorChar + fldName + File.separatorChar;
             while (iter.hasNext()) {
-                final Entry<File, byte[]> entry = iter.next();
+                final Entry<File, YamlRef> entry = iter.next();
                 String pathName = entry.getKey().getPath();
                 if (pathName.startsWith(fldName)) {
-                    try {
-                        retval.put(pathName, Yaml.load(Charsets.toString(entry.getValue(), Charsets.UTF_8)));
-                    } catch (YamlException e) {
-                        // Failed to load .yml file
-                        throw new IllegalStateException("Failed to load YAML file '" + pathName + "'. Reason:" + e.getMessage(), e);
-                    }
+                    retval.put(pathName, entry.getValue().getValue());
                 }
             }
         }
@@ -812,7 +810,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         // Copy current content to get associated files on check for expired PropertyWatchers
         final Map<File, Properties> oldPropertiesByFile = new HashMap<File, Properties>(propertiesByFile);
         final Map<File, byte[]> oldXml = new HashMap<File, byte[]>(xmlFiles);
-        final Map<File, byte[]> oldYaml = new HashMap<File, byte[]>(yamlFiles);
+        final Map<File, YamlRef> oldYaml = new HashMap<File, YamlRef>(yamlFiles);
 
         // Clear maps
         properties.clear();
@@ -830,51 +828,64 @@ public final class ConfigurationImpl implements ConfigurationService {
         reinitConfigCascade();
 
         // Check if properties have been changed, execute only forced ones if not
-        Set<File> changes = getChanges(oldPropertiesByFile, oldXml, oldYaml);
-        if (changes.isEmpty()) {
-            LOG.info("No changes in *.properties, *.xml, *.yaml configuration files detected");
+        Set<String> namesOfChangedProperties = new HashSet<>(512);
+        Set<File> changes = getChanges(oldPropertiesByFile, oldXml, oldYaml, namesOfChangedProperties);
 
-            // Trigger only forced ones
-            for (Reloadable reloadable : reloadableServices.values()) {
-                try {
-                    if (ForcedReloadable.class.isInstance(reloadable)) {
-                        reloadable.reloadConfiguration(this);
+        Set<Reloadable> toTrigger = new LinkedHashSet<>(32);
+
+        // Collect forced ones
+        for (ForcedReloadable reloadable : forcedReloadables) {
+            toTrigger.add(reloadable);
+        }
+
+        if (!changes.isEmpty()) {
+            // Continue to reload
+            LOG.info("Detected changes in the following configuration files: {}", changes);
+
+            // Collect the ones interested in all
+            for (Reloadable reloadable : matchingAllProperties) {
+                toTrigger.add(reloadable);
+            }
+
+            // Collect the ones interested in properties
+            for (String nameOfChangedProperties : namesOfChangedProperties) {
+                // Now check for prefix matches
+                if (!matchingPrefixProperty.isEmpty()) {
+                    int pos = nameOfChangedProperties.lastIndexOf('/');
+                    while (pos > 0) {
+                        String prefix = nameOfChangedProperties.substring(0, pos);
+                        List<Reloadable> interestedReloadables = matchingPrefixProperty.get(prefix);
+                        if (null != interestedReloadables) {
+                            toTrigger.addAll(interestedReloadables);
+                        }
+                        pos = prefix.lastIndexOf('/');
                     }
-                } catch (Exception e) {
-                    LOG.warn("Failed to let reloaded configuration be handled by: {}", reloadable.getClass().getName(), e);
+                }
+
+                // Add the subscriptions for matching topic names
+                {
+                    List<Reloadable> interestedReloadables = matchingProperty.get(nameOfChangedProperties);
+                    if (null != interestedReloadables) {
+                        toTrigger.addAll(interestedReloadables);
+                    }
                 }
             }
 
-            return;
+            // Collect the ones interested in files
+            for (File file : changes) {
+                List<Reloadable> interestedReloadables = matchingFile.get(file.getName());
+                if (null != interestedReloadables) {
+                    toTrigger.addAll(interestedReloadables);
+                }
+            }
+        } else {
+            LOG.info("No changes in *.properties, *.xml, or *.yaml configuration files detected");
         }
 
-        // Continue to reload
-        LOG.info("Detected changes in the following configuration files: {}", changes);
-
-        // Propagate reloaded configuration among Reloadables
-        for (Reloadable reloadable : reloadableServices.values()) {
+        // Trigger collected ones
+        for (Reloadable reloadable : toTrigger) {
             try {
-                Map<String, String[]> configFileNames = reloadable.getConfigFileNames();
-                if (null == configFileNames || configFileNames.isEmpty()) {
-                    // Reloadable does not indicate the files of interest
-
-                    reloadable.reloadConfiguration(this);
-                } else {
-                    // Reloadable does indicate the files of interest; thus check against changed ones
-
-                    boolean doReload = false;
-                    for (Iterator<String> it = configFileNames.keySet().iterator(); !doReload && it.hasNext();) {
-                        String fileName = it.next();
-                        for (File changedFilePath : changes) {
-                            if (changedFilePath.getName().equals(fileName)) {
-                                doReload = true;
-                            }
-                        }
-                    }
-                    if (doReload) {
-                        reloadable.reloadConfiguration(this);
-                    }
-                }
+                reloadable.reloadConfiguration(this);
             } catch (Exception e) {
                 LOG.warn("Failed to let reloaded configuration be handled by: {}", reloadable.getClass().getName(), e);
             }
@@ -895,6 +906,21 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
          *
          */
+    }
+
+    private boolean isInterestedInAll(String[] propertiesOfInterest) {
+        if (null == propertiesOfInterest || 0 == propertiesOfInterest.length) {
+            // Reloadable does not indicate the properties of interest
+            return true;
+        }
+
+        for (String poi : propertiesOfInterest) {
+            if ("*".equals(poi)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void reinitConfigCascade() {
@@ -929,12 +955,72 @@ public final class ConfigurationImpl implements ConfigurationService {
      * @param service The instance to add
      * @return <code>true</code> if successfully added; otherwise <code>false</code> if already present
      */
-    public boolean addReloadable(Reloadable service) {
-        if (null != service) {
-            return null == reloadableServices.putIfAbsent(service.getClass().getName(), service);
+    public synchronized boolean addReloadable(Reloadable service) {
+        if (ForcedReloadable.class.isInstance(service)) {
+            forcedReloadables.add((ForcedReloadable) service);
+            return true;
         }
-        LOG.warn("Tried to add null to reloadable services");
-        return false;
+
+        Interests interests = service.getInterests();
+        String[] propertiesOfInterest = null == interests ? null : interests.getPropertiesOfInterest();
+        String[] configFileNames = null == interests ? null : interests.getConfigFileNames();
+
+        boolean hasInterestForProperties = (null != propertiesOfInterest && propertiesOfInterest.length > 0);
+        boolean hasInterestForFiles = (null != configFileNames && configFileNames.length > 0);
+
+        // No interests at all?
+        if (!hasInterestForProperties && !hasInterestForFiles) {
+            // A Reloadable w/o any interests... Assume all
+            matchingAllProperties.add(service);
+            return true;
+        }
+
+        // Check interest for concrete properties
+        if (hasInterestForProperties) {
+            if (isInterestedInAll(propertiesOfInterest)) {
+                matchingAllProperties.add(service);
+            } else {
+                for (String propertyName : propertiesOfInterest) {
+                    Reloadables.validatePropertyName(propertyName);
+                    if (propertyName.endsWith(".*")) {
+                        // Wild-card property name: we remove the .*
+                        String prefix = propertyName.substring(0, propertyName.length() - 2);
+                        List<Reloadable> list = matchingPrefixProperty.get(prefix);
+                        if (null == list) {
+                            List<Reloadable> newList = new CopyOnWriteArrayList<>();
+                            matchingPrefixProperty.put(prefix, newList);
+                            list = newList;
+                        }
+                        list.add(service);
+                    } else {
+                        // Exact match
+                        List<Reloadable> list = matchingProperty.get(propertyName);
+                        if (null == list) {
+                            List<Reloadable> newList = new CopyOnWriteArrayList<>();
+                            matchingProperty.put(propertyName, newList);
+                            list = newList;
+                        }
+                        list.add(service);
+                    }
+                }
+            }
+        }
+
+        // Check interest for files
+        if (hasInterestForFiles) {
+            for (String configFileName : configFileNames) {
+                Reloadables.validateFileName(configFileName);
+                List<Reloadable> list = matchingFile.get(configFileName);
+                if (null == list) {
+                    List<Reloadable> newList = new CopyOnWriteArrayList<>();
+                    matchingFile.put(configFileName, newList);
+                    list = newList;
+                }
+                list.add(service);
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -942,11 +1028,34 @@ public final class ConfigurationImpl implements ConfigurationService {
      *
      * @param service The instance to remove
      */
-    public void removeReloadable(Reloadable service) {
-        if (null != service) {
-            reloadableServices.remove(service.getClass().getName());
-        } else {
-            LOG.warn("Tried to remove null from reloadable services");
+    public synchronized void removeReloadable(Reloadable service) {
+        matchingAllProperties.remove(service);
+
+        for (Iterator<List<Reloadable>> it = matchingPrefixProperty.values().iterator(); it.hasNext();) {
+            List<Reloadable> reloadables = it.next();
+            if (reloadables.remove(service)) {
+                if (reloadables.isEmpty()) {
+                    it.remove();
+                }
+            }
+        }
+
+        for (Iterator<List<Reloadable>> it = matchingProperty.values().iterator(); it.hasNext();) {
+            List<Reloadable> reloadables = it.next();
+            if (reloadables.remove(service)) {
+                if (reloadables.isEmpty()) {
+                    it.remove();
+                }
+            }
+        }
+
+        for (Iterator<List<Reloadable>> it = matchingFile.values().iterator(); it.hasNext();) {
+            List<Reloadable> reloadables = it.next();
+            if (reloadables.remove(service)) {
+                if (reloadables.isEmpty()) {
+                    it.remove();
+                }
+            }
         }
     }
 
@@ -960,7 +1069,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     @NonNull
-    private Set<File> getChanges(Map<File, Properties> oldPropertiesByFile, Map<File, byte[]> oldXml, Map<File, byte[]> oldYaml) {
+    private Set<File> getChanges(Map<File, Properties> oldPropertiesByFile, Map<File, byte[]> oldXml, Map<File, YamlRef> oldYaml, Set<String> namesOfChangedProperties) {
         Set<File> result = new HashSet<File>(oldPropertiesByFile.size());
 
         // Check for changes in .properties files
@@ -968,9 +1077,41 @@ public final class ConfigurationImpl implements ConfigurationService {
             File pathname = newEntry.getKey();
             Properties newProperties = newEntry.getValue();
             Properties oldProperties = oldPropertiesByFile.get(pathname);
-            if (null == oldProperties || !newProperties.equals(oldProperties)) {
-                // New or changed .properties file
+            if (null == oldProperties) {
+                // New .properties file
                 result.add(pathname);
+                for (Object propertyName : newProperties.keySet()) {
+                    namesOfChangedProperties.add(propertyName.toString());
+                }
+            } else if (!newProperties.equals(oldProperties)) {
+                // Changed .properties file
+                result.add(pathname);
+
+                // Removed ones
+                {
+                    Set<Object> removedKeys = new HashSet<>(oldProperties.keySet());
+                    removedKeys.removeAll(newProperties.keySet());
+                    for (Object removedKey : removedKeys) {
+                        namesOfChangedProperties.add(removedKey.toString());
+                    }
+                }
+
+                // New ones or changed value
+                Iterator<Map.Entry<Object, Object>> i = newProperties.entrySet().iterator();
+                while (i.hasNext()) {
+                    Map.Entry<Object, Object> e = i.next();
+                    Object key = e.getKey();
+                    Object value = e.getValue();
+                    if (value == null) {
+                        if (oldProperties.get(key) != null || !oldProperties.containsKey(key)) {
+                            namesOfChangedProperties.add(key.toString());
+                        }
+                    } else {
+                        if (!value.equals(oldProperties.get(key))) {
+                            namesOfChangedProperties.add(key.toString());
+                        }
+                    }
+                }
             }
         }
         {
@@ -995,12 +1136,15 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
 
         // ... and one more time for YAMLs
-        for (Entry<File, byte[]> filenameEntry : yamlFiles.entrySet()) {
+        for (Entry<File, YamlRef> filenameEntry : yamlFiles.entrySet()) {
             File filename = filenameEntry.getKey();
-            byte[] newHash = filenameEntry.getValue();
-            byte[] oldHash = oldYaml.get(filename);
-            if (null == oldHash || !Arrays.equals(oldHash, newHash)) {
+            YamlRef newYamlRef = filenameEntry.getValue();
+            YamlRef oldYamlRef = oldYaml.get(filename);
+            if (null == oldYamlRef || !oldYamlRef.equals(newYamlRef)) {
                 result.add(filename);
+            } else {
+                // Still the same, take over YAML value if present
+                newYamlRef.setValueIfAbsent(oldYamlRef.optValue());
             }
         }
         {
@@ -1018,20 +1162,19 @@ public final class ConfigurationImpl implements ConfigurationService {
      * @return The <code>Reloadable</code> instances
      */
     public Collection<Reloadable> getReloadables() {
-        return reloadableServices.values();
-    }
-
-    byte[] getHash(File file) {
-        byte[] retval = null;
-        MessageDigest md;
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-            md.update(readFile(file).getBytes());
-            retval = md.digest();
-        } catch (NoSuchAlgorithmException e) {
-            // Should not happen
+        Set<Reloadable> tracked = new LinkedHashSet<>(32);
+        tracked.addAll(forcedReloadables);
+        tracked.addAll(matchingAllProperties);
+        for (List<Reloadable> reloadables : matchingPrefixProperty.values()) {
+            tracked.addAll(reloadables);
         }
-        return retval;
+        for (List<Reloadable> reloadables : matchingProperty.values()) {
+            tracked.addAll(reloadables);
+        }
+        for (List<Reloadable> reloadables : matchingFile.values()) {
+            tracked.addAll(reloadables);
+        }
+        return tracked;
     }
 
 }

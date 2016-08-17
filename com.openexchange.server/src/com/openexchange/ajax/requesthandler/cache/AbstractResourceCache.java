@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -52,18 +52,17 @@ package com.openexchange.ajax.requesthandler.cache;
 import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.DOCUMENT_QUOTA;
 import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.ENABLED;
 import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.GLOBAL_QUOTA;
-import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.PROP_FILE;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -149,11 +148,8 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        return Collections.singletonMap(PROP_FILE, new String[] {
-            GLOBAL_QUOTA,
-            DOCUMENT_QUOTA
-        });
+    public Interests getInterests() {
+        return Reloadables.interestsForProperties(GLOBAL_QUOTA, DOCUMENT_QUOTA);
     }
 
     private void initQuotas(ConfigurationService configService) {

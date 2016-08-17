@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -51,6 +51,7 @@ package com.openexchange.ajax.mail;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.LinkedList;
@@ -91,6 +92,8 @@ public class TestMail implements IdentitySource<TestMail> {
     private String subject, body, contentType, folder, id;
 
     private int priority, flags, color;
+
+    private List<String> userFlags;
 
     private final List<MailTypeStrategy> strategies = Arrays.asList(new MailTypeStrategy[] {
         new PlainTextStrategy(), new AlternativeStrategy(), new FallbackStrategy() });
@@ -224,6 +227,10 @@ public class TestMail implements IdentitySource<TestMail> {
         return attachment;
     }
 
+    public List<String> getUserFlags() {
+        return userFlags;
+    }
+
     public void setAttachment(final List<JSONObject> attachment) {
         this.attachment = attachment;
     }
@@ -299,7 +306,18 @@ public class TestMail implements IdentitySource<TestMail> {
         read(I2i(columns), jsonArray);
 
         // handle fields that the other method cannot handle, because MailListField does not contain them.
-        String field = "id";
+
+        String field = "user";
+        if (json.has(field)) {
+            List<String> stringList = new ArrayList<>();
+            for (Object o : ((JSONArray) json.get(field)).asList()) {
+                if (o instanceof String) {
+                    stringList.add((String) o);
+                }
+            }
+            setUserFlags(stringList);
+        }
+        field = "id";
         if (json.has(field)) {
             setId(json.getString(field));
         }
@@ -321,6 +339,15 @@ public class TestMail implements IdentitySource<TestMail> {
             this.headers = hdrObject;
         }
         sanitize();
+    }
+
+    /**
+     * Sets the user flags
+     * 
+     * @param flags A list of user flags
+     */
+    private void setUserFlags(List<String> flags) {
+        this.userFlags = flags;
     }
 
     /**

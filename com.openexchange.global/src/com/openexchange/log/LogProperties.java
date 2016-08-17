@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -63,6 +63,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.slf4j.spi.MDCAdapter;
@@ -498,7 +499,9 @@ public final class LogProperties {
             logger.warn("Unexpected MDC adapter: {}", mdcAdapter.getClass().getName());
             return Collections.unmodifiableMap(getPropertiesMap(mdcAdapter).get());
         } catch (Exception e) {
-            return null;
+            final Logger logger = org.slf4j.LoggerFactory.getLogger(LogProperties.class);
+            logger.warn("Failed to retrieve MDC map.", e);
+            return Collections.emptyMap();
         }
     }
 

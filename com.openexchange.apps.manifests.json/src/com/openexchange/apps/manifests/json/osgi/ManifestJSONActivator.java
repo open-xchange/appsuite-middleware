@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -52,7 +52,6 @@ package com.openexchange.apps.manifests.json.osgi;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.Map;
 import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.apps.manifests.json.ManifestActionFactory;
@@ -60,7 +59,9 @@ import com.openexchange.apps.manifests.json.ManifestBuilder;
 import com.openexchange.apps.manifests.json.values.UIVersion;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.userconfiguration.osgi.PermissionRelevantServiceAddedTracker;
@@ -202,8 +203,8 @@ public class ManifestJSONActivator extends AJAXModuleActivator implements Forced
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        return null;
+    public Interests getInterests() {
+        return Reloadables.getInterestsForAll();
     }
 
 }

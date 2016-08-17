@@ -1,0 +1,10 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The ID of the according facet.
+  value:
+    type: string
+    description: The ID of the according value. Must always be copied from the value object, not from a possibly according option (in the two-dimensional case).
+  filter:
+    $ref: "#/definitions/FindActiveFacetFilter"

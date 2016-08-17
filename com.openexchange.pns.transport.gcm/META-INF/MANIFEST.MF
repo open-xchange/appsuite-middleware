@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The FCM-backend transport for push notifications
+Bundle-SymbolicName: com.openexchange.pns.transport.gcm
+Bundle-Version: 7.8.2
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: 
+ com.google.android.gcm,
+ com.openexchange.config,
+ com.openexchange.configuration,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.osgi.util,
+ com.openexchange.pns,
+ com.openexchange.server,
+ com.openexchange.timer,
+ com.openexchange.tools.strings,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Export-Package: com.openexchange.pns.transport.gcm
+Bundle-Activator: com.openexchange.pns.transport.gcm.osgi.GcmPushNotificationTransportActivator

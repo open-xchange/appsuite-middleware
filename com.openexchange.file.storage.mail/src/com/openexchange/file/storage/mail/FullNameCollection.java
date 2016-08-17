@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.file.storage.mail.FullName.Type;
-import com.openexchange.mail.utils.MailFolderUtility;
 
 /**
  * {@link FullNameCollection}
@@ -88,11 +87,30 @@ public class FullNameCollection implements Iterable<FullName> {
 
     @Override
     public Iterator<FullName> iterator() {
-        List<FullName> fullNames = new ArrayList<FullName>(3);
-        fullNames.add(new FullName(fullNameAll, Type.ALL, MailFolderUtility.prepareFullname(0, fullNameAll)));
-        fullNames.add(new FullName(fullNameReceived, Type.RECEIVED, MailFolderUtility.prepareFullname(0, fullNameReceived)));
-        fullNames.add(new FullName(fullNameSent, Type.SENT, MailFolderUtility.prepareFullname(0, fullNameSent)));
-        return fullNames.iterator();
+        return asList().iterator();
+    }
+
+    /**
+     * Gets the full name for specified type.
+     *
+     * @param type The type
+     * @return The associated full name or <code>null</code>
+     */
+    public FullName getFullNameFor(Type type) {
+        if (null == type) {
+            return null;
+        }
+
+        switch (type) {
+            case ALL:
+                return null == fullNameAll ? null : new FullName(fullNameAll, Type.ALL);
+            case RECEIVED:
+                return null == fullNameReceived ? null : new FullName(fullNameReceived, Type.RECEIVED);
+            case SENT:
+                return null == fullNameSent ? null : new FullName(fullNameSent, Type.SENT);
+            default:
+                return null;
+        }
     }
 
     /**
@@ -102,9 +120,15 @@ public class FullNameCollection implements Iterable<FullName> {
      */
     public List<FullName> asList() {
         List<FullName> fullNames = new ArrayList<FullName>(3);
-        fullNames.add(new FullName(fullNameAll, Type.ALL, MailFolderUtility.prepareFullname(0, fullNameAll)));
-        fullNames.add(new FullName(fullNameReceived, Type.RECEIVED, MailFolderUtility.prepareFullname(0, fullNameReceived)));
-        fullNames.add(new FullName(fullNameSent, Type.SENT, MailFolderUtility.prepareFullname(0, fullNameSent)));
+        if (null != fullNameAll) {
+            fullNames.add(new FullName(fullNameAll, Type.ALL));
+        }
+        if (null != fullNameReceived) {
+            fullNames.add(new FullName(fullNameReceived, Type.RECEIVED));
+        }
+        if (null != fullNameSent) {
+            fullNames.add(new FullName(fullNameSent, Type.SENT));
+        }
         return fullNames;
     }
 

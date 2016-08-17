@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,12 +49,17 @@
 
 package com.openexchange.database.internal.reloadable;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.DefaultInterests.Builder;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 
 /**
  * {@link GenericReloadable} - Collects contributed reloadables for server bundle.
@@ -92,20 +97,53 @@ public final class GenericReloadable implements Reloadable {
      *
      * @param reloadable The instance to add
      */
-    public void addReloadable(final Reloadable reloadable) {
+    public void addReloadable(Reloadable reloadable) {
         reloadables.add(reloadable);
     }
 
     @Override
-    public void reloadConfiguration(final ConfigurationService configService) {
-        for (final Reloadable reloadable : reloadables) {
+    public void reloadConfiguration(ConfigurationService configService) {
+        for (Reloadable reloadable : reloadables) {
             reloadable.reloadConfiguration(configService);
         }
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        return Collections.emptyMap();
+    public Interests getInterests() {
+        Set<String> properties = new TreeSet<>();
+        Set<String> fileNames = new TreeSet<>();
+
+        boolean somethingAdded = false;
+        for (Reloadable reloadable : reloadables) {
+            Interests interests = reloadable.getInterests();
+            if (null == interests) {
+                return Reloadables.getInterestsForAll();
+            }
+
+            String[] propertiesOfInterest = interests.getPropertiesOfInterest();
+            if (null != propertiesOfInterest) {
+                properties.addAll(Arrays.asList(propertiesOfInterest));
+                somethingAdded = true;
+            }
+            String[] configFileNames = interests.getConfigFileNames();
+            if (null != configFileNames) {
+                fileNames.addAll(Arrays.asList(configFileNames));
+                somethingAdded = true;
+            }
+        }
+
+        if (!somethingAdded) {
+            return Reloadables.getInterestsForAll();
+        }
+
+        Builder builder = DefaultInterests.builder();
+        if (!properties.isEmpty()) {
+            builder.propertiesOfInterest(properties.toArray(new String[properties.size()]));
+        }
+        if (!fileNames.isEmpty()) {
+            builder.configFileNames(fileNames.toArray(new String[fileNames.size()]));
+        }
+        return builder.build();
     }
 
 }

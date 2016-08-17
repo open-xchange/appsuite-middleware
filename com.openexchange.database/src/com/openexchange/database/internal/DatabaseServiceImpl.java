@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -129,6 +129,17 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     // Delegate config database service methods.
 
+    /**
+     * Gets the assignment for specified context identifier
+     *
+     * @param contextId The context identifier
+     * @return The associated assignment
+     * @throws OXException If such an assignment cannot be returned
+     */
+    public AssignmentImpl getAssignment(int contextId) throws OXException {
+        return configDatabaseService.getAssignment(contextId);
+    }
+
     @Override
     public Connection getReadOnly() throws OXException {
         return configDatabaseService.getReadOnly();
@@ -162,6 +173,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
     @Override
     public void backForUpdateTask(Connection con) {
         configDatabaseService.backForUpdateTask(con);
+    }
+
+    @Override
+    public void backForUpdateTaskAfterReading(Connection con) {
+        configDatabaseService.backForUpdateTaskAfterReading(con);
     }
 
     @Override

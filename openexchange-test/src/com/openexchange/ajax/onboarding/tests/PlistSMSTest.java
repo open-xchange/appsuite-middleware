@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,16 +49,21 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
+import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.sms.SMSExceptionCode;
 
 /**
  * {@link PlistSMSTest}
@@ -68,14 +73,12 @@ import com.openexchange.exception.OXException;
  */
 public class PlistSMSTest extends AbstractPlistSMSTest {
 
-    private String name;
     private static final String SLASH = "/";
 
-    public PlistSMSTest(String name) {
-        super(name);
-        this.name = name;
+    public PlistSMSTest() {
     }
 
+    @Test
     public void testExecute() throws Exception {
         String jsonString = "{\"sms\":\"+49276183850\"}";
         JSONObject body = new JSONObject(jsonString);
@@ -91,11 +94,12 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
                 // scenario disabled
                 continue;
             }
-            assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 3, response.getException().getCode());
-            assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "SMS", response.getException().getPrefix());
+
+            assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), SMSExceptionCode.NOT_SENT.create().getErrorCode(), response.getException().getErrorCode());
         }
     }
 
+    @Test
     public void testExecute_missingNumber() throws Exception {
         String jsonString = "{\"sms\":\"\"}";
         JSONObject body = new JSONObject(jsonString);
@@ -106,10 +110,10 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
         assertNotNull("Response is empty!", response);
         // Expecting an invalid number exception
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 22, response.getException().getCode());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "ONBRD", response.getException().getPrefix());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), OnboardingExceptionCodes.INVALID_PHONE_NUMBER.create().getErrorCode(), response.getException().getErrorCode());
     }
 
+    @Test
     public void testExecute_invalidNumber() throws Exception {
         String jsonString = "{\"sms\":\"1234\"}";
         JSONObject body = new JSONObject(jsonString);
@@ -120,8 +124,7 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
         assertNotNull("Response is empty!", response);
         // Expecting an invalid number exception
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 22, response.getException().getCode());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "ONBRD", response.getException().getPrefix());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception: " + response.getException().getMessage(), OnboardingExceptionCodes.INVALID_PHONE_NUMBER.create().getErrorCode(), response.getException().getErrorCode());
 
         jsonString = "{\"sms\":\"abcde\"}";
         body = new JSONObject(jsonString);
@@ -130,12 +133,12 @@ public class PlistSMSTest extends AbstractPlistSMSTest {
         assertNotNull("Response is empty!", response);
         // Expecting an invalid number exception
         assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 22, response.getException().getCode());
-        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "ONBRD", response.getException().getPrefix());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", OnboardingExceptionCodes.INVALID_PHONE_NUMBER.create().getErrorCode(), response.getException().getErrorCode());
     }
 
+    @Test
     public void testDownload() throws Exception {
-        PListDownloadTestHelper helper = new PListDownloadTestHelper(name);
+        PListDownloadTestHelper helper = new PListDownloadTestHelper(PlistSMSTest.class.getName());
 
         String url = getURL(client.getValues().getUserId(), client.getValues().getContextId(), "mailsync", "apple.iphone");
         helper.testMailDownload(url, client.getHostname());

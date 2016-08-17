@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -305,9 +305,6 @@ public enum Tree {
 
     /** If a search for all users, groups and resources when participant selection dialog is opened. (read-only, added 2008-10-09/SP5) */
     ParticipantAutoSearch("/participants/autoSearch"),
-
-    /** Defines the maximum number of participants for appointments and tasks. (read-only, added 2008-10-20/SP5) */
-    MAXIMUM_NUMBER_PARTICIPANTS("/participants/maximumNumberParticipants"),
 
     /** If external participants without email should be shown. */
     ShowWithoutEmail("/participants/showWithoutEmail"),

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,8 +49,6 @@
 
 package com.openexchange.spamhandler.parallels.osgi;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -67,30 +65,33 @@ import com.openexchange.user.UserService;
  * Registers the SpamdService implementation as an OSGi service.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SpamdServiceRegisterer implements ServiceTrackerCustomizer<Object, Object> {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamdServiceRegisterer.class);
 
     private final BundleContext context;
-    private final Lock lock = new ReentrantLock();
-
     private ServiceRegistration<SpamdService> registration;
     private ConfigurationService configService;
     private ContextService contextService;
     private UserService userService;
 
+    /**
+     * Initializes a new {@link SpamdServiceRegisterer}.
+     *
+     * @param context The bundle context
+     */
     public SpamdServiceRegisterer(BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public Object addingService(ServiceReference<Object> reference) {
+    public synchronized Object addingService(ServiceReference<Object> reference) {
         final Object obj = context.getService(reference);
         final boolean needsRegistration;
-        lock.lock();
-        try {
+        {
             if (obj instanceof ConfigurationService) {
                 configService = (ConfigurationService) obj;
             }
@@ -101,8 +102,6 @@ public class SpamdServiceRegisterer implements ServiceTrackerCustomizer<Object, 
                 userService = (UserService) obj;
             }
             needsRegistration = null != configService && null != contextService && null != userService && null == registration;
-        } finally {
-            lock.unlock();
         }
         if (needsRegistration) {
             LOG.info("Registering Parallels spam handler service.");
@@ -121,10 +120,9 @@ public class SpamdServiceRegisterer implements ServiceTrackerCustomizer<Object, 
     }
 
     @Override
-    public void removedService(ServiceReference<Object> reference, Object service) {
+    public synchronized void removedService(ServiceReference<Object> reference, Object service) {
         ServiceRegistration<?> unregister = null;
-        lock.lock();
-        try {
+        {
             if (service instanceof ConfigurationService) {
                 configService = null;
             }
@@ -138,8 +136,6 @@ public class SpamdServiceRegisterer implements ServiceTrackerCustomizer<Object, 
                 unregister = registration;
                 registration = null;
             }
-        } finally {
-            lock.unlock();
         }
         if (null != unregister) {
             LOG.info("Unregistering Parallels spam handler service.");

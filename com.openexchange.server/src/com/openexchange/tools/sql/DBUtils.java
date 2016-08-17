@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -66,6 +66,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.java.Strings;
 
 /**
  * Utilities for database resource handling.
@@ -212,6 +213,7 @@ public final class DBUtils {
     /**
      * Starts a transaction on the given connection. This implementation sets autocommit to false and even executes a START TRANSACTION
      * statement to ensure isolation levels for the current connection.
+     *
      * @param con connection to start the transaction on.
      * @throws SQLException if starting the transaction fails.
      */
@@ -334,16 +336,22 @@ public final class DBUtils {
      */
     public static int getColumnSize(final Connection con, final String table, final String column) throws SQLException {
         final DatabaseMetaData metas = con.getMetaData();
-        final ResultSet result = metas.getColumns(null, null, table, column);
-        int retval = -1;
-        if (result.next()) {
-            retval = result.getInt("COLUMN_SIZE");
+        ResultSet result = null;
+        try {
+            result = metas.getColumns(null, null, table, column);
+            int retval = -1;
+            if (result.next()) {
+                retval = result.getInt("COLUMN_SIZE");
+            }
+            return retval;
+        } finally {
+            DBUtils.closeSQLStuff(result);
         }
-        return retval;
     }
 
     /**
      * Filters a given list of table names. Returns only those that also exist
+     *
      * @param con The connection to the database in which to check for the tables
      * @param tablesToCheck The list of table names to check for.
      * @return A set with all the tables that exist of those to be checked for
@@ -352,7 +360,7 @@ public final class DBUtils {
     public static Set<String> existingTables(final Connection con, final String... tablesToCheck) throws SQLException {
         final Set<String> tables = new HashSet<String>();
         for (final String table : tablesToCheck) {
-            if(tableExists(con, table)) {
+            if (tableExists(con, table)) {
                 tables.add(table);
             }
         }
@@ -361,6 +369,7 @@ public final class DBUtils {
 
     /**
      * Finds out whether all tables listed exist in the given database
+     *
      * @param con The connection to the database in which to check for the tables
      * @param tablesToCheck The list of table names to check for.
      * @return A set with all the tables that exist of those to be checked for
@@ -368,7 +377,7 @@ public final class DBUtils {
      */
     public static boolean tablesExist(final Connection con, final String... tablesToCheck) throws SQLException {
         for (final String table : tablesToCheck) {
-            if(!tableExists(con, table)) {
+            if (!tableExists(con, table)) {
                 return false;
             }
         }
@@ -377,6 +386,7 @@ public final class DBUtils {
 
     /**
      * Finds out whether a table listed exist in the given database
+     *
      * @param con The connection to the database in which to check for the tables
      * @param table The table name to check for.
      * @return A set with all the tables that exist of those to be checked for
@@ -397,6 +407,7 @@ public final class DBUtils {
 
     /**
      * Finds out whether a table listed exist in the given database
+     *
      * @param con The connection to the database in which to check for the tables
      * @param table The table name to check for.
      * @return A set with all the tables that exist of those to be checked for
@@ -418,9 +429,12 @@ public final class DBUtils {
     public static String forSQLCommand(final Order order) {
         if (order != null) {
             switch (order) {
-            case ASCENDING: return " ASC ";
-            case DESCENDING: return " DESC ";
-            case NO_ORDER: return " ";
+                case ASCENDING:
+                    return " ASC ";
+                case DESCENDING:
+                    return " DESC ";
+                case NO_ORDER:
+                    return " ";
             }
         }
         return " ";
@@ -493,7 +507,7 @@ public final class DBUtils {
         if (null == sqlException) {
             return false;
         }
-        if (sqlException.getClass().getName().endsWith("TransactionRollbackException")) {
+        if (suggestsRestartingTransaction(sqlException) || sqlException.getClass().getName().endsWith("TransactionRollbackException")) {
             return true;
         }
         if (isTransactionRollbackException(sqlException.getNextException())) {
@@ -528,6 +542,18 @@ public final class DBUtils {
             return false;
         }
         return isTransactionRollbackException((Exception) cause);
+    }
+
+    /**
+     * Checks if specified SQL exception's detail message contains a suggestion to restart the transaction;<br>
+     * e.g. <code>"Lock wait timeout exceeded; try restarting transaction"</code>
+     *
+     * @param sqlException The SQL exception to check
+     * @return <code>true</code> if SQL exception suggests restarting transaction; otherwise <code>false</code>
+     */
+    public static boolean suggestsRestartingTransaction(SQLException sqlException) {
+        String message = null == sqlException ? null : sqlException.getMessage();
+        return null != message && Strings.asciiLowerCase(message).indexOf("try restarting transaction") >= 0;
     }
 
     /**

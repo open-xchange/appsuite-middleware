@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -62,13 +62,9 @@ import com.openexchange.configjump.ConfigJumpService;
  */
 public final class Services {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Services.class);
-
     private final BundleContext context;
-
-    private ServiceRegistration<ConfigJumpService> configJump;
-
     private final Lock registrationLock = new ReentrantLock();
+    private ServiceRegistration<ConfigJumpService> configJump;
 
     /**
      * Default constructor.
@@ -81,7 +77,7 @@ public final class Services {
     public void registerService(final Properties props) {
         final String url = props.getProperty("URL");
         if (null == url) {
-            LOG.error("Missing URL property in configjump.properties.");
+            org.slf4j.LoggerFactory.getLogger(Services.class).error("Missing URL property in configjump.properties.");
             return;
         }
         registrationLock.lock();

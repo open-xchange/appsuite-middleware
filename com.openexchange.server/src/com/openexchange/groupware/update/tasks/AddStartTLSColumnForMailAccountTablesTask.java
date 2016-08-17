@@ -51,6 +51,7 @@ package com.openexchange.groupware.update.tasks;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
@@ -58,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
@@ -65,7 +67,8 @@ import com.openexchange.tools.update.Tools;
 
 
 /**
- * {@link AddStartTLSColumnForMailAccountTablesTask}
+ * {@link AddStartTLSColumnForMailAccountTablesTask} - Adds "starttls" column to "user_mail_account" and "user_transport_account" tables and
+ * attempts to set a reasonable default value for that column dependent on mail account data
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.2
@@ -73,6 +76,7 @@ import com.openexchange.tools.update.Tools;
 public class AddStartTLSColumnForMailAccountTablesTask extends UpdateTaskAdapter {
 
     private final String[] TABLES = { "user_mail_account", "user_transport_account" };
+    private final String[] SECURE_PROTOCOLS = { "imaps", "pop3s", "pops", "smtps" };
 
     /**
      * Initializes a new {@link AddStartTLSColumnForMailAccountTablesTask}.
@@ -96,7 +100,7 @@ public class AddStartTLSColumnForMailAccountTablesTask extends UpdateTaskAdapter
                 Tools.addColumns(con, table, new Column[] { column });
             }
             if (force) {
-                activateStartTLS(con, contextId);
+                activateStartTLS(con, force);
             }
             con.commit();
         } catch (SQLException e) {
@@ -113,20 +117,49 @@ public class AddStartTLSColumnForMailAccountTablesTask extends UpdateTaskAdapter
 
     @Override
     public String[] getDependencies() {
-        return new String[] { com.openexchange.groupware.update.tasks.ContactsAddDepartmentIndex4AutoCompleteSearch.class.getName() };
+        return new String[] { com.openexchange.groupware.update.tasks.Release781UpdateTask.class.getName() };
     }
 
-    private void activateStartTLS(Connection con, int contextId) throws SQLException {
+    private void activateStartTLS(Connection con, boolean forceSecure) throws SQLException {
         for (String table : TABLES) {
             PreparedStatement stmt = null;
+            PreparedStatement stmt2 = null;
+            ResultSet rs = null;
             try {
-                stmt = con.prepareStatement("UPDATE " + table + " SET starttls=1 WHERE cid = ?");
-                stmt.setInt(1, contextId);
-                stmt.executeUpdate();
+                stmt = con.prepareStatement("SELECT id, cid, user, url FROM " + table + " WHERE id <> 0 FOR UPDATE");
+                rs = stmt.executeQuery();
+                stmt2 = con.prepareStatement("UPDATE " + table + " SET starttls = ? WHERE id = ? AND cid = ? AND user = ?");
+                while (rs.next()) {
+                    int id = rs.getInt(1);
+                    int cid = rs.getInt(2);
+                    int user = rs.getInt(3);
+                    String url = rs.getString(4);
+                    boolean secure = checkSecureUrl(url) || forceSecure;
+                    stmt2 = con.prepareStatement("UPDATE " + table + " SET starttls = ? WHERE id = ? AND cid = ? AND user = ?");
+                    stmt2.setBoolean(1, secure);
+                    stmt2.setInt(2, id);
+                    stmt2.setInt(3, cid);
+                    stmt2.setInt(4, user);
+                    stmt2.addBatch();
+                }
+                stmt2.executeBatch();
             } finally {
-                DBUtils.closeSQLStuff(stmt);
+                DBUtils.closeSQLStuff(stmt2);
+                DBUtils.closeSQLStuff(rs, stmt);
             }
         }
+    }
+
+    private boolean checkSecureUrl(String url) {
+        if (Strings.isEmpty(url)) {
+            return false;
+        }
+        for (String protocol : SECURE_PROTOCOLS) {
+            if (url.toLowerCase().startsWith(protocol)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

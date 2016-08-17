@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -71,21 +71,9 @@ import com.openexchange.admin.tools.PropertyHandler;
  */
 public abstract class OXUserStorageInterface {
 
-    /**
-     * Proxy attribute for the class implementing this interface.
-     */
-    private static Class<? extends OXUserStorageInterface> implementingClass;
-
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXUserStorageInterface.class);
 
-    protected static AdminCache cache = null;
-
-    protected static PropertyHandler prop = null;
-
-    static {
-        cache = ClientAdminThread.cache;
-        prop = cache.getProperties();
-    }
+    private static volatile OXUserStorageInterface instance;
 
     /**
      * Creates a new instance implementing the group storage interface.
@@ -93,46 +81,56 @@ public abstract class OXUserStorageInterface {
      * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
      */
     public static OXUserStorageInterface getInstance() throws StorageException {
-        synchronized (OXUserStorageInterface.class) {
-            if (null == implementingClass) {
-                final String className = prop.getProp(PropertyHandler.USER_STORAGE, null);
-                if (null != className) {
+        OXUserStorageInterface i = instance;
+        if (null == i) {
+            synchronized (OXUserStorageInterface.class) {
+                i = instance;
+                if (null == i) {
+                    Class<? extends OXUserStorageInterface> implementingClass;
+                    AdminCache cache = ClientAdminThread.cache;
+                    PropertyHandler prop = cache.getProperties();
+                    final String className = prop.getProp(PropertyHandler.USER_STORAGE, null);
+                    if (null != className) {
+                        try {
+                            implementingClass = Class.forName(className).asSubclass(OXUserStorageInterface.class);
+                        } catch (final ClassNotFoundException e) {
+                            log.error("", e);
+                            throw new StorageException(e);
+                        }
+                    } else {
+                        final StorageException storageException = new StorageException("Property for user_storage not defined");
+                        log.error("", storageException);
+                        throw storageException;
+                    }
+
+                    Constructor<? extends OXUserStorageInterface> cons;
                     try {
-                        implementingClass = Class.forName(className).asSubclass(OXUserStorageInterface.class);
-                    } catch (final ClassNotFoundException e) {
+                        cons = implementingClass.getConstructor(new Class[] {});
+                        i = cons.newInstance(new Object[] {});
+                        instance = i;
+                    } catch (final SecurityException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final NoSuchMethodException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final IllegalArgumentException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final InstantiationException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final IllegalAccessException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final InvocationTargetException e) {
                         log.error("", e);
                         throw new StorageException(e);
                     }
-                } else {
-                    final StorageException storageException = new StorageException("Property for user_storage not defined");
-                    log.error("", storageException);
-                    throw storageException;
                 }
             }
         }
-        Constructor<? extends OXUserStorageInterface> cons;
-        try {
-            cons = implementingClass.getConstructor(new Class[] {});
-            return cons.newInstance(new Object[] {});
-        } catch (final SecurityException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final NoSuchMethodException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final IllegalArgumentException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final InstantiationException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final IllegalAccessException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final InvocationTargetException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        }
+        return i;
     }
 
     /**
@@ -342,7 +340,7 @@ public abstract class OXUserStorageInterface {
 
     /**
      * Retrieve all users with given alias domain
-     * 
+     *
      * @param context The context
      * @param aliasDomain The alias domain
      * @return The users
@@ -353,17 +351,17 @@ public abstract class OXUserStorageInterface {
     /**
      * Delete an user or multiple from given context in given connection
      */
-    public abstract void delete(final Context ctx, final User[] user_ids, final Connection write_ox_con ) throws StorageException;
+    public abstract void delete(final Context ctx, final User[] user_ids, Integer destUID, final Connection write_ox_con) throws StorageException;
 
     /**
      * Delete users in given context
      */
-    public abstract void delete( final Context ctx, final User[] users) throws StorageException;
+    public abstract void delete(final Context ctx, final User[] users, Integer destUser) throws StorageException;
 
     /**
      * Delete one user in given context
      */
-    public abstract void delete( final Context ctx, final User user) throws StorageException;
+    public abstract void delete(final Context ctx, final User user, Integer destUser) throws StorageException;
 
     /**
      * Fetch all data from current user  and add it to "del_user"

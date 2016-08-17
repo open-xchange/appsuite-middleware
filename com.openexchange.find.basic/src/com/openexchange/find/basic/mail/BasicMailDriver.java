@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,6 +49,7 @@
 
 package com.openexchange.find.basic.mail;
 
+import static com.openexchange.find.basic.mail.Constants.FIELD_FILENAME_NAME;
 import static com.openexchange.find.basic.mail.Constants.FIELD_BCC;
 import static com.openexchange.find.basic.mail.Constants.FIELD_BODY;
 import static com.openexchange.find.basic.mail.Constants.FIELD_CC;
@@ -71,11 +72,13 @@ import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.find.mail.MailFacetType.CONTACTS;
 import static com.openexchange.find.mail.MailFacetType.MAIL_TEXT;
 import static com.openexchange.find.mail.MailFacetType.SUBJECT;
+import static com.openexchange.find.mail.MailFacetType.FILENAME;
 import static com.openexchange.find.mail.MailStrings.FACET_FROM;
 import static com.openexchange.find.mail.MailStrings.FACET_FROM_AND_TO;
 import static com.openexchange.find.mail.MailStrings.FACET_MAIL_TEXT;
 import static com.openexchange.find.mail.MailStrings.FACET_SUBJECT;
 import static com.openexchange.find.mail.MailStrings.FACET_TO;
+import static com.openexchange.find.mail.MailStrings.FACET_FILENAME_NAME;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,6 +93,8 @@ import java.util.List;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.exception.OXException;
@@ -138,6 +143,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.FileNameTerm;
 import com.openexchange.mail.search.BccTerm;
 import com.openexchange.mail.search.BodyTerm;
 import com.openexchange.mail.search.CatenatingTerm;
@@ -169,22 +175,14 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     /** Denotes if simple queries (from the global facet) be searched within the mail body */
     private final boolean searchMailBody;
 
-    /** Name of an optional virtual all-messages folder for primary accounts */
-    private final String virtualAllMessagesFolder;
-
-    /** Signals if there is an invalid setting for virtual all-messages folder */
-    private final boolean invalidAllMessagesFolder;
-
     /**
      * Initializes a new {@link BasicMailDriver}.
      *
      * @param virtualAllMessagesFolder Name of an optional virtual all-messages folder for primary accounts
      * @param searchMailBody <code>true</code> to also search in messages' bodies; otherwise <code>false</code>
      */
-    public BasicMailDriver(final String virtualAllMessagesFolder, final boolean searchMailBody) {
+    public BasicMailDriver(final boolean searchMailBody) {
         super();
-        this.virtualAllMessagesFolder = virtualAllMessagesFolder;
-        invalidAllMessagesFolder = Strings.isEmpty(virtualAllMessagesFolder);
         this.searchMailBody = searchMailBody;
     }
 
@@ -201,11 +199,17 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
     @Override
     public SearchConfiguration getSearchConfiguration(ServerSession session) throws OXException {
         SearchConfiguration config = new SearchConfiguration();
-        if (invalidAllMessagesFolder) {
+        if (Strings.isEmpty(getAllMessageFolder(session))) {
             config.setRequiresFolder();
         }
 
         return config;
+    }
+
+    private String getAllMessageFolder(ServerSession session) throws OXException {
+        ConfigViewFactory factory = Services.requireService(ConfigViewFactory.class);
+        ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+        return view.get("com.openexchange.find.basic.mail.allMessagesFolder", String.class);
     }
 
     @Override
@@ -223,24 +227,32 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         List<Facet> facets = new ArrayList<Facet>(5);
         List<String> prefixTokens = null;
         int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        if (false == Strings.isEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
+        
+        final boolean prefixAvailable = Strings.isNotEmpty(prefix) && prefix.length() >= minimumSearchCharacters;
+        Object[] values = accessMailStorage(autocompleteRequest, session, new MailAccessClosure<Object[]>() {
+
+            @Override
+            public Object[] call(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailFolder folder) throws OXException {
+                Object[] vals = new Object[2];
+                vals[0] = folder;
+                vals[1] = prefixAvailable ? Boolean.valueOf(mailAccess.getMailConfig().getCapabilities().hasFileNameSearch()) : Boolean.FALSE;
+                return vals;
+            }
+        });
+
+        if (prefixAvailable) {
             prefixTokens = tokenize(prefix, minimumSearchCharacters);
             if (prefixTokens.isEmpty()) {
                 prefixTokens = Collections.singletonList(prefix);
             }
 
-            addSimpleFacets(facets, prefix, prefixTokens);
+            boolean addFileNameSearch = ((Boolean) values[1]).booleanValue();
+            addSimpleFacets(facets, prefix, prefixTokens, addFileNameSearch);
         } else {
             prefixTokens = Collections.emptyList();
         }
 
-        MailFolder folder = accessMailStorage(autocompleteRequest, session, new MailAccessClosure<MailFolder>() {
-            @Override
-            public MailFolder call(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailFolder folder) throws OXException {
-                return folder;
-            }
-        });
-
+        MailFolder folder = (MailFolder) values[0];
         boolean toAsDefaultOption = folder.isSent();
         List<ActiveFacet> activeContactFacets = autocompleteRequest.getActiveFacets(MailFacetType.CONTACTS);
         if (!toAsDefaultOption && activeContactFacets != null && !activeContactFacets.isEmpty()) {
@@ -291,7 +303,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     private <R> R accessMailStorage(AbstractFindRequest request, ServerSession session, MailAccessClosure<R> closure) throws OXException {
         long start = System.currentTimeMillis();
-        FullnameArgument fullnameArgument = determineFolder(request);
+        FullnameArgument fullnameArgument = determineFolder(session, request);
         MailService mailService = Services.getMailService();
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
@@ -303,7 +315,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         } finally {
             MailAccess.closeInstance(mailAccess);
             long diff = System.currentTimeMillis() - start;
-            LOG.debug("Transaction for MailAccess lasted {}ms. Request type: {}", diff, request.getClass().getSimpleName());
+            LOG.debug("Transaction for MailAccess lasted {}ms. Request type: {}", Long.valueOf(diff), request.getClass().getSimpleName());
         }
     }
 
@@ -313,20 +325,21 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     }
 
-
-    private FullnameArgument determineFolder(AbstractFindRequest request) throws OXException {
+    private FullnameArgument determineFolder(ServerSession session, AbstractFindRequest request) throws OXException {
         String folderName = request.getFolderId();
-        if (folderName == null && invalidAllMessagesFolder) {
-            throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());
-        }
+
         if (folderName == null) {
-            folderName = virtualAllMessagesFolder;
+            String allMessageFolder = getAllMessageFolder(session);
+            if (Strings.isEmpty(allMessageFolder)) {
+                throw FindExceptionCode.MISSING_MANDATORY_FACET.create(CommonFacetType.FOLDER.getId());
+            }
+            folderName = allMessageFolder;
         }
 
         return MailFolderUtility.prepareMailFolderParam(folderName);
     }
 
-    private static void addSimpleFacets(List<Facet> facets, String prefix, List<String> prefixTokens) {
+    private static void addSimpleFacets(List<Facet> facets, String prefix, List<String> prefixTokens, boolean addFileNameSearch) {
         if (!prefixTokens.isEmpty()) {
 
             facets.add(newSimpleBuilder(GLOBAL)
@@ -347,6 +360,10 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
                 prefix,
                 FIELD_BODY,
                 prefixTokens));
+            
+            if (addFileNameSearch) {
+                facets.add(buildSimpleFacet(FILENAME, FACET_FILENAME_NAME, prefix, FIELD_FILENAME_NAME, prefixTokens));
+            }
         }
     }
 
@@ -416,7 +433,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             .build();
     }
 
-    private static List<MailMessage> searchMessages(IMailMessageStorage messageStorage, MailFolder folder, SearchTerm<?> searchTerm, MailField[] fields, String headers[], int start, int size) throws OXException {
+    static List<MailMessage> searchMessages(IMailMessageStorage messageStorage, MailFolder folder, SearchTerm<?> searchTerm, MailField[] fields, String headers[], int start, int size) throws OXException {
         MailSortField sortField = folder.isSent() ? MailSortField.SENT_DATE : MailSortField.RECEIVED_DATE;
         IndexRange indexRange = new IndexRange(start, start + size);
         OrderDirection orderDirection = OrderDirection.DESC;
@@ -506,6 +523,11 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             facetTerms.add(bodyTerm);
         }
 
+        SearchTerm<?> attachmentTerm = prepareTermForFacet(searchRequest, MailFacetType.FILENAME, folder, OP.AND, OP.AND, OP.AND);
+        if (attachmentTerm != null) {
+            facetTerms.add(attachmentTerm);
+        }
+
         SearchTerm<?> contactsTerm = prepareTermForFacet(searchRequest, MailFacetType.CONTACTS, folder, OP.AND, OP.OR, OP.OR);
         if (contactsTerm != null) {
             facetTerms.add(contactsTerm);
@@ -555,38 +577,39 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         if (dateFacets != null && !dateFacets.isEmpty()) {
             ActiveFacet dateFacet = dateFacets.get(0);
             Filter filter = dateFacet.getFilter();
-            if (filter == Filter.NO_FILTER) {
-                String timeFramePattern = dateFacet.getValueId();
-                TimeFrame timeFrame = TimeFrame.valueOf(timeFramePattern);
-                if (timeFrame == null) {
-                    throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(timeFramePattern, FIELD_DATE);
-                }
-
-                Comparison fromComparison;
-                Comparison toComparison;
-                if (timeFrame.isInclusive()) {
-                    fromComparison = Comparison.GREATER_EQUALS;
-                    toComparison = Comparison.LOWER_EQUALS;
-                } else {
-                    fromComparison = Comparison.GREATER_THAN;
-                    toComparison = Comparison.LOWER_THAN;
-                }
-
-                long from = timeFrame.getFrom();
-                long to = timeFrame.getTo();
-                if (to < 0L) {
-                    return buildDateTerm(fromComparison, from, folder.isSent());
-                }
-
-                SearchTerm<?> fromTerm = buildDateTerm(fromComparison, from, folder.isSent());
-                SearchTerm<?> toTerm = buildDateTerm(toComparison, to, folder.isSent());
-                return new ANDTerm(fromTerm, toTerm);
-            } else {
+            if (filter != Filter.NO_FILTER) {
                 Pair<Comparison, Long> parsed = parseDateQuery(filter.getQueries().get(0));
                 Comparison comparison = parsed.getFirst();
                 Long timestamp = parsed.getSecond();
-                return buildDateTerm(comparison, timestamp, folder.isSent());
+                return buildDateTerm(comparison, timestamp.longValue(), folder.isSent());
             }
+            
+            // No filter...
+            String timeFramePattern = dateFacet.getValueId();
+            TimeFrame timeFrame = TimeFrame.valueOf(timeFramePattern);
+            if (timeFrame == null) {
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(timeFramePattern, FIELD_DATE);
+            }
+
+            Comparison fromComparison;
+            Comparison toComparison;
+            if (timeFrame.isInclusive()) {
+                fromComparison = Comparison.GREATER_EQUALS;
+                toComparison = Comparison.LOWER_EQUALS;
+            } else {
+                fromComparison = Comparison.GREATER_THAN;
+                toComparison = Comparison.LOWER_THAN;
+            }
+
+            long from = timeFrame.getFrom();
+            long to = timeFrame.getTo();
+            if (to < 0L) {
+                return buildDateTerm(fromComparison, from, folder.isSent());
+            }
+
+            SearchTerm<?> fromTerm = buildDateTerm(fromComparison, from, folder.isSent());
+            SearchTerm<?> toTerm = buildDateTerm(toComparison, to, folder.isSent());
+            return new ANDTerm(fromTerm, toTerm);
         }
 
         return null;
@@ -697,7 +720,9 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             Pair<Comparison, Long> parsed = parseDateQuery(query);
             Comparison comparison = parsed.getFirst();
             Long timestamp = parsed.getSecond();
-            return buildDateTerm(comparison, timestamp, isOutgoingFolder);
+            return buildDateTerm(comparison, timestamp.longValue(), isOutgoingFolder);
+        } else if (FIELD_FILENAME_NAME.equals(field)) {
+            return new FileNameTerm(query);
         }
 
         throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
@@ -780,6 +805,6 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             return null;
         }
 
-        return new Pair<Comparison, Long>(comparison, timestamp);
+        return new Pair<Comparison, Long>(comparison, Long.valueOf(timestamp));
     }
 }

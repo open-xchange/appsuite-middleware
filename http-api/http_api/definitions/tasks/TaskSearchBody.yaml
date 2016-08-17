@@ -1,0 +1,18 @@
+type: object
+required:
+  - pattern
+properties:
+  pattern:
+    type: string
+    description: Search pattern to find tasks. In the pattern, the character "*" matches zero or more characters and the character "?" matches exactly one character. All other characters match only themselves.
+  folder:
+    type: string
+    description: Defines the folder to search for tasks in. If this is omitted in all task folders will be searched.
+  start:
+    type: integer
+    format: int64
+    description: Inclusive start date for a time range the tasks should end in. If start is omitted end is ignored.
+  end:
+    type: integer
+    format: int64
+    description: Exclusive end date for a time range the tasks should end in. If this parameter is omitted the time range has an open end.

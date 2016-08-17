@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -69,6 +69,7 @@ public class DriveFileHolder implements IFileHolder {
     private final String contentType;
     private final String name;
     private final List<Runnable> tasks;
+    private final long length;
 
     /**
      * Initializes a new {@link DriveFileHolder}.
@@ -77,20 +78,28 @@ public class DriveFileHolder implements IFileHolder {
      * @param stream The underlying stream
      * @param name The filename
      * @param contentType The content-type, or <code>null</code> if unknown
+     * @param length The context length, or <code>-1</code> if unknown
      */
-    public DriveFileHolder(SyncSession session, InputStream stream, String name, String contentType) {
-        this(session, stream, name, contentType, true);
+    public DriveFileHolder(SyncSession session, InputStream stream, String name, String contentType, long length) {
+        this(session, stream, name, contentType, length, true);
     }
 
-    public DriveFileHolder(SyncSession session, InputStream stream, String name, String contentType, boolean throttled) {
+    /**
+     * Initializes a new {@link DriveFileHolder}.
+     *
+     * @param session The sync session
+     * @param stream The underlying stream
+     * @param name The filename
+     * @param contentType The content-type, or <code>null</code> if unknown
+     * @param length The context length, or <code>-1</code> if unknown
+     * @param throttled <code>true</code> to provide a (potentially) throttled stream, <code>false</code>, otherwise
+     */
+    public DriveFileHolder(SyncSession session, InputStream stream, String name, String contentType, long length, boolean throttled) {
         super();
         this.contentType = null != contentType ? contentType : "application/octet-stream";
+        this.length = length;
         this.name = name;
-        if (throttled) {
-            this.stream = new BucketInputStream(stream, session.getServerSession());
-        } else {
-            this.stream = stream;
-        }
+        this.stream = throttled ? new BucketInputStream(stream, session.getServerSession()) : stream;
         tasks = new LinkedList<Runnable>();
     }
 
@@ -129,7 +138,7 @@ public class DriveFileHolder implements IFileHolder {
 
     @Override
     public long getLength() {
-        return -1;
+        return length;
     }
 
     @Override

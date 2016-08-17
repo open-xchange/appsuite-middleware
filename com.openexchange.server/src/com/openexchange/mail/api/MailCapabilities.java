@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -94,6 +94,11 @@ public abstract class MailCapabilities {
         @Override
         public String toString() {
             return "Empty mail capabilities";
+        }
+
+        @Override
+        public boolean hasFileNameSearch() {
+            return false;
         };
 
     };
@@ -198,6 +203,28 @@ public abstract class MailCapabilities {
      * @return <code>true</code> if mail system supports subscription; otherwise <code>false</code>
      */
     public abstract boolean hasSubscription();
+
+    /**
+     * Indicates if mail system supports search of attachment file names.
+     * <p>
+     * Defaults to <code>false</code>
+     *
+     * @return <code>true</code> if mail system supports search of attachment file names; otherwise <code>false</code>
+     */
+    public boolean hasFileNameSearch() {
+        return false;
+    }
+
+    /**
+     * Indicates if mail system supports retrieving folder validity information.
+     * <p>
+     * Defaults to <code>false</code>
+     *
+     * @return <code>true</code> if mail system supports retrieving folder validity information; otherwise <code>false</code>
+     */
+    public boolean hasFolderValidity() {
+        return false;
+    }
 
     /**
      * Returns the capabilities as a bit mask.

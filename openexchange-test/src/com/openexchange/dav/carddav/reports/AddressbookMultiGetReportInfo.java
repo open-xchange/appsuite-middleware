@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,27 +50,29 @@
 package com.openexchange.dav.carddav.reports;
 
 import org.apache.jackrabbit.webdav.DavConstants;
-import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.apache.jackrabbit.webdav.property.PropContainer;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.apache.jackrabbit.webdav.xml.DomUtil;
 import org.apache.jackrabbit.webdav.xml.Namespace;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import com.openexchange.dav.caldav.reports.CalendarMultiGetReport;
 
 /**
  * {@link AddressbookMultiGetReportInfo}
- * 
+ *
  * Encapsulates the BODY of a {@link CalendarMultiGetReport} request ("calendar-multiget").
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class AddressbookMultiGetReportInfo extends ReportInfo {
 
     private final String[] hrefs;
+    private final PropContainer propertyNames;
 
     /**
      * Creates a new {@link AddressbookMultiGetReportInfo}.
-     * @param hrefs The contact data references to include in the request 
+     * @param hrefs The contact data references to include in the request
      */
     public AddressbookMultiGetReportInfo(final String[] hrefs) {
     	this(hrefs, null);
@@ -78,12 +80,13 @@ public class AddressbookMultiGetReportInfo extends ReportInfo {
 
     /**
      * Creates a new {@link AddressbookMultiGetReportInfo}.
-     * @param hrefs The contact data references to include in the request 
+     * @param hrefs The contact data references to include in the request
      * @param propertyNames the properties to include in the request
      */
-    public AddressbookMultiGetReportInfo(final String[] hrefs, final DavPropertyNameSet propertyNames) {
-        super(AddressbookMultiGetReport.ADDRESSBOOK_MULTI_GET, DavConstants.DEPTH_0, propertyNames);
+    public AddressbookMultiGetReportInfo(final String[] hrefs, PropContainer propertyNames) {
+        super(AddressbookMultiGetReport.ADDRESSBOOK_MULTI_GET, DavConstants.DEPTH_0, null);
         this.hrefs = hrefs;
+        this.propertyNames = propertyNames;
     }
 
     @Override
@@ -91,15 +94,17 @@ public class AddressbookMultiGetReportInfo extends ReportInfo {
     	/*
     	 * create addressbook-multi-get element
     	 */
-    	final Element addressbookMultiGetElement = DomUtil.createElement(document, 
-    			AddressbookMultiGetReport.ADDRESSBOOK_MULTI_GET.getLocalName(), 
+    	final Element addressbookMultiGetElement = DomUtil.createElement(document,
+    			AddressbookMultiGetReport.ADDRESSBOOK_MULTI_GET.getLocalName(),
     			AddressbookMultiGetReport.ADDRESSBOOK_MULTI_GET.getNamespace());
-    	addressbookMultiGetElement.setAttributeNS(Namespace.XMLNS_NAMESPACE.getURI(), 
+    	addressbookMultiGetElement.setAttributeNS(Namespace.XMLNS_NAMESPACE.getURI(),
     			Namespace.XMLNS_NAMESPACE.getPrefix() + ":" + DavConstants.NAMESPACE.getPrefix(), DavConstants.NAMESPACE.getURI());
     	/*
     	 * append properties element
     	 */
-    	addressbookMultiGetElement.appendChild(super.getPropertyNameSet().toXml(document));
+        if (null != propertyNames) {
+            addressbookMultiGetElement.appendChild(propertyNames.toXml(document));
+        }
     	/*
     	 * append hrefs
     	 */

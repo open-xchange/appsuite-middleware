@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,11 +50,8 @@
 package com.openexchange.mail.json.actions;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONValue;
 import org.slf4j.Logger;
@@ -68,19 +65,26 @@ import com.openexchange.json.cache.JsonCaches;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
-import com.openexchange.mail.json.ColumnCollection;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.converters.MailConverter;
+import com.openexchange.mail.json.osgi.MailJSONActivator;
+import com.openexchange.mail.json.utils.ColumnCollection;
+import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.FlagTerm;
+import com.openexchange.mail.search.ORTerm;
+import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.search.UserFlagTerm;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
@@ -327,22 +331,68 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     throw MailExceptionCode.INVALID_INT_VALUE.create(AJAXServlet.PARAMETER_ORDER);
                 }
             }
+
+            /*
+             * Prepare search term for mail categories
+             */
+//            String searchTerm = null;
+
+            String category_filter = req.getParameter("categoryid");
+
+            SearchTerm<?> searchTerm = null;
+            if (filterApplied || category_filter != null) {
+                mailInterface.openFor(folderId);
+                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
+
+                {
+
+                    // Check if mail categories are enabled
+                    MailCategoriesConfigService categoriesService = MailJSONActivator.SERVICES.get().getOptionalService(MailCategoriesConfigService.class);
+                    if (categoriesService != null && categoriesService.isEnabled(req.getSession()) && category_filter != null && !category_filter.equals("none")) {
+                        filterApplied = true;
+                        if (category_filter.equals("general")) {
+                            // Special case with unkeyword
+                            String categoryNames[] = categoriesService.getAllFlags(req.getSession(), true, false);
+                            if (categoryNames.length != 0) {
+                                searchTerm = new UserFlagTerm(categoryNames, false);
+                            }
+                        } else {
+                            // Normal case with keyword
+                            String flag = categoriesService.getFlagByCategory(req.getSession(), category_filter);
+                            if (flag == null) {
+                                throw MailExceptionCode.INVALID_PARAMETER_VALUE.create(category_filter);
+                            }
+
+                            // test if category is a system category
+                            if (categoriesService.isSystemCategory(category_filter, req.getSession())) {
+                                // Add active user categories as unkeywords
+                                String[] unkeywords = categoriesService.getAllFlags(req.getSession(), true, true);
+                                if (unkeywords.length != 0) {
+                                    searchTerm = new ANDTerm(new UserFlagTerm(flag, true), new UserFlagTerm(unkeywords, false));
+                                } else {
+                                    searchTerm = new UserFlagTerm(flag, true);
+                                }
+                            } else {
+                                searchTerm = new UserFlagTerm(flag, true);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // -------
+
             /*
              * Start response
              */
             long start = System.currentTimeMillis();
             int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
             if (!filterApplied) {
-                List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, cache, sortCol, orderDir, columns, fromToIndices, lookAhead);
-
-                if (null != headers && headers.length > 0) {
-                    enrichWithHeaders(mails, headers, mailInterface.getMailAccess().getMessageStorage());
-                }
-
+                List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, cache, sortCol, orderDir, columns, headers, fromToIndices, lookAhead, null);
                 return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
             }
 
-            List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, null, lookAhead);
+            List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, headers, null, lookAhead, searchTerm);
             boolean cached = false;
             int more = -1;
             if (mails instanceof PropertizedList) {
@@ -396,10 +446,6 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 }
             }
 
-            if (null != headers && headers.length > 0) {
-                enrichWithHeaders(mails, headers, mailInterface.getMailAccess().getMessageStorage());
-            }
-
             AJAXRequestResult result = new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
             result.setResponseProperty("cached", Boolean.valueOf(cached));
             if (more > 0) {
@@ -408,62 +454,6 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             return result.setDurationByStart(start);
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private void enrichWithHeaders(List<List<MailMessage>> conversations, String[] headerNames, IMailMessageStorage messageStorage) throws OXException {
-        Map<String, List<MailMessage>> folders = new HashMap<String, List<MailMessage>>(4);
-
-        for (List<MailMessage> conversation : conversations) {
-            for (MailMessage mail : conversation) {
-                if (null != mail) {
-                    String fullName = mail.getFolder();
-                    List<MailMessage> msgs = folders.get(fullName);
-                    if (null == msgs) {
-                        msgs = new LinkedList<MailMessage>();
-                        folders.put(fullName, msgs);
-                    }
-                    msgs.add(mail);
-                }
-            }
-        }
-
-        for (Map.Entry<String, List<MailMessage>> entry : folders.entrySet()) {
-            enrichWithHeaders(entry.getKey(), entry.getValue(), headerNames, messageStorage);
-        }
-    }
-
-    private void enrichWithHeaders(String fullName, List<MailMessage> mails, String[] headerNames, IMailMessageStorage messageStorage) throws OXException {
-        Map<String, MailMessage> headers;
-        {
-            List<String> ids = new LinkedList<String>();
-            for (MailMessage mail : mails) {
-                if (null != mail) {
-                    ids.add(mail.getMailId());
-                }
-            }
-
-            MailMessage[] ms = messageStorage.getMessages(fullName, ids.toArray(new String[ids.size()]), MailFields.toArray(MailField.ID, MailField.HEADERS));
-            headers = new HashMap<String, MailMessage>(ms.length);
-            for (MailMessage header : ms) {
-                headers.put(header.getMailId(), header);
-            }
-        }
-
-        for (MailMessage mail : mails) {
-            if (null != mail) {
-                MailMessage header = headers.get(mail.getMailId());
-                if (null != header) {
-                    for (String headerName : headerNames) {
-                        String[] values = header.getHeader(headerName);
-                        if (null != values) {
-                            for (String value : values) {
-                                mail.addHeader(headerName, value);
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 

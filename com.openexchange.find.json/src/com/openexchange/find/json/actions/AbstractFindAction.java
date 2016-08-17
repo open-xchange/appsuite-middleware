@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.SearchService;
 import com.openexchange.find.json.FindRequest;
+import com.openexchange.find.json.SearchServiceProvider;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -68,7 +69,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @since 7.6.0
  */
-public abstract class AbstractFindAction implements AJAXActionService {
+public abstract class AbstractFindAction implements AJAXActionService, SearchServiceProvider {
 
     /** The service look-up */
     protected final ServiceLookup services;
@@ -85,7 +86,7 @@ public abstract class AbstractFindAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
-        final FindRequest searchRequest = new FindRequest(requestData, session);
+        final FindRequest searchRequest = new FindRequest(requestData, session, this);
         try {
             return doPerform(searchRequest);
         } catch (final JSONException e) {
@@ -98,7 +99,8 @@ public abstract class AbstractFindAction implements AJAXActionService {
      *
      * @return The search service
      */
-    protected SearchService getSearchService() {
+    @Override
+    public SearchService getSearchService() {
         return services.getService(SearchService.class);
     }
 

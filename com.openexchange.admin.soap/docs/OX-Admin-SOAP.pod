@@ -13,7 +13,7 @@ how to setup SOAP on Open-Xchange.
 =begin html
 
 <p>
-See <A HREF=javadoc/com/openexchange/admin/soap/OXContext.html>Javadoc</A>
+See <A HREF=http://software.open-xchange.com/products/appsuite/doc/RMI/javadoc/com/openexchange/admin/rmi/OXContextInterface.html>Javadoc</A>
 </p>
 
 =end html
@@ -25,7 +25,7 @@ Context related service.
 =begin html
 
 <p>
-See <A HREF=javadoc/com/openexchange/admin/soap/OXUtil.html>Javadoc</A>
+See <A HREF=http://software.open-xchange.com/products/appsuite/doc/RMI/javadoc/com/openexchange/admin/rmi/OXUtilInterface.html>Javadoc</A>
 </p>
 
 =end html
@@ -37,7 +37,7 @@ Util related service.
 =begin html
 
 <p>
-See <A HREF=javadoc/com/openexchange/admin/soap/OXUser.html>Javadoc</A>
+See <A HREF=http://software.open-xchange.com/products/appsuite/doc/RMI/javadoc/com/openexchange/admin/rmi/OXUserInterface.html>Javadoc</A>
 </p>
 
 =end html
@@ -49,7 +49,7 @@ User related service.
 =begin html
 
 <p>
-See <A HREF=javadoc/com/openexchange/admin/soap/OXGroup.html>Javadoc</A>
+See <A HREF=http://software.open-xchange.com/products/appsuite/doc/RMI/javadoc/com/openexchange/admin/rmi/OXGroupInterface.html>Javadoc</A>
 </p>
 
 =end html
@@ -61,7 +61,7 @@ Group related service.
 =begin html
 
 <p>
-See <A HREF=javadoc/com/openexchange/admin/soap/OXResource.html>Javadoc</A>
+See <A HREF=http://software.open-xchange.com/products/appsuite/doc/RMI/javadoc/com/openexchange/admin/rmi/OXResourceInterface.html>Javadoc</A>
 </p>
 
 =end html
@@ -73,7 +73,7 @@ Resource related service.
 =begin html
 
 <p>
-See <A HREF=javadoc/com/openexchange/admin/soap/OXTaskMgmt.html>Javadoc</A>
+See <A HREF=http://software.open-xchange.com/products/appsuite/doc/RMI/javadoc/com/openexchange/admin/rmi/OXTaskMgmtInterface.html>Javadoc</A>
 </p>
 
 =end html
@@ -321,7 +321,7 @@ for the user object.
 
 =begin html
 
-See <A HREF=javadoc/com/openexchange/admin/soap/OXUser.html>Javadoc</A>
+See <A HREF=http://software.open-xchange.com/products/appsuite/doc/RMI/javadoc/com/openexchange/admin/rmi/OXUserInterface.html>Javadoc</A>
 
 =end html
 
@@ -337,7 +337,7 @@ hostname and not the url.
 
 =item executing SOAP operation and error handling
 
- $result = 
+ $result =
     $souserclt->create($context,
 		  SOAP::Data->name("User" => \SOAP::Data->value(
 			SOAP::Data->name("name" => $uname),

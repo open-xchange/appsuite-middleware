@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -71,36 +71,24 @@ public final class ExtendedMimeMessage extends MimeMessage {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ExtendedMimeMessage.class);
 
     private final String fullname;
-
-    private final char separator;
-
     private long uid = -1;
-
     private Boolean hasAttachment;
-
     private int threadLevel;
-
     private BODYSTRUCTURE bodystructure;
-
     private int priority = -1;
-
     private Date receivedDate;
-
     private Integer size;
-
     private ContentType contentType;
 
     /**
      * Initializes a new {@link ExtendedMimeMessage}
      *
-     * @param fullname The folder fullname
-     * @param separator The folder separator character
+     * @param fullname The folder full name
      * @param msgnum The message number in folder
      */
-    public ExtendedMimeMessage(final String fullname, final char separator, final int msgnum) {
+    public ExtendedMimeMessage(final String fullname, final int msgnum) {
         super(MimeDefaultSession.getDefaultSession());
         this.fullname = fullname;
-        this.separator = separator;
         this.msgnum = msgnum;
     }
 
@@ -123,15 +111,6 @@ public final class ExtendedMimeMessage extends MimeMessage {
      */
     public String getFullname() {
         return fullname;
-    }
-
-    /**
-     * Gets this message's folder separator
-     *
-     * @return The separator
-     */
-    public char getSeparator() {
-        return separator;
     }
 
     private static final String MULTI = "multipart/";

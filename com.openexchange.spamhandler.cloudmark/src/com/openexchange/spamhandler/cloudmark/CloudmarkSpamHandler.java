@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -67,6 +67,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.datasource.FileHolderDataSource;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.MailTransport.SendRawProperties;
@@ -90,8 +91,6 @@ public final class CloudmarkSpamHandler extends SpamHandler {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CloudmarkSpamHandler.class);
 
     private static final String NAME = "CloudmarkSpamHandler";
-
-
 
     // -------------------------------------------------------------------------------------------
 
@@ -135,11 +134,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
         if (null != sink) {
             try {
                 // Initialize send properties
-                SendRawProperties sendRawProperties = MailTransport.SendRawProperties.newInstance()
-                    .addRecipient(targetAddress)
-                    .setSender(senderAddress)
-                    .setValidateAddressHeaders(false)
-                    .setSanitizeHeaders(false);
+                SendRawProperties sendRawProperties = MailTransport.SendRawProperties.newInstance().addRecipient(targetAddress).setSender(senderAddress).setValidateAddressHeaders(false).setSanitizeHeaders(false);
 
                 // Wrap if demanded
                 if (wrap) {
@@ -201,7 +196,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
             } else {
                 InternetAddress targetSpamAddress = null;
                 try {
-                    targetSpamAddress = new InternetAddress(sTargetSpamEmailAddress, true);
+                    targetSpamAddress = new QuotedInternetAddress(sTargetSpamEmailAddress, true);
                 } catch (final AddressException e) {
                     LOG.error("The configured target eMail address is not valid", e);
                 }
@@ -226,7 +221,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                 } else if (targetSpamFolder.equals("3")) {
                     mailAccess.getMessageStorage().moveMessages(fullName, mailAccess.getFolderStorage().getConfirmedSpamFolder(), mailIDs, true);
                 } else if (targetSpamFolder.equals("0")) {
-                	// no move at all
+                    // no move at all
                 } else {
                     mailAccess.getMessageStorage().moveMessages(fullName, mailAccess.getFolderStorage().getTrashFolder(), mailIDs, true);
                     LOG.error("There is no valid 'com.openexchange.spamhandler.cloudmark.targetSpamFolder' configured. Moving spam to trash.");
@@ -254,7 +249,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
             } else {
                 InternetAddress targetHamAddress = null;
                 try {
-                    targetHamAddress = new InternetAddress(sTargetHamEmailAddress, true);
+                    targetHamAddress = new QuotedInternetAddress(sTargetHamEmailAddress, true);
                 } catch (final AddressException e) {
                     LOG.error("The configured target eMail address is not valid", e);
                 }
@@ -306,15 +301,19 @@ public final class CloudmarkSpamHandler extends SpamHandler {
         }
 
         String sendAddr = usm.getSendAddr();
+        return getAddress(sendAddr);
+    }
+
+    protected static InternetAddress getAddress(String sendAddr) {
         if (sendAddr == null) {
             return null;
         }
 
         try {
-            return new InternetAddress(sendAddr, true);
+            return new QuotedInternetAddress(sendAddr, true);
         } catch (AddressException e) {
+            LOG.error("Unable to parse provided email address " + sendAddr, e);
             return null;
         }
     }
-
 }

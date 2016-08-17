@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -201,7 +201,7 @@ public class AdminCache {
     public void initCache(final ConfigurationService service) throws OXGenericException {
         this.prop = new PropertyHandler(System.getProperties());
         configureAuthentication(); // disabling authentication mechs
-        readMasterCredentials(service);
+        readAndSetMasterCredentials(service);
         log.info("Init Cache");
         initPool();
         this.adminCredentialsCache = new Hashtable<Integer, Credentials>();
@@ -635,7 +635,18 @@ public class AdminCache {
         log.debug("Master override: {}", allowMasterOverride);
     }
 
-    private void readMasterCredentials(final ConfigurationService service) throws OXGenericException {
+    private void readAndSetMasterCredentials(final ConfigurationService service) throws OXGenericException {
+        Credentials masterCredentials = readMasterCredentials(service);
+        if (null == masterCredentials) {
+            final OXGenericException genericException = new OXGenericException("No master credentials defined!");
+            log.warn("", genericException);
+        } else {
+            this.masterCredentials = masterCredentials;
+            log.debug("Master credentials successfully set!");
+        }
+    }
+
+    private Credentials readMasterCredentials(final ConfigurationService service) throws OXGenericException {
         BufferedReader bf = null;
         try {
             final File file = service.getFileByName("mpasswd");
@@ -648,9 +659,9 @@ public class AdminCache {
                             // ok seems to be a line with user:pass entry
                             final String[] user_pass_combination = line.split(":");
                             if (user_pass_combination.length == 3) {
-                                this.masterCredentials = new Credentials(user_pass_combination[0], user_pass_combination[2]);
-                                this.masterCredentials.setPasswordMech(user_pass_combination[1]);
-                                log.debug("Master credentials successfully set!");
+                                Credentials masterCredentials = new Credentials(user_pass_combination[0], user_pass_combination[2]);
+                                masterCredentials.setPasswordMech(user_pass_combination[1]);
+                                return masterCredentials;
                             } else {
                                 throw new OXGenericException("Invalid mpasswd format.");
                             }
@@ -669,10 +680,7 @@ public class AdminCache {
                 }
             }
         }
-        if (masterCredentials == null) {
-            final OXGenericException genericException = new OXGenericException("No master credentials defined!");
-            log.warn("", genericException);
-        }
+        return null;
     }
 
     private final void checkDatabaseLocked() throws PoolException {
@@ -728,53 +736,53 @@ public class AdminCache {
 
     @Deprecated
     public void closeConfigDBSqlStuff(final Connection con, final PreparedStatement stmt) {
-        try {
-            if (stmt != null) {
+        if (stmt != null) {
+            try {
                 stmt.close();
+            } catch (final SQLException e) {
+                log.error("Error closing statement", e);
             }
-        } catch (final SQLException e) {
-            log.error("Error closing statement", e);
         }
-        try {
-            if (con != null) {
+        if (con != null) {
+            try {
                 pushConnectionForConfigDB(con);
+            } catch (final PoolException exp) {
+                log.error("Pool Error pushing connection to pool!", exp);
             }
-        } catch (final PoolException exp) {
-            log.error("Pool Error pushing connection to pool!", exp);
         }
     }
 
     public void closeReadConfigDBSqlStuff(final Connection con, final PreparedStatement stmt) {
-        try {
-            if (stmt != null) {
+        if (stmt != null) {
+            try {
                 stmt.close();
+            } catch (final SQLException e) {
+                log.error("Error closing statement", e);
             }
-        } catch (final SQLException e) {
-            log.error("Error closing statement", e);
         }
-        try {
-            if (con != null) {
+        if (con != null) {
+            try {
                 pushReadConnectionForConfigDB(con);
+            } catch (final PoolException exp) {
+                log.error("Pool Error pushing connection to pool!", exp);
             }
-        } catch (final PoolException exp) {
-            log.error("Pool Error pushing connection to pool!", exp);
         }
     }
 
     public void closeWriteConfigDBSqlStuff(final Connection con, final PreparedStatement stmt) {
-        try {
-            if (stmt != null) {
+        if (stmt != null) {
+            try {
                 stmt.close();
+            } catch (final SQLException e) {
+                log.error("Error closing statement", e);
             }
-        } catch (final SQLException e) {
-            log.error("Error closing statement", e);
         }
-        try {
-            if (con != null) {
+        if (con != null) {
+            try {
                 pushWriteConnectionForConfigDB(con);
+            } catch (final PoolException exp) {
+                log.error("Pool Error pushing connection to pool!", exp);
             }
-        } catch (final PoolException exp) {
-            log.error("Pool Error pushing connection to pool!", exp);
         }
     }
 
@@ -801,7 +809,21 @@ public class AdminCache {
     }
 
     public void reloadMasterCredentials(ConfigurationService configService) throws OXGenericException {
-        readMasterCredentials(configService);
+        Credentials credentials = readMasterCredentials(configService);
+        if (this.masterCredentials == null) {
+            if (credentials != null) {
+                this.masterCredentials = credentials;
+                log.debug("Master credentials successfully set!");
+            }
+        } else if (!this.masterCredentials.equals(credentials)) {
+            this.masterCredentials = credentials;
+            if (null == this.masterCredentials) {
+                final OXGenericException genericException = new OXGenericException("No master credentials defined!");
+                log.warn("", genericException);
+            } else {
+                log.debug("Master credentials successfully set!");
+            }
+        }
     }
 
     public boolean isAllowMasterOverride() {

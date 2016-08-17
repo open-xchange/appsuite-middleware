@@ -1,0 +1,39 @@
+/folders?action=updates:
+  get:
+    operationId: getFolderUpdates
+    tags:
+      - folders
+    summary: Gets the new, modified and deleted folders of a given folder.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: parent
+        type: string
+        description: Object ID of a folder, which is the parent folder of the requested folders.
+        required: true
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the requested folders.
+        required: true
+      - $ref: "#/parameters/gblQueryParamFolderColumns"
+      - $ref: "#/parameters/gblQueryParamFolderTree"
+      - in: query
+        name: ignore
+        type: string
+        description: Which kinds of updates should be ignored. Currently, the only valid value – "deleted" – causes deleted object IDs not to be returned.
+        required: false
+        enum:
+          - "deleted"
+      - $ref: "#/parameters/gblQueryParamAllowedModules"
+    responses:
+      200:
+        description: |
+          An array with data for new, modified and deleted folders. New and modified folders are represented
+          by arrays. The elements of each array contain the information specified by the corresponding
+          identifiers in the `columns` parameter. Deleted folders (should the ignore parameter be ever implemented)
+          would be identified by their object IDs as plain strings, without being part of a nested array. In case
+          of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/FolderUpdatesResponse"

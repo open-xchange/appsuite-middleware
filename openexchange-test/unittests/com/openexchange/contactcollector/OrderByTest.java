@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -54,7 +54,7 @@ import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
-import com.openexchange.contactcollector.osgi.CCServiceRegistry;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -63,16 +63,23 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class OrderByTest extends TestCase {
+
+    private SimpleServiceLookup services;
 
     private String user;
 
@@ -87,6 +94,17 @@ public class OrderByTest extends TestCase {
     @Override
     public void setUp() throws Exception {
         Init.startServer();
+
+        services = new SimpleServiceLookup();
+        {
+            services.add(TimerService.class, Init.LOOKUP.getService(TimerService.class));
+            services.add(ThreadPoolService.class, Init.LOOKUP.getService(ThreadPoolService.class));
+            services.add(ContextService.class, Init.LOOKUP.getService(ContextService.class));
+            services.add(UserConfigurationService.class, Init.LOOKUP.getService(UserConfigurationService.class));
+            services.add(UserService.class, Init.LOOKUP.getService(UserService.class));
+            services.add(ContactService.class, Init.LOOKUP.getService(ContactService.class));
+        }
+
         final TestConfig config = new TestConfig();
         user = config.getUser();
 
@@ -107,7 +125,7 @@ public class OrderByTest extends TestCase {
     }
 
     public void testOrderByUserfield20() throws Throwable {
-        ContactService contactService = CCServiceRegistry.getInstance().getService(ContactService.class);
+        ContactService contactService = services.getService(ContactService.class);
 
         final Contact contact1 = new Contact();
         final Contact contact2 = new Contact();
@@ -130,13 +148,13 @@ public class OrderByTest extends TestCase {
             contactService.createContact(session, String.valueOf(contactFolder.getObjectID()), contact2);
             contactService.createContact(session, String.valueOf(contactFolder.getObjectID()), contact3);
 
-            ContactField[] fields = new ContactField[] { ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, 
+            ContactField[] fields = new ContactField[] { ContactField.FOLDER_ID, ContactField.LAST_MODIFIED,
                 ContactField.OBJECT_ID, ContactField.SUR_NAME };
             ContactSearchObject searchObject = new ContactSearchObject();
             searchObject.addFolder(contactFolder.getObjectID());
             searchObject.setEmailAutoComplete(true);
             searchObject.setEmail1("orderbyTest");
-            SearchIterator<Contact> iterator = contactService.searchContacts(session, searchObject, fields,  
+            SearchIterator<Contact> iterator = contactService.searchContacts(session, searchObject, fields,
                 new SortOptions(ContactField.USERFIELD20, Order.ASCENDING));
             List<String> surnames = new ArrayList<String>();
             while (iterator.hasNext()) {
@@ -153,11 +171,11 @@ public class OrderByTest extends TestCase {
             assertEquals("Contact on wrong position", "orderbyTest_contact1", surnames.get(2));
 
         } finally {
-            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact1.getObjectID()), 
+            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact1.getObjectID()),
                 contact1.getLastModified());
-            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact2.getObjectID()), 
+            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact2.getObjectID()),
                 contact2.getLastModified());
-            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact3.getObjectID()), 
+            contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact3.getObjectID()),
                 contact3.getLastModified());
         }
 

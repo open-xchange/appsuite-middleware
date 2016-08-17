@@ -2,10 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Box.com file storage bundle
 Bundle-SymbolicName: com.openexchange.file.storage.boxcom
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.fasterxml.jackson.core,
+Import-Package: com.fasterxml.jackson.annotation,
+ com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,
  com.fasterxml.jackson.core.io,
@@ -13,6 +14,8 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.sym,
  com.fasterxml.jackson.core.type,
  com.fasterxml.jackson.core.util,
+ com.fasterxml.jackson.databind,
+ com.fasterxml.jackson.databind.jsontype,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.config,
@@ -28,7 +31,9 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.log,
  com.openexchange.mime,
  com.openexchange.oauth,
+ com.openexchange.oauth.access,
  com.openexchange.osgi,
+ com.openexchange.rest.client.httpclient,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sessiond,
@@ -116,7 +121,5 @@ Import-Package: com.fasterxml.jackson.core,
  org.scribe.utils,
  org.slf4j
 Bundle-ClassPath: lib/box-java-sdk-v2-3.0.11.jar,
- lib/jackson-annotations-2.2.3.jar,
- lib/jackson-databind-2.2.4.jar,
  .
 Bundle-Activator: com.openexchange.file.storage.boxcom.osgi.BoxActivator

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -111,7 +111,7 @@ public class UploadHelper {
         /*
          * Try to save directly if applicable (no upload resume, no replace, total length is known and smaller than threshold)
          */
-        if (null == originalVersion && 0 >= offset && 0 < totalLength && DriveConstants.OPTIMISTIC_UPLOAD_SIZE_THRESHOLD >= totalLength) {
+        if (null == originalVersion && 0 >= offset && 0 < totalLength && session.getOptimisticSaveThreshold() >= totalLength) {
 
             Entry<File, String> uploadEntry = session.getStorage().wrapInTransaction(new StorageOperation<Entry<File, String>>() {
 
@@ -392,7 +392,7 @@ public class UploadHelper {
         String uploadPath;
         File uploadFile;
         if (session.getTemp().supported()) {
-            boolean existedBefore = session.getTemp().exists(); 
+            boolean existedBefore = session.getTemp().exists();
             uploadPath = session.getTemp().getPath(true);
             if (null == uploadPath) {
                 session.trace("Unable to get path to temp folder, falling back to direct upload.");
@@ -402,7 +402,7 @@ public class UploadHelper {
         } else {
             uploadPath = path;
             uploadFile = session.getStorage().getFileByName(path, uploadFileName);
-        }       
+        }
         if (null == uploadFile) {
             /*
              * create new upload file
@@ -453,7 +453,7 @@ public class UploadHelper {
         String uploadPath;
         if (session.getTemp().supported()) {
             /*
-             * partial uploads would be stored in temp folder, if it exists 
+             * partial uploads would be stored in temp folder, if it exists
              */
             if (false == session.getTemp().exists()) {
                 return Collections.emptyList();

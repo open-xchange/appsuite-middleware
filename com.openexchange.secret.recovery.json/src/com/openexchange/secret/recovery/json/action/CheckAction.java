@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -90,10 +90,14 @@ public final class CheckAction extends AbstractSecretRecoveryAction {
         String diagnosis = secretInconsistencyDetector.isSecretWorking(session);
 
         // Compose JSON response
-        JSONObject object = new JSONObject(2);
-        object.put("secretWorks", diagnosis == null);
-        if (diagnosis != null) {
+        JSONObject object;
+        if (diagnosis == null) {
+            // Works...
+            object = new JSONObject(2);
+            object.put("secretWorks", true);
+        } else {
             LOG.info("Secrets in session {} (user={}, context={}) seem to need migration: {}", session.getSessionID(), I(session.getUserId()), I(session.getContextId()), diagnosis);
+            object = new JSONObject(4);
             object.put("secretWorks", false);
             object.put("diagnosis", diagnosis);
         }

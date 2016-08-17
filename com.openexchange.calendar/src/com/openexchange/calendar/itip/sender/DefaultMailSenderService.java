@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -52,6 +52,8 @@ package com.openexchange.calendar.itip.sender;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
 import javax.activation.DataHandler;
@@ -68,6 +70,8 @@ import com.openexchange.calendar.itip.generators.NotificationMail;
 import com.openexchange.calendar.itip.generators.NotificationParticipant;
 import com.openexchange.calendar.itip.sender.datasources.MessageDataSource;
 import com.openexchange.context.ContextService;
+import com.openexchange.data.conversion.ical.ConversionError;
+import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.itip.ITipEmitter;
 import com.openexchange.data.conversion.ical.itip.ITipMethod;
 import com.openexchange.exception.OXException;
@@ -390,8 +394,23 @@ public class DefaultMailSenderService implements MailSenderService {
 		final byte[] icalFile;
 		final boolean isAscii;
 		{
+            List<ConversionWarning> warnings = new ArrayList<>();
+            List<ConversionError> errors = new ArrayList<>();
+
 			String message = iTipEmitter.writeMessage(mail.getMessage(), ctx,
-					null, null);
+                errors, warnings);
+
+            if (!warnings.isEmpty()) {
+                for (ConversionWarning warning : warnings) {
+                    LOG.warn(warning.getMessage(), warning);
+                }
+            }
+            if (!errors.isEmpty()) {
+                for (ConversionWarning error : errors) {
+                    LOG.error(error.getMessage(), error);
+                }
+            }
+
 			message = trimICal(message);
 			icalFile = message.getBytes(charset);
 			isAscii = isAscii(icalFile);

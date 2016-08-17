@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -633,13 +633,70 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             return (RemoteInternalPreviewService) previewService;
         }
 
+        return getRemoteInternalPreviewServiceWithMime0(previewService, new FileNameMimeTypeProvider(fileName), output);
+    }
+
+    /**
+     * (Optionally) Gets the {@link RemoteInternalPreviewService} representation for given arguments.
+     *
+     * @param previewService The preview service
+     * @param mimeType The MIME type of the file
+     * @param output The desired preview output
+     * @return The {@code RemoteInternalPreviewService} representation or <code>null</code>
+     */
+    public static RemoteInternalPreviewService getRemoteInternalPreviewServiceWithMime(PreviewService previewService, String mimeType, PreviewOutput output) {
+        if (previewService instanceof RemoteInternalPreviewService) {
+            return (RemoteInternalPreviewService) previewService;
+        }
+
+        return getRemoteInternalPreviewServiceWithMime0(previewService, new DirectMimeTypeProvider(mimeType), output);
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------
+
+    private static interface MimeTypeProvider {
+
+        String getMimeType();
+    }
+
+    private static final class DirectMimeTypeProvider implements MimeTypeProvider {
+
+        private final String mimeType;
+
+        DirectMimeTypeProvider(String mimeType) {
+            super();
+            this.mimeType = mimeType;
+        }
+
+        @Override
+        public String getMimeType() {
+            return mimeType;
+        }
+    }
+
+    private static final class FileNameMimeTypeProvider implements MimeTypeProvider {
+
+        private final String fileName;
+
+        FileNameMimeTypeProvider(String fileName) {
+            super();
+            this.fileName = fileName;
+        }
+
+        @Override
+        public String getMimeType() {
+            // Try to determine MIME type by file name
+            return MimeType2ExtMap.getContentType(fileName, null);
+        }
+    }
+
+    private static RemoteInternalPreviewService getRemoteInternalPreviewServiceWithMime0(PreviewService previewService, MimeTypeProvider mimeTypeProvider, PreviewOutput output) {
         // PreviewService object is no direct RemoteInternalPreviewService instance. Check if it is an instance of Delegating
         if (!(previewService instanceof Delegating)) {
             return null;
         }
 
-        // Try to determine file MIME type
-        String mimeType = MimeType2ExtMap.getContentType(fileName, null);
+        String mimeType = mimeTypeProvider.getMimeType();
         if (null == mimeType) {
             // No MIME type available
             return null;
@@ -658,6 +715,8 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         // No suitable candidate found...
         return null;
     }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Try to get a cached resource from preview service.

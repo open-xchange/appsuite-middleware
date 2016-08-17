@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,12 +50,6 @@
 package com.openexchange.ajax.request;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -110,6 +104,12 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link AppointmentRequest} - Processes appointment requests.
@@ -166,7 +166,7 @@ public class AppointmentRequest extends CalendarRequest {
         return timestamp;
     }
 
-    public JSONValue action(final String action, final JSONObject jsonObject) throws  JSONException, OXException{
+    public JSONValue action(final String action, final JSONObject jsonObject) throws JSONException, OXException {
         if (!session.getUserPermissionBits().hasCalendar()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("calendar");
         }
@@ -199,7 +199,7 @@ public class AppointmentRequest extends CalendarRequest {
         } else if (AJAXServlet.ACTION_RESOLVE_UID.equalsIgnoreCase(action)) {
             return actionResolveUid(jsonObject);
         } else {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
+            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
         }
     }
 
@@ -230,7 +230,7 @@ public class AppointmentRequest extends CalendarRequest {
         appointmentParser.parse(appointmentObj, jData);
 
         if (!appointmentObj.containsParentFolderID()) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( AJAXServlet.PARAMETER_FOLDERID);
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_FOLDERID);
         }
 
         convertExternalToInternalUsersIfPossible(appointmentObj, ctx, LOG);
@@ -258,8 +258,7 @@ public class AppointmentRequest extends CalendarRequest {
         return jsonResponseObj;
     }
 
-
-	public JSONObject actionUpdate(final JSONObject jsonObj) throws JSONException, OXException {
+    public JSONObject actionUpdate(final JSONObject jsonObj) throws JSONException, OXException {
         final int objectId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int inFolder = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_INFOLDER);
         timestamp = DataParser.checkDate(jsonObj, AJAXServlet.PARAMETER_TIMESTAMP);
@@ -357,24 +356,12 @@ public class AppointmentRequest extends CalendarRequest {
         try {
             if (!bIgnoreModified) {
                 if (showAppointmentInAllFolders) {
-                    it = appointmentsql.getModifiedAppointmentsBetween(
-                        session.getUserId(),
-                        start,
-                        end,
-                        _appointmentFields,
-                        requestedTimestamp,
-                        0,
-                        Order.NO_ORDER);
+                    it = appointmentsql.getModifiedAppointmentsBetween(session.getUserId(), start, end, _appointmentFields, requestedTimestamp, 0, Order.NO_ORDER);
                 } else {
                     if (start == null || end == null) {
                         it = appointmentsql.getModifiedAppointmentsInFolder(folderId, _appointmentFields, requestedTimestamp);
                     } else {
-                        it = appointmentsql.getModifiedAppointmentsInFolder(
-                            folderId,
-                            start,
-                            end,
-                            _appointmentFields,
-                            requestedTimestamp);
+                        it = appointmentsql.getModifiedAppointmentsInFolder(folderId, start, end, _appointmentFields, requestedTimestamp);
                     }
                 }
 
@@ -408,11 +395,7 @@ public class AppointmentRequest extends CalendarRequest {
                                     recuResults = recColl.calculateFirstRecurring(appointmentObj);
                                     written = true;
                                 } else {
-                                    recuResults = recColl.calculateRecurring(
-                                        appointmentObj,
-                                        start.getTime(),
-                                        end.getTime(),
-                                        0);
+                                    recuResults = recColl.calculateRecurring(appointmentObj, start.getTime(), end.getTime(), 0);
                                     written = true;
                                 }
                             } catch (final OXException e) {
@@ -618,11 +601,7 @@ public class AppointmentRequest extends CalendarRequest {
                             for (int a = 0; a < listSize; a++) {
                                 appointment.setStartDate(startDate);
                                 appointment.setEndDate(endDate);
-                                final RecurringResultsInterface recuResults = recColl.calculateRecurring(
-                                    appointment,
-                                    0,
-                                    0,
-                                    recurrencePosList.get(a));
+                                final RecurringResultsInterface recuResults = recColl.calculateRecurring(appointment, 0, 0, recurrencePosList.get(a));
                                 if (recuResults.size() > 0) {
                                     final RecurringResultInterface result = recuResults.getRecurringResult(0);
                                     appointment.setStartDate(new Date(result.getStart()));
@@ -684,8 +663,7 @@ public class AppointmentRequest extends CalendarRequest {
         }
     }
 
-
-    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException,OXException {
+    public JSONArray actionAll(final JSONObject jsonObj) throws JSONException, OXException {
         timestamp = new Date(0);
 
         SearchIterator<Appointment> it = null;
@@ -758,23 +736,23 @@ public class AppointmentRequest extends CalendarRequest {
                             final int owner = ofa.getFolderOwner(appointment.getParentFolderID());
 
                             switch (folderType) {
-                            case FolderObject.PRIVATE:
-                                for (final UserParticipant u : appointment.getUsers()) {
-                                    if (u.getIdentifier() == user.getId() && u.getAlarmMinutes() > -1) {
-                                        appointment.setAlarm(u.getAlarmMinutes());
-                                        break;
+                                case FolderObject.PRIVATE:
+                                    for (final UserParticipant u : appointment.getUsers()) {
+                                        if (u.getIdentifier() == user.getId() && u.getAlarmMinutes() > -1) {
+                                            appointment.setAlarm(u.getAlarmMinutes());
+                                            break;
+                                        }
                                     }
-                                }
-                                break;
+                                    break;
 
-                            case FolderObject.SHARED:
-                                for (final UserParticipant u : appointment.getUsers()) {
-                                    if (u.getIdentifier() == owner && u.getAlarmMinutes() > -1) {
-                                        appointment.setAlarm(u.getAlarmMinutes());
-                                        break;
+                                case FolderObject.SHARED:
+                                    for (final UserParticipant u : appointment.getUsers()) {
+                                        if (u.getIdentifier() == owner && u.getAlarmMinutes() > -1) {
+                                            appointment.setAlarm(u.getAlarmMinutes());
+                                            break;
+                                        }
                                     }
-                                }
-                                break;
+                                    break;
                             }
                         } catch (final OXException e) {
                             LOG.error("An error occurred during filling an appointment with alarm information.", e);
@@ -819,10 +797,7 @@ public class AppointmentRequest extends CalendarRequest {
 
                                 // add to order list
                                 if (listOrder) {
-                                    final DateOrderObject dateOrderObject = new DateOrderObject(getDateByFieldId(
-                                        orderBy,
-                                        appointment,
-                                        timeZone), appointment.clone());
+                                    final DateOrderObject dateOrderObject = new DateOrderObject(getDateByFieldId(orderBy, appointment, timeZone), appointment.clone());
                                     objectList.add(dateOrderObject);
                                 } else {
                                     writer.writeArray(appointment, columns, startUTC, endUTC, jsonResponseArray);
@@ -835,9 +810,7 @@ public class AppointmentRequest extends CalendarRequest {
                 if (!written) {
                     // add to order list
                     if (listOrder) {
-                        final DateOrderObject dateOrderObject = new DateOrderObject(
-                            getDateByFieldId(orderBy, appointment, timeZone),
-                            appointment.clone());
+                        final DateOrderObject dateOrderObject = new DateOrderObject(getDateByFieldId(orderBy, appointment, timeZone), appointment.clone());
                         objectList.add(dateOrderObject);
                     } else {
                         writer.writeArray(appointment, columns, startUTC, endUTC, jsonResponseArray);
@@ -857,18 +830,18 @@ public class AppointmentRequest extends CalendarRequest {
                 Arrays.sort(dateOrderObjectArray);
 
                 switch (orderDir) {
-                case ASCENDING:
-                case NO_ORDER:
-                    for (int a = 0; a < dateOrderObjectArray.length; a++) {
-                        final Appointment appointmentObj = (Appointment) dateOrderObjectArray[a].getObject();
-                        appointmentwriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
-                    }
-                    break;
-                case DESCENDING:
-                    for (int a = dateOrderObjectArray.length - 1; a >= 0; a--) {
-                        final Appointment appointmentObj = (Appointment) dateOrderObjectArray[a].getObject();
-                        appointmentwriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
-                    }
+                    case ASCENDING:
+                    case NO_ORDER:
+                        for (int a = 0; a < dateOrderObjectArray.length; a++) {
+                            final Appointment appointmentObj = (Appointment) dateOrderObjectArray[a].getObject();
+                            appointmentwriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
+                        }
+                        break;
+                    case DESCENDING:
+                        for (int a = dateOrderObjectArray.length - 1; a >= 0; a--) {
+                            final Appointment appointmentObj = (Appointment) dateOrderObjectArray[a].getObject();
+                            appointmentwriter.writeArray(appointmentObj, columns, startUTC, endUTC, jsonResponseArray);
+                        }
                 }
             }
 
@@ -897,7 +870,7 @@ public class AppointmentRequest extends CalendarRequest {
         final CalendarCollectionService recColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
         try {
             final Appointment appointmentobject = appointmentsql.getObjectById(id, inFolder);
-            if(shouldAnonymize(appointmentobject, session.getUserId())) {
+            if (shouldAnonymize(appointmentobject, session.getUserId())) {
                 anonymize(appointmentobject);
             }
 
@@ -909,13 +882,7 @@ public class AppointmentRequest extends CalendarRequest {
             if (appointmentobject.getRecurrenceType() != CalendarObject.NONE && recurrencePosition > 0) {
                 // Commented this because this is done in CalendarOperation.loadAppointment():207 that calls extractRecurringInformation()
                 // appointmentobject.calculateRecurrence();
-                final RecurringResultsInterface recuResults = recColl.calculateRecurring(
-                    appointmentobject,
-                    0,
-                    0,
-                    recurrencePosition,
-                    CalendarCollectionService.MAX_OCCURRENCESE,
-                    true);
+                final RecurringResultsInterface recuResults = recColl.calculateRecurring(appointmentobject, 0, 0, recurrencePosition, CalendarCollectionService.MAX_OCCURRENCESE, true);
                 if (recuResults.size() == 0) {
                     LOG.warn("No occurrence at position {}", recurrencePosition);
                     throw OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_POSITION.create(Integer.valueOf(recurrencePosition));
@@ -960,7 +927,7 @@ public class AppointmentRequest extends CalendarRequest {
         } else if (participant.getType() == Participant.EXTERNAL_USER) {
             timestamp = appointmentSql.setExternalConfirmation(objectId, folderId, participant.getEmailAddress(), confirmStatus, confirmMessage);
         } else {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create( AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(AJAXServlet.PARAMETER_TYPE, jData.get(AJAXServlet.PARAMETER_TYPE));
         }
 
         return new JSONObject();
@@ -1050,7 +1017,6 @@ public class AppointmentRequest extends CalendarRequest {
         }
     }
 
-
     public JSONArray actionNewAppointmentsSearch(final JSONObject jsonObj) throws JSONException, OXException {
         final String[] sColumns = split(DataParser.checkString(jsonObj, AJAXServlet.PARAMETER_COLUMNS));
         final int[] columns = StringCollection.convertStringArray2IntArray(sColumns);
@@ -1121,11 +1087,7 @@ public class AppointmentRequest extends CalendarRequest {
                         appointmentobject.setRecurrencePosition(result.getPosition());
 
                         if (appointmentobject.getFullTime()) {
-                            if (recColl.inBetween(
-                                appointmentobject.getStartDate().getTime(),
-                                appointmentobject.getEndDate().getTime(),
-                                startUTC.getTime(),
-                                endUTC.getTime())) {
+                            if (recColl.inBetween(appointmentobject.getStartDate().getTime(), appointmentobject.getEndDate().getTime(), startUTC.getTime(), endUTC.getTime())) {
                                 compareStartDateForList(appointmentList, appointmentobject, limit);
                             }
                         } else {
@@ -1135,11 +1097,7 @@ public class AppointmentRequest extends CalendarRequest {
                 }
                 if (!processed) {
                     if (appointmentobject.getFullTime() && (startUTC != null && endUTC != null)) {
-                        if (recColl.inBetween(
-                            appointmentobject.getStartDate().getTime(),
-                            appointmentobject.getEndDate().getTime(),
-                            startUTC.getTime(),
-                            endUTC.getTime())) {
+                        if (recColl.inBetween(appointmentobject.getStartDate().getTime(), appointmentobject.getEndDate().getTime(), startUTC.getTime(), endUTC.getTime())) {
                             compareStartDateForList(appointmentList, appointmentobject, limit);
                         }
                     } else {
@@ -1169,7 +1127,7 @@ public class AppointmentRequest extends CalendarRequest {
         }
     }
 
-    public JSONArray actionFreeBusy(final JSONObject jsonObj) throws JSONException,OXException {
+    public JSONArray actionFreeBusy(final JSONObject jsonObj) throws JSONException, OXException {
         final int userId = DataParser.checkInt(jsonObj, AJAXServlet.PARAMETER_ID);
         final int type = DataParser.checkInt(jsonObj, "type");
         final TimeZone timeZone;
@@ -1180,7 +1138,6 @@ public class AppointmentRequest extends CalendarRequest {
 
         final Date start = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_START, timeZone);
         final Date end = DataParser.checkTime(jsonObj, AJAXServlet.PARAMETER_END, timeZone);
-
 
         timestamp = new Date(0);
 
@@ -1301,22 +1258,12 @@ public class AppointmentRequest extends CalendarRequest {
     }
 
     private Date getDateByFieldId(final int field, final Appointment appointmentObj, final TimeZone timeZone) {
-        final Date date = null;
         if (field == CalendarObject.START_DATE) {
             return appointmentObj.getStartDate();
         } else if (field == CalendarObject.END_DATE) {
             return appointmentObj.getEndDate();
         }
-
-        if (date == null) {
-            return null;
-        }
-
-        if (appointmentObj.getFullTime()) {
-            return date;
-        }
-        final int offset = timeZone.getOffset(date.getTime());
-        return new Date(date.getTime() + offset);
+        return null;
     }
 
     /**
@@ -1329,7 +1276,7 @@ public class AppointmentRequest extends CalendarRequest {
         return new Date(utcTime - timeZone.getOffset(utcTime));
     }
 
-    private void anonymize(final Appointment anonymized){
+    private void anonymize(final Appointment anonymized) {
         //TODO: Solve dependency problem and use AnonymizingIterator#anonymize instead
         anonymized.setTitle("Private");
         anonymized.removeAlarm();

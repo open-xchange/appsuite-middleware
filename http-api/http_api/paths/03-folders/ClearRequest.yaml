@@ -1,0 +1,28 @@
+/folders?action=clear:
+  put:
+    operationId: clearFolders
+    tags:
+      - folders
+    summary: Clears the content of a list of folders.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamFolderTree"
+      - $ref: "#/parameters/gblQueryParamAllowedModules"
+      - in: body
+        name: body
+        description: A JSON array with object IDs of the folders.
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+    responses:
+      200:
+        description: |
+          A JSON array containing the IDs of folders that could not be cleared due to a concurrent modification.
+          Meaning you receive an empty JSON array if everything worked well. In case of errors the responsible
+          fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/FoldersCleanUpResponse"

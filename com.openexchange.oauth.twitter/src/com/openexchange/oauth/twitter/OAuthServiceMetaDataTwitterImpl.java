@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -72,22 +72,7 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAware
      * Initializes a new {@link OAuthServiceMetaDataTwitterImpl}.
      */
     public OAuthServiceMetaDataTwitterImpl(ServiceLookup services) {
-        super(services, "com.openexchange.oauth.twitter", "Twitter", true, true);
-    }
-
-    @Override
-    public String getDisplayName() {
-        return "Twitter";
-    }
-
-    @Override
-    public String getId() {
-        return "com.openexchange.oauth.twitter";
-    }
-
-    @Override
-    public API getAPI() {
-        return API.TWITTER;
+        super(services, API.TWITTER, true, true);
     }
 
     @Override

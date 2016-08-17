@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.UUID;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
@@ -269,14 +270,13 @@ public final class MailSearchTest extends AbstractMailTest {
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
 
-			final String name = "TemporaryFolder";
+			final String name = "TemporaryFolder" + UUID.randomUUID().toString().substring(0, 8);
 			String fullname = null;
 			{
 				final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
 				final String parentFullname;
 				if (inbox.isHoldsFolders()) {
-					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(name)
-							.toString();
+					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(name).toString();
 					parentFullname = "INBOX";
 				} else {
 					fullname = name;
@@ -436,14 +436,13 @@ public final class MailSearchTest extends AbstractMailTest {
 			final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
 			mailAccess.connect();
 
-			final String name = "TemporaryFolder";
+			final String name = "TemporaryFolder" + UUID.randomUUID().toString().substring(0, 8);
 			String fullname = null;
 			{
 				final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
 				final String parentFullname;
 				if (inbox.isHoldsFolders()) {
-					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(name)
-							.toString();
+					fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(name).toString();
 					parentFullname = "INBOX";
 				} else {
 					fullname = name;
@@ -607,21 +606,20 @@ public final class MailSearchTest extends AbstractMailTest {
 				mailAccess.close(false);
 			}
 	}
-	
+
 	public void testRequestedFields() throws Exception {
 	    final SessionObject session = getSession();
 
         final MailAccess<?, ?> mailAccess = MailAccess.getInstance(session);
         mailAccess.connect();
 
-        final String name = "TemporaryFolder";
+        final String name = "TemporaryFolder" + UUID.randomUUID().toString().substring(0, 8);
         String fullname = null;
         {
             final MailFolder inbox = mailAccess.getFolderStorage().getFolder("INBOX");
             final String parentFullname;
             if (inbox.isHoldsFolders()) {
-                fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(name)
-                        .toString();
+                fullname = new StringBuilder(inbox.getFullname()).append(inbox.getSeparator()).append(name).toString();
                 parentFullname = "INBOX";
             } else {
                 fullname = name;
@@ -707,7 +705,7 @@ public final class MailSearchTest extends AbstractMailTest {
             mailAccess.close(false);
         }
 	}
-	
+
 	private static void assertEquals(MailMessage expected, MailMessage actual, MailField[] fields) throws Exception {
 	    for (MailField field : fields) {
 	        switch (field) {
@@ -780,13 +778,13 @@ public final class MailSearchTest extends AbstractMailTest {
 	        }
 	    }
 	}
-	
+
 	private static void compareAddresses(InternetAddress[] expected, InternetAddress[] actual) {
 	    if (expected == null) {
 	        assertNull(actual);
 	        return;
 	    }
-	    
+
 	    assertEquals(expected.length, actual.length);
 	    for (int i = 0; i < expected.length; i++) {
             InternetAddress ea = expected[i];
@@ -794,7 +792,7 @@ public final class MailSearchTest extends AbstractMailTest {
             assertEquals(ea, aa);
         }
 	}
-	
+
 	private static void compareHeaders(MailMessage expected, MailMessage actual) throws Exception {
 	    Iterator<Entry<String, String>> headers = expected.getHeadersIterator();
         while (headers.hasNext()) {
@@ -812,7 +810,7 @@ public final class MailSearchTest extends AbstractMailTest {
             assertTrue("Actual mail object did not contain header \"" + headerName + ": " + header.getValue() + "\"", found);
         }
 	}
-	
+
 	private static void compareBodies(MailMessage expected, MailMessage actual) throws Exception {
 	    if (expected.getContentType().getBaseType().startsWith("multipart/")) {
             assertEquals("Enclosed count did not match", expected.getEnclosedCount(), actual.getEnclosedCount());
@@ -826,7 +824,7 @@ public final class MailSearchTest extends AbstractMailTest {
             compareContents(expected.getContent(), actual.getContent());
         }
 	}
-	
+
 	private static void compareContents(Object expectedContent, Object actualContent) {
 	    if (expectedContent instanceof String) {
             assertEquals("Actual content was wrong", Strings.sanitizeString((String) expectedContent), Strings.sanitizeString((String) actualContent)); // compare ignoring control characters
@@ -835,5 +833,5 @@ public final class MailSearchTest extends AbstractMailTest {
             fail("Cannot compare contents of type " + expectedContent.getClass());
         }
 	}
-	
+
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -121,7 +121,8 @@ public class FileEventTest {
         file.setFolderId(srcfolder.toUniqueID());
         fileAccess.saveFileMetadata(file, 0);
         final File updated = new DefaultFile(file);
-        fileAccess.saveFileMetadata(updated, 0);
+        final String fullID = fileAccess.saveFileMetadata(updated, 0);
+        final String folderID = fullID.substring(0, fullID.lastIndexOf("/"));
 
         fileAccess.setEventVerifier(new EventVerifier() {
             @Override
@@ -130,14 +131,14 @@ public class FileEventTest {
                 String folderId = FileStorageEventHelper.extractFolderId(event);
                 String objectId = FileStorageEventHelper.extractObjectId(event);
                 Set<String> versions = FileStorageEventHelper.extractVersions(event);
-                assertEquals("Wrong folder.", updated.getFolderId(), folderId);
-                assertEquals("Wrong id.", updated.getId(), objectId);
+                assertEquals("Wrong folder.", folderID, folderId);
+                assertEquals("Wrong id.", fullID, objectId);
                 assertEquals("Too much versions.", 1, versions.size());
                 String next = versions.iterator().next();
                 assertTrue("Wrong version.", next == updated.getVersion());
             }
         });
-        String[] notRemoved = fileAccess.removeVersion(updated.getId(), new String[] { updated.getVersion() });
+        String[] notRemoved = fileAccess.removeVersion(fullID, new String[] { updated.getVersion() });
         assertTrue("Version not removed.", notRemoved.length == 0);
 
         fileAccess.setEventVerifier(new EventVerifier() {
@@ -146,11 +147,11 @@ public class FileEventTest {
                 assertTrue("Wrong topic.", event.getTopic().equals(FileStorageEventConstants.DELETE_TOPIC));
                 String folderId = FileStorageEventHelper.extractFolderId(event);
                 String objectId = FileStorageEventHelper.extractObjectId(event);
-                assertEquals("Wrong folder.", updated.getFolderId(), folderId);
-                assertEquals("Wrong id.", updated.getId(), objectId);
+                assertEquals("Wrong folder.", folderID, folderId);
+                assertEquals("Wrong id.", fullID, objectId);
             }
         });
-        assertTrue("Deletion failed.", fileAccess.removeDocument(Collections.singletonList(updated.getId()), 0).size() == 0);
+        assertTrue("Deletion failed.", fileAccess.removeDocument(Collections.singletonList(fullID), 0).size() == 0);
     }
 
     @Test
@@ -231,7 +232,8 @@ public class FileEventTest {
         file.setTitle("Title...");
         final FolderID srcfolder = new FolderID(SERVICE, ACCOUNT, "dasdb3424");
         file.setFolderId(srcfolder.toUniqueID());
-        fileAccess.saveFileMetadata(file, 0);
+        String fullID = fileAccess.saveFileMetadata(file, 0);
+        final String folderID = fullID.substring(0, fullID.lastIndexOf("/"));
 
         file.setTitle("Another title...");
         fileAccess.setEventVerifier(new EventVerifier() {
@@ -240,8 +242,8 @@ public class FileEventTest {
                 assertTrue("Wrong topic.", event.getTopic().equals(FileStorageEventConstants.UPDATE_TOPIC));
                 String folderId = FileStorageEventHelper.extractFolderId(event);
                 String objectId = FileStorageEventHelper.extractObjectId(event);
-                assertEquals("Wrong folder.", file.getFolderId(), folderId);
-                assertEquals("Wrong id.", file.getId(), objectId);
+                assertEquals("Wrong folder.", folderID, folderId);
+                assertEquals("Wrong id.", folderID + "/" + file.getId(), objectId);
             }
         });
         fileAccess.saveFileMetadata(file, 0);

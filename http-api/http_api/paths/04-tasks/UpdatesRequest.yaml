@@ -1,0 +1,44 @@
+/tasks?action=updates:
+  get:
+    operationId: getTaskUpdates
+    tags:
+      - tasks
+    summary: Gets the new, modified and deleted tasks.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamTaskFolder"
+      - $ref: "#/parameters/gblQueryParamTaskColumns"
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the requested tasks.
+        required: true
+      - in: query
+        name: ignore
+        type: string
+        description: Which kinds of updates should be ignored. Omit this parameter or set it to "deleted" to not have deleted tasks identifier in the response. Set this parameter to `false` and the response contains deleted tasks identifier.
+        required: false
+        enum:
+          - deleted
+          - false
+      - in: query
+        name: sort
+        type: string
+        description: The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified.
+        required: false
+      - in: query
+        name: order
+        type: string
+        description: '"asc" if the response entities should be sorted in the ascending order, "desc" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.'
+        required: false
+    responses:
+      200:
+        description: |
+          An array with new, modified and deleted tasks. New and modified tasks are represented by arrays. The
+          elements of each array contain the information specified by the corresponding identifiers in the `columns`
+          parameter. Deleted tasks would be identified by their object IDs as integers, without being part of
+          a nested array. In case of errors the responsible fields in the response are filled (see
+          [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/TaskUpdatesResponse"

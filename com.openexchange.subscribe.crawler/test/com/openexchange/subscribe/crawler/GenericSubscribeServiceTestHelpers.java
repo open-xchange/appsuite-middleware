@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -51,11 +51,13 @@ package com.openexchange.subscribe.crawler;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import junit.framework.TestCase;
-import org.ho.yaml.Yaml;
+import org.yaml.snakeyaml.Yaml;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
@@ -63,6 +65,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.subscribe.crawler.internal.GenericSubscribeService;
 import com.openexchange.subscribe.crawler.osgi.CrawlersActivator;
+import junit.framework.TestCase;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
@@ -93,7 +96,7 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
     public void setUp() {
         try {
             // insert path to credentials-file here (switch for automated tests (Hudson) / local tests)
-            map = (HashMap<String, String>) Yaml.load(getSecretsFile());
+            map = (HashMap<String, String>) new Yaml().load(new FileReader(getSecretsFile()));
             // map = (HashMap<String, String>) Yaml.load(new File("/Users/karstenwill/Documents/open-xchange/crawler/crawlerCredentials.yml"));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -263,9 +266,9 @@ public abstract class GenericSubscribeServiceTestHelpers extends TestCase {
      */
     protected void dumpThis(final CrawlerDescription crawler, final String filename) {
         try {
-            Yaml.dump(crawler, new File("../open-xchange-development/crawlers/" + filename + ".yml"));
-            Yaml.dump(crawler, new File("conf/crawlers/" + filename + ".yml"));
-        } catch (final FileNotFoundException e) {
+            new Yaml().dump(crawler, new FileWriter(new File("../open-xchange-development/crawlers/" + filename + ".yml")));
+            new Yaml().dump(crawler, new FileWriter(new File("conf/crawlers/" + filename + ".yml")));
+        } catch (final IOException e) {
             e.printStackTrace();
         }
     }

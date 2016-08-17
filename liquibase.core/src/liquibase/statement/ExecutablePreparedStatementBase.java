@@ -64,6 +64,12 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 	        stmt.execute();
 	    } catch(SQLException e) {
 	        throw new DatabaseException(e);
+	    } finally {
+	        try {
+                stmt.close();
+            } catch (SQLException e) {
+                throw new DatabaseException(e);
+            }
 	    }
 	}
 

@@ -1,0 +1,32 @@
+/drive?action=listen:
+  get:
+    operationId: pollingForChanges
+    tags:
+      - drive
+    summary: Listen for changes (long polling).
+    description: |
+      Listens for server-side changes. The request **blocks until new actions for the client are available, or the
+      specified waiting time elapses**. May return immediately if previously received but not yet processed actions
+      are available for this client.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+      - in: query
+        name: timeout
+        type: integer
+        format: int64
+        description: The maximum timeout in milliseconds to wait.
+        required: false
+      - in: query
+        name: pushToken
+        type: string
+        description: The client's push registration token to associate it to generated events.
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object containing an array of actions the client should execute for synchronization. if no changes
+          were detected, an empty array is returned. Typically, the client will continue with the next `/drive?action=listen`
+          request after the response was processed. In case of errors the responsible fields in the response are filled.
+        schema:
+          $ref: "#/definitions/DriveActionsResponse"

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -80,6 +80,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.Document;
@@ -123,6 +124,7 @@ import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.Strings;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -831,13 +833,14 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             /*
              * collect warnings prior saving & abort the operation if not ignored
              */
-            List<OXException> warnings = collectWarningsBeforeSave(document, fileAccess, modifiedColumns);
+            final List<OXException> warnings = collectWarningsBeforeSave(document, fileAccess, modifiedColumns);
             if (0 < warnings.size()) {
                 addWarnings(warnings);
                 if (false == ignoreWarnings) {
                     return null;
                 }
             }
+
             /*
              * perform save operation & return resulting file identifier
              */
@@ -930,11 +933,10 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         IDTuple idTuple = result.getIDTuple();
         FileID newFileID = new FileID(serviceID, accountID, idTuple.getFolder(), idTuple.getId());
         FolderID newFolderID = new FolderID(serviceID, accountID, idTuple.getFolder());
-        document.setId(newFileID.toUniqueID());
-        document.setFolderId(newFolderID.toUniqueID());
+        String newId = newFileID.toUniqueID();
         postEvent(FileStorageEventHelper.buildUpdateEvent(
-            session, serviceID, accountID, newFolderID.toUniqueID(), newFileID.toUniqueID(), document.getFileName()));
-        return newFileID.toUniqueID();
+            session, serviceID, accountID, newFolderID.toUniqueID(), newId, document.getFileName()));
+        return newId;
     }
 
 
@@ -959,6 +961,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         document.setId(FileStorageFileAccess.NEW);
         document.setFolderId(folderId.getFolderId());
         document.setObjectPermissions(null);
+        document.setFileName(sourceFile.getFileName());
 
         if (null == data) {
             /*
@@ -1069,11 +1072,11 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     @Override
     public String saveDocument(File document, InputStream data, long sequenceNumber, List<Field> modifiedColumns, boolean ignoreVersion) throws OXException {
-        return saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion, false);
+        return saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion, false, false);
     }
 
     @Override
-    public String saveDocument(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final boolean ignoreVersion, boolean ignoreWarnings) throws OXException {
+    public String saveDocument(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final boolean ignoreVersion, final boolean ignoreWarnings, final boolean tryAddVersion) throws OXException {
         return save(document, data, sequenceNumber, modifiedColumns, ignoreWarnings, new TransactionAwareFileAccessDelegation<SaveResult>() {
 
             @Override
@@ -1087,6 +1090,17 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                      */
                     result = ((FileStorageIgnorableVersionFileAccess) access).saveDocument(
                         document, data, sequenceNumber, modifiedColumns, ignoreVersion);
+                } else if (tryAddVersion && FileStorageFileAccess.NEW == document.getId()) {
+                    /*
+                     * try to add file version
+                     */
+                    if (FileStorageTools.supports(access, FileStorageCapability.FILE_VERSIONS) && FileStorageTools.supports(access, FileStorageCapability.AUTO_NEW_VERSION)) {
+                        FileStorageIgnorableVersionFileAccess fileAccess = (FileStorageIgnorableVersionFileAccess) access;
+                        result = fileAccess.saveDocumentTryAddVersion(document, data, sequenceNumber, modifiedColumns);
+                    } else {
+                        addWarning(FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(access.getAccountAccess().getService().getId()));
+                        result = access.saveDocument(document, data, sequenceNumber, modifiedColumns);
+                    }
                 } else {
                     /*
                      * perform normal save operation
@@ -1147,11 +1161,11 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     @Override
     public String saveFileMetadata(final File document, final long sequenceNumber, final List<Field> modifiedColumns) throws OXException {
-        return saveFileMetadata(document, sequenceNumber, modifiedColumns, false);
+        return saveFileMetadata(document, sequenceNumber, modifiedColumns, false, false);
     }
 
     @Override
-    public String saveFileMetadata(final File document, final long sequenceNumber, final List<Field> modifiedColumns, boolean ignoreWarnings) throws OXException {
+    public String saveFileMetadata(final File document, final long sequenceNumber, final List<Field> modifiedColumns, boolean ignoreWarnings, boolean tryAddVersion) throws OXException {
         return save(document, null, sequenceNumber, modifiedColumns, ignoreWarnings, new TransactionAwareFileAccessDelegation<SaveResult>() {
 
             @Override
@@ -1346,33 +1360,33 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             ThreadPoolService threadPool = ThreadPools.getThreadPool();
             CompletionService<SearchIterator<File>> completionService = null != threadPool ?
                 new ThreadPoolCompletionService<SearchIterator<File>>(threadPool) : new CallerRunsCompletionService<SearchIterator<File>>();
-            int count = 0;
-            for (Entry<FileStorageFileAccess, List<String>> entry : foldersByFileAccess.entrySet()) {
-                if (FileStorageTools.supports(entry.getKey(), FileStorageCapability.SEARCH_BY_TERM)) {
-                    FileStorageAdvancedSearchFileAccess fileAccess = (FileStorageAdvancedSearchFileAccess) entry.getKey();
-                    completionService.submit(getSearchCallable(fileAccess, entry.getValue(), searchTerm, fields, sort, order));
-                    count++;
-                }
-            }
-            /*
-             * collect & filter results
-             */
-            return new FilteringSearchIterator<File>(collectSearchResults(completionService, count, sort, order)) {
-
-                int index = 0;
-
-                @Override
-                public boolean accept(File thing) throws OXException {
-                    try {
-                        if (0 < start && index < start || 0 < end && index >= end) {
-                            return false;
-                        }
-                        return true;
-                    } finally {
-                        index++;
+                int count = 0;
+                for (Entry<FileStorageFileAccess, List<String>> entry : foldersByFileAccess.entrySet()) {
+                    if (FileStorageTools.supports(entry.getKey(), FileStorageCapability.SEARCH_BY_TERM)) {
+                        FileStorageAdvancedSearchFileAccess fileAccess = (FileStorageAdvancedSearchFileAccess) entry.getKey();
+                        completionService.submit(getSearchCallable(fileAccess, entry.getValue(), searchTerm, fields, sort, order));
+                        count++;
                     }
                 }
-            };
+                /*
+                 * collect & filter results
+                 */
+                return new FilteringSearchIterator<File>(collectSearchResults(completionService, count, sort, order)) {
+
+                    int index = 0;
+
+                    @Override
+                    public boolean accept(File thing) throws OXException {
+                        try {
+                            if (0 < start && index < start || 0 < end && index >= end) {
+                                return false;
+                            }
+                            return true;
+                        } finally {
+                            index++;
+                        }
+                    }
+                };
         }
     }
 
@@ -1582,8 +1596,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
      *
      * @param event The event
      */
-    protected void postEvent(final Event event) {
-        getEventAdmin().postEvent(event);
+    protected void postEvent(final Event event) throws OXException {
+        EventAdmin eventAdmin = getEventAdmin();
+        if (eventAdmin == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(EventAdmin.class);
+        }
+        eventAdmin.postEvent(event);
     }
 
     /**
@@ -1777,7 +1795,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     private static String getFileNameFrom(File file, FileStorageFileAccess fileAccess) throws OXException {
         String fileName = file.getFileName();
         if (Strings.isEmpty(fileName)) {
-            fileName = fileAccess.getFileMetadata(file.getFolderId(), file.getId(), FileStorageFileAccess.CURRENT_VERSION).getFileName();
+            FileID fileId = new FileID(file.getId());
+            fileName = fileAccess.getFileMetadata(fileId.getFolderId(), fileId.getFileId(), FileStorageFileAccess.CURRENT_VERSION).getFileName();
         }
         return fileName;
     }

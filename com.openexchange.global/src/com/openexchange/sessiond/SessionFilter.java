@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -73,7 +73,7 @@ import com.openexchange.session.Session;
  *   &lt;equal&gt; ::= '='
  * </pre>
  *
- * {@code &lt;attr&gt;} is a string representing a field of a session object or a key in the properties
+ * <code>&lt;attr&gt;</code> is a string representing a field of a session object or a key in the properties
  * of a session. Attribute names are case sensitive. {@code &lt;value&gt;} is a string representing the
  * value of a field or property. The constants of this class define the attribute names that are matched
  * against their according fields in the session objetcs. Be careful with white spaces, especially within
@@ -126,8 +126,33 @@ public class SessionFilter {
      */
     public static final String CLIENT = "client";
 
-    private final String filterString;
+    /**
+     * Creates a filter from specified expression.
+     *
+     * @param filterString The filter expression
+     * @return The yielded filter
+     * @throws IllegalArgumentException If filter expression is invalid
+     */
+    public static SessionFilter create(String filterString) throws IllegalArgumentException {
+        Matcher matcher = new Parser(filterString).parse();
+        return new SessionFilter(filterString, matcher);
+    }
 
+    /**
+     * Creates a filter from specified secret.
+     *
+     * @param secret The session secret to filter by
+     * @return The yielded filter
+     */
+    public static SessionFilter createSecretFilter(String secret) {
+        String filterString = "(" + SessionFilter.SECRET + "=" + secret + ")";
+        Matcher matcher = new Parser(filterString).parse();
+        return new SessionFilter(filterString, matcher);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------- //
+
+    private final String filterString;
     private final Matcher matcher;
 
     private SessionFilter(String filterString, Matcher matcher) {
@@ -136,11 +161,12 @@ public class SessionFilter {
         this.matcher = matcher;
     }
 
-    public static SessionFilter create(String filterString) throws IllegalArgumentException {
-        Matcher matcher = new Parser(filterString).parse();
-        return new SessionFilter(filterString, matcher);
-    }
-
+    /**
+     * Checks if specified session applies to this session filter.
+     *
+     * @param session The session to test
+     * @return <code>true</code> if applicable; otherwise <code>false</code>
+     */
     public boolean apply(Session session) {
         return matcher.matches(new SessionMatchee(session));
     }
@@ -157,7 +183,7 @@ public class SessionFilter {
 
         private final Session session;
 
-        private SessionMatchee(Session session) {
+        SessionMatchee(Session session) {
             super();
             this.session = session;
         }

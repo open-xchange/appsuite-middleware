@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -183,11 +183,21 @@ public final class CheckPermissionOnRemove extends CheckPermission {
         /*
          * Check if recursive call is needed that is current parent folder is no more visible to entity if system permission is removed
          */
-        if (!getFolderFromMaster(parent).isNonSystemVisible(entity)) {
+        FolderObject parentFolder;
+        try {
+            parentFolder = getFolderFromMaster(parent, false);
+        } catch (OXException e) {
+            if ("FLD-0008".equals(e.getErrorCode())) {
+                // parent no longer found, abort
+                return;
+            }
+            throw e;
+        }
+        if (false == parentFolder.isNonSystemVisible(entity)) {
             /*
              * Recursively check ancestor folders
              */
-            hasVisibleSibling(getFolderFromMaster(parent).getParentFolderID(), parent, origin, entity, isGroup, toRemove);
+            hasVisibleSibling(parentFolder.getParentFolderID(), parent, origin, entity, isGroup, toRemove);
         }
     }
 

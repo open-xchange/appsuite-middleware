@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -69,7 +69,8 @@ public class ActionSMS implements ActionService {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilityProvisioningServlet.class);
 
-	public ProvisioningResponse handleAction(
+	@Override
+    public ProvisioningResponse handleAction(
 			final ProvisioningInformation provisioningInformation){
 		final ProvisioningResponse provisioningResponse = new ProvisioningResponse();
 		final int cid = provisioningInformation.getCtx().getContextId();
@@ -110,7 +111,6 @@ public class ActionSMS implements ActionService {
 				provisioningResponse.setSuccess(true);
 				LOG.info("SMS to recipient {} (unformatted nr:{}) sent successfully for user {} in context {}", to_formatted, to, userid, cid);
 			}else{
-				smssend.getErrorMessage();
 				provisioningResponse.setMessage("SMS could not be sent. Details: "+smssend.getErrorMessage());
 				provisioningResponse.setSuccess(false);
 				LOG.error("API error occured while sending sms to recipient {} (unformatted nr:{})  for user {} in context {}", to_formatted, to, userid, cid);

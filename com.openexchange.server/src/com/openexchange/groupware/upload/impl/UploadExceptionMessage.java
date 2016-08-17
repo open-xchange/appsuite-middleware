@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -99,6 +99,10 @@ public class UploadExceptionMessage implements LocalizableStrings {
     // Upload file's content type \"%1$s\" does not match given file filter \"%2$s\"
     // Thrown to indicate that currently uploaded file's MIME type does not obey a certain search criterion
     public final static String INVALID_FILE_TYPE_MSG = "Upload file's content type \"%1$s\" does not match given file filter \"%2$s\".";
+
+    // Upload file is invalid or illegal
+    // Thrown to indicate that currently uploaded file is not accepted for being saved due to illegal and/or harmful content
+    public final static String INVALID_FILE_MSG = "Upload file is invalid or illegal.";
 
     // Request rejected because its size exceeds the maximum configured size of %1$s
     public static final String MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN_MSG = "Request rejected because its size exceeds the maximum configured size of %1$s.";

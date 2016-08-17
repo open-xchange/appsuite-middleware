@@ -1,0 +1,17 @@
+type: object
+properties:
+  new:
+    type: array
+    description: Array of new group objects.
+    items:
+      $ref: "#/definitions/GroupData"
+  modified:
+    type: array
+    description: Array of modified group objects.
+    items:
+      $ref: "#/definitions/GroupData"
+  deleted:
+    type: array
+    description: Array of deleted group objects.
+    items:
+      $ref: "#/definitions/GroupData"

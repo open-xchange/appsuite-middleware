@@ -62,6 +62,13 @@ CREATE TABLE filestore (
     CONSTRAINT filestore_uri_unique UNIQUE(uri)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE filestore2user (
+    cid INT4 UNSIGNED NOT NULL,
+    user INT4 UNSIGNED NOT NULL,
+    filestore_id INT4 UNSIGNED,
+    PRIMARY KEY (cid, user, filestore_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 CREATE TABLE server (
     server_id INT4 UNSIGNED NOT NULL,
     name VARCHAR(255) NOT NULL,
@@ -101,3 +108,16 @@ CREATE TABLE replicationMonitor (
     PRIMARY KEY (cid)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 INSERT INTO replicationMonitor (cid,transaction) VALUES (0,0);
+
+CREATE TABLE advertisement_mapping (
+    reseller VARCHAR(128) NOT NULL,
+    package VARCHAR(128) NOT NULL,
+    configId int NOT NULL,    
+    PRIMARY KEY (reseller, package)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+    
+CREATE TABLE advertisement_config (    
+	configId int NOT NULL AUTO_INCREMENT,
+    config text NOT NULL,
+    PRIMARY KEY (configId)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

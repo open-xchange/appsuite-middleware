@@ -1,0 +1,75 @@
+/infostore?action=new:
+  put:
+    operationId: createInfoItem
+    tags:
+      - infostore
+    summary: Creates an infoitem.
+    description: |
+      Creates a new contact. This request cannot add a file to the infoitem. Therefor it
+      is necessary to use the `POST` method.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: Object ID of the infoitem that shall be updated.
+        required: true
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description:  Timestamp of the last update of the infoitem. If the infoitem was modified after the specified timestamp, then the update must fail.
+        required: true
+      - in: body
+        name: body
+        description: A JSON object containing a field `file` with the modified fields of the infoitem's data. It is possible to let added object permission entities be notified about newly shared files. In that case add a "notification" object.
+        required: true
+        schema:
+          type: array
+          items:
+            $ref: "#/definitions/InfoItemBody"
+    responses:
+      200:
+        description: |
+          A JSON object with the object ID of the newly created infoitem. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/InfoItemUpdateResponse"
+  post:
+    operationId: createInfoItemAdvanced
+    tags:
+      - infostore
+    summary: Creates an infoitem.
+    description: |
+      Creates a new infoitem with a file. The normal request body must be placed as form-data using the
+      content-type `multipart/form-data`. The form field `json` contains the infoitem's data while the file
+      must be placed in a file field named `file` (see also [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads)).
+    consumes:
+      - multipart/form-data
+    produces:
+      - text/html
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: try_add_version
+        type: boolean
+        description: Add new file version if file name exists
+        required: false
+      - in: formData
+        name: json
+        type: string
+        description: Represents the normal request body as JSON string containing the infoitem's data as described in the [InfoItemBody](#/definitions/InfoItemBody) model.
+        required: true
+      - in: formData
+        name: file
+        type: file
+        description: The metadata as per `<input type="file" />`.
+        required: true
+    responses:
+      200:
+        description: |
+          A HTML page as described in [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) containing the object ID of the infoitem or errors if some occurred.
+        schema:
+          type: string

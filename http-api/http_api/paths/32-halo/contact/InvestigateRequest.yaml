@@ -1,0 +1,57 @@
+/halo/contact?action=investigate:
+  get:
+    operationId: investigateContactHalo
+    tags:
+      - halo
+    summary: Investigates a contact.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: provider
+        type: string
+        description: The halo provider, like "com.openexchange.halo.contacts". See `/halo/contact?action=services` for available providers.
+        required: true
+      - in: query
+        name: timezone
+        type: string
+        description: The timezone.
+        required: false
+      - in: query
+        name: columns
+        type: string
+        description: A comma-separated list of columns to return. See [Column identifiers](#column-identifiers) for a mapping of numeric identifiers to fields.
+        required: true
+      - in: query
+        name: start
+        type: integer
+        format: int64
+        description: The start point. Only mandatory for provider "com.openexchange.halo.appointments".
+        required: false
+      - in: query
+        name: end
+        type: integer
+        format: int64
+        description: The end point. Only mandatory for provider "com.openexchange.halo.appointments".
+        required: false
+      - in: query
+        name: sort
+        type: string
+        description:  The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified. Optional for provider "com.openexchange.halo.appointments".
+        required: false
+      - in: query
+        name: order
+        type: string
+        description: '"asc" if the response entires should be sorted in the ascending order, "desc" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified. Optional for provider "com.openexchange.halo.appointments".'
+        required: false
+      - in: query
+        name: limit
+        type: integer
+        description: The maximum number of mails within the result. Optional for provider "com.openexchange.halo.mail".
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with data for the requested columns. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/HaloInvestigationResponse"

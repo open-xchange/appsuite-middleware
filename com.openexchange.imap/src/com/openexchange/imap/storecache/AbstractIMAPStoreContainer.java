@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -66,14 +66,18 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractIMAPStoreContainer.class);
 
+    protected final int accountId;
     protected final String name;
     protected final boolean propagateClientIp;
+    protected final Session session;
 
     /**
      * Initializes a new {@link AbstractIMAPStoreContainer}.
      */
-    protected AbstractIMAPStoreContainer(boolean propagateClientIp) {
+    protected AbstractIMAPStoreContainer(int accountId, Session session, boolean propagateClientIp) {
         super();
+        this.accountId = accountId;
+        this.session = session;
         this.propagateClientIp = propagateClientIp;
         name = PROTOCOL_NAME;
     }
@@ -103,14 +107,14 @@ public abstract class AbstractIMAPStoreContainer implements IMAPStoreContainer {
          * ... and connect it
          */
         try {
-            doIMAPConnect(imapSession, imapStore, server, port, login, pw);
+            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session);
         } catch (final AuthenticationFailedException e) {
             /*
              * Retry connect with AUTH=PLAIN disabled
              */
             imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
             imapStore = (IMAPStore) imapSession.getStore(name);
-            doIMAPConnect(imapSession, imapStore, server, port, login, pw);
+            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session);
         }
 
         String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());

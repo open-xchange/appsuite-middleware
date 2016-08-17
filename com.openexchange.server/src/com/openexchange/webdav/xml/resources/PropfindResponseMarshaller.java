@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -80,10 +80,20 @@ public class PropfindResponseMarshaller extends PropertiesMarshaller implements 
 		this.brief = brief;
 	}
 
-	public PropfindResponseMarshaller addProperty(final String namespace, final String name) {
-		requestedProps.add(new WebdavProperty(namespace, name));
-		return this;
-	}
+    public PropfindResponseMarshaller addProperty(final String namespace, final String name) {
+        return addProperty(new WebdavProperty(namespace, name));
+    }
+
+    /**
+     * Adds a requested property for marshaling.
+     *
+     * @param property The property to add
+     * @return A self reference
+     */
+    public PropfindResponseMarshaller addProperty(WebdavProperty property) {
+        requestedProps.add(property);
+        return this;
+    }
 
 	@Override
 	protected Multistatus<Iterable<WebdavProperty>> getProps(final WebdavResource resource) {
@@ -92,7 +102,7 @@ public class PropfindResponseMarshaller extends PropertiesMarshaller implements 
 		final List<WebdavProperty> notFound = new LinkedList<WebdavProperty>();
 		for(final WebdavProperty prop : requestedProps) {
 			try {
-				final WebdavProperty p = resource.getProperty(prop.getNamespace(), prop.getName());
+				final WebdavProperty p = resource.getProperty(prop);
 				if(p == null) {
 				    if (false == brief) {
 				        notFound.add(prop);

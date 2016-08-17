@@ -1,0 +1,47 @@
+/messaging/message?action=perform:
+  put:
+    operationId: performMessagingAction
+    tags:
+      - messaging
+    summary: Performs a certain messaging action on a message.
+    description: |
+      On actions of type "message" the body should contain the JSON representation of the message the action should be applied to.
+      To invoke a messaging action of type "storage" the folder and id are needed in URL parameters.
+      Messaging actions of type "none" need a messaging message and account.
+    consumes:
+      - spplication/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: messageAction
+        type: string
+        description: The message action to invoke.
+        required: true
+      - in: query
+        name: id
+        type: string
+        description: The ID of the message the action shall be invoked on. Only used on actions of type "storage".
+        required: false
+      - in: query
+        name: folder
+        type: string
+        description: The folder ID of the message. Only used on actions of type "storage".
+        required: false
+      - in: query
+        name: account
+        type: integer
+        description: The account ID. Only used on actions of type "none".
+        required: false
+      - in: body
+        name: body
+        description: A JSON array of JSON arrays with the folder and ID as elements each identifying a message.
+        required: true
+        schema:
+          $ref: "#/definitions/MessagingMessageData"
+    responses:
+      200:
+        description: |
+          A JSON object containing the number 1 if message could be sent. In case of errors the responsible fields in the
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/MessagingMessageUpdateResponse"

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -53,6 +53,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.Constants;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
@@ -91,16 +92,15 @@ public class FindBasicActivator extends HousekeepingActivator {
             MailAccountStorageService.class, IDBasedFileAccessFactory.class, UnifiedInboxManagement.class,
             AppointmentSqlFactoryService.class, CalendarCollectionService.class, ThreadPoolService.class,
             IDBasedFolderAccessFactory.class, ResourceService.class, ConfigurationService.class, InfostoreSearchEngine.class,
-            FileStorageServiceRegistry.class };
+            FileStorageServiceRegistry.class, ConfigViewFactory.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
         ConfigurationService configService = getService(ConfigurationService.class);
-        String virtualAllMessagesFolder = configService.getProperty("com.openexchange.find.basic.mail.allMessagesFolder");
         boolean searchMailBody = configService.getBoolProperty("com.openexchange.find.basic.mail.searchmailbody", false);
-        registerService(ModuleSearchDriver.class, new BasicMailDriver(virtualAllMessagesFolder, searchMailBody), defaultProperties());
+        registerService(ModuleSearchDriver.class, new BasicMailDriver(searchMailBody), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicDriveDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicContactsDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicCalendarDriver(), defaultProperties());

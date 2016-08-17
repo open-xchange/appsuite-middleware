@@ -1,0 +1,31 @@
+/infostore?action=move:
+  put:
+    operationId: moveInfoItems
+    tags:
+      - infostore
+    summary: Moves one or more infoitems to another folder.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: folder
+        type: string
+        description: ID of the destination folder.
+        required: true
+      - in: body
+        name: body
+        description: A JSON array of JSON objects each referencing to an existing infoitem that is supposed to be moved to the destination folder.
+        required: true
+        schema:
+          type: array
+          items:
+            $ref: "#/definitions/InfoItemListElement"
+    responses:
+      200:
+        description: |
+          A JSON object with an array of infoitem identifiers that could not be moved (due to a conflict).
+          Th array is empty if everything went fine. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/InfoItemsMovedResponse"

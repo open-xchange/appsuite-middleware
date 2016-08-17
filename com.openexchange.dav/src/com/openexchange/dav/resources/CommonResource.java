@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.resources;
 
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -65,7 +66,6 @@ import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.attachments.AttachmentUtils;
 import com.openexchange.dav.internal.Tools;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentConfig;
@@ -157,76 +157,10 @@ public abstract class CommonResource<T extends CommonObject> extends DAVResource
         try {
             deserialize(body);
         } catch (IOException e) {
-            throw protocolException(e, HttpServletResponse.SC_BAD_REQUEST);
+            throw protocolException(getUrl(), e, HttpServletResponse.SC_BAD_REQUEST);
         } catch (OXException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
-    }
-
-    /**
-     * Accepts an {@link OXException} instance signaling default status code (500).
-     *
-     * @param e The exception
-     * @return The appropriate {@link WebdavProtocolException} instance
-     */
-    protected WebdavProtocolException protocolException(OXException e) {
-        if (WebdavProtocolException.class.isInstance(e)) {
-            return (WebdavProtocolException) e;
-        }
-        return protocolException(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    }
-
-    /**
-     * Accepts an {@link OXException} instance signaling specified status code (<code>statusCode</code>).
-     *
-     * @param e The exception
-     * @param statusCode The HTTP status code
-     * @return The appropriate {@link WebdavProtocolException} instance
-     */
-    protected WebdavProtocolException protocolException(OXException e, int statusCode) {
-        if (Category.CATEGORY_USER_INPUT.equals(e.getCategory()) || Category.CATEGORY_CONFLICT.equals(e.getCategory())) {
-            LOG.debug("{}", this.getUrl(), e);
-        } else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
-            LOG.info("{}", this.getUrl(), e);
-        } else {
-            LOG.error("{}", this.getUrl(), e);
-        }
-        if (WebdavProtocolException.class.isInstance(e)) {
-            return (WebdavProtocolException) e;
-        }
-        return WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), statusCode, e);
-    }
-
-    /**
-     * Accepts a {@link Throwable} instance signaling default status code (500).
-     *
-     * @param e The exception
-     * @return The appropriate {@link WebdavProtocolException} instance
-     */
-    protected WebdavProtocolException protocolException(Throwable t) {
-        return protocolException(t, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    }
-
-    /**
-     * Accepts a {@link Throwable} instance signaling specified status code (<code>statusCode</code>).
-     *
-     * @param t The exception
-     * @param statusCode The HTTP status code
-     * @return The appropriate {@link WebdavProtocolException} instance
-     */
-    protected WebdavProtocolException protocolException(Throwable t, int statusCode) {
-        LOG.error("{}", this.getUrl(), t);
-        return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
-    }
-
-    /**
-     * Yields a {@link Throwable} instance with default error message signaling specified status code (<code>statusCode</code>).
-     *
-     * @param statusCode The HTTP status code
-     * @return The appropriate {@link WebdavProtocolException} instance
-     */
-    protected WebdavProtocolException protocolException(int statusCode) {
-        return protocolException(new Throwable("A WebDAV error occurred."), statusCode);
     }
 
     /**
@@ -432,7 +366,7 @@ public abstract class CommonResource<T extends CommonObject> extends DAVResource
                         newAttachments.add(referencedAttachment);
                     }
                 } catch (IllegalArgumentException e) {
-                    throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
+                    throw protocolException(getUrl(), e, HttpServletResponse.SC_FORBIDDEN);
                 }
             }
             for (AttachmentMetadata originalAttachment : originalAttachments) {

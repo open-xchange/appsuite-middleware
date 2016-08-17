@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -123,6 +123,11 @@ public final class PushEventConstants {
      * Force an immediate delivery of the associated event.
      */
     public static final String PROPERTY_IMMEDIATELY = "com.openexchange.push.immediately";
+
+    /**
+     * Sets that a event must not be forwarded to notification system. Property value is of type <code>java.lang.Boolean</code>.
+     */
+    public static final String PROPERTY_NO_FORWARD = "com.openexchange.push.noforward";
 
     /**
      * <b>Optional</b> property that specifies the identifiers of those messages that were newly received as a comma-separated string. e.g.

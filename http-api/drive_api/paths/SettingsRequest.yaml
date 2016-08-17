@@ -1,0 +1,23 @@
+/drive?action=settings:
+  get:
+    operationId: getSettings
+    tags:
+      - drive
+    summary: Gets various settings applicable for the drive client.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+      - in: query
+        name: language
+        type: string
+        description: The locale to use for language-sensitive setting (in the format `<2-letter-language>_<2-letter-regin>`, e.g. `de_CH` or `en_GB`). Defaults to the user's configured locale on the server.
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object holding the settings. This also includes a JSON array with the property name `quota` that
+          contains zero, one or two quota objects, depending on the filestore configuration. If one or more quota types
+          are missoing in the array, the client can expect that there are no limitations for that type. In case of
+          errors the responsible fields in the response are filled.
+        schema:
+          $ref: "#/definitions/DriveSettingsResponse"

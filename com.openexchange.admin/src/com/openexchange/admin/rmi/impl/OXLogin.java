@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -85,19 +85,19 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
 
     @Override
     public void login(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException,DatabaseUpdateException {
-        new BasicAuthenticator().doUserAuthentication(auth, ctx);
+        BasicAuthenticator.createNonPluginAwareAuthenticator().doUserAuthentication(auth, ctx);
         triggerUpdateProcess(ctx);
     }
 
     @Override
     public void login(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         doNullCheck(auth);
-        new BasicAuthenticator().doAuthentication(auth);
+        BasicAuthenticator.createNonPluginAwareAuthenticator().doAuthentication(auth);
     }
 
     @Override
     public User login2User(final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
-        new BasicAuthenticator().doUserAuthentication(auth, ctx);
+        BasicAuthenticator.createNonPluginAwareAuthenticator().doUserAuthentication(auth, ctx);
 
         triggerUpdateProcess(ctx);
 
@@ -129,15 +129,15 @@ public class OXLogin extends OXCommonImpl implements OXLoginInterface {
         return retusers[0];
     }
 
-    private void triggerUpdateProcess(Context ctx) throws DatabaseUpdateException{
+    private void triggerUpdateProcess(Context ctx) throws DatabaseUpdateException {
         // Check for update.
         try {
             OXToolStorageInterface oxt = OXToolStorageInterface.getInstance();
-            if( oxt.checkAndUpdateSchemaIfRequired(ctx) ) {
-                throw new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
+            if (oxt.checkAndUpdateSchemaIfRequired(ctx)) {
+                oxt.generateDatabaseUpdateException(ctx.getId().intValue());
             }
         } catch (StorageException e) {
-            LOGGER.error("Error running updateprocess",e);
+            LOGGER.error("Error running updateprocess", e);
             throw new DatabaseUpdateException(e.toString());
         }
     }

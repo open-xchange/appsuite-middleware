@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -93,6 +93,24 @@ public abstract class JDBC4StatementWrapper implements Statement {
         }
     }
 
+    /**
+     * Logs the given read timeout error (if appropriate)
+     *
+     * @param sqlException The possible read timeout error to log
+     * @param delegate The statement that encountered the read timeout error
+     * @param con The associated connection
+     */
+    protected static void logReadTimeoutError(java.sql.SQLException sqlException, Statement delegate, Connection con) {
+        if (sqlException.getCause() instanceof java.net.SocketTimeoutException) {
+            String catalog = getCatalogSafe(con);
+            if (null == catalog) {
+                LOG.error("Read timeout encountered for the following statement: {}", Databases.getSqlStatement(delegate, "<unknown>"));
+            } else {
+                LOG.error("Read timeout encountered for the following statement on schema {}: {}", catalog, Databases.getSqlStatement(delegate, "<unknown>"));
+            }
+        }
+    }
+
     private static String getCatalogSafe(Connection con) {
         if (null != con) {
             try {
@@ -166,6 +184,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
+            logReadTimeoutError(sqlException, delegate, con);
             throw sqlException;
         }
     }
@@ -184,6 +203,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
+            logReadTimeoutError(sqlException, delegate, con);
             throw sqlException;
         }
     }
@@ -202,6 +222,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
+            logReadTimeoutError(sqlException, delegate, con);
             throw sqlException;
         }
     }
@@ -220,6 +241,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
+            logReadTimeoutError(sqlException, delegate, con);
             throw sqlException;
         }
     }
@@ -238,6 +260,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
+            logReadTimeoutError(sqlException, delegate, con);
             throw sqlException;
         }
     }
@@ -254,6 +277,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
+            logReadTimeoutError(sqlException, delegate, con);
             throw sqlException;
         }
     }
@@ -272,6 +296,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
+            logReadTimeoutError(sqlException, delegate, con);
             throw sqlException;
         }
     }
@@ -290,6 +315,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
+            logReadTimeoutError(sqlException, delegate, con);
             throw sqlException;
         }
     }
@@ -308,6 +334,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
+            logReadTimeoutError(sqlException, delegate, con);
             throw sqlException;
         }
     }
@@ -326,6 +353,7 @@ public abstract class JDBC4StatementWrapper implements Statement {
             if (null != incorrectStringError) {
                 throw incorrectStringError;
             }
+            logReadTimeoutError(sqlException, delegate, con);
             throw sqlException;
         }
     }

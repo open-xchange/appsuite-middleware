@@ -1,0 +1,35 @@
+/tasks?action=update:
+  put:
+    operationId: updateTask
+    tags:
+      - tasks
+    summary: Updates a task.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamTaskFolder"
+      - in: query
+        name: id
+        type: string
+        description: Object ID of the requested task.
+        required: true
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the requested tasks.
+        required: true
+      - in: body
+        name: body
+        description: A JSON object containing the task's data. Only modified fields are present.
+        required: true
+        schema:
+          $ref: "#/definitions/TaskData"
+    responses:
+      200:
+        description: |
+          A JSON object with a timestamp. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/TaskUpdateResponse"

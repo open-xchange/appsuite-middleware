@@ -1,0 +1,45 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The ID of the message. Only unique in the given folder.
+  folder:
+    type: string
+    description: The folder ID.
+  threadLevel:
+    type: integer
+    description: The nesting level of this message according to the conversation it's belonged to. May not be set.
+  flags:
+    type: integer
+    description: Bitmask showing the state of this message. The same as in the module "mail".
+  receivedDate:
+    type: integer
+    format: int64
+    description: The time this message was received.
+  colorLabel:
+    type: integer
+    description: An arbitrary number marking the message in a certain color. The same as the color label common to all groupware objects.
+  user:
+    type: array
+    description: An array of strings representing user flags.
+    items:
+      type: string
+  size:
+    type: integer
+    format: int64
+    description: The size of the message in bytes.
+  picture:
+    type: string
+    description: The URL to a picture for this message.
+  url:
+    type: string
+    description: A link to the messages origin currently used in RSS messages.
+  sectionId:
+    type: string
+    description: The section ID of a certain message part, if the content-type is `multipart/*`.
+  headers:
+    type: object
+    description: A JSON object of header data. Usually the value is either a string or an array (if it has more than one value). Certain headers are rendered as more complex structures.
+  body:
+    type: object
+    description: A JSON object representing the content of the message.

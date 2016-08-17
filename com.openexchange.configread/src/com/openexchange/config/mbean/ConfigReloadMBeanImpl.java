@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,17 +49,21 @@
 
 package com.openexchange.config.mbean;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import org.slf4j.Logger;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.internal.ConfigurationImpl;
 
@@ -108,16 +112,40 @@ public class ConfigReloadMBeanImpl extends StandardMBean implements ConfigReload
                 return Collections.emptyMap();
             }
 
-            Map<String, List<String>> map = new HashMap<String, List<String>>();
-            Iterator<Reloadable> i = configService.getReloadables().iterator();
-            while (i.hasNext()) {
-                Map<String, String[]> configs = i.next().getConfigFileNames();
-                if (null != configs && !configs.isEmpty()) {
-                    for (Entry<String, String[]> fileEntry : configs.entrySet()) {
-                        map.put(fileEntry.getKey(), Arrays.asList(fileEntry.getValue()));
+            Map<String, List<String>> files = new TreeMap<String, List<String>>();
+            Set<String> properties = null;
+
+            for (Iterator<Reloadable> i = configService.getReloadables().iterator(); i.hasNext();) {
+                Interests interests = i.next().getInterests();
+
+                if (null != interests) {
+                    String[] configFileNames = interests.getConfigFileNames();
+                    if (null != configFileNames && configFileNames.length > 0) {
+                        for (String configFileName : configFileNames) {
+                            if (false == files.containsKey(configFileName)) {
+                                files.put(configFileName, Arrays.asList("All properties in that file"));
+                            }
+                        }
+                    }
+
+                    String[] propertiesOfInterest = interests.getPropertiesOfInterest();
+                    if (null != propertiesOfInterest && propertiesOfInterest.length > 0) {
+                        if (null == properties) {
+                            properties = new TreeSet<>();
+                        }
+                        properties.addAll(Arrays.asList(propertiesOfInterest));
                     }
                 }
             }
+
+            Map<String, List<String>> map = new LinkedHashMap<String, List<String>>();
+            map.putAll(files);
+
+            if (null != properties) {
+                properties.remove("*");
+                map.put("properties", new ArrayList<>(properties));
+            }
+
             return map;
         } catch (final Exception e) {
             logger.error("", e);
@@ -125,5 +153,4 @@ public class ConfigReloadMBeanImpl extends StandardMBean implements ConfigReload
             throw new MBeanException(new Exception(message), message);
         }
     }
-
 }

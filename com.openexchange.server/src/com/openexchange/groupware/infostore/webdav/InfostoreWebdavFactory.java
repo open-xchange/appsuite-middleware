@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -77,6 +77,7 @@ import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
@@ -489,22 +490,26 @@ public class InfostoreWebdavFactory extends AbstractWebdavFactory implements Bul
         if(!(perm.canReadAllObjects() || perm.canReadOwnObjects())) {
             return new ArrayList<OXWebdavResource>();
         }
-        final SearchIterator<DocumentMetadata> iter = database.getDocuments(folderId, session).results();
-        final List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>();
 
-        while(iter.hasNext()) {
-            final DocumentMetadata docMeta = iter.next();
-            if(null == docMeta.getFileName() || docMeta.getFileName().equals("")) {
-                continue;
+        SearchIterator<DocumentMetadata> iter = database.getDocuments(folderId, session).results();
+        try {
+            final List<OXWebdavResource> retVal = new ArrayList<OXWebdavResource>();
+            while(iter.hasNext()) {
+                final DocumentMetadata docMeta = iter.next();
+                if(null == docMeta.getFileName() || docMeta.getFileName().equals("")) {
+                    continue;
+                }
+                DocumentMetadataResource res = s.resourcesById.get(docMeta.getId());
+                if(res == null) {
+                    res = new DocumentMetadataResource(collection.getUrl().dup().append(docMeta.getFileName()), docMeta, this);
+                    s.addResource(res);
+                }
+                retVal.add(res);
             }
-            DocumentMetadataResource res = s.resourcesById.get(docMeta.getId());
-            if(res == null) {
-                res = new DocumentMetadataResource(collection.getUrl().dup().append(docMeta.getFileName()), docMeta, this);
-                s.addResource(res);
-            }
-            retVal.add(res);
+            return retVal;
+        } finally {
+            SearchIterators.close(iter);
         }
-        return retVal;
     }
 
     private void addService(final TransactionAware service) {

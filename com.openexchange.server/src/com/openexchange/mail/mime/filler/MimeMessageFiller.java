@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -92,7 +92,9 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -109,6 +111,7 @@ import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.HTMLDetector;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
@@ -950,7 +953,7 @@ public class MimeMessageFiller {
                              *
                              * Well-formed HTML
                              */
-                            if (HTMLDetector.containsHTMLTags(content, true)) {
+                            if (HTMLDetector.containsHTMLTags(content, "<br", "<p>", "<div")) {
                                 isHtml = true;
                                 if (BODY_START.matcher(content).find()) {
                                     final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
@@ -984,19 +987,18 @@ public class MimeMessageFiller {
                     if (text == null || text.length() == 0) {
                         mailText = "";
                     } else if (isHtml) {
-                        mailText = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(
-                            htmlService.html2text(text, true),
-                            compositionParameters.getAutoLinebreak());
+                        mailText = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(htmlService.html2text(text, true), compositionParameters.getAutoLinebreak());
                     } else {
                         mailText = ComposeType.NEW_SMS.equals(type) ? content : performLineFolding(text, compositionParameters.getAutoLinebreak());
                     }
                     mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mailText, contentType)));
+                    if (Streams.isAscii(mailText.getBytes(contentType.getCharsetParameter()))) {
+                        mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "7bit");
+                    }
                 } else {
                     final String wellFormedHTMLContent = htmlService.getConformHTML(content, contentType.getCharsetParameter());
                     if (wellFormedHTMLContent == null || wellFormedHTMLContent.length() == 0) {
-                        mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(
-                            HTML_SPACE,
-                            ""), contentType)));
+                        mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(htmlService.getConformHTML(HTML_SPACE, charset).replaceFirst(HTML_SPACE, ""), contentType)));
                     } else {
                         mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(wellFormedHTMLContent, contentType)));
                     }
@@ -1006,10 +1008,14 @@ public class MimeMessageFiller {
                 mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
             } else {
                 final MimeBodyPart msgBodyPart = new MimeBodyPart();
-                mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mail.getContent().toString(), contentType)));
+                String mailText = mail.getContent().toString();
+                mimeMessage.setDataHandler(new DataHandler(new MessageDataSource(mailText, contentType)));
                 // msgBodyPart.setContent(mail.getContent(), contentType.toString());
                 msgBodyPart.setHeader(HDR_MIME_VERSION, VERSION_1_0);
                 msgBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType.toString()));
+                if (isPlainText && Streams.isAscii(mailText.getBytes(contentType.getCharsetParameter()))) {
+                    mimeMessage.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "7bit");
+                }
                 primaryMultipart.addBodyPart(msgBodyPart);
             }
         } else {
@@ -1333,8 +1339,8 @@ public class MimeMessageFiller {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.mail.octetExtensions");
             }
         });
     }
@@ -1568,6 +1574,13 @@ public class MimeMessageFiller {
         // MailConfig.getDefaultMimeCharset());
         text.setHeader(HDR_MIME_VERSION, VERSION_1_0);
         text.setHeader(MessageHeaders.HDR_CONTENT_TYPE, new StringBuilder("text/plain; charset=").append(charset).toString());
+        try {
+            if (Streams.isAscii(textContent.getBytes(charset))) {
+                text.setHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, "7bit");
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new MessagingException("Unsupported character encoding: " + charset, e);
+        }
         return text;
     }
 
@@ -1856,19 +1869,7 @@ public class MimeMessageFiller {
          * Determine filename
          */
         String fileName = imageProvider.getFileName();
-        if (null == fileName) {
-            /*
-             * Generate dummy file name
-             */
-            final List<String> exts = MimeType2ExtMap.getFileExtensions(imageProvider.getContentType().toLowerCase(Locale.ENGLISH));
-            final StringBuilder sb = new StringBuilder("image.");
-            if (exts == null) {
-                sb.append("dat");
-            } else {
-                sb.append(exts.get(0));
-            }
-            fileName = sb.toString();
-        } else {
+        if (null != fileName)  {
             /*
              * Encode image's file name for being mail-safe
              */

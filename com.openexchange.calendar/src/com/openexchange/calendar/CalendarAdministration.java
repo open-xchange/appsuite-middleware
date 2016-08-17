@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -62,6 +62,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.calendar.api.CalendarCollection;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
@@ -520,28 +521,18 @@ public class CalendarAdministration implements CalendarAdministrationService {
                 del_rights.executeBatch();
             }
         } finally {
-            final CalendarCollection collection = new CalendarCollection();
-            if (rs != null) {
-                collection.closeResultSet(rs);
-            }
-            if (pst != null) {
-                collection.closePreparedStatement(pst);
-            }
-            if (del_dates != null) {
-                collection.closePreparedStatement(del_dates);
-            }
-            if (del_rights != null) {
-                collection.closePreparedStatement(del_rights);
-            }
-            if (del_members != null) {
-                collection.closePreparedStatement(del_members);
-            }
+            Databases.closeSQLStuff(rs);
+            Databases.closeSQLStuff(pst, del_dates, del_rights, del_members, dateExternal);
         }
     }
 
     private static final String SQL_DEL_REMINDER = "DELETE FROM reminder WHERE cid = ? AND module = ? AND userid = ?";
 
     private void deleteUserFromAppointments(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws SQLException, OXException {
+        Integer destUser = deleteEvent.getDestinationUserID();
+        if (destUser == null || destUser <= 0) {
+            destUser = deleteEvent.getContext().getMailadmin();
+        }
         PreparedStatement pst2 = null;
         ResultSet rs2 = null;
         PreparedStatement pst3 = null;
@@ -580,10 +571,11 @@ public class CalendarAdministration implements CalendarAdministrationService {
             sb2.append(deleteEvent.getId());
             pst2 = readcon.prepareStatement(sb2.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
             rs2 = new CalendarMySQL().getResultSet(pst2);
+
             final PreparedStatement update = getUpdatePreparedStatement(writecon);
             while (rs2.next()) {
                 final int object_id = rs2.getInt(1);
-                addUpdateMasterObjectBatch(update, deleteEvent.getContext().getMailadmin(), deleteEvent.getContext().getContextId(), object_id);
+                addUpdateMasterObjectBatch(update, destUser, deleteEvent.getContext().getContextId(), object_id);
                 eventHandling(object_id, 0, deleteEvent.getContext(), deleteEvent.getSession(), CalendarOperation.UPDATE, readcon);
             }
             update.executeBatch();
@@ -657,7 +649,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             replaceOrganizerId.append(" pd SET ");
             replaceOrganizerId.append(collection.getFieldName(CalendarObject.ORGANIZER_ID));
             replaceOrganizerId.append(" = ");
-            replaceOrganizerId.append(deleteEvent.getContext().getMailadmin());
+            replaceOrganizerId.append(destUser);
             replaceOrganizerId.append(", ");
             replaceOrganizerId.append(collection.getFieldName(CalendarObject.ORGANIZER));
             replaceOrganizerId.append(" = ");
@@ -725,8 +717,8 @@ public class CalendarAdministration implements CalendarAdministrationService {
         }
     }
 
-    private final void addUpdateMasterObjectBatch(final PreparedStatement update, final int mailadmin, final int cid, final int oid) throws SQLException {
-        update.setInt(1, mailadmin);
+    private final void addUpdateMasterObjectBatch(final PreparedStatement update, final int destUser, final int cid, final int oid) throws SQLException {
+        update.setInt(1, destUser);
         update.setLong(2, System.currentTimeMillis());
         update.setInt(3, cid);
         update.setInt(4, oid);

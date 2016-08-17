@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,6 +49,7 @@
 
 package com.openexchange.caldav.resources;
 
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -149,7 +150,7 @@ public class TaskResource extends CalDAVResource<Task> {
         try {
             return new String(bytes.toByteArray(), "UTF-8");
         } catch (UnsupportedEncodingException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -157,7 +158,7 @@ public class TaskResource extends CalDAVResource<Task> {
     protected void deserialize(InputStream body) throws OXException {
         List<Task> tasks = getICalParser().parseTasks(body, getTimeZone(), factory.getContext(), new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
         if (null == tasks || 1 != tasks.size()) {
-            throw protocolException(HttpServletResponse.SC_BAD_REQUEST);
+            throw protocolException(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         } else {
             taskToSave = tasks.get(0);
             taskToSave.removeLastModified();

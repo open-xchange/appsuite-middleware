@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -60,6 +60,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.concurrent.TimeoutConcurrentMap;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -73,7 +74,8 @@ import com.openexchange.user.UserService;
  */
 public final class AliasesProvider {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AliasesProvider.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AliasesProvider.class);
 
     private static final AliasesProvider INSTANCE = new AliasesProvider();
 
@@ -104,10 +106,11 @@ public final class AliasesProvider {
      *
      * @param context The context
      * @param userService The user service
+     * @param aliasStorage The optional alias storage to use
      * @return All aliases
      * @throws Exception If an error occurs
      */
-    public Set<InternetAddress> getContextAliases(final Context context, final UserService userService) throws Exception {
+    public Set<InternetAddress> getContextAliases(final Context context, final UserService userService, final UserAliasStorage aliasStorage) throws Exception {
         final Integer key = Integer.valueOf(context.getContextId());
         Future<Set<InternetAddress>> f = aliasesMap.get(key);
         if (null == f) {
@@ -115,11 +118,29 @@ public final class AliasesProvider {
 
                 @Override
                 public Set<InternetAddress> call() throws Exception {
+                    // First check alias storage availability
+                    if (null != aliasStorage) {
+                        Set<String> aliases = aliasStorage.getAliases(context.getContextId());
+                        if (aliases.isEmpty()) {
+                            return Collections.emptySet();
+                        }
+
+                        Set<InternetAddress> set = new HashSet<InternetAddress>(aliases.size());
+                        for (String aliase : aliases) {
+                            try {
+                                set.add(new QuotedInternetAddress(aliase, false));
+                            } catch (AddressException e) {
+                                LOG.debug("Alias could not be parsed to an internet address: {}", aliase, e);
+                            }
+                        }
+                        return set;
+                    }
+
                     // All context-known users' aliases
-                    final int[] allUserIDs = userService.listAllUser(context);
-                    final Set<InternetAddress> aliases = new HashSet<InternetAddress>(allUserIDs.length * 8);
-                    for (final int allUserID : allUserIDs) {
-                        aliases.addAll(getAliases(userService.getUser(allUserID, context)));
+                    int[] allUserIDs = userService.listAllUser(context);
+                    Set<InternetAddress> aliases = new HashSet<InternetAddress>(allUserIDs.length * 8);
+                    for (int allUserID : allUserIDs) {
+                        aliases.addAll(getAliases(userService.getUser(allUserID, context), context, aliasStorage));
                     }
                     return aliases;
                 }
@@ -149,18 +170,42 @@ public final class AliasesProvider {
      * Gets the aliases of a specified user.
      *
      * @param user The user whose aliases shall be returned
+     * @param context The user-associated context
+     * @param aliasStorage The optional alias storage to use
      * @return The aliases of a specified user
      */
-    public Set<InternetAddress> getAliases(final User user) {
-        final String[] aliases = user.getAliases();
+    public Set<InternetAddress> getAliases(User user, Context context, UserAliasStorage aliasStorage) {
+        if (null != aliasStorage) {
+            try {
+                Set<String> aliases = aliasStorage.getAliases(context.getContextId(), user.getId());
+                if (aliases.isEmpty()) {
+                    return Collections.emptySet();
+                }
+
+                Set<InternetAddress> set = new HashSet<InternetAddress>(aliases.size());
+                for (String aliase : aliases) {
+                    try {
+                        set.add(new QuotedInternetAddress(aliase, false));
+                    } catch (final AddressException e) {
+                        LOG.debug("Alias could not be parsed to an internet address: {}", aliase, e);
+                    }
+                }
+                return set;
+            } catch (OXException e) {
+                LOG.debug("Aliases could not be fetched from alias service.", e);
+            }
+        }
+
+        String[] aliases = user.getAliases();
         if (null == aliases || aliases.length <= 0) {
             return Collections.emptySet();
         }
-        final Set<InternetAddress> set = new HashSet<InternetAddress>(aliases.length);
-        for (final String aliase : aliases) {
+
+        Set<InternetAddress> set = new HashSet<InternetAddress>(aliases.length);
+        for (String aliase : aliases) {
             try {
                 set.add(new QuotedInternetAddress(aliase, false));
-            } catch (final AddressException e) {
+            } catch (AddressException e) {
                 LOG.debug("Alias could not be parsed to an internet address: {}", aliase, e);
             }
         }

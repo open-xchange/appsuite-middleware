@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -219,9 +219,9 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
      */
     BROKEN_CONNECTION("Connection is broken due to a socket exception on remote server: %1$s", CATEGORY_SERVICE_DOWN, 1020),
     /**
-     * A socket error occurred: %1$s
+     * A socket error occurred
      */
-    SOCKET_ERROR("A socket error occurred: %1$s", CATEGORY_ERROR, 1021),
+    SOCKET_ERROR("A socket error occurred", CATEGORY_ERROR, 1021),
     /**
      * The IP address of host "%1$s" could not be determined
      */
@@ -340,7 +340,7 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Message displayed to the user
      */
-    private String displayMessage;
+    private final String displayMessage;
 
     private MimeMailExceptionCode(final String message, final Category category, final int detailNumber, final String displayMessage) {
         this.message = message;

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -73,6 +73,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -127,6 +129,10 @@ public final class Tools {
 
     public static UserConfiguration getUserConfiguration(final Context ctx, final int userId) throws OXException {
         return UserConfigurationStorage.getInstance().getUserConfiguration(userId, ctx);
+    }
+
+    public static UserPermissionBits getUserPermissionBits(final Context ctx, final int userId) throws OXException {
+        return UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
     }
 
     /**

@@ -1,0 +1,32 @@
+/mail?action=clear:
+  put:
+    operationId: clearMailFolders
+    tags:
+      - mail
+    summary: Clears the content of mail folders.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: 'Not IMAP: timestamp of the last update of the deleted mails.'
+        required: false
+      - in: body
+        name: body
+        description: A JSON array with object IDs of the mail folders that shall be cleared.
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+    responses:
+      200:
+        description: |
+          A JSON array with IDs of mail folder that could not be cleared; meaning the response body is an empty
+          JSON array if everything went well. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/MailsCleanUpResponse"

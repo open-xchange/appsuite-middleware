@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -126,7 +126,6 @@ public class DefaultNotificationParticipantResolver implements
 				appointment.getParticipants().length);
 		final Set<String> externalGuardian = new HashSet<String>();
 
-		final Set<Integer> groupIds = new HashSet<Integer>();
 		final Set<Integer> resourceIds = new HashSet<Integer>();
 
 		Participant[] participants = appointment.getParticipants();
@@ -144,9 +143,6 @@ public class DefaultNotificationParticipantResolver implements
 						externalGuardian
 								.add(ep.getEmailAddress().toLowerCase());
 					}
-				} else if (participant instanceof GroupParticipant) {
-					final GroupParticipant gp = (GroupParticipant) participant;
-					groupIds.add(gp.getIdentifier());
 				} else if (participant instanceof ResourceParticipant) {
 					final ResourceParticipant rp = (ResourceParticipant) participant;
 					resourceIds.add(rp.getIdentifier());
@@ -190,19 +186,7 @@ public class DefaultNotificationParticipantResolver implements
 							externalGuardian.add(ep.getEmailAddress()
 									.toLowerCase());
 						}
-					} else if (participant instanceof GroupParticipant) {
-						final GroupParticipant gp = (GroupParticipant) participant;
-						groupIds.add(gp.getIdentifier());
 					}
-				}
-			}
-		}
-
-		for (final int id : groupIds) {
-			final int[] member = groupService.getGroup(ctx, id).getMember();
-			for (final int i : member) {
-				if (!userIds.containsKey(i)) {
-					userIds.put(i, new UserParticipant(i));
 				}
 			}
 		}

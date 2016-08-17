@@ -1,0 +1,36 @@
+# The YAML configuration file for the APNS transport of the Push Notification Service
+#
+# Notation/meaning is:
+# <unique-client-identifier>:
+#     enabled: <true|false>
+#       Boolean. If set to "false" the client configuration will not be available.
+#                Default is "true".
+#
+#     keystore: <keystore-namek>
+#       String. Specifies the path to the local keystore file (PKCS #12) containing the APNS
+#               certificate and keys for the client-associated iOS application
+#
+#     password: <password>
+#       String. Specifies the password to use when creating the referenced keystore containing
+#               the certificate of the iOS application.
+#
+#     production: <true|falses>
+#       Boolean. Indicates which APNS service is used when sending push notifications to iOS
+#                devices. A value of "true" will use the production service, a value of "false"
+#                references to the sandbox service. Default is "true".
+#
+
+# Only an example
+myiosclient:
+    # Disabled...
+    enabled: false
+    keystore: /opt/open-xchange/etc/mykey-apns.p12
+    password: A3JWKAKR8XB
+    production: true
+
+anotheriosclient:
+    # Disabled...
+    enabled: false
+    keystore: /opt/open-xchange/etc/anotherkey-apns.p12
+    password: 1465WKAKR8XB
+    production: true

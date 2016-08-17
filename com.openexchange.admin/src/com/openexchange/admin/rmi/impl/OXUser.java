@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -97,6 +97,7 @@ import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
+import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
@@ -110,6 +111,9 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.ConfigurationProperty;
+import com.openexchange.config.cascade.ConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.alias.UserAliasStorage;
@@ -1099,7 +1103,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             usrdata.testMandatoryCreateFieldsNull();
             userid = usrdata.getId();
 
-            if (!ClientAdminThread.cache.contextAuthenticationDisabled()) {
+            if (!cache.contextAuthenticationDisabled()) {
                 if( basicauth.isMasterOfContext(credentials, ctx) ) {
                     basicauth.doAuthentication(auth, ctx);
                 } else {
@@ -1249,8 +1253,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         // change cached admin credentials if necessary
         if (isContextAdmin && usrdata.getPassword() != null) {
-            final Credentials cauth = ClientAdminThread.cache.getAdminCredentials(ctx);
-            final String mech = ClientAdminThread.cache.getAdminAuthMech(ctx);
+            final Credentials cauth = cache.getAdminCredentials(ctx);
+            final String mech = cache.getAdminAuthMech(ctx);
             if ("{CRYPT}".equalsIgnoreCase(mech)) {
                 try {
                     cauth.setPassword(UnixCrypt.crypt(usrdata.getPassword()));
@@ -1276,7 +1280,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     throw new StorageException(e);
                 }
             }
-            ClientAdminThread.cache.setAdminCredentials(ctx,mech,cauth);
+            cache.setAdminCredentials(ctx,mech,cauth);
         }
     }
 
@@ -1690,7 +1694,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                     }
                                 }
                                 try {
-                                    oxu.delete(ctx, usr);
+
+                                    oxu.delete(ctx, usr, -1);
                                 } catch (final StorageException e1) {
                                     LOGGER.error("Error doing rollback for creating user in database", e1);
                                 }
@@ -1708,7 +1713,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                     }
                                 }
                                 try {
-                                    oxu.delete(ctx, usr);
+                                    oxu.delete(ctx, usr, -1);
                                 } catch (final StorageException e1) {
                                     LOGGER.error("Error doing rollback for creating user in database", e1);
                                 }
@@ -1728,7 +1733,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                             }
                         }
                         try {
-                            oxu.delete(ctx, usr);
+                            oxu.delete(ctx, usr, -1);
                         } catch (final StorageException e1) {
                             LOGGER.error("Error doing rollback for creating user in database", e1);
                         }
@@ -1745,6 +1750,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             try {
                 final Cache mailAccountCache = cacheService.getCache("MailAccount");
                 mailAccountCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), String.valueOf(0), String.valueOf(usr.getId())));
+                mailAccountCache.remove(cacheService.newCacheKey(ctx.getId().intValue(), String.valueOf(usr.getId())));
                 mailAccountCache.invalidateGroup(ctx.getId().toString());
 
                 final Cache globalFolderCache = cacheService.getCache("GlobalFolderCache");
@@ -1764,12 +1770,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public void delete(final Context ctx, final User user, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        delete(ctx, new User[]{user}, auth);
+    public void delete(final Context ctx, final User user, final Integer destUser, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        delete(ctx, new User[] { user }, destUser, auth);
     }
 
     @Override
-    public void delete(final Context ctx, final User[] users, final Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public void delete(final Context ctx, final User[] users, Integer destUser, final Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         final Credentials auth = credentials == null ? new Credentials("","") : credentials;
 
         try {
@@ -1810,6 +1816,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             Set<Integer> dubCheck = new HashSet<Integer>();
             List<User> filestoreOwners = new java.util.LinkedList<User>();
             for (final User user : users) {
+                if (destUser != null && user.getId() == destUser.intValue()) {
+                    throw new InvalidDataException("It is not allowed to reassign the shared data to the user which should be deleted. Please choose a different reassign user.");
+                }
                 if (false == dubCheck.add(user.getId())) {
                     throw new InvalidDataException("User " + user.getId() + " is contained multiple times in delete request.");
                 }
@@ -1832,11 +1841,24 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
 
             }
-
-            for (User filestoreOwner : filestoreOwners) {
-                LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to context filestore...", filestoreOwner.getId());
-                moveFromUserToContextFilestore(ctx, filestoreOwner, credentials, true);
-                LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
+            if (destUser == null) { // Move to ctx store
+                for (User filestoreOwner : filestoreOwners) {
+                    LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to context filestore...", filestoreOwner.getId());
+                    moveFromUserToContextFilestore(ctx, filestoreOwner, credentials, true);
+                    LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
+                }
+            } else {
+                if (destUser > 0) { // Move to master store
+                    if (!tool.existsUser(ctx, destUser)) {
+                        throw new InvalidDataException(String.format("The reassign user with id %1$s does not exist in context %2$s. Please choose a different reassign user.", destUser.intValue(), ctx.getId()));
+                    }
+                    User masterUser = new User(destUser);
+                    for (User filestoreOwner : filestoreOwners) {
+                        LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to filestore of user {}", filestoreOwner.getId(), masterUser.getId());
+                        moveFromUserFilestoreToMaster(ctx, filestoreOwner, masterUser, credentials);
+                        LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
+                    }
+                }
             }
         } catch (final InvalidDataException e) {
             LOGGER.error("", e);
@@ -1904,7 +1926,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         */
 
-        oxu.delete(ctx, users);
+        oxu.delete(ctx, users, destUser);
+        for (final User user : users) {
+            try {
+                Filestore2UserUtil.removeFilestore2UserEntry(ctx.getId().intValue(), user.getId().intValue(), cache);
+            } catch (Exception e) {
+                LOGGER.error("Failed to remove filestore2User entry for user {} in context {}", ctx.getId(), user.getId(), e);
+            }
+        }
 
         // JCS
         final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);;
@@ -2517,7 +2546,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             try {
                 permissionBits = Integer.parseInt(filter);
             } catch (final NumberFormatException nfe) {
-                final UserModuleAccess namedAccessCombination = ClientAdminThread.cache.getNamedAccessCombination(filter);
+                final UserModuleAccess namedAccessCombination = cache.getNamedAccessCombination(filter);
                 if (namedAccessCombination == null) {
                     throw new InvalidDataException("No such access combination name \"" + filter.trim() + "\"");
                 }
@@ -2821,5 +2850,15 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             LOGGER.error("", e);
             throw e;
         }
+    }
+
+    @Override
+    public void delete(Context ctx, User[] users, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        delete(ctx, users, null, auth);
+    }
+
+    @Override
+    public void delete(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        delete(ctx, user, null, auth);
     }
 }

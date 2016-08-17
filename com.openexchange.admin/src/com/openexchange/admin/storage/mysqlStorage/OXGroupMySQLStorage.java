@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -62,6 +62,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import org.osgi.framework.BundleContext;
+import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Group;
@@ -72,6 +73,7 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXGroupSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
@@ -88,6 +90,18 @@ import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDefaultValues {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXGroupMySQLStorage.class);
+
+    private final AdminCache cache;
+    private final PropertyHandler prop;
+
+    /**
+     * Initializes a new {@link OXGroupMySQLStorage}.
+     */
+    public OXGroupMySQLStorage() {
+        super();
+        this.cache = ClientAdminThread.cache;
+        this.prop = cache.getProperties();
+    }
 
     private void changeLastModifiedOnGroup(int ctxId, int groupId, Connection con) throws SQLException {
         PreparedStatement stmt = null;

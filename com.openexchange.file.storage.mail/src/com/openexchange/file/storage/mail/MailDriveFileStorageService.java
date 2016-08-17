@@ -60,9 +60,12 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
+import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.RootFolderPermissionsAware;
 import com.openexchange.file.storage.mail.osgi.Services;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
@@ -77,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public final class MailDriveFileStorageService implements AccountAware {
+public final class MailDriveFileStorageService implements AccountAware, RootFolderPermissionsAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailDriveFileStorageService.class);
 
@@ -127,6 +130,18 @@ public final class MailDriveFileStorageService implements AccountAware {
         return Collections.emptySet();
     }
 
+    @Override
+    public List<FileStoragePermission> getRootFolderPermissions(String accountId, Session session) throws OXException {
+        if (!MailDriveConstants.ACCOUNT_ID.equals(accountId)) {
+            throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(accountId, MailDriveConstants.ID, session.getUserId(), session.getContextId());
+        }
+        DefaultFileStoragePermission p = DefaultFileStoragePermission.newInstance();
+        p.setEntity(session.getUserId());
+        p.setAdmin(false);
+        p.setAllPermissions(FileStoragePermission.READ_FOLDER, FileStoragePermission.READ_ALL_OBJECTS, FileStoragePermission.NO_PERMISSIONS, FileStoragePermission.NO_PERMISSIONS);
+        return Collections.<FileStoragePermission> singletonList(p);
+    }
+
     private UserPermissionBits getUserPermissionBits(Session session, int userId, int contextId) throws OXException {
         if (session instanceof ServerSession) {
             ServerSession serverSession = (ServerSession) session;
@@ -172,7 +187,7 @@ public final class MailDriveFileStorageService implements AccountAware {
             return Collections.emptyList();
         }
 
-        return Arrays.<FileStorageAccount> asList(new MailDriveFileStorageAccount(this));
+        return Arrays.<FileStorageAccount> asList(new MailDriveFileStorageAccount(this, session));
     }
 
     @Override
@@ -212,12 +227,16 @@ public final class MailDriveFileStorageService implements AccountAware {
 
         ConfigView view = viewFactory.getView(userId, contextId);
 
+        boolean requireFullNames = false;
         String fullNameAll;
         {
             String propName = "com.openexchange.file.storage.mail.fullNameAll";
             ComposedConfigProperty<String> propertyAll = view.property(propName, String.class);
             if (!propertyAll.isDefined() || Strings.isEmpty((fullNameAll = propertyAll.get()))) {
-                throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_ID);
+                if (requireFullNames) {
+                    throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_ID);
+                }
+                fullNameAll = null;
             }
         }
 
@@ -226,7 +245,10 @@ public final class MailDriveFileStorageService implements AccountAware {
             String propName = "com.openexchange.file.storage.mail.fullNameReceived";
             ComposedConfigProperty<String> propertyReceived = view.property(propName, String.class);
             if (!propertyReceived.isDefined() || Strings.isEmpty((fullNameReceived = propertyReceived.get()))) {
-                throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_ID);
+                if (requireFullNames) {
+                    throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_ID);
+                }
+                fullNameReceived = null;
             }
         }
 
@@ -235,11 +257,14 @@ public final class MailDriveFileStorageService implements AccountAware {
             String propName = "com.openexchange.file.storage.mail.fullNameSent";
             ComposedConfigProperty<String> propertySent = view.property(propName, String.class);
             if (!propertySent.isDefined() || Strings.isEmpty((fullNameSent = propertySent.get()))) {
-                throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_ID);
+                if (requireFullNames) {
+                    throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_ID);
+                }
+                fullNameSent = null;
             }
         }
 
-        return new FullNameCollection(fullNameAll.trim(), fullNameReceived.trim(), fullNameSent.trim());
+        return new FullNameCollection(null == fullNameAll ? null : fullNameAll.trim(), null == fullNameReceived ? null : fullNameReceived.trim(), null == fullNameSent ? null : fullNameSent.trim());
     }
 
     /**

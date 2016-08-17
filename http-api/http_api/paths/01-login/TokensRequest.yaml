@@ -1,0 +1,33 @@
+/login?action=tokens:
+  post:
+    operationId: accessSession
+    tags:
+      - login
+    summary: Accesses a session that was previously created with the token login (**available since v7.0.1**).
+    description: |
+      This request allows clients to access a session created with the `/login?action=tokenLogin` request.
+      When accessing the session its life time is extended equally to every other session.
+    parameters:
+      - in: formData
+        name: serverToken
+        type: string
+        description: The login name.
+        required: true
+      - in: formData
+        name: clientToken
+        type: string
+        description: The password (MUST be placed in the request body, otherwise the login request will be denied).
+        required: true
+      - in: formData
+        name: client
+        type: string
+        description: Identifier of the client using the HTTP/JSON interface. This is for statistic evaluations what clients are used with Open-Xchange.
+        required: true
+    responses:
+      200:
+        description: |
+          A JSON object conform to the normal response body containing the session identifier, the login, the identifier
+          and the locale of the user.  In case of errors the responsible fields in the response are filled
+          (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/TokensResponse"

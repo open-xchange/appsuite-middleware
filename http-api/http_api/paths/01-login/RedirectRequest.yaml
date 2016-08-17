@@ -1,0 +1,41 @@
+/login;jsessionid=1157370816112.OX1?action=redirect:
+  get:
+    operationId: redirect
+    tags:
+      - login
+    summary: Refresh auto-login cookie
+    description: |
+      **SECURITY WARNING!** Utilizing this request is **INSECURE!** This request allows to access a session with a
+      single one time token. This one time token may be delivered to the wrong client if the protocol has an
+      error or Apache or the load balancer make a mistake. This will cause a wrong user to be in a wrong
+      session. **IMMEDIATELY** consider not to use this request anymore. You have been warned. Use instead the
+      FormLogin that does not need to use the redirect request.
+    parameters:
+      - in: query
+        type: string
+        name: random
+        description: |
+          A session random token to jump into the session. This random token is part of the login
+          response. Only a very short configurable time after the login it is allowed to jump into
+          the session with the random token.
+        required: true
+      - in: query
+        type: string
+        name: client
+        description: The client can be defined here newly if it is not correct on the login request itself.
+        required: false
+      - in: query
+        type: boolean
+        name: store
+        description: Tells the UI to do a store request after login to be able to use autologin request.
+        required: false
+      - in: query
+        type: string
+        name: uiWebPath
+        description: The optional path on the webserver to the UI. If this parameter is not given the configured uiWebPath is used.
+        required: false
+    responses:
+      200:
+        description: In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/CommonResponse"

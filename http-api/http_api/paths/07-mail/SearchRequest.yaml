@@ -1,0 +1,40 @@
+/mail?action=search:
+  put:
+    operationId: searchMails
+    tags:
+      - mail
+    summary: Searches for mails.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamMailFolder"
+      - $ref: "#/parameters/gblQueryParamMailColumns"
+      - in: query
+        name: sort
+        type: string
+        description: 'The identifier of a column which determines the sort order of the response or the string “thread” to return thread-sorted messages. If this parameter is specified and holds a column number, then the parameter order must be also specified. Note: Applies only to root-level messages.'
+        required: false
+      - in: query
+        name: order
+        type: string
+        description: '"asc" if the response entires should be sorted in the ascending order, "desc" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified. Note: Applies only to root-level messages.'
+        required: false
+      - in: body
+        name: body
+        description: |
+          A JSON object describing the search term as introducted in [Advanced search](https://documentation.open-xchange.com/latest/middleware/http_api/5_advanced_search.html). Example:
+          `{"filter":["and",["=", {"field":"to"},"test1@example.com"],["not",["=",{"attachment":"name"},"document.pdf"]]]}`
+          which represents 'to = "test1@example.com" AND NOT from = "test2@example.com"'. Available field names are
+          `from`, `to`, `cc`, `bcc`, `subject`, `received_date`, `sent_date`, `size`, `flags`, `content`, `content_type`, `disp`, and `priority`.
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: |
+          'A JSON object containing an array with matching mails. Mails are represented by arrays. The elements of each array contain the
+          information specified by the corresponding identifiers in the `columns` parameter. Not IMAP: with timestamp. In case of errors the responsible fields in the
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).'
+        schema:
+          $ref: "#/definitions/MailsResponse"

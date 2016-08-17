@@ -1,0 +1,6 @@
+type: object
+properties:
+  file:
+    $ref: "#/definitions/DriveFileMetadata"
+  notification:
+    $ref: "#/definitions/DriveNotificationData"

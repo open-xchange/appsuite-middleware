@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -287,27 +287,6 @@ public class ServerUserSetting {
     private ServerUserSetting(final Connection connection) {
         super();
         this.connection = connection;
-    }
-
-    /**
-     * Complete <i>contact-collect</i> feature is enabled if one of its sub switches is enabled (<i>collect-on-mail-access</i> OR <i>collect-on-mail-transport</i>).
-     *
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @return The value or <code>false</code> if no entry is found.
-     */
-    public Boolean isContactCollectionEnabled(final int contextId, final int userId) throws OXException {
-        Boolean contactCollectOnMailAccess = isContactCollectOnMailAccess(contextId, userId);
-        if (contactCollectOnMailAccess.booleanValue()) {
-            return Boolean.TRUE;
-        }
-
-        Boolean contactCollectOnMailTransport = isContactCollectOnMailTransport(contextId, userId);
-        if (contactCollectOnMailTransport.booleanValue()) {
-            return Boolean.TRUE;
-        }
-
-        return Boolean.FALSE;
     }
 
     /**

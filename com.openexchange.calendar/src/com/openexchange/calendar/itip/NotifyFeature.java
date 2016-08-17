@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -56,8 +56,8 @@ import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
 import com.openexchange.calendar.itip.sender.MailSenderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -89,9 +89,9 @@ public class NotifyFeature implements CalendarFeature {
 
     @Override
     public AppointmentSQLInterface wrap(AppointmentSQLInterface delegate, Session session) throws OXException {
-        UserConfiguration userConfiguration = UserConfigurationStorage.getInstance().getUserConfiguration(session.getUserId(), ContextStorage.getStorageContext(session));
+        UserPermissionBits permissionBits = UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), ContextStorage.getStorageContext(session));
 
-        if (userConfiguration.hasWebMail()) {
+        if (permissionBits.hasWebMail()) {
             return new NotifyingCalendar(generators, sender, delegate, attachmentMemory, services, session);
         }
 

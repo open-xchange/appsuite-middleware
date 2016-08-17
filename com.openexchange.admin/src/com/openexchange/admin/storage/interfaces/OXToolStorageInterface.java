@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -60,6 +60,7 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
@@ -92,7 +93,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Creates a new instance implementing the group storage interface.
-     * 
+     *
      * @return an instance implementing the group storage interface.
      */
     public static OXToolStorageInterface getInstance() {
@@ -111,7 +112,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Checks if given domain is used as mail address of any group in given context.
-     * 
+     *
      * @param domain
      * @return Groups which use this domain.null if no group uses this domain.
      * @throws StorageException
@@ -120,7 +121,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Checks if given domain is used as mail address of any resource in given context.
-     * 
+     *
      * @param domain
      * @return Resources which use this domain. null if no resource uses this domain.
      * @throws StorageException
@@ -129,7 +130,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Checks if given domain is used as alias or primary mail address of any user in given context.
-     * 
+     *
      * @param domain
      * @return Users which use this domain. null if no user uses this domain.
      * @throws StorageException
@@ -160,7 +161,7 @@ public abstract class OXToolStorageInterface {
     /**
      * This method can be used to check if some group exists in a context. The connection is given to be able to check for groups that are
      * not committed yet.
-     * 
+     *
      * @param ctx Context.
      * @param con readable database connection.
      * @param id unique identifier of the group.
@@ -316,7 +317,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Checks via resource id and resource name if it already exists. Should be used in change method!
-     * 
+     *
      * @param ctx The context
      * @param res
      * @return
@@ -326,7 +327,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Checks if given name is already used for resource in given context!Should be used in create method!
-     * 
+     *
      * @param ctx The context
      * @param resourceName
      * @return
@@ -375,6 +376,24 @@ public abstract class OXToolStorageInterface {
     public abstract int getDatabaseIDByDatabaseSchema(String schemaName) throws StorageException, NoSuchObjectException;
 
     /**
+     * Gets the database schema for specified context.
+     *
+     * @param contextId The context identifier
+     * @return The database schema
+     * @throws StorageException If database cannot be loaded
+     * @throws NoSuchObjectException If there is no such database schema
+     */
+    public abstract Database getSchemaByContextId(int contextId) throws StorageException, NoSuchObjectException;
+
+    /**
+     * Generates an appropriate {@link DatabaseUpdateException} for specified context.
+     *
+     * @param contextId The context identifier
+     * @return The <code>DatabaseUpdateException</code> instance
+     */
+    public abstract DatabaseUpdateException generateDatabaseUpdateException(int contextId);
+
+    /**
      * Checks whether all contexts of the given db share the same write pool ID or not.
      *
      * @param schema the schema name
@@ -386,7 +405,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Load database information with the given identifier.
-     * 
+     *
      * @param id the identifier of the database. It must be the identifier of the master.
      * @return the database information with the given identifier.
      * @throws StorageException if the database with the given identifier does not exist or a problem occurs when loading it.
@@ -468,6 +487,22 @@ public abstract class OXToolStorageInterface {
 
     public abstract boolean schemaBeingLockedOrNeedsUpdate(final int writePoolId, final String schema) throws StorageException;
 
+    /**
+     * Lists all schemas in databases that are either locked (currently marked as being updated) or needing an update.
+     *
+     * @return All such schemas as a list with length of 3; first element contains schemas needing an update, the second those schemas currently marked for being updated, and the third providing outdated updating schemas
+     * @throws StorageException If such schemas cannot be returned
+     */
+    public abstract List<List<Database>> listSchemasBeingLockedOrNeedsUpdate() throws StorageException;
+
+    /**
+     * Unblocks specified database schema or all schemas associated with specified database inc ase no schema name is given.
+     *
+     * @return The list of unblocked database schemas
+     * @throws StorageException If unblocking fails
+     */
+    public abstract List<Database> unblockDatabaseSchema(Database db) throws StorageException;
+
     public abstract boolean serverInUse(final int server_id) throws StorageException;
 
     public abstract void setUserSettingMailBit(final Context ctx, final User user, final int bit, final Connection con) throws StorageException;
@@ -494,7 +529,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Verifies whether the specified user is the owner of a master filestore and other users are using this filestore
-     * 
+     *
      * @param context The context
      * @param userId The user identifier
      * @return true if the user is a master filestore owner AND other users are using this filestore; false otherwise
@@ -504,7 +539,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Fetches the slave users of the master filestore
-     * 
+     *
      * @param context
      * @param userId
      * @return
@@ -514,7 +549,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Determines whether the specified context is the last one on the database schema
-     * 
+     *
      * @param context The context
      * @return true if the specified context is the last one on the database schema; false otherwise
      * @throws StorageException if a problem occurs on the storage layer.

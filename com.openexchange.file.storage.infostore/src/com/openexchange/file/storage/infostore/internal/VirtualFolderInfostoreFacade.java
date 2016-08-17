@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -75,6 +75,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
     @Override
     public int countDocuments(final long folderId, ServerSession session) {
+        return 0;
+    }
+
+    @Override
+    public long getTotalSize(long folderId, ServerSession session) throws OXException {
         return 0;
     }
 
@@ -218,7 +223,7 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public void removeUser(final int userId, final Context context, final ServerSession session) {
+    public void removeUser(final int userId, final Context context, final Integer destUser, final ServerSession session) {
         // Nothing to do.
     }
 
@@ -229,6 +234,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
     @Override
     public IDTuple saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final ServerSession session) throws OXException {
+        throw virtualFolder();
+    }
+
+    @Override
+    public IDTuple saveDocumentTryAddVersion(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession session) throws OXException {
         throw virtualFolder();
     }
 

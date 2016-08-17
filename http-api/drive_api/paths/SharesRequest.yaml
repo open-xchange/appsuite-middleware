@@ -1,0 +1,17 @@
+/drive?action=shares:
+  get:
+    operationId: getShares
+    tags:
+      - drive
+    summary: Gets all shared files and directories (**available since API version 4**).
+    description: Gets all files and directories within the synchronized tree that are shared to others.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamRoot"
+    responses:
+      200:
+        description: |
+          A JSON object containing the fields `directories` and `files` with metadata objects of the shared items.
+          In case of errors the responsible fields in the response are filled.
+        schema:
+          $ref: "#/definitions/DriveSharesResponse"

@@ -1,0 +1,52 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The server-side unique identifier of the directory.
+  localized_name:
+    type: string
+    description: The localized display name of the directory, if different from the physical name.
+  checksum:
+    type: string
+    description: The directory's checksum. Only set if metadata is not retrieved through [Metadata synchronization](#metadata-synchronization).
+  own_rights:
+    type: integer
+    description: Folder permissions which apply to the current user, as described in OX HTTP API, Flags / bit masks.
+  permissions:
+    type: array
+    description: An array of all folder permissions.
+    items:
+      $ref: "#/definitions/FolderPermission"
+  extended_permissions:
+    type: array
+    description: An array of all folder permissions including some additional information.
+    items:
+      $ref: "#/definitions/FolderExtendedPermission"
+  default_folder:
+    type: boolean
+    description: "`true` if the folder is a default folder, `false` or not set, otherwise."
+  has_subfolders:
+    type: boolean
+    description: "`true` if the folder (potentially) has subfolders, `false` or not set, otherwise."
+  shared:
+    type: boolean
+    description: "`true` if the folder is shared, `false` or not set, otherwise."
+  shareable:
+    type: boolean
+    description: "`true` if the folder can be shared to others by the user, `false` or not set, otherwise."
+  not_synchronizable:
+    type: boolean
+    description: "`true` if the folder is excluded from synchronization, `false` or not set, otherwise."
+  type:
+    type: integer
+    description: The specifal folder type, or not set, if not available.
+  jump:
+    type: array
+    description: An array containing the names of possible `jump` methods to use for the folder, like "permissions", etc.
+    items:
+      type: string
+  files:
+    type: array
+    description: Metadata for the contained files. Only set if metadata is retrieved through [Metadata synchronization](#metadata-synchronization).
+    items:
+      $ref: "#/definitions/DriveFileMetadata"

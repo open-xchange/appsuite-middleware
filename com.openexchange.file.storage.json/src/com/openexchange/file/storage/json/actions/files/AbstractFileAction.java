@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -62,6 +62,8 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
+import com.openexchange.file.storage.json.FileMetadataWriter;
+import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -142,6 +144,26 @@ public abstract class AbstractFileAction implements AJAXActionService {
         return new AJAXRequestResult(file, new Date(file.getSequenceNumber()), "infostore");
     }
 
+    /**
+     * Creates an appropriate result for a single file.
+     *
+     * @param file The file result
+     * @param request The request
+     * @param saveAction Action performed when saving the file
+     * @return The AJAX result for a single file
+     * @throws OXException If result cannot be created
+     */
+    protected AJAXRequestResult result(final File file, final AJAXInfostoreRequest request, String saveAction) throws OXException {
+        try {
+            JSONObject json = new JSONObject();
+            json.put("save_action", saveAction);
+            json.put("file", new FileMetadataWriter(Services.getFieldCollector()).write(request, file));
+            return new AJAXRequestResult(json);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
+    }
+
     protected AJAXRequestResult result(final List<String> ids, final InfostoreRequest request) throws OXException {
         try {
             JSONArray array = new JSONArray(ids.size());
@@ -184,10 +206,6 @@ public abstract class AbstractFileAction implements AJAXActionService {
             failure(req, e);
             LOG.error("", e);
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, "Null dereference.");
-        } catch (RuntimeException e) {
-            failure(req, e);
-            LOG.error("", e);
-            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             after(req);
 

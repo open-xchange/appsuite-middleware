@@ -64,7 +64,15 @@ public enum CommandParserExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * No parser found under the specified key '%1$s'
      */
-    UNKNOWN_PARSER("No parser found under the specified key '%1$s'", CATEGORY_ERROR, 1)
+    UNKNOWN_PARSER("No parser found under the specified key '%1$s'", CATEGORY_ERROR, 1),
+    /**
+     * Unable to encode the field '%1$s' of the '%2$s' rule
+     */
+    UNABLE_TO_ENCODE("Unable to encode the field '%1$s' of the '%2$s' rule", CATEGORY_ERROR, 2),
+    /**
+     * Unable to decode the field '%1$s' of the '%2$s' rule
+     */
+    UNABLE_TO_DECODE("Unable to decode the field '%1$s' of the '%2$s' rule", CATEGORY_ERROR, 3),
 
     ;
 

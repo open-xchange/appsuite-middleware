@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,24 +49,18 @@
 
 package com.openexchange.caldav.resources;
 
-import java.io.IOException;
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
-import org.jdom2.Document;
-import org.jdom2.Element;
-import org.jdom2.JDOMException;
-import com.openexchange.caldav.CalDAVPermission;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Tools;
@@ -89,10 +83,8 @@ import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.mixins.CalendarColor;
 import com.openexchange.dav.resources.CommonFolderCollection;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
-import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
@@ -101,12 +93,10 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.xml.jdom.JDOMParser;
 
 /**
  * {@link CalDAVFolderCollection}
@@ -122,6 +112,8 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     protected final GroupwareCaldavFactory factory;
     protected final int folderID;
 
+    private Date minDateTime;
+    private Date maxDateTime;
     private Date lastModified;
 
     /**
@@ -165,12 +157,64 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
         return CalDAVResource.EXTENSION_ICS;
     }
 
+    /**
+     * Gets the start time of the configured synchronization timeframe for CalDAV.
+     *
+     * @return The start of the configured synchronization interval
+     */
     public Date getIntervalStart() {
-        return factory.getState().getMinDateTime();
+        if (null == minDateTime) {
+            String value = null;
+            try {
+                value = factory.getConfigValue("com.openexchange.caldav.interval.start", "one_month");
+            } catch (OXException e) {
+                LOG.warn("falling back to 'one_month' as interval start", e);
+                value = "one_month";
+            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            if ("one_year".equals(value)) {
+                calendar.add(Calendar.YEAR, -1);
+                calendar.set(Calendar.DAY_OF_YEAR, 1);
+            } else if ("six_months".equals(value)) {
+                calendar.add(Calendar.MONTH, -6);
+                calendar.set(Calendar.DAY_OF_MONTH, 1);
+            } else {
+                calendar.add(Calendar.MONTH, -1);
+                calendar.set(Calendar.DAY_OF_MONTH, 1);
+            }
+            minDateTime = calendar.getTime();
+        }
+        return minDateTime;
     }
 
+    /**
+     * Gets the end time of the configured synchronization timeframe for CalDAV.
+     *
+     * @return The end of the configured synchronization interval
+     */
     public Date getIntervalEnd() {
-        return factory.getState().getMaxDateTime();
+        if (null == maxDateTime) {
+            String value = null;
+            try {
+                value = factory.getConfigValue("com.openexchange.caldav.interval.end", "one_year");
+            } catch (OXException e) {
+                LOG.warn("falling back to 'one_year' as interval end", e);
+                value = "one_year";
+            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.YEAR, "two_years".equals(value) ? 3 : 2);
+            calendar.set(Calendar.DAY_OF_YEAR, 1);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            maxDateTime = calendar.getTime();
+        }
+        return maxDateTime;
     }
 
     @Override
@@ -193,7 +237,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
                     lastModified = Tools.getLatestModified(lastModified, object);
                 }
             } catch (OXException e) {
-                throw protocolException(e);
+                throw protocolException(getUrl(), e);
             }
         }
         return lastModified;
@@ -203,7 +247,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
         if (CalendarColor.NAMESPACE.getURI().equals(prop.getNamespace()) && CalendarColor.NAME.equals(prop.getName())) {
             if (false == PrivateType.getInstance().equals(folder.getType())) {
-                throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+                throw protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
             /*
              * apply color to meta field
@@ -245,182 +289,6 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     @Override
     public void setLength(Long l) throws WebdavProtocolException {
 
-    }
-
-    @Override
-    public void putBody(InputStream data, boolean guessSize) throws WebdavProtocolException {
-        try {
-            Document document = factory.getService(JDOMParser.class).parse(data);
-            if (null == document.getRootElement() || false == "share".equals(document.getRootElement().getName()) || false == CaldavProtocol.CALENDARSERVER_NS.equals(document.getRootElement().getNamespace())) {
-                throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
-            }
-            if (false == getFolder().getOwnPermission().isAdmin()) {
-                throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_FORBIDDEN);
-            }
-            List<Permission> permissionsToSet = extractPermissionsToSet(document);
-            Set<Integer> permissionsEntitiesToRemove = extractPermissionsToRemove(document);
-            boolean hasChanged = false;
-            List<Permission> updatedPermissions = new ArrayList<Permission>();
-            Permission[] permissions = getFolder().getPermissions();
-            // remove / update
-            for (Permission permission : permissions) {
-                if (permission.isAdmin()) {
-                    updatedPermissions.add(permission);
-                    continue;
-                }
-                if (permissionsEntitiesToRemove.contains(Integer.valueOf(permission.getEntity()))) {
-                    // don't add
-                    hasChanged = true;
-                    continue;
-                }
-                Iterator<Permission> iterator = permissionsToSet.iterator();
-                while (iterator.hasNext()) {
-                    Permission permissionToSet = iterator.next();
-                    if (permission.getEntity() == permissionToSet.getEntity()) {
-                        // update
-                        permission = permissionToSet;
-                        iterator.remove();
-                        hasChanged = true;
-                        break;
-                    }
-                }
-                updatedPermissions.add(permission);
-            }
-            // add remaining
-            if (0 < permissionsToSet.size()) {
-                updatedPermissions.addAll(permissionsToSet);
-                hasChanged = true;
-            }
-            if (hasChanged) {
-                AbstractFolder updatableFolder = getFolderToUpdate();
-                updatableFolder.setPermissions(updatedPermissions.toArray(new Permission[updatedPermissions.size()]));
-                factory.getFolderService().updateFolder(updatableFolder, folder.getLastModifiedUTC(), factory.getSession(), null);
-            }
-        } catch (JDOMException e) {
-            throw WebdavProtocolException.generalError(e, getUrl(), HttpServletResponse.SC_BAD_REQUEST);
-        } catch (IOException e) {
-            throw WebdavProtocolException.generalError(e, getUrl(), HttpServletResponse.SC_BAD_REQUEST);
-        } catch (OXException e) {
-            if (e.getCategory().equals(Category.CATEGORY_PERMISSION_DENIED)) {
-                throw WebdavProtocolException.generalError(e, getUrl(), HttpServletResponse.SC_FORBIDDEN);
-            } else {
-                throw WebdavProtocolException.generalError(e, getUrl(), HttpServletResponse.SC_BAD_REQUEST);
-            }
-        }
-    }
-
-    /**
-     * Gets a list of permission entities that are requested to remove in the supplied "share" document.
-     *
-     * @param document The document body of the request
-     * @return A set of permission entities to remove, or an empty set if there are none
-     */
-    private Set<Integer> extractPermissionsToRemove(Document document) {
-        Set<Integer> permissionsEntitiesToRemove = new HashSet<Integer>();
-        for (Element element : document.getRootElement().getChildren("remove", CaldavProtocol.CALENDARSERVER_NS)) {
-            try {
-                Element hrefElement = element.getChild("href", CaldavProtocol.DAV_NS);
-                int entity = discoverUserID(hrefElement);
-                if (-1 == entity) {
-                    entity = discoverGroupID(hrefElement);
-                    if (-1 == entity) {
-                        continue;
-                    }
-                }
-                permissionsEntitiesToRemove.add(entity);
-            } catch (OXException e) {
-                LOG.warn("Error resolving share entitites", e);
-            }
-        }
-        return permissionsEntitiesToRemove;
-    }
-
-    /**
-     * Gets a list of permissions that are requested to set in the supplied "share" document.
-     *
-     * @param document The document body of the request
-     * @return The list of permissions to set, or an empty list if there are none
-     */
-    private List<Permission> extractPermissionsToSet(Document document) {
-        List<Permission> permissionsToSet = new ArrayList<Permission>();
-        for (Element element : document.getRootElement().getChildren("set", CaldavProtocol.CALENDARSERVER_NS)) {
-            try {
-                Element hrefElement = element.getChild("href", CaldavProtocol.DAV_NS);
-                boolean group = false;
-                int entity = discoverUserID(hrefElement);
-                if (-1 == entity) {
-                    entity = discoverGroupID(hrefElement);
-                    if (-1 == entity) {
-                        continue;
-                    }
-                    group = true;
-                }
-                if (null != element.getChild("read", CaldavProtocol.CALENDARSERVER_NS)) {
-                    permissionsToSet.add(CalDAVPermission.createReadOnlyForEntity(entity, group));
-                } else if (null != element.getChild("read-write", CaldavProtocol.CALENDARSERVER_NS)) {
-                    permissionsToSet.add(CalDAVPermission.createReadWriteForEntity(entity, group));
-                }
-            } catch (OXException e) {
-                LOG.warn("Error resolving share entitites", e);
-            }
-        }
-        return permissionsToSet;
-    }
-
-    private int discoverGroupID(Element hrefElement) throws OXException {
-        if (null != hrefElement && null != hrefElement.getText()) {
-            String text = hrefElement.getText();
-            if (text.startsWith("mailto:")) {
-                text = text.substring(7);
-            }
-            if (text.startsWith("/principals/groups/")) {
-                /*
-                 * get group by id
-                 */
-                String value = text.substring(19);
-                if ('/' == value.charAt(value.length() - 1)) {
-                    value = value.substring(0, value.length() - 1);
-                }
-                try {
-                    return Integer.valueOf(value);
-                } catch (NumberFormatException e) {
-                    LOG.debug("Error parsing group identifier '{}'", value, e);
-                }
-            }
-        }
-        return -1;
-    }
-
-    private int discoverUserID(Element hrefElement) throws OXException {
-        if (null != hrefElement && null != hrefElement.getText()) {
-            String text = hrefElement.getText();
-            if (text.startsWith("mailto:")) {
-                text = text.substring(7);
-            }
-            if (text.startsWith("/principals/")) {
-                if (text.startsWith("/principals/users/")) {
-                    /*
-                     * get user by id or login info
-                     */
-                    String value = text.substring(18);
-                    if ('/' == value.charAt(value.length() - 1)) {
-                        value = value.substring(0, value.length() - 1);
-                    }
-                    try {
-                        return Integer.valueOf(value);
-                    } catch (NumberFormatException e) {
-                        LOG.debug("Error parsing user identifier '{}'", value, e);
-                    }
-                    return factory.getService(UserService.class).getUserId(value, factory.getContext());
-                }
-                return -1; // other principal
-            }
-            /*
-             * search by mail address
-             */
-            return factory.getService(UserService.class).searchUser(text, factory.getContext()).getId();
-        }
-        return -1;
     }
 
     protected static <T extends CalendarObject> boolean isInInterval(T object, Date intervalStart, Date intervalEnd) {
@@ -519,10 +387,10 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
                     return resources;
                 }
             } catch (OXException e) {
-                throw protocolException(e);
+                throw protocolException(getUrl(), e);
             }
         } else {
-            throw protocolException(HttpServletResponse.SC_NOT_IMPLEMENTED);
+            throw protocolException(getUrl(), HttpServletResponse.SC_NOT_IMPLEMENTED);
         }
     }
 

@@ -1,0 +1,5 @@
+type: object
+properties:
+  $ref: ./CommonResponsedata.yaml
+  data:
+    $ref: "#/definitions/DriveSharesData"

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -173,7 +173,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          * extract meta override parameter if present
          */
         if (requestData.containsParameter("driveMeta")) {
-            driveSession.setUseDriveMeta(requestData.getParameter("driveMeta", Boolean.class));
+            driveSession.setDriveMeta(requestData.getParameter("driveMeta"));
         }
         /*
          * extract push token if present
@@ -351,6 +351,16 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         if (servletRequest instanceof CountingHttpServletRequest) {
             ((CountingHttpServletRequest)servletRequest).setMax(-1);
         }
+    }
+
+    /**
+     * Actively prevents additional image transformations by setting the <code>transformationNeeded</code> parameter to
+     * <code>false</code> in the supplied request data reference.
+     *
+     * @param requestData The request data
+     */
+    protected void preventTransformations(AJAXRequestData requestData) {
+        requestData.putParameter("transformationNeeded", String.valueOf(false));
     }
 
 }

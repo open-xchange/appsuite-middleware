@@ -1,0 +1,28 @@
+/reminder?action=remindAgain:
+  put:
+    operationId: remindAgain
+    tags:
+      - reminder
+    summary: Updates the reminder alarm (**available since v6.18.1**).
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: integer
+        description: The ID of the reminder whose alarm date shall be changed.
+        required: true
+      - in: body
+        name: body
+        description: A JSON object containing the field `alarm` which provides the new reminder date.
+        required: true
+        schema:
+          $ref: "#/definitions/ReminderUpdateBody"
+    responses:
+      200:
+        description: |
+          A JSON object containing the data of the updated reminder. In case of
+          errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/ReminderResponse"

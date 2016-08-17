@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,37 +49,40 @@
 
 package com.openexchange.report.appsuite.management;
 
+import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.report.appsuite.ReportService;
 import com.openexchange.report.appsuite.internal.HazelcastReportService;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
+import com.openexchange.report.appsuite.serialization.ReportConfigs;
 
 /**
  * The {@link ReportMXBeanImpl} implements the MXBean interface by delegating all calls to
  * the {@link HazelcastReportService} singleton and wrapping reports as {@link JMXReport} instances
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public class ReportMXBeanImpl implements ReportMXBean {
 
-    @Override
-    public String run() throws Exception {
-        try {
-            return Services.getService(ReportService.class).run();
-        } catch (OXException e) {
-            throw new Exception(e.getMessage());
-        }
-    }
-
-    @Override
-    public String run(String reportType) throws Exception {
-        try {
-            return Services.getService(ReportService.class).run(reportType);
-        } catch (OXException e) {
-            throw new Exception(e.getMessage());
-        }
-    }
+//    @Override
+//    public String run() throws Exception {
+//        try {
+//            return Services.getService(ReportService.class).run();
+//        } catch (OXException e) {
+//            throw new Exception(e.getMessage());
+//        }
+//    }
+//
+//    @Override
+//    public String run(String reportType) throws Exception {
+//        try {
+//            return Services.getService(ReportService.class).run(reportType);
+//        } catch (OXException e) {
+//            throw new Exception(e.getMessage());
+//        }
+//    }
 
     @Override
     public JMXReport retrieveLastReport(String reportType) throws Exception {
@@ -118,5 +121,32 @@ public class ReportMXBeanImpl implements ReportMXBean {
         Report lastReport = Services.getService(ReportService.class).getLastErrorReport(reportType);
         return null == lastReport ? null : new JMXReport(lastReport);
     }
+    
+//    @Override
+//    public String run(String reportType, Date startDate, Date endDate) throws Exception {
+//        try {
+//            return Services.getService(ReportService.class).run(reportType, startDate, endDate);
+//        } catch (OXException e) {
+//            throw new Exception(e.getMessage());
+//        }
+//    }
+//
+//    @Override
+//    public String run(String reportType, Date startDate, Date endDate, Boolean isCustomTimerange, Boolean isShowSingleTenant, Long singleTenantId, Boolean isIgnoreAdmin, Boolean isShowDriveMetrics, Boolean isShowMailMetrics) throws Exception {
+//        try {
+//            return Services.getService(ReportService.class).run(reportType, startDate, endDate, isCustomTimerange, isShowSingleTenant, singleTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics);
+//        } catch (OXException e) {
+//            throw new Exception(e.getMessage());
+//        }
+//    }
 
+    @Override
+    public String run(ReportConfigs reportConfig) throws Exception {
+        try {
+            return Services.getService(ReportService.class).run(reportConfig);
+        } catch (OXException e) {
+            throw new Exception(e.getMessage());
+        }
+    }
+    
 }

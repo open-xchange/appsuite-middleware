@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -54,6 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -75,6 +76,7 @@ import com.openexchange.tools.sql.DBUtils;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public class LoginCounterImpl implements LoginCounterService {
 
@@ -297,6 +299,47 @@ public class LoginCounterImpl implements LoginCounterService {
                 return false;
             }
             return true;
+        }
+    }
+
+    @Override
+    public HashMap<String, Long> getLastClientLogIns(int userId, int contextId, Date startDate, Date endDate) throws OXException {
+        final DatabaseService service = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        final HashMap<String, Long> returnMap = new HashMap<String, Long>();
+        if (null == service) {
+            throw new OXException(-1, "DatabaseService not available at the moment. Try again later.");
+        }
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = service.getReadOnly(contextId);
+            stmt = con.prepareStatement("SELECT value, name FROM user_attribute WHERE cid=? AND id=? AND name LIKE 'client:%'");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                try {
+                    final String name = rs.getString(2);
+                    final Long date = rs.getLong(1);
+                    Date lastLogin = new Date(Long.parseLong(rs.getString(1)));
+                    if (lastLogin.after(startDate) && lastLogin.before(endDate)) {
+                        returnMap.put(name, date);
+                    }
+                } catch (final NumberFormatException e) {
+                    logger.warn("Client value is not a number.", e);
+                }
+            }
+            return returnMap;
+        } catch (final Exception e) {
+            logger.error("", e);
+            throw new OXException(-1, e.getMessage(), e);
+        } finally {
+            closeSQLStuff(rs, stmt);
+            if (null != con) {
+                service.backReadOnly(contextId, con);
+            }
         }
     }
 

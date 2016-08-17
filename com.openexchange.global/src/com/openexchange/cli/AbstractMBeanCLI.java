@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -100,7 +100,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, M
             options.addOption("h", "help", false, "Prints a help text");
 
             // Option for JMX connect & authentication
-            options.addOption("t", "host", true, "The optional JMX host (default:localhost)");
+            options.addOption("H", "host", true, "The optional JMX host (default:localhost)");
             options.addOption("p", "port", true, "The optional JMX port (default:9999)");
             options.addOption(new Option(null, "responsetimeout", true, "The optional response timeout in seconds when reading data from server (default: 0s; infinite)"));
             options.addOption("l", "login", true, "The optional JMX login (if JMX authentication is enabled)");

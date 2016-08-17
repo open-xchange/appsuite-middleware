@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,7 +56,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -74,18 +76,6 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class RdbAliasStorage implements UserAliasStorage {
 
-    // private static final String CREATE_ALIAS = "INSERT INTO user_alias (cid, user, alias) VALUES(?,?,?)";
-
-    private static final String CREATE_ALIAS_WITH_UUID = "INSERT INTO user_alias (cid, user, alias, uuid) VALUES(?,?,?,?)";
-
-    private static final String READ_ALIASES = "SELECT alias FROM user_alias WHERE cid=? AND user=?";
-
-    private static final String UPDATE_ALIAS = "UPDATE user_alias SET alias=? WHERE cid=? AND user=? AND alias=?";
-
-    private static final String DELETE_ALIAS = "DELETE FROM user_alias WHERE cid=? AND user=? AND alias=?";
-
-    private static final String DELETE_ALL_ALIASES = "DELETE FROM user_alias WHERE cid=? AND user=?";
-
     /**
      * Initialises a new {@link RdbAliasStorage}.
      */
@@ -99,13 +89,39 @@ public class RdbAliasStorage implements UserAliasStorage {
     }
 
     @Override
+    public Set<String> getAliases(int contextId) throws OXException {
+        Connection con = Database.get(contextId, false);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT alias FROM user_alias WHERE cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return Collections.emptySet();
+            }
+
+            List<String> l = new LinkedList<String>();
+            do {
+                l.add(rs.getString(1));
+            } while (rs.next());
+            return new HashSet<String>(l);
+        } catch (SQLException e) {
+            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+            Database.back(contextId, false, con);
+        }
+    }
+
+    @Override
     public HashSet<String> getAliases(int contextId, int userId) throws OXException {
         Connection con = Database.get(contextId, false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             int index = 0;
-            stmt = con.prepareStatement(READ_ALIASES);
+            stmt = con.prepareStatement("SELECT alias FROM user_alias WHERE cid=? AND user=?");
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
             rs = stmt.executeQuery();
@@ -129,7 +145,10 @@ public class RdbAliasStorage implements UserAliasStorage {
         ResultSet rs = null;
         try {
             int index = 0;
-            stmt = con.prepareStatement("SELECT user FROM user_alias WHERE cid=? AND alias LIKE ? COLLATE utf8_bin");
+            /*
+             *  Use utf8_bin to match umlauts. But that also makes it case sensitive, so use LOWER to be case insesitive.
+             */
+            stmt = con.prepareStatement("SELECT user FROM user_alias WHERE cid=? AND LOWER(alias) LIKE LOWER(?) COLLATE utf8_bin");
             stmt.setInt(++index, contextId);
             stmt.setString(++index, alias);
             rs = stmt.executeQuery();
@@ -163,7 +182,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         PreparedStatement stmt = null;
         try {
             int index = 0;
-            stmt = con.prepareStatement(CREATE_ALIAS_WITH_UUID);
+            stmt = con.prepareStatement("INSERT INTO user_alias (cid, user, alias, uuid) VALUES(?,?,?,?)");
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
             stmt.setString(++index, alias);
@@ -195,7 +214,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         PreparedStatement stmt = null;
         try {
             int index = 0;
-            stmt = con.prepareStatement(UPDATE_ALIAS);
+            stmt = con.prepareStatement("UPDATE user_alias SET alias=? WHERE cid=? AND user=? AND alias=?");
             stmt.setString(++index, newAlias);
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
@@ -226,7 +245,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         PreparedStatement stmt = null;
         try {
             int index = 0;
-            stmt = con.prepareStatement(DELETE_ALIAS);
+            stmt = con.prepareStatement("DELETE FROM user_alias WHERE cid=? AND user=? AND alias=?");
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
             stmt.setString(++index, alias);
@@ -256,7 +275,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         PreparedStatement stmt = null;
         try {
             int index = 0;
-            stmt = con.prepareStatement(DELETE_ALL_ALIASES);
+            stmt = con.prepareStatement("DELETE FROM user_alias WHERE cid=? AND user=?");
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
             return stmt.executeUpdate() != 0;

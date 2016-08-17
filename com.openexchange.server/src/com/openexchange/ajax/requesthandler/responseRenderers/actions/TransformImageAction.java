@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -138,9 +138,17 @@ public class TransformImageAction implements IFileResponseRendererAction {
 
     private IFileHolder transformIfImage(final AJAXRequestData request, final AJAXRequestResult result, final IFileHolder fileHolder, final String delivery, AtomicReference<File> tmpDirReference) throws IOException, OXException, FileResponseRendererActionException {
         // Check input
-        if (false == isImage(fileHolder)) {
+        String sourceContentType = fileHolder.getContentType();
+        if (null == sourceContentType || false == Strings.toLowerCase(sourceContentType).startsWith("image/")) {
+            String contentTypeByFileName = FileResponseRenderer.getContentTypeByFileName(fileHolder.getName());
+            if (null != contentTypeByFileName) {
+                sourceContentType = contentTypeByFileName;
+            }
+        }
+        if (null == sourceContentType || false == sourceContentType.startsWith("image/")) {
             return fileHolder;
         }
+        String sourceFormatName = Strings.toLowerCase(ImageTransformationUtility.getImageFormat(sourceContentType));
 
         // Check availability of scaler instance
         ImageTransformationService scaler = scalerReference.get();
@@ -179,8 +187,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
             }
             // Rotation/compression only required for JPEG
             if (!transform) {
-                final String formatName = com.openexchange.java.Strings.toLowerCase(ImageTransformationUtility.getImageFormat(file.getContentType()));
-                if (("jpeg".equals(formatName) || "jpg".equals(formatName)) && !IDataWrapper.DOWNLOAD.equalsIgnoreCase(delivery)) {
+                if (("jpeg".equals(sourceFormatName) || "jpg".equals(sourceFormatName)) && !IDataWrapper.DOWNLOAD.equalsIgnoreCase(delivery)) {
                     // Ensure IFileHolder is repetitive
                     if (!file.repetitive()) {
                         file = new ThresholdFileHolder(file);
@@ -263,14 +270,18 @@ public class TransformImageAction implements IFileResponseRendererAction {
         // Validate...
         {
             InputStream stream = file.getStream();
-            if (null == stream) {
-                LOG.warn("(Possible) Image file misses stream data");
-                return file;
-            }
+            try {
+                if (null == stream) {
+                    LOG.warn("(Possible) Image file misses stream data");
+                    return file;
+                }
 
-            // Check for an animated .gif image
-            if (ImageUtils.isAnimatedGif(stream)) {
-                return fileHolder;
+                // Check for an animated .gif or svg image
+                if ("svg".equals(sourceFormatName) || "gif".equals(sourceFormatName) && ImageUtils.isAnimatedGif(stream)) {
+                    return file;
+                }
+            } finally {
+                Streams.close(stream);
             }
         }
 
@@ -304,9 +315,10 @@ public class TransformImageAction implements IFileResponseRendererAction {
             if (maxHeight > Constants.getMaxHeight()) {
                 throw AjaxExceptionCodes.BAD_REQUEST.create("Height " + maxHeight + " exceeds max. supported height " + Constants.getMaxHeight());
             }
+            boolean shrinkOnly = request.isSet("shrinkOnly") && Boolean.parseBoolean(request.getParameter("shrinkOnly"));
             ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
             try {
-                transformations.scale(maxWidth, maxHeight, scaleType);
+                transformations.scale(maxWidth, maxHeight, scaleType, shrinkOnly);
             } catch (final IllegalArgumentException e) {
                 throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create(e, e.getMessage());
             }
@@ -321,16 +333,10 @@ public class TransformImageAction implements IFileResponseRendererAction {
         // Transform
         boolean cachingAdvised = false;
         try {
-            String fileContentType = file.getContentType();
-            if (null == fileContentType || !Strings.toLowerCase(fileContentType).startsWith("image/")) {
-                String contentTypeByFileName = FileResponseRenderer.getContentTypeByFileName(file.getName());
-                if (null != contentTypeByFileName) {
-                    fileContentType = contentTypeByFileName;
-                }
-            }
+            String targetContentType = getTargetContentType(sourceContentType);
             final BasicTransformedImage transformedImage;
             try {
-                transformedImage = transformations.getTransformedImage(fileContentType);
+                transformedImage = transformations.getTransformedImage(ImageTransformationUtility.getImageFormat(targetContentType));
                 if (null == transformedImage) {
                     // ImageIO.read() returned null...
                     return file.repetitive() ? file : null;
@@ -356,7 +362,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
                 }
             }
             final int size = (int) transformedImage.getSize();
-            final String contentType = fileContentType;
+            final String contentType = targetContentType;
             final String fileName = file.getName();
 
 
@@ -462,21 +468,6 @@ public class TransformImageAction implements IFileResponseRendererAction {
         return 0;
     }
 
-    private boolean isImage(final IFileHolder file) {
-        if (0 == file.getLength()) {
-            // File signals no available data
-            return false;
-        }
-        String contentType = file.getContentType();
-        if (null == contentType || !contentType.startsWith("image/")) {
-            final String fileName = file.getName();
-            if (fileName == null || !(contentType = MimeType2ExtMap.getContentType(fileName)).startsWith("image/")) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     private IFileHolder handleFailure(IFileHolder file) {
         LOG.warn("Unable to transform image from {}", file.getName());
         return file.repetitive() ? file : null;
@@ -532,6 +523,22 @@ public class TransformImageAction implements IFileResponseRendererAction {
         public InputStream newStream() throws OXException, IOException {
             return transformedImage.getImageStream();
         }
+    }
+
+    /**
+     * Gets the target content type to use for a transformed image, based on the type of the source image type.
+     *
+     * @param sourceContentType The source image's content type file
+     * @return The target content type, falling back to <code>image/jpeg</code> for unknown or mostly unsupported content types
+     */
+    private static String getTargetContentType(String sourceContentType) {
+        if (Strings.isNotEmpty(sourceContentType) && (
+                "image/bmp".equals(sourceContentType) ||
+                "image/gif".equals(sourceContentType) ||
+                "image/png".equals(sourceContentType))) {
+            return sourceContentType;
+        }
+        return "image/jpeg";
     }
 
 }

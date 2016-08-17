@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -186,7 +186,6 @@ public class RdbResourceCacheImpl extends AbstractResourceCache {
             // Try to create space through removing oldest entries
             // until enough space is available
             boolean commited = false;
-            PreparedStatement stmt = null;
             try {
                 Databases.startTransaction(con);
                 long usedContextQuota = metadataStore.getUsedSize(con, contextId) - existingSize;
@@ -194,12 +193,17 @@ public class RdbResourceCacheImpl extends AbstractResourceCache {
                     ResourceCacheMetadata metadata = metadataStore.removeOldest(con, contextId);
                     if (metadata == null) {
                         return false;
-                    } else {
+                    }
+
+                    PreparedStatement stmt = null;
+                    try {
                         stmt = con.prepareStatement("DELETE FROM previewData WHERE cid=? AND user=? AND id=?");
                         stmt.setInt(1, contextId);
                         stmt.setInt(2, metadata.getUserId());
                         stmt.setString(3, metadata.getResourceId());
                         stmt.executeUpdate();
+                    } finally {
+                        Databases.closeSQLStuff(stmt);
                     }
 
                     usedContextQuota = metadataStore.getUsedSize(con, contextId) - existingSize;
@@ -212,7 +216,6 @@ public class RdbResourceCacheImpl extends AbstractResourceCache {
             } catch (SQLException e) {
                 throw PreviewExceptionCodes.ERROR.create(e, e.getMessage());
             } finally {
-                Databases.closeSQLStuff(stmt);
                 if (!commited) {
                     Databases.rollback(con);
                 }

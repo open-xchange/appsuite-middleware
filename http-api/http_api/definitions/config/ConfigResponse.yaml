@@ -1,0 +1,6 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: object
+    description: Generic type which can be object, string, array, etc.

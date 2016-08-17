@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -94,6 +94,25 @@ public class FileConverter implements ResultConverter {
              * write single file result
              */
             resultObject = writer.write(infostoreRequest, (File) resultObject);
+        } else if (Delta.class.isInstance(resultObject)) {
+            /*
+             * write delta result
+             */
+            SearchIterator<File> newAndModifiedIterator = null;
+            SearchIterator<File> deletedIterator = null;
+            try {
+                Delta<File> deltaResult = (Delta<File>) resultObject;
+                newAndModifiedIterator = deltaResult.results();
+                JSONArray jsonArray = writer.write(infostoreRequest, newAndModifiedIterator);
+                deletedIterator = deltaResult.getDeleted();
+                while (deletedIterator.hasNext()) {
+                    jsonArray.put(deletedIterator.next().getId());
+                }
+                resultObject = jsonArray;
+            } finally {
+                SearchIterators.close(newAndModifiedIterator);
+                SearchIterators.close(deletedIterator);
+            }
         } else if (TimedResult.class.isInstance(resultObject)) {
             /*
              * write timed files result
@@ -117,25 +136,6 @@ public class FileConverter implements ResultConverter {
                 resultObject = writer.write(infostoreRequest, searchIterator);
             } finally {
                 SearchIterators.close(searchIterator);
-            }
-        } else if (Delta.class.isInstance(resultObject)) {
-            /*
-             * write delta result
-             */
-            SearchIterator<File> newAndModifiedIterator = null;
-            SearchIterator<File> deletedIterator = null;
-            try {
-                Delta<File> deltaResult = (Delta<File>) resultObject;
-                newAndModifiedIterator = deltaResult.results();
-                JSONArray jsonArray = writer.write(infostoreRequest, newAndModifiedIterator);
-                deletedIterator = deltaResult.getDeleted();
-                while (deletedIterator.hasNext()) {
-                    jsonArray.put(deletedIterator.next().getId());
-                }
-                resultObject = jsonArray;
-            } finally {
-                SearchIterators.close(newAndModifiedIterator);
-                SearchIterators.close(deletedIterator);
             }
         } else {
             throw new UnsupportedOperationException("unknown result object");

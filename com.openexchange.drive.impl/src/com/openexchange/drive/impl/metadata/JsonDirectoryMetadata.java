@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -122,20 +122,10 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
         try {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", folder.getId());
-            jsonObject.put("name", folder.getName());
             String localizedName = folder.getLocalizedName(session.getDriveSession().getLocale());
             if (Strings.isNotEmpty(localizedName) && false == localizedName.equals(folder.getName())) {
                 jsonObject.put("localized_name", localizedName);
             }
-            jsonObject.put("path", session.getStorage().getPath(folderID));
-            if (null != folder.getCreationDate()) {
-                jsonObject.put("created", folder.getCreationDate().getTime());
-            }
-            if (null != folder.getLastModifiedDate()) {
-                jsonObject.put("modified", folder.getLastModifiedDate().getTime());
-            }
-            jsonObject.put("created_by", folder.getCreatedBy());
-            jsonObject.put("modified_by", folder.getModifiedBy());
             if (folder.isDefaultFolder()) {
                 jsonObject.put("default_folder", true);
             }

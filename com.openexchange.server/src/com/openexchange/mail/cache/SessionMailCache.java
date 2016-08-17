@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -68,15 +68,42 @@ import com.openexchange.session.Session;
 public final class SessionMailCache {
 
     /**
+     * (Optionally) Gets the session-bound mail cache.
+     *
+     * @param session The session whose mail cache shall be returned
+     * @param accountId The account identifier
+     * @return The session-bound mail cache or <code>null</code>
+     */
+    public static SessionMailCache optInstance(Session session, int accountId) {
+        MailSessionCache mailSessionCache = MailSessionCache.optInstance(session);
+        if (null == mailSessionCache) {
+            return null;
+        }
+
+        String key = MailSessionParameterNames.getParamMailCache();
+        SessionMailCache mailCache = null;
+        try {
+            mailCache = (SessionMailCache) mailSessionCache.getParameter(accountId, key);
+        } catch (final ClassCastException e) {
+            /*
+             * Class version does not match; just renew session cache.
+             */
+            mailCache = null;
+            mailSessionCache.removeParameter(accountId, key);
+        }
+        return mailCache;
+    }
+
+    /**
      * Gets the session-bound mail cache.
      *
      * @param session The session whose mail cache shall be returned
-     * @param accountId The account ID
+     * @param accountId The account identifier
      * @return The session-bound mail cache.
      */
-    public static SessionMailCache getInstance(final Session session, final int accountId) {
-        final MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
-        final String key = MailSessionParameterNames.getParamMailCache();
+    public static SessionMailCache getInstance(Session session, int accountId) {
+        MailSessionCache mailSessionCache = MailSessionCache.getInstance(session);
+        String key = MailSessionParameterNames.getParamMailCache();
         SessionMailCache mailCache = null;
         try {
             mailCache = (SessionMailCache) mailSessionCache.getParameter(accountId, key);

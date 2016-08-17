@@ -1,0 +1,29 @@
+/folders?action=shares:
+  get:
+    operationId: getSharedFolders
+    tags:
+      - folders
+    summary: Gets shared folders of a certain module (**available since v7.8.0, preliminary**).
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamFolderColumns"
+      - in: query
+        name: content_type
+        type: string
+        description: The desired content type (either numbers or strings; e.g. "tasks", "calendar", "contacts", "mail", "infostore").
+        required: true
+      - $ref: "#/parameters/gblQueryParamFolderTree"
+      - in: query
+        name: all
+        type: integer
+        description: Set to 1 to list even not subscribed folders.
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with data for all folders that are considered as shared by the user.
+          Each array element describes one folder and is itself an array. The elements of each array contain the
+          information specified by the corresponding identifiers in the `columns` parameter. In case
+          of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/FoldersResponse"

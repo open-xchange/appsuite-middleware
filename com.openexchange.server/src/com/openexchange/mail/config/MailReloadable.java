@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,15 +49,19 @@
 
 package com.openexchange.mail.config;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.DefaultInterests.Builder;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -73,11 +77,9 @@ public final class MailReloadable implements Reloadable {
 
     private static final MailReloadable INSTANCE = new MailReloadable();
 
-    private static final String CONFIGFILE = "mail.properties";
-
     private static final String[] PROPERTIES = new String[] {"com.openexchange.mail.loginSource","com.openexchange.mail.passwordSource",
         "com.openexchange.mail.mailServerSource", "com.openexchange.mail.masterPassword", "com.openexchange.mail.mailServer",
-        "com.openexchange.mail.transportServer"};
+        "com.openexchange.mail.transportServer", "com.openexchange.mail.adminMailLoginEnabled"};
 
     /**
      * Gets the instance.
@@ -138,10 +140,34 @@ public final class MailReloadable implements Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
+    public Interests getInterests() {
+        Set<String> properties = new TreeSet<>();
+        properties.addAll(Arrays.asList(PROPERTIES));
+        Set<String> fileNames = new TreeSet<>();
+        fileNames.add("mail.properties");
+
+        for (Reloadable reloadable : reloadables) {
+            Interests interests = reloadable.getInterests();
+            if (null != interests) {
+                String[] propertiesOfInterest = interests.getPropertiesOfInterest();
+                if (null != propertiesOfInterest) {
+                    properties.addAll(Arrays.asList(propertiesOfInterest));
+                }
+                String[] configFileNames = interests.getConfigFileNames();
+                if (null != configFileNames) {
+                    fileNames.addAll(Arrays.asList(configFileNames));
+                }
+            }
+        }
+
+        Builder builder = DefaultInterests.builder();
+        if (!properties.isEmpty()) {
+            builder.propertiesOfInterest(properties.toArray(new String[properties.size()]));
+        }
+        if (!fileNames.isEmpty()) {
+            builder.configFileNames(fileNames.toArray(new String[fileNames.size()]));
+        }
+        return builder.build();
     }
 
 }

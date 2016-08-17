@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -73,6 +73,7 @@ import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.impl.internal.VCardExceptionCodes;
 import com.openexchange.contact.vcard.impl.internal.VCardServiceLookup;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.imagetransformation.ScaleType;
@@ -100,7 +101,7 @@ public class PhotoMapping extends AbstractMapping {
      * Initializes a new {@link PhotoMapping}.
      */
     public PhotoMapping() {
-        super();
+        super("PHOTO", ContactField.IMAGE1, ContactField.NUMBER_OF_IMAGES, ContactField.IMAGE1_CONTENT_TYPE);
     }
 
     @Override
@@ -178,14 +179,18 @@ public class PhotoMapping extends AbstractMapping {
             IFileHolder fileHolder = null;
             InputStream inputStream = null;
             try {
-                fileHolder = loadImageFromURL(urlString, parameters, warnings);
-                if (null != fileHolder) {
-                    if (null != parameters && 0 < parameters.getMaxContactImageSize() && parameters.getMaxContactImageSize() < fileHolder.getLength()) {
-                        addConversionWarning(warnings, "PHOTO", "Referenced image exceeds maximum contact image size");
-                    } else {
-                        inputStream = fileHolder.getStream();
-                        imageData = Streams.stream2bytes(inputStream);
+                try {
+                    fileHolder = loadImageFromURL(urlString, parameters, warnings);
+                    if (null != fileHolder) {
+                        if (null != parameters && 0 < parameters.getMaxContactImageSize() && parameters.getMaxContactImageSize() < fileHolder.getLength()) {
+                            addConversionWarning(warnings, "PHOTO", "Referenced image exceeds maximum contact image size");
+                        } else {
+                            inputStream = fileHolder.getStream();
+                            imageData = Streams.stream2bytes(inputStream);
+                        }
                     }
+                } finally {
+                    Streams.close(fileHolder);
                 }
             } catch (IOException e) {
                 addConversionWarning(warnings, e, "PHOTO", e.getMessage());
@@ -250,7 +255,7 @@ public class PhotoMapping extends AbstractMapping {
         }
         try {
             return imageService.transfom(imageBytes, getSource(parameters))
-                .scale((int) targetDimension.getWidth(), (int) targetDimension.getHeight(), ScaleType.CONTAIN).getFullTransformedImage(formatName);
+                .scale((int) targetDimension.getWidth(), (int) targetDimension.getHeight(), ScaleType.CONTAIN, true).getFullTransformedImage(formatName);
         } catch (IOException e) {
             throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }

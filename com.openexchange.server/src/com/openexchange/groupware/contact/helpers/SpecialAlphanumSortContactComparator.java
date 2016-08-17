@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -127,7 +127,16 @@ public class SpecialAlphanumSortContactComparator implements Comparator<Contact>
 
     @Override
     public int compare(final Contact contact1, final Contact contact2) {
-        int compared = stringComparator.compare(contact1.getSortName(), contact2.getSortName());
+        String sortName1 = contact1.getSortName();
+        String sortName2 = contact2.getSortName();
+        int compared;
+        if (null == sortName1) {
+            compared = null == sortName2 ? 0 : -1;
+        } else if (null == sortName2) {
+            compared = 1;
+        } else {
+            compared = stringComparator.compare(sortName1, sortName2);
+        }
         return inverse * compared;
     }
 

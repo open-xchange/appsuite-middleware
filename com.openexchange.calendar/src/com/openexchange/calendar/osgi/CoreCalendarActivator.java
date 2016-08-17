@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -70,7 +70,6 @@ import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.reminder.TargetService;
 import com.openexchange.java.Streams;
-import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.QuotaProvider;
 
@@ -112,7 +111,6 @@ public class CoreCalendarActivator extends HousekeepingActivator {
         registerCacheRegion();
 
         track(ContactCollectorService.class, new ContactCollectorServiceTracker(this.context));
-        track(ObjectUseCountService.class, new ObjectUseCountServiceTracker(context));
         openTrackers();
     }
 

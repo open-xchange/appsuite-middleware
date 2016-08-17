@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -67,11 +67,25 @@ import com.openexchange.file.storage.meta.FileFieldHandling;
  */
 public abstract class AbstractFile implements File {
 
+    /** The boolean value indicating whether whether {@link #getFileSize()} returns the exact size w/o any encodings (e.g. base64) applied */
+    protected boolean accurateSize;
+
     /**
      * Initializes a new {@link AbstractFile}.
      */
     protected AbstractFile() {
         super();
+        accurateSize = true;
+    }
+
+    @Override
+    public boolean isAccurateSize() {
+        return accurateSize;
+    }
+
+    @Override
+    public void setAccurateSize(boolean accurateSize) {
+        this.accurateSize = accurateSize;
     }
 
     @Override

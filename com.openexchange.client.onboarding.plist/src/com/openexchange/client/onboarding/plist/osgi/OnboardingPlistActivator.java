@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -87,7 +87,7 @@ public class OnboardingPlistActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { NotificationMailFactory.class, ConfigViewFactory.class, ConfigurationService.class,
- DispatcherPrefixService.class, HttpService.class, OnboardingService.class, UserService.class, SMSBucketService.class };
+            DispatcherPrefixService.class, HttpService.class, OnboardingService.class, UserService.class };
     }
 
     @Override
@@ -96,6 +96,7 @@ public class OnboardingPlistActivator extends HousekeepingActivator {
 
         // Track services needed for SMS transport
         trackService(SMSServiceSPI.class);
+        trackService(SMSBucketService.class);
         trackService(DownloadLinkProvider.class);
         trackService(HostnameService.class);
         openTrackers();

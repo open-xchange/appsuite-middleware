@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -61,38 +61,40 @@ public enum DriveClientType {
     /**
      * An unknown client
      */
-    UNKNOWN(null),
+    UNKNOWN(null, true),
 
     /**
      * The windows desktop client
      */
-    WINDOWS("OpenXchange.HTTPClient.OXDrive"),
+    WINDOWS("OpenXchange.HTTPClient.OXDrive", true),
 
     /**
      * The Mac OS desktop client
      */
-    MAC_OS("OSX.OXDrive"),
+    MAC_OS("OSX.OXDrive", true),
 
     /**
      * The iOS mobile client
      */
-    IOS("OpenXchange.iosClient.OXDrive"),
+    IOS("OpenXchange.iosClient.OXDrive", false),
 
     /**
      * The Android mobile client
      */
-    ANDROID("OpenXchange.Android.OXDrive"),
+    ANDROID("OpenXchange.Android.OXDrive", false),
 
     /**
      * The .NET test drive client
      */
-    TEST_DRIVE("OpenXchange.HTTPClient.TestDrive"),
+    TEST_DRIVE("OpenXchange.HTTPClient.TestDrive", true),
     ;
 
     private String clientString;
+    private boolean desktop;
 
-    private DriveClientType(String clientString) {
+    private DriveClientType(String clientString, boolean desktop) {
         this.clientString = clientString;
+        this.desktop = desktop;
     }
 
     /**
@@ -102,6 +104,15 @@ public enum DriveClientType {
      */
     public String getClientString() {
         return clientString;
+    }
+
+    /**
+     * Gets a value indicating whether the client denotes a "desktop" client or not.
+     *
+     * @return <code>true</code> for a "desktop" client, <code>false</code>, otherwise
+     */
+    public boolean isDesktop() {
+        return desktop;
     }
 
     /**

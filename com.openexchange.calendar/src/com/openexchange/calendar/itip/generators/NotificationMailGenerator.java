@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -850,6 +850,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             }
             if (diff.anyFieldChangedOf("participants")) {
                 final FieldUpdate update = diff.getUpdateFor("participants");
+                if (update == null) {
+                    return false;
+                }
                 final Difference difference = (Difference) update.getExtraInfo();
                 final List<Object> removed = difference.getRemoved();
                 for (final Object object : removed) {
@@ -867,6 +870,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             }
             if (diff.anyFieldChangedOf("participants")) {
                 final FieldUpdate update = diff.getUpdateFor("participants");
+                if (update == null) {
+                    return false;
+                }
                 final Difference difference = (Difference) update.getExtraInfo();
                 final List<Object> added = difference.getAdded();
                 for (final Object object : added) {
@@ -972,6 +978,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             }
             if (diff.onlyTheseChanged("participants", "confirmations", "users") && diff.anyFieldChangedOf("users")) {
                 final FieldUpdate update = diff.getUpdateFor("users");
+                if (update == null) {
+                    return false;
+                }
                 final Difference difference = (Difference) update.getExtraInfo();
                 final List<Change> changed = difference.getChanged();
                 if (changed.size() > 1) {

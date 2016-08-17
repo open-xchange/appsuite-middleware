@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -89,10 +89,24 @@ public interface ImageTransformations {
      * @param scaleType The scale type to use
      * @return A self reference
      * @throws IllegalArgumentException If given maxWidth and/or maxHeight are not supported
-     * @see Constants#MAX_WIDTH
-     * @see Constants#MAX_HEIGHT
+     * @see Constants#getMaxWidth
+     * @see Constants#getMaxHeight
      */
     ImageTransformations scale(int maxWidth, int maxHeight, ScaleType scaleType);
+
+    /**
+     * Adds a 'scale' transformation, leading to the image being scaled according to the supplied parameters.
+     *
+     * @param maxWidth The maximum width of the target image
+     * @param maxHeight The maximum height of the target image
+     * @param scaleType The scale type to use
+     * @param shrinkOnly <code>true</code> to only scale images 'greater than' target size, <code>false</code>, otherwise
+     * @return A self reference
+     * @throws IllegalArgumentException If given maxWidth and/or maxHeight are not supported
+     * @see Constants#getMaxWidth
+     * @see Constants#getMaxHeight
+     */
+    ImageTransformations scale(int maxWidth, int maxHeight, ScaleType scaleType, boolean shrinkOnly);
 
     /**
      * Adds a 'crop' transformation, leading to the image being cropped according to the supplied parameters.

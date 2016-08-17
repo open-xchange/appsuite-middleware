@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -103,7 +103,7 @@ public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
          * The user-sensitive UserPermissionBits instance is needed in order to retrieve the applicable "specification" (the set of tags that do apply).
          *
          */
-        
+
         int contextAdminId = contextService.getContext(contextId).getMailadmin();
         ConfigView view = configViewFactory.getView(contextAdminId, contextId);
         DefaultNoReplyConfig config = new DefaultNoReplyConfig();
@@ -130,8 +130,7 @@ public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
         {
             String str = view.get("com.openexchange.noreply.login", String.class);
             if (Strings.isEmpty(str)) {
-                String msg = "Missing no-reply login";
-                logger.error(msg, new Throwable(msg));
+                config.setLogin(null);
             } else {
                 config.setLogin(str.trim());
             }
@@ -140,8 +139,7 @@ public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
         {
             String str = view.get("com.openexchange.noreply.password", String.class);
             if (Strings.isEmpty(str)) {
-                String msg = "Missing no-reply password";
-                logger.error(msg, new Throwable(msg));
+                config.setPassword(null);
             } else {
                 config.setPassword(str.trim());
             }

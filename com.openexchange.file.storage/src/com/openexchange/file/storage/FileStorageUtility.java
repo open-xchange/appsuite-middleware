@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,11 +51,12 @@ package com.openexchange.file.storage;
 
 import java.net.MalformedURLException;
 import java.util.Date;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.Deflater;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.internal.FileStorageConfigReloadable;
@@ -146,6 +147,32 @@ public final class FileStorageUtility {
     }
 
     /**
+     * Tries to cast a concrete {@link File} implementation to the class or interface represented by the supplied {@link Class}
+     * object recursively, also considering possible underlying delegates.
+     *
+     * @param file The file implementation to launder
+     * @param clazz The target interface or class
+     * @return The target class implementation, or <code>null</code> if no suitable type found
+     */
+    public static <T extends File> T launderDelegate(File file, Class<T> clazz) {
+        if (null == file) {
+            return null;
+        }
+        if (clazz.isInstance(file)) {
+            return clazz.cast(file);
+        }
+        if (DelegatingFile.class.isInstance(file)) {
+            DelegatingFile delegatingFile = (DelegatingFile) file;
+            File fileDelegate = delegatingFile.getDelegate();
+            if (null != fileDelegate && clazz.isInstance(fileDelegate)) {
+                return clazz.cast(fileDelegate);
+            }
+            return launderDelegate(fileDelegate, clazz);
+        }
+        return null;
+    }
+
+    /**
      * Appends or modifies a counter in the 'name' part of the supplied filename. For example, passing the filename
      * <code>test.txt</code> and a counter of <code>2</code> will result in the string <code>test (2).txt</code>, while the filename
      * <code>test (1).txt</code> would be changed to <code>test (2).txt</code>.
@@ -167,15 +194,16 @@ public final class FileStorageUtility {
         if (matcher.find()) {
             return new StringBuilder(filename).replace(matcher.start(), matcher.end(), counterString).toString();
         }
-        int index = filename.lastIndexOf('.');
 
+        int index = -1;
         //See Bug 40142
         if (filename.endsWith(".pgp")) {
             index = filename.substring(0, filename.length() - 4).lastIndexOf('.');
-            if (index != filename.lastIndexOf('.')) {
+            if (index != -1 && index != filename.lastIndexOf('.')) {
                 return new StringBuilder(filename).insert(index, ' ' + counterString).toString();
             }
         }
+        index = filename.lastIndexOf('.');
 
         if (0 >= index) {
             index = filename.length();
@@ -278,8 +306,12 @@ public final class FileStorageUtility {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return DefaultInterests.builder().propertiesOfInterest(
+                    "com.openexchange.file.storage.numberOfPregeneratedPreviews",
+                    "com.openexchange.file.storage.zipFolderThreshold",
+                    "com.openexchange.infostore.zipDocumentsCompressionLevel"
+                    ).build();
             }
         });
     }

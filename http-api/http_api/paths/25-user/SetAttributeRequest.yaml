@@ -1,0 +1,36 @@
+/user?action=setAttribute:
+  put:
+    operationId: setUserAttribute
+    tags:
+      - user
+    summary: Sets a user attribute (**available since v6.20**).
+    description: |
+      Sets a custom user attribute consisting of a name and a value. The attribute can later be
+      retrieved using the `/user?action=getAttribute` request.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: The ID of the user.
+        required: true
+      - in: query
+        name: setIfAbsent
+        type: boolean
+        description: Set to `true` to put the value only if the specified name is not already associated with a value, otherwise `false` to put value in any case.
+        required: false
+      - in: body
+        name: body
+        description: A JSON object providing the name and the value of the attribute. If the `value` field is missing or `null`, the attribute is removed.
+        required: true
+        schema:
+          $ref: "#/definitions/UserAttribute"
+    responses:
+      200:
+        description: |
+          A JSON object providing the information whether the attribute could be set. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/UserAttributionResponse"

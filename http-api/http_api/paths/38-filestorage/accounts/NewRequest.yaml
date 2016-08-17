@@ -1,0 +1,71 @@
+/fileaccount?action=new:
+  put:
+    operationId: createFileAccount
+    tags:
+      - filestorage
+    summary: Creates a file storage account.
+    description: |
+      #### Example for creating a new OAuth-based file storage account
+      First, get the description of the file storage service for which a new account is supposed to be created:
+      `GET /ajax/fileservice?action=get&id=boxcom&session=...`
+      
+      The response might be:
+      ```json
+      {
+        id: "boxcom",
+        displayName: "Box File Storage Service",
+        configuration: {
+          widget: "oauthAccount",
+          options: {
+            type: "com.openexchange.oauth.boxcom"
+          },
+          name: "account",
+          displayName: "Select an existing account",
+          mandatory: true
+        }
+      }
+      ```
+      Next get the associated OAuth account information:
+      `GET /ajax/oauth/accounts?action=all&serviceId=com.openexchange.oauth.boxcom&session=...`
+      
+      The response might be:
+      ```json
+      {
+        "data":[
+          {
+            "id":333,
+            "displayName":"My Box.com account",
+            "serviceId":"com.openexchange.oauth.boxcom"
+          }
+        ]
+      }
+      ```
+      Finally, create the file storage account:
+      ```
+      PUT /ajax/fileaccount?action=new&session=...
+      
+      {
+        "filestorageService":"boxcom",
+        "displayName":"My box.com account",
+        "configuration":{
+          "account":"333",
+          "type":"com.openexchange.oauth.boxcom"
+        }
+      }
+      ```
+      The response provides the relative identifier of the newly created account.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON object describing the account to create, with at least the field `filestorageService` set.
+        required: true
+        schema:
+          $ref: "#/definitions/FileAccountData"
+    responses:
+      200:
+        description: A JSON object containing the ID of the newly created account. In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/FileAccountCreationResponse"

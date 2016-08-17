@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -55,6 +55,7 @@ import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.exception.OXException.Generic;
 import com.openexchange.tools.exceptions.SimpleIncorrectStringAttribute;
 
 /**
@@ -830,7 +831,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {
-        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+        return specials(OXExceptionFactory.getInstance().create(this, new Object[0]));
     }
 
     /**
@@ -840,7 +841,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+        return specials(OXExceptionFactory.getInstance().create(this, (Throwable) null, args));
     }
 
     /**
@@ -851,6 +852,13 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
      * @return The newly created {@link OXException} instance
      */
     public OXException create(final Throwable cause, final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, cause, args);
+        return specials(OXExceptionFactory.getInstance().create(this, cause, args));
+    }
+
+    private OXException specials(OXException exc) {
+        if (exc.getCategories().contains(Category.CATEGORY_PERMISSION_DENIED)) {
+            exc.setGeneric(Generic.NO_PERMISSION);
+        }
+        return exc;
     }
 }

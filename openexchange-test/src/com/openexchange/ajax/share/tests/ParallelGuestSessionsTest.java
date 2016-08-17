@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -51,12 +51,14 @@ package com.openexchange.ajax.share.tests;
 
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
+import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.RecipientType;
 
 /**
@@ -94,8 +96,15 @@ public class ParallelGuestSessionsTest extends ShareTest {
          * update folder, add permission for guest
          */
         folder.addPermission(guestPermission);
-        folder = updateFolder(api, folder);
+        folder = updateFolder(api, folder, new RequestCustomizer<UpdateRequest>() {
+            @Override
+            public void customize(UpdateRequest request) {
+                request.setCascadePermissions(false);
+                request.setNotifyPermissionEntities(Transport.MAIL);
+            }
+        });
         /*
+         * /*
          * check permissions
          */
         OCLPermission matchingPermission = null;
@@ -116,6 +125,7 @@ public class ParallelGuestSessionsTest extends ShareTest {
          * check access to share, using the same ajax session as the sharing user
          */
         String shareURL = discoverShareURL(guest);
+        assertNotNull("ShareURL couldn't be discovered.", shareURL);
         AJAXSession sharedSession = getSession();
         String oldSessionID = sharedSession.getId();
         try {

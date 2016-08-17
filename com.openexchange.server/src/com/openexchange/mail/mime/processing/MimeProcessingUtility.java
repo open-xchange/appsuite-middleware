@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.mime.processing;
 
-import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import static com.openexchange.mail.text.HtmlProcessing.htmlFormat;
@@ -649,10 +648,10 @@ public final class MimeProcessingUtility {
         final StringBuilder sb = new StringBuilder(32);
         final String personal = addr.getPersonal();
         if (null == personal) {
-            sb.append(MimeProcessingUtility.prepareAddress(sAddress.substring(0, pos)));
+            sb.append(MimeMessageUtility.prepareAddress(sAddress.substring(0, pos)));
         } else {
             sb.append(MimeProcessingUtility.preparePersonal(personal));
-            sb.append(" <").append(MimeProcessingUtility.prepareAddress(sAddress.substring(0, pos))).append('>');
+            sb.append(" <").append(MimeMessageUtility.prepareAddress(sAddress.substring(0, pos))).append('>');
         }
         return sb.toString();
     }
@@ -686,22 +685,5 @@ public final class MimeProcessingUtility {
      */
     static String preparePersonal(final String personal) {
         return MimeMessageUtility.quotePhrase(personal, false);
-    }
-
-    private static final String DUMMY_DOMAIN = "@unspecified-domain";
-
-    /**
-     * Prepares given address string by checking for possible mail-safe encodings.
-     *
-     * @param address The address
-     * @return The prepared address
-     */
-    static String prepareAddress(final String address) {
-        final String decoded = toIDN(MimeMessageUtility.decodeMultiEncodedHeader(address));
-        final int pos = decoded.indexOf(DUMMY_DOMAIN);
-        if (pos >= 0) {
-            return decoded.substring(0, pos);
-        }
-        return decoded;
     }
 }

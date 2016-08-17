@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -66,6 +66,7 @@ import com.openexchange.drive.DriveShareLink;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.FolderStats;
 import com.openexchange.drive.NotificationParameters;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
@@ -76,6 +77,7 @@ import com.openexchange.drive.impl.metadata.DirectoryMetadataParser;
 import com.openexchange.drive.impl.metadata.FileMetadataParser;
 import com.openexchange.drive.impl.metadata.JsonDirectoryMetadata;
 import com.openexchange.drive.impl.metadata.JsonFileMetadata;
+import com.openexchange.drive.impl.storage.DriveStorage;
 import com.openexchange.drive.impl.storage.StorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -155,8 +157,15 @@ public class DriveUtilityImpl implements DriveUtility {
         if (1 < folders.size()) {
             Collections.sort(folders, new FolderComparator(session.getLocale()));
         }
-        for (FileStorageFolder subfolder : folders) {
-            metadata.add(new JsonDirectoryMetadata(syncSession, subfolder).build(false));
+        try {
+            for (FileStorageFolder subfolder : folders) {
+                JSONObject jsonObject = new JsonDirectoryMetadata(syncSession, subfolder).build(false);
+                jsonObject.put("path", syncSession.getStorage().getPath(subfolder.getId()));
+                jsonObject.put("name", subfolder.getName());
+                metadata.add(jsonObject);
+            }
+        } catch (JSONException e) {
+            throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
         return metadata;
     }
@@ -240,6 +249,7 @@ public class DriveUtilityImpl implements DriveUtility {
             return;
         }
         final SyncSession syncSession = new SyncSession(session);
+        syncSession.trace("About to update metadata for file [" + fileVersion + "]: " + jsonObject);
         final boolean notify = null != parameters.getNotificationTransport();
         final Reference<ShareTarget> targetReference = new Reference<ShareTarget>();
         Entities entities = syncSession.getStorage().wrapInTransaction(new StorageOperation<Entities>() {
@@ -274,6 +284,7 @@ public class DriveUtilityImpl implements DriveUtility {
                 return null;
             }
         });
+        syncSession.trace("Metadata for file [" + fileVersion + "] updated successfully.");
         /*
          * send notifications if needed
          */
@@ -288,6 +299,7 @@ public class DriveUtilityImpl implements DriveUtility {
     public void updateDirectory(DriveSession session, final DirectoryVersion directoryVersion, JSONObject jsonObject, NotificationParameters parameters) throws OXException {
         final FileStorageFolder folder = DirectoryMetadataParser.parse(jsonObject);
         final SyncSession syncSession = new SyncSession(session);
+        syncSession.trace("About to update metadata for directory [" + directoryVersion + "]: " + jsonObject);
         final boolean notify = null != parameters.getNotificationTransport();
         final Reference<ShareTarget> targetReference = new Reference<ShareTarget>();
         Entities entities = syncSession.getStorage().wrapInTransaction(new StorageOperation<Entities>() {
@@ -317,6 +329,7 @@ public class DriveUtilityImpl implements DriveUtility {
                 return null;
             }
         });
+        syncSession.trace("Metadata for directory [" + directoryVersion + "] updated successfully.");
         /*
          * send notifications if needed
          */
@@ -362,8 +375,11 @@ public class DriveUtilityImpl implements DriveUtility {
         List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(session, folderIDs);
         JSONArray jsonArray = new JSONArray(folders.size());
         for (int i = 0; i < folderIDs.size(); i++) {
-            JSONObject jsonObject = new JsonDirectoryMetadata(session, folders.get(i)).build(false);
+            FileStorageFolder folder = folders.get(i);
+            JSONObject jsonObject = new JsonDirectoryMetadata(session, folder).build(false);
             jsonObject.put("checksum", checksums.get(i).getChecksum());
+            jsonObject.put("path", session.getStorage().getPath(folder.getId()));
+            jsonObject.put("name", folder.getName());
             jsonArray.put(jsonObject);
         }
         return jsonArray;
@@ -385,6 +401,8 @@ public class DriveUtilityImpl implements DriveUtility {
         FileStorageFolder folder = session.getStorage().getFolder(serverVersion.getPath());
         JSONObject jsonObject = new JsonDirectoryMetadata(session, folder).build(false);
         jsonObject.put("checksum", serverVersion.getChecksum());
+        jsonObject.put("path", serverVersion.getPath());
+        jsonObject.put("name", folder.getName());
         return jsonObject;
     }
 
@@ -412,6 +430,32 @@ public class DriveUtilityImpl implements DriveUtility {
     public void notify(DriveSession session, DriveShareTarget target, int[] entityIDs, NotificationParameters parameters) throws OXException {
         ShareHelper shareHelper = new ShareHelper(new SyncSession(session));
         parameters.addWarnings(shareHelper.notifyEntities(target, parameters.getNotificationTransport(), parameters.getNotificationMessage(), entityIDs));
+    }
+
+    @Override
+    public JSONArray autocomplete(final DriveSession session, final String query, Map<String, Object> parameters) throws OXException {
+        return AutocompleteHelper.autocomplete(session, query, parameters);
+    }
+
+    @Override
+    public FolderStats getTrashFolderStats(DriveSession session) throws OXException {
+        DriveStorage storage = new SyncSession(session).getStorage();
+        if (false == storage.hasTrashFolder()) {
+            return null;
+        }
+        FileStorageFolder trashFolder = storage.getTrashFolder();
+        return storage.getFolderStats(trashFolder.getId(), true);
+    }
+
+    @Override
+    public FolderStats emptyTrash(DriveSession session) throws OXException {
+        DriveStorage storage = new SyncSession(session).getStorage();
+        if (false == storage.hasTrashFolder()) {
+            return null;
+        }
+        FileStorageFolder trashFolder = storage.getTrashFolder();
+        storage.getFolderAccess().clearFolder(trashFolder.getId(), true);
+        return storage.getFolderStats(trashFolder.getId(), true);
     }
 
 }

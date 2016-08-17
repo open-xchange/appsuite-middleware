@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -156,7 +156,7 @@ public final class EditAction extends AbstractMailAction {
                 /*
                  * Parse with default account's transport provider
                  */
-                ComposedMailMessage composedMail = MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, MailAccount.DEFAULT_ID, csid, warnings);
+                ComposedMailMessage composedMail = MessageParser.parse4Draft(jsonMailObj, uploadEvent, session, MailAccount.DEFAULT_ID, warnings);
                 MailPath msgref = composedMail.getMsgref();
                 /*
                  * ... and edit draft
@@ -178,8 +178,7 @@ public final class EditAction extends AbstractMailAction {
             result.addWarnings(warnings);
             return result;
         } catch (final OXException e) {
-            final Object[] args = e.getDisplayArgs();
-            final String uid = null == args || 0 == args.length ? null : args[0].toString();
+            final String uid = getUidFromException(e);
             if (MailExceptionCode.MAIL_NOT_FOUND.equals(e) && "undefined".equalsIgnoreCase(uid)) {
                 throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
             }

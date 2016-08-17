@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -56,14 +56,13 @@ import org.junit.runners.Suite.SuiteClasses;
 
 /**
  * RMI tests for core admin rmi
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.2
  */
 @RunWith(Suite.class)
 @SuiteClasses({
     AdditionalRMITests.class,
-    AdminCoreTest.class,
     Bug16865Test.class,
     Bug19379Test.class,
     Bug27065Test.class,

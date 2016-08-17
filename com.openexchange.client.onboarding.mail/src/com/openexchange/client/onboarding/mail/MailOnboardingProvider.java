@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -73,6 +73,7 @@ import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.mail.transport.config.TransportAuthSupportAware;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
@@ -82,6 +83,7 @@ import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.user.UserService;
 
@@ -230,6 +232,10 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             }
             String smtpLogin = smtpConfig.getLogin();
             String smtpPassword = smtpConfig.getPassword();
+            if ((smtpConfig instanceof TransportAuthSupportAware) && (false == ((TransportAuthSupportAware) smtpConfig).isAuthSupported())) {
+                smtpLogin = null;
+                smtpPassword = null;
+            }
             smtpConfiguration = new Configuration(smtpServer, smtpPort.intValue(), smtpSecure.booleanValue(), smtpLogin, smtpPassword);
         }
 
@@ -246,6 +252,29 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         Session session = sessiondService.getAnyActiveSessionForUser(userId, contextId);
         if (null == session) {
             throw OXException.general("No active session for user " + userId + " in context " + contextId);
+        }
+
+        if (session.getPassword() == null) {
+            // Try to find a session with password!=null
+            SessionMatcher matcher = new SessionMatcher() {
+
+                @Override
+                public Set<Flag> flags() {
+                    return SessionMatcher.NO_FLAGS;
+                }
+
+                @Override
+                public boolean accepts(Session session) {
+                    if (session.getPassword() != null) {
+                        return true;
+                    }
+                    return false;
+                }
+            };
+            session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, matcher);
+            if (null == session) {
+                throw OXException.general("No active session for user " + userId + " in context " + contextId);
+            }
         }
 
         return getEffectiveConfigurations(session);

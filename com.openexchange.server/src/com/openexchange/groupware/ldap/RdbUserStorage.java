@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -269,6 +269,7 @@ public class RdbUserStorage extends UserStorage {
                 writeLoginInfo(con, user, context, userId);
             }
             writeUserAttributes(con, user.getAttributes(), context, userId);
+            writeUserAliases(con, user.getAliases(), context, userId);
             return userId;
         } catch (final SQLException e) {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -329,7 +330,7 @@ public class RdbUserStorage extends UserStorage {
             DeleteEvent deleteEvent;
             if (0 < guestCreatedBy) {
                 int subType = Strings.isEmpty(mail) ? DeleteEvent.SUBTYPE_ANONYMOUS_GUEST : DeleteEvent.SUBTYPE_INVITED_GUEST;
-                deleteEvent = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, subType, context);
+                deleteEvent = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, subType, context, null);
             } else {
                 deleteEvent = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, context);
             }
@@ -469,6 +470,17 @@ public class RdbUserStorage extends UserStorage {
             stmt.executeBatch();
         } finally {
             closeSQLStuff(stmt);
+        }
+    }
+
+    private static void writeUserAliases(Connection con, String[] aliases, Context context, int userId) throws OXException {
+        UserAliasStorage userAlias = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
+        if (aliases != null && aliases.length > 0) {
+            for (String tmp_mail : aliases) {
+                if (tmp_mail.length() > 0) {
+                    userAlias.createAlias(con, context.getContextId(), userId, tmp_mail);
+                }
+            }
         }
     }
 
@@ -811,9 +823,6 @@ public class RdbUserStorage extends UserStorage {
                             tmp.add(alias);
                         }
                     }
-                    // For compatibility reason; also add alias to user attributes
-                    attrs.put("alias", new UserAttribute("alias", aliases));
-
                     user.setAliases(tmp.toArray(new String[tmp.size()]));
                 } else {
                     user.setAliases(new String[0]);
@@ -1477,7 +1486,10 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public User searchUser(final String email, final Context context, boolean considerAliases, boolean includeGuests, boolean excludeUsers) throws OXException {
-        StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user WHERE cid=? AND mail LIKE ? COLLATE utf8_bin");
+        /*
+         *  Use utf8_bin to match umlauts. But that also makes it case sensitive, so use LOWER to be case insesitive.
+         */
+        StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user WHERE cid=? AND LOWER(mail) LIKE LOWER(?) COLLATE utf8_bin");
         if (excludeUsers) {
             /*
              * exclude all regular users

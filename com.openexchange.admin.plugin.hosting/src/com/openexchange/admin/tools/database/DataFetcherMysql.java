@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -55,6 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Vector;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  *
@@ -186,36 +187,41 @@ public class DataFetcherMysql implements DataFetcher{
 
         dbmetadata = dbConnection.getMetaData();
         // get the tables to check
-        ResultSet rs2 = dbmetadata.getTables(null,null,null,null);
-        TableObject to = null;
-        while(rs2.next()){
-            String table_name = rs2.getString("TABLE_NAME");
-            to = new TableObject();
-            to.setName(table_name);
-            // fetch all columns from table and see if it contains matching column
-            ResultSet columns_res = dbmetadata.getColumns(getCatalogName(),null,table_name,null);
-            boolean table_matches = false;
-            while(columns_res.next()){
+        ResultSet rs2 = null;
+        try {
+            rs2 = dbmetadata.getTables(null, null, null, null);
+            TableObject to = null;
+            while (rs2.next()) {
+                String table_name = rs2.getString("TABLE_NAME");
+                to = new TableObject();
+                to.setName(table_name);
+                // fetch all columns from table and see if it contains matching column
+                ResultSet columns_res = dbmetadata.getColumns(getCatalogName(), null, table_name, null);
+                boolean table_matches = false;
+                while (columns_res.next()) {
 
-                TableColumnObject tco = new TableColumnObject();
-                String column_name = columns_res.getString("COLUMN_NAME");
-                tco.setName(column_name);
-                tco.setType(columns_res.getInt("DATA_TYPE"));
-                tco.setColumnSize(columns_res.getInt("COLUMN_SIZE"));
+                    TableColumnObject tco = new TableColumnObject();
+                    String column_name = columns_res.getString("COLUMN_NAME");
+                    tco.setName(column_name);
+                    tco.setType(columns_res.getInt("DATA_TYPE"));
+                    tco.setColumnSize(columns_res.getInt("COLUMN_SIZE"));
 
-                // if table has our ciriteria column, we should fetch data from it
-                if(column_name.equals(getMatchingColumn())){
-                    table_matches = true;
+                    // if table has our ciriteria column, we should fetch data from it
+                    if (column_name.equals(getMatchingColumn())) {
+                        table_matches = true;
+                    }
+                    // add column to table
+                    to.addColumn(tco);
                 }
-                // add column to table
-                to.addColumn(tco);
+                columns_res.close();
+                if (table_matches) {
+                    tableObjects.add(to);
+                }
             }
-            columns_res.close();
-            if(table_matches){
-                tableObjects.add(to);
-            }
+            log.debug("####### Found -> {} tables", tableObjects.size());
+        } finally {
+            DBUtils.closeSQLStuff(rs2);
         }
-        log.debug("####### Found -> {} tables", tableObjects.size());
 
         return tableObjects;
     }

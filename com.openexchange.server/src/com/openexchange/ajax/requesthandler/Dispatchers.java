@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,12 +51,11 @@ package com.openexchange.ajax.requesthandler;
 
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -77,33 +76,14 @@ public class Dispatchers {
     }
 
     /**
-     * Triggers the given dispatcher to perform specified AJAX request data using given session.
+     * Triggers post-processing for specified request result.
      *
-     * @param requestData The AJAX request data
-     * @param dispatcher The dispatcher to use
-     * @param session The associated session
-     * @return The result
-     * @throws OXException If operation fails
-     * @see #sendResponse(DispatcherResult, HttpServletRequest, HttpServletResponse)
+     * @param requestResult The request result or <code>null</code>
+     * @param e The exception that caused termination, or <code>null</code> if execution completed normally
      */
-    public static DispatcherResult perform(AJAXRequestData requestData, Dispatcher dispatcher, ServerSession session) throws OXException {
-        AJAXState ajaxState = dispatcher.begin();
-        return new DispatcherResult(requestData, dispatcher.perform(requestData, ajaxState, session), ajaxState, dispatcher);
-    }
-
-    /**
-     * Sends a proper response to requesting client after request has been orderly dispatched.
-     *
-     * @param result The dispatcher result
-     * @param httpRequest The associated HTTP Servlet request
-     * @param httpResponse The associated HTTP Servlet response
-     * @see #perform(AJAXRequestData, Dispatcher, ServerSession)
-     */
-    public static void sendResponse(DispatcherResult result, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
-        try {
-            DispatcherServlet.sendResponse(result.getRequestData(), result.getRequestResult(), httpRequest, httpResponse);
-        } finally {
-            result.close();
+    public static void signalDone(@Nullable AJAXRequestResult requestResult, Exception e) {
+        if (null != requestResult) {
+            requestResult.signalDone(e);
         }
     }
 

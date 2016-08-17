@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -174,6 +174,9 @@ public enum ImportExportExceptionCodes implements DisplayableOXExceptionCode {
         ImportExportExceptionMessages.LIMIT_EXCEEDED_MSG),
     /** The character encoding \"%1$s\" is not supported. Please choose another one. */
     UNSUPPORTED_CHARACTER_ENCODING("Unsupported charset: \"%1$s\"", CATEGORY_USER_INPUT, 1318, ImportExportExceptionMessages.UNSUPPORTED_CHARACTER_ENCODING_MSG),
+
+    /** The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s */
+    CONTACT_TOO_SIMILAR("The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s", CATEGORY_CONFLICT, 1319, ImportExportExceptionMessages.CONTACT_TOO_SIMILAR),
 
     ;
 

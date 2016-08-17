@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.update.internal;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.groupware.update.SchemaUpdateState;
@@ -65,6 +66,8 @@ public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateSta
     private final Set<String> executedTasks = new HashSet<String>();
 
     private boolean backgroundUpdatesRunning;
+    private Date backgroundUpdatesRunningSince;
+    private Date lockedSince;
 
     SchemaUpdateStateImpl() {
         super();
@@ -93,6 +96,10 @@ public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateSta
         return executedTasks.toArray(new String[executedTasks.size()]);
     }
 
+    void setBlockingUpdatesRunningSince(Date date) {
+        this.lockedSince = date;
+    }
+
     @Override
     public boolean backgroundUpdatesRunning() {
         return backgroundUpdatesRunning;
@@ -100,5 +107,21 @@ public class SchemaUpdateStateImpl extends SchemaImpl implements SchemaUpdateSta
 
     void setBackgroundUpdatesRunning(boolean backgroundUpdatesRunning) {
         this.backgroundUpdatesRunning = backgroundUpdatesRunning;
+    }
+
+    @Override
+    public Date blockingUpdatesRunningSince() {
+        Date lockedSince = this.lockedSince;
+        return null == lockedSince ? null : new Date(lockedSince.getTime());
+    }
+
+    @Override
+    public Date backgroundUpdatesRunningSince() {
+        Date backgroundUpdatesRunningSince = this.backgroundUpdatesRunningSince;
+        return null == backgroundUpdatesRunningSince ? null : new Date(backgroundUpdatesRunningSince.getTime());
+    }
+
+    void setBackgroundUpdatesRunningSince(Date date) {
+        this.backgroundUpdatesRunningSince = date;
     }
 }

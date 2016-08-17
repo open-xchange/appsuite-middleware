@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -62,9 +62,9 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.iterator.SearchIterator;
 import ezvcard.Ezvcard;
-import ezvcard.Ezvcard.WriterChainText;
 import ezvcard.VCard;
 import ezvcard.ValidationWarnings;
+import ezvcard.io.chain.ChainingTextWriter;
 import ezvcard.io.text.VCardReader;
 import ezvcard.util.IOUtils;
 
@@ -202,7 +202,7 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
         ThresholdFileHolder originalVCard = null;
         if (parameters.isKeepOriginalVCard()) {
             originalVCard = new ThresholdFileHolder();
-            WriterChainText writerChain = Ezvcard.write(vCard).prodId(false);
+            ChainingTextWriter writerChain = Ezvcard.write(vCard).prodId(false);
             try {
                 if(parameters.isEnforceUtf8()) {
                     writerChain.go(IOUtils.utf8Writer(originalVCard.asOutputStream()));

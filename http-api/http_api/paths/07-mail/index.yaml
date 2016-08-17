@@ -1,0 +1,26 @@
+requests:
+  - CountRequest.yaml
+  - AllRequest.yaml
+  - ThreadedAllRequest.yaml
+  - SearchRequest.yaml
+  - ListRequest.yaml
+  - CopyRequest.yaml
+  - UpdateRequest.yaml
+  - AllSeenRequest.yaml
+  - UpdatesRequest.yaml
+  - GetRequest.yaml
+  - GetHeadersRequest.yaml
+  - GetSourceRequest.yaml
+  - ZipMessagesRequest.yaml
+  - AttachmentRequest.yaml
+  - ZipAttachmentsRequest.yaml
+  - NewRequest.yaml
+  - ImportRequest.yaml
+  - ReplyRequest.yaml
+  - ReplyAllRequest.yaml
+  - ForwardRequest.yaml
+  - DeleteRequest.yaml
+  - ClearRequest.yaml
+  - ReceiptAckRequest.yaml
+  - ResolveShareReferenceRequest.yaml
+  - ExamineRequest.yaml

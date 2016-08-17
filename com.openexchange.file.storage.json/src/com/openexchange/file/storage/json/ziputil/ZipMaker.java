@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -114,8 +114,9 @@ public class ZipMaker {
      *
      * @param out The output stream to write to
      * @throws OXException If create operation fails
+     * @return long with the number of bytes that have been written to the {@link OutputStream}
      */
-    public void writeZipArchive(OutputStream out) throws OXException {
+    public long writeZipArchive(OutputStream out) throws OXException {
         ZipArchiveOutputStream zipOutput = null;
         try {
             // Initialize ZIP output stream
@@ -139,6 +140,7 @@ public class ZipMaker {
                     addFile2Archive(file, fileAccess.getDocument(idVersionPair.getIdentifier(), idVersionPair.getVersion()), zipOutput, "", buflen, buf);
                 }
             }
+            return zipOutput.getBytesWritten();
         } finally {
             // Complete the ZIP file
             Streams.close(zipOutput);

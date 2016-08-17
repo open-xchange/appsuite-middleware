@@ -1,0 +1,31 @@
+/attachment?action=list:
+  put:
+    operationId: getAttachmentList
+    tags:
+      - attachments
+    summary: Gets a list of attachments.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamAttached"
+      - $ref: "#/parameters/gblQueryParamAttachmentsFolder"
+      - $ref: "#/parameters/gblQueryParamAttachmentsModule"
+      - $ref: "#/parameters/gblQueryParamAttachmentsColumns"
+      - in: body
+        name: body
+        description: A JSON array with the identifiers of the requested attachments.
+        required: true
+        schema:
+          type: array
+          items:
+            type: integer
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with data for the requested infoitems. Each array element describes one infoitem and
+          is itself an array. The elements of each array contain the information specified by the corresponding
+          identifiers in the `columns` parameter. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/InfoItemsResponse"

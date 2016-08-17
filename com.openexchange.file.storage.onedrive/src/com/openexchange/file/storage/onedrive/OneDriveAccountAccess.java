@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,7 +60,12 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.onedrive.access.OneDriveAccess;
+import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
+import com.openexchange.file.storage.onedrive.osgi.Services;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.session.Session;
 
 /**
@@ -73,7 +78,7 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess, Ca
     private final FileStorageAccount account;
     private final Session session;
     private final FileStorageService service;
-    private OneDriveAccess oneDriveAccess;
+    private OAuthAccess oneDriveAccess;
 
     /**
      * Initializes a new {@link OneDriveAccountAccess}.
@@ -103,7 +108,18 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess, Ca
 
     @Override
     public void connect() throws OXException {
-        oneDriveAccess = OneDriveAccess.accessFor(account, session);
+        OAuthAccessRegistryService service = Services.getService(OAuthAccessRegistryService.class);
+        OAuthAccessRegistry registry = service.get(API.MS_LIVE_CONNECT.getFullName());
+        oneDriveAccess = registry.get(session.getContextId(), session.getUserId());
+        if (oneDriveAccess == null) {
+            OneDriveOAuthAccess access = new OneDriveOAuthAccess(account, session);
+            registry.add(session.getContextId(), session.getUserId(), access);
+            if (oneDriveAccess == null) {
+                oneDriveAccess = access;
+            }
+        } else {
+            oneDriveAccess = oneDriveAccess.ensureNotExpired();
+        }
     }
 
     @Override
@@ -118,7 +134,7 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess, Ca
 
     @Override
     public boolean ping() throws OXException {
-        return OneDriveAccess.pingFor(account, session);
+        return oneDriveAccess.ping();
     }
 
     @Override
@@ -133,20 +149,18 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess, Ca
 
     @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
-        OneDriveAccess oneDriveAccess = this.oneDriveAccess;
         if (null == oneDriveAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        return new OneDriveFileAccess(oneDriveAccess, account, session, this);
+        return new OneDriveFileAccess((OneDriveOAuthAccess) oneDriveAccess, account, session, this);
     }
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
-        OneDriveAccess oneDriveAccess = this.oneDriveAccess;
         if (null == oneDriveAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        return new OneDriveFolderAccess(oneDriveAccess, account, session, this);
+        return new OneDriveFolderAccess((OneDriveOAuthAccess) oneDriveAccess, account, session, this);
     }
 
     @Override

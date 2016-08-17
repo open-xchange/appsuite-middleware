@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,8 +49,6 @@
 
 package com.openexchange.admin.osgi;
 
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -62,6 +60,8 @@ import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.auth.Credentials;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 
@@ -170,11 +170,8 @@ public final class AuthenticatorImpl implements Authenticator, Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(2);
-        map.put("mpasswd", new String[] {"all properties in file"});
-        map.put("ModuleAccessDefinitions.properties", new String[] {"all properties in file"});
-        return map;
+    public Interests getInterests() {
+        return DefaultInterests.builder().configFileNames("mpasswd", "ModuleAccessDefinitions.properties").build();
     }
 
 }

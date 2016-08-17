@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -128,11 +128,10 @@ public class ConversationCache {
 
     /**
      * Gets the calculated hash string for specified arguments.
-     * @param usedFields
      *
      * @return The calculated hash string
      */
-    public static String getArgsHash(MailSortField sortField, OrderDirection order, int lookAhead, boolean mergeWithSent, MailFields usedFields, int total, long uidnext, int sentTotal, long sentUidNext) {
+    public static String getArgsHash(MailSortField sortField, OrderDirection order, int lookAhead, boolean mergeWithSent, MailFields usedFields, String[] headerNames, int total, long uidnext, int sentTotal, long sentUidNext) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(sortField.getKey().getBytes(Charsets.UTF_8));
@@ -140,6 +139,11 @@ public class ConversationCache {
             md.update(intToByteArray(lookAhead));
             md.update(mergeWithSent ? (byte) 1 : 0);
             md.update(usedFields.toByteArray());
+            if (null != headerNames && headerNames.length > 0) {
+                for (String headerName : headerNames) {
+                    md.update(Charsets.getBytes(headerName, Charsets.UTF_8));
+                }
+            }
             md.update(intToByteArray(total));
             md.update(longToByteArray(uidnext));
             if (mergeWithSent) {

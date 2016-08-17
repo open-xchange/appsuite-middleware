@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,29 +49,19 @@
 
 package com.openexchange.report.appsuite;
 
+import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.report.appsuite.serialization.Report;
+import com.openexchange.report.appsuite.serialization.ReportConfigs;
 
 /**
  * The {@link ReportService} runs reports and manages pending and finished reports. This service is available via OSGi
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public interface ReportService {
-
-    /**
-     * Same as calling {@link #run(String)} with the 'default' reportType
-     */
-    String run() throws OXException;
-
-    /**
-     * Run a report of the given reportType. Note that when a report of this type is already running, no new report is triggered and the
-     * uuid of the running report is returned instead
-     * 
-     * @return The uuid of triggered or the already running report
-     */
-    String run(String reportType) throws OXException;
 
     /**
      * Same as calling {@link #getLastReport(String)} with the 'default' reportType
@@ -135,4 +125,6 @@ public interface ReportService {
      * @return {@link Report} that contains the status while abortion and the detailed error description.
      */
     Report getLastErrorReport(String reportType);
+
+    String run(ReportConfigs reportConfig) throws OXException;
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -60,6 +60,7 @@ import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.util.MimeHeaders;
 import org.glassfish.grizzly.servlet.ServletUtils;
 import com.openexchange.java.Strings;
+import com.openexchange.servlet.StatusKnowing;
 
 /**
  * {@link HttpServletResponseWrapper} - Wraps an HttpServletResponse and delegates all calls that we don't need to modify to the response
@@ -67,11 +68,12 @@ import com.openexchange.java.Strings;
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class HttpServletResponseWrapper implements HttpServletResponse {
+public class HttpServletResponseWrapper implements StatusKnowing {
 
     private final HttpServletResponse httpServletResponse;
     private final String echoHeaderName;
     private final String echoHeaderValue;
+    private int statusCode;
 
     /**
      * Initializes a new {@link HttpServletResponseWrapper}. Incorporates the echo header when using KippData's mod_id in case somebody
@@ -85,6 +87,11 @@ public class HttpServletResponseWrapper implements HttpServletResponse {
         this.httpServletResponse = httpServletResponse;
         this.echoHeaderName = echoHeaderName;
         this.echoHeaderValue = echoHeaderValue;
+    }
+
+    @Override
+    public int getStatus() {
+        return statusCode;
     }
 
     @Override
@@ -262,11 +269,13 @@ public class HttpServletResponseWrapper implements HttpServletResponse {
 
     @Override
     public void setStatus(int arg0, String arg1) {
+        this.statusCode = arg0;
         httpServletResponse.setStatus(arg0, arg1);
     }
 
     @Override
     public void setStatus(int arg0) {
+        this.statusCode = arg0;
         httpServletResponse.setStatus(arg0);
     }
 

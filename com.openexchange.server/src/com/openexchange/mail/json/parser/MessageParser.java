@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -65,7 +65,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Queue;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
@@ -103,7 +102,6 @@ import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -122,9 +120,7 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MultipleMailPartHandler;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -169,13 +165,12 @@ public final class MessageParser {
      * @param uploadEvent The upload event containing the uploaded files to attach
      * @param session The session
      * @param accountId The account identifier
-     * @param csid The optional identifier of the associated composition space
      * @param warnings A list to add possible warnings to
      * @return A corresponding instance of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
      */
-    public static ComposedMailMessage parse4Draft(JSONObject jMail, UploadEvent uploadEvent, Session session, int accountId, String csid, List<OXException> warnings) throws OXException {
-        return parse(jMail, uploadEvent, session, accountId, null, null, false, csid, warnings)[0];
+    public static ComposedMailMessage parse4Draft(JSONObject jMail, UploadEvent uploadEvent, Session session, int accountId, List<OXException> warnings) throws OXException {
+        return parse(jMail, uploadEvent, session, accountId, null, null, false, warnings)[0];
     }
 
     /**
@@ -187,14 +182,13 @@ public final class MessageParser {
      * @param session The session
      * @param accountId The account identifier
      * @param protocol The server's protocol
-     * @param hostname The server's host name
-     * @param csid The optional identifier of the associated composition space
      * @param warnings A list to add possible warnings to
+     * @param hostname The server's host name
      * @return The corresponding instances of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
      */
-    public static ComposedMailMessage[] parse4Transport(JSONObject jMail, UploadEvent uploadEvent, Session session, int accountId, String protocol, String hostName, String csid, List<OXException> warnings) throws OXException {
-        return parse(jMail, uploadEvent, session, accountId, protocol, hostName, true, csid, warnings);
+    public static ComposedMailMessage[] parse4Transport(JSONObject jMail, UploadEvent uploadEvent, Session session, int accountId, String protocol, String hostName, List<OXException> warnings) throws OXException {
+        return parse(jMail, uploadEvent, session, accountId, protocol, hostName, true, warnings);
     }
 
     /**
@@ -206,29 +200,22 @@ public final class MessageParser {
      * @param session The session
      * @param accountId The account identifier
      * @param protocol The server's protocol
-     * @param hostname The server's host name
      * @param prepare4Transport <code>true</code> to parse with the intention to transport returned mail later on; otherwise <code>false</code>
-     * @param csid The optional identifier of the associated composition space
      * @param warnings
+     * @param hostname The server's host name
      * @param monitor The monitor
      * @return The corresponding instances of {@link ComposedMailMessage}
      * @throws OXException If parsing fails
      */
-    private static ComposedMailMessage[] parse(JSONObject jMail, UploadEvent uploadEvent, Session session, int accountId, String protocol, String hostName, boolean prepare4Transport, String csid, List<OXException> warnings) throws OXException {
+    private static ComposedMailMessage[] parse(JSONObject jMail, UploadEvent uploadEvent, Session session, int accountId, String protocol, String hostName, boolean prepare4Transport, List<OXException> warnings) throws OXException {
         try {
             TransportProvider provider = TransportProviderRegistry.getTransportProviderBySession(session, accountId);
             Context ctx = ContextStorage.getStorageContext(session.getContextId());
             ComposedMailMessage composedMail = provider.getNewComposedMailMessage(session, ctx);
             composedMail.setAccountId(accountId);
-            composedMail.setCsid(csid);
 
             // Select appropriate handler
-            IAttachmentHandler attachmentHandler;
-            if (prepare4Transport && TransportProperties.getInstance().isPublishOnExceededQuota() && (!TransportProperties.getInstance().isPublishPrimaryAccountOnly() || (MailAccount.DEFAULT_ID == accountId))) {
-                attachmentHandler = new PublishAttachmentHandler(session, provider, protocol, hostName);
-            } else {
-                attachmentHandler = new AbortAttachmentHandler(session);
-            }
+            IAttachmentHandler attachmentHandler = new AbortAttachmentHandler(session);
 
             // Parse transport message plus its text body
             parse(composedMail, jMail, session, accountId, provider, attachmentHandler, ctx, prepare4Transport);
@@ -383,8 +370,6 @@ public final class MessageParser {
         parse(jsonObj, mail, timeZone, TransportProviderRegistry.getTransportProviderBySession(session, accountId), session, accountId, new AbortAttachmentHandler(session), false);
     }
 
-    private static final boolean ALIGN_TO_COMPOSITION_SPACE = false;
-
     private static void parse(JSONObject jsonObj, MailMessage mail, TimeZone timeZone, TransportProvider provider, Session session, int accountId, IAttachmentHandler attachmentHandler, boolean prepare4Transport) throws OXException {
         try {
             parseBasics(jsonObj, mail, timeZone, prepare4Transport);
@@ -428,28 +413,7 @@ public final class MessageParser {
                      */
                     if (attachmentArray.length() > 1) {
                         Set<String> contentIds = extractContentIds(sContent);
-
                         MailPath transportMailMsgref = transportMail.getMsgref();
-                        if (ALIGN_TO_COMPOSITION_SPACE) {
-                            String csid = transportMail.getCsid();
-                            if (null != csid) {
-                                CompositionSpace compositionSpace = CompositionSpace.optCompositionSpace(csid, session);
-                                if (null != compositionSpace) {
-                                    MailPath replyMailPath = compositionSpace.getReplyFor();
-                                    if (null != replyMailPath) {
-                                        // Prefer the one from composition space
-                                        transportMailMsgref = replyMailPath;
-                                    } else {
-                                        Queue<MailPath> forwards = compositionSpace.getForwardsFor();
-                                        if (null != forwards && 1 == forwards.size()) {
-                                            // Prefer the one from composition space
-                                            transportMailMsgref = forwards.peek();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
                         parseReferencedParts(provider, session, accountId, transportMailMsgref, attachmentHandler, attachmentArray, contentIds, prepare4Transport);
                     }
                 } else {
@@ -652,13 +616,13 @@ public final class MessageParser {
          * Sent & received date
          */
         if (jsonObj.hasAndNotNull(MailJSONField.SENT_DATE.getKey())) {
-            Date date = new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()));
-            int offset = timeZone.getOffset(date.getTime());
+            long date = jsonObj.getLong(MailJSONField.SENT_DATE.getKey());
+            int offset = timeZone.getOffset(date);
             mail.setSentDate(new Date(jsonObj.getLong(MailJSONField.SENT_DATE.getKey()) - offset));
         }
         if (jsonObj.hasAndNotNull(MailJSONField.RECEIVED_DATE.getKey())) {
-            Date date = new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()));
-            int offset = timeZone.getOffset(date.getTime());
+            long date = jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey());
+            int offset = timeZone.getOffset(date);
             mail.setReceivedDate(new Date(jsonObj.getLong(MailJSONField.RECEIVED_DATE.getKey()) - offset));
         }
         /*
@@ -974,7 +938,7 @@ public final class MessageParser {
             if (length == 0) {
                 return EMPTY_ADDRS;
             }
-            return parseAdressArray(jAddresses, length, false);
+            return parseAdressArray(jAddresses, length, ParseMode.AS_IS);
         } catch (JSONException e) {
             LOG.error("", e);
             /*
@@ -991,31 +955,96 @@ public final class MessageParser {
      * [&quot;&lt;personal&gt;&quot;, &quot;&lt;email-address&gt;&quot;]
      * </pre>
      *
-     * @param jsonArray The JSON array
+     * @param jAddresses The JSON array of addresses
+     * @param length The length of the passed JSON array
      * @param strict boolean flag to enable/disable strict RFC822 parsing
      * @return Parsed address list combined in a {@link String} object
      * @throws JSONException If a JSON error occurs
      * @throws AddressException If constructing an address fails
      */
-    public static InternetAddress[] parseAdressArray(JSONArray jsonArray, int length, boolean strict) throws JSONException, AddressException {
+    public static InternetAddress[] parseAdressArray(JSONArray jAddresses, int length, boolean strict) throws JSONException, AddressException {
+        return parseAdressArray(jAddresses, length, strict ? ParseMode.STRICT : ParseMode.LENIENT);
+    }
+
+    /** The parse mode */
+    public static enum ParseMode {
+        /**
+         * Enforces strict RFC822 syntax during parsing
+         */
+        STRICT,
+        /**
+         * Enforces no strict RFC822 syntax during parsing, but does fail for completely syntactically wrong addresses; e.g. containing illegal characters
+         */
+        LENIENT,
+        /**
+         * Simply passes address string as-is.
+         */
+        AS_IS;
+    }
+
+    /**
+     * Expects the specified JSON array to be an array of arrays. Each inner array conforms to pattern:
+     *
+     * <pre>
+     * [&quot;&lt;personal&gt;&quot;, &quot;&lt;email-address&gt;&quot;]
+     * </pre>
+     *
+     * @param jAddresses The JSON array of addresses
+     * @param length The length of the passed JSON array
+     * @param parseMode The parse mode to apply
+     * @return Parsed address list combined in a {@link String} object
+     * @throws JSONException If a JSON error occurs
+     * @throws AddressException If constructing an address fails
+     */
+    public static InternetAddress[] parseAdressArray(JSONArray jAddresses, int length, ParseMode parseMode) throws JSONException, AddressException {
+        boolean strictOrLenient = (ParseMode.STRICT == parseMode) || (ParseMode.LENIENT == parseMode);
         List<InternetAddress> addresses = new ArrayList<InternetAddress>(length);
-        for (int i = 0; i < length; i++) {
-            JSONArray persAndAddr = jsonArray.getJSONArray(i);
+        for (int i = 0, k = length; k-- > 0; i++) {
+            JSONArray persAndAddr = jAddresses.getJSONArray(i);
             int pLen = persAndAddr.length();
             if (pLen != 0) {
                 if (1 == pLen) {
-                    addresses.add(new QuotedInternetAddress(persAndAddr.getString(0), strict));
-                } else {
-                    String personal = persAndAddr.getString(0);
-                    boolean hasPersonal = (personal != null && !"null".equals(personal));
-                    if (hasPersonal) {
+                    if (strictOrLenient) {
+                        addresses.add(new QuotedInternetAddress(persAndAddr.getString(0), ParseMode.STRICT == parseMode));
+                    } else {
+                        // Use 'QuotedInternetAddress(String, String, String)' constructor for no parsing, but accepting literals as-is
                         try {
-                            addresses.add(new QuotedInternetAddress(persAndAddr.getString(1), personal, "UTF-8"));
+                            addresses.add(new QuotedInternetAddress(persAndAddr.getString(0), null, "UTF-8"));
                         } catch (UnsupportedEncodingException x) {
                             // Cannot occur
                         }
+                    }
+                } else {
+                    String personal = persAndAddr.optString(0, null);
+                    boolean hasPersonal = (personal != null && !"null".equals(personal));
+                    if (hasPersonal) {
+                        if (strictOrLenient) {
+                            QuotedInternetAddress addr = new QuotedInternetAddress(persAndAddr.getString(1), ParseMode.STRICT == parseMode);
+                            try {
+                                addr.setPersonal(personal, "UTF-8");
+                            } catch (UnsupportedEncodingException x) {
+                                // Cannot occur
+                            }
+                            addresses.add(addr);
+                        } else {
+                            // Use 'QuotedInternetAddress(String, String, String)' constructor for no parsing, but accepting literals as-is
+                            try {
+                                addresses.add(new QuotedInternetAddress(persAndAddr.getString(1), personal, "UTF-8"));
+                            } catch (UnsupportedEncodingException x) {
+                                // Cannot occur
+                            }
+                        }
                     } else {
-                        addresses.add(new QuotedInternetAddress(persAndAddr.getString(1), strict));
+                        if (strictOrLenient) {
+                            addresses.add(new QuotedInternetAddress(persAndAddr.getString(1), ParseMode.STRICT == parseMode));
+                        } else {
+                            // Use 'QuotedInternetAddress(String, String, String)' constructor for no parsing, but accepting literals as-is
+                            try {
+                                addresses.add(new QuotedInternetAddress(persAndAddr.getString(1), null, "UTF-8"));
+                            } catch (UnsupportedEncodingException x) {
+                                // Cannot occur
+                            }
+                        }
                     }
                 }
             }

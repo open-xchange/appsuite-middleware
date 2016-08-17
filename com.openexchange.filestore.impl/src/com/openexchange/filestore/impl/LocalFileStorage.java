@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -56,6 +56,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -72,8 +73,32 @@ import com.openexchange.java.Streams;
  */
 public class LocalFileStorage extends DefaultFileStorage {
 
-    /** TRhe logger constant */
+    /** The logger constant */
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalFileStorage.class);
+
+    /**
+     * Checks specified URI for being used to create an instance of {@code java.io.File}.
+     *
+     * @param uri The URI to check
+     * @return An URI with a scheme equal to <code>"file"</code>
+     */
+    private static URI checkUri(URI uri) {
+        if (null == uri) {
+            return uri;
+        }
+
+        URI fileUri = uri;
+        if (null == fileUri.getScheme()) {
+            try {
+                fileUri = new URI("file", fileUri.getUserInfo(), fileUri.getHost(), fileUri.getPort(), fileUri.getPath(), fileUri.getQuery(), fileUri.getFragment());
+            } catch (URISyntaxException e) {
+                // Cannot occur...
+                throw new IllegalArgumentException("URI syntax error.", e);
+            }
+        }
+
+        return fileUri;
+    }
 
     /**
      * Default number of files or directories per directory.
@@ -138,16 +163,20 @@ public class LocalFileStorage extends DefaultFileStorage {
     }
 
     /**
-     * Constructor with more detailed parameters. This file storage can store entries ^ depth files.
+     * Initializes a new {@link LocalFileStorage}.
      *
-     * @param depth depth of sub directories for storing files.
-     * @param entries number of entries per sub directory.
-     * @throws IllegalArgumentException if a problem occurs while creating the file storage.
+     * @param uri An URI denoting the storage's root path, which is absolute, hierarchical with a scheme equal to <code>"file"</code>, a non-empty path component, and undefined authority, query, and fragment components
+     * @throws IllegalArgumentException If the preconditions on the URI parameter do not hold
      */
-    public LocalFileStorage(final URI uri) {
-        this(new File(uri));
+    public LocalFileStorage(URI uri) {
+        this(new File(checkUri(uri)));
     }
 
+    /**
+     * Initializes a new {@link LocalFileStorage}.
+     *
+     * @param storage The storage's root path
+     */
     public LocalFileStorage(File storage) {
         super(storage);
         alreadyInitialized = storage.exists();

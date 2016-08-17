@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -171,8 +171,8 @@ public abstract class AbstractDelegatingIDBasedFileAccess implements DelegatingI
     }
 
     @Override
-    public String saveFileMetadata(File document, long sequenceNumber, List<Field> modifiedColumns, boolean ignoreWarnings) throws OXException {
-        return fileAccess.saveFileMetadata(document, sequenceNumber, modifiedColumns, ignoreWarnings);
+    public String saveFileMetadata(File document, long sequenceNumber, List<Field> modifiedColumns, boolean ignoreWarnings, boolean tryAddVersion) throws OXException {
+        return fileAccess.saveFileMetadata(document, sequenceNumber, modifiedColumns, ignoreWarnings, tryAddVersion);
     }
 
     @Override
@@ -226,8 +226,8 @@ public abstract class AbstractDelegatingIDBasedFileAccess implements DelegatingI
     }
 
     @Override
-    public String saveDocument(File document, InputStream data, long sequenceNumber, List<Field> modifiedColumns, boolean ignoreVersion, boolean ignoreWarnings) throws OXException {
-        return fileAccess.saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion, ignoreWarnings);
+    public String saveDocument(File document, InputStream data, long sequenceNumber, List<Field> modifiedColumns, boolean ignoreVersion, boolean ignoreWarnings, boolean tryAddVersion) throws OXException {
+        return fileAccess.saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion, ignoreWarnings, tryAddVersion);
     }
 
     @Override

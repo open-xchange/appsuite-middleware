@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -61,10 +61,7 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * Service tracker for transport providers
@@ -128,12 +125,7 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
                     @Override
                     public boolean isEnabled(String capability, Session ses) throws OXException {
                         if (sCapability.equals(capability)) {
-                            final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                            if (session.isAnonymous() || !session.getUserPermissionBits().hasWebMail()) {
-                                return false;
-                            }
-
-                            return (TransportProperties.getInstance().isPublishOnExceededQuota() && session.getUserPermissionBits().hasInfostore());
+                            return false;
                         }
 
                         return true;

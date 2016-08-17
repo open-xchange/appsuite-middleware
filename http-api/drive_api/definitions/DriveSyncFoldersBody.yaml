@@ -1,0 +1,25 @@
+type: object
+required:
+  - clientVersions
+  - originalVersions
+properties:
+  clientVersions:
+    type: array
+    description: Lists all current directories below the root directory as a flat list.
+    items:
+      $ref: "#/definitions/DriveDirectoryVersion"
+  originalVersions:
+    type: array
+    description: Contains all previously known directories, i.e. all previously synchronized and acknowledged directories.
+    items:
+      $ref: "#/definitions/DriveDirectoryVersion"
+  fileExclusions:
+    type: array
+    description: Defines client-side exclusion filters for files (since API version 2). See [Client side filtering](#client-side-filtering) for further information.
+    items:
+      $ref: "#/definitions/DriveFilePattern"
+  directoryExclusions:
+    type: array
+    description: Defines client-side exclusion filters for directories (since API version 2). See [Client side filtering](#client-side-filtering) for further information.
+    items:
+      $ref: "#/definitions/DriveDirectoryPattern"

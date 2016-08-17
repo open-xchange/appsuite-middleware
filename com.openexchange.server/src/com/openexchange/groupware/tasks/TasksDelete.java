@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -118,9 +118,13 @@ public class TasksDelete implements DeleteListener {
         // changed to mailadmin. Remaining task with single folder mappings
         // must be private tasks that can be deleted.
         // Remove private task in private folders.
-        assignToAdmin(event, con);
+        Integer destUser = event.getDestinationUserID();
+        if (destUser == null) {
+            destUser = event.getContext().getMailadmin();
+        }
+        assignToUser(event, con, destUser);
         // Change createdFrom and modifiedBy attributes of left over tasks.
-        changeCFMB(event, con);
+        changeCFMB(event, con, destUser);
     }
 
     /**
@@ -146,7 +150,7 @@ public class TasksDelete implements DeleteListener {
      * @param con writable database connection.
      * @throws OXException if a problem occurs.
      */
-    private void assignToAdmin(final DeleteEvent event, final Connection con) throws OXException {
+    private void assignToUser(final DeleteEvent event, final Connection con, final Integer destUser) throws OXException {
         final Session session = event.getSession();
         final Context ctx = event.getContext();
         final int userId = event.getId();
@@ -178,7 +182,7 @@ public class TasksDelete implements DeleteListener {
                     TaskLogic.removeTask(session, ctx, con, folderId, taskId, type);
                 } else if (Tools.isFolderPublic(folder)) {
                     foldStor.deleteFolder(ctx, con, taskId, folderId, type);
-                    final Folder aFolder = new Folder(folderId, ctx.getMailadmin());
+                    final Folder aFolder = new Folder(folderId, destUser);
                     foldStor.insertFolder(ctx, con, taskId, aFolder, type);
                 } else if (Tools.isFolderPrivate(folder)) {
                     TaskLogic.removeTask(session, ctx, con, folderId, taskId, type);
@@ -195,7 +199,10 @@ public class TasksDelete implements DeleteListener {
      * @param con writable database connection.
      * @throws OXException if an exception occurs.
      */
-    private void changeCFMB(final DeleteEvent event, final Connection con) throws OXException {
+    private void changeCFMB(final DeleteEvent event, final Connection con, int destUser) throws OXException {
+        if (destUser <= 0) {
+            destUser = event.getContext().getMailadmin();
+        }
         final int[] modified = new int[] { DataObject.CREATED_BY, DataObject.MODIFIED_BY, DataObject.LAST_MODIFIED };
         final Context ctx = event.getContext();
         final int userId = event.getId();
@@ -206,10 +213,10 @@ public class TasksDelete implements DeleteListener {
                 final Task update = stor.selectTask(ctx, con, taskId, type);
                 final Date lastModified = update.getLastModified();
                 if (update.getCreatedBy() == userId) {
-                    update.setCreatedBy(ctx.getMailadmin());
+                    update.setCreatedBy(destUser);
                 }
                 if (update.getModifiedBy() == userId) {
-                    update.setModifiedBy(ctx.getMailadmin());
+                    update.setModifiedBy(destUser);
                 }
                 update.setLastModified(new Date());
                 stor.updateTask(ctx, con, update, lastModified, modified, type);

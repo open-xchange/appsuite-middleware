@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,8 +50,11 @@
 package com.openexchange.report.appsuite.serialization;
 
 import java.io.Serializable;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import com.openexchange.report.appsuite.serialization.osgi.StringParserServiceRegistry;
 import com.openexchange.tools.strings.StringParser;
@@ -62,10 +65,71 @@ import com.openexchange.tools.strings.StringParser;
  * performed, how many are still open).
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public class Report implements Serializable {
 
     private static final long serialVersionUID = 6998213011280390705L;
+
+    //--------------------Report output sections and identifiers--------------------
+
+    public static final String MACDETAIL = "macdetail";
+
+    public static final String MACDETAIL_QUOTA = "macdetail-quota";
+
+    public static final String QUOTA = "quota";
+
+    public static final String CAPABILITIES = "capabilities";
+
+    public static final String CAPABILITY_LIST = "capabilityList";
+
+    public static final String DISABLED = "disabled";
+
+    public static final String TOTAL = "total";
+
+    public static final String CAPABILITY_SETS = "capabilitySets";
+
+    public static final String MAILADMIN = "mailadmin";
+
+    public static final String USER_LOGINS = "user-logins";
+
+    public static final String ADMIN = "admin";
+
+    public static final String MACDETAIL_LISTS = "macdetail-lists";
+
+    public static final String LINKS = "links";
+
+    public static final String GUESTS = "guests";
+
+    public static final String CONTEXTS = "contexts";
+
+    public static final String CONTEXT_USERS_MAX = "Context-users-max";
+
+    public static final String CONTEXT_USERS_MIN = "Context-users-min";
+
+    public static final String CONTEXT_USERS_AVG = "Context-users-avg";
+
+    public static final String CLIENT_LOGINS = "client-list";
+
+    public static final String CONTEXTS_DISABLED = "contexts-disabled";
+
+    public static final String USERS = "users";
+
+    public static final String USERS_DISABLED = "users-disabled";
+
+    public static final String DRIVE_OVERALL = "drive-overall";
+
+    public static final String DRIVE_USER = "drive-user";
+
+    public static final String DRIVE_TOTAL = "drive-total";
+
+    public static final String TIMEFRAME = "timeframe";
+
+    public static final String TIMEFRAME_START = "start";
+
+    public static final String TIMEFRAME_END = "end";
+
+    //--------------------Report attributes--------------------
 
     private final String uuid;
 
@@ -81,6 +145,28 @@ public class Report implements Serializable {
 
     private int pendingTasks;
 
+    private LinkedHashMap<String, LinkedHashMap<String, Object>> tenantMap;
+    
+    private int tenantIdCounter;
+
+    private boolean isSingleDeployment = true;
+
+    private Long consideredTimeframeStart;
+
+    private Long consideredTimeframeEnd;
+
+    //--------------------OXCS-Report, relevant attributes--------------------
+
+    private boolean isShowSingleTenant;
+
+    private Long singleTenantId;
+
+    private boolean isAdminIgnore;
+
+    private boolean isShowDriveMetrics;
+
+    private boolean isShowMailMetrics;
+
     /**
      * Initializes a new {@link Report}.
      *
@@ -92,6 +178,10 @@ public class Report implements Serializable {
         this.uuid = uuid;
         this.type = type;
         this.startTime = startTime;
+        this.tenantMap = new LinkedHashMap<>();
+        this.tenantMap.put("deployment", new LinkedHashMap<String, Object>());
+        this.singleTenantId = 0l;
+        this.tenantIdCounter = 0;
     }
 
     /**
@@ -107,6 +197,77 @@ public class Report implements Serializable {
         getNamespace(ns).put(key, value);
 
         return this;
+    }
+
+    /**
+     * Initializes a new {@link Report}. With all fields needed for either timeframe considered only "default" report or
+     * "oxcs-etended" report-type with additional parameters. If no timeframe is given, the last year from today is used
+     * as timeframe.
+     * 
+     * @param uuid
+     * @param reportType
+     * @param startTime
+     * @param startDate
+     * @param endDate
+     * @param isCustomTimerange
+     * @param isShowSingleTenant
+     * @param singleTenantId
+     * @param isIgnoreAdmin
+     * @param isShowDriveMetrics
+     * @param isShowMailMetrics
+     */
+    public Report(String uuid, String reportType, long startTime, Date startDate, Date endDate, Boolean isCustomTimerange, Boolean isShowSingleTenant, Long singleTenantId, Boolean isIgnoreAdmin, Boolean isShowDriveMetrics, Boolean isShowMailMetrics) {
+        this.uuid = uuid;
+        this.type = reportType;
+        this.startTime = startTime;
+        this.tenantMap = new LinkedHashMap<>();
+        this.tenantMap.put("deployment", new LinkedHashMap<String, Object>());
+        this.singleTenantId = 0l;
+        if (isCustomTimerange) {
+            this.consideredTimeframeStart = startDate.getTime();
+            this.consideredTimeframeEnd = endDate.getTime();
+        } else {
+            Calendar cal = Calendar.getInstance();
+            Date ed = cal.getTime();
+            cal.add(Calendar.YEAR, -1);
+            Date sd = cal.getTime();
+            this.consideredTimeframeStart = sd.getTime();
+            this.consideredTimeframeEnd = ed.getTime();
+        }
+        this.isShowSingleTenant = isShowSingleTenant;
+        if (isShowSingleTenant) {
+            this.singleTenantId = singleTenantId;
+        }
+        this.isAdminIgnore = isIgnoreAdmin;
+        this.isShowDriveMetrics = isShowDriveMetrics;
+        this.isShowMailMetrics = isShowMailMetrics;
+    }
+    
+    public Report(String uuid, long startTime, ReportConfigs reportConfig) {
+        this.uuid = uuid;
+        this.type = reportConfig.getType();
+        this.startTime = startTime;
+        this.tenantMap = new LinkedHashMap<>();
+        this.tenantMap.put("deployment", new LinkedHashMap<String, Object>());
+        this.singleTenantId = 0l;
+        if (reportConfig.isConfigTimerange()) {
+            this.consideredTimeframeStart = reportConfig.getConsideredTimeframeStart();
+            this.consideredTimeframeEnd = reportConfig.getConsideredTimeframeEnd();
+        } else {
+            Calendar cal = Calendar.getInstance();
+            Date ed = cal.getTime();
+            cal.add(Calendar.YEAR, -1);
+            Date sd = cal.getTime();
+            this.consideredTimeframeStart = sd.getTime();
+            this.consideredTimeframeEnd = ed.getTime();
+        }
+        this.isShowSingleTenant = reportConfig.isShowSingleTenant();
+        if (isShowSingleTenant) {
+            this.singleTenantId = reportConfig.getSingleTenantId();
+        }
+        this.isAdminIgnore = reportConfig.isAdminIgnore();
+        this.isShowDriveMetrics = reportConfig.isShowDriveMetrics();
+        this.isShowMailMetrics = reportConfig.isShowMailMetrics();
     }
 
     private static Class[] allowedTypes = new Class[] { Integer.class, Long.class, Float.class, Short.class, Double.class, Byte.class, Boolean.class, String.class };
@@ -285,5 +446,77 @@ public class Report implements Serializable {
     @Override
     public String toString() {
         return "Report [UUID=" + uuid + ", type=" + type + ", tasks=" + numberOfTasks + ", tasksToDo=" + pendingTasks + "]";
+    }
+
+    public boolean isSingleDeployment() {
+        return isSingleDeployment;
+    }
+
+    public void setSingleDeployment(boolean isSingleDeployment) {
+        this.isSingleDeployment = isSingleDeployment;
+    }
+
+    public LinkedHashMap<String, LinkedHashMap<String, Object>> getTenantMap() {
+        return tenantMap;
+    }
+
+    public void setTenantMap(LinkedHashMap<String, LinkedHashMap<String, Object>> tenantMap) {
+        this.tenantMap = tenantMap;
+    }
+
+    public Long getConsideredTimeframeStart() {
+        return consideredTimeframeStart;
+    }
+
+    public void setConsideredTimeframeStart(Long consideredTimeframeStart) {
+        this.consideredTimeframeStart = consideredTimeframeStart;
+    }
+
+    public Long getConsideredTimeframeEnd() {
+        return consideredTimeframeEnd;
+    }
+
+    public void setConsideredTimeframeEnd(Long consideredTimeframeEnd) {
+        this.consideredTimeframeEnd = consideredTimeframeEnd;
+    }
+
+    public boolean isShowSingleTenant() {
+        return isShowSingleTenant;
+    }
+
+    public void setShowSingleTenant(boolean isShowSingleTenant) {
+        this.isShowSingleTenant = isShowSingleTenant;
+    }
+
+    public Long getSingleTenantId() {
+        return singleTenantId;
+    }
+
+    public void setSingleTenantId(Long singleTenantId) {
+        this.singleTenantId = singleTenantId;
+    }
+
+    public boolean isAdminIgnore() {
+        return isAdminIgnore;
+    }
+
+    public void setAdminIgnore(boolean isAdminIgnore) {
+        this.isAdminIgnore = isAdminIgnore;
+    }
+
+    public boolean isShowDriveMetrics() {
+        return isShowDriveMetrics;
+    }
+
+    public void setShowDriveMetrics(boolean isShowDriveMetrics) {
+        this.isShowDriveMetrics = isShowDriveMetrics;
+    }
+
+    public boolean isShowMailMetrics() {
+        return isShowMailMetrics;
+    }
+
+    public void setShowMailMetrics(boolean isShowMailMetrics) {
+        this.isShowMailMetrics = isShowMailMetrics;
     }
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,6 +56,7 @@ import com.openexchange.ajax.contact.action.AutocompleteRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.CommonSearchResponse;
+import com.openexchange.ajax.jslob.actions.SetRequest;
 import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.ajax.mail.TestMail;
 import com.openexchange.groupware.container.Contact;
@@ -103,9 +104,13 @@ public class UseCountTest extends ContactTest {
         Contact c2 = ContactTestManager.generateContact(folder.getObjectID(), "UseCount");
         c2.setEmail1("useCount2@ox.invalid");
         c2 = ctm.newAction(c2);
+
+        AJAXClient client = new AJAXClient(User.User1);
+        SetRequest req = new SetRequest("io.ox/mail", "{\"contactCollectOnMailTransport\": true}", true);
+        client.execute(req);
+
         mtm = new MailTestManager(client);
-        Random rnd = new Random(System.currentTimeMillis());
-        address = rnd.nextInt() % 2 == 0 ? c1.getEmail1() : c2.getEmail1();
+        address = c2.getEmail1();
         mtm.send(new TestMail(client.getValues().getDefaultAddress(), address, "Test", "text/plain", "Test"));
     }
 

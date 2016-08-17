@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,10 +50,12 @@
 package com.openexchange.share.handler.download.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.share.handler.download.DownloadHandler;
 import com.openexchange.share.handler.download.Services;
+import com.openexchange.share.handler.download.limiter.ShareDownloadLimiter;
 import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.user.UserService;
 
@@ -73,13 +75,12 @@ public class DownloadHandlerActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { IDBasedFileAccessFactory.class, ConfigurationService.class, UserService.class };
+        return new Class<?>[] { IDBasedFileAccessFactory.class, ConfigurationService.class, UserService.class, ConfigViewFactory.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(DownloadHandlerActivator.class).info(
-            "Starting bundle: \"com.openexchange.share.handler.download.osgi\"");
+        org.slf4j.LoggerFactory.getLogger(DownloadHandlerActivator.class).info("Starting bundle: \"com.openexchange.share.handler.download\"");
         /*
          * set references
          */
@@ -87,14 +88,18 @@ public class DownloadHandlerActivator extends HousekeepingActivator {
         /*
          * register handler
          */
-        DownloadHandler handler = new DownloadHandler();
+        final DownloadHandler handler = new DownloadHandler();
+
+        // only a local limiter for DownloadHandlers FileResponseRenderer 
+        final ShareDownloadLimiter shareDownloadLimiter = new ShareDownloadLimiter(getService(ConfigViewFactory.class));
+        handler.addRenderListener(shareDownloadLimiter);
+
         registerService(ShareHandler.class, handler, handler.getRanking());
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(DownloadHandlerActivator.class).info(
-            "Stopping bundle: \"com.openexchange.share.handler.download.osgi\"");
+        org.slf4j.LoggerFactory.getLogger(DownloadHandlerActivator.class).info("Stopping bundle: \"com.openexchange.share.handler.download\"");
         Services.set(null);
         super.stopBundle();
     }

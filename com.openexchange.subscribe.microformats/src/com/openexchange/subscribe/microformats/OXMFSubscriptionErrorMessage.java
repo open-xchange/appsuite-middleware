@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -69,7 +69,7 @@ public enum OXMFSubscriptionErrorMessage implements DisplayableOXExceptionCode {
     IOException(CATEGORY_SERVICE_DOWN, 3, "An I/O error occurred: %1$s. Was trying to get the service at %2$s."),
     HttpException(CATEGORY_SERVICE_DOWN, 4, "An HTTP Error occurred: %1$s. Was trying to get the service at %2$s."),
     CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES(CATEGORY_ERROR, 5, OXMFErrorStrings.CAN_ONLY_POST_TO_EXTERNAL_SUBSCRIPTION_SOURCES, "Can only post to external subscription sources."),
-    ERROR_LOADING_SUBSCRIPTION(CATEGORY_SERVICE_DOWN, 6, OXMFErrorStrings.ERROR_LOADING_SUBSCRIPTION, "Could not fetch site at %1$s. Please check the spelling or whether you can reach the site in your browser."),
+    ERROR_LOADING_SUBSCRIPTION(CATEGORY_SERVICE_DOWN, 6, OXMFErrorStrings.ERROR_LOADING_SUBSCRIPTION, "Could not fetch site at '%1$s'. Please check the spelling or whether you can reach the site in your browser."),
     /**
      * The string cannot be parsed to a valid URL.
      */

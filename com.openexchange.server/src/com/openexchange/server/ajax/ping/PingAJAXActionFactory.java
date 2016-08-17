@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -64,13 +64,14 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class PingAJAXActionFactory implements AJAXActionServiceFactory {
-    
-    private static final Collection<String> SUPPORTED_SERVICES = Arrays.asList("ping", "whoami");
+
+    private static final Collection<String> SUPPORTED_SERVICES = Arrays.asList("ping", "time", "whoami");
     private final Map<String, AJAXActionService> ACTIONS = new HashMap<String, AJAXActionService>() {{
         put("ping", new PingAction());
+        put("time", new TimeAction());
         put("whoami", new WhoAmIAction());
     }};
-    
+
     @Override
     public Collection<?> getSupportedServices() {
         return SUPPORTED_SERVICES;

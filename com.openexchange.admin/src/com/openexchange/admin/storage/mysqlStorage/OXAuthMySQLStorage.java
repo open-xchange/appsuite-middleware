@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -63,6 +63,7 @@ import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.storage.interfaces.OXAuthStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
+import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.GenericChecks;
 
 /**
@@ -74,8 +75,12 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
 
     private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAuthMySQLStorage.class);
 
+    private final AdminCache cache;
+
     /** */
     public OXAuthMySQLStorage() {
+        super();
+        cache = ClientAdminThread.cache;
     }
 
     @Override
@@ -93,7 +98,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
 
         if (authdata != null && authdata.getLogin() != null && authdata.getPassword() != null) {
 
-            final Credentials cachedAdminCredentials = ClientAdminThread.cache.getAdminCredentials(ctx);
+            final Credentials cachedAdminCredentials = cache.getAdminCredentials(ctx);
             //disabling caching for admin-password as fix for bug 15200
             //if(cachedAdminCredentials == null ) {
                 final OXToolStorageInterface instance = OXToolStorageInterface.getInstance();
@@ -109,7 +114,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                     ResultSet rs = null;
                     try {
 
-                        sql_con = ClientAdminThread.cache.getConnectionForContext(ctx.getId());
+                        sql_con = cache.getConnectionForContext(ctx.getId());
                         prep = sql_con.prepareStatement("select u.userPassword,u.passwordMech from user u JOIN login2user l JOIN user_setting_admin usa ON u.id = l.id AND u.cid = l.cid AND u.cid = usa.cid AND u.id = usa.user WHERE u.cid = ? AND l.uid = ?");
 
                         prep.setInt(1, ctx.getId());
@@ -125,7 +130,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                             String pwmech = rs.getString("passwordMech");
                             if (GenericChecks.authByMech(pwcrypt, authdata.getPassword(), pwmech)) {
                                 Credentials cauth = new Credentials(authdata.getLogin(), pwcrypt);
-                                ClientAdminThread.cache.setAdminCredentials(ctx, pwmech, cauth);
+                                cache.setAdminCredentials(ctx, pwmech, cauth);
                                 return true;
                             }
                             return false;
@@ -160,7 +165,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                         }
 
                         try {
-                            ClientAdminThread.cache.pushConnectionForContextAfterReading(ctx.getId(), sql_con);
+                            cache.pushConnectionForContextAfterReading(ctx.getId(), sql_con);
                         } catch (final PoolException ecp) {
                             log.error("Pool Error", ecp);
                         }
@@ -207,7 +212,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
             ResultSet rs = null;
             try {
 
-                sql_con = ClientAdminThread.cache.getConnectionForContext(ctx.getId());
+                sql_con = cache.getConnectionForContext(ctx.getId());
                 prep = sql_con.prepareStatement("SELECT u.userPassword,u.passwordMech FROM user u JOIN login2user l ON u.id = l.id AND u.cid = l.cid WHERE u.cid = ? AND l.uid = ?");
 
                 prep.setInt(1, ctx.getId());
@@ -258,7 +263,7 @@ public class OXAuthMySQLStorage extends OXAuthStorageInterface {
                 }
 
                 try {
-                    ClientAdminThread.cache.pushConnectionForContextAfterReading(ctx.getId(), sql_con);
+                    cache.pushConnectionForContextAfterReading(ctx.getId(), sql_con);
                 } catch (final PoolException ecp) {
                     log.error("Pool Error", ecp);
                 }

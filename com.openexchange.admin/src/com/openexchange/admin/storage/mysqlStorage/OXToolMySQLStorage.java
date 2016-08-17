@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -53,23 +53,25 @@ import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.sql.grammar.Constant.PLACEHOLDER;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
+import java.util.concurrent.TimeUnit;
 import org.osgi.framework.BundleContext;
-import com.openexchange.admin.daemons.ClientAdminThread;
-import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -77,6 +79,7 @@ import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.Resource;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchGroupException;
@@ -86,10 +89,10 @@ import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
-import com.openexchange.admin.storage.mysqlStorage.OXUtilMySQLStorage.PoolAndSchema;
 import com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage;
+import com.openexchange.admin.storage.utils.Filestore2UserUtil;
+import com.openexchange.admin.storage.utils.PoolAndSchema;
 import com.openexchange.admin.tools.AdminCache;
-import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.GenericChecks;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
@@ -111,9 +114,6 @@ import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.INVERT;
 import com.openexchange.sql.grammar.Table;
 import com.openexchange.sql.grammar.UPDATE;
-import com.openexchange.threadpool.ThreadPoolCompletionService;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.threadpool.ThreadPools;
 
 /**
  * @author d7
@@ -331,7 +331,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public boolean existsGroup(final Context ctx, final Group[] grps) throws StorageException {
         boolean retBool = false;
-        final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -397,7 +396,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Deprecated
     public boolean existsGroup(final Context ctx, final int[] gids) throws StorageException {
         boolean retBool = false;
-        final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -453,7 +451,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public boolean existsGroupMember(final Context ctx, final int group_ID, final int[] user_ids) throws StorageException {
         final int contextId = ctx.getId().intValue();
-        final AdminCache cache = ClientAdminThread.cache;
 
         boolean ret = false;
         Connection con = null;
@@ -528,7 +525,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public boolean existsResource(final Context ctx, final int resource_id) throws StorageException {
         final int contextId = ctx.getId().intValue();
-        final AdminCache cache = ClientAdminThread.cache;
 
         Connection con = null;
         PreparedStatement prep_check = null;
@@ -569,7 +565,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public boolean existsResourceAddress(final Context ctx, final String address) throws StorageException {
         final int context_id = ctx.getId().intValue();
-        final AdminCache cache = ClientAdminThread.cache;
 
         Connection con = null;
         PreparedStatement prep_check = null;
@@ -606,7 +601,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public boolean existsResourceAddress(final Context ctx, final String address, final Integer resource_id) throws StorageException {
         final int context_id = ctx.getId().intValue();
-        final AdminCache cache = ClientAdminThread.cache;
 
         Connection con = null;
         PreparedStatement prep_check = null;
@@ -679,7 +673,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      */
     @Override
     public boolean existsUser(final Context ctx, final int uid) throws StorageException {
-        final AdminCache cache = ClientAdminThread.cache;
         final int contextId = ctx.getId().intValue();
 
         Connection con = null;
@@ -719,7 +712,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      */
     @Override
     public boolean existsUser(final Context ctx, final int[] user_ids) throws StorageException {
-        AdminCache cache = ClientAdminThread.cache;
         int contextId = ctx.getId().intValue();
 
         boolean ret = false;
@@ -776,7 +768,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public boolean existsUser(final Context ctx, final User[] users) throws StorageException {
         int intValue = ctx.getId().intValue();
-        AdminCache cache = ClientAdminThread.cache;
 
         boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
 
@@ -852,7 +843,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     @Override
     public boolean isGuestUser(Context ctx, int userId) throws StorageException {
-        AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         ResultSet rs = null;
         PreparedStatement prep = null;
@@ -963,6 +953,98 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public int getDatabaseIDByDatabaseSchema(String schemaName) throws StorageException, NoSuchObjectException {
         return getByNameForConfigDB(schemaName, "database", "SELECT write_db_pool_id FROM context_server2db_pool WHERE db_schema=?");
+    }
+
+    @Override
+    public Database getSchemaByContextId(int contextId) throws StorageException, NoSuchObjectException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+            stmt = con.prepareStatement("SELECT c2db.write_db_pool_id,c2db.db_schema,db.url,db.driver,db.login,db.password,db.name,dbc.read_db_pool_id,dbc.weight,dbc.max_units FROM context_server2db_pool c2db JOIN db_pool db ON db.db_pool_id=c2db.write_db_pool_id JOIN db_cluster dbc ON dbc.write_db_pool_id=c2db.write_db_pool_id WHERE c2db.cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                throw new NoSuchObjectException("No database for context " + contextId);
+            }
+
+            Database retval = new Database();
+            int pos = 1;
+            retval.setId(I(rs.getInt(pos++)));
+            retval.setScheme(rs.getString(pos++));
+            retval.setUrl(rs.getString(pos++));
+            retval.setDriver(rs.getString(pos++));
+            retval.setLogin(rs.getString(pos++));
+            retval.setPassword(rs.getString(pos++));
+            retval.setName(rs.getString(pos++));
+            int slaveId = rs.getInt(pos++);
+            if (slaveId > 0) {
+                retval.setRead_id(I(slaveId));
+            }
+            retval.setClusterWeight(I(rs.getInt(pos++)));
+            retval.setMaxUnits(I(rs.getInt(pos++)));
+            return retval;
+        } catch (PoolException e) {
+            log.error("", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing ox db read connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    @Override
+    public DatabaseUpdateException generateDatabaseUpdateException(int contextId) {
+        DatabaseUpdateException e;
+        if (contextId > 0) {
+            try {
+                // Schema "db1_1273" from database 1996 on host "db-master.host.invalid" is locked or is now being updated, please try again later
+                Database db = getSchemaByContextId(contextId);
+                StringBuilder sb = new StringBuilder(256);
+                sb.append("Schema \"").append(db.getScheme()).append("\" from database ").append(db.getId());
+                String host = extractHostFrom(db);
+                if (null != host) {
+                    sb.append(" on host \"").append(host).append("\"");
+                }
+                sb.append(" is locked or is now being updated, please try again later");
+                e = new DatabaseUpdateException(sb.toString());
+            } catch (NoSuchObjectException x) {
+                e = new DatabaseUpdateException("Database is locked or is now being updated, please try again later");
+            } catch (StorageException x) {
+                e = new DatabaseUpdateException("Database is locked or is now being updated, please try again later");
+            }
+        } else {
+            e = new DatabaseUpdateException("Database is locked or is now being updated, please try again later");
+        }
+        return e;
+    }
+
+    private static String extractHostFrom(Database db) {
+        if (null == db) {
+            return null;
+        }
+
+        String url = db.getUrl();
+        if (Strings.isEmpty(url)) {
+            return null;
+        }
+
+        try {
+            return new URI(url.substring("jdbc:".length())).getHost();
+        } catch (URISyntaxException e) {
+            log.error("Failed to extract host name from URL {}", url, e);
+            return null;
+        }
     }
 
     @Override
@@ -1497,7 +1579,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         final int contextId = ctx.getId().intValue();
 
         boolean isadmin = false;
-        final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
 
         try {
@@ -1523,7 +1604,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     @Override
     public boolean isContextAdmin(final Context ctx, final User user) throws StorageException {
-        final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -1578,7 +1658,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public boolean isContextEnabled(final Context ctx) throws StorageException {
         boolean retBool = false;
-        final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -1692,28 +1771,39 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public boolean checkAndUpdateSchemaIfRequired(int contextId) throws StorageException {
-        try {
-            final Updater updater = Updater.getInstance();
-            UpdateStatus status = updater.getStatus(contextId);
-            if (status.blockingUpdatesRunning()) {
-                return true;
+    public boolean checkAndUpdateSchemaIfRequired(final int contextId) throws StorageException {
+        UpdateStatusProvider provider = new UpdateStatusProvider() {
+
+            @Override
+            public UpdateStatus generateUpdateStatus() throws OXException {
+                Updater updater = Updater.getInstance();
+                return updater.getStatus(contextId);
             }
-            if (status.needsBlockingUpdates()) {
-                updater.startUpdate(contextId);
-                return true;
-            }
-        } catch (OXException e) {
-            throw new StorageException(e.getMessage(), e);
-        }
-        return false;
+        };
+        return condCheckAndUpdateSchemaIfRequired(provider, true, contextId);
     }
 
-    private boolean condCheckAndUpdateSchemaIfRequired(final int writePoolId, final String schema, final boolean doUpdate, final Context ctx) throws StorageException {
-        Updater updater;
+    @Override
+    public boolean schemaBeingLockedOrNeedsUpdate(final int writePoolId, final String schema) throws StorageException {
+        UpdateStatusProvider provider = new UpdateStatusProvider() {
+
+            @Override
+            public UpdateStatus generateUpdateStatus() throws OXException {
+                Updater updater = Updater.getInstance();
+                return updater.getStatus(schema, writePoolId);
+            }
+        };
+        return condCheckAndUpdateSchemaIfRequired(provider, false, 0);
+    }
+
+    private static interface UpdateStatusProvider {
+
+        UpdateStatus generateUpdateStatus() throws OXException;
+    }
+
+    private boolean condCheckAndUpdateSchemaIfRequired(UpdateStatusProvider statusProvider, boolean doUpdate, int contextId) throws StorageException {
         try {
-            updater = Updater.getInstance();
-            UpdateStatus status = updater.getStatus(schema, writePoolId);
+            UpdateStatus status = statusProvider.generateUpdateStatus();
             if (status.blockingUpdatesRunning()) {
                 log.info("Another database update process is already running");
                 return true;
@@ -1724,12 +1814,12 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             // we only reach this point, if we need an update
             if (doUpdate) {
-                if (ctx == null) {
-                    final StorageException e = new StorageException("context must not be null when schema update should be done");
+                if (contextId <= 0) {
+                    final StorageException e = new StorageException("A valid context identifier is required in case schema update should be done");
                     log.error("", e);
                     throw e;
                 }
-                updater.startUpdate(ctx.getId().intValue());
+                Updater.getInstance().startUpdate(contextId);
             }
             // either with or without starting an update task, when we reach this point, we
             // must return true
@@ -1746,8 +1836,167 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public boolean schemaBeingLockedOrNeedsUpdate(final int writePoolId, final String schema) throws StorageException {
-        return condCheckAndUpdateSchemaIfRequired(writePoolId, schema, false, null);
+    public List<Database> unblockDatabaseSchema(Database db) throws StorageException {
+        try {
+            int poolId = db.getId().intValue();
+            if (Strings.isNotEmpty(db.getScheme())) {
+                // Only check specified schema
+                Database ldb = loadDatabaseById(poolId);
+                Updater updater = Updater.getInstance();
+                try {
+                    updater.unblock(db.getScheme(), poolId, getAnyContextFromSchema(poolId, db.getScheme()));
+                    ldb.setScheme(db.getScheme());
+                    return Collections.singletonList(ldb);
+                } catch (OXException e) {
+                    // UPD-0005
+                    if (!e.equalsCode(5, "UPD")) {
+                        throw e;
+                    }
+                    return Collections.emptyList();
+                }
+            }
+
+            // Query all schemas from denoted database
+            List<Database> databases;
+            {
+                Connection con = null;
+                try {
+                    con = cache.getReadConnectionForConfigDB();
+                    databases = PoolAndSchema.listDatabaseSchemas(poolId, cache.getServerId(), con);
+                } catch (PoolException e) {
+                    throw new StorageException(e.getMessage(), e);
+                } finally {
+                    if (null != con) {
+                        try {
+                            cache.pushReadConnectionForConfigDB(con);
+                        } catch (PoolException e) {
+                            log.error("Error pushing connection to pool!", e);
+                        }
+                    }
+                }
+            }
+
+            // Determine outdated threshold
+            long outdatedThreshold = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1); // 24h ago
+            List<Database> outdatedUpdating = new LinkedList<Database>();
+
+            // Unblock outdated schemas
+            Updater updater = Updater.getInstance();
+            for (Database database : databases) {
+                UpdateStatus status = updater.getStatus(database.getScheme(), poolId);
+                if (status.blockingUpdatesRunning()) {
+                    // Currently updating
+                    Date runningSince = status.blockingUpdatesRunningSince();
+                    if (null != runningSince && runningSince.getTime() < outdatedThreshold) {
+                        int contextId = getAnyContextFromSchema(poolId, database.getScheme());
+                        try {
+                            updater.unblock(database.getScheme(), poolId, contextId);
+                            outdatedUpdating.add(database);
+                        } catch (OXException e) {
+                            if (!e.equalsCode(5, "UPD")) {
+                                throw e;
+                            }
+                            // Ignore
+                        }
+                    }
+                }
+            }
+            return outdatedUpdating;
+        } catch (OXException e) {
+            if (e.getCode() == 102) {
+                // NOTE: this situation should not happen!
+                // it can only happen, when a schema has not been initialized correctly!
+                log.debug("FATAL: this error must not happen", e);
+            }
+            log.error("Error in checking/updating schema", e);
+            throw new StorageException(e.toString(), e);
+        }
+    }
+
+    private int getAnyContextFromSchema(int writePoolId, String schema) throws StorageException {
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = cache.getReadConnectionForConfigDB();
+            stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE server_id=? AND write_db_pool_id=? AND db_schema=? LIMIT 1");
+            stmt.setInt(1, cache.getServerId());
+            stmt.setInt(2, writePoolId);
+            stmt.setString(3, schema);
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : -1;
+        } catch (PoolException e) {
+            throw new StorageException(e.getMessage(), e);
+        } catch (SQLException e) {
+            throw new StorageException(e.toString(), e);
+        } finally {
+            closeRecordSet(rs);
+            closePreparedStatement(stmt);
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    log.error("Error pushing connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    @Override
+    public List<List<Database>> listSchemasBeingLockedOrNeedsUpdate() throws StorageException {
+        List<Database> databases;
+        {
+            Connection con = null;
+            try {
+                con = cache.getReadConnectionForConfigDB();
+                databases = PoolAndSchema.listAllSchemas(cache.getServerId(), con);
+            } catch (PoolException e) {
+                throw new StorageException(e.getMessage(), e);
+            } finally {
+                if (null != con) {
+                    try {
+                        cache.pushReadConnectionForConfigDB(con);
+                    } catch (PoolException e) {
+                        log.error("Error pushing connection to pool!", e);
+                    }
+                }
+            }
+        }
+
+        List<Database> needingUpdate = new LinkedList<Database>();
+        List<Database> currentlyUpdating = new LinkedList<Database>();
+        List<Database> outdatedUpdating = new LinkedList<Database>();
+
+        long outdatedThreshold = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1); // 24h ago
+
+        try {
+            Updater updater = Updater.getInstance();
+            for (Database database : databases) {
+                UpdateStatus status = updater.getStatus(database.getScheme(), database.getId().intValue());
+                if (status.blockingUpdatesRunning()) {
+                    // Currently updating
+                    Date runningSince = status.blockingUpdatesRunningSince();
+                    if (null != runningSince && runningSince.getTime() < outdatedThreshold) {
+                        outdatedUpdating.add(database);
+                    } else {
+                        currentlyUpdating.add(database);
+                    }
+                } else if (status.needsBlockingUpdates()) {
+                    // Needs update
+                    needingUpdate.add(database);
+                }
+            }
+        } catch (OXException e) {
+            if (e.getCode() == 102) {
+                // NOTE: this situation should not happen!
+                // it can only happen, when a schema has not been initialized correctly!
+                log.debug("FATAL: this error must not happen", e);
+            }
+            log.error("Error in checking/updating schema", e);
+            throw new StorageException(e.toString(), e);
+        }
+
+        return Arrays.asList(needingUpdate, currentlyUpdating, outdatedUpdating);
     }
 
     /**
@@ -1802,93 +2051,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     private boolean hasUsers(int id) throws StorageException {
-        Connection con = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        Set<PoolAndSchema> pools = new LinkedHashSet<PoolAndSchema>();
-        try {
-            con = cache.getReadConnectionForConfigDB();
-            stmt = con.prepareStatement("SELECT DISTINCT write_db_pool_id, db_schema FROM context_server2db_pool WHERE server_id=?");
-            stmt.setInt(1, cache.getServerId());
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                pools.add(new PoolAndSchema(rs.getInt(1), rs.getString(2)));
-            }
-        } catch (PoolException e) {
-            log.error("Pooling Error", e);
-            throw new StorageException(e);
-        } catch (SQLException e) {
-            log.error("SQL Error", e);
-            throw new StorageException(e);
-        } finally {
-            closeSQLStuff(rs, stmt);
-            rs = null;
-            stmt = null;
-
-            if (null != con) {
-                try {
-                    cache.pushReadConnectionForConfigDB(con);
-                } catch (PoolException e) {
-                    log.error("Failed to push back read-only connection to configdb.", e);
-                }
-            }
-        }
-
-        return hasUsers(pools, id);
-    }
-
-    private boolean hasUsers(Set<PoolAndSchema> pools, final int id) throws StorageException {
-        CompletionService<Boolean> completionService = new ThreadPoolCompletionService<Boolean>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
-        int taskCount = 0;
-
-        for (final PoolAndSchema poolAndSchema : pools) {
-            final AdminCacheExtended cache = ClientAdminThreadExtended.cache;
-            completionService.submit(new Callable<Boolean>() {
-
-                @Override
-                public Boolean call() throws StorageException {
-                    Connection con = null;
-                    PreparedStatement stmt = null;
-                    ResultSet result = null;
-                    try {
-                        con = cache.getWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, poolAndSchema.dbSchema);
-                        stmt = con.prepareStatement("SELECT u.filestore_id, u.id FROM user AS u JOIN filestore_usage AS fu ON u.cid=fu.cid AND u.id=fu.user WHERE u.filestore_id=?");
-                        stmt.setInt(1, id);
-                        result = stmt.executeQuery();
-
-                        return Boolean.valueOf(result.next());
-                    } catch (PoolException e) {
-                        log.error("Pool Error", e);
-                        throw new StorageException(e);
-                    } catch (SQLException e) {
-                        log.error("SQL Error", e);
-                        throw new StorageException(e);
-                    } finally {
-                        closeSQLStuff(result, stmt);
-                        if (null != con) {
-                            try {
-                                cache.pushWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, con);
-                            } catch (PoolException e) {
-                                log.error("Error pushing connection to pool!", e);
-                            }
-                        }
-                    }
-                }
-            });
-            taskCount++;
-        }
-
-        // Await completion
-        List<Boolean> counts = ThreadPools.<Boolean, StorageException> takeCompletionService(completionService, taskCount, OXUtilMySQLStorage.EXCEPTION_FACTORY);
-
-        boolean retval = false;
-        for (Boolean bool : counts) {
-            if (bool) {
-                return true;
-            }
-        }
-
-        return retval;
+        return Filestore2UserUtil.getUserCountFor(id, cache) > 0;
     }
 
     @Override
@@ -2066,7 +2229,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      */
     private boolean selectwithint(final int context_id, final String sql_select_string, final int... ins_numbers) throws StorageException {
         boolean retBool = false;
-        final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -2155,7 +2317,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      */
     private boolean selectwithstring(final int context_id, final String sql_select_string, final String... ins_strings) throws StorageException {
         boolean retBool = false;
-        final AdminCache cache = ClientAdminThread.cache;
         Connection con = null;
         PreparedStatement prep_check = null;
         ResultSet rs = null;
@@ -2208,7 +2369,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet rs = null;
 
         try {
-            con = ClientAdminThread.cache.getReadConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             prep_check = con.prepareStatement("SELECT cid FROM context WHERE name = ? and cid !=?");
             prep_check.setString(1, ctx.getName());
             prep_check.setInt(2, ctx.getId().intValue());
@@ -2249,7 +2410,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet rs = null;
 
         try {
-            con = ClientAdminThread.cache.getReadConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
 
             prep_check = con.prepareStatement("SELECT db_pool_id FROM db_pool WHERE name = ? AND db_pool_id !=?");
             prep_check.setString(1, db.getName());
@@ -2293,7 +2454,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         PreparedStatement prep_check = null;
         ResultSet rs = null;
         try {
-            con = ClientAdminThread.cache.getConnectionForContext(contextId);
+            con = cache.getConnectionForContext(contextId);
             prep_check = con.prepareStatement("SELECT id FROM groups WHERE cid = ? AND identifier = ? AND id !=?");
             prep_check.setInt(1, contextId);
             prep_check.setString(2, grp.getName());
@@ -2336,7 +2497,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         PreparedStatement prep_check = null;
         ResultSet rs = null;
         try {
-            con = ClientAdminThread.cache.getConnectionForContext(contextId);
+            con = cache.getConnectionForContext(contextId);
             prep_check = con.prepareStatement("SELECT id FROM resource WHERE cid = ? AND identifier = ? AND id != ?");
             prep_check.setInt(1, contextId);
             prep_check.setString(2, res.getName());
@@ -2379,7 +2540,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet rs = null;
 
         try {
-            con = ClientAdminThread.cache.getReadConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             prep_check = con.prepareStatement("SELECT server_id FROM server WHERE name = ? AND server_id != ?");
             prep_check.setString(1, srv.getName());
             prep_check.setInt(2, srv.getId().intValue());
@@ -2707,7 +2868,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     public Database loadDatabaseById(int id) throws StorageException {
         final Connection con;
         try {
-            con = ClientAdminThread.cache.getReadConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
         } catch (PoolException e) {
             throw new StorageException(e.getMessage(), e);
         }

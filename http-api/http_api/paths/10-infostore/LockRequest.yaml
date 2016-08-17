@@ -1,0 +1,25 @@
+/infostore?action=lock:
+  get:
+    operationId: lockInfoItem
+    tags:
+      - infostore
+    summary: Locks an infoitem.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: Object ID of the infoitem that shall be locked.
+        required: true
+      - in: query
+        name: diff
+        type: integer
+        format: int64
+        description: If present the value is added to the current time on the server (both in ms). The document will be locked until that time. If this parameter is not present, the document will be locked for a duration as configured on the server.
+        required: false
+    responses:
+      200:
+        description: |
+          In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/CommonResponse"

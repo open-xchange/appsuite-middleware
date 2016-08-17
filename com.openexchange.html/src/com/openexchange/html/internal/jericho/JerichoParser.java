@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -55,19 +55,28 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.html.HtmlServices;
+import com.openexchange.html.internal.jericho.control.JerichoParseControl;
+import com.openexchange.html.internal.jericho.control.JerichoParseControlTask;
+import com.openexchange.html.internal.jericho.control.JerichoParseTask;
+import com.openexchange.html.internal.parser.HtmlHandler;
+import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.java.InterruptibleCharSequence;
+import com.openexchange.java.InterruptibleCharSequence.InterruptedRuntimeException;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.EndTag;
 import net.htmlparser.jericho.EndTagType;
 import net.htmlparser.jericho.Segment;
+import net.htmlparser.jericho.Source;
 import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.StartTagType;
 import net.htmlparser.jericho.StreamedSource;
 import net.htmlparser.jericho.Tag;
 import net.htmlparser.jericho.TagType;
-import com.openexchange.html.HtmlServices;
-import com.openexchange.html.internal.parser.HtmlHandler;
-import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 
 /**
  * {@link JerichoParser} - Parses specified real-life HTML document.
@@ -75,6 +84,8 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JerichoParser {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(JerichoParser.class);
 
     /**
      * {@link ParsingDeniedException} - Thrown if HTML content cannot be parsed by {@link JerichoParser#parse(String, JerichoHandler)}
@@ -130,13 +141,45 @@ public final class JerichoParser {
         return INSTANCE;
     }
 
+    /**
+     * Shuts-down the parser.
+     */
+    public static void shutDown() {
+        INSTANCE.stop();
+    }
+
     // -------------------------------------------------------------------------------------------------------------- //
+
+    private final int htmlParseTimeoutSec;
+    private final Thread controlRunner;
 
     /**
      * Initializes a new {@link JerichoParser}.
      */
     private JerichoParser() {
         super();
+        ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        int defaultValue = 10;
+        htmlParseTimeoutSec = null == service ? defaultValue : service.getIntProperty("com.openexchange.html.parse.timeout", defaultValue);
+        if (htmlParseTimeoutSec > 0) {
+            controlRunner = new Thread(new JerichoParseControlTask(), "JerichoControl");
+            controlRunner.start();
+        } else {
+            controlRunner = null;
+        }
+    }
+
+    /**
+     * Stops this parser.
+     */
+    private void stop() {
+        if (htmlParseTimeoutSec > 0) {
+            JerichoParseControl.getInstance().add(JerichoParseTask.POISON);
+        }
+        Thread controlRunner = this.controlRunner;
+        if (null != controlRunner) {
+            controlRunner.interrupt();
+        }
     }
 
     /**
@@ -159,8 +202,7 @@ public final class JerichoParser {
         return (html.indexOf("<body") >= 0) || (html.indexOf("<BODY") >= 0);
     }
 
-    private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
-    private static final Pattern FIX_START_TAG = Pattern.compile("\\s*(<[^?][^>]+)(>?)\\s*");
+    private static final Pattern FIX_START_TAG = Pattern.compile("\\s*(<[a-zA-Z][^>]+)(>?)\\s*");
 
     /**
      * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
@@ -174,14 +216,37 @@ public final class JerichoParser {
     }
 
     /**
-     * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
+     * Parses specified real-life HTML document and delegates events to given instance of {@link JerichoHandler}.
      *
      * @param html The real-life HTML document
      * @param handler The HTML handler
      * @param checkSize Whether this call is supposed to check the size of given HTML content against <i>"com.openexchange.html.maxLength"</i> property
      * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
-    public void parse(String html, JerichoHandler handler, boolean checkSize) {
+    public void parse(final String html, final JerichoHandler handler, final boolean checkSize) {
+        int timeout = htmlParseTimeoutSec;
+        if (timeout <= 0) {
+            doParse(html, handler, checkSize);
+            return;
+        }
+
+        // Run as a separate task monitored by Jericho control
+        new JerichoParseTask(html, handler, checkSize, timeout, this).call();
+    }
+
+    /**
+     * Parses specified real-life HTML document and delegates events to given instance of {@link JerichoHandler}.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">Never call this method directly!</div>
+     * <p>
+     *
+     * @param html The real-life HTML document
+     * @param handler The HTML handler
+     * @param checkSize Whether this call is supposed to check the size of given HTML content against <i>"com.openexchange.html.maxLength"</i> property
+     * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
+     */
+    public void doParse(String html, JerichoHandler handler, boolean checkSize) {
+        Thread thread = Thread.currentThread();
         StreamedSource streamedSource = null;
         try {
             if (false == checkBody(html, checkSize)) {
@@ -190,9 +255,8 @@ public final class JerichoParser {
             }
 
             // Start regular parsing
-            streamedSource = new StreamedSource(html);
+            streamedSource = new StreamedSource(InterruptibleCharSequence.valueOf(html));
             streamedSource.setLogger(null);
-            Thread thread = Thread.currentThread();
             int lastSegmentEnd = 0;
             for (Iterator<Segment> iter = streamedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
                 Segment segment = iter.next();
@@ -205,6 +269,8 @@ public final class JerichoParser {
                 // Handle current segment
                 handleSegment(handler, segment, true);
             }
+        } catch (InterruptedRuntimeException e) {
+            throw new ParsingDeniedException("Parser timeout.", e);
         } catch (StackOverflowError parserOverflow) {
             throw new ParsingDeniedException("Parser overflow detected.", parserOverflow);
         } finally {
@@ -243,23 +309,23 @@ public final class JerichoParser {
                 }
             } else {
                 switch (enumType) {
-                case START_TAG:
-                    handler.handleStartTag((StartTag) tag);
-                    break;
-                case END_TAG:
-                    handler.handleEndTag((EndTag) tag);
-                    break;
-                case DOCTYPE_DECLARATION:
-                    handler.handleDocDeclaration(segment.toString());
-                    break;
-                case CDATA_SECTION:
-                    handler.handleCData(segment.toString());
-                    break;
-                case COMMENT:
-                    handler.handleComment(segment.toString());
-                    break;
-                default:
-                    break;
+                    case START_TAG:
+                        handler.handleStartTag((StartTag) tag);
+                        break;
+                    case END_TAG:
+                        handler.handleEndTag((EndTag) tag);
+                        break;
+                    case DOCTYPE_DECLARATION:
+                        handler.handleDocDeclaration(segment.toString());
+                        break;
+                    case CDATA_SECTION:
+                        handler.handleCData(segment.toString());
+                        break;
+                    case COMMENT:
+                        handler.handleComment(segment.toString());
+                        break;
+                    default:
+                        break;
                 }
             }
         } else if (segment instanceof CharacterReference) {
@@ -267,81 +333,59 @@ public final class JerichoParser {
             handler.handleCharacterReference(characterReference);
         } else {
             // Safety re-parse
-            if (fixStartTags && contains('<', segment)) {
-                Matcher m = FIX_START_TAG.matcher(segment);
-                if (m.find()) {
-                    // Re-parse start tag
+            safeParse(handler, segment, fixStartTags);
+        }
+    }
 
-                    String startTag = m.group(1);
-                    if (startTag.startsWith("<!--")) {
-                        handler.handleComment(m.group());
-                        return;
-                    }
+    private static void safeParse(JerichoHandler handler, Segment segment, boolean fixStartTags) {
+        if (fixStartTags && containsStartTag(segment)) {
+            Matcher m = FIX_START_TAG.matcher(segment);
+            if (m.find()) {
+                // Re-parse start tag
 
-                    int start = m.start();
-                    if (start > 0) {
-                        handler.handleSegment(segment.subSequence(0, start));
-                    }
-                    String remainder = null;
+                String startTag = m.group(1);
+                if (startTag.startsWith("<!--")) {
+                    handler.handleComment(m.group());
+                    return;
+                }
 
-                    int end = m.end();
-                    if (end < segment.length()) {
-                        remainder = segment.subSequence(end, segment.length()).toString();
-                        int pos = remainder.indexOf('>');
-                        if (pos >= 0) {
-                            startTag = startTag + remainder.substring(0, pos + 1);
-                            remainder = remainder.substring(pos + 1);
-                        }
-                    }
+                int start = m.start();
+                if (start > 0) {
+                    handler.handleSegment(segment.subSequence(0, start));
+                }
+                int[] remainder = null;
 
-                    @SuppressWarnings("resource")
-                    StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(startTag));
-                    Thread thread = Thread.currentThread();
-                    for (Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
-                        Segment nestedSegment = iter.next();
-                        handleSegment(handler, nestedSegment, false);
+                int end = m.end();
+                if (end < segment.length()) {
+                    int pos = indexOf('>', end, segment);
+                    if (pos >= 0) {
+                        startTag = startTag + segment.subSequence(end, pos + 1);
+                        remainder = new int[] { pos + 1, segment.length() };
+                    } else {
+                        remainder = new int[] { end, segment.length() };
                     }
+                }
 
-                    if (null != remainder) {
-                        handler.handleSegment(remainder);
-                    }
-                } else {
-                    handler.handleSegment(segment);
+                @SuppressWarnings("resource")
+                StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(startTag)); // No need to close since String-backed (all in memory)!
+                Thread thread = Thread.currentThread();
+                for (Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
+                    Segment nestedSegment = iter.next();
+                    handleSegment(handler, nestedSegment, false);
+                }
+                if (null != remainder) {
+                    safeParse(handler, new Segment(new Source(segment), remainder[0], remainder[1]), fixStartTags);
+                    // handler.handleSegment(remainder);
                 }
             } else {
                 handler.handleSegment(segment);
             }
+        } else {
+            handler.handleSegment(segment);
         }
     }
 
-    private String fixStyleAttribute(String startTag) {
-        if (startTag.indexOf("style=") <= 0) {
-            return startTag;
-        }
-        return INVALID_DELIM.matcher(startTag).replaceAll("; ");
-    }
-
-    private static boolean startsWith(char startingChar, CharSequence toCheck) {
-        if (null == toCheck) {
-            return false;
-        }
-        final int len = toCheck.length();
-        if (len <= 0) {
-            return false;
-        }
-        int i = 0;
-        if (Strings.isWhitespace(toCheck.charAt(i))) {
-            do {
-                i++;
-            } while (i < len && Strings.isWhitespace(toCheck.charAt(i)));
-        }
-        if (i >= len) {
-            return false;
-        }
-        return startingChar == toCheck.charAt(i);
-    }
-
-    private static boolean contains(char c, CharSequence toCheck) {
+    private static boolean containsStartTag(CharSequence toCheck) {
         if (null == toCheck) {
             return false;
         }
@@ -349,12 +393,30 @@ public final class JerichoParser {
         if (len <= 0) {
             return false;
         }
-        for (int k = len, index = 0; k-- > 0; index++) {
-            if (c == toCheck.charAt(index)) {
+        for (int k = len - 1, index = 0; k-- > 0; index++) {
+            if ('<' == toCheck.charAt(index) && isAsciLetter(toCheck.charAt(index + 1))) {
                 return true;
             }
         }
         return false;
+    }
+
+    private static boolean isAsciLetter(char ch) {
+        return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
+    }
+
+    private static int indexOf(int ch, int fromIndex, CharSequence cs) {
+        int max = cs.length();
+        if (fromIndex >= max) {
+            return -1;
+        }
+
+        for (int i = fromIndex; i < max; i++) {
+            if (cs.charAt(i) == ch) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private static Pattern PATTERN_ATTRIBUTE = Pattern.compile("([a-zA-Z_0-9-]+)=((?:\".*?\")|(?:'.*?')|(?:[a-zA-Z_0-9-]+))");

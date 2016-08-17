@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -327,10 +327,11 @@ public final class Databases {
      */
     public static int getColumnSize(Connection con, String table, String column) throws SQLException {
         DatabaseMetaData metas = con.getMetaData();
-        ResultSet result = metas.getColumns(null, null, table, column);
         int retval = -1;
-        if (result.next()) {
-            retval = result.getInt("COLUMN_SIZE");
+        try (ResultSet result = metas.getColumns(null, null, table, column)) {
+            if (result.next()) {
+                retval = result.getInt("COLUMN_SIZE");
+            }
         }
         return retval;
     }
@@ -392,6 +393,7 @@ public final class Databases {
     }
 
     private static final Pattern DUPLICATE_KEY = Pattern.compile("Duplicate entry '([^']+)' for key '([^']+)'");
+    private static final Pattern DUPLICATE_KEY_MYSQL_PRE51 = Pattern.compile("Duplicate entry '([^']+)' for key 1");
 
     /**
      * Checks if given {@link SQLException} instance denotes an integrity constraint violation due to a PRIMARY KEY conflict.
@@ -400,7 +402,28 @@ public final class Databases {
      * @return <code>true</code> if given {@link SQLException} instance denotes a PRIMARY KEY conflict; otherwise <code>false</code>
      */
     public static boolean isPrimaryKeyConflictInMySQL(SQLException e) {
-        return isKeyConflictInMySQL(e, "PRIMARY");
+        return isKeyConflictInMySQL(e, "PRIMARY") || isPrimaryKeyConflictInMySQL50(e);
+    }
+
+    private static boolean isPrimaryKeyConflictInMySQL50(SQLException e) {
+        if (null == e) {
+            return false;
+        }
+        /*
+         * SQLState 23000: Integrity Constraint Violation
+         * Error: 1586 SQLSTATE: 23000 (ER_DUP_ENTRY_WITH_KEY_NAME)
+         * Error: 1062 SQLSTATE: 23000 (ER_DUP_ENTRY)
+         * com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException: Duplicate entry 'some-data' for key 1
+         * Message: Duplicate entry '%s' for key 1
+         */
+        if ("23000".equals(e.getSQLState())) {
+            int errorCode = e.getErrorCode();
+            if (1062 == errorCode || 1586 == errorCode) {
+                Matcher matcher = DUPLICATE_KEY_MYSQL_PRE51.matcher(e.getMessage());
+                return matcher.matches();
+            }
+        }
+        return false;
     }
 
     /**
@@ -434,6 +457,9 @@ public final class Databases {
         return false;
     }
 
+    /**
+     * Code is correct and will not leave a connection in CLOSED_WAIT state. See CloseWaitTest.java.
+     */
     public static void close(Connection con) {
         if (null == con) {
             return;
@@ -447,6 +473,12 @@ public final class Databases {
         }
     }
 
+    /**
+     * Rolls specified connection back to given save-point.
+     *
+     * @param con The connection to roll-back
+     * @param savePoint The save-point to restore to
+     */
     public static void rollback(Connection con, Savepoint savePoint) {
         if (null == con || null == savePoint) {
             return;
@@ -458,6 +490,30 @@ public final class Databases {
         } catch (SQLException e) {
             LOG.error(e.getMessage(), e);
         }
+    }
+
+    /**
+     * Checks if specified column exists.
+     *
+     * @param con The connection
+     * @param table The table name
+     * @param column The column name
+     * @return <code>true</code> if specified column exists; otherwise <code>false</code>
+     * @throws SQLException If an SQL error occurs
+     */
+    public static boolean columnExists(final Connection con, final String table, final String column) throws SQLException {
+        final DatabaseMetaData metaData = con.getMetaData();
+        ResultSet rs = null;
+        boolean retval = false;
+        try {
+            rs = metaData.getColumns(null, null, table, column);
+            while (rs.next()) {
+                retval = rs.getString(4).equalsIgnoreCase(column);
+            }
+        } finally {
+            closeSQLStuff(rs);
+        }
+        return retval;
     }
 
 }

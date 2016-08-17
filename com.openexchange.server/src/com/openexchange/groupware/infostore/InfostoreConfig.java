@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -97,7 +97,7 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
 
     // ------------------------------------------------------------------- //
 
-    private static boolean loaded = false;
+    private volatile boolean loaded = false;
 
     /**
      * Initializes a new {@link InfostoreConfig}.
@@ -119,16 +119,22 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
         return filename;
     }
 
-    public static String getProperty(final String key) {
-    	InfostoreConfig singleton = InfostoreConfig.singleton;
-        if(!loaded || singleton == null) {
-			try {
-			    singleton = getInstance();
-				singleton.start();
-			} catch (final OXException e) {
-				LOG.error("Can't init config:",e);
-			}
-		}
+    /**
+     * Gets the value associated with specified property key.
+     *
+     * @param key The property name
+     * @return The associated value or <code>null</code>
+     */
+    public static String getProperty(String key) {
+        InfostoreConfig singleton = InfostoreConfig.singleton;
+        if (singleton == null || !singleton.loaded) {
+            try {
+                singleton = getInstance();
+                singleton.start();
+            } catch (final OXException e) {
+                LOG.error("Can't init config:", e);
+            }
+        }
 
         return singleton.getPropertyInternal(key);
     }

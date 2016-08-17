@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -65,8 +65,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
-import com.openexchange.objectusecount.IncrementArguments;
-import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
@@ -210,16 +208,16 @@ public class TasksSQLImpl implements TasksSQLInterface {
         insert.createReminder();
         insert.sentEvent(session);
 
-        collectAddresses(task);
-        countObjectUse(task);
+        collectAddresses(task, false);
     }
 
     /**
      * Tries to add addresses of external participants to the ContactCollector.
      *
-     * @param task - the {@link Task} to collect addresses for
+     * @param task The {@link Task} to collect addresses for
+     * @param incrementUseCount Whether the use-count is supposed to be incremented
      */
-    private void collectAddresses(Task task) {
+    private void collectAddresses(Task task, boolean incrementUseCount) {
         if ((task == null) || (task.getParticipants() == null)) {
             LOG.debug("Provided Task object or containing participants null. Nothing to collect for the ContactCollector!");
             return;
@@ -241,38 +239,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
                 }
             }
 
-            contactCollectorService.memorizeAddresses(addresses, session);
-        }
-    }
-
-    private void countObjectUse(Task task) throws OXException {
-        if (null == task) {
-            return;
-        }
-        ObjectUseCountService service = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
-        if (null == service) {
-            return;
-        }
-        if (task.containsParticipants()) {
-            for (Participant p : task.getParticipants()) {
-                switch (p.getType()) {
-                    case Participant.USER:
-                        if (p.getIdentifier() != session.getUserId()) {
-                            //TODO Get contact id
-                            IncrementArguments arguments = new IncrementArguments.Builder(p.getIdentifier(), FolderObject.SYSTEM_LDAP_FOLDER_ID).build();
-                            service.incrementObjectUseCount(session, arguments);
-                        }
-                        break;
-                    case Participant.EXTERNAL_USER:
-                        {
-                            IncrementArguments arguments = new IncrementArguments.Builder(p.getEmailAddress()).build();
-                            service.incrementObjectUseCount(session, arguments);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            }
+            contactCollectorService.memorizeAddresses(addresses, incrementUseCount, session);
         }
     }
 
@@ -300,8 +267,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
             update.updateReminder();
             update.makeNextRecurrence(session);
 
-            collectAddresses(update);
-            countObjectUse(task);
+            collectAddresses(update, false);
         } catch (final OXException e) {
             throw e;
         }
@@ -310,10 +276,11 @@ public class TasksSQLImpl implements TasksSQLInterface {
     /**
      * Collects addresses from the given {@link UpdateData}
      *
-     * @param update - the {@link UpdateData} to get addresses from
+     * @param update The {@link UpdateData} to get addresses from
+     * @param incrementUseCount Whether use-count is supposed to be incremented
      * @throws OXException
      */
-    private void collectAddresses(UpdateData update) throws OXException {
+    private void collectAddresses(UpdateData update, boolean incrementUseCount) throws OXException {
         if (update == null) {
             LOG.info("Provided UpdateData object is null. Nothing to collect for the ContactCollector!");
             return;
@@ -337,7 +304,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
                     }
                 }
             }
-            contactCollectorService.memorizeAddresses(addresses, session);
+            contactCollectorService.memorizeAddresses(addresses, incrementUseCount, session);
         }
     }
 

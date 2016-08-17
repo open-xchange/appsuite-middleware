@@ -1,0 +1,10 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The ID of the option. Must be unique within a set of options.
+  name:
+    type: string
+    description: The displayable (and localized) name for this option.
+  filter:
+    $ref: "#/definitions/FindFacetValueFilter"

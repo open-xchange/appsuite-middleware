@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Mail Filter JSON
 Bundle-SymbolicName: com.openexchange.mail.filter.json
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.fasterxml.jackson.core,
@@ -13,6 +13,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.sym,
  com.fasterxml.jackson.core.type,
  com.fasterxml.jackson.core.util,
+ com.google.common.base,
  com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.writer,
@@ -25,8 +26,10 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.java,
  com.openexchange.jsieve.commands,
+ com.openexchange.jsieve.commands.test,
  com.openexchange.jsieve.export,
  com.openexchange.jsieve.export.exceptions,
+ com.openexchange.jsieve.registry,
  com.openexchange.log,
  com.openexchange.mail,
  com.openexchange.mail.json.parser,
@@ -63,4 +66,5 @@ Import-Package: com.fasterxml.jackson.core,
  org.slf4j
 Bundle-Activator: com.openexchange.mailfilter.json.osgi.MailFilterJSONActivator
 Export-Package: 
+ com.openexchange.mailfilter.json.ajax.json.mapper,
  com.openexchange.mailfilter.json.ajax.json.mapper.parser

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -108,6 +108,14 @@ public interface ConfigDatabaseService {
      * @param con Writable connection to return.
      */
     void backForUpdateTask(Connection con);
+
+    /**
+     * Returns a writable connection to the config database to the pool. It should be used to return a writable connection if it was only
+     * used for reading information from the master database server.This method must be used if the connection is obtained with
+     * {@link #getForUpdateTask()}.
+     * @param con Writable connection to return.
+     */
+    void backForUpdateTaskAfterReading(Connection con);
 
     int[] listContexts(int poolId) throws OXException;
 

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -71,7 +71,7 @@ public class SnippetStrings implements LocalizableStrings {
     public static final String INVALID_IMAGE_DATA_MSG = "Invalid or harmful image data detected";
 
     // Thrown if a user tries to create a snippet/signature referencing to an image which is too big
-    public static final String MAXIMUM_IMAGE_SIZE_MSG = "The maximum allowed size of '%1$s' for an image in the signature is reached.";
+    public static final String MAXIMUM_IMAGE_SIZE_MSG = "The signature image exceeds the maximum allowed size of '%1$s'.";
 
     // Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
     public static final String MAXIMUM_IMAGES_COUNT_MSG = "The maximum allowed number of '%1$s' images in the signature is reached.";

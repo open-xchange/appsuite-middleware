@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -129,6 +129,9 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
 
     // Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes.
     public static final String VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS_MSG_DISPLAY = "Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes.";
+
+    // Group %1$s can't be used for object permissions.
+    public static final String VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS_GUEST_GROUP_MSG_DISPLAY = "Group %1$s can't be used for object permissions.";
 
     // Concurrent write attempt. Please await the previous save operation to terminate.
     public static final String CONCURRENT_VERSION_CREATION_MSG_DISPLA = "Concurrent write attempt. Please await the previous save operation to terminate.";

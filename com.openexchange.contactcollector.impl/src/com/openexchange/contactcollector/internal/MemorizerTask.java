@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -61,19 +61,30 @@ import com.openexchange.session.Session;
 public final class MemorizerTask {
 
     private final List<InternetAddress> addresses;
-
+    private final boolean incrementUseCount;
     private final Session session;
 
     /**
      * Initializes a new {@link MemorizerTask}.
      *
      * @param address The addresses to memorize
+     * @param incrementUseCount Whether use-count is supposed to be incremented
      * @param session The associated session
      */
-    public MemorizerTask(final List<InternetAddress> addresses, final Session session) {
+    public MemorizerTask(List<InternetAddress> addresses, boolean incrementUseCount, Session session) {
         super();
         this.addresses = addresses;
+        this.incrementUseCount = incrementUseCount;
         this.session = session;
+    }
+
+    /**
+     * Checks whether use-count is supposed to be incremented.
+     *
+     * @return <code>true</code> to increment; otherwise <code>false</code>
+     */
+    public boolean isIncrementUseCount() {
+        return incrementUseCount;
     }
 
     /**

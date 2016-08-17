@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -124,7 +124,7 @@ public class AdditionalRMITests extends AbstractRMITest {
     public final void tearDownContexts() throws Exception {
         try {
             if (ui != null && context != null) {
-                ui.delete(context, user, getCredentials());
+                ui.delete(context, user, null, getCredentials());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -286,7 +286,7 @@ public class AdditionalRMITests extends AbstractRMITest {
             assertUserWasCreatedProperly(myNewUser, context, adminCredentials);
         } finally {
             if (userCreated) {
-                userInterface.delete(context, myNewUser, adminCredentials);
+                userInterface.delete(context, myNewUser, null, adminCredentials);
             }
         }
     }
@@ -542,7 +542,7 @@ public class AdditionalRMITests extends AbstractRMITest {
         User missingUser = new User();
         missingUser.setId(Integer.valueOf(Integer.MAX_VALUE));
         try {
-            ui.delete(context, missingUser, adminCredentials);
+            ui.delete(context, missingUser, null, adminCredentials);
             fail("Expected NoSuchUserException");
         } catch (NoSuchUserException e) {
             assertTrue("Caught exception", true);

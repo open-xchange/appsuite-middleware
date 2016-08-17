@@ -1,0 +1,21 @@
+/tasks?action=get:
+  get:
+    operationId: getTask
+    tags:
+      - tasks
+    summary: Gets a task.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: Object ID of the requested task.
+        required: true
+      - $ref: "#/parameters/gblQueryParamTaskFolder"
+    responses:
+      200:
+        description: |
+          An object containing all data of the requested task. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/TaskResponse"

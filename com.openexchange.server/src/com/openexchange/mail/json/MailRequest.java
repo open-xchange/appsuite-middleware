@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -62,7 +62,10 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.json.actions.AbstractMailAction;
+import com.openexchange.mail.json.utils.Column;
+import com.openexchange.mail.json.utils.ColumnCollection;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -83,8 +86,8 @@ public final class MailRequest {
     public static final int NOT_FOUND = -9999;
 
     private final ServerSession session;
-
     private final AJAXRequestData requestData;
+    private MailServletInterface mailServletInterface;
 
     /**
      * Initializes a new {@link MailRequest}.
@@ -96,6 +99,25 @@ public final class MailRequest {
         super();
         this.requestData = request;
         this.session = session;
+    }
+
+
+    /**
+     * Gets the newly opened {@link MailServletInterface} associated with this request
+     *
+     * @return The {@code MailServletInterface} instance or <code>null</code>
+     */
+    public MailServletInterface getMailServletInterface() {
+        return mailServletInterface;
+    }
+
+    /**
+     * Sets the newly opened {@link MailServletInterface} associated with this request
+     *
+     * @param openedMailServletInterface The {@code MailServletInterface} instance
+     */
+    public void setMailServletInterface(MailServletInterface openedMailServletInterface) {
+        this.mailServletInterface = openedMailServletInterface;
     }
 
     private static final Set<String> ALIASES_MAX = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("max", "maximum")));

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -109,6 +109,8 @@ public class DeleteEvent extends EventObject {
 
     protected int subType;
 
+    protected Integer destUserID;
+
     private transient Session session;
 
     /**
@@ -135,7 +137,7 @@ public class DeleteEvent extends EventObject {
      * @param ctx the context
      */
     public DeleteEvent(final Object source, final int id, final int type, final Context ctx) {
-        this(source, id, type, 0, ctx);
+        this(source, id, type, 0, ctx, null);
     }
 
     /**
@@ -147,13 +149,16 @@ public class DeleteEvent extends EventObject {
      *            <code>{@link #TYPE_RESOURCE}</code>, <code>{@value #TYPE_RESOURCE_GROUP}</code>, or <code>{@value #TYPE_CONTEXT}</code>
      * @param type The object's subtype, or <code>0</code> if not specified
      * @param ctx the context
+     * @param destUserID The identifier of the user to reassign shared/public data to, <code>null</code> to reassign to the context admin
+     *        (default), or <code>0</code> to not reassign at all
      */
-    public DeleteEvent(final Object source, final int id, final int type, int subType, final Context ctx) {
+    public DeleteEvent(final Object source, final int id, final int type, int subType, final Context ctx, Integer destUserID) {
         super(source);
         this.id = id;
         this.type = type;
         this.subType = subType;
         this.ctx = ctx;
+        this.destUserID = destUserID;
     }
 
     /**
@@ -204,6 +209,18 @@ public class DeleteEvent extends EventObject {
             session = SessionObjectWrapper.createSessionObject(ctx.getMailadmin(), ctx, "DeleteEventSessionObject");
         }
         return session;
+    }
+
+    /**
+     * Gets the identifier of the user that should be used as target account for preserved (e.g. shared or public) data of the deleted
+     * user. If set to <code>null</code>, the context admin should be used as default, if set to <code>0</code>, no data should be
+     * reassigned.
+     *
+     * @return The identifier of the user to reassign the data to, <code>null</code> to reassign to the context admin (default), or
+     *         <code>0</code> to not reassign at all.
+     */
+    public Integer getDestinationUserID() {
+        return destUserID;
     }
 
 }

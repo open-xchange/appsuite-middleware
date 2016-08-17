@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -53,12 +53,14 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.UrlInfo;
 import com.openexchange.mail.transport.config.ITransportProperties;
+import com.openexchange.mail.transport.config.TransportAuthSupportAware;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.utils.MailPasswordUtil;
-import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.Account;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.SMTPExceptionCode;
@@ -70,7 +72,7 @@ import com.openexchange.tools.net.URIParser;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SMTPConfig extends TransportConfig {
+public final class SMTPConfig extends TransportConfig implements TransportAuthSupportAware {
 
     private static final String PROTOCOL_SMTP_SECURE = "smtps";
 
@@ -157,6 +159,15 @@ public final class SMTPConfig extends TransportConfig {
         return transportProperties;
     }
 
+    @Override
+    public boolean isAuthSupported() throws OXException {
+        ISMTPProperties transportProperties = this.transportProperties;
+        if (null == transportProperties) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create("SMTP config not yet initialized");
+        }
+        return transportProperties.isSmtpAuth();
+    }
+
     public ISMTPProperties getSMTPProperties() {
         return transportProperties;
     }
@@ -170,9 +181,12 @@ public final class SMTPConfig extends TransportConfig {
      * {@inheritDoc}
      */
     @Override
-    protected boolean doCustomParsing(final MailAccount account, final Session session) throws OXException {
+    protected boolean doCustomParsing(final Account account, final Session session) throws OXException {
         if (!account.isDefaultAccount()) {
             TransportAuth transportAuth = account.getTransportAuth();
+            if (transportAuth == null) {
+                return true;
+            }
             switch (transportAuth) {
             case CUSTOM:
                 login = saneLogin(account.getTransportLogin());

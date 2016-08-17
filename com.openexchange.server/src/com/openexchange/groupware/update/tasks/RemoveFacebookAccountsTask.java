@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -84,19 +84,24 @@ public class RemoveFacebookAccountsTask implements UpdateTaskV2 {
         int contextId = params.getContextId();
         final DatabaseService ds = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         final Connection con = ds.getForUpdateTask(contextId);
-        PreparedStatement stmt = null;
+        boolean rb = false;
         try {
             con.setAutoCommit(false);
+            rb = true;
 
-            removeOAuthAccounts(stmt, con);
-            removeMessagingAccounts(stmt, con);
+            removeOAuthAccounts(con);
+            removeMessagingAccounts(con);
 
             con.commit();
+            rb = false;
         } catch (final SQLException x) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(x, x.getMessage());
         } finally {
-            Databases.closeSQLStuff(stmt);
+            if (rb) {
+                Databases.rollback(con);
+            }
             if (con != null) {
+                Databases.autocommit(con);
                 ds.backForUpdateTask(contextId, con);
             }
         }
@@ -109,15 +114,18 @@ public class RemoveFacebookAccountsTask implements UpdateTaskV2 {
      * @param con The {@link Connection} to get the statement from
      * @throws SQLException
      */
-    private void removeOAuthAccounts(PreparedStatement stmt, final Connection con) throws SQLException {
+    private void removeOAuthAccounts(Connection con) throws SQLException {
         if (!Databases.tablesExist(con, "oauthAccounts")) {
             return;
         }
 
-        stmt = con.prepareStatement("DELETE FROM oauthAccounts WHERE serviceId = ? ;");
-        stmt.setString(1, OAUTH_ID);
-        stmt.executeUpdate();
-        stmt.close();
+        PreparedStatement stmt = con.prepareStatement("DELETE FROM oauthAccounts WHERE serviceId = ?");
+        try {
+            stmt.setString(1, OAUTH_ID);
+            stmt.executeUpdate();
+        } finally {
+            stmt.close();
+        }
     }
 
     /**
@@ -127,18 +135,19 @@ public class RemoveFacebookAccountsTask implements UpdateTaskV2 {
      * @param con The {@link Connection} to get the statement from
      * @throws SQLException
      */
-    private void removeMessagingAccounts(PreparedStatement stmt, Connection con) throws OXException, SQLException {
+    private void removeMessagingAccounts(Connection con) throws OXException, SQLException {
         if (!Databases.tablesExist(con, "messagingAccount")) {
             return;
         }
 
-        final List<int[]> dataList = listFacebookMessagingAccounts(stmt, con);
+        final List<int[]> dataList = listFacebookMessagingAccounts(con);
         for (final int[] data : dataList) {
-            dropAccountByData(stmt, data, con);
+            dropAccountByData(data, con);
         }
     }
 
-    private List<int[]> listFacebookMessagingAccounts(PreparedStatement stmt, final Connection con) throws OXException {
+    private List<int[]> listFacebookMessagingAccounts(Connection con) throws OXException {
+        PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT account, confId, user, cid FROM messagingAccount WHERE serviceId = ?");
@@ -158,17 +167,16 @@ public class RemoveFacebookAccountsTask implements UpdateTaskV2 {
                 dataList.add(data);
             } while (rs.next());
 
-            stmt.close();
-
             return dataList;
         } catch (final SQLException e) {
             throw createSQLError(e);
         } finally {
-            Databases.closeSQLStuff(rs);
+            Databases.closeSQLStuff(rs, stmt);
         }
     }
 
-    private void dropAccountByData(PreparedStatement stmt, final int[] data, final Connection writeCon) throws OXException {
+    private void dropAccountByData(int[] data, Connection writeCon) throws OXException {
+        PreparedStatement stmt = null;
         try {
             /*
              * Delete genconf
@@ -190,6 +198,8 @@ public class RemoveFacebookAccountsTask implements UpdateTaskV2 {
             stmt.close();
         } catch (final SQLException e) {
             throw createSQLError(e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
     }
 

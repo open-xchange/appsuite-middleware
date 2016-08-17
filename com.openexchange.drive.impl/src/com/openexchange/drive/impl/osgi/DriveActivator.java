@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -51,10 +51,13 @@ package com.openexchange.drive.impl.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
@@ -67,6 +70,7 @@ import com.openexchange.drive.DriveService;
 import com.openexchange.drive.checksum.rdb.DriveCreateTableService;
 import com.openexchange.drive.checksum.rdb.DriveDeleteListener;
 import com.openexchange.drive.checksum.rdb.SQL;
+import com.openexchange.drive.impl.checksum.PeriodicChecksumCleaner;
 import com.openexchange.drive.impl.checksum.events.DelayedChecksumEventListener;
 import com.openexchange.drive.impl.internal.DriveServiceImpl;
 import com.openexchange.drive.impl.internal.DriveServiceLookup;
@@ -139,6 +143,42 @@ public class DriveActivator extends HousekeepingActivator {
         serviceProperties.put(EventConstants.EVENT_TOPIC, DelayedChecksumEventListener.getHandledTopics());
         registerService(EventHandler.class, DelayedChecksumEventListener.getInstance(), serviceProperties);
         DelayedChecksumEventListener.getInstance().start();
+        /*
+         * schedule cluster-wide periodic checksum cleanup task
+         */
+        track(ClusterTimerService.class, new ServiceTrackerCustomizer<ClusterTimerService, ClusterTimerService>() {
+
+            private volatile PeriodicChecksumCleaner checksumCleaner;
+
+            @Override
+            public ClusterTimerService addingService(ServiceReference<ClusterTimerService> reference) {
+                LOG.debug("Initializing periodic checksum cleaner task");
+                ClusterTimerService timerService = context.getService(reference);
+                long interval = DriveConfig.getInstance().getChecksumCleanerInterval();
+                if (0 < interval) {
+                    PeriodicChecksumCleaner checksumCleaner = new PeriodicChecksumCleaner(DriveConfig.getInstance().getChecksumCleanerMaxAge());
+                    this.checksumCleaner = checksumCleaner;
+                    timerService.scheduleWithFixedDelay(PeriodicChecksumCleaner.class.getName(), checksumCleaner, interval, interval);
+                }
+                return timerService;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<ClusterTimerService> reference, ClusterTimerService service) {
+                // Ignored
+            }
+
+            @Override
+            public void removedService(ServiceReference<ClusterTimerService> reference, ClusterTimerService service) {
+                LOG.debug("Stopping periodic checksum cleaner task");
+                PeriodicChecksumCleaner checksumCleaner = this.checksumCleaner;
+                if (null != checksumCleaner) {
+                    checksumCleaner.stop();
+                    this.checksumCleaner = null;
+                }
+            }
+        });
+        openTrackers();
     }
 
     @Override

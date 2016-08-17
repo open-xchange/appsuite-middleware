@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -180,9 +180,19 @@ public class AllAction extends AbstractFileStorageAccountAction {
             caps.add(FileStorageCapability.READ_ONLY.name());
         }
 
-        supported = capabilityAware.supports(FileStorageCapability.MAIL_STORE);
+        supported = capabilityAware.supports(FileStorageCapability.MAIL_ATTACHMENTS);
         if (null != supported && supported.booleanValue()) {
-            caps.add(FileStorageCapability.MAIL_STORE.name());
+            caps.add(FileStorageCapability.MAIL_ATTACHMENTS.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.AUTO_NEW_VERSION);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.AUTO_NEW_VERSION.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.ZIPPABLE_FOLDER);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.ZIPPABLE_FOLDER.name());
         }
 
         return caps;

@@ -50,9 +50,14 @@
 package com.openexchange.file.storage.mail;
 
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
+import org.slf4j.Logger;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.session.Session;
 
 /**
  * {@link MailDriveFileStorageAccount} - The special account for Mail Drive.
@@ -65,17 +70,30 @@ public final class MailDriveFileStorageAccount implements FileStorageAccount {
     private static final long serialVersionUID = 8675168697186715107L;
 
     private static final String ACCOUNT_ID = MailDriveConstants.ACCOUNT_ID;
-    private static final String ACCOUNT_DISPLAY_NAME = MailDriveStrings.ACCOUNT_DISPLAY_NAME;
+    private static final String ACCOUNT_DISPLAY_NAME = MailDriveStrings.NAME_ATTACHMENTS_ALL;
 
     // --------------------------------------------------------------------------------------------------------------
 
     private final MailDriveFileStorageService service;
+    private final Locale locale;
 
     /**
      * Initializes a new {@link FileStorageAccountImplementation}.
      */
-    MailDriveFileStorageAccount(MailDriveFileStorageService service) {
+    MailDriveFileStorageAccount(MailDriveFileStorageService service, Session session) {
+        super();
         this.service = service;
+        locale = getLocaleFor(session);
+    }
+
+    private Locale getLocaleFor(Session session) {
+        try {
+            return MailDriveFolder.getSessionUserLocale(session);
+        } catch (OXException e) {
+            Logger logger = org.slf4j.LoggerFactory.getLogger(MailDriveFileStorageAccount.class);
+            logger.error("Error getting locale for session. Using en_US as fall-back", e);
+            return Locale.US;
+        }
     }
 
     @Override
@@ -90,7 +108,7 @@ public final class MailDriveFileStorageAccount implements FileStorageAccount {
 
     @Override
     public String getDisplayName() {
-        return ACCOUNT_DISPLAY_NAME;
+        return StringHelper.valueOf(locale).getString(ACCOUNT_DISPLAY_NAME);
     }
 
     @Override

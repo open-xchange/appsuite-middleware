@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -86,6 +86,11 @@ public class SimInfostoreFacade implements InfostoreFacade {
     @Override
     public int countDocuments(long folderId, ServerSession session) throws OXException {
         // Nothing to do
+        return 0;
+    }
+
+    @Override
+    public long getTotalSize(long folderId, ServerSession session) throws OXException {
         return 0;
     }
 
@@ -195,7 +200,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public void removeUser(int userId, Context context, ServerSession session) throws OXException {
+    public void removeUser(int userId, Context context, final Integer destUser, ServerSession session) throws OXException {
         // Nothing to do
     }
 
@@ -213,6 +218,12 @@ public class SimInfostoreFacade implements InfostoreFacade {
 
     @Override
     public IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
+        // Nothing to do
+        return null;
+    }
+
+    @Override
+    public IDTuple saveDocumentTryAddVersion(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
         // Nothing to do
         return null;
     }

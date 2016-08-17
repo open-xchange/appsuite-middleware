@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -336,14 +336,14 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
     RESERVED_NAME("File name is a reserved name: \"%1$s\"", Category.CATEGORY_USER_INPUT, 66, FileStorageExceptionMessages.RESERVED_NAME_MSG),
 
     /**
-     * File name must not be \".\" or \"..\".
+     * File name must not be <code>"."</code> or <code>".."</code>.
      */
     ONLY_DOTS_NAME("File name must not be \".\" or \"..\".", Category.CATEGORY_USER_INPUT, 67, FileStorageExceptionMessages.ONLY_DOTS_MSG),
 
     /**
      * File name must not end with a dot or whitespace.
      */
-    WHITESPACE_END("File name must not end with a dot or whitespace.", Category.CATEGORY_USER_INPUT, 68, FileStorageExceptionMessages.WHITESPACE_END_MSG)
+    WHITESPACE_END("File name must not end with a dot or whitespace.", Category.CATEGORY_USER_INPUT, 68, FileStorageExceptionMessages.WHITESPACE_END_MSG),
 
     ;
 

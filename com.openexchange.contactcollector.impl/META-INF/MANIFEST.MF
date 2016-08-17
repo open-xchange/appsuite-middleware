@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Contect Collector Implementation Bundle
 Bundle-SymbolicName: com.openexchange.contactcollector.impl
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Activator: com.openexchange.contactcollector.osgi.ContactCollectorActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -17,6 +17,7 @@ Import-Package: com.openexchange.api2,
  com.openexchange.exception,
  com.openexchange.folder,
  com.openexchange.groupware,
+ com.openexchange.groupware.alias,
  com.openexchange.groupware.contact,
  com.openexchange.groupware.contact.helpers,
  com.openexchange.groupware.container,
@@ -32,6 +33,7 @@ Import-Package: com.openexchange.api2,
  com.openexchange.log,
  com.openexchange.login,
  com.openexchange.mail.mime,
+ com.openexchange.objectusecount,
  com.openexchange.osgi,
  com.openexchange.preferences,
  com.openexchange.search,

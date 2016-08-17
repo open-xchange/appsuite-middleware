@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -237,9 +237,6 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                         throw e;
                     }
-
-                    // Obviously associated file does no more exist
-                    deleteSnippetSafe(id, userId, contextId);
                 }
             }
             return list;
@@ -309,9 +306,6 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                         throw e;
                     }
-
-                    // Obviously associated file does no more exist
-                    deleteSnippetSafe(id, userId, contextId);
                 }
             }
             return list;
@@ -334,9 +328,6 @@ public final class MimeSnippetManagement implements SnippetManagement {
             if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                 throw e;
             }
-
-            // Obviously associated file does no more exist
-            deleteSnippetSafe(id, userId, contextId);
             throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, id);
         } finally {
             databaseService.backReadOnly(contextId, con);
@@ -389,9 +380,6 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                         throw e;
                     }
-
-                    // Obviously associated file does no more exist
-                    deleteSnippetSafe(identifier, userId, contextId);
                     throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, identifier);
                 } finally {
                     Streams.close(in);
@@ -501,7 +489,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
         AccountQuota quota = getQuota();
         if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
             Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
-            if (amountQuota.isExceeded() || amountQuota.willExceed(getOwnSnippetsCount())) {
+            if (amountQuota.isExceeded() || amountQuota.willExceed(1)) {
                 throw QuotaExceptionCodes.QUOTA_EXCEEDED_SNIPPETS.create(amountQuota.getUsage(), amountQuota.getLimit());
             }
         }
@@ -681,9 +669,6 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
                         throw e;
                     }
-
-                    // Obviously associated file does no more exist
-                    deleteSnippetSafe(identifier, userId, contextId);
                     throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, identifier);
                 } finally {
                     Streams.close(in);

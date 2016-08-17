@@ -1,0 +1,33 @@
+/resource?action=update:
+  put:
+    operationId: updateResource
+    tags:
+      - resources
+    summary: Updates a resource.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: integer
+        description: ID of the resource that shall be updated.
+        required: true
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description: Timestamp of the last update of the resource to update. If the resource was modified after the specified timestamp, then the update must fail.
+        required: true
+      - in: body
+        name: body
+        description: A JSON object containing the resource data fields to change. Only modified fields are present and the field id is omitted.
+        required: true
+        schema:
+          $ref: "#/definitions/ResourceData"
+    responses:
+      200:
+        description: |
+          In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/CommonResponse"

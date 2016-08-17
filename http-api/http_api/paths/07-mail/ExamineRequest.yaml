@@ -1,0 +1,24 @@
+/mail?action=examine:
+  put:
+    operationId: examine
+    tags:
+      - mail
+    summary: Examines a specifed mail folder and provides its basic status information
+    consumes:
+      - application/json
+    produces:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: folder
+        type: string
+        description: The identifier of the folder to provide the status information for
+        required: true
+    responses:
+      200:
+        description: |
+          'The JSON representation for the status information. In case of errors the responsible fields in the
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).'
+        schema:
+          $ref: "#/definitions/ExamineResponse"

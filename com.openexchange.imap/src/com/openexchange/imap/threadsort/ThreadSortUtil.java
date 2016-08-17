@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -227,7 +227,7 @@ public final class ThreadSortUtil {
      *
      * @return An array of <code>javax.mail.Message</code> objects only filled with message's sequence number.
      */
-    public static ExtendedMimeMessage[] getMessagesFromThreadResponse(final String folderFullname, final char separator, final String threadResponse) {
+    public static ExtendedMimeMessage[] getMessagesFromThreadResponse(final String folderFullname, final String threadResponse) {
         final List<ExtendedMimeMessage> tmp = new ArrayList<ExtendedMimeMessage>();
         final StringBuilder sb = new StringBuilder(8);
         final int length = threadResponse.length();
@@ -239,7 +239,7 @@ public final class ThreadSortUtil {
                 c = threadResponse.charAt(i++);
             }
             if (sb.length() > 0) {
-                tmp.add(new ExtendedMimeMessage(folderFullname, separator, Integer.parseInt(sb.toString())));
+                tmp.add(new ExtendedMimeMessage(folderFullname, Integer.parseInt(sb.toString())));
                 sb.setLength(0);
             }
         }

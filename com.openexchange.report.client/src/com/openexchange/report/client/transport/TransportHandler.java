@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -65,6 +65,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import javax.management.openmbean.CompositeData;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.report.client.configuration.ReportConfiguration;
@@ -75,10 +76,16 @@ import com.openexchange.report.client.container.MacDetail;
 import com.openexchange.report.client.container.Total;
 import com.openexchange.tools.encoding.Base64;
 
+/**
+ * {@link TransportHandler}
+ *
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.8.0
+ */
 public class TransportHandler {
 
     private static final String REPORT_SERVER_URL = "activation.open-xchange.com";
-
+    
     private static final String REPORT_SERVER_CLIENT_AUTHENTICATION_STRING = "rhadsIsAgTicOpyodNainPacloykAuWyribZydkarbEncherc4";
 
     private static final String POST_CLIENT_AUTHENTICATION_STRING_KEY = "clientauthenticationstring";
@@ -119,44 +126,89 @@ public class TransportHandler {
         }
 
         if (savereport) {
-            File tmpfile = File.createTempFile("oxreport", ".json", new File("/tmp"));
-            System.out.println("Saving report to " + tmpfile.getAbsolutePath());
-            DataOutputStream tfo = new DataOutputStream(new FileOutputStream(tmpfile));
-            tfo.writeBytes(report.toString());
-            tfo.close();
+            saveReportToHardDrive(report);
         } else {
-            final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) new URL("https://" + REPORT_SERVER_URL + "/").openConnection();
-            httpsURLConnection.setConnectTimeout(2500);
-            httpsURLConnection.setReadTimeout(2500);
-            httpsURLConnection.setUseCaches(false);
-            httpsURLConnection.setDoOutput(true);
-            httpsURLConnection.setDoInput(true);
-            httpsURLConnection.setRequestMethod("POST");
-            httpsURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+            sendReport(true, reportConfiguration, report);
+        }
+    }
 
-            if ("true".equals(reportConfiguration.getUseProxy().trim()) && "true".equals(reportConfiguration.getProxyAuthRequired().trim())) {
-                final String proxyAutorizationProperty = "Basic " + Base64.encode((reportConfiguration.getProxyUsername().trim() + ":" + reportConfiguration.getProxyPassword().trim()).getBytes());
+    /**
+     * Try to send the report to the saved REPORT_SERVER_URL over https, if the given parameter is set. If
+     * https fails, try it with http. If that fails, save the report to hard-drive and save location
+     * to logfile.
+     * 
+     * @param isHttps
+     * @param reportConfiguration
+     * @param report
+     * @throws MalformedURLException
+     * @throws IOException
+     */
+    private void sendReport(boolean isHttps, ReportConfiguration reportConfiguration, StringBuffer report) throws MalformedURLException, IOException {
 
-                Authenticator.setDefault(new ProxyAuthenticator(reportConfiguration.getProxyUsername().trim(), reportConfiguration.getProxyPassword().trim()));
+        HttpURLConnection httpURLConnection = (HttpURLConnection) new URL("http://" + REPORT_SERVER_URL + "/").openConnection();
+        if (isHttps) {
+            httpURLConnection = (HttpsURLConnection) new URL("https://" + REPORT_SERVER_URL + "/").openConnection();
+        }
+        httpURLConnection.setConnectTimeout(2500);
+        httpURLConnection.setReadTimeout(2500);
+        httpURLConnection.setUseCaches(false);
+        httpURLConnection.setDoOutput(true);
+        httpURLConnection.setDoInput(true);
+        httpURLConnection.setRequestMethod("POST");
+        httpURLConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
 
-                httpsURLConnection.setRequestProperty("Proxy-Authorization", proxyAutorizationProperty);
-            }
+        if ("true".equals(reportConfiguration.getUseProxy().trim()) && "true".equals(reportConfiguration.getProxyAuthRequired().trim())) {
+            final String proxyAutorizationProperty = "Basic " + Base64.encode((reportConfiguration.getProxyUsername().trim() + ":" + reportConfiguration.getProxyPassword().trim()).getBytes());
 
-            final DataOutputStream stream = new DataOutputStream(httpsURLConnection.getOutputStream());
+            Authenticator.setDefault(new ProxyAuthenticator(reportConfiguration.getProxyUsername().trim(), reportConfiguration.getProxyPassword().trim()));
+
+            httpURLConnection.setRequestProperty("Proxy-Authorization", proxyAutorizationProperty);
+        }
+
+        try {
+            final DataOutputStream stream = new DataOutputStream(httpURLConnection.getOutputStream());
             stream.writeBytes(report.toString());
             stream.flush();
             stream.close();
-
-            if (httpsURLConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
-                throw new MalformedURLException("Problem contacting report server: " + httpsURLConnection.getResponseCode());
-            }
-            final BufferedReader in = new BufferedReader(new InputStreamReader(httpsURLConnection.getInputStream()));
-            String buffer = "";
-            while ((buffer = in.readLine()) != null) {
-                System.out.println(new StringBuilder().append(REPORT_SERVER_URL).append(" said: ").append(buffer).toString());
-            }
-            in.close();
+        } catch (SSLException e) {
+            e.printStackTrace();
+            System.err.println("Report sending failure, unable to send with ssl.");
+            if (isHttps) {
+                System.out.println("Trying to send without ssl.");
+                sendReport(false, reportConfiguration, report);
+                return;
+            } else
+                saveReportToHardDrive(report);
         }
+
+        if (httpURLConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+            System.err.println("Report sending failure, unable to send via http...");
+            if (isHttps)
+                sendReport(false, reportConfiguration, report);
+            else
+                saveReportToHardDrive(report);
+            throw new MalformedURLException("Problem contacting report server: " + httpURLConnection.getResponseCode());
+        }
+        final BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+        String buffer = "";
+        while ((buffer = in.readLine()) != null) {
+            System.out.println(new StringBuilder().append(REPORT_SERVER_URL).append(" said: ").append(buffer).toString());
+        }
+        in.close();
+    }
+
+    /**
+     * Save the given report to hard-drive and print the location into the logfile.
+     * 
+     * @param report
+     * @throws IOException
+     */
+    private void saveReportToHardDrive(final StringBuffer report) throws IOException {
+        File tmpfile = File.createTempFile("oxreport", ".json", new File("/tmp"));
+        System.out.println("Saving report to " + tmpfile.getAbsolutePath());
+        DataOutputStream tfo = new DataOutputStream(new FileOutputStream(tmpfile));
+        tfo.writeBytes(report.toString());
+        tfo.close();
     }
 
     private JSONObject buildJSONObject(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, Map<String, String> serverConfiguration, final String[] versions, final ClientLoginCount clc, final ClientLoginCount clcYear) throws JSONException {

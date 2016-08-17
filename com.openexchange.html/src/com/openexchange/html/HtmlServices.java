@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,9 +49,11 @@
 
 package com.openexchange.html;
 
+import static com.openexchange.java.Strings.isEmpty;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import org.apache.commons.codec.net.URLCodec;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.WhitelistedSchemes;
 import com.openexchange.html.osgi.Services;
@@ -71,6 +73,40 @@ public final class HtmlServices {
     }
 
     /**
+     * Does URL decoding until fully decoded
+     *
+     * @param sInput The input to sanitize, can be <code>null</code> or empty
+     * @return The fully decoded string
+     */
+    public static String fullUrlDecode(String sInput) {
+        if (isEmpty(sInput)) {
+            return sInput;
+        }
+
+        String s = sInput;
+
+        // Do URL decoding until fully decoded
+        {
+            int pos = s.indexOf('%');
+            if (pos >= 0 && pos < s.length() - 1) {
+                URLCodec urlCodec = new URLCodec("UTF-8");
+                boolean k = true;
+                do {
+                    try {
+                        s = urlCodec.decode(s);
+                    } catch (org.apache.commons.codec.DecoderException e) {
+                        // Break...
+                        k = false;
+                    }
+                } while (k && (pos = s.indexOf('%')) >= 0 && pos < s.length() - 1);
+            }
+        }
+
+        // Return result
+        return s;
+    }
+
+    /**
      * Checks if specified URL String is safe or not.
      *
      * @param val The URL String to check
@@ -79,6 +115,8 @@ public final class HtmlServices {
     public static boolean isNonJavaScriptURL(final String val) {
         return isNonJavaScriptURL(val, new String[0]);
     }
+
+    private static final String[] UNSAFE_TOKENS = {"javascript:", "vbscript:", "data:text/html", "<script"};
 
     /**
      * Checks if specified URL String is safe or not.
@@ -91,10 +129,14 @@ public final class HtmlServices {
         if (null == val) {
             return false;
         }
-        String lc = asciiLowerCase(val.trim());
-        if (lc.indexOf("javascript:") >= 0 || lc.indexOf("vbscript:") >= 0) {
-            return false;
+
+        String lc = asciiLowerCase(fullUrlDecode(val.trim()));
+        for (String unsafeToken : UNSAFE_TOKENS) {
+            if (lc.indexOf(unsafeToken) >= 0) {
+                return false;
+            }
         }
+
         if (null != more && more.length > 0) {
             for (final String token : more) {
                 if (lc.indexOf(asciiLowerCase(token)) >= 0) {
@@ -133,7 +175,7 @@ public final class HtmlServices {
         try {
             uri = new URI(possibleUrl.trim());
         } catch (URISyntaxException x) {
-            // At least check for common attach vectors
+            // At least check for common attack vectors
             return isNonJavaScriptURL(possibleUrl);
         }
 

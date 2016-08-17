@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -81,7 +81,7 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
      */
     @Override
@@ -117,7 +117,7 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
      */
     @Override
@@ -127,7 +127,7 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
 
     /**
      * Insert random UUIDs to the 'uuid' column of the 'user_alias' table for all aliases that have none
-     * 
+     *
      * @param connection The writable connection
      * @throws SQLException If an SQL error occurs
      */
@@ -144,13 +144,14 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
             }
             preparedStatment.executeBatch();
         } finally {
+            DBUtils.closeSQLStuff(resultSet, statement);
             DBUtils.closeSQLStuff(preparedStatment);
         }
     }
 
     /**
      * Migrate the existing UUIDs from the 'user_attribute' table to the 'user_alias' table only if not previously migrated
-     * 
+     *
      * @param connection The writable connection
      * @param aliases The set of a
      * @throws SQLException
@@ -170,7 +171,7 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
 
     /**
      * Add a batch to the prepared statement
-     * 
+     *
      * @param preparedStatement The prepared statement
      * @param contextId The context identifier
      * @param userId The user identifier

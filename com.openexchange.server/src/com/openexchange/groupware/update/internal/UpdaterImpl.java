@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,6 +50,7 @@
 package com.openexchange.groupware.update.internal;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
@@ -68,10 +69,23 @@ import com.openexchange.timer.TimerService;
  */
 public class UpdaterImpl extends Updater {
 
+    private static final UpdaterImpl INSTANCE = new UpdaterImpl();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static UpdaterImpl getInstance() {
+        return INSTANCE;
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------ //
+
     /**
      * Default constructor.
      */
-    public UpdaterImpl() {
+    private UpdaterImpl() {
         super();
     }
 
@@ -104,7 +118,21 @@ public class UpdaterImpl extends Updater {
             public boolean backgroundUpdatesRunning() {
                 return schema.backgroundUpdatesRunning();
             }
+            @Override
+            public Date blockingUpdatesRunningSince() {
+                return schema.blockingUpdatesRunningSince();
+            }
+            @Override
+            public Date backgroundUpdatesRunningSince() {
+                return schema.backgroundUpdatesRunningSince();
+            }
         };
+    }
+
+    @Override
+    public void unblock(String schemaName, int poolId, int contextId) throws OXException {
+        SchemaUpdateState schema = SchemaStore.getInstance().getSchema(poolId, schemaName);
+        SchemaStore.getInstance().unlockSchema(schema, contextId, false);
     }
 
     @Override

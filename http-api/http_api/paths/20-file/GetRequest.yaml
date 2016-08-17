@@ -1,0 +1,23 @@
+/file?action=get:
+  get:
+    operationId: getFile
+    tags:
+      - file
+    summary: Requests a formerly uploaded file.
+    produces:
+      - application/octet-stream
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description:  The ID of the uploaded file.
+        required: true
+    responses:
+      200:
+        description: The content of the requested file is directly written into output stream.
+        schema:
+          type: string
+          format: binary
+      404:
+        description: Not found.

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -54,9 +54,11 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.events.subscribe.internal.SubscribeServiceLookup;
+import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsAddUuidColumnTask;
 import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsCreateTableService;
 import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsCreateTableTask;
 import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsDeleteListener;
+import com.openexchange.drive.events.subscribe.rdb.DriveEventSubscriptionsMakeUuidPrimaryTask;
 import com.openexchange.drive.events.subscribe.rdb.RdbSubscriptionStore;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
@@ -90,6 +92,8 @@ public class SubscribeActivator extends HousekeepingActivator {
         SubscribeServiceLookup.set(this);
         registerService(CreateTableService.class, new DriveEventSubscriptionsCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveEventSubscriptionsCreateTableTask()));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveEventSubscriptionsAddUuidColumnTask()));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new DriveEventSubscriptionsMakeUuidPrimaryTask()));
         registerService(DeleteListener.class, new DriveEventSubscriptionsDeleteListener());
         registerService(DriveSubscriptionStore.class, new RdbSubscriptionStore());
     }

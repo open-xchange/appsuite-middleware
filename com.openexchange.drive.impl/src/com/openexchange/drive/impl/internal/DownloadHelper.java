@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,6 +57,7 @@ import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
 import com.openexchange.drive.impl.checksum.FileChecksum;
+import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.drive.impl.metadata.DriveMetadata;
 import com.openexchange.drive.impl.storage.StorageOperation;
 import com.openexchange.exception.OXException;
@@ -133,7 +134,9 @@ public class DownloadHelper {
                 if (null == inputStream) {
                     throw DriveExceptionCodes.FILE_NOT_FOUND.create(fileVersion.getName(), path);
                 }
-                return new DriveFileHolder(session, inputStream, fileVersion.getName(), file.getFileMIMEType());
+                long contentLength = 0 < offset || 0 < length && length != file.getFileSize() ? -1L : file.getFileSize();
+                boolean throttled = 0 < DriveConfig.getInstance().getMaxBandwidth() || 0 < DriveConfig.getInstance().getMaxBandwidthPerClient();
+                return new DriveFileHolder(session, inputStream, fileVersion.getName(), file.getFileMIMEType(), contentLength, throttled);
             }
         });
     }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -55,6 +55,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import javax.mail.MessagingException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -81,7 +82,8 @@ import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.TransportAuth;
-import com.openexchange.mailaccount.json.parser.MailAccountParser;
+import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
+import com.openexchange.mailaccount.utils.MailAccountUtils;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
@@ -122,7 +124,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
 
         MailAccountDescription accountDescription = new MailAccountDescription();
         List<OXException> warnings = new LinkedList<OXException>();
-        Set<Attribute> availableAttributes = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
+        Set<Attribute> availableAttributes = DefaultMailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
 
         if (accountDescription.getId() == MailAccount.DEFAULT_ID) {
             return new AJAXRequestResult(Boolean.TRUE);
@@ -186,7 +188,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         if (tree) {
             return new AJAXRequestResult(actionValidateTree(accountDescription, session, ignoreInvalidTransport, warnings)).addWarnings(warnings);
         }
-        return new AJAXRequestResult(actionValidateBoolean(accountDescription, session, ignoreInvalidTransport, warnings)).addWarnings(warnings);
+        return new AJAXRequestResult(actionValidateBoolean(accountDescription, session, ignoreInvalidTransport, warnings, false)).addWarnings(warnings);
     }
 
     private static boolean hasValidationReason(MailAccountDescription accountDescription, MailAccount storageMailAccount, boolean checkPassword, ServerSession session) throws OXException {
@@ -255,7 +257,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
     }
 
     private static Object actionValidateTree(final MailAccountDescription accountDescription, final ServerSession session, final boolean ignoreInvalidTransport, final List<OXException> warnings) throws JSONException, OXException {
-        if (!actionValidateBoolean(accountDescription, session, ignoreInvalidTransport, warnings).booleanValue()) {
+        if (!actionValidateBoolean(accountDescription, session, ignoreInvalidTransport, warnings, false).booleanValue()) {
             // TODO: How to indicate error if folder tree requested?
             return null;
         }
@@ -274,18 +276,20 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
      * @param session The associated session
      * @param ignoreInvalidTransport
      * @param warnings The warnings list
+     * @param errorOnDenied <code>true</code> to throw an error in case account description is denied (either by host or port); otherwise <code>false</code>
      * @return <code>true</code> for successful validation; otherwise <code>false</code>
      * @throws OXException If an severe error occurs
      */
-    public static Boolean actionValidateBoolean(final MailAccountDescription accountDescription, final ServerSession session, final boolean ignoreInvalidTransport, final List<OXException> warnings) throws OXException {
+    public static Boolean actionValidateBoolean(MailAccountDescription accountDescription, ServerSession session, boolean ignoreInvalidTransport, List<OXException> warnings, boolean errorOnDenied) throws OXException {
         // Check for primary account
         if (MailAccount.DEFAULT_ID == accountDescription.getId()) {
             return Boolean.TRUE;
         }
         // Validate mail server
-        boolean validated = checkMailServerURL(accountDescription, session, warnings);
+        boolean validated = checkMailServerURL(accountDescription, session, warnings, errorOnDenied);
         // Failed?
         if (!validated) {
+            checkForCommunicationProblem(warnings, false, accountDescription);
             return Boolean.FALSE;
         }
         if (ignoreInvalidTransport) {
@@ -294,12 +298,54 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         }
         // Now check transport server URL, if a transport server is present
         if (!isEmpty(accountDescription.getTransportServer())) {
-            validated = checkTransportServerURL(accountDescription, session, warnings);
+            validated = checkTransportServerURL(accountDescription, session, warnings, errorOnDenied);
+            if (!validated) {
+                checkForCommunicationProblem(warnings, true, accountDescription);
+                return Boolean.FALSE;
+            }
         }
         return Boolean.valueOf(validated);
     }
 
-    static boolean checkMailServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
+    static void checkForCommunicationProblem(List<OXException> warnings, boolean transport, MailAccountDescription accountDescription) {
+        if (null != warnings && !warnings.isEmpty()) {
+            OXException warning = warnings.get(0);
+            if (indicatesCommunicationProblem(warning.getCause())) {
+                OXException newWarning;
+                if (transport) {
+                    String login = accountDescription.getTransportLogin();
+                    if (!seemsValid(login)) {
+                        login = accountDescription.getLogin();
+                    }
+                    newWarning = MailAccountExceptionCodes.VALIDATE_FAILED_TRANSPORT.create(accountDescription.getTransportServer(), login);
+                } else {
+                    newWarning = MailAccountExceptionCodes.VALIDATE_FAILED_MAIL.create(accountDescription.getMailServer(), accountDescription.getLogin());
+                }
+                newWarning.setCategory(Category.CATEGORY_WARNING);
+                warnings.clear();
+                warnings.add(newWarning);
+            }
+        }
+    }
+
+    private static boolean indicatesCommunicationProblem(Throwable cause) {
+        if (MessagingException.class.isInstance(cause)) {
+            Exception ne = ((MessagingException) cause).getNextException();
+            return indicatesCommunicationProblem(ne);
+        }
+        return com.sun.mail.iap.ConnectionException.class.isInstance(cause) || java.net.SocketException.class.isInstance(cause);
+    }
+
+    static boolean checkMailServerURL(MailAccountDescription accountDescription, ServerSession session, List<OXException> warnings, boolean errorOnDenied) throws OXException {
+        if (MailAccountUtils.isDenied(accountDescription.getMailServer(), accountDescription.getMailPort())) {
+            OXException oxe = MailAccountExceptionCodes.VALIDATE_FAILED_MAIL.create(accountDescription.getMailServer(), accountDescription.getLogin());
+            if (errorOnDenied) {
+                throw oxe;
+            }
+            warnings.add(oxe);
+            return false;
+        }
+
         try {
             fillMailServerCredentials(accountDescription, session, false);
         } catch (OXException e) {
@@ -325,11 +371,25 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
         return success;
     }
 
-    protected static boolean checkTransportServerURL(final MailAccountDescription accountDescription, final ServerSession session, final List<OXException> warnings) throws OXException {
+    protected static boolean checkTransportServerURL(MailAccountDescription accountDescription, ServerSession session, List<OXException> warnings, boolean errorOnDenied) throws OXException {
         // Now check transport server URL, if a transport server is present
         if (isEmpty(accountDescription.getTransportServer())) {
             return true;
         }
+
+        if (MailAccountUtils.isDenied(accountDescription.getTransportServer(), accountDescription.getTransportPort())) {
+            String login = accountDescription.getTransportLogin();
+            if (!seemsValid(login)) {
+                login = accountDescription.getLogin();
+            }
+            OXException oxe = MailAccountExceptionCodes.VALIDATE_FAILED_TRANSPORT.create(accountDescription.getTransportServer(), login);
+            if (errorOnDenied) {
+                throw oxe;
+            }
+            warnings.add(oxe);
+            return false;
+        }
+
         final String transportServerURL = accountDescription.generateTransportServerURL();
         // Get the appropriate transport provider by transport server URL
         final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);

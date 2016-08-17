@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -134,10 +134,11 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass UNDEFINED_SEQUENCE_NUMBER for new files or DISTANT_FUTURE to circumvent the check
      * @param modifiedColumns The fields to save. All other fields will be ignored
      * @param ignoreWarnings <code>true</code> to force a file update even if warnings regarding potential data loss are detected, <code>false</code>, otherwise
+     * @param tryAddVersion <code>true</code> to add a new version if a file with given name already exists and file versions are supported
      * @return The (fully qualified) unique identifier of the saved file
      * @throws OXException If operation fails
      */
-    String saveFileMetadata(File document, long sequenceNumber, List<File.Field> modifiedColumns, boolean ignoreWarnings) throws OXException ;
+    String saveFileMetadata(File document, long sequenceNumber, List<File.Field> modifiedColumns, boolean ignoreWarnings, boolean tryAddVersion) throws OXException;
 
     /**
      * Copies a file from the source to the destination.
@@ -309,15 +310,16 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
      * @param document The metadata to save
      * @param data The binary content
      * @param sequenceNumber The sequence number to catch concurrent modification. May pass
-     *        {@link FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER} for new files or
-     *        {@link FileStorageFileAccess#DISTANT_FUTURE} to circumvent the check
+     *            {@link FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER} for new files or
+     *            {@link FileStorageFileAccess#DISTANT_FUTURE} to circumvent the check
      * @param modifiedColumns The fields to save. All other fields will be ignored
      * @param ignoreVersion Whether a new version is supposed to be set if binary content is available; or <code>true</code> to keep version as is
      * @param ignoreWarnings <code>true</code> to force a file update even if warnings regarding potential data loss are detected, <code>false</code>, otherwise
+     * @param tryAddVersion <code>true</code> to add a new version if a file with given name already exists and file versions are supported
      * @return The (fully qualified) unique identifier of the saved file
      * @throws OXException If operation fails
      */
-    String saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, boolean ignoreVersion, boolean ignoreWarnings) throws OXException;
+    String saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, boolean ignoreVersion, boolean ignoreWarnings, boolean tryAddVersion) throws OXException;
 
     /**
      * Save file metadata and content. Since the actual version is modified, the version number is not increased.

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -74,14 +74,19 @@ import com.openexchange.smtp.services.Services;
  * {@link NoReplySMTPTransport}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
 public class NoReplySMTPTransport extends AbstractSMTPTransport {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NoReplySMTPTransport.class);
-
     private final NoReplyConfig noReplyConfig;
 
+    /**
+     * Initializes a new {@link NoReplySMTPTransport}.
+     *
+     * @param contextId The context identifier
+     * @throws OXException If initialization fails
+     */
     public NoReplySMTPTransport(int contextId) throws OXException {
         super(contextId);
         NoReplyConfigFactory configFactory = Services.getService(NoReplyConfigFactory.class);
@@ -112,7 +117,7 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
         SecureMode secureMode = noReplyConfig.getSecureMode();
         smtpConfig.setRequireTls(NoReplyConfig.SecureMode.TLS.equals(secureMode));
         smtpConfig.setSecure(NoReplyConfig.SecureMode.SSL.equals(secureMode));
-        smtpConfig.setTransportProperties(new NoReplySMTPProperties());
+        smtpConfig.setTransportProperties(new NoReplySMTPProperties(noReplyConfig));
         return smtpConfig;
     }
 
@@ -139,18 +144,22 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
         return TransportProperties.getInstance();
     }
 
-    private final class NoReplySMTPProperties implements ISMTPProperties {
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
+    private static final class NoReplySMTPProperties implements ISMTPProperties {
 
         private final TransportProperties serverProperties;
-
         private final SMTPProperties smtpProperties;
+        private final NoReplyConfig noReplyConfig;
 
         /**
          * Initializes a new {@link NoReplySMTPProperties}.
-         * @param serverProperties
-         * @param smtpProperties
+         *
+         * @param noReplyConfig The no-reply configuration
          */
-        NoReplySMTPProperties() {
+        NoReplySMTPProperties(NoReplyConfig noReplyConfig) {
+            super();
+            this.noReplyConfig = noReplyConfig;
             this.smtpProperties = SMTPProperties.getInstance();
             this.serverProperties = TransportProperties.getInstance();
         }

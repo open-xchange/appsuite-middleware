@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,6 +49,7 @@
 
 package com.openexchange.xing.access;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.session.WebAuthSession;
 
@@ -65,7 +66,7 @@ public interface XingOAuthAccess {
      *
      * @return The XING API reference
      */
-    XingAPI<WebAuthSession> getXingAPI();
+    XingAPI<WebAuthSession> getXingAPI() throws OXException;
 
     /**
      * Disposes this XING OAuth access.

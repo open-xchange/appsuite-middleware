@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -52,7 +52,9 @@ package com.openexchange.caldav.mixins;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
@@ -90,7 +92,9 @@ public class ScheduleDefaultCalendarURL extends SingleXMLPropertyMixin {
     protected String getValue() {
         String value = null;
         try {
-            UserizedFolder defaultFolder = factory.getState().getDefaultFolder();
+            String treeID = factory.getConfigValue("com.openexchange.caldav.tree", FolderStorage.REAL_TREE_ID);
+            UserizedFolder defaultFolder = factory.getFolderService().getDefaultFolder(
+                factory.getUser(), treeID, CalendarContentType.getInstance(), factory.getSession(), null);
             if (null != defaultFolder) {
                 value = defaultFolder.getID();
             }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -55,8 +55,10 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
 import com.openexchange.mailaccount.Constants;
+import com.openexchange.mailaccount.json.DefaultMailAccountActionProvider;
+import com.openexchange.mailaccount.json.MailAccountActionProvider;
 import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
-import com.openexchange.mailaccount.json.actions.MailAccountActionFactory;
+import com.openexchange.mailaccount.json.factory.TrackingMailAccountActionFactory;
 
 
 /**
@@ -80,8 +82,13 @@ public final class MailAccountJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(MailAccountActionFactory.getInstance(), Constants.getModule());
         final BundleContext context = this.context;
+
+        DefaultMailAccountActionProvider defaultProvider = new DefaultMailAccountActionProvider();
+
+        TrackingMailAccountActionFactory actionFactory = new TrackingMailAccountActionFactory(defaultProvider, context);
+        track(MailAccountActionProvider.class, actionFactory);
+
         track(JSlobStorageRegistry.class, new ServiceTrackerCustomizer<JSlobStorageRegistry, JSlobStorageRegistry>() {
 
             @Override
@@ -103,6 +110,9 @@ public final class MailAccountJSONActivator extends AJAXModuleActivator {
             }
         });
         openTrackers();
+
+        registerModule(actionFactory, Constants.getModule());
+        registerService(DefaultMailAccountActionProvider.class, defaultProvider);
     }
 
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -183,7 +183,7 @@ public abstract class PasswordChangeService {
                 }
             }
             if (!user.isGuest()) {
-                authenticationService.handleLoginInfo(new _LoginInfo(session.getLogin(), event.getOldPassword(), properties));
+                Authentication.login(new _LoginInfo(session.getLogin(), event.getOldPassword(), properties), authenticationService);
             } else {
                 BasicAuthenticationService basicService = Authentication.getBasicService();
                 if (basicService == null) {
@@ -317,6 +317,7 @@ public abstract class PasswordChangeService {
 
                 jcs = cacheService.getCache("MailAccount");
                 jcs.remove(cacheService.newCacheKey(contextId, String.valueOf(0), String.valueOf(userId)));
+                jcs.remove(cacheService.newCacheKey(contextId, Integer.toString(userId)));
                 jcs.invalidateGroup(Integer.toString(contextId));
             } catch (final OXException e) {
                 // Ignore

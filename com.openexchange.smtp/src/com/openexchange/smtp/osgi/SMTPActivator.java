@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -58,6 +58,7 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.config.NoReplyConfigFactory;
 import com.openexchange.mail.transport.listener.MailTransportListener;
@@ -103,6 +104,7 @@ public final class SMTPActivator extends HousekeepingActivator {
 
             trackService(HostnameService.class);
             trackService(NoReplyConfigFactory.class);
+            trackService(AuditLogService.class);
             track(MailcapCommandMap.class, new MailcapServiceTracker(context));
             openTrackers();
 

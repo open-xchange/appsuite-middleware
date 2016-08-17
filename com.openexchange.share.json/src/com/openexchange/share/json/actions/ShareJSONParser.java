@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -57,6 +57,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -241,16 +242,23 @@ public class ShareJSONParser {
     }
 
     private static InternetAddress parseAddress(JSONArray jRecipient) throws JSONException, OXException {
+        String address = null;
         try {
             if (jRecipient.length() == 1) {
-                return new QuotedInternetAddress(jRecipient.getString(0));
+                address = jRecipient.getString(0);
+                if (EmailValidator.getInstance(true).isValid(address)) {
+                    return new QuotedInternetAddress(address);
+                }
             } else if (jRecipient.length() == 2) {
-                return new QuotedInternetAddress(jRecipient.getString(1), jRecipient.getString(0), "UTF-8");
+                address = jRecipient.getString(1);
+                if (EmailValidator.getInstance(true).isValid(address)) {
+                    return new QuotedInternetAddress(address, jRecipient.getString(0), "UTF-8");
+                }
             }
 
-            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(jRecipient.get(0));
+            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(null != address ? address : jRecipient.get(0));
         } catch (AddressException | UnsupportedEncodingException e) {
-            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(jRecipient.get(0));
+            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(null != address ? address : jRecipient.get(0));
         }
     }
 

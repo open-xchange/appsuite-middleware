@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -51,6 +51,7 @@ package com.openexchange.imap.util;
 
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
+import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPFolderWorker;
@@ -61,6 +62,7 @@ import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.protocol.ListInfo;
 
 /**
  * {@link FolderUtility} - A session-bound cache for IMAP folders converted to a {@link MailFolder} instance.
@@ -120,26 +122,16 @@ public final class FolderUtility {
             } else {
                 f = (IMAPFolder) imapStore.getFolder(fullName);
                 imapFullName = fullName;
-            }
-            boolean ignoreSubscription = folderStorage.getImapConfig().getIMAPProperties().isIgnoreSubscription();
-            boolean exists = "INBOX".equals(imapFullName) || ListLsubCache.getCachedLISTEntry(imapFullName, folderStorage.getAccountId(), f, session, ignoreSubscription).exists();
-            if (!exists) {
-                // Check existence through EXAMINE
-                try {
-                    f.open(IMAPFolder.READ_ONLY);
-                    exists = true;
-                } catch (javax.mail.FolderNotFoundException e) {
-                    exists = false;
-                } finally {
-                    if (exists) {
-                        f.close(false);
-                    }
-                }
-
+                boolean ignoreSubscription = folderStorage.getImapConfig().getIMAPProperties().isIgnoreSubscription();
+                boolean exists = "INBOX".equals(imapFullName) || ListLsubCache.getCachedLISTEntry(imapFullName, folderStorage.getAccountId(), f, session, ignoreSubscription).exists();
                 if (!exists) {
-                    f = folderStorage.checkForNamespaceFolder(imapFullName, f);
-                    if (null == f) {
-                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                    // Do explicit LIST for "hidden" folders not appearing in LIST "" "*", but dedicatedly LISTable
+                    ListInfo listInfo = IMAPCommandsCollection.getListInfo(imapFullName, f);
+                    if (null == listInfo) {
+                        f = folderStorage.checkForNamespaceFolder(imapFullName, f);
+                        if (null == f) {
+                            throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                        }
                     }
                 }
             }

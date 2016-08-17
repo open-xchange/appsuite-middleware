@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -62,6 +62,7 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.user.UserService;
 
 /**
@@ -100,6 +101,9 @@ public class AppointmentJSONActivator extends AJAXModuleActivator {
                 return capabilities.contains(Permission.CALENDAR.getCapabilityName());
             }
         });
+
+        trackService(ObjectUseCountService.class);
+        openTrackers();
     }
 
 }

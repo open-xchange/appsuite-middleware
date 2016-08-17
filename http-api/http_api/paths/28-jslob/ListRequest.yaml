@@ -1,0 +1,30 @@
+/jslob?action=list:
+  put:
+    operationId: getJSlobList
+    tags:
+      - JSlob
+    summary: Gets a list of JSlobs (**available since v6.22**).
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: serviceId
+        type: string
+        description: The identifier for the JSlob service, default is "com.openexchange.jslob.config".
+        required: false
+      - in: body
+        name: body
+        description: A JSON array with the identifiers of the requested JSlobs.
+        required: true
+        schema:
+          type: array
+          items:
+            type: string
+    responses:
+      200:
+        description: |
+          A JSON object containing an array of JSON objects each representing a certain JSON configuration.
+          In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/JSlobsResponse"

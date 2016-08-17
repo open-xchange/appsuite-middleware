@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -46,11 +46,13 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.daemons;
 
 import com.openexchange.admin.tools.AdminCache;
 
 public class ClientAdminThread extends Thread {
-    public static AdminCache      cache       = null;
-    public static Object create_mutex = new Object();
+
+    public static volatile AdminCache cache;
+    public static final Object create_mutex = new Object();
 }

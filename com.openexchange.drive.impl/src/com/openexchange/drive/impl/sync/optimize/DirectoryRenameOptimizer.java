@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -305,7 +305,7 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
         if (null == path1) {
             return null == path2 ? Integer.MAX_VALUE : 0;
         } else if (null == path2) {
-            return null == path1 ? Integer.MAX_VALUE : 0;
+            return 0;
         } else if (path1.equals(path2)) {
             return Integer.MAX_VALUE;
         }

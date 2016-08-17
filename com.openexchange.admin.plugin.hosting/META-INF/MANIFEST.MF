@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Hosting Plugin for Administration Daemon
 Bundle-SymbolicName: com.openexchange.admin.plugin.hosting
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Activator: com.openexchange.admin.osgi.MainActivator
 Import-Package: com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.dataobjects,
@@ -11,6 +11,7 @@ Import-Package: com.openexchange.admin.rmi,
  com.openexchange.caching,
  com.openexchange.caching.events,
  com.openexchange.config,
+ com.openexchange.config.cascade,
  com.openexchange.context,
  com.openexchange.database,
  com.openexchange.databaseold,

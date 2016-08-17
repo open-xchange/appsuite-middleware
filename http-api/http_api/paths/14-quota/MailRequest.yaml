@@ -1,0 +1,15 @@
+/quota?action=mail:
+  get:
+    operationId: getMailUsage
+    tags:
+      - quota
+    summary: Gets the mail usage data.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+    responses:
+      200:
+        description: |
+          A JSON object containing the mail quota. In case of errors the responsible
+          fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/QuotaResponse"

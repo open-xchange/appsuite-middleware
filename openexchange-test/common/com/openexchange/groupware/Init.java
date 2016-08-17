@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -98,7 +98,6 @@ import com.openexchange.contact.internal.ContactServiceLookup;
 import com.openexchange.contact.storage.internal.DefaultContactStorageRegistry;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
-import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.contacts.json.converters.ContactInsertDataHandler;
 import com.openexchange.context.ContextService;
 import com.openexchange.context.internal.ContextServiceImpl;
@@ -157,13 +156,14 @@ import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.storecache.IMAPStoreCache;
 import com.openexchange.mail.MailProviderRegistry;
+import com.openexchange.mail.autoconfig.AutoconfigService;
+import com.openexchange.mail.autoconfig.internal.AutoconfigServiceImpl;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.transport.config.TransportPropertiesInit;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.osgi.util.ServiceCallWrapperModifier;
 import com.openexchange.passwordmechs.PasswordMechFactoryImpl;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
@@ -236,7 +236,7 @@ public final class Init {
 
     private static final Map<Class<?>, Object> services = new HashMap<Class<?>, Object>();
 
-    private static final ServiceLookup LOOKUP = new ServiceLookup() {
+    public static final ServiceLookup LOOKUP = new ServiceLookup() {
 
         @Override
         public <S> S getService(Class<? extends S> clazz) {
@@ -444,6 +444,10 @@ public final class Init {
         startTestServices = System.currentTimeMillis();
         startAndInjectMailAccountStorageService();
         System.out.println("startAndInjectMailAccountStorageService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
+        startAndInjectMailAutoconfigService();
+        System.out.println("startAndInjectMailAutoconfigService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
 
         startTestServices = System.currentTimeMillis();
         startAndInjectMailBundle();
@@ -878,17 +882,7 @@ public final class Init {
     }
 
     private static void startAndInjectContactCollector() {
-        CCServiceRegistry.SERVICE_REGISTRY.set(new ServiceRegistry());
-        final ServiceRegistry reg = CCServiceRegistry.getInstance();
-        if (null == reg.getService(TimerService.class)) {
-            reg.addService(TimerService.class, services.get(TimerService.class));
-            reg.addService(ThreadPoolService.class, services.get(ThreadPoolService.class));
-            reg.addService(ContextService.class, services.get(ContextService.class));
-            reg.addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
-            reg.addService(UserService.class, services.get(UserService.class));
-            //            reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
-            reg.addService(ContactService.class, services.get(ContactService.class));
-        }
+        // Nothing to do
     }
 
     private static void startAndInjectMailAccountStorageService() throws Exception {
@@ -908,6 +902,14 @@ public final class Init {
             final UnifiedInboxManagement unifiedINBOXManagement = MailAccountStorageInit.newUnifiedINBOXManagement();
             services.put(UnifiedInboxManagement.class, unifiedINBOXManagement);
             TestServiceRegistry.getInstance().addService(UnifiedInboxManagement.class, unifiedINBOXManagement);
+        }
+    }
+
+    private static void startAndInjectMailAutoconfigService() throws Exception {
+        if (null == TestServiceRegistry.getInstance().getService(AutoconfigService.class)) {
+            AutoconfigService service = new AutoconfigServiceImpl(LOOKUP);
+            services.put(AutoconfigService.class, service);
+            TestServiceRegistry.getInstance().addService(AutoconfigService.class, service);
         }
     }
 

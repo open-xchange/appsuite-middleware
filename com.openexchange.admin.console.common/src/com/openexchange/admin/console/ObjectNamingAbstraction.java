@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -95,6 +95,14 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
         createMessage(id, ctxid, type, System.out, parser, false);
     }
 
+    protected void createMessageForStdout(final String message, final AdminParser parser) {
+        createMessage(message, System.out, parser, false);
+    }
+
+    protected void createLinefeedForStdout(AdminParser parser) {
+        createMessage("", System.out, parser, false);
+    }
+
     /**
      * @param id
      * @param ctxid
@@ -119,15 +127,19 @@ public abstract class ObjectNamingAbstraction extends BasicCommandlineOptions {
             sb.append(" ");
             sb.append(type);
         }
-        if( null != parser && parser.checkNoNewLine()) {
-            final String output = sb.toString().replace("\n", "");
+        createMessage(sb.toString(), ps, parser, followingtext);
+    }
+
+    private void createMessage(String message, PrintStream ps, AdminParser parser, boolean followingtext) {
+        if (null != parser && parser.checkNoNewLine()) {
+            String output = null == message || 0 == message.length() ? "" : message.replaceAll("\r?\n", "");
             if (followingtext) {
                 ps.print(output);
             } else {
                 ps.println(output);
             }
         } else {
-            ps.println(sb.toString());
+            ps.println(message);
         }
     }
 

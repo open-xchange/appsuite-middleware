@@ -1,0 +1,8 @@
+type: object
+properties:
+  $ref: ./CommonResponseData.yaml
+  data:
+    type: array
+    description: An array containing the actions the client should execute for synchronization. If `diagnostics` parameter is set, this is a JSON object with the fields `actions` (array of actions to execute) and `diagnostics` (contains diagnostics trace).
+    items:
+      $ref: "#/definitions/DriveAction"

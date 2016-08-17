@@ -1,0 +1,25 @@
+/mailfilter?action=list:
+  get:
+    operationId: getRules
+    tags:
+      - mailfilter
+    summary: Gets all mail filter rules.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: flag
+        type: string
+        description:  If given, only rules with this flag are returned.
+        required: false
+      - in: query
+        name: username
+        type: string
+        description: Must contain the user name for **admin mode**. So the normal credentials are taken for authentication but the mail filter of the user with this username is being changed.
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object with an array of rule-objects. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/MailFilterRulesResponse"

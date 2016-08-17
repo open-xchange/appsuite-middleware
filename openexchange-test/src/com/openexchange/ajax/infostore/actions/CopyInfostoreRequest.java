@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -69,15 +69,21 @@ import com.openexchange.file.storage.File;
  */
 public class CopyInfostoreRequest extends AbstractInfostoreRequest<CopyInfostoreResponse> {
 
-    String id;
-    String folderId;
+    private String id;
+    private String folderId;
     private com.openexchange.file.storage.File metadata;
+    private String version;
 
     public CopyInfostoreRequest(String id, String folderId, File file) {
+        this(id, folderId, file, null);
+    }
+    
+    public CopyInfostoreRequest(String id, String folderId, File file, String version) {
         super();
         this.id = id;
         this.folderId = folderId;
         this.metadata = file;
+        this.version = version;
     }
 
     @Override
@@ -87,11 +93,14 @@ public class CopyInfostoreRequest extends AbstractInfostoreRequest<CopyInfostore
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        List<Parameter> tmp = new ArrayList<Parameter>(3);
+        List<Parameter> tmp = new ArrayList<Parameter>(4);
         tmp.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_COPY));
         tmp.add(new Parameter(AJAXServlet.PARAMETER_ID, id));
         tmp.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
         tmp.add(new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, new Date()));
+        if (version != null) {
+            tmp.add(new Parameter(AJAXServlet.PARAMETER_VERSION, this.version));
+        }
         return tmp.toArray(new Parameter[tmp.size()]);
     }
 

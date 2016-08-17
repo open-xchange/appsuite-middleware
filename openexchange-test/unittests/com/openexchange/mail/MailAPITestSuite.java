@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -79,7 +79,7 @@ public final class MailAPITestSuite extends TestSuite {
 		/*
 		 * Message storage
 		 */
-		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailAppendTest.class);
+//		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailAppendTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailAttachmentTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailColorLabelTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.messagestorage.MailCopyTest.class);

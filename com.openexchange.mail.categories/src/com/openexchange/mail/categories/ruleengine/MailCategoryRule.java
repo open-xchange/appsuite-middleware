@@ -64,8 +64,9 @@ public class MailCategoryRule {
     private boolean hasSubRules;
     private List<MailCategoryRule> subRules;
     private boolean isAND;
-    private String header;
-    private String value;
+    private List<String> headers;
+    private List<String> values;
+    private String[] flagsToRemove;
 
     /**
      * Initializes a new {@link MailCategoryRule} with subrules.
@@ -86,10 +87,10 @@ public class MailCategoryRule {
      * @param value The value of the header field.
      * @param flag The mail flag
      */
-    public MailCategoryRule(String header, String value, String flag) {
+    public MailCategoryRule(List<String> headers, List<String> values, String flag) {
         super();
-        this.header = header;
-        this.value = value;
+        this.headers = headers;
+        this.values = values;
         this.flag = flag;
     }
 
@@ -109,12 +110,20 @@ public class MailCategoryRule {
         return isAND;
     }
 
-    public String getHeader() {
-        return header;
+    public List<String> getHeaders() {
+        return headers;
     }
 
-    public String getValue() {
-        return value;
+    public List<String> getValues() {
+        return values;
+    }
+
+    public void addFlagsToRemove(String... flags) {
+        this.flagsToRemove = flags;
+    }
+
+    public String[] getFlagsToRemove() {
+        return flagsToRemove;
     }
 
     /**

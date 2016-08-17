@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,10 +49,8 @@
 
 package com.openexchange.mail.transport.config;
 
-import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.i18n.LocaleTools;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -85,19 +83,7 @@ public final class TransportProperties implements ITransportProperties {
 
     private String defaultTransportProvider;
 
-    private boolean publishOnExceededQuota;
-
     private String publishingInfostoreFolder;
-
-    private boolean publishPrimaryAccountOnly;
-
-    private boolean sendAttachmentToExternalRecipients;
-
-    private boolean provideLinksInAttachment;
-
-    private long publishedDocumentTimeToLive;
-
-    private Locale externalRecipientsLocale;
 
     private boolean removeMimeVersionInSubParts;
 
@@ -142,12 +128,6 @@ public final class TransportProperties implements ITransportProperties {
     private void resetFields() {
         referencedPartLimit = 0;
         publishingInfostoreFolder = null;
-        publishOnExceededQuota = false;
-        publishPrimaryAccountOnly = true;
-        sendAttachmentToExternalRecipients = false;
-        provideLinksInAttachment = false;
-        publishedDocumentTimeToLive = 604800000L;
-        externalRecipientsLocale = null;
         removeMimeVersionInSubParts = false;
         enforceSecureConnection = false;
     }
@@ -180,68 +160,11 @@ public final class TransportProperties implements ITransportProperties {
         }
 
         {
-            final String tmp = configuration.getProperty("com.openexchange.mail.transport.enablePublishOnExceededQuota", "false").trim();
-            publishOnExceededQuota = Boolean.parseBoolean(tmp);
-            logBuilder.append("\tPublish On Exceeded Quota: ").append(publishOnExceededQuota).append('\n');
-        }
-
-        {
             final String tmp = configuration.getProperty(
                 "com.openexchange.mail.transport.publishingPublicInfostoreFolder",
                 "i18n-defined").trim();
             publishingInfostoreFolder = tmp;
             logBuilder.append("\tPublishing Infostore Folder Name: \"").append(publishingInfostoreFolder).append('"').append('\n');
-        }
-
-        {
-            final String tmp = configuration.getProperty("com.openexchange.mail.transport.publishPrimaryAccountOnly", "true").trim();
-            publishPrimaryAccountOnly = Boolean.parseBoolean(tmp);
-            logBuilder.append("\tPublish Primary Account Only: ").append(publishPrimaryAccountOnly).append('\n');
-        }
-
-        {
-            final String tmp = configuration.getProperty("com.openexchange.mail.transport.sendAttachmentToExternalRecipients", "false").trim();
-            sendAttachmentToExternalRecipients = Boolean.parseBoolean(tmp);
-            logBuilder.append("\tSend Attachment to External Recipients: ").append(sendAttachmentToExternalRecipients).append('\n');
-        }
-
-        {
-            final String tmp = configuration.getProperty("com.openexchange.mail.transport.provideLinksInAttachment", "false").trim();
-            provideLinksInAttachment = Boolean.parseBoolean(tmp);
-            logBuilder.append("\tProvide Links In Attachment: ").append(provideLinksInAttachment).append('\n');
-        }
-
-        {
-            final String tmp = configuration.getProperty("com.openexchange.mail.transport.publishedDocumentTimeToLive", "604800000").trim();
-            try {
-                publishedDocumentTimeToLive = Long.parseLong(tmp);
-            } catch (final NumberFormatException e) {
-                LOG.warn("Value of property \"com.openexchange.mail.transport.publishedDocumentTimeToLive\" is not a number: {}. Using fallback 604800000 instead.", tmp,
-                    e);
-                publishedDocumentTimeToLive = 604800000L;
-            }
-            logBuilder.append("\tPublished Document Time-to-Live: ").append(publishedDocumentTimeToLive).append('\n');
-        }
-
-        {
-            final String tmp = configuration.getProperty("com.openexchange.mail.transport.externalRecipientsLocale", "user-defined").trim();
-            if ("user-defined".equalsIgnoreCase(tmp)) {
-                externalRecipientsLocale = null;
-                logBuilder.append("\tExternal Recipients Locale: ").append("user-defined").append('\n');
-            } else {
-                try {
-                    externalRecipientsLocale = LocaleTools.getLocale(tmp);
-                } catch (final Exception e) {
-                    LOG.warn("Value of property \"com.openexchange.mail.transport.externalRecipientsLocale\" is not a valid locale identifier (such as \"en_US\"): {}. Using fallback \"en\" instead.", tmp,
-                        e);
-                    externalRecipientsLocale = Locale.ENGLISH;
-                }
-                if (null == externalRecipientsLocale) {
-                    LOG.warn("Value of property \"com.openexchange.mail.transport.externalRecipientsLocale\" is not a valid locale identifier (such as \"en_US\"): {}. Using fallback \"en\" instead.", tmp);
-                    externalRecipientsLocale = Locale.ENGLISH;
-                }
-                logBuilder.append("\tExternal Recipients Locale: ").append(externalRecipientsLocale.toString()).append('\n');
-            }
         }
 
         {
@@ -290,69 +213,6 @@ public final class TransportProperties implements ITransportProperties {
      */
     public String getPublishingInfostoreFolder() {
         return publishingInfostoreFolder;
-    }
-
-    /**
-     * Checks if exceeded attachments shall be published rather than throwing an exceeded-quota exception.
-     *
-     * @return <code>true</code> if exceeded attachments shall be published rather than throwing an exceeded-quota exception; otherwise
-     *         <code>false</code>
-     */
-    public boolean isPublishOnExceededQuota() {
-        return publishOnExceededQuota;
-    }
-
-    /**
-     * Checks if publishing of email attachments is only enabled for primary account.
-     *
-     * @return <code>true</code> if publishing of email attachments is only enabled for primary account; otherwise <code>false</code>
-     */
-    public boolean isPublishPrimaryAccountOnly() {
-        return publishPrimaryAccountOnly;
-    }
-
-    /**
-     * Checks if attachments shall be sent to external recipients although quota was exceeded.
-     *
-     * @return <code>true</code> if attachments shall be sent to external recipients although quota was exceeded; othjerwise
-     *         <code>false</code>
-     */
-    public boolean isSendAttachmentToExternalRecipients() {
-        return sendAttachmentToExternalRecipients;
-    }
-
-    /**
-     * Checks if publication links shall be provided in "text/html" file attachment named "links.html".
-     *
-     * @return <code>true</code> if publication links shall be provided in "text/html" file attachment; otherwise <code>false</code>
-     */
-    public boolean isProvideLinksInAttachment() {
-        return provideLinksInAttachment;
-    }
-
-    /**
-     * Gets the time-to-live in milliseconds for published documents.
-     *
-     * @return The time-to-live in milliseconds for published documents
-     */
-    public long getPublishedDocumentTimeToLive() {
-        return publishedDocumentTimeToLive;
-    }
-
-    /**
-     * Determines if published documents should expire.
-     */
-    public boolean publishedDocumentsExpire() {
-        return publishedDocumentTimeToLive > 0;
-    }
-
-    /**
-     * Gets the locale to use when composing text sent to external recipients.
-     *
-     * @return The locale to use when composing text sent to external recipients or <code>null</code> to select user's locale
-     */
-    public Locale getExternalRecipientsLocale() {
-        return externalRecipientsLocale;
     }
 
     @Override

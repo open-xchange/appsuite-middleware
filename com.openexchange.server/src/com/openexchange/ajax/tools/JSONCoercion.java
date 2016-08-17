@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -52,7 +52,6 @@ package com.openexchange.ajax.tools;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,25 +124,28 @@ public class JSONCoercion {
      */
     public static Object coerceToNative(final Object object) throws JSONException {
         if (object instanceof JSONArray) {
-            final JSONArray jsonArray = (JSONArray) object;
-            final int length = jsonArray.length();
-            final List<Object> list = new ArrayList<Object>(length);
+            JSONArray jsonArray = (JSONArray) object;
+            int length = jsonArray.length();
+            List<Object> list = new ArrayList<Object>(length);
             for (int i = 0; i < length; i++) {
                 list.add(coerceToNative(jsonArray.get(i)));
             }
             return list;
         }
+
         if (object instanceof JSONObject) {
-            final JSONObject jsonObject = (JSONObject) object;
-            final Map<String, Object> map = new HashMap<String, Object>(jsonObject.length());
-            for (final String key : jsonObject.keySet()) {
-                map.put(key, coerceToNative(jsonObject.get(key)));
+            JSONObject jsonObject = (JSONObject) object;
+            Map<String, Object> map = new LinkedHashMap<String, Object>(jsonObject.length());
+            for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
+                map.put(entry.getKey(), coerceToNative(entry.getValue()));
             }
             return map;
         }
+
         if (JSONObject.NULL == object) {
             return null;
         }
+
         return object;
     }
 

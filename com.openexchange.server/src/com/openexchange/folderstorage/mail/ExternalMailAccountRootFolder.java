@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -111,7 +111,11 @@ public class ExternalMailAccountRootFolder extends AbstractFolder {
         parent = FolderStorage.PRIVATE_ID;
         final MailPermissionImpl mp = new MailPermissionImpl();
         mp.setEntity(userId);
-        mp.setAllPermissions(Permission.CREATE_SUB_FOLDERS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
+        if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
+            mp.setAllPermissions(Permission.CREATE_OBJECTS_IN_FOLDER, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
+        } else {
+            mp.setAllPermissions(Permission.CREATE_SUB_FOLDERS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
+        }
         mp.setAdmin(false);
         permissions = new Permission[] { mp };
         type = SystemType.getInstance();

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -56,6 +56,8 @@ import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObje
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -173,18 +175,28 @@ public class CSVContactExporter implements Exporter {
             EnumSet<ContactField> illegalFields = EnumSet.complementOf(POSSIBLE_FIELDS);
             fields = ContactMapper.getInstance().getFields(fieldsToBeExported, illegalFields, (ContactField[])null);
         }
-        SearchIterator<Contact> conIter;
-        try {
-            conIter = ImportExportServices.getContactService().getAllContacts(sessObj, Integer.toString(folderId), fields);
-        } catch (final OXException e) {
-            throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
-        }
 
         final boolean exportDlists;
         if (optionalParams == null) {
-        	exportDlists = true;
+            exportDlists = true;
         } else {
-        	exportDlists = optionalParams.containsKey(PARAMETER_EXPORT_DLISTS) ? Boolean.valueOf(optionalParams.get(PARAMETER_EXPORT_DLISTS).toString()).booleanValue() : true;
+            exportDlists = optionalParams.containsKey(PARAMETER_EXPORT_DLISTS) ? Boolean.valueOf(optionalParams.get(PARAMETER_EXPORT_DLISTS).toString()).booleanValue() : true;
+        }
+
+        SearchIterator<Contact> conIter;
+        try {
+            if (!exportDlists) {
+                List<ContactField> fieldList = Arrays.asList(fields.clone());
+                if (!fieldList.contains(ContactField.MARK_AS_DISTRIBUTIONLIST)) {
+                    fieldList = new ArrayList<>(fieldList);
+                    fieldList.add(ContactField.MARK_AS_DISTRIBUTIONLIST);
+                }
+                conIter = ImportExportServices.getContactService().getAllContacts(sessObj, Integer.toString(folderId), fieldList.toArray(new ContactField[fieldList.size()]));
+            } else {
+                conIter = ImportExportServices.getContactService().getAllContacts(sessObj, Integer.toString(folderId), fields);
+            }
+        } catch (final OXException e) {
+            throw ImportExportExceptionCodes.LOADING_CONTACTS_FAILED.create(e);
         }
 
         boolean inMemory = false;
@@ -196,7 +208,7 @@ public class CSVContactExporter implements Exporter {
                     Contact current;
                     try {
                         current = conIter.next();
-                        if (!exportDlists && current.containsDistributionLists()) {
+                        if (!exportDlists && current.getMarkAsDistribtuionlist()) {
                             continue;
                         }
                         ret.append(convertToLine(convertToList(current, fields)));
@@ -223,7 +235,7 @@ public class CSVContactExporter implements Exporter {
                     Contact current;
                     try {
                         current = conIter.next();
-                        if (!exportDlists && current.containsDistributionLists()) {
+                        if (!exportDlists && current.getMarkAsDistribtuionlist()) {
                             continue;
                         }
                         writer.write(convertToLine(convertToList(current, fields)));

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -48,22 +48,6 @@
  */
 
 package com.openexchange.file.storage;
-
-import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
-import com.openexchange.file.storage.FileStorageETagProvider;
-import com.openexchange.file.storage.FileStorageEfficientRetrieval;
-import com.openexchange.file.storage.FileStorageExtendedMetadata;
-import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
-import com.openexchange.file.storage.FileStorageLockedFileAccess;
-import com.openexchange.file.storage.FileStoragePersistentIDs;
-import com.openexchange.file.storage.FileStorageRandomFileAccess;
-import com.openexchange.file.storage.FileStorageRangeFileAccess;
-import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
-import com.openexchange.file.storage.FileStorageVersionedFileAccess;
-import com.openexchange.file.storage.ObjectPermissionAware;
-import com.openexchange.file.storage.ThumbnailAware;
-
 
 /**
  * {@link FileStorageCapabilityTools} - Utility class for file storage capabilities.
@@ -123,8 +107,12 @@ public class FileStorageCapabilityTools {
             return Boolean.valueOf(FileStorageMultiMove.class.isAssignableFrom(fileAccessClass));
         case READ_ONLY:
             return Boolean.valueOf(FileStorageReadOnly.class.isAssignableFrom(fileAccessClass));
-        case MAIL_STORE:
-            return Boolean.valueOf(FileStorageMailStore.class.isAssignableFrom(fileAccessClass));
+        case MAIL_ATTACHMENTS:
+            return Boolean.valueOf(FileStorageMailAttachments.class.isAssignableFrom(fileAccessClass));
+        case AUTO_NEW_VERSION:
+            return Boolean.valueOf(FileStorageIgnorableVersionFileAccess.class.isAssignableFrom(fileAccessClass));
+        case ZIPPABLE_FOLDER:
+            return Boolean.valueOf(FileStorageZippableFolderFileAccess.class.isAssignableFrom(fileAccessClass));
         default:
             org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class).warn("Unknown capability: {}", capability);
             return Boolean.FALSE;
@@ -172,8 +160,12 @@ public class FileStorageCapabilityTools {
             return FileStorageMultiMove.class.isInstance(fileAccess);
         case READ_ONLY:
             return FileStorageReadOnly.class.isInstance(fileAccess);
-        case MAIL_STORE:
-            return FileStorageMailStore.class.isInstance(fileAccess);
+        case MAIL_ATTACHMENTS:
+            return FileStorageMailAttachments.class.isInstance(fileAccess);
+        case AUTO_NEW_VERSION:
+            return FileStorageIgnorableVersionFileAccess.class.isInstance(fileAccess);
+        case ZIPPABLE_FOLDER:
+            return FileStorageZippableFolderFileAccess.class.isInstance(fileAccess);
         default:
             org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class).warn("Unknown capability: {}", capability);
             return false;

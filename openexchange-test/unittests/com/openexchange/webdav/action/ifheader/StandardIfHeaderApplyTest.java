@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -53,7 +53,6 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import junit.framework.TestCase;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -62,6 +61,7 @@ import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
+import junit.framework.TestCase;
 
 /**
  * {@link StandardIfHeaderApplyTest}
@@ -137,8 +137,6 @@ public class StandardIfHeaderApplyTest extends TestCase {
 
     protected WebdavResource resourceWithETag(final String eTag) {
         return new WebdavResource() {
-
-
 
             @Override
             public String getETag() throws WebdavProtocolException {
@@ -335,6 +333,11 @@ public class StandardIfHeaderApplyTest extends TestCase {
             public Protocol getProtocol() {
                 // Nothing to do
                 return null;
+            }
+
+            @Override
+            public WebdavProperty getProperty(WebdavProperty property) throws WebdavProtocolException {
+                return getProperty(property.getNamespace(), property.getName());
             }
 
         };
@@ -543,6 +546,11 @@ public class StandardIfHeaderApplyTest extends TestCase {
             public Protocol getProtocol() {
                 // Nothing to do
                 return null;
+            }
+
+            @Override
+            public WebdavProperty getProperty(WebdavProperty property) throws WebdavProtocolException {
+                return getProperty(property.getNamespace(), property.getName());
             }
 
         };

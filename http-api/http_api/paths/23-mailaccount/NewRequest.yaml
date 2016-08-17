@@ -1,0 +1,23 @@
+/account?action=new:
+  put:
+    operationId: createAccount
+    tags:
+      - mailaccount
+    summary: Creates a new mail account (**available since v6.12**).
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON object describing the new account to create.
+        required: true
+        schema:
+          $ref: "#/definitions/MailAccountData"
+    responses:
+      200:
+        description: |
+          A JSON object containing the data of the inserted mail account. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/MailAccountUpdateResponse"

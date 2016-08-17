@@ -1,0 +1,16 @@
+type: object
+properties:
+  num_found:
+    type: integer
+    description: The number of found items.
+  start:
+    type: integer
+    description: The start of the pagination.
+  size:
+    type: integer
+    description: The page size.
+  results:
+    type: array
+    description: An array of search results. Each result is described by a JSON object containing the fields specified in the `columns` parameter.
+    items:
+      type: object

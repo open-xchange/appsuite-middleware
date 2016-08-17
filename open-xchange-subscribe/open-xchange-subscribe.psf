@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.crawler"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.google"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.microformats"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.mslive"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.yahoo"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.subscribe.xing"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.subscribe.crawler"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.subscribe.google"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.subscribe.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.subscribe.microformats"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.subscribe.mslive"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.subscribe.yahoo"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.subscribe.xing"/>
 </provider>
 </psf>

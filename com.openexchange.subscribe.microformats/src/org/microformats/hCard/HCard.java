@@ -1087,7 +1087,7 @@ public final class HCard implements Serializable {
             appendStringValue(sb, "titles", sl2j(titles));
         }
 
-		if ( adrs.size() > 0 ) {
+		if ( orgs.size() > 0 ) {
 			sb.append("\"orgs\":[");
 			boolean first = true;
 			for ( Organization org : orgs ) {

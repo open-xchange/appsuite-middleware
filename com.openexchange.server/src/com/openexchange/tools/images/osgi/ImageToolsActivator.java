@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,18 +49,9 @@
 
 package com.openexchange.tools.images.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.imagetransformation.ImageTransformationProvider;
 import com.openexchange.imagetransformation.TransformedImageCreator;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.processing.ProcessorService;
-import com.openexchange.timer.TimerService;
 import com.openexchange.tools.images.DefaultTransformedImageCreator;
-import com.openexchange.tools.images.impl.JavaImageTransformationProvider;
-import com.openexchange.tools.images.scheduler.Scheduler;
 
 
 /**
@@ -73,24 +64,16 @@ public class ImageToolsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ProcessorService.class, TimerService.class };
+        return EMPTY_CLASSES;
     }
 
     @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        // Register services
         registerService(TransformedImageCreator.class, new DefaultTransformedImageCreator());
-        Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-        properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-        registerService(ImageTransformationProvider.class, new JavaImageTransformationProvider(), properties);
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        Scheduler.shutDown();
         super.stopBundle();
     }
 

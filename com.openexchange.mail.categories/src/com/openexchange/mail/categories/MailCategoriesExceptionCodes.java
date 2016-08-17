@@ -64,19 +64,19 @@ import com.openexchange.exception.OXExceptionStrings;
 public enum MailCategoriesExceptionCodes implements DisplayableOXExceptionCode {
     
     /**
-     * The user category %1$s already exists.
-     */
-    USER_CATEGORY_ALREADY_EXISTS("The user category %1$s already exists.", CATEGORY_USER_INPUT, 1, MailCategoriesExceptionStrings.USER_CATEGORY_ALREADY_EXISTS),
-
-    /**
      * The user category %1$s does not exist.
      */
-    USER_CATEGORY_DOES_NOT_EXIST("The user category %1$s does not exist.", CATEGORY_USER_INPUT, 2, MailCategoriesExceptionStrings.USER_CATEGORY_DOES_NOT_EXIST),
+    USER_CATEGORY_DOES_NOT_EXIST("The user category %1$s does not exist.", CATEGORY_USER_INPUT, 1, MailCategoriesExceptionStrings.USER_CATEGORY_DOES_NOT_EXIST),
 
     /**
      * Invalid configuration: %1$s
      */
-    INVALID_CONFIGURATION("Invalid configuration: %1$s", CATEGORY_USER_INPUT, 3, MailCategoriesExceptionStrings.INVALID_CONFIGURATION),
+    INVALID_CONFIGURATION_EXTENDED("Invalid configuration: %1$s", CATEGORY_USER_INPUT, 2, MailCategoriesExceptionStrings.INVALID_CONFIGURATION_EXTENDED),
+
+    /**
+     * Invalid configuration.
+     */
+    INVALID_CONFIGURATION("Invalid configuration.", CATEGORY_USER_INPUT, 3, MailCategoriesExceptionStrings.INVALID_CONFIGURATION),
 
     /**
      * A JSON error occurred: %1$s
@@ -89,9 +89,14 @@ public enum MailCategoriesExceptionCodes implements DisplayableOXExceptionCode {
     SERVICE_UNAVAILABLE("The required service %1$s is temporary not available. Please try again later.", Category.CATEGORY_TRY_AGAIN, 5, MailCategoriesExceptionStrings.SERVICE_UNAVAILABLE_MSG),
     
     /**
-     * Unable to create category. Missing parameter %1$s.
+     * You are not allowed to change the name of the category %1$s.
      */
-    MISSING_PARAMETER("Unable to create category. Missing parameter %1$s.", Category.CATEGORY_USER_INPUT, 6, MailCategoriesExceptionStrings.MISSING_PARAMETER),
+    CHANGE_NAME_NOT_ALLOWED("You are not allowed to change the name of the category %1$s.", Category.CATEGORY_USER_INPUT, 6, MailCategoriesExceptionStrings.CHANGE_NAME_NOT_ALLOWED),
+
+    /**
+     * You are not allowed to enable or disable the category %1$s.
+     */
+    SWITCH_NOT_ALLOWED("You are not allowed to enable or disable the category %1$s.", Category.CATEGORY_USER_INPUT, 8, MailCategoriesExceptionStrings.SWITCH_NOT_ALLOWED),
 
     ;
 

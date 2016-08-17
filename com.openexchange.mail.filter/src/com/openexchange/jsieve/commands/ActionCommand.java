@@ -94,6 +94,7 @@ public class ActionCommand extends ControlOrActionCommand {
         VACATION("vacation", 1, vacationTags(), "vacation", Collections.singletonList("vacation")),
         ENOTIFY("notify", 1, enotifyTags(), "notify", Collections.singletonList("enotify")),
         ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "addflags", java.util.Arrays.asList("imapflags", "imap4flags")),
+        REMOVEFLAG("removeflag", 1, new Hashtable<String, Integer>(), "removeflags", java.util.Arrays.asList("imapflags", "imap4flags")),
         PGP_ENCRYPT("pgp_encrypt", 0, pgpEncryptTags(), "pgp", java.util.Arrays.asList("vnd.dovecot.pgp-encrypt")),
         ADDHEADER("addheader", 2, addHeaderTags(), "addheader", Collections.singletonList("editheader")),
         DELETEHEADER("deleteheader", 1, deleteHeaderTags(), "deleteheader", Collections.singletonList("editheader")),

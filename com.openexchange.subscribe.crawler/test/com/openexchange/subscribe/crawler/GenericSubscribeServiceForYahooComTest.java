@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -52,7 +52,7 @@ package com.openexchange.subscribe.crawler;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import org.ho.yaml.Yaml;
+import org.yaml.snakeyaml.Yaml;
 import com.openexchange.subscribe.crawler.internal.PagePart;
 import com.openexchange.subscribe.crawler.internal.PagePartSequence;
 import com.openexchange.subscribe.crawler.internal.Step;
@@ -125,7 +125,7 @@ public class GenericSubscribeServiceForYahooComTest extends GenericSubscribeServ
 
         Workflow workflow = new Workflow(steps);
         //workflow.setUseThreadedRefreshHandler(true);
-        crawler.setWorkflowString(Yaml.dump(workflow));
+        crawler.setWorkflowString(new Yaml().dump(workflow));
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler, true);
         // uncomment this if the if the crawler description was updated to get the new config-files

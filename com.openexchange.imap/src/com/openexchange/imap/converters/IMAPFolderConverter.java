@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -174,11 +174,25 @@ public final class IMAPFolderConverter {
      * @throws OXException If IMAP folder's attributes cannot be accessed
      */
     public static Entity2ACLArgs getEntity2AclArgs(Session session, IMAPFolder imapFolder, IMAPConfig imapConfig) throws OXException {
+        return getEntity2AclArgs(session.getUserId(), session, imapFolder, imapConfig);
+    }
+
+    /**
+     * Creates an appropriate implementation of {@link Entity2ACLArgs}.
+     *
+     * @param userId The user identifier
+     * @param session The session
+     * @param imapFolder The IMAP folder
+     * @param imapConfig The IMAP configuration
+     * @return An appropriate implementation of {@link Entity2ACLArgs}
+     * @throws OXException If IMAP folder's attributes cannot be accessed
+     */
+    public static Entity2ACLArgs getEntity2AclArgs(int userId, Session session, IMAPFolder imapFolder, IMAPConfig imapConfig) throws OXException {
         try {
             return new Entity2ACLArgsImpl(
                 imapConfig.getAccountId(),
                 new StringBuilder(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(),
-                session.getUserId(),
+                userId,
                 imapFolder.getFullName(),
                 ListLsubCache.getSeparator(imapConfig.getAccountId(), imapFolder, session, imapConfig.getIMAPProperties().isIgnoreSubscription()),
                 NamespaceFoldersCache.getUserNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()),

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -51,14 +51,15 @@ package com.openexchange.contact.storage.ldap.osgi;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import org.slf4j.Logger;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.contact.storage.ldap.config.LdapContactStorageFactory;
@@ -171,8 +172,8 @@ public class LdapContactStorageActivator extends HousekeepingActivator implement
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>();
+    public Interests getInterests() {
+        Set<String> fileNames = new TreeSet<>();
         try {
             File[] newProperties = Tools.listPropertyFiles();
             Set<File> files = new HashSet<File>(Arrays.asList(newProperties));
@@ -181,14 +182,15 @@ public class LdapContactStorageActivator extends HousekeepingActivator implement
             }
             oldProperties = Arrays.copyOf(newProperties, newProperties.length);
             for (File propertyFile : files) {
-                if (null != map.put(propertyFile.getName(), PROPERTIES)) {
-                    LOG.warn("Duplicate entry in map: {}", propertyFile.getName());
+                if (false == fileNames.add(propertyFile.getName())) {
+                    LOG.warn("Duplicate entry in set: {}", propertyFile.getName());
                 }
             }
         } catch (OXException e) {
             LOG.error("error reloading config file: {}", e);
         }
-        return map;
+
+        return DefaultInterests.builder().configFileNames(fileNames.toArray(new String[fileNames.size()])).build();
     }
 
 }

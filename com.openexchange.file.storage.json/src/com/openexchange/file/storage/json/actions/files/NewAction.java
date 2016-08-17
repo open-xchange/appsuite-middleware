@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,7 +50,6 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
@@ -75,13 +74,13 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 @Actions({@Action(method = RequestMethod.PUT, name = "new", description = "Create an infoitem via PUT", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, requestBody = "Infoitem object as described in Common object data and Detailed infoitem data. The field id is not included.",
-responseDescription = "FolderID/ObjectID of the newly created infoitem."),
-@Action(method = RequestMethod.POST, name = "new", description = "Create an infoitem via POST", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "json", description = "Infoitem object as described in Common object data and Detailed infoitem data. The field id is not included."),
-    @Parameter(name = "file", description = "File metadata as per <input type=\"file\" />")
-}, requestBody = "Body of content-type \"multipart/form-data\" or \"multipart/mixed\" containing the above mentioned fields and file-data.",
-responseDescription = "FolderID/ObjectID of the newly created infoitem. The response is sent as a HTML document (see introduction).")})
+    responseDescription = "FolderID/ObjectID of the newly created infoitem."),
+    @Action(method = RequestMethod.POST, name = "new", description = "Create an infoitem via POST", parameters = {
+        @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+        @Parameter(name = "json", description = "Infoitem object as described in Common object data and Detailed infoitem data. The field id is not included."),
+        @Parameter(name = "file", description = "File metadata as per <input type=\"file\" />")
+    }, requestBody = "Body of content-type \"multipart/form-data\" or \"multipart/mixed\" containing the above mentioned fields and file-data.",
+    responseDescription = "FolderID/ObjectID of the newly created infoitem. The response is sent as a HTML document (see introduction).")})
 public class NewAction extends AbstractWriteAction {
 
     @Override
@@ -90,6 +89,7 @@ public class NewAction extends AbstractWriteAction {
 
         IDBasedFileAccess fileAccess = request.getFileAccess();
         File file = request.getFile();
+        String originalFileName = file.getFileName();
 
         // Check folder
         if (Strings.isEmpty(file.getFolderId())) {
@@ -98,30 +98,38 @@ public class NewAction extends AbstractWriteAction {
 
         file.setId(FileStorageFileAccess.NEW);
         boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
+        boolean tryAddVersion = AJAXRequestDataTools.parseBoolParameter("try_add_version", request.getRequestData(), false);
 
         String newId;
         if (request.hasUploads()) {
             // Save file metadata with binary payload
-            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, request.getSentColumns(), false, ignoreWarnings);
+            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, request.getSentColumns(), false, ignoreWarnings, tryAddVersion);
         } else {
             // Save file metadata without binary payload
-            newId = fileAccess.saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, request.getSentColumns(), ignoreWarnings);
+            newId = fileAccess.saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, request.getSentColumns(), ignoreWarnings, tryAddVersion);
         }
-        
+
         List<OXException> warnings = new ArrayList<>(fileAccess.getAndFlushWarnings());
         if (request.notifyPermissionEntities() && file.getObjectPermissions() != null && file.getObjectPermissions().size() > 0) {
             File modified = fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION);
             warnings.addAll(sendNotifications(request.getNotificationTransport(), request.getNotifiactionMessage(), null, modified, request.getSession(), request.getRequestData().getHostData()));
         }
-        
+
         // Construct detailed response as requested including any warnings, treat as error if not forcibly ignored by client
         AJAXRequestResult result;
+        String saveAction = "none";
         if (null != newId && request.extendedResponse()) {
-            result = result(fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION), request);
+            File metadata = fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION);
+            if (null != originalFileName && !originalFileName.equals(metadata.getFileName())) {
+                saveAction = "rename";
+            } else if (1 < metadata.getNumberOfVersions()) {
+                saveAction = "new_version";
+            }
+            result = result(metadata, (AJAXInfostoreRequest) request, saveAction);
         } else {
             result = new AJAXRequestResult(newId, new Date(file.getSequenceNumber()));
         }
-       
+
         result.addWarnings(warnings);
         if (null == newId && null != warnings && false == warnings.isEmpty() && false == ignoreWarnings) {
             String name = getFilenameSave(file, null, fileAccess);

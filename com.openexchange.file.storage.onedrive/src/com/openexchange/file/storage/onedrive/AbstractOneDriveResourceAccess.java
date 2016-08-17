@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -90,7 +90,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.onedrive.access.OneDriveAccess;
+import com.openexchange.file.storage.onedrive.access.OneDriveOAuthAccess;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
@@ -224,7 +224,7 @@ public abstract class AbstractOneDriveResourceAccess {
         return false == isFolder(jItem);
     }
 
-    protected final OneDriveAccess oneDriveAccess;
+    protected final OneDriveOAuthAccess oneDriveAccess;
     protected final Session session;
     protected final FileStorageAccount account;
     protected String rootFolderIdentifier;
@@ -232,7 +232,7 @@ public abstract class AbstractOneDriveResourceAccess {
     /**
      * Initializes a new {@link AbstractOneDriveResourceAccess}.
      */
-    protected AbstractOneDriveResourceAccess(OneDriveAccess oneDriveAccess, FileStorageAccount account, Session session) {
+    protected AbstractOneDriveResourceAccess(OneDriveOAuthAccess oneDriveAccess, FileStorageAccount account, Session session) {
         super();
         this.oneDriveAccess = oneDriveAccess;
         this.account = account;
@@ -255,7 +255,7 @@ public abstract class AbstractOneDriveResourceAccess {
                 try {
                     int keepOn = 1;
                     while (keepOn > 0) {
-                        DefaultHttpClient httpClient = oneDriveAccess.getHttpClient();
+                        DefaultHttpClient httpClient = (DefaultHttpClient) oneDriveAccess.getClient().client;
                         HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
                         request = method;
                         // HttpClients.setRequestTimeout(3500, method);
@@ -270,7 +270,7 @@ public abstract class AbstractOneDriveResourceAccess {
                             request = null;
                             keepOn = 2;
 
-                            oneDriveAccess.reinit(session);
+                            oneDriveAccess.initialise();
                         } else {
                             JSONObject jResponse = handleHttpResponse(httpResponse, JSONObject.class);
                             rootFolderId = jResponse.optString("id", null);
@@ -353,7 +353,7 @@ public abstract class AbstractOneDriveResourceAccess {
      */
     protected List<NameValuePair> initiateQueryString() {
         List<NameValuePair> qparams = new LinkedList<NameValuePair>();
-        qparams.add(new BasicNameValuePair("access_token", oneDriveAccess.getAccessToken()));
+        qparams.add(new BasicNameValuePair("access_token", oneDriveAccess.getOAuthAccount().getToken()));
         return qparams;
     }
 
@@ -418,8 +418,6 @@ public abstract class AbstractOneDriveResourceAccess {
         return parseIntoObject(httpResponse.getEntity().getContent(), clazz);
     }
 
-
-
     /**
      * Performs given closure.
      *
@@ -429,7 +427,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws OXException If performing closure fails
      */
     protected <R> R perform(OneDriveClosure<R> closure) throws OXException {
-        return closure.perform(this, oneDriveAccess.getHttpClient(), session);
+        return closure.perform(this, (DefaultHttpClient) oneDriveAccess.getClient().client, session);
     }
 
     /**
@@ -441,7 +439,7 @@ public abstract class AbstractOneDriveResourceAccess {
      */
     protected void handleAuthError(HttpResponseException e, Session session) throws OXException {
         try {
-            oneDriveAccess.reinit(session);
+            oneDriveAccess.initialise();
         } catch (OXException oxe) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractOneDriveResourceAccess.class);
             logger.warn("Could not re-initialize Microsoft OneDrive access", oxe);

@@ -1,0 +1,23 @@
+/tasks?action=new:
+  put:
+    operationId: createTask
+    tags:
+      - tasks
+    summary: Creates a task.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON object containing the task's data.
+        required: true
+        schema:
+          $ref: "#/definitions/TaskData"
+    responses:
+      200:
+        description: |
+          A JSON object containing the id of the newly created task. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/TaskUpdateResponse"

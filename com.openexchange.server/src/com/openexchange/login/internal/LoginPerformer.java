@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,6 +50,7 @@
 package com.openexchange.login.internal;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -79,6 +80,9 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.audit.AuditLogService;
+import com.openexchange.log.audit.DefaultAttribute;
+import com.openexchange.log.audit.DefaultAttribute.Name;
 import com.openexchange.login.Blocking;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRequest;
@@ -147,10 +151,10 @@ public final class LoginPerformer {
     public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties) throws OXException {
         return doLogin(request, properties, new NormalLoginMethod(request, properties));
     }
-    
+
     /**
      * Performs the auto login for the specified login request and with the specified properties
-     * 
+     *
      * @param request The login request
      * @param properties The properties
      * @return The login providing login information
@@ -649,6 +653,15 @@ public final class LoginPerformer {
             formatter.formatLogin(request, result, sb);
         }
         LOG.info(sb.toString());
+
+        AuditLogService auditLogService = ServerServiceRegistry.getInstance().getService(AuditLogService.class);
+        if (null != auditLogService) {
+            String login = request.getLogin();
+            if (null != login) {
+                String client = request.getClient();
+                auditLogService.log("ox.login", DefaultAttribute.valueFor(Name.LOGIN, login, 256), DefaultAttribute.valueFor(Name.IP_ADDRESS, request.getClientIP()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.valueFor(Name.CLIENT, null == client ? "<none>" : client));
+            }
+        }
     }
 
     private static void logLogout(final LoginResult result) {
@@ -660,6 +673,12 @@ public final class LoginPerformer {
             formatter.formatLogout(result, sb);
         }
         LOG.info(sb.toString());
+
+        AuditLogService auditLogService = ServerServiceRegistry.getInstance().getService(AuditLogService.class);
+        if (null != auditLogService) {
+            Session session = result.getSession();
+            auditLogService.log("ox.logout", DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName(), 256), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()));
+        }
     }
 
     public Session lookupSession(final String sessionId) throws OXException {

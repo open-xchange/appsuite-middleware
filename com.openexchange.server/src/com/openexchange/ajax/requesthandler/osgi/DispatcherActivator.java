@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -69,6 +69,8 @@ import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.DefaultConverter;
 import com.openexchange.ajax.requesthandler.DefaultDispatcher;
 import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.ajax.requesthandler.DispatcherListener;
+import com.openexchange.ajax.requesthandler.DispatcherListenerRegistry;
 import com.openexchange.ajax.requesthandler.DispatcherNotesProcessor;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.ajax.requesthandler.Dispatchers;
@@ -77,6 +79,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.cache.PreviewFilestoreLocationUpdater;
 import com.openexchange.ajax.requesthandler.converters.BasicTypeAPIResultConverter;
 import com.openexchange.ajax.requesthandler.converters.BasicTypeJsonConverter;
+import com.openexchange.ajax.requesthandler.converters.Bean2JSONConverter;
 import com.openexchange.ajax.requesthandler.converters.DebugConverter;
 import com.openexchange.ajax.requesthandler.converters.Native2JSONConverter;
 import com.openexchange.ajax.requesthandler.converters.NativeConverter;
@@ -133,8 +136,10 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
     	Dispatchers.setDispatcherPrefixService(dispatcherPrefixService);
     	Dispatcher.PREFIX.set(prefix);
 
-    	final DefaultDispatcher dispatcher = new DefaultDispatcher();
-        /*
+        OSGiDispatcherListenerRegistry dispatcherListenerRegistry = new OSGiDispatcherListenerRegistry(context);
+    	final DefaultDispatcher dispatcher = new DefaultDispatcher(dispatcherListenerRegistry);
+
+    	/*
          * Specify default converters
          */
         final DefaultConverter defaultConverter = new DefaultConverter();
@@ -152,6 +157,8 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         for (final ResultConverter converter : BasicTypeJsonConverter.CONVERTERS) {
             defaultConverter.addConverter(converter);
         }
+        
+        defaultConverter.addConverter(new Bean2JSONConverter());
         /*
          * Add cover extractor converter
          */
@@ -355,9 +362,12 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 			}
 		});
 
+        track(DispatcherListener.class, dispatcherListenerRegistry);
+
         openTrackers();
 
         registerService(Dispatcher.class, dispatcher);
+        registerService(DispatcherListenerRegistry.class, dispatcherListenerRegistry);
 
         /*
          * Register preview filestore updater for move context filestore

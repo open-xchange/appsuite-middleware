@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -91,6 +91,8 @@ import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
 import com.openexchange.ajax.session.actions.LoginRequest;
 import com.openexchange.ajax.session.actions.LoginRequest.GuestCredentials;
 import com.openexchange.ajax.session.actions.LoginResponse;
+import com.openexchange.ajax.share.actions.RedeemRequest;
+import com.openexchange.ajax.share.actions.RedeemResponse;
 import com.openexchange.ajax.share.actions.ResolveShareRequest;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.ajax.task.actions.AllRequest;
@@ -341,11 +343,24 @@ public class GuestClient extends AJAXClient {
             loginRequest = LoginRequest.createGuestLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), credentials, config.client, false);
         } else if ("anonymous_password".equals(shareResponse.getLoginType())) {
             loginRequest = LoginRequest.createAnonymousLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), config.password, false);
+        } else if ("message".equals(shareResponse.getLoginType()) && null != shareResponse.getToken()) {
+            RedeemRequest req = new RedeemRequest(shareResponse.getToken(), true);
+            RedeemResponse resp = execute(req);
+            if ("guest".equals(resp.getLoginType()) || "guest_password".equals(resp.getLoginType())) {
+                GuestCredentials credentials = new GuestCredentials(config.username, config.password);
+                loginRequest = LoginRequest.createGuestLoginRequest(resp.getShare(), resp.getTarget(), credentials, config.client, false);
+            } else if ("anonymous_password".equals(resp.getLoginType())) {
+                loginRequest = LoginRequest.createAnonymousLoginRequest(resp.getShare(), resp.getTarget(), config.password, false);
+            } else {
+                Assert.fail("unknown login type: " + resp.getLoginType());
+            }
         } else {
             Assert.fail("unknown login type: " + shareResponse.getLoginType());
         }
         return Executor.execute(this, loginRequest, getProtocol(), getHostname());
     }
+    
+    
 
     private static void prepareClient(DefaultHttpClient httpClient, String username, String password) {
         httpClient.getParams().setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);

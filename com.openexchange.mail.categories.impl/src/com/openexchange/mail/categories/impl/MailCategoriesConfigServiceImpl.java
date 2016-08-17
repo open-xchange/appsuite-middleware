@@ -52,12 +52,13 @@ package com.openexchange.mail.categories.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.cascade.ConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
@@ -66,20 +67,23 @@ import com.openexchange.mail.categories.MailCategoriesConstants;
 import com.openexchange.mail.categories.MailCategoriesExceptionCodes;
 import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.mail.categories.MailCategoryConfig.Builder;
+import com.openexchange.mail.categories.MailObjectParameter;
 import com.openexchange.mail.categories.ReorganizeParameter;
-import com.openexchange.mail.categories.impl.mailfilter.MailCategoriesOrganizeExceptionCodes;
-import com.openexchange.mail.categories.impl.mailfilter.MailCategoriesOrganizer;
 import com.openexchange.mail.categories.impl.osgi.Services;
+import com.openexchange.mail.categories.organizer.MailCategoriesOrganizeExceptionCodes;
+import com.openexchange.mail.categories.organizer.MailCategoriesOrganizer;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngineExceptionCodes;
 import com.openexchange.mail.categories.ruleengine.MailCategoryRule;
+import com.openexchange.mail.categories.ruleengine.RuleType;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.HeaderTerm;
 import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
-
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link MailCategoriesConfigServiceImpl}
@@ -89,34 +93,67 @@ import com.openexchange.session.Session;
  */
 public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailCategoriesConfigServiceImpl.class);
+    static final String INIT_TASK_STATUS_PROPERTY = "com.openexchange.mail.categories.ruleengine.sieve.init.run";
 
     private final static String FLAG_PREFIX = "$ox_";
+    private static final String FROM_HEADER = "from";
 
-    private final ServiceLookup services;
+    private static final String RULE_DEFINITION_PROPERTY_PREFIX = "com.openexchange.mail.categories.rules.";
+    private static final String STATUS_NOT_YET_STARTED = "notyetstarted";
+    private static final String STATUS_ERROR = "error";
+    private static final String STATUS_RUNNING = "running";
+    private static final String STATUS_FINISHED = "finished";
 
-    public MailCategoriesConfigServiceImpl(ServiceLookup services) {
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
+    private final MailCategoriesRuleEngine ruleEngine;
+
+    /**
+     * Initializes a new {@link MailCategoriesConfigServiceImpl}.
+     *
+     * @param The rule engine to use
+     */
+    public MailCategoriesConfigServiceImpl(MailCategoriesRuleEngine ruleEngine) {
         super();
-        this.services = services;
+        this.ruleEngine = ruleEngine;
+    }
+
+    /**
+     * Gets the rule engine
+     *
+     * @return The rule engine
+     */
+    public MailCategoriesRuleEngine getRuleEngine() {
+        return ruleEngine;
     }
 
     @Override
-    public List<MailCategoryConfig> getAllCategories(Session session, boolean onlyEnabled) throws OXException {
+    public List<MailCategoryConfig> getAllCategories(Session session, Locale locale, boolean onlyEnabled, boolean includeGeneral) throws OXException {
         String[] categories = getSystemCategoryNames(session);
         String[] userCategories = getUserCategoryNames(session);
-        if (categories.length == 0 && userCategories.length==0) {
+        List<MailCategoryConfig> result = new ArrayList<>(categories.length);
+
+        if (includeGeneral) {
+            String name = getLocalizedName(session, locale, MailCategoriesConstants.GENERAL_CATEGORY_ID);
+            String description = getLocalizedDescription(session, locale, MailCategoriesConstants.GENERAL_CATEGORY_ID);
+
+            MailCategoryConfig generalConfig = new MailCategoryConfig.Builder().category(MailCategoriesConstants.GENERAL_CATEGORY_ID).isSystemCategory(true).enabled(true).force(true).name(name).description(description).build();
+            result.add(generalConfig);
+        }
+
+        if (categories.length == 0 && userCategories.length == 0) {
             return new ArrayList<>();
         }
-        List<MailCategoryConfig> result = new ArrayList<>(categories.length);
+
         for (String category : categories) {
-            MailCategoryConfig config = getConfigByCategory(session, category);
+            MailCategoryConfig config = getConfigByCategory(session, locale, category);
             if (onlyEnabled && !config.isActive()) {
                 continue;
             }
             result.add(config);
         }
         for (String category : userCategories) {
-            MailCategoryConfig config = getUserConfigByCategory(session, category);
+            MailCategoryConfig config = getUserConfigByCategory(session, locale, category);
             if (onlyEnabled && !config.isActive()) {
                 continue;
             }
@@ -135,12 +172,12 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             ArrayList<String> result = new ArrayList<>(userCategories.length);
             for (String category : userCategories) {
                 if (onlyEnabled) {
-                    boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
+                    boolean active = MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
                     if (!active) {
                         continue;
                     }
                 }
-                result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
+                result.add(MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
             }
 
             return result.toArray(new String[result.size()]);
@@ -149,117 +186,98 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         // Include system categories
         String[] categories = getSystemCategoryNames(session);
         String[] userCategories = getUserCategoryNames(session);
-        if (categories.length == 0 && userCategories.length==0) {
+        if (categories.length == 0 && userCategories.length == 0) {
             return new String[0];
         }
 
         ArrayList<String> result = new ArrayList<>(categories.length + userCategories.length);
         for (String category : categories) {
             if (onlyEnabled) {
-                boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
+                boolean active = MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
                 if (!active) {
-                    boolean forced = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session);
+                    boolean forced = MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session);
                     if (!forced) {
                         continue;
                     }
                 }
             }
-           result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
+            result.add(MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
         }
         for (String category : userCategories) {
             if (onlyEnabled) {
-                boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
+                boolean active = MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
                 if (!active) {
                     continue;
                 }
             }
-           result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
+            result.add(MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
         }
 
         return result.toArray(new String[result.size()]);
     }
 
-    @Override
-    public MailCategoryConfig getConfigByCategory(Session session, String category) throws OXException {
+    private MailCategoryConfig getConfigByCategory(Session session, Locale locale, String category) throws OXException {
         Builder builder = new Builder();
         builder.category(category);
-        builder.name(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, null, session));
-        builder.active(MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session));
-        builder.force(MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session));
-        builder.flag(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
-        builder.addLocalizedNames(getLocalizedNames(session, category));
+        String name = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, null, session);
+        if (Strings.isEmpty(name)) {
+            name = getLocalizedName(session, locale, category);
+        }
+        builder.name(name);
+        String description = getLocalizedDescription(session, locale, category);
+        builder.description(description);
+        builder.enabled(MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session));
+        builder.force(MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session));
+        builder.flag(MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
+        builder.isSystemCategory(isSystemCategory(category, session));
         MailCategoryConfig result = builder.build();
         if (result.getFlag() == null) {
-            throw MailCategoriesExceptionCodes.INVALID_CONFIGURATION.create(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG);
+            throw MailCategoriesExceptionCodes.INVALID_CONFIGURATION_EXTENDED.create(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG);
         }
 
         return result;
     }
 
-    @Override
-    public MailCategoryConfig getUserConfigByCategory(Session session, String category) throws OXException {
+    private MailCategoryConfig getUserConfigByCategory(Session session, Locale locale, String category) throws OXException {
         Builder builder = new Builder();
         builder.category(category);
-        builder.name(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, null, session));
-        builder.active(MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session));
-        builder.flag(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
-        MailCategoryConfig result = builder.build();
-        if (result.getFlag() == null) {
-            throw MailCategoriesExceptionCodes.INVALID_CONFIGURATION.create(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG);
+        String name = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, null, session);
+        if (Strings.isEmpty(name)) {
+            name = getLocalizedName(session, locale, category);
         }
-
+        builder.name(name);
+        builder.enabled(MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session));
+        builder.flag(MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
+        builder.isSystemCategory(false);
+        MailCategoryConfig result = builder.build();
         return result;
     }
 
     @Override
     public String getFlagByCategory(Session session, String category) throws OXException {
-        return MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session);
+        return MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session);
     }
 
-    private Map<Locale, String> getLocalizedNames(Session session, String category) throws OXException {
-        String languagesString = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_LANGUAGES, "de_DE, cs_CZ, en_GB, es_ES, fr_FR, hu_HU, it_IT, jp_JP, lv_LV, nl_NL, pl_PL, sv_SV, sk_SK, zh_CN", session);
-        if (Strings.isEmpty(languagesString)){
-            return java.util.Collections.emptyMap();
-        }
+    private String getLocalizedName(Session session, Locale locale, String category) throws OXException {
 
-        String languages[] = Strings.splitByComma(languagesString);
-        if (languages==null || languages.length==0){
-            return java.util.Collections.emptyMap();
+        String translation = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME_LANGUAGE_PREFIX + locale.toString(), null, session);
+        if (translation != null && !translation.isEmpty()) {
+            return translation;
         }
-
-        Map<Locale, String> result = new HashMap<>(languages.length);
-        for(String language: languages){
-            String translation = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME + "." + language, null, session);
-            if (translation != null && !translation.isEmpty()) {
-                result.put(new Locale(language), translation);
-            }
-        }
-        return result;
+        return MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FALLBACK, category, session);
     }
 
-    @Override
-    public MailCategoryConfig getConfigByFlag(Session session, String flag) throws OXException {
-        List<MailCategoryConfig> all = getAllCategories(session, false);
-        for (MailCategoryConfig config : all) {
-            if (config.getFlag().equals(flag)) {
-                return config;
-            }
+    private String getLocalizedDescription(Session session, Locale locale, String category) throws OXException {
+
+        String translation = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_DESCRIPTION_LANGUAGE_PREFIX + locale.toString(), null, session);
+        if (translation != null && !translation.isEmpty()) {
+            return translation;
         }
-        return null;
+        return MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_DESCRIPTION, null, session);
     }
 
-    private String[] getSystemCategoryNames(Session session) throws OXException {
-        String categoriesString = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_IDENTIFIERS, null, session);
-        if (Strings.isEmpty(categoriesString)){
-            return new String[0];
-        }
-
-        String result[] = Strings.splitByComma(categoriesString);
-        return result==null ? new String[0] : result;
-    }
-
-    private String[] getUserCategoryNames(Session session) throws OXException {
-        String categoriesString = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_USER_CATEGORIES_IDENTIFIERS, null, session);
+    String[] getSystemCategoryNames(Session session) throws OXException {
+        String categoriesString = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_IDENTIFIERS, null, session);
         if (Strings.isEmpty(categoriesString)) {
             return new String[0];
         }
@@ -268,28 +286,25 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         return result == null ? new String[0] : result;
     }
 
-    @Override
-    public List<MailCategoryConfig> changeConfigurations(String[] categories, boolean activate, Session session) throws OXException {
-        if (null == categories || categories.length == 0) {
-            return Collections.emptyList();
+    private String[] getUserCategoryNames(Session session) throws OXException {
+        String categoriesString = MailCategoriesConfigUtil.getValueFromProperty(MailCategoriesConstants.MAIL_USER_CATEGORIES_IDENTIFIERS, null, session);
+        if (Strings.isEmpty(categoriesString)) {
+            return new String[0];
         }
 
-        List<MailCategoryConfig> allConfigs = getAllCategories(session, false);
-        int size = allConfigs.size();
-        if (size <= 0) {
-            return Collections.emptyList();
-        }
+        String result[] = Strings.splitByComma(categoriesString);
+        return result == null ? new String[0] : result;
+    }
 
-        Set<String> categoriesToChange = new HashSet<String>(Arrays.asList(categories));
-        List<MailCategoryConfig> retval = new ArrayList<MailCategoryConfig>(size);
-        for (MailCategoryConfig config : allConfigs) {
-            if (categoriesToChange.contains(config.getCategory())) {
-                MailCategories.activateProperty(config.getCategory(), activate, session);
-                retval.add(MailCategoryConfig.copyOf(config, activate));
-            }
-        }
-
-        return allConfigs;
+    /**
+     * Checks if underlying rule engine is applicable for specified session.
+     *
+     * @param session The session to check for
+     * @return <code>true</code> if rule engine is applicable; otherwise <code>false</code>
+     * @throws OXException If check fort applicability fails
+     */
+    public boolean isRuleEngineApplicable(Session session) throws OXException {
+        return ruleEngine.isApplicable(session);
     }
 
     @Override
@@ -305,204 +320,77 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     }
 
     @Override
-    public void addUserCategory(String category, String flag, String name, MailCategoryRule rule, ReorganizeParameter reorganize, Session session) throws OXException {
-        if (Strings.isEmpty(category)) {
-            throw MailCategoriesExceptionCodes.MISSING_PARAMETER.create("category");
-        }
-        if (Strings.isEmpty(flag)) {
-            throw MailCategoriesExceptionCodes.MISSING_PARAMETER.create("flag");
-        }
-        if (Strings.isEmpty(name)) {
-            throw MailCategoriesExceptionCodes.MISSING_PARAMETER.create("name");
-        }
-
-        String[] userCategories = getUserCategoryNames(session);
-        StringBuilder newCategoriesList = new StringBuilder((userCategories.length << 3) + 8).append(category);
-        for (String oldCategory : userCategories) {
-            if (oldCategory.equals(category)) {
-                throw MailCategoriesExceptionCodes.USER_CATEGORY_ALREADY_EXISTS.create(category);
-            }
-            newCategoriesList.append(',').append(oldCategory);
-        }
-        MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, name, session);
-        MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, String.valueOf(true), session);
-        MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, flag, session);
-        MailCategories.setProperty(MailCategoriesConstants.MAIL_USER_CATEGORIES_IDENTIFIERS, newCategoriesList.toString(), session);
-
-        // Create filter
-        if (null != rule) {
-            boolean error = true;
-            try {
-                setRule(session, category, rule);
-                error = false;
-            } finally {
-                if (error) {
-                    removeUserCategory(category, session);
-                }
-            }
-        }
-
-        // Reorganize if demanded
-        if (reorganize.isReorganize()) {
-            List<OXException> warnings = reorganize.getWarnings();
-            try {
-                SearchTerm<?> searchTerm = null;
-                if (rule != null) {
-                    searchTerm = getSearchTerm(rule);
-                    FullnameArgument fa = new FullnameArgument("INBOX");
-                    if (searchTerm != null) {
-                        MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullName(), searchTerm, flag, true);
-                    }
-                } else {
-                    warnings.add(MailCategoriesOrganizeExceptionCodes.UNABLE_TO_ORGANIZE.create());
-                }
-            } catch (OXException e) {
-                warnings.add(MailCategoriesOrganizeExceptionCodes.UNABLE_TO_ORGANIZE.create(e));
-            }
-        }
-    }
-
-    @Override
-    public void removeUserCategory(String category, Session session) throws OXException {
-        removeRule(session, category);
-
-        String[] userCategories = getUserCategoryNames(session);
-        if (userCategories.length == 0) {
-            throw MailCategoriesExceptionCodes.USER_CATEGORY_DOES_NOT_EXIST.create(category);
-        }
-
-        StringBuilder newCategoriesList = new StringBuilder(userCategories.length << 3);
-        boolean exists = false;
-        for (String oldCategory : userCategories) {
-            if (oldCategory.equals(category)) {
-                exists = true;
-            } else {
-                if (newCategoriesList.length() > 0) {
-                    newCategoriesList.append(',');
-                }
-                newCategoriesList.append(oldCategory);
-            }
-        }
-
-        if (!exists) {
-            throw MailCategoriesExceptionCodes.USER_CATEGORY_DOES_NOT_EXIST.create(category);
-        }
-
-        MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, null, session);
-        MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, null, session);
-        MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session);
-        MailCategories.setProperty(MailCategoriesConstants.MAIL_USER_CATEGORIES_IDENTIFIERS, newCategoriesList.toString(), session);
-    }
-
-    @Override
-    public void updateUserCategory(String category, String name, MailCategoryRule rule, ReorganizeParameter reorganize, Session session) throws OXException {
-        if (!Strings.isEmpty(name)) {
-            boolean found = false;
-            String[] userCategoryNames = getUserCategoryNames(session);
-            for (int i = 0; !found && i < userCategoryNames.length; i++) {
-                String oldCategory = userCategoryNames[i];
-                if (oldCategory.equals(category)) {
-                    MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, name, session);
-                    found = true;
-                }
-            }
-            if (!found) {
-                throw MailCategoriesExceptionCodes.USER_CATEGORY_DOES_NOT_EXIST.create(category);
-            }
-        }
-
-        String flag = generateFlag(category);
-
-        // Update rule
-        if (null != rule) {
-            boolean error = true;
-            try {
-                setRule(session, category, rule);
-                error = false;
-            } finally {
-                if (error) {
-                    // undo category creation
-                    removeUserCategory(category, session);
-                }
-            }
-        }
-
-        // Reorganize if necessary
-        if (reorganize.isReorganize()) {
-            List<OXException> warnings = reorganize.getWarnings();
-            try {
-                SearchTerm<?> searchTerm = null;
-                if (null != null) {
-                    searchTerm = getSearchTerm(rule);
-                } else {
-                    MailCategoryRule oldRule = getRule(session, category);
-                    if (oldRule == null) {
-                        OXException warning = MailCategoriesOrganizeExceptionCodes.UNABLE_TO_ORGANIZE.create();
-                        warnings.add(warning);
-                        throw warning;
-                    }
-
-                    searchTerm = getSearchTerm(oldRule);
-                }
-                FullnameArgument fa = new FullnameArgument("INBOX");
-                if (searchTerm != null) {
-                    MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullName(), searchTerm, flag, true);
-                }
-            } catch (OXException e) {
-                if (warnings.isEmpty()) {
-                    warnings.add(MailCategoriesOrganizeExceptionCodes.UNABLE_TO_ORGANIZE.create());
-                }
-            }
-        }
-    }
-
-    @Override
     public boolean isEnabled(Session session) throws OXException {
-        return MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, false, session);
+        return MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, true, session);
     }
 
     @Override
-    public boolean isAllowedToCreateUserCategories(Session session) throws OXException{
-        return MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_USER_SWITCH, false, session);
+    public boolean isForced(Session session) throws OXException {
+        return MailCategoriesConfigUtil.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_FORCE_SWITCH, false, session);
     }
 
     @Override
-    public String generateFlag(String category) {
+    public void enable(Session session, boolean enable) throws OXException {
+        MailCategoriesConfigUtil.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, String.valueOf(enable), session);
+        if (enable) {
+            initMailCategories(session);
+        }
+    }
+
+    String generateFlag(String category) {
         StringBuilder builder = new StringBuilder(FLAG_PREFIX);
         builder.append(category.hashCode());
         return builder.toString();
     }
 
     private void setRule(Session session, String category, MailCategoryRule rule) throws OXException {
-        if (!generateFlag(category).equals(rule.getFlag())) {
+        String flag = null;
+        if (!category.equals(MailCategoriesConstants.GENERAL_CATEGORY_ID)) {
+            flag = getFlagByCategory(session, category);
+            if (Strings.isEmpty(flag)) {
+                flag = generateFlag(category);
+            }
+        }
+        if ((flag == null && rule.getFlag() != null) || (flag != null && !flag.equals(rule.getFlag()))) {
             throw MailCategoriesRuleEngineExceptionCodes.INVALID_RULE.create();
         }
-        MailCategoriesRuleEngine ruleEngine = Services.getService(MailCategoriesRuleEngine.class);
-        if (ruleEngine == null) {
-            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailCategoriesRuleEngine.class.getSimpleName());
-        }
-        ruleEngine.setRule(session, rule);
-    }
-
-    private void removeRule(Session session, String category) throws OXException {
-        MailCategoriesRuleEngine ruleEngine = Services.getService(MailCategoriesRuleEngine.class);
-        if (ruleEngine == null) {
-            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailCategoriesRuleEngine.class.getSimpleName());
-        }
-        ruleEngine.removeRule(session, generateFlag(category));
+        ruleEngine.setRule(session, rule, RuleType.CATEGORY);
     }
 
     private MailCategoryRule getRule(Session session, String category) throws OXException {
-        MailCategoriesRuleEngine ruleEngine = Services.getService(MailCategoriesRuleEngine.class);
-        if (ruleEngine == null) {
-            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailCategoriesRuleEngine.class.getSimpleName());
+        String flag = null;
+        if (!category.equals(MailCategoriesConstants.GENERAL_CATEGORY_ID)) {
+            flag = getFlagByCategory(session, category);
+            if (Strings.isEmpty(flag)) {
+                flag = generateFlag(category);
+                MailCategoriesConfigUtil.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, flag, session);
+            }
         }
-        return ruleEngine.getRule(session, generateFlag(category));
+        return ruleEngine.getRule(session, flag);
     }
 
-    private SearchTerm<?> getSearchTerm(MailCategoryRule rule) {
+    private void removeMailFromRules(Session session, String mailAddress) throws OXException {
+        ruleEngine.removeValueFromHeader(session, mailAddress, "from");
+    }
+
+    SearchTerm<?> getSearchTerm(MailCategoryRule rule) {
         if (!rule.hasSubRules()) {
-            return new HeaderTerm(rule.getHeader(), rule.getValue());
+            if (rule.getHeaders().size() == 1 && rule.getValues().size() == 1) {
+
+                return new HeaderTerm(rule.getHeaders().get(0), rule.getValues().get(0));
+            }
+            SearchTerm<?> result = null;
+            for (String header : rule.getHeaders()) {
+                for (String value : rule.getValues()) {
+                    if (result == null) {
+                        result = new HeaderTerm(header, value);
+                    } else {
+                        result = new ORTerm(result, new HeaderTerm(header, value));
+                    }
+                }
+            }
+            return result;
+
         }
 
         SearchTerm<?> result = null;
@@ -516,6 +404,245 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             }
         }
         return result;
+    }
+
+    @Override
+    public void trainCategory(String category, List<String> addresses, boolean createRule, ReorganizeParameter reorganize, Session session) throws OXException {
+        if (!createRule && !reorganize.isReorganize()) {
+            // nothing to do
+            return;
+        }
+
+        String flag = null;
+        if (!category.equals(MailCategoriesConstants.GENERAL_CATEGORY_ID)) {
+            flag = getFlagByCategory(session, category);
+            if (Strings.isEmpty(flag)) {
+                flag = generateFlag(category);
+            }
+        }
+
+        MailCategoryRule newRule = null;
+        if (createRule) {
+            // create new rule
+
+            // Remove from old rules
+            for (String mailAddress : addresses) {
+                removeMailFromRules(session, mailAddress);
+            }
+
+            // Update rule
+            MailCategoryRule oldRule = getRule(session, category);
+            for (String mailAddress : addresses) {
+                if (newRule == null) {
+                    if (null == oldRule) {        // Create new rule
+                        newRule = new MailCategoryRule(Collections.singletonList(FROM_HEADER), new ArrayList<>(Collections.singleton(mailAddress)), flag);
+                    } else {
+
+                        if (oldRule.getSubRules() != null && !oldRule.getSubRules().isEmpty()) {
+                            if (oldRule.isAND()) {
+                                newRule = new MailCategoryRule(flag, false);
+                                newRule.addSubRule(oldRule);
+                                newRule.addSubRule(new MailCategoryRule(Collections.singletonList(FROM_HEADER), new ArrayList<>(Collections.singleton(mailAddress)), flag));
+                            } else {
+                                newRule = oldRule;
+                                newRule.addSubRule(new MailCategoryRule(Collections.singletonList(FROM_HEADER), new ArrayList<>(Collections.singleton(mailAddress)), flag));
+                            }
+                        } else {
+                            if (!oldRule.getHeaders().contains(FROM_HEADER)) {
+                                oldRule.getHeaders().add(FROM_HEADER);
+                            }
+                            if (!oldRule.getValues().contains(mailAddress)) {
+                                oldRule.getValues().add(mailAddress);
+                            }
+                            newRule = oldRule;
+                        }
+
+                    }
+                } else {
+                    if (!newRule.getValues().contains(mailAddress)) {
+                        newRule.getValues().add(mailAddress);
+                    }
+                }
+            }
+
+            // remove all previous category flags
+            String[] flagsToRemove = getAllFlags(session, false, false);
+            newRule.addFlagsToRemove(flagsToRemove);
+
+            setRule(session, category, newRule);
+
+        } else {
+            // create rule for reorganize only
+            for (String mailAddress : addresses) {
+                if (newRule == null) {
+                    newRule = new MailCategoryRule(Collections.singletonList(FROM_HEADER), new ArrayList<>(Collections.singleton(mailAddress)), flag);
+                } else {
+                    if (!newRule.getValues().contains(mailAddress)) {
+                        newRule.getValues().add(mailAddress);
+                    }
+                }
+            }
+
+            // remove all previous category flags
+            String[] flagsToRemove = getAllFlags(session, false, false);
+            newRule.addFlagsToRemove(flagsToRemove);
+        }
+
+        // Reorganize if necessary
+        if (reorganize.isReorganize()) {
+            List<OXException> warnings = reorganize.getWarnings();
+            try {
+                SearchTerm<?> searchTerm = getSearchTerm(newRule);
+                FullnameArgument fa = new FullnameArgument("INBOX");
+                if (searchTerm != null) {
+                    MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullName(), searchTerm, flag, newRule.getFlagsToRemove());
+                }
+            } catch (OXException e) {
+                if (warnings.isEmpty()) {
+                    warnings.add(MailCategoriesOrganizeExceptionCodes.UNABLE_TO_ORGANIZE.create());
+                }
+            }
+        }
+
+    }
+
+    @Override
+    public void updateConfigurations(List<MailCategoryConfig> configs, Session session, Locale locale) throws OXException {
+        List<MailCategoryConfig> oldConfigs = getAllCategories(session, locale, false, true);
+
+        for (MailCategoryConfig newConfig : configs) {
+
+            int index = oldConfigs.indexOf(newConfig);
+            if (index >= 0) {
+                MailCategoryConfig oldConfig = oldConfigs.get(index);
+                boolean rename = false;
+                boolean switchStatus = false;
+                if (newConfig.isEnabled() != oldConfig.isActive() && newConfig.isEnabled() != oldConfig.isEnabled()) {
+                    if (oldConfig.isForced()) {
+                        throw MailCategoriesExceptionCodes.SWITCH_NOT_ALLOWED.create(oldConfig.getCategory());
+                    }
+                    switchStatus = true;
+                }
+                String name = oldConfig.getName();
+                if (!newConfig.getName().equals(name)) {
+                    if (isSystemCategory(oldConfig.getCategory(), session)) {
+                        throw MailCategoriesExceptionCodes.CHANGE_NAME_NOT_ALLOWED.create(oldConfig.getCategory());
+                    }
+                    rename = true;
+                }
+
+                if (switchStatus) {
+                    MailCategoriesConfigUtil.activateProperty(oldConfig.getCategory(), newConfig.isEnabled(), session);
+                }
+                if (rename) {
+                    MailCategoriesConfigUtil.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + oldConfig.getCategory() + MailCategoriesConstants.MAIL_CATEGORIES_NAME, newConfig.getName(), session);
+                }
+            } else {
+                throw MailCategoriesExceptionCodes.USER_CATEGORY_DOES_NOT_EXIST.create(newConfig.getCategory());
+            }
+        }
+
+    }
+
+    @Override
+    public void addMails(Session session, List<MailObjectParameter> mails, String category) throws OXException {
+        FullnameArgument fa = new FullnameArgument("INBOX");
+        String flag = getFlagByCategory(session, category);
+        String[] allFlags = getAllFlags(session, false, false);
+        MailCategoriesOrganizer.organizeMails(session, fa.getFullName(), mails, flag, allFlags);
+    }
+
+    @Override
+    public String getInitStatus(Session session) throws OXException {
+        return MailCategoriesConfigUtil.getValueFromProperty(INIT_TASK_STATUS_PROPERTY, STATUS_NOT_YET_STARTED, session);
+    }
+
+    void initMailCategories(Session session) throws OXException {
+
+        CapabilityService capService = Services.getService(CapabilityService.class);
+        Boolean capability = capService.getCapabilities(session).contains(new Capability("mail_categories"));
+        if (!capability) {
+            return;
+        }
+
+        MailCategoriesRuleEngine engine = Services.getService(MailCategoriesRuleEngine.class);
+        String flags[] = getAllFlags(session, false, false);
+        engine.cleanUp(Arrays.asList(flags), session);
+
+        ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+        if (configViewFactory == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class);
+        }
+        ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
+        Boolean apply = view.get(MailCategoriesConstants.APPLY_OX_RULES_PROPERTY, Boolean.class);
+
+        if (apply == null || !apply) {
+            return;
+        }
+
+        final ConfigProperty<String> hasRun = view.property("user", MailCategoriesConfigServiceImpl.INIT_TASK_STATUS_PROPERTY, String.class);
+        String currentStatus = hasRun.get();
+        if (hasRun.isDefined() && (currentStatus.equals(STATUS_RUNNING) || currentStatus.equals(STATUS_FINISHED))) {
+            return;
+        }
+        ThreadPoolService threadPoolService = Services.getService(ThreadPoolService.class);
+        threadPoolService.submit(new InitTask(this, session, hasRun));
+
+    }
+
+    private static final class InitTask extends AbstractTask<Boolean> {
+
+        private final MailCategoriesConfigServiceImpl mailCategoriesService;
+        private final Session session;
+        private final ConfigProperty<String> hasRun;
+
+        /**
+         * Initializes a new {@link MailCategoriesConfigServiceImpl.InitTask}.
+         */
+        InitTask(MailCategoriesConfigServiceImpl mailCategoriesService, Session session, ConfigProperty<String> hasRun) {
+            super();
+            this.mailCategoriesService = mailCategoriesService;
+            this.session = session;
+            this.hasRun = hasRun;
+        }
+
+        @Override
+        public Boolean call() throws Exception {
+            try {
+                hasRun.set(STATUS_RUNNING);
+
+                String categoryNames[] = mailCategoriesService.getSystemCategoryNames(session);
+                List<MailCategoryRule> rules = new ArrayList<>();
+                for (String categoryName : categoryNames) {
+                    String propValue = MailCategoriesConfigUtil.getValueFromProperty(RULE_DEFINITION_PROPERTY_PREFIX + categoryName, "", session);
+                    if (propValue.length() == 0) {
+                        continue;
+                    }
+                    String addresses[] = Strings.splitByComma(propValue.trim());
+                    String flag = mailCategoriesService.getFlagByCategory(session, categoryName);
+                    if (flag == null) {
+                        flag = mailCategoriesService.generateFlag(categoryName);
+                    }
+                    MailCategoryRule rule = new MailCategoryRule(Collections.singletonList(FROM_HEADER), Arrays.asList(addresses), flag);
+                    rules.add(rule);
+                }
+                mailCategoriesService.getRuleEngine().initRuleEngineForUser(session, rules);
+                FullnameArgument fa = new FullnameArgument("INBOX");
+                for (MailCategoryRule rule : rules) {
+                    SearchTerm<?> searchTerm = mailCategoriesService.getSearchTerm(rule);
+                    MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullname(), searchTerm, rule.getFlag(), null);
+                }
+                hasRun.set(STATUS_FINISHED);
+            } catch (Exception e) {
+                try {
+                    hasRun.set(STATUS_ERROR);
+                } catch (OXException ox) {
+                }
+                return false;
+            }
+            return true;
+        }
+
     }
 
 }

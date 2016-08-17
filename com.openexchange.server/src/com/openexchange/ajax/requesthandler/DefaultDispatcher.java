@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -99,11 +99,19 @@ public class DefaultDispatcher implements Dispatcher {
     private final Queue<AJAXActionCustomizerFactory> customizerFactories;
     private final Queue<AJAXActionAnnotationProcessor> annotationProcessors;
 
+    private final DispatcherListenerRegistry listenerRegistry;
 
     /**
      * Initializes a new {@link DefaultDispatcher}.
      */
     public DefaultDispatcher() {
+        this(null);
+    }
+
+    /**
+     * Initializes a new {@link DefaultDispatcher}.
+     */
+    public DefaultDispatcher(DispatcherListenerRegistry listenerRegistry) {
         super();
         fallbackSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128, 0.9f, 1);
         publicSessionAuthCache = new ConcurrentHashMap<StrPair, Boolean>(128, 0.9f, 1);
@@ -113,6 +121,8 @@ public class DefaultDispatcher implements Dispatcher {
         actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>(64, 0.9f, 1);
         customizerFactories = new ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
         annotationProcessors = new ConcurrentLinkedQueue<AJAXActionAnnotationProcessor>();
+
+        this.listenerRegistry = null == listenerRegistry ? DispatcherListenerRegistry.NOOP_REGISTRY : listenerRegistry;
     }
 
     @Override
@@ -141,13 +151,13 @@ public class DefaultDispatcher implements Dispatcher {
         addLogProperties(requestData, false);
         List<AJAXActionCustomizer> customizers = determineCustomizers(requestData, session);
         try {
+            // Customize request data
             AJAXRequestData modifiedRequestData = customizeRequest(requestData, customizers, session);
 
-                /*
-                 * Set request context
-                 */
-                RequestContextHolder.set(buildRequestContext(modifiedRequestData));
+            // Set request context
+            RequestContextHolder.set(buildRequestContext(modifiedRequestData));
 
+            // Determine action factory and yield an action executing the request
             AJAXActionServiceFactory factory = lookupFactory(modifiedRequestData.getModule());
             if (factory == null) {
                 throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequestData.getModule());
@@ -158,59 +168,52 @@ public class DefaultDispatcher implements Dispatcher {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(modifiedRequestData.getAction(), modifiedRequestData.getModule());
             }
 
-            /*
-             * Validate request headers for caching
-             */
+            // Validate request headers for caching
             AJAXRequestResult etagResult = checkResultNotModified(action, modifiedRequestData, session);
             if (etagResult != null) {
                 return etagResult;
             }
 
-            /*
-             * Validate request headers for resume
-             */
+            // Validate request headers for resume
             AJAXRequestResult failedResult = checkRequestPreconditions(action, modifiedRequestData, session);
             if (failedResult != null) {
                 return failedResult;
             }
 
-                /*
-                 * Check for action annotations
-                 */
-                for (AJAXActionAnnotationProcessor annotationProcessor : annotationProcessors) {
-                    if (annotationProcessor.handles(action)) {
-                        annotationProcessor.process(action, modifiedRequestData, session);
-                    }
+            // Check for action annotations
+            for (AJAXActionAnnotationProcessor annotationProcessor : annotationProcessors) {
+                if (annotationProcessor.handles(action)) {
+                    annotationProcessor.process(action, modifiedRequestData, session);
                 }
-
-                /*
-                 * State already initialized for module?
-                 */
-                if (factory instanceof AJAXStateHandler) {
-                    final AJAXStateHandler handler = (AJAXStateHandler) factory;
-                    if (state.addInitializer(modifiedRequestData.getModule(), handler)) {
-                        handler.initialize(state);
-                    }
-                }
-                modifiedRequestData.setState(state);
-
-                /*
-                 * Ensure requested format
-                 */
-                if (requestData.getFormat() == null) {
-                    requestData.setFormat("apiResponse");
-                }
-
-            /*
-             * Perform request
-             */
-            AJAXRequestResult result = callAction(action, modifiedRequestData, session);
-            if (AJAXRequestResult.ResultType.DIRECT == result.getType()) {
-                // No further processing
-                return result;
             }
 
-            return customizeResult(modifiedRequestData, result, customizers, session);
+            // State already initialized for module?
+            if (factory instanceof AJAXStateHandler) {
+                final AJAXStateHandler handler = (AJAXStateHandler) factory;
+                if (state.addInitializer(modifiedRequestData.getModule(), handler)) {
+                    handler.initialize(state);
+                }
+            }
+            modifiedRequestData.setState(state);
+
+            // Ensure requested format
+            if (requestData.getFormat() == null) {
+                requestData.setFormat("apiResponse");
+            }
+
+            // Grab applicable dispatcher listeners
+
+            List<DispatcherListener> dispatcherListeners = listenerRegistry.getDispatcherListenersFor(modifiedRequestData);
+
+            // Perform request
+            AJAXRequestResult result = callAction(action, modifiedRequestData, dispatcherListeners, session);
+            if (AJAXRequestResult.ResultType.DIRECT == result.getType()) {
+                // No further processing
+                return contributeDispatcherListeners(result, dispatcherListeners);
+            }
+
+            result = customizeResult(modifiedRequestData, result, customizers, session);
+            return contributeDispatcherListeners(result, dispatcherListeners);
         } catch (OXException e) {
             for (AJAXActionCustomizer customizer : customizers) {
                 if (customizer instanceof AJAXExceptionHandler) {
@@ -231,13 +234,13 @@ public class DefaultDispatcher implements Dispatcher {
                 }
             }
 
-                // Wrap unchecked exception
-                addLogProperties(requestData, true);
-                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } finally {
-                RequestContextHolder.reset();
-            }
+            // Wrap unchecked exception
+            addLogProperties(requestData, true);
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            RequestContextHolder.reset();
         }
+    }
 
     private RequestContext buildRequestContext(AJAXRequestData requestData) throws OXException {
         HostData hostData = requestData.getHostData();
@@ -247,6 +250,7 @@ public class DefaultDispatcher implements Dispatcher {
 
         DefaultRequestContext context = new DefaultRequestContext();
         context.setHostData(hostData);
+        context.setUserAgent(requestData.getUserAgent());
         return context;
     }
 
@@ -254,18 +258,42 @@ public class DefaultDispatcher implements Dispatcher {
      * Finally calls the requested action with the given request data and returns the result.
      *
      * @param action The action to call
-     * @param modifiedRequestData The request data
+     * @param requestData The request data
+     * @param optListeners The optional dispatcher listeners that receive call-backs or <code>null</code>
      * @param session The session
      * @return The actions result
-     * @throws OXException
+     * @throws OXException If action fails to handle the request data
      */
-    private AJAXRequestResult callAction(AJAXActionService action, AJAXRequestData modifiedRequestData, ServerSession session) throws OXException {
-        AJAXRequestResult result;
+    private AJAXRequestResult callAction(AJAXActionService action, AJAXRequestData requestData, List<DispatcherListener> optListeners, ServerSession session) throws OXException {
+        if ((null == optListeners) || (optListeners.isEmpty())) {
+            return doCallAction(action, requestData, session);
+        }
+
+        AJAXRequestResult result = null;
+        Exception exc = null;
         try {
-            result = action.perform(modifiedRequestData, session);
+            triggerOnRequestInitialized(requestData, optListeners);
+            result = doCallAction(action, requestData, session);
+            return result;
+        } catch (OXException e) {
+            exc = e;
+            throw e;
+        } catch (RuntimeException e) {
+            exc = e;
+            throw e;
+        } finally {
+            triggerOnRequestPerformed(requestData, result, exc, optListeners);
+        }
+    }
+
+    private AJAXRequestResult doCallAction(AJAXActionService action, AJAXRequestData requestData, ServerSession session) throws OXException {
+        AJAXRequestResult result = null;
+
+        try {
+            result = action.perform(requestData, session);
             if (null == result) {
                 // Huh...?!
-                addLogProperties(modifiedRequestData, true);
+                addLogProperties(requestData, true);
                 throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(AJAXRequestResult.class.getSimpleName(), "null");
             }
         } catch (final IllegalStateException e) {
@@ -277,10 +305,10 @@ public class DefaultDispatcher implements Dispatcher {
         } catch (final ContinuationException e) {
             result = handleContinuationException(e, session);
         } finally {
-            modifiedRequestData.cleanUploads();
+            requestData.cleanUploads();
         }
 
-        return result;
+        return result.setRequestData(requestData);
     }
 
     /**
@@ -328,22 +356,21 @@ public class DefaultDispatcher implements Dispatcher {
     /**
      * Determines all {@link AJAXActionCustomizer} instances that can potentially modify the request data.
      *
-     * @param requestData The reuqest data
+     * @param requestData The request data
      * @param session The session
      * @return A list of customizers meant to be called for the request object.
      */
     private List<AJAXActionCustomizer> determineCustomizers(AJAXRequestData requestData, ServerSession session) {
-        final List<AJAXActionCustomizer> todo = new LinkedList<AJAXActionCustomizer>();
         /*
          * Create customizers
          */
-        for (final AJAXActionCustomizerFactory customizerFactory : customizerFactories) {
-            final AJAXActionCustomizer customizer = customizerFactory.createCustomizer(requestData, session);
+        List<AJAXActionCustomizer> todo = new ArrayList<AJAXActionCustomizer>(4);
+        for (AJAXActionCustomizerFactory customizerFactory : customizerFactories) {
+            AJAXActionCustomizer customizer = customizerFactory.createCustomizer(requestData, session);
             if (customizer != null) {
                 todo.add(customizer);
             }
         }
-
         return todo;
     }
 
@@ -363,7 +390,7 @@ public class DefaultDispatcher implements Dispatcher {
          * Iterate customizers for AJAXRequestData
          */
         AJAXRequestData modifiedRequestData = requestData;
-        List<AJAXActionCustomizer> outgoing = new ArrayList<AJAXActionCustomizer>(customizerFactories.size());
+        List<AJAXActionCustomizer> outgoing = new ArrayList<AJAXActionCustomizer>(4);
         while (!customizers.isEmpty()) {
             final Iterator<AJAXActionCustomizer> iterator = customizers.iterator();
             while (iterator.hasNext()) {
@@ -386,6 +413,13 @@ public class DefaultDispatcher implements Dispatcher {
         return modifiedRequestData;
     }
 
+    private AJAXRequestResult contributeDispatcherListeners(AJAXRequestResult requestResult, List<DispatcherListener> dispatcherListeners) {
+        if (null != requestResult && null != dispatcherListeners) {
+            requestResult.addPostProcessor(new DispatcherListenerPostProcessor(dispatcherListeners));
+        }
+        return requestResult;
+    }
+
     /**
      * Checks if potential HTTP preconditions are fulfilled. Namely the following headers are checked:
      * <ul>
@@ -400,8 +434,8 @@ public class DefaultDispatcher implements Dispatcher {
      * @param requestData The request data
      * @param session The session
      * @return <code>null</code> if the request shall be processed normally. If a precondition fails, an
-     * according {@link AJAXRequestResult} with code {@link HttpServletResponse#SC_PRECONDITION_FAILED} is returned,
-     * which should be directly written out to the client.
+     *         according {@link AJAXRequestResult} with code {@link HttpServletResponse#SC_PRECONDITION_FAILED} is returned,
+     *         which should be directly written out to the client.
      */
     private AJAXRequestResult checkRequestPreconditions(AJAXActionService action, AJAXRequestData requestData, ServerSession session) throws OXException {
         // If-Match header should contain "*" or ETag. If not, then return 412.
@@ -437,8 +471,8 @@ public class DefaultDispatcher implements Dispatcher {
      * @param requestData The request data
      * @param session The session
      * @return An {@link AJAXRequestResult} with {@link ResultType#ETAG}, that causes a <code>304 Not Modified</code> with
-     * no further processing of the request. If checks against those headers are not supported by the underlying action or
-     * if the result has changed since the last request <code>null</code> is returned.
+     *         no further processing of the request. If checks against those headers are not supported by the underlying action or
+     *         if the result has changed since the last request <code>null</code> is returned.
      * @throws OXException
      */
     private AJAXRequestResult checkResultNotModified(AJAXActionService action, AJAXRequestData requestData, ServerSession session) throws OXException {
@@ -471,7 +505,6 @@ public class DefaultDispatcher implements Dispatcher {
 
         return null;
     }
-
 
     /**
      * Handles specified <code>ContinuationException</code> instance.
@@ -557,10 +590,7 @@ public class DefaultDispatcher implements Dispatcher {
     }
 
     private DispatcherNotes getActionMetadata(final AJAXActionService action) {
-        if (null == action) {
-            return null;
-        }
-        return action.getClass().getAnnotation(DispatcherNotes.class);
+        return null == action ? null : action.getClass().getAnnotation(DispatcherNotes.class);
     }
 
     /**
@@ -580,8 +610,7 @@ public class DefaultDispatcher implements Dispatcher {
                         final StringBuilder sb = new StringBuilder(512).append("There is already a factory associated with module \"");
                         sb.append(module).append("\": ").append(current.getClass().getName());
                         sb.append(". Therefore registration is denied for factory \"").append(factory.getClass().getName());
-                        sb.append("\". Unless these two factories provide the \"").append(Module.class.getName()).append(
-                            "\" annotation to specify what actions are supported by each factory.");
+                        sb.append("\". Unless these two factories provide the \"").append(Module.class.getName()).append("\" annotation to specify what actions are supported by each factory.");
                         LOG.warn(sb.toString());
                     } else {
                         final CombinedActionFactory combinedFactory;
@@ -609,13 +638,27 @@ public class DefaultDispatcher implements Dispatcher {
     public void addCustomizer(final AJAXActionCustomizerFactory factory) {
         this.customizerFactories.add(factory);
     }
+
     /**
      * Removes the specified customizer factory
+     *
+     * @param factory The customizer factory
      */
-	public void removeCustomizer(AJAXActionCustomizerFactory factory) {
-		this.customizerFactories.remove(factory);
-	}
+    public void removeCustomizer(AJAXActionCustomizerFactory factory) {
+        this.customizerFactories.remove(factory);
+    }
 
+    private void triggerOnRequestInitialized(AJAXRequestData requestData, List<DispatcherListener> dispatcherListeners) throws OXException {
+        for (DispatcherListener dispatcherListener : dispatcherListeners) {
+            dispatcherListener.onRequestInitialized(requestData);
+        }
+    }
+
+    private void triggerOnRequestPerformed(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e, List<DispatcherListener> dispatcherListeners) throws OXException {
+        for (DispatcherListener dispatcherListener : dispatcherListeners) {
+            dispatcherListener.onRequestPerformed(requestData, requestResult, e);
+        }
+    }
 
     /**
      * Releases specified factory from given module.
@@ -638,6 +681,7 @@ public class DefaultDispatcher implements Dispatcher {
 
     /**
      * Adds an {@link AJAXActionAnnotationProcessor}.
+     *
      * @param processor The processor
      */
     public void addAnnotationProcessor(AJAXActionAnnotationProcessor processor) {
@@ -648,6 +692,7 @@ public class DefaultDispatcher implements Dispatcher {
 
     /**
      * Removes an {@link AJAXActionAnnotationProcessor}.
+     *
      * @param processor The processor
      */
     public void removeAnnotationProcessor(AJAXActionAnnotationProcessor processor) {
@@ -662,25 +707,25 @@ public class DefaultDispatcher implements Dispatcher {
         }
     }
 
-	@Override
-	public boolean mayUseFallbackSession(final String module, final String action) throws OXException {
-	    final StrPair key = new StrPair(module, action);
+    @Override
+    public boolean mayUseFallbackSession(final String module, final String action) throws OXException {
+        final StrPair key = new StrPair(module, action);
         Boolean ret = fallbackSessionActionsCache.get(key);
-	    if (null == ret) {
-	        final AJAXActionServiceFactory factory = lookupFactory(module);
-	        if (factory == null) {
-	            return false;
-	        }
+        if (null == ret) {
+            final AJAXActionServiceFactory factory = lookupFactory(module);
+            if (factory == null) {
+                return false;
+            }
             final DispatcherNotes actionMetadata = getActionMetadata(getActionServiceSafe(action, factory));
             ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.allowPublicSession());
-	        fallbackSessionActionsCache.put(key, ret);
+            fallbackSessionActionsCache.put(key, ret);
         }
-	    return ret.booleanValue();
-	}
+        return ret.booleanValue();
+    }
 
-	@Override
-	public boolean mayPerformPublicSessionAuth(final String module, final String action) throws OXException {
-	    final StrPair key = new StrPair(module, action);
+    @Override
+    public boolean mayPerformPublicSessionAuth(final String module, final String action) throws OXException {
+        final StrPair key = new StrPair(module, action);
         Boolean ret = publicSessionAuthCache.get(key);
         if (null == ret) {
             final AJAXActionServiceFactory factory = lookupFactory(module);
@@ -692,11 +737,11 @@ public class DefaultDispatcher implements Dispatcher {
             publicSessionAuthCache.put(key, ret);
         }
         return ret.booleanValue();
-	}
+    }
 
-	@Override
+    @Override
     public boolean mayOmitSession(final String module, final String action) throws OXException {
-	    final StrPair key = new StrPair(module, action);
+        final StrPair key = new StrPair(module, action);
         Boolean ret = omitSessionActionsCache.get(key);
         if (null == ret) {
             final AJAXActionServiceFactory factory = lookupFactory(module);
@@ -708,11 +753,11 @@ public class DefaultDispatcher implements Dispatcher {
             omitSessionActionsCache.put(key, ret);
         }
         return ret.booleanValue();
-	}
+    }
 
-	@Override
-	public boolean noSecretCallback(String module, String action) throws OXException {
-	    final StrPair key = new StrPair(module, action);
+    @Override
+    public boolean noSecretCallback(String module, String action) throws OXException {
+        final StrPair key = new StrPair(module, action);
         Boolean ret = noSecretCallbackCache.get(key);
         if (null == ret) {
             final AJAXActionServiceFactory factory = lookupFactory(module);
@@ -725,12 +770,13 @@ public class DefaultDispatcher implements Dispatcher {
             noSecretCallbackCache.put(key, ret);
         }
         return ret.booleanValue();
-	}
+    }
 
-	private static final class StrPair {
-	    private final String str1;
-	    private final String str2;
-	    private final int hash;
+    private static final class StrPair {
+
+        private final String str1;
+        private final String str2;
+        private final int hash;
 
         StrPair(String str1, String str2) {
             super();
@@ -774,7 +820,6 @@ public class DefaultDispatcher implements Dispatcher {
             return true;
         }
 
-	} // End of class Strings
-
+    }// End of class Strings
 
 }

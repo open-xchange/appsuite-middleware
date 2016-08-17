@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -74,16 +74,20 @@ public interface DriveAction<T extends DriveVersion> extends Comparable<DriveAct
     static final String PARAMETER_LENGTH = "length";
     static final String PARAMETER_STOP = "stop";
     static final String PARAMETER_ACKNOWLEDGE = "acknowledge";
+    static final String PARAMETER_ROOT = "root";
 
     static final String PARAMETER_DIRECT_LINK = "directLink";
     static final String PARAMETER_DIRECT_LINK_FRAGMENTS = "directLinkFragments";
     static final String PARAMETER_PREVIEW_LINK = "previewLink";
     static final String PARAMETER_THUMBNAIL_LINK = "thumbnailLink";
 
+    static final String PARAMETER_DATA = "data";
+
     static final Set<String> PARAMETER_NAMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] {
         PARAMETER_PATH, PARAMETER_TOTAL_LENGTH, PARAMETER_OFFSET, PARAMETER_CONTENT_TYPE, PARAMETER_ERROR, PARAMETER_QUARANTINE,
         PARAMETER_MODIFIED, PARAMETER_CREATED, PARAMETER_RESET, PARAMETER_LENGTH, PARAMETER_STOP, PARAMETER_ACKNOWLEDGE,
-        PARAMETER_DIRECT_LINK, PARAMETER_DIRECT_LINK_FRAGMENTS, PARAMETER_PREVIEW_LINK, PARAMETER_THUMBNAIL_LINK
+        PARAMETER_DIRECT_LINK, PARAMETER_DIRECT_LINK_FRAGMENTS, PARAMETER_PREVIEW_LINK, PARAMETER_THUMBNAIL_LINK, PARAMETER_DATA,
+        PARAMETER_ROOT
     })));
 
     /**

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -83,9 +83,10 @@ public class DownloadAction extends AbstractDriveAction {
     public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         try {
             /*
-             * no limits for download
+             * no limits & no transformations for download
              */
             enableUnlimitedBodySize(requestData);
+            preventTransformations(requestData);
             /*
              * get parameters
              */
@@ -133,9 +134,7 @@ public class DownloadAction extends AbstractDriveAction {
             /*
              * return file result
              */
-            AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
-//            requestResult.setType(ResultType.DIRECT);//TODO: this leads to 0 bytes?
-            return requestResult;
+            return new AJAXRequestResult(fileHolder, "file");
         } catch (OXException e) {
             /*
              * indicate error by setting HTTP status code

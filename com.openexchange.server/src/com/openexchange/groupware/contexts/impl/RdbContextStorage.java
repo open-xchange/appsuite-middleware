@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -274,46 +274,45 @@ public class RdbContextStorage extends ContextStorage {
      */
     @Override
     public List<Integer> getAllContextIds() throws OXException {
-        final List<Integer> retval = new ArrayList<Integer>();
-        final Connection con = DBPool.pickup();
+        Connection con = DBPool.pickup();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
             stmt = con.prepareStatement("SELECT cid FROM context");
             result = stmt.executeQuery();
+            List<Integer> retval = new ArrayList<Integer>();
             while (result.next()) {
                 retval.add(Integer.valueOf(result.getInt(1)));
             }
+            return retval;
         } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(con);
         }
-        return retval;
     }
 
     @Override
     public List<Integer> getAllContextIdsForFilestore(int filestoreId) throws OXException {
-        final List<Integer> retval = new ArrayList<Integer>();
-        final Connection con = DBPool.pickup();
+        Connection con = DBPool.pickup();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
             stmt = con.prepareStatement("SELECT cid FROM context WHERE filestore_id = ?");
             stmt.setInt(1, filestoreId);
-
             result = stmt.executeQuery();
+            List<Integer> retval = new ArrayList<Integer>();
             while (result.next()) {
                 retval.add(Integer.valueOf(result.getInt(1)));
             }
+            return retval;
         } catch (final SQLException e) {
             throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(con);
         }
-        return retval;
     }
 
     @Override

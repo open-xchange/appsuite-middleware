@@ -15,7 +15,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/json-simple-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/libthrift-0.7.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/metrics-core-2.0.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/snakeyaml-1.6.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/snaptree-0.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/speed4j-0.13.jar" sourcepath="lib/source/speed4j-0.13-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/uuid-3.3.jar" sourcepath="lib/source/uuid-3.3-sources.jar"/>

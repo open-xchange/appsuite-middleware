@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -51,6 +51,7 @@ package com.openexchange.xing;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -486,23 +487,28 @@ public class RESTUtility {
             throw new XingParseException("Bad response from Xing.");
         }
 
-        final Scanner scanner;
+        Scanner scanner = null;
+        InputStream contentStream = null;
         try {
-            scanner = new Scanner(entity.getContent()).useDelimiter("&");
+            contentStream = entity.getContent();
+            scanner = new Scanner(contentStream);
+            scanner.useDelimiter("&");
+
+            Map<String, String> result = new HashMap<String, String>();
+            while (scanner.hasNext()) {
+                final String nameValue = scanner.next();
+                final String[] parts = nameValue.split("=");
+                if (parts.length != 2) {
+                    throw new XingParseException("Bad query string from Xing.");
+                }
+                result.put(parts[0], parts[1]);
+            }
+            return result;
         } catch (final IOException e) {
             throw new XingIOException(e);
+        } finally {
+            Streams.close(contentStream, scanner);
         }
-
-        final Map<String, String> result = new HashMap<String, String>();
-        while (scanner.hasNext()) {
-            final String nameValue = scanner.next();
-            final String[] parts = nameValue.split("=");
-            if (parts.length != 2) {
-                throw new XingParseException("Bad query string from Xing.");
-            }
-            result.put(parts[0], parts[1]);
-        }
-        return result;
     }
 
     /**

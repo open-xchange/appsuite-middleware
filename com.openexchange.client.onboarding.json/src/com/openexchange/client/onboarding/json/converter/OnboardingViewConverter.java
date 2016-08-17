@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -192,7 +192,8 @@ public class OnboardingViewConverter implements ResultConverter {
                     JSONArray jCompositeIds = new JSONArray(compositeIds.size());
                     for (CompositeId compositeId : compositeIds) {
                         // Check for an appropriate scenario-action-association entry
-                        JSONObject jScenario2ActionEntry = createScenario2ActionEntry(compositeId, actionCollector, requestData, onboardingService, session);
+                        Set<String> missingCapabilities = new LinkedHashSet<String>(4);
+                        JSONObject jScenario2ActionEntry = createScenario2ActionEntry(compositeId, actionCollector, requestData, onboardingService, missingCapabilities, session);
                         if (null != jScenario2ActionEntry) {
                             // Add to device's list of supported scenarios
                             jCompositeIds.put(compositeId.toString());
@@ -201,7 +202,19 @@ public class OnboardingViewConverter implements ResultConverter {
                             if (scenarioIds.add(compositeId.getScenarioId())) {
                                 Scenario scenario = onboardingService.getScenario(compositeId.getScenarioId(), session);
                                 boolean available = onboardingService.isAvailableFor(compositeId.getScenarioId(), session);
-                                jScenarios.put(toJson(scenario, available, session));
+                                JSONObject jScenario = toJson(scenario, available, session);
+
+                                // Add missing capabilities for currently processed scenario (if any)
+                                if (false == missingCapabilities.isEmpty()) {
+                                    JSONArray jMissingCaps = new JSONArray(missingCapabilities.size());
+                                    for (String missingCapability : missingCapabilities) {
+                                        jMissingCaps.put(missingCapability);
+                                    }
+                                    jScenario.put("missing_capabilities", jMissingCaps);
+                                }
+
+                                // Add to jScenarios array
+                                jScenarios.put(jScenario);
                             }
 
                             // Add to scenario-to-action mapping
@@ -223,7 +236,7 @@ public class OnboardingViewConverter implements ResultConverter {
         return jView;
     }
 
-    private JSONObject createScenario2ActionEntry(CompositeId compositeId, ActionCollector actionCollector, AJAXRequestData requestData, OnboardingService onboardingService, Session session) throws OXException, JSONException {
+    private JSONObject createScenario2ActionEntry(CompositeId compositeId, ActionCollector actionCollector, AJAXRequestData requestData, OnboardingService onboardingService, Collection<String> missingCapabilities, Session session) throws OXException, JSONException {
         DeviceAwareScenario scenario = onboardingService.getScenario(compositeId.getScenarioId(), compositeId.getDevice(), session);
 
         JSONArray jActionIds = new JSONArray(10);
@@ -235,13 +248,17 @@ public class OnboardingViewConverter implements ResultConverter {
             boolean enabled = scenario.isEnabled(session);
             jScenario2ActionEntry.put("enabled", enabled);
             if (!enabled) {
-                Collection<String> missingCapabilities = scenario.getMissingCapabilities(session);
-                if (null != missingCapabilities && !missingCapabilities.isEmpty()) {
-                    JSONArray jMissingCaps = new JSONArray(missingCapabilities.size());
-                    for (String missingCapability : missingCapabilities) {
+                Collection<String> missingCapsFromScenario = scenario.getMissingCapabilities(session);
+                if (null != missingCapsFromScenario && !missingCapsFromScenario.isEmpty()) {
+                    missingCapabilities.addAll(missingCapsFromScenario);
+                    // TODO: Remove adding "missing_capabilities" to jScenario2ActionEntry instance once work-around for bug #46968 becomes obsolete
+                    // ---
+                    JSONArray jMissingCaps = new JSONArray(missingCapsFromScenario.size());
+                    for (String missingCapability : missingCapsFromScenario) {
                         jMissingCaps.put(missingCapability);
                     }
                     jScenario2ActionEntry.put("missing_capabilities", jMissingCaps);
+                    // ---
                 }
             }
 

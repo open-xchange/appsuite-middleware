@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -91,21 +91,21 @@ public final class CreateMailAccountTables extends AbstractCreateTableImpl {
             + "replyTo VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,"
             + "default_flag TINYINT UNSIGNED NOT NULL DEFAULT 0,"
             + "spam_handler VARCHAR(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "trash VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "sent VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "drafts VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "spam VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "confirmed_spam VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "confirmed_ham VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "archive VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+            + "trash VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
+            + "sent VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
+            + "drafts VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
+            + "spam VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
+            + "confirmed_spam VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
+            + "confirmed_ham VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
+            + "archive VARCHAR(64) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT '',"
             + "unified_inbox TINYINT UNSIGNED DEFAULT 0,"
-            + "trash_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "sent_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "drafts_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "spam_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "confirmed_spam_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "confirmed_ham_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,"
-            + "archive_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '',"
+            + "trash_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
+            + "sent_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
+            + "drafts_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
+            + "spam_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
+            + "confirmed_spam_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
+            + "confirmed_ham_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci,"
+            + "archive_fullname VARCHAR(256) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT '',"
             + "starttls TINYINT UNSIGNED NOT NULL DEFAULT 0,"
             + "PRIMARY KEY (cid, id, user),"
             + "INDEX (cid, user),"

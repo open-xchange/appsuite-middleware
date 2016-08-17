@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -81,6 +81,7 @@ public final class UpdateTaskSchemasAndVersionsCLT {
     static {
         toolkitOptions = new Options();
         toolkitOptions.addOption("h", "help", false, "Prints a help text");
+        toolkitOptions.addOption("H", "host", true, "The optional JMX host (default:localhost)");
         toolkitOptions.addOption("p", "port", true, "The optional JMX port (default:9999)");
         toolkitOptions.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
         toolkitOptions.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
@@ -107,6 +108,13 @@ public final class UpdateTaskSchemasAndVersionsCLT {
             if (cmd.hasOption('h')) {
                 printHelp();
                 System.exit(0);
+            }
+            String host = "localhost";
+            if (cmd.hasOption('H')) {
+                String tmp = cmd.getOptionValue('H');
+                if (null != tmp) {
+                    host = tmp.trim();
+                }
             }
             int port = 9999;
             if (cmd.hasOption('p')) {
@@ -172,7 +180,7 @@ public final class UpdateTaskSchemasAndVersionsCLT {
                 environment.put(JMXConnector.CREDENTIALS, creds);
             }
 
-            final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://localhost:" + port + "/server");
+            final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/server");
             final JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
             try {
                 final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Drive Events Subscription Bundle
 Bundle-SymbolicName: com.openexchange.drive.events.subscribe
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.openexchange.drive.events.subscribe.osgi.SubscribeActivator
@@ -22,6 +22,7 @@ Import-Package: com.openexchange.context,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.sql,
+ com.openexchange.tools.update,
  org.apache.commons.logging,
  org.osgi.framework,
  org.slf4j

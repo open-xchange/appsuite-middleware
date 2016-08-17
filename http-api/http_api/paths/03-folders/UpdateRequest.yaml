@@ -1,0 +1,45 @@
+/folders?action=update:
+  put:
+    operationId: updateFolder
+    tags:
+      - folders
+    summary: Updates a folder.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: Object ID of the updated folder.
+        required: true
+      - in: query
+        name: timestamp
+        type: integer
+        format: int64
+        description:  Timestamp of the updated folder. If the folder was modified after the specified timestamp, then the update must fail.
+        required: true
+      - $ref: "#/parameters/gblQueryParamFolderTree"
+      - $ref: "#/parameters/gblQueryParamAllowedModules"
+      - in: query
+        name: cascadePermissions
+        type: boolean
+        description: |
+          `true` to cascade permissions to all sub-folders. The user must have administrative permissions to all
+          sub-folders subject to change. If one permission change fails, the entire operation fails. (since 7.8.0)
+        required: false
+        default: false
+      - in: body
+        name: body
+        description: |
+          JSON object with "folder" object containing the modified fields and optional "notification"
+          object to let added permission entities be notified about newly shared folders for all modules
+          except mail. (Example: {"folder":{"title":"test123"}} or {"folder":{"permissions":[{"bits":403710016,"entity":84,"group":false}]},"notification":{"transport":"mail","message":"The message"}})
+        required: true
+        schema:
+          $ref: "#/definitions/FolderBody"
+    responses:
+      200:
+        description: A JSON object with the object id of the folder. In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/FolderUpdateResponse"

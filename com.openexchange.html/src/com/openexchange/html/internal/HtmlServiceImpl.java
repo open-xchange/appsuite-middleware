@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -105,6 +105,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlSanitizeResult;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.HtmlServices;
+import com.openexchange.html.internal.emoji.EmojiRegistry;
 import com.openexchange.html.internal.image.DroppingImageHandler;
 import com.openexchange.html.internal.image.ImageProcessor;
 import com.openexchange.html.internal.image.ProxyRegistryImageHandler;
@@ -539,6 +540,14 @@ public final class HtmlServiceImpl implements HtmlService {
             html = processDownlevelRevealedConditionalComments(html);
             html = dropDoubleAccents(html);
             html = dropSlashedTags(html);
+            
+            // Repetitive sanitizing until no further replacement/changes performed
+            final boolean[] sanitized = new boolean[] { true };
+            while (sanitized[0]) {
+                sanitized[0] = false;
+                // Start sanitizing round
+                html = SaneScriptTags.saneScriptTags(html, sanitized);
+            }
 
             // CSS- and tag-wise sanitizing
             try {
@@ -568,14 +577,6 @@ public final class HtmlServiceImpl implements HtmlService {
                 htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             } catch (final ParsingDeniedException e) {
                 LOG.warn("HTML content will be returned un-white-listed.", e);
-            }
-
-            // Repetitive sanitizing until no further replacement/changes performed
-            final boolean[] sanitized = new boolean[] { true };
-            while (sanitized[0]) {
-                sanitized[0] = false;
-                // Start sanitizing round
-                html = SaneScriptTags.saneScriptTags(html, sanitized);
             }
 
             // Replace HTML entities
@@ -934,8 +935,7 @@ public final class HtmlServiceImpl implements HtmlService {
     }
 
     private String escape(final String s, final boolean withQuote, final String commentId) {
-        final int len = s.length();
-        final StringBuilder sb = new StringBuilder(len);
+        StringBuilder sb = new StringBuilder(s.length());
         if (null == commentId) {
             escapePlain(s, withQuote, sb);
             return sb.toString();
@@ -943,15 +943,14 @@ public final class HtmlServiceImpl implements HtmlService {
         /*
          * Specify pattern & matcher
          */
-        final Pattern p = Pattern.compile(
-            sb.append(Pattern.quote("<!--" + commentId + ' ')).append("(.+?)").append(Pattern.quote("-->")).toString(),
-            Pattern.DOTALL);
+        Pattern p = Pattern.compile(sb.append(Pattern.quote("<!--" + commentId + ' ')).append("(.+?)").append(Pattern.quote("-->")).toString(), Pattern.DOTALL);
         sb.setLength(0);
-        final Matcher m = p.matcher(s);
+        Matcher m = p.matcher(s);
         if (!m.find()) {
             escapePlain(s, withQuote, sb);
             return sb.toString();
         }
+
         int lastMatch = 0;
         do {
             escapePlain(s.substring(lastMatch, m.start()), withQuote, sb);
@@ -962,41 +961,77 @@ public final class HtmlServiceImpl implements HtmlService {
         return sb.toString();
     }
 
-    private void escapePlain(final String s, final boolean withQuote, final StringBuilder sb) {
+    private void escapePlain(String s, boolean withQuote, StringBuilder htmlBuilder) {
         int length = s.length();
         TIntObjectMap<String> htmlChar2EntityMap = htmlCharMap;
 
-        int i = 0;
         if (withQuote) {
-            for (int k = length; k-- > 0; i++) {
-                char c = s.charAt(i);
-                String entity = htmlChar2EntityMap.get(c);
-                if (entity != null) {
-                    sb.append('&').append(entity).append(';');
-                } else if (c > 127) {
-                    // Non-ASCII character
-                    sb.append("&#").append((int) c).append(';');
-                } else {
-                    sb.append(c);
+            for (int i = 0, k = length; k-- > 0;) {
+                char c = s.charAt(i++);
+                boolean isSurrogatePair = appendChar(c, htmlChar2EntityMap.get(c), k > 0 ? Character.valueOf(s.charAt(i)) : null, htmlBuilder);
+                if (isSurrogatePair) {
+                    k--;
+                    i++;
                 }
             }
         } else {
-            for (int k = length; k-- > 0; i++) {
-                char c = s.charAt(i);
+            for (int i = 0, k = length; k-- > 0;) {
+                char c = s.charAt(i++);
                 if ('"' == c) {
-                    sb.append(c);
+                    htmlBuilder.append(c);
                 } else {
-                    String entity = htmlChar2EntityMap.get(c);
-                    if (entity != null) {
-                        sb.append('&').append(entity).append(';');
-                    } else if (c > 127) {
-                        // Non-ASCII character
-                        sb.append("&#").append((int) c).append(';');
-                    } else {
-                        sb.append(c);
+                    boolean isSurrogatePair = appendChar(c, htmlChar2EntityMap.get(c), k > 0 ? Character.valueOf(s.charAt(i)) : null, htmlBuilder);
+                    if (isSurrogatePair) {
+                        k--;
+                        i++;
                     }
                 }
             }
+        }
+    }
+
+    private boolean appendChar(char c, String optEntity, Character optNextChar, StringBuilder htmlBuilder) {
+        if (optEntity != null) {
+            htmlBuilder.append('&').append(optEntity).append(';');
+            return false;
+        }
+
+        if (c <= 127) {
+            // ASCII character
+            htmlBuilder.append(c);
+            return false;
+        }
+
+        // Non-ASCII character
+        if (null == optNextChar) {
+            // No next character to check for a possible Unicode surrogate pair
+            appendNonAsciiChar(c, htmlBuilder);
+            return false;
+        }
+
+        char nc = optNextChar.charValue();
+        if (false == Character.isSurrogatePair(c, nc)) {
+            // Not a Unicode surrogate pair.
+            appendNonAsciiChar(c, htmlBuilder);
+            return false;
+        }
+
+        int codePoint = Character.toCodePoint(c, nc);
+        if (EmojiRegistry.getInstance().isEmoji(codePoint)) {
+            // Keep unicode for Emoji
+            htmlBuilder.appendCodePoint(codePoint);
+        } else {
+            htmlBuilder.append("&#").append(codePoint).append(';');
+        }
+        return true;
+    }
+
+    private void appendNonAsciiChar(char c, StringBuilder sb) {
+        if (EmojiRegistry.getInstance().isEmoji(c)) {
+            // Keep unicode for Emoji
+            sb.append(c);
+        } else {
+            sb.append("&#").append((int) c).append(';');
         }
     }
 
@@ -1206,6 +1241,7 @@ public final class HtmlServiceImpl implements HtmlService {
          * Convert to absolute URIs
          */
         String html = htmlContent.substring(0, m.start()) + htmlContent.substring(m.end());
+        html = sanitizeAttributes(html);
         m = ImageProcessor.getInstance().getImgPattern().matcher(html);
         MatcherReplacer mr = new MatcherReplacer(m, html);
         final Stringer sb = new StringBuilderStringer(new StringBuilder(html.length()));
@@ -1315,6 +1351,29 @@ public final class HtmlServiceImpl implements HtmlService {
         mr.appendTail(sb);
         html = sb.toString();
         return html;
+    }
+    
+    private final static Pattern SRC_ATTRIBUTE_PATTERN = Pattern.compile("(src= *\"[^\"]*\")|(src= *'[^']*')", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static String sanitizeAttributes(String html) {
+        Matcher m = SRC_ATTRIBUTE_PATTERN.matcher(html);
+        String retval = html;
+        if (m.find()) {
+            /*
+             * Replace < > with &lt; &gt;
+             */
+            do {
+                final String attribute = m.group();
+                if(attribute.contains("<") && attribute.contains(">")) {
+                    String replace = attribute;
+                    replace = replace.replace("<", "&lt;");
+                    replace = replace.replace(">", "&gt;");
+                    retval = html.replace(attribute, replace);
+                }
+                    
+            } while (m.find()); 
+        }
+        return retval;
     }
 
     private static String trimHref(final String href) {
@@ -1667,6 +1726,8 @@ public final class HtmlServiceImpl implements HtmlService {
     private static final String CC_END_IF = " -->";
 
     private static final String CC_ENDIF = "<!-- <![endif] -->";
+    
+    private static final String CC_UNCOMMENTED_ENDIF = "<![endif] -->";
 
     /**
      * Processes detected downlevel-revealed <a href="http://en.wikipedia.org/wiki/Conditional_comment">conditional comments</a> through
@@ -1703,22 +1764,30 @@ public final class HtmlServiceImpl implements HtmlService {
              */
             return htmlContent;
         }
+        
         int lastMatch = 0;
         final StringBuilder sb = new StringBuilder(htmlContent.length() + 128);
         do {
             sb.append(htmlContent.substring(lastMatch, m.start()));
             final String condition = m.group(2);
             if (isValidCondition(condition)) {
+                boolean isDownlevelRevealed = false;
+                if (m.group(1).startsWith("<![if")) {
+                    isDownlevelRevealed = true;
+                }
+                //check for downlevel hidden comments and leave them be
                 sb.append(CC_START_IF).append(condition);
                 final String wrappedContent = m.group(3);
-                if (!wrappedContent.startsWith("-->", 0) && !condition.endsWith("-->")) {
+                if (!wrappedContent.startsWith("-->", 0) && !condition.endsWith("-->") && isDownlevelRevealed) {
                     sb.append(CC_END_IF);
                 }
                 sb.append(wrappedContent);
                 if (wrappedContent.endsWith("<!--")) {
                     sb.append(m.group(4));
-                } else {
+                } else if (isDownlevelRevealed){
                     sb.append(CC_ENDIF);
+                } else {
+                    sb.append(CC_UNCOMMENTED_ENDIF);
                 }
             }
             lastMatch = m.end();

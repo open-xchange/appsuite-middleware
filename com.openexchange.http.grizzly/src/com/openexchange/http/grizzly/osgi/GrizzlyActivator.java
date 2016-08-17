@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,6 +50,7 @@
 package com.openexchange.http.grizzly.osgi;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import javax.servlet.Filter;
 import org.glassfish.grizzly.comet.CometAddOn;
@@ -59,6 +60,8 @@ import org.glassfish.grizzly.http.server.OXTCPNIOTransportFilter;
 import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
+import org.glassfish.grizzly.ssl.SSLContextConfigurator;
+import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -96,6 +99,28 @@ public class GrizzlyActivator extends HousekeepingActivator {
         return new Class[] { ConfigurationService.class, RequestWatcherService.class, ThreadPoolService.class, TimerService.class };
     }
 
+    /**
+     * Initialize server side SSL configuration.
+     *
+     * @return server side {@link SSLEngineConfigurator}.
+     */
+    private static SSLEngineConfigurator createSslConfiguration(GrizzlyConfig grizzlyConfig) {
+        // Initialize SSLContext configuration
+        SSLContextConfigurator sslContextConfig = new SSLContextConfigurator();
+
+        // Set key store
+        // http://www.sslshopper.com/article-most-common-java-keytool-keystore-commands.html
+        sslContextConfig.setKeyStoreFile(grizzlyConfig.getKeystorePath());
+        sslContextConfig.setKeyStorePass(grizzlyConfig.getKeystorePassword());
+        // Create SSLEngine configurator
+        SSLEngineConfigurator sslEngineConfigurator = new SSLEngineConfigurator(sslContextConfig.createSSLContext(), false, false, false);
+        List<String> enabledCipherSuites = grizzlyConfig.getEnabledCiphers();
+        if (null != enabledCipherSuites && !enabledCipherSuites.isEmpty()) {
+            sslEngineConfigurator.setEnabledCipherSuites(enabledCipherSuites.toArray(new String[enabledCipherSuites.size()]));
+        }
+        return sslEngineConfigurator;
+    }
+
     @Override
     protected void startBundle() throws OXException {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(GrizzlyActivator.class);
@@ -130,7 +155,6 @@ public class GrizzlyActivator extends HousekeepingActivator {
             int maxBodySize = grizzlyConfig.getMaxBodySize();
             networkListener.setMaxFormPostSize(maxBodySize);
             networkListener.setMaxBufferedPostSize(maxBodySize);
-
             networkListener.setMaxHttpHeaderSize(grizzlyConfig.getMaxHttpHeaderSize());
 
             // Set the transport
@@ -169,9 +193,29 @@ public class GrizzlyActivator extends HousekeepingActivator {
                 log.info("Enabled Comet for Grizzly server.");
             }
 
+            if (grizzlyConfig.isSslEnabled()) {
+                NetworkListener networkSslListener = new NetworkListener("https-listener", grizzlyConfig.getHttpHost(), grizzlyConfig.getHttpsPort());
+                networkSslListener.setMaxFormPostSize(maxBodySize);
+                networkSslListener.setMaxBufferedPostSize(maxBodySize);
+                networkSslListener.setMaxHttpHeaderSize(grizzlyConfig.getMaxHttpHeaderSize());
+                networkSslListener.setSSLEngineConfig(createSslConfiguration(grizzlyConfig));
+                networkSslListener.setSecure(true);
+                TCPNIOTransport configuredTcpNioTransportSsl = buildTcpNioTransport(getService(ConfigurationService.class));
+                networkSslListener.setTransport(configuredTcpNioTransportSsl);
+                if (grizzlyConfig.isWebsocketsEnabled()) {
+                    networkSslListener.registerAddOn(new WebSocketAddOn());
+                }
+                if (grizzlyConfig.isCometEnabled()) {
+                    networkSslListener.registerAddOn(new CometAddOn());
+                }
+                log.info("Enabled SSL for Grizzly server.");
+                grizzly.addListener(networkSslListener);
+                log.info("Prepared secure Grizzly HttpNetworkListener on host: {} and port: {}, but not yet started...", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpsPort()));
+            }
+
             grizzly.addListener(networkListener);
-            grizzly.start();
             log.info("Prepared Grizzly HttpNetworkListener on host: {} and port: {}, but not yet started...", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort()));
+            grizzly.start();
 
             if (grizzlyConfig.isShutdownFast()) {
                 /*-

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -53,7 +53,6 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
-import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -67,8 +66,8 @@ import com.openexchange.jslob.JSlobId;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.json.fields.MailAccountFields;
-import com.openexchange.mailaccount.json.writer.MailAccountWriter;
+import com.openexchange.mailaccount.json.MailAccountFields;
+import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -83,8 +82,6 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "id", description = "The ID of the account to return.")
 }, responseDescription = "A JSON object representing the desired mail account. See mail account data.")
 public final class GetAction extends AbstractMailAccountAction implements MailAccountFields {
-
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GetAction.class);
 
     public static final String ACTION = AJAXServlet.ACTION_GET;
 
@@ -119,7 +116,7 @@ public final class GetAction extends AbstractMailAccountAction implements MailAc
                     Integer.valueOf(session.getContextId()));
             }
 
-            final JSONObject jsonAccount = MailAccountWriter.write(mailAccount);
+            final JSONObject jsonAccount = DefaultMailAccountWriter.write(mailAccount);
             // final JSONObject jsonAccount = MailAccountWriter.write(checkFullNames(mailAccount, storageService, session));
 
             {

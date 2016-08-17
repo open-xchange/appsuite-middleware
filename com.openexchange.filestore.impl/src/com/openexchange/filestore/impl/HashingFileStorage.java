@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -136,21 +136,22 @@ public class HashingFileStorage extends DefaultFileStorage {
 
             return new StringBuilder(filestorePath[0]).append('/').append(filestorePath[1]).toString();
         } catch (final IOException e) {
-            throw FileStorageCodes.IOERROR.create(e, e.toString());
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } finally {
             Streams.close(file, out);
         }
     }
 
     public String[] generateName() {
-        final String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
+        // The random UUID for the file
+        final UUID uuid = UUID.randomUUID();
 
-        final String prefix = Integer.toHexString(uuid.hashCode());
-
-        final StringBuilder b = new StringBuilder();
-
+        // Build the directory prefix
+        StringBuilder b = new StringBuilder(10);
         int i = 0;
-        for (; i < prefix.length() && i < 6; i++) {
+        String prefix = Integer.toHexString(uuid.hashCode());
+        int length = prefix.length();
+        for (; i < length && i < 6; i++) {
             b.append(prefix.charAt(i));
             if (((i & 1) == 1) && (i > 0)) {
                 b.append('/');
@@ -162,10 +163,9 @@ public class HashingFileStorage extends DefaultFileStorage {
                 b.append('/');
             }
         }
-
         b.setLength(b.length()-1);
 
-        return new String[] { b.toString(), uuid };
+        return new String[] { b.toString(), UUIDs.getUnformattedString(uuid) };
     }
 
     @Override

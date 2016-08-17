@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -66,7 +66,6 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
-
 
 /**
  * {@link GenconfAttributesBoolsAddPrimaryKey}
@@ -124,6 +123,7 @@ public class GenconfAttributesBoolsAddPrimaryKey extends UpdateTaskAdapter {
             }
 
             class Dup {
+
                 final UUID uuid;
                 final int cid;
                 final int id;
@@ -199,9 +199,9 @@ public class GenconfAttributesBoolsAddPrimaryKey extends UpdateTaskAdapter {
         try {
             stmt = con.prepareStatement("SELECT cid, id, name, value FROM genconf_attributes_bools WHERE uuid IS NULL FOR UPDATE");
             rs = stmt.executeQuery();
-            PreparedStatement stmt2 = null;
-            try {
-                while (rs.next()) {
+            while (rs.next()) {
+                PreparedStatement stmt2 = null;
+                try {
                     StringBuilder sb = new StringBuilder();
                     sb.append("UPDATE genconf_attributes_bools SET uuid = ? WHERE cid ");
                     oldPos = 1;
@@ -241,9 +241,9 @@ public class GenconfAttributesBoolsAddPrimaryKey extends UpdateTaskAdapter {
                     stmt2.setString(newPos++, name);
                     stmt2.setShort(newPos++, value);
                     stmt2.execute();
+                } finally {
+                    DBUtils.closeSQLStuff(stmt2);
                 }
-            } finally {
-                DBUtils.closeSQLStuff(stmt2);
             }
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);

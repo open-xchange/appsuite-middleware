@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -60,7 +60,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 /**
  * This is an abstract class for all common attributes and methods of database related command line tools
- * 
+ *
  * @author d7
  */
 public abstract class DatabaseAbstraction extends UtilAbstraction {
@@ -117,6 +117,8 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
 
     protected final static String OPT_NAME_IS_MASTER_LONG = "master";
 
+    protected final static String OPT_NAME_SCHEMA_LONG = "schema";
+
     protected CLIOption databaseIdOption = null;
 
     protected CLIOption databaseUsernameOption = null;
@@ -143,9 +145,10 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
 
     protected CLIOption poolMaxOption = null;
 
+    protected CLIOption schemaOption = null;
+
     // Needed for right error output
     protected String dbid = null;
-
     protected String dbname = null;
 
     protected void parseAndSetDatabaseID(final AdminParser parser, final Database db) {
@@ -159,6 +162,13 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
         dbname = (String) parser.getOptionValue(this.databaseNameOption);
         if (null != dbname) {
             db.setName(dbname);
+        }
+    }
+
+    protected void parseAndSetSchema(final AdminParser parser, final Database db) {
+        String schema = (String) parser.getOptionValue(this.schemaOption);
+        if (null != schema) {
+            db.setScheme(schema);
         }
     }
 
@@ -269,6 +279,10 @@ public abstract class DatabaseAbstraction extends UtilAbstraction {
             "The id of the database.",
             true,
             NeededQuadState.eitheror);
+    }
+
+    protected void setDatabaseSchemaOption(final AdminParser parser) {
+        this.schemaOption = setLongOpt(parser, OPT_NAME_SCHEMA_LONG, "The optional schema name of the database.", true, false);
     }
 
     protected void setDatabasePoolMaxOption(final AdminParser parser, final String defaultvalue, final boolean required) {

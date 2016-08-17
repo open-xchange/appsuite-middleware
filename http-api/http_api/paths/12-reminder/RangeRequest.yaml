@@ -1,0 +1,22 @@
+/reminder?action=range:
+  get:
+    operationId: getRange
+    tags:
+      - reminder
+    summary: Gets a reminder range.
+    description: Gets all reminders which are scheduled until the specified time (end date).
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: end
+        type: integer
+        format: int64
+        description: The end date of the reminder range.
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with data for each reminder. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/RemindersResponse"

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -51,7 +51,9 @@ package com.openexchange.webdav.protocol;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import org.jdom2.Element;
 
 public class WebdavProperty {
 
@@ -62,6 +64,7 @@ public class WebdavProperty {
 	private boolean xml;
 	private boolean date;
 	private Map<String, String> attributes;
+	private List<Element> children;
 
 	/**
 	 * Initializes a new, empty {@link WebdavProperty}.
@@ -135,6 +138,24 @@ public class WebdavProperty {
 	public Map<String, String> getAttributes() {
 	    return null != attributes ? Collections.unmodifiableMap(attributes) : null;
 	}
+
+	/**
+	 * Gets the property's child elements
+	 *
+	 * @return The children, or <code>null</code> if not set
+	 */
+    public List<Element> getChildren() {
+        return children;
+    }
+
+    /**
+     * Sets the property's child elements.
+     *
+     * @param children The children
+     */
+    public void setChildren(List<Element> children) {
+        this.children = children;
+    }
 
 	public boolean isXML() {
 		return xml;

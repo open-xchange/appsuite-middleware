@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,15 +50,17 @@
 package com.openexchange.report.appsuite;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import javax.annotation.concurrent.NotThreadSafe;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.report.appsuite.serialization.Report;
-
 
 /**
  * A {@link ContextReport} holds the information discovered about a certain context. See {@link Report}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public @NotThreadSafe class ContextReport extends Report {
 
@@ -67,7 +69,20 @@ public @NotThreadSafe class ContextReport extends Report {
     private final Context ctx;
 
     /**
+     * capSToContext - This value is used to store the contexts/users for each capabilitySet
+     * in this ContextReport. Each Context can have n users with different capability sets.
+     */
+    private final LinkedHashMap<String, LinkedHashMap<Integer, ArrayList<Integer>>> capSToContext;
+    
+    
+    /**
+     * userList - This value stores all user ids, that are in this context.
+     */
+    private final ArrayList<Integer> userList;
+
+    /**
      * Initializes a new {@link ContextReport}.
+     * 
      * @param uuid The UUID of the report this context report belongs to
      * @param type The report type. This determines which analyzers and cumulators partake in this report run.
      * @param ctx The context about which this report is
@@ -75,6 +90,8 @@ public @NotThreadSafe class ContextReport extends Report {
     public ContextReport(String uuid, String type, Context ctx) {
         super(uuid, type, -1);
         this.ctx = ctx;
+        this.capSToContext = new LinkedHashMap<>();
+        this.userList = new ArrayList<>();
     }
 
     /**
@@ -90,4 +107,13 @@ public @NotThreadSafe class ContextReport extends Report {
         return ctx;
     }
 
+    public LinkedHashMap<String, LinkedHashMap<Integer, ArrayList<Integer>>> getCapSToContext() {
+        return capSToContext;
+    }
+
+    public ArrayList<Integer> getUserList() {
+        return userList;
+    }
+
+    
 }

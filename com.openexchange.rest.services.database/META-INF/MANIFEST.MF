@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Database REST Service
 Bundle-SymbolicName: com.openexchange.rest.services.database
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.google.common.cache,
@@ -14,6 +14,7 @@ Import-Package: com.google.common.cache,
  com.openexchange.java.util,
  com.openexchange.osgi,
  com.openexchange.rest.services,
+ com.openexchange.rest.services.annotation,
  com.openexchange.server,
  com.openexchange.timer,
  com.openexchange.tools.servlet,

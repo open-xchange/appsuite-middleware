@@ -1,0 +1,38 @@
+/messaging/message?action=get:
+  get:
+    operationId: getMessagingMessage
+    tags:
+      - messaging
+    summary: Gets a messaging message.
+    description: |
+      A messaging message consists of some metadata, headers and a content. The content attribute varies
+      by the content-type header. If the content-type is `text/*` it is a string, if it is `multipart/*` it
+      is an array of objects, each representing a part of the multipart. If it is anything else it is considered binary
+      and is a Base64 encoded string.
+      
+      The folder ID of a message follows a predefined format: `[messagingService]://[accountId]/[path]`, like
+      `com.openexchange.messaging.twitter://535/defaultTimeline/directMessages`.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: The ID of the message to load.
+        required: true
+      - in: query
+        name: folder
+        type: string
+        description: The folder ID of the message.
+        required: true
+      - in: query
+        name: peek
+        type: boolean
+        description: If set to `true` the read/unread state of the message will not change. Default is `false`.
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object containing the data of the message. In case of errors the responsible fields in the
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/MessagingMessageResponse"

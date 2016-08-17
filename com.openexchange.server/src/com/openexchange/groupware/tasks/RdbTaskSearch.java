@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -157,14 +157,12 @@ public class RdbTaskSearch extends TaskSearch {
         if (StorageType.DELETED == type) {
             final StringBuilder sql2 = new StringBuilder();
             sql2.append("SELECT ");
-            sql2.append(SQL.getFields(columns, false));
+            final String activeTaskTable = SQL.TASK_TABLES.get(StorageType.ACTIVE);
+            sql2.append(SQL.getFields(columns, false, activeTaskTable));
             sql2.append(" FROM ");
-            final String activeTaskTable = SQL.TASK_TABLES.get(StorageType
-                .ACTIVE);
             sql2.append(activeTaskTable);
             sql2.append(" JOIN ");
-            final String removedPartsTable = SQL.PARTS_TABLES.get(StorageType
-                .REMOVED);
+            final String removedPartsTable = SQL.PARTS_TABLES.get(StorageType.REMOVED);
             sql2.append(removedPartsTable);
             sql2.append(" ON ");
             sql2.append(activeTaskTable);

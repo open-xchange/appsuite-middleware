@@ -1,0 +1,18 @@
+type: object
+required:
+  - id
+  - folder
+properties:
+  id:
+    type: string
+    description: The object ID of the appointment.
+  folder:
+    type: string
+    description: The object ID of the related folder.
+  recurrence_position:
+    type: integer
+    description: 1-based position of an individual appointment in a sequence.
+  recurrence_date_position:
+    type: integer
+    format: int64
+    description: Date of an individual appointment in a sequence.

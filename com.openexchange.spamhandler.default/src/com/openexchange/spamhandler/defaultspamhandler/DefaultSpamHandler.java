@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -63,8 +63,7 @@ import com.openexchange.spamhandler.SpamHandler;
  */
 public final class DefaultSpamHandler extends SpamHandler {
 
-
-    private static final String NAME = "DefaultSpamHandler";
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultSpamHandler.class);
 
     private static final DefaultSpamHandler instance = new DefaultSpamHandler();
 
@@ -77,6 +76,8 @@ public final class DefaultSpamHandler extends SpamHandler {
         return instance;
     }
 
+    // --------------------------------------------------------------------------------------------------------------------------------
+
     /**
      * Initializes a new {@link DefaultSpamHandler}
      */
@@ -86,24 +87,73 @@ public final class DefaultSpamHandler extends SpamHandler {
 
     @Override
     public String getSpamHandlerName() {
-        return NAME;
+        return "DefaultSpamHandler";
     }
 
     @Override
-    public void handleHam(final int accountId, final String spamFullName, final String[] mailIDs, final boolean move, final Session session) throws OXException {
-        /*
-         * Copy to confirmed ham
-         */
-        final MailService mailService = Services.getService(MailService.class);
-        if (null == mailService) {
+    public void handleSpam(int accountId, String fullName, String[] mailIDs, boolean move, Session session) throws OXException {
+        // Copy to confirmed spam folder (if exists)
+        boolean confirmedSpamExists = isCreateConfirmedSpam();
+        if (!confirmedSpamExists && !move) {
+            // Nothing to do...
             return;
         }
+
+        // Check for mail service availability
+        MailService mailService = Services.getService(MailService.class);
+        if (null == mailService) {
+            LOG.warn("No mail service available. Aborting DefaultSpamHandler.handleSpam()...");
+            return;
+        }
+
         MailAccess<?, ?> mailAccess = null;
         try {
             mailAccess = mailService.getMailAccess(session, accountId);
             mailAccess.connect();
-            final String confirmedHamFullname = mailAccess.getFolderStorage().getConfirmedHamFolder();
-            mailAccess.getMessageStorage().copyMessages(spamFullName, confirmedHamFullname, mailIDs, true);
+
+            if (confirmedSpamExists) {
+                String confirmedSpamFullname = mailAccess.getFolderStorage().getConfirmedSpamFolder();
+                mailAccess.getMessageStorage().copyMessages(fullName, confirmedSpamFullname, mailIDs, true);
+            }
+
+            if (move) {
+                // Move to spam folder
+                String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
+                mailAccess.getMessageStorage().moveMessages(fullName, spamFullname, mailIDs, true);
+            }
+        } finally {
+            if (null != mailAccess) {
+                mailAccess.close(true);
+            }
+        }
+    }
+
+    @Override
+    public void handleHam(int accountId, String spamFullName, String[] mailIDs, boolean move, Session session) throws OXException {
+        // Copy to confirmed ham (if exists)
+        boolean confirmedHamExists = isCreateConfirmedHam();
+        if (!confirmedHamExists && !move) {
+            // Nothing to do...
+            return;
+        }
+
+        // Check for mail service availability
+        MailService mailService = Services.getService(MailService.class);
+        if (null == mailService) {
+            LOG.warn("No mail service available. Aborting DefaultSpamHandler.handleHam()...");
+            return;
+        }
+
+        MailAccess<?, ?> mailAccess = null;
+        try {
+            mailAccess = mailService.getMailAccess(session, accountId);
+            mailAccess.connect();
+
+            if (confirmedHamExists) {
+                String confirmedHamFullname = mailAccess.getFolderStorage().getConfirmedHamFolder();
+                mailAccess.getMessageStorage().copyMessages(spamFullName, confirmedHamFullname, mailIDs, true);
+            }
+
             if (move) {
                 mailAccess.getMessageStorage().moveMessages(spamFullName, FULLNAME_INBOX, mailIDs, true);
             }
@@ -116,38 +166,23 @@ public final class DefaultSpamHandler extends SpamHandler {
 
     @Override
     public boolean isCreateConfirmedSpam() {
-        final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
-        if (null == configurationService) {
-            /*
-             * Return default
-             */
-            return true;
-        }
-        return configurationService.getBoolProperty("com.openexchange.spamhandler.defaultspamhandler.createConfirmedSpam", true);
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
+        boolean def = true;
+        return null == configService ? def : configService.getBoolProperty("com.openexchange.spamhandler.defaultspamhandler.createConfirmedSpam", def);
     }
 
     @Override
     public boolean isCreateConfirmedHam() {
-        final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
-        if (null == configurationService) {
-            /*
-             * Return default
-             */
-            return true;
-        }
-        return configurationService.getBoolProperty("com.openexchange.spamhandler.defaultspamhandler.createConfirmedHam", true);
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
+        boolean def = true;
+        return null == configService ? def : configService.getBoolProperty("com.openexchange.spamhandler.defaultspamhandler.createConfirmedHam", def);
     }
 
     @Override
     public boolean isUnsubscribeSpamFolders() {
-        final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
-        if (null == configurationService) {
-            /*
-             * Return default
-             */
-            return true;
-        }
-        return configurationService.getBoolProperty("com.openexchange.spamhandler.defaultspamhandler.unsubscribeSpamFolders", true);
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
+        boolean def = true;
+        return null == configService ? def : configService.getBoolProperty("com.openexchange.spamhandler.defaultspamhandler.unsubscribeSpamFolders", def);
     }
 
 }

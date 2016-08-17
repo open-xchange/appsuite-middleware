@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -76,8 +76,7 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
 
     private static final int TARGET = 2;
 
-    private static final int[] COMPARISON_COLUMNS = {
-        Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE, Task.START_DATE, Task.END_DATE, Task.UID, Task.NOTE, Task.LAST_MODIFIED, Task.SEQUENCE };
+    private static final int[] COMPARISON_COLUMNS = { Task.OBJECT_ID, Task.FOLDER_ID, Task.TITLE, Task.START_DATE, Task.END_DATE, Task.UID, Task.NOTE, Task.LAST_MODIFIED, Task.SEQUENCE };
 
     @Override
     public int calculateSimilarityScore(final Task original, final Task candidate, final Object session) throws OXException {
@@ -124,29 +123,33 @@ public class TaskFolderUpdaterStrategy implements FolderUpdaterStrategy<Task> {
         final TasksSQLInterface taskSql = (TasksSQLInterface) getFromSession(SQL_INTERFACE, session);
 
         final int folderId = target.getFolderIdAsInt();
-        SearchIterator<Task> tasksInFolder;
         final List<Task> retval = new ArrayList<Task>();
         int[] columns = Task.ALL_COLUMNS;
 
         // filter out LAST_MODIFIED_UTC as it is a virtual column and will not work
         final ArrayList<Integer> filteredColumns = new ArrayList<Integer>();
-        for (int i = 0; i<columns.length; i++){
-            if (columns[i] != DataObject.LAST_MODIFIED_UTC){
+        for (int i = 0; i < columns.length; i++) {
+            if (columns[i] != DataObject.LAST_MODIFIED_UTC) {
                 filteredColumns.add(columns[i]);
             }
         }
         columns = new int[filteredColumns.size()];
         int counter = 0;
-        for (final Integer integer : filteredColumns){
+        for (final Integer integer : filteredColumns) {
             columns[counter] = integer;
             counter++;
         }
-
-        tasksInFolder = taskSql.getTaskList(folderId, 0, Integer.MAX_VALUE, 0, Order.ASCENDING, columns);
-        while (tasksInFolder.hasNext()) {
-            retval.add(tasksInFolder.next());
+        SearchIterator<Task> tasksInFolder = null;
+        try {
+            tasksInFolder = taskSql.getTaskList(folderId, 0, Integer.MAX_VALUE, 0, Order.ASCENDING, columns);
+            while (tasksInFolder.hasNext()) {
+                retval.add(tasksInFolder.next());
+            }
+        } finally {
+            if (tasksInFolder != null) {
+                tasksInFolder.close();
+            }
         }
-
         return retval;
     }
 

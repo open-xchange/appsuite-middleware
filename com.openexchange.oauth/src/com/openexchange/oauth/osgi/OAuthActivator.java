@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -63,11 +63,14 @@ import com.openexchange.http.client.builder.HTTPResponseProcessor;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.oauth.CallbackRegistry;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
+import com.openexchange.oauth.access.impl.OAuthAccessRegistryServiceImpl;
 import com.openexchange.oauth.httpclient.impl.scribe.ScribeHTTPClientFactoryImpl;
 import com.openexchange.oauth.internal.CallbackRegistryImpl;
 import com.openexchange.oauth.internal.DeleteListenerRegistry;
@@ -127,6 +130,11 @@ public final class OAuthActivator extends HousekeepingActivator {
             final OSGiMetaDataRegistry registry = OSGiMetaDataRegistry.getInstance();
             final BundleContext context = this.context;
             registry.start(context);
+            
+            OAuthAccessRegistryService accessRegistryService = new OAuthAccessRegistryServiceImpl();
+            registerService(OAuthAccessRegistryService.class, accessRegistryService);
+            trackService(OAuthAccessRegistryService.class);
+            
             /*
              * Start other trackers
              */
@@ -174,7 +182,8 @@ public final class OAuthActivator extends HousekeepingActivator {
                 registry,
                 delegateServices.get(ContextService.class),
                 cbRegistry);
-
+            
+            registerService(CallbackRegistry.class, cbRegistry);
             registerService(CustomRedirectURLDetermination.class, cbRegistry);
             registerService(OAuthService.class, oauthService);
             registerService(OAuthServiceMetaDataRegistry.class, registry);

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,13 +49,14 @@
 package com.openexchange.user.copy.internal.folder.util;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * {@link Node}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class Node<T> {
+public class Node<T extends Comparable<T>> implements Comparable<Node<T>> {
 
     private final T value;
 
@@ -76,7 +77,7 @@ public class Node<T> {
     }
 
     public Set<Node<T>> getChildren() {
-        return new HashSet<Node<T>>(children);
+        return new TreeSet<>(children);
     }
 
     public void setChildren(final Set<Node<T>> children) {
@@ -162,6 +163,11 @@ public class Node<T> {
     @Override
     public String toString() {
         return "{" + value.toString() + "}";
+    }
+
+    @Override
+    public int compareTo(Node<T> o) {
+        return this.value.compareTo(o.getValue());
     }
 
 }

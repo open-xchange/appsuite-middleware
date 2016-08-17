@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Configuration REST API
 Bundle-SymbolicName: com.openexchange.rest.services.configuration
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.config,
@@ -11,6 +11,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.ldap,
  com.openexchange.osgi,
+ com.openexchange.rest.services.annotation,
  com.openexchange.server,
  com.openexchange.tools.servlet,
  javax.inject,

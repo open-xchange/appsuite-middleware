@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -59,6 +59,22 @@ import java.util.Collection;
 public class IPRange {
 
     /**
+     * The special NULL IP range.
+     */
+    public static final IPRange NULL = new IPRange(null) {
+
+        @Override
+        public boolean contains(String ipAddress) {
+            return false;
+        }
+
+        @Override
+        public String toString() {
+            return "null";
+        }
+    };
+
+    /**
      * Checks if specified IP address is contained in given collection of IP address ranges
      *
      * @param actual The IP address to check
@@ -93,9 +109,31 @@ public class IPRange {
     /**
      * Initializes a new {@link IPRange}.
      */
-    private IPRange(final com.openexchange.sessiond.impl.IPRange delegate) {
+    IPRange(final com.openexchange.sessiond.impl.IPRange delegate) {
         super();
         this.delegate = delegate;
+    }
+
+    /**
+     * Checks if specified IPv4 octets are covered by configured IP range.
+     *
+     * @param octets The IPv4 octets to check
+     * @param ipAddress The octets' IPv4 string representation; might be <code>null</code>
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public boolean containsIPv4(byte[] octets, String ipAddress) {
+        return delegate.containsIPv4(octets, ipAddress);
+    }
+
+    /**
+     * Checks if specified IPv6 octets are covered by configured IP range.
+     *
+     * @param octets The IPv6 octets to check
+     * @param ipAddress The octets' IPv6 string representation; might be <code>null</code>
+     * @return <code>true</code> if contained; otherwise <code>false</code>
+     */
+    public boolean containsIPv6(byte[] octets, String ipAddress) {
+        return delegate.containsIPv6(octets, ipAddress);
     }
 
     /**

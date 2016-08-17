@@ -1,0 +1,19 @@
+/jump?action=identityToken:
+  get:
+    operationId: acquireIdentityToken
+    tags:
+      - jump
+    summary: Acquires an identity token (**available since v7.6.0**).
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: system
+        type: string
+        description: The identifier for the external service/system, like "com.openexchange.jump.endpoint.mysystem".
+    responses:
+      200:
+        description: |
+          A JSON object containing the identity token. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/JumpResponse"

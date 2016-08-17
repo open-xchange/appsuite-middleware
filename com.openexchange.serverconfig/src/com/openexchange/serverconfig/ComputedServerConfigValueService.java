@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -51,14 +51,30 @@ package com.openexchange.serverconfig;
 
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link ComputedServerConfigValueService} - Services implementing this interface are able to add computed values to the server config object that is being generated.
+ * {@link ComputedServerConfigValueService}
+ * <p/>
+ * Services implementing this interface are able to add computed values to the server config object that is being generated.
+ * <p/>
+ * <b>Note:</b> When modifying this interface, mind that there is also an external implementations at
+ * <code>open-xchange-mailapp-backend</code> that follows a different release-cycle.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public interface ComputedServerConfigValueService {
 
-    public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID) throws OXException;
+    /**
+     * Adds this instance's value to passed map.
+     *
+     * @param serverConfig The server config map
+     * @param hostName The host name
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param optSession The optional session or <code>null</code>
+     * @throws OXException If this instance's value cannot be computed
+     */
+    void addValue(Map<String, Object> serverConfig, String hostName, int userId, int contextId, Session optSession) throws OXException;
 }

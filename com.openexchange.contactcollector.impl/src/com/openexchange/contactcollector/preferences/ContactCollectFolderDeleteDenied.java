@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,7 +50,6 @@
 package com.openexchange.contactcollector.preferences;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -59,6 +58,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -70,8 +70,11 @@ public class ContactCollectFolderDeleteDenied implements PreferencesItemService 
 
     private static final String[] PATH = new String [] { "modules", "mail", "contactCollectFolderDeleteDenied" };
 
-    public ContactCollectFolderDeleteDenied() {
+    final ServiceLookup services;
+
+    public ContactCollectFolderDeleteDenied(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -85,8 +88,8 @@ public class ContactCollectFolderDeleteDenied implements PreferencesItemService 
 
             @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                final ConfigurationService service = CCServiceRegistry.getInstance().getOptionalService(ConfigurationService.class);
-                final Boolean value = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.contactcollector.folder.deleteDenied", false));
+                ConfigurationService service = services.getOptionalService(ConfigurationService.class);
+                Boolean value = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.contactcollector.folder.deleteDenied", false));
                 setting.setSingleValue(value);
             }
 

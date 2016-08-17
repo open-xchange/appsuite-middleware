@@ -120,9 +120,9 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.filestore"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.filestore.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.http.grizzly"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi_3.10.1.v20140909-1633.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.services_3.4.0.v20140312-2051.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.util_3.3.0.v20131023-1243.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi_3.11.0.v20160603-1336.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.services_3.5.100.v20160504-1419.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.util_3.3.100.v20150423-1351.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sessionstorage"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.cluster.timer"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.2.0.v201405211200.jar"/>
@@ -138,5 +138,12 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.client.onboarding"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sms"/>
 	<classpathentry kind="lib" path="lib/xmlwise-1_2.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.imagetransformation"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.imagetransformation.java"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.mail.autoconfig"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.mail.autoconfig.json"/>
+	<classpathentry kind="src" path="/com.openexchange.mail.categories"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.templating.impl"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.reseller.rmi"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

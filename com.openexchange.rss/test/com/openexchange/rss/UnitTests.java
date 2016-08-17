@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -52,7 +52,12 @@ package com.openexchange.rss;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.rss.actions.RssActionTest;
+import com.openexchange.rss.actions.RssActionTestReconfiguredHosts;
+import com.openexchange.rss.actions.RssActionTestReconfiguredPorts;
+import com.openexchange.rss.actions.RssActionTestReconfiguredPortsAndHosts;
 import com.openexchange.rss.preprocessors.PreprocessorChainingTest;
+import com.openexchange.rss.util.RssPropertiesTest;
 
 /**
  * Unit tests for the bundle com.openexchange.rss
@@ -62,7 +67,12 @@ import com.openexchange.rss.preprocessors.PreprocessorChainingTest;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    PreprocessorChainingTest.class
+    PreprocessorChainingTest.class,
+    RssActionTest.class,
+    RssActionTestReconfiguredHosts.class,
+    RssActionTestReconfiguredPorts.class,
+    RssActionTestReconfiguredPortsAndHosts.class,
+    RssPropertiesTest.class
 })
 public class UnitTests {
 

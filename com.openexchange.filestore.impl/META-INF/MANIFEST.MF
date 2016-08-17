@@ -2,10 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The file storage implementation bundle
 Bundle-SymbolicName: com.openexchange.filestore.impl
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.caching,
+Import-Package: com.google.common.collect,
+ com.openexchange.caching,
  com.openexchange.context,
  com.openexchange.database,
  com.openexchange.exception,

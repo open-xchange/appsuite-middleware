@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,9 +53,7 @@ import static com.openexchange.imap.command.MailMessageFetchIMAPCommand.getFetch
 import static com.openexchange.imap.command.MailMessageFetchIMAPCommand.handleFetchRespone;
 import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import gnu.trove.TLongCollection;
 import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TLongHashSet;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,15 +68,15 @@ import javax.mail.Header;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetHeaders;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPMessageStorage;
 import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
-import com.openexchange.imap.threader.ThreadableCache.ThreadableCacheEntry;
 import com.openexchange.imap.threader.nntp.ThreadableImpl;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
@@ -87,7 +85,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.ThreadPools;
 import com.sun.mail.iap.BadCommandException;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
@@ -149,8 +146,8 @@ public final class Threadables {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.imap.useCommonsNetThreader");
             }
         });
     }
@@ -198,74 +195,15 @@ public final class Threadables {
      * @throws MessagingException If <tt>Threadable</tt> cannot be returned for any reason
      */
     public static ThreadableResult getThreadableFor(final IMAPFolder imapFolder, final boolean sorted, final boolean cache, final int lookAhead, final int accountId, final Session session) throws MessagingException {
-        if (!ThreadableCache.isThreadableCacheEnabled()) {
-            Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
-            if (sorted) {
-                if (useCommonsNetThreader()) {
-                    threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
-                } else {
-                    threadable = new Threader().thread(threadable);
-                }
-            }
-            return new ThreadableResult(threadable, false);
-        }
-        /*
-         * Fetch from cache (if present)
-         */
-        final ThreadableCacheEntry entry = ThreadableCache.getInstance().getEntry(imapFolder.getFullName(), accountId, session);
-        synchronized (entry) {
-            TLongCollection uids = null;
-            if (null == entry.getThreadable() || sorted != entry.isSorted()) {
-                Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
-                if (sorted) {
-                    if (useCommonsNetThreader()) {
-                        threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
-                    } else {
-                        threadable = new Threader().thread(threadable);
-                    }
-                }
-                entry.set(new TLongHashSet(IMAPCommandsCollection.getUIDCollection(imapFolder)), threadable, sorted);
-            } else if (entry.reconstructNeeded((uids = IMAPCommandsCollection.getUIDCollection(imapFolder)))) {
-                final TLongHashSet uidsSet = new TLongHashSet(uids);
-                if (cache) {
-                    // Immediately return cached state & reconstruct ansynchronously
-                    final Threadable retval = (Threadable) entry.getThreadable().clone();
-                    // Runnable instance
-                    final Runnable task = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            try {
-                                Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
-                                if (sorted) {
-                                    if (useCommonsNetThreader()) {
-                                        threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(
-                                            threadable))).getDelegatee();
-                                    } else {
-                                        threadable = new Threader().thread(threadable);
-                                    }
-                                }
-                                entry.set(uidsSet, threadable, sorted);
-                            } catch (final Exception e) {
-                                entry.set(null, null, sorted);
-                            }
-                        }
-                    };
-                    ThreadPools.getThreadPool().submit(ThreadPools.trackableTask(task));
-                    return new ThreadableResult((Threadable) retval.clone(), true);
-                }
-                Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
-                if (sorted) {
-                    if (useCommonsNetThreader()) {
-                        threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
-                    } else {
-                        threadable = new Threader().thread(threadable);
-                    }
-                }
-                entry.set(uidsSet, threadable, sorted);
+        Threadable threadable = getAllThreadablesFrom(imapFolder, lookAhead);
+        if (sorted) {
+            if (useCommonsNetThreader()) {
+                threadable = ((ThreadableImpl) new org.apache.commons.net.nntp.Threader().thread(new ThreadableImpl(threadable))).getDelegatee();
+            } else {
+                threadable = new Threader().thread(threadable);
             }
         }
-        return new ThreadableResult((Threadable) entry.getThreadable().clone(), false);
+        return new ThreadableResult(threadable, false);
     }
 
     private static interface HeaderHandler {
@@ -362,13 +300,12 @@ public final class Threadables {
                     try {
                         final List<MailMessage> mails = new ArrayList<MailMessage>(messageCount);
                         final String fullName = imapFolder.getFullName();
-                        final char sep = imapFolder.getSeparator();
                         final String sFetch = "FETCH";
                         final String sInReplyTo = "In-Reply-To";
                         final String sReferences = "References";
                         for (int j = 0; j < len; j++) {
                             if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
-                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, sep);
+                                final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName);
                                 final String references = message.getFirstHeader(sReferences);
                                 if (null == references) {
                                     final String inReplyTo = message.getFirstHeader(sInReplyTo);

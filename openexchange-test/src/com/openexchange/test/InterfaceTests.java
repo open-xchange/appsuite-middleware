@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,15 +49,16 @@
 
 package com.openexchange.test;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.advertisement.AdvertisementTestSuite;
 import com.openexchange.ajax.drive.DriveAJAXSuite;
 import com.openexchange.ajax.find.FindTestSuite;
 import com.openexchange.ajax.jslob.JSlobTestSuite;
 import com.openexchange.ajax.oauth.provider.OAuthProviderTests;
 import com.openexchange.ajax.onboarding.OnboardingAJAXSuite;
 import com.openexchange.ajax.share.ShareAJAXSuite;
+import junit.framework.JUnit4TestAdapter;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * Test suite for all AJAX interface tests.
@@ -97,7 +98,6 @@ public final class InterfaceTests {
         tests.addTest(com.openexchange.ajax.publish.PublishTestSuite.suite());
         tests.addTest(com.openexchange.ajax.subscribe.SubscribeTestSuite.suite());
         tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.user.UserAJAXSuite.class));
-        tests.addTest(com.openexchange.ajax.xing.XINGTestSuite.suite());
         tests.addTest(com.openexchange.subscribe.google.GoogleTestSuite.suite());
         // TODO: enable when MSLiveOAuthClient is implemented
         // tests.addTest(com.openexchange.subscribe.mslive.MSLiveTestSuite.suite());
@@ -141,6 +141,10 @@ public final class InterfaceTests {
         // TODO: enable
         tests.addTest(DriveAJAXSuite.suite());
         tests.addTest(OnboardingAJAXSuite.suite());
+        tests.addTest(new JUnit4TestAdapter(com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class));
+
+        tests.addTest(AdvertisementTestSuite.suite());
+
         return tests;
     }
 }

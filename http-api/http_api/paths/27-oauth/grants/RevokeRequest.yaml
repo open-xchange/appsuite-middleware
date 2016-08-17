@@ -1,0 +1,18 @@
+/oauth/grants?action=revoke:
+  get:
+    operationId: revokeOAuthGrant
+    tags:
+      - OAuth
+    summary: Revokes access for an OAuth client (**available since v7.8.0**).
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: client
+        type: string
+        description: The ID of the client whose access shall be revoked.
+        required: true
+    responses:
+      200:
+        description: In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/CommonResponse"

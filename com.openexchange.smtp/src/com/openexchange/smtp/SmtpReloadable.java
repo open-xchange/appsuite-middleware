@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,13 +49,18 @@
 
 package com.openexchange.smtp;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
+import com.openexchange.config.DefaultInterests.Builder;
 import com.openexchange.exception.OXException;
 import com.openexchange.smtp.config.SMTPProperties;
 
@@ -70,10 +75,6 @@ public final class SmtpReloadable implements Reloadable {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(SmtpReloadable.class);
 
     private static final SmtpReloadable INSTANCE = new SmtpReloadable();
-
-    private static final String CONFIGFILE = "smtp.properties";
-
-    private static final String[] PROPERTIES = new String[] {"all properties in file"};
 
     /**
      * Gets the instance.
@@ -123,10 +124,41 @@ public final class SmtpReloadable implements Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
+    public Interests getInterests() {
+        Set<String> properties = new TreeSet<>();
+        Set<String> fileNames = new TreeSet<>();
+
+        boolean somethingAdded = false;
+        for (Reloadable reloadable : reloadables) {
+            Interests interests = reloadable.getInterests();
+            if (null == interests) {
+                return Reloadables.getInterestsForAll();
+            }
+
+            String[] propertiesOfInterest = interests.getPropertiesOfInterest();
+            if (null != propertiesOfInterest) {
+                properties.addAll(Arrays.asList(propertiesOfInterest));
+                somethingAdded = true;
+            }
+            String[] configFileNames = interests.getConfigFileNames();
+            if (null != configFileNames) {
+                fileNames.addAll(Arrays.asList(configFileNames));
+                somethingAdded = true;
+            }
+        }
+
+        if (!somethingAdded) {
+            return Reloadables.getInterestsForAll();
+        }
+
+        Builder builder = DefaultInterests.builder();
+        if (!properties.isEmpty()) {
+            builder.propertiesOfInterest(properties.toArray(new String[properties.size()]));
+        }
+        if (!fileNames.isEmpty()) {
+            builder.configFileNames(fileNames.toArray(new String[fileNames.size()]));
+        }
+        return builder.build();
     }
 
 }

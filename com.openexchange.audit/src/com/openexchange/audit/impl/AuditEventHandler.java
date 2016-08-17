@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -86,6 +86,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
+import com.openexchange.java.Streams;
 import com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -105,7 +106,7 @@ public class AuditEventHandler implements EventHandler {
 
         ExtendedPatternLayoutEncoder encoder = new ExtendedPatternLayoutEncoder();
         encoder.setContext(context);
-        encoder.setPattern("%date{\"yyyy-MM-dd'T'HH:mm:ss,SSSZ\"} %-5level [%thread] %class.%method\\(%class{0}.java:%line\\)%n%message%n%lmdc%exception{full}");
+        encoder.setPattern("%date{\"yyyy-MM-dd'T'HH:mm:ss,SSSZ\"} %-5level [%thread] %class.%method\\(%class{0}.java:%line\\)%n%sanitisedMessage%n%lmdc%exception{full}");
 
         SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = new SizeBasedTriggeringPolicy<ILoggingEvent>();
         triggeringPolicy.setContext(context);
@@ -586,10 +587,11 @@ public class AuditEventHandler implements EventHandler {
      */
     protected String getPathToRoot(final int folderId, final Session sessionObj) {
         String retval = "";
-
+        FolderObjectIterator it = null;
         try {
             final FolderSQLInterface foldersqlinterface = new RdbFolderSQLInterface(ServerSessionAdapter.valueOf(sessionObj));
-            final Queue<FolderObject> q = ((FolderObjectIterator) foldersqlinterface.getPathToRoot(folderId)).asQueue();
+            it = (FolderObjectIterator) foldersqlinterface.getPathToRoot(folderId);
+            final Queue<FolderObject> q = it.asQueue();
             final int size = q.size();
             final Iterator<FolderObject> iter = q.iterator();
             for (int i = 0; i < size; i++) {
@@ -597,6 +599,8 @@ public class AuditEventHandler implements EventHandler {
             }
         } catch (final OXException e) {
             logger.error("", e);
+        } finally {
+            Streams.close(it);
         }
 
         return retval;

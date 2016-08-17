@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -821,6 +821,39 @@ public class ContentType extends ParameterizedHeader {
      */
     public boolean isMimeType(final String pattern) {
         return Pattern.compile(wildcardToRegex(pattern), Pattern.CASE_INSENSITIVE).matcher(getBaseType()).matches();
+    }
+
+    /**
+     * Checks if Content-Type's base type ignore-case contains specified string.
+     *
+     * @param string The string
+     * @return <code>true</code> if Content-Type's base type ignore-case starts with specified prefix; otherwise <code>false</code>
+     * @throws IllegalArgumentException If specified string is <code>null</code>
+     */
+    public boolean contains(final String string) {
+        if (null == string) {
+            throw new IllegalArgumentException("String is null");
+        }
+        return getLowerCaseBaseType().indexOf(Strings.asciiLowerCase(string)) >= 0;
+    }
+
+    /**
+     * Checks if Content-Type's base type ignore-case contains specified strings.
+     *
+     * @param s The strings
+     * @return <code>true</code> if Content-Type's base type ignore-case starts with specified prefix; otherwise <code>false</code>
+     */
+    public boolean containsAny(final String... strings) {
+        if (null == strings) {
+            return false;
+        }
+        final String lowerCase = getLowerCaseBaseType();
+        for (final String string : strings) {
+            if (null != string && lowerCase.indexOf(Strings.asciiLowerCase(string)) >= 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

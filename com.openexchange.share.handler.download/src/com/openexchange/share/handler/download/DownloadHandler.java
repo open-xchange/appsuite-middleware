@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -62,6 +62,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseRenderers.RenderListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
@@ -72,6 +73,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.share.servlet.handler.AccessShareRequest;
 import com.openexchange.share.servlet.handler.HttpAuthShareHandler;
 import com.openexchange.share.servlet.handler.ResolvedShare;
+import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
@@ -92,6 +94,14 @@ public class DownloadHandler extends HttpAuthShareHandler {
         this.renderer = new FileResponseRenderer();
     }
 
+    public void addRenderListener(RenderListener listener) {
+        this.renderer.addRenderListener(listener);
+    }
+
+    public void removeRenderListener(RenderListener listener) {
+        this.renderer.removeRenderListener(listener);
+    }
+
     @Override
     public boolean keepSession() {
         return false;
@@ -104,8 +114,7 @@ public class DownloadHandler extends HttpAuthShareHandler {
 
     @Override
     protected boolean handles(AccessShareRequest shareRequest, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        return Module.INFOSTORE.getFolderConstant() == shareRequest.getTarget().getModule() && null != shareRequest.getTarget().getItem() &&
-            (indicatesDownload(request) || indicatesRaw(request));
+        return Module.INFOSTORE.getFolderConstant() == shareRequest.getTarget().getModule() && null != shareRequest.getTarget().getItem() && (indicatesDownload(request) || indicatesRaw(request));
     }
 
     @Override
@@ -155,8 +164,7 @@ public class DownloadHandler extends HttpAuthShareHandler {
         /*
          * prepare renderer-compatible request result
          */
-        AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(
-            resolvedShare.getRequest(), false, false, session, "/share", resolvedShare.getResponse());
+        AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(resolvedShare.getRequest(), false, false, session, "/share", resolvedShare.getResponse());
         request.setSession(session);
         AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
         if (null != eTag) {
@@ -172,12 +180,15 @@ public class DownloadHandler extends HttpAuthShareHandler {
             fileHolder.setDelivery("download");
             fileHolder.setDisposition("attachment");
         }
-        renderer.write(request, result, resolvedShare.getRequest(), resolvedShare.getResponse());
+        try {
+            renderer.write(request, result, resolvedShare.getRequest(), resolvedShare.getResponse());
+        } catch (RateLimitedException e) {
+            e.send(resolvedShare.getResponse());
+        }
     }
 
     private static boolean indicatesRaw(HttpServletRequest request) {
-        return "view".equalsIgnoreCase(AJAXUtility.sanitizeParam(request.getParameter("delivery"))) ||
-            isTrue(AJAXUtility.sanitizeParam(request.getParameter("raw")));
+        return "view".equalsIgnoreCase(AJAXUtility.sanitizeParam(request.getParameter("delivery"))) || isTrue(AJAXUtility.sanitizeParam(request.getParameter("raw")));
     }
 
 }

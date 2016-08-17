@@ -1,0 +1,55 @@
+/infostore?action=search:
+  put:
+    operationId: searchInfoItems
+    tags:
+      - infostore
+    summary: Search for infoitems.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamInfostoreColumns"
+      - in: query
+        name: folder
+        type: string
+        description: The folder ID to restrict the search to. If not specified, all folders are searched.
+        required: false
+      - in: query
+        name: sort
+        type: string
+        description: The identifier of a column which determines the sort order of the response. If this parameter is specified , then the parameter order must be also specified.
+        required: false
+      - in: query
+        name: order
+        type: string
+        description: '"asc" if the response entires should be sorted in the ascending order, "desc" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.'
+        required: false
+      - in: query
+        name: start
+        type: integer
+        description: The start index (inclusive, zero-based) in the ordered search, that is requested.
+        required: false
+      - in: query
+        name: end
+        type: integer
+        description: The last index (inclusive) from the ordered search, that is requested.
+        required: false
+      - in: query
+        name: includeSubfolders
+        type: boolean
+        description: If set to \"true\" and a \"folder\" is specified, this folder and all of its subfolders are considered by the search.
+        required: false
+      - in: body
+        name: body
+        description: A JSON object containing search parameters.
+        required: true
+        schema:
+          $ref: "#/definitions/InfoItemSearchBody"
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with matching infoitems. Infoitems are represented by arrays. The elements of each array contain the
+          information specified by the corresponding identifiers in the `columns` parameter. In case of errors the
+          responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/InfoItemsResponse"

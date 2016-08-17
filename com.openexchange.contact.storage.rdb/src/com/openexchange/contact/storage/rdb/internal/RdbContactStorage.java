@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -766,19 +766,19 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 }
                 contacts = executor.select(connection, Table.DELETED_CONTACTS, contextID, parentFolderID, objectIDs, minLastModified, availableFields.toArray(new ContactField[availableFields.size()]), term, sortOptions, session.getUserId());
             } else {
-                contacts = executor.select(connection, deleted ? Table.DELETED_CONTACTS : Table.CONTACTS, contextID, parentFolderID, objectIDs, minLastModified, queryFields.getContactDataFields(), term, sortOptions, session.getUserId());
+                contacts = executor.select(connection, Table.CONTACTS, contextID, parentFolderID, objectIDs, minLastModified, queryFields.getContactDataFields(), term, sortOptions, session.getUserId());
                 if (null != contacts && 0 < contacts.size()) {
                     /*
                      * merge image data if needed
                      */
                     if (queryFields.hasImageData()) {
-                        contacts = mergeImageData(connection, deleted ? Table.DELETED_IMAGES : Table.IMAGES, contextID, contacts, queryFields.getImageDataFields());
+                        contacts = mergeImageData(connection, Table.IMAGES, contextID, contacts, queryFields.getImageDataFields());
                     }
                     /*
                      * merge distribution list data if needed
                      */
                     if (queryFields.hasDistListData()) {
-                        contacts = mergeDistListData(connection, deleted ? Table.DELETED_DISTLIST : Table.DISTLIST, contextID, contacts);
+                        contacts = mergeDistListData(connection, Table.DISTLIST, contextID, contacts);
                     }
                     /*
                      * merge attachment information in advance if needed
@@ -1088,7 +1088,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             if (oldImage == null || oldImage.getWidth() < image_width || oldImage.getHeight() < image_height) {
                 return;
             }
-            transform.scale(image_width, image_height, type);
+            transform.scale(image_width, image_height, type, true);
             final byte[] image = transform.getBytes("jpg");
             if (image != null && image.length != 0) {
                 contact.setImage1(image);

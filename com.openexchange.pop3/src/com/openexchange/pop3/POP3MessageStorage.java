@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -201,11 +201,11 @@ public final class POP3MessageStorage extends MailMessageStorage implements ISim
     }
 
     @Override
-    public List<List<MailMessage>> getThreadSortedMessages(final String folder, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] fields) throws OXException {
+    public List<List<MailMessage>> getThreadSortedMessages(final String folder, final boolean includeSent, final boolean cache, final IndexRange indexRange, final long max, final MailSortField sortField, final OrderDirection order, final MailField[] fields, SearchTerm<?> searchTerm) throws OXException {
         if (!(pop3MessageStorage instanceof ISimplifiedThreadStructure)) {
             throw MailExceptionCode.UNSUPPORTED_OPERATION.create();
         }
-        return ((ISimplifiedThreadStructure) pop3MessageStorage).getThreadSortedMessages(folder, includeSent, cache, indexRange, max, sortField, order, fields);
+        return ((ISimplifiedThreadStructure) pop3MessageStorage).getThreadSortedMessages(folder, includeSent, cache, indexRange, max, sortField, order, fields, searchTerm);
     }
 
     @Override

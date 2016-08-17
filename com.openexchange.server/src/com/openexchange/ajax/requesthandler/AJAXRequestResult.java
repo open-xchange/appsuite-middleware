@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -55,12 +55,16 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import java.util.UUID;
+import javax.servlet.http.HttpServletResponse;
 import org.json.JSONValue;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.OXException;
+import com.openexchange.servlet.StatusKnowing;
 
 /**
  * {@link AJAXRequestResult} - Simple container for a {@link JSONValue result}.
@@ -192,6 +196,8 @@ public class AJAXRequestResult {
      */
     public static final Object DIRECT_OBJECT = new Object();
 
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
     private @NonNull ResultType resultType;
 
     private @Nullable Object resultObject;
@@ -223,6 +229,11 @@ public class AJAXRequestResult {
     private @Nullable UUID continuationUuid;
 
     private int httpStatusCode;
+
+    /** The post-processing tasks */
+    private final @NonNull Queue<AJAXRequestResultPostProcessor> postProcessors;
+
+    private @Nullable AJAXRequestData requestData;
 
     /**
      * Initializes a new {@link AJAXRequestResult} with data and time stamp set to <code>null</code>.
@@ -276,6 +287,7 @@ public class AJAXRequestResult {
         headers = new LinkedHashMap<String, String>(8);
         parameters = new HashMap<String, Object>(8);
         responseProperties = new HashMap<String, Object>(4);
+        postProcessors = new LinkedList<AJAXRequestResultPostProcessor>();
         this.timestamp = null == timestamp ? null : new Date(timestamp.getTime());
         this.format = null == format ? JSON : format;
         if ("direct".equals(format)) {
@@ -305,6 +317,8 @@ public class AJAXRequestResult {
         resultObject = other.resultObject;
         resultType = other.resultType;
         timestamp = other.timestamp;
+        requestData = other.requestData;
+        postProcessors = new LinkedList<AJAXRequestResultPostProcessor>(other.postProcessors);
 
         if(other.headers != null) {
             headers =  new LinkedHashMap<String, String>(other.headers);
@@ -328,6 +342,72 @@ public class AJAXRequestResult {
             warnings = new HashSet<OXException>(other.warnings);
         } else {
             warnings = new HashSet<OXException>(4);
+        }
+    }
+
+    /**
+     * Sets the associated request data
+     *
+     * @param requestData The request data to set
+     * @return This result instance
+     */
+    public AJAXRequestResult setRequestData(AJAXRequestData requestData) {
+        this.requestData = requestData;
+        return this;
+    }
+
+    /**
+     * Gets the request data
+     *
+     * @return The request data or <code>null</code>
+     */
+    public @Nullable AJAXRequestData getRequestData() {
+        return requestData;
+    }
+
+    /**
+     * Adds specified listener.
+     *
+     * @param postProcessor The post processor
+     * @return This result instance
+     */
+    public @NonNull AJAXRequestResult addPostProcessor(AJAXRequestResultPostProcessor postProcessor) {
+        if (null != postProcessor) {
+            this.postProcessors.offer(postProcessor);
+        }
+        return this;
+    }
+
+    /**
+     * Triggers post-processing for this instance.
+     *
+     * @param e The exception that caused termination, or <code>null</code> if execution completed normally
+     */
+    public void signalDone(Exception e) {
+        // Get associated request data (if any)
+        AJAXRequestData requestData = this.requestData;
+
+        // Assign a suitable exception
+        Exception exc = e;
+        if (null == exc && null != requestData) {
+            HttpServletResponse servletResponse = requestData.optHttpServletResponse();
+            if (servletResponse instanceof StatusKnowing) {
+                int status = ((StatusKnowing) servletResponse).getStatus();
+                if ((status >= 400 && status <= 499) || (status >= 500 && status <= 599)) {
+                    // Assume error was returned
+                    exc = new HttpErrorCodeException(status);
+                }
+            }
+        }
+
+        // Trigger post-processing
+        for (AJAXRequestResultPostProcessor postProcessor; (postProcessor = this.postProcessors.poll()) != null;) {
+            try {
+                postProcessor.doPostProcessing(requestData, this, exc);
+            } catch (Exception x) {
+                org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AJAXRequestData.class);
+                logger.warn("'{}' failed to perform post-processing", postProcessor.getClass().getName(), x);
+            }
         }
     }
 
@@ -605,11 +685,7 @@ public class AJAXRequestResult {
      */
     public @NonNull Collection<OXException> getWarnings() {
         final Collection<OXException> thisWarnings = warnings;
-        if (null == thisWarnings) {
-            return Collections.<OXException> emptySet();
-        } else {
-            return Collections.unmodifiableCollection(thisWarnings);
-        }
+        return null == thisWarnings ? Collections.<OXException> emptySet() : Collections.unmodifiableCollection(thisWarnings);
     }
 
     /**

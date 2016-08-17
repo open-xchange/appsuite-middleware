@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JavaMail API
 Bundle-SymbolicName: javax.mail
-Bundle-Version: 1.5.2
+Bundle-Version: 1.5.5
 Bundle-Vendor: Oracle
 Bundle-License: http://www.sun.com/cddl, https://glassfish.dev.java.net/public/CDDL+GPL.html
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -40,16 +40,16 @@ Import-Package: com.openexchange.tools.ssl,
  org.slf4j,
  sun.security.util
 Export-Package: com.boxbe.pub.email,
- com.sun.mail.auth;version="1.5.2",
- com.sun.mail.dsn;version="1.5.2",
- com.sun.mail.handlers;version="1.5.2";
+ com.sun.mail.auth;version="1.5.5",
+ com.sun.mail.dsn;version="1.5.5",
+ com.sun.mail.handlers;version="1.5.5";
   uses:="javax.activation,
    javax.mail.internet,
    javax.mail,
    javax.xml.transform,
    javax.xml.transform.stream",
- com.sun.mail.iap;version="1.5.2";uses:="com.sun.mail.util,javax.net.ssl",
- com.sun.mail.imap;version="1.5.2";
+ com.sun.mail.iap;version="1.5.5";uses:="com.sun.mail.util,javax.net.ssl",
+ com.sun.mail.imap;version="1.5.5";
   uses:="com.sun.mail.imap.protocol,
    com.sun.mail.iap,
    javax.mail,
@@ -58,7 +58,7 @@ Export-Package: com.boxbe.pub.email,
    javax.mail.internet,
    javax.mail.search,
    javax.mail.event",
- com.sun.mail.imap.protocol;version="1.5.2";
+ com.sun.mail.imap.protocol;version="1.5.5";
   uses:="com.sun.mail.iap,
    com.sun.mail.util,
    javax.mail.internet,
@@ -68,28 +68,28 @@ Export-Package: com.boxbe.pub.email,
    javax.security.sasl,
    javax.security.auth.callback",
  com.sun.mail.mbox,
- com.sun.mail.pop3;version="1.5.2";
+ com.sun.mail.pop3;version="1.5.5";
   uses:="javax.mail,
    com.sun.mail.util,
    javax.mail.internet,
    javax.net.ssl,
    javax.mail.util",
- com.sun.mail.remote;version="1.5.2",
- com.sun.mail.smtp;version="1.5.2";
+ com.sun.mail.remote;version="1.5.5",
+ com.sun.mail.smtp;version="1.5.5";
   uses:="com.sun.mail.util,
    javax.mail.internet,
    javax.mail,
    javax.security.sasl,
    javax.security.auth.callback,
    javax.net.ssl",
- com.sun.mail.util;version="1.5.2";
+ com.sun.mail.util;version="1.5.5";
   uses:="javax.mail,
    javax.net.ssl,
    javax.mail.internet,
    javax.mail.util,
    javax.net,
    javax.security.auth.x500",
- com.sun.mail.util.logging;version="1.5.2";
+ com.sun.mail.util.logging;version="1.5.5";
   uses:="javax.mail,
    javax.mail.internet,
    javax.mail.util,

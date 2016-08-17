@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -59,9 +59,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.UnifiedInboxUID;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 
@@ -232,7 +230,7 @@ public final class CompositionSpaces {
      * @throws OXException If operation fails
      */
     public static void applyCompositionSpace(String csid, Session session) throws OXException {
-        applyCompositionSpace(csid, session, null, true);
+        applyCompositionSpace(csid, session, null, false);
     }
 
     /**
@@ -241,7 +239,7 @@ public final class CompositionSpaces {
      * @param csid The composition space identifier
      * @param session The associated session
      * @param optMailAccess The optional pre-initialized mail access
-     * @param updateMailFlags Boolean value <code>true</code> if the messages flags should be updated; otherwise <code>false</code>
+     * @param updateMailFlags <code>true</code> if the messages flags should be updated; otherwise <code>false</code>
      * @throws OXException If operation fails
      */
     public static void applyCompositionSpace(String csid, Session session, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> optMailAccess, boolean updateMailFlags) throws OXException {
@@ -250,6 +248,8 @@ public final class CompositionSpaces {
             return;
         }
 
+        /*-
+         *
         int unifiedMailId = -1;
         {
             UnifiedInboxManagement uim = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
@@ -257,12 +257,13 @@ public final class CompositionSpaces {
                 unifiedMailId = uim.getUnifiedINBOXAccountID(session);
             }
         }
+         */
 
         Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4, 0.9f, 1);
         try {
             {
                 final MailPath replyFor = space.getReplyFor();
-                if (null != replyFor && !updateMailFlags) {
+                if (null != replyFor && updateMailFlags) {
                     if (null != optMailAccess && replyFor.getAccountId() == optMailAccess.getAccountId()) {
                         new SafeAction<Void>() {
 
@@ -293,7 +294,7 @@ public final class CompositionSpaces {
 
             {
                 Queue<MailPath> forwardsFor = space.getForwardsFor();
-                if ((null != forwardsFor && !forwardsFor.isEmpty()) && !updateMailFlags) {
+                if ((null != forwardsFor && !forwardsFor.isEmpty()) && updateMailFlags) {
                     for (final MailPath mailPath : forwardsFor) {
                         if (null != optMailAccess && mailPath.getAccountId() == optMailAccess.getAccountId()) {
                             new SafeAction<Void>() {

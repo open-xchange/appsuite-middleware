@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -345,7 +345,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     /**
      * Current pool size, updated only while holding mainLock but volatile to allow concurrent readability even during updates.
      */
-    private volatile int poolSize;
+    private final AtomicInteger poolSize = new AtomicInteger();
 
     /**
      * False if should cancel/suppress periodic tasks on shutdown.
@@ -455,7 +455,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             // Continue initialization worker
             w.thread = t;
             workers.put(w, PRESENT);
-            final int nt = ++poolSize;
+            final int nt = poolSize.incrementAndGet();
             if (nt > largestPoolSize) {
                 largestPoolSize = nt;
             }
@@ -474,7 +474,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
-            if (poolSize < corePoolSize) {
+            if (poolSize.get() < corePoolSize) {
                 t = addThread(firstTask);
             }
         } finally {
@@ -500,7 +500,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
-            if (poolSize < maximumPoolSize) {
+            if (poolSize.get() < maximumPoolSize) {
                 next = workQueue.poll();
                 if (null == next) {
                     next = firstTask;
@@ -527,7 +527,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         for (;;) {
             switch (runState) {
             case RUNNING: {
-                if (poolSize <= corePoolSize) {
+                if (poolSize.get() <= corePoolSize) {
                     /*
                      * Prefer "normal" work queue before taking from delayed work queue
                      */
@@ -545,7 +545,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 if (null != r) {
                     return r;
                 }
-                if (poolSize > corePoolSize) {
+                if (poolSize.get() > corePoolSize) {
                     return null;
                 }
                 // else, after timeout, pool shrank so shouldn't die, so retry
@@ -610,7 +610,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             LogProperties.dropTempFiles();
             completedTaskCount += w.completedTasks.get();
             workers.remove(w);
-            if (--poolSize > 0) {
+            if (poolSize.decrementAndGet() > 0) {
                 return;
             }
 
@@ -1710,7 +1710,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 rejectCustom(mdcCommand);
                 return;
             }
-            if (poolSize < corePoolSize && addIfUnderCorePoolSize(mdcCommand)) {
+            if (poolSize.get() < corePoolSize && addIfUnderCorePoolSize(mdcCommand)) {
                 return;
             }
             /*
@@ -1733,7 +1733,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                     rejectCustom(mdcCommand);
                     return;
                 }
-                if (poolSize < corePoolSize && addIfUnderCorePoolSize(mdcCommand)) {
+                if (poolSize.get() < corePoolSize && addIfUnderCorePoolSize(mdcCommand)) {
                     return;
                 }
                 /*
@@ -2104,7 +2104,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                 // We have to create initially-idle threads here
                 // because we otherwise have no recourse about
                 // what to do with a dequeued task if addThread fails.
-                while (extra++ < 0 && n-- > 0 && poolSize < corePoolSize) {
+                while (extra++ < 0 && n-- > 0 && poolSize.get() < corePoolSize) {
                     final Thread t = addThread(null);
                     if (t != null) {
                         t.start();
@@ -2112,9 +2112,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
                         break;
                     }
                 }
-            } else if (extra > 0 && poolSize > corePoolSize) {
+            } else if (extra > 0 && poolSize.get() > corePoolSize) {
                 final Iterator<Worker> it = workerSet.iterator();
-                while (it.hasNext() && extra-- > 0 && poolSize > corePoolSize && workQueue.remainingCapacity() == 0) {
+                while (it.hasNext() && extra-- > 0 && poolSize.get() > corePoolSize && workQueue.remainingCapacity() == 0) {
                     it.next().interruptIfIdle();
                 }
             }
@@ -2178,9 +2178,9 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         try {
             int extra = this.maximumPoolSize - maximumPoolSize;
             this.maximumPoolSize = maximumPoolSize;
-            if (extra > 0 && poolSize > maximumPoolSize) {
+            if (extra > 0 && poolSize.get() > maximumPoolSize) {
                 final Iterator<Worker> it = workerSet.iterator();
-                while (it.hasNext() && extra > 0 && poolSize > maximumPoolSize) {
+                while (it.hasNext() && extra > 0 && poolSize.get() > maximumPoolSize) {
                     it.next().interruptIfIdle();
                     --extra;
                 }
@@ -2295,7 +2295,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      */
     @Override
     public int getPoolSize() {
-        return poolSize;
+        return poolSize.get();
     }
 
     /**

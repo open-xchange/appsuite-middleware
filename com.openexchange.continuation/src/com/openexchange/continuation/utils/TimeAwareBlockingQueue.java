@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -771,8 +771,8 @@ public class TimeAwareBlockingQueue<E> extends AbstractQueue<E> implements Block
          * Basic weakly-consistent iterator. At all times hold the next item to hand out so that if hasNext() reports true, we will still
          * have it to return even if lost race with a take etc.
          */
-        private Node<E> current;
-        private Node<E> lastRet;
+        private volatile Node<E> current;
+        private volatile Node<E> lastRet;
         private E currentElement;
 
         Itr() {
@@ -828,12 +828,17 @@ public class TimeAwareBlockingQueue<E> extends AbstractQueue<E> implements Block
 
         @Override
         public void remove() {
-            if (lastRet == null) {
+            Node<E> node = lastRet;
+            if (node == null) {
                 throw new IllegalStateException();
             }
+
             fullyLock();
             try {
-                final Node<E> node = lastRet;
+                node = lastRet;
+                if (node == null) {
+                    throw new IllegalStateException();
+                }
                 lastRet = null;
                 for (Node<E> trail = head, p = trail.next; p != null; trail = p, p = p.next) {
                     if (p == node) {

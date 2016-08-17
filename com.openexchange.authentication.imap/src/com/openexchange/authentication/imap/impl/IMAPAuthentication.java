@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -91,6 +91,7 @@ public class IMAPAuthentication implements AuthenticationService {
         IMAP_CONNECTIONTIMEOUT("IMAP_CONNECTIONTIMEOUT"),
         USE_FULL_LOGIN_INFO("USE_FULL_LOGIN_INFO"),
         USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP("USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP"),
+        USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP("USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP"),
         IMAP_SERVER("IMAP_SERVER"),
         IMAP_PORT("IMAP_PORT"),
         USE_MULTIPLE("USE_MULTIPLE"),
@@ -181,6 +182,11 @@ public class IMAPAuthentication implements AuthenticationService {
                 useFullLoginForUserLookup = Boolean.parseBoolean(((String) props.get(PropertyNames.USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP.name)).trim());
             }
 
+            boolean useFullLoginForContextLookup = false;
+            if (props.get(PropertyNames.USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP.name) != null) {
+                useFullLoginForContextLookup = Boolean.parseBoolean(((String) props.get(PropertyNames.USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP.name)).trim());
+            }
+
             String host = "localhost";
             if (props.get(PropertyNames.IMAP_SERVER.name) != null) {
                 host = IDNA.toASCII((String) props.get(PropertyNames.IMAP_SERVER.name));
@@ -201,7 +207,7 @@ public class IMAPAuthentication implements AuthenticationService {
 
             // Set user/context info
             String userInfo = useFullLoginForUserLookup ? splitResult.fullLoginInfo : localPart;
-            String contextInfo = splitResult.domainPart;
+            String contextInfo = useFullLoginForContextLookup ? splitResult.fullLoginInfo : splitResult.domainPart;
 
             // Support for multiple IMAP servers
             boolean secure = false;
@@ -274,6 +280,7 @@ public class IMAPAuthentication implements AuthenticationService {
                 }
             }
 
+            ConfigurationService configuration = services.getService(ConfigurationService.class);
             final String socketFactoryClass = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
             final String sPort = port.toString();
             if (secure) {
@@ -295,7 +302,6 @@ public class IMAPAuthentication implements AuthenticationService {
                  * Specify SSL protocols
                  */
                 {
-                    final ConfigurationService configuration = services.getService(ConfigurationService.class);
                     final String sslProtocols = configuration.getProperty("com.openexchange.imap.ssl.protocols", "SSLv3 TLSv1").trim();
                     imapprops.put("mail.imap.ssl.protocols", sslProtocols);
                 }
@@ -303,7 +309,6 @@ public class IMAPAuthentication implements AuthenticationService {
                  * Specify SSL cipher suites
                  */
                 {
-                    final ConfigurationService configuration = services.getService(ConfigurationService.class);
                     final String cipherSuites = configuration.getProperty("com.openexchange.imap.ssl.ciphersuites", "").trim();
                     if (false == Strings.isEmpty(cipherSuites)) {
                         imapprops.put("mail.imap.ssl.ciphersuites", cipherSuites);
@@ -313,7 +318,12 @@ public class IMAPAuthentication implements AuthenticationService {
                 /*
                  * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
                  */
-                imapprops.put("mail.imap.starttls.enable", "true");
+                {
+                    boolean enableTls = configuration.getBoolProperty("com.openexchange.imap.enableTls", true);
+                    if (enableTls) {
+                        imapprops.put("mail.imap.starttls.enable", "true");
+                    }
+                }
                 /*
                  * Specify the javax.net.ssl.SSLSocketFactory class, this class will be used to create IMAP SSL sockets if TLS handshake says
                  * so.
@@ -326,7 +336,6 @@ public class IMAPAuthentication implements AuthenticationService {
                  * Specify SSL protocols
                  */
                 {
-                    final ConfigurationService configuration = services.getService(ConfigurationService.class);
                     final String sslProtocols = configuration.getProperty("com.openexchange.imap.ssl.protocols", "SSLv3 TLSv1").trim();
                     imapprops.put("mail.imap.ssl.protocols", sslProtocols);
                 }
@@ -334,7 +343,6 @@ public class IMAPAuthentication implements AuthenticationService {
                  * Specify SSL cipher suites
                  */
                 {
-                    final ConfigurationService configuration = services.getService(ConfigurationService.class);
                     final String cipherSuites = configuration.getProperty("com.openexchange.imap.ssl.ciphersuites", "").trim();
                     if (false == Strings.isEmpty(cipherSuites)) {
                         imapprops.put("mail.imap.ssl.ciphersuites", cipherSuites);

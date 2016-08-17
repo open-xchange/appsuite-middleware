@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -121,7 +121,6 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
     private static final int LENGTH = 9; // "FETCH <nums> (<command>)"
     private static final int LENGTH_WITH_UID = 13; // "UID FETCH <nums> (<command>)"
 
-    private final char separator;
     private String[] args;
     private final String command;
     private boolean uid;
@@ -141,21 +140,19 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * Initializes a new {@link MailMessageFetchIMAPCommand}.
      *
      * @param imapFolder The IMAP folder providing connected protocol
-     * @param separator The separator character
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param seqNums The sequence numbers to fetch
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information deduced from configuration
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
         }
-        this.separator = separator;
         lastHandlers = new HashSet<FetchItemHandler>();
         command = getFetchCommand(isRev1, fp, false, serverInfo);
         uid = false;
@@ -177,20 +174,18 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * Initializes a new {@link MailMessageFetchIMAPCommand} to fetch all messages.
      *
      * @param imapFolder The IMAP folder providing connected protocol
-     * @param separator The separator character
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information deduced from configuration
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
         }
-        this.separator = separator;
         lastHandlers = new HashSet<FetchItemHandler>();
         command = getFetchCommand(isRev1, fp, false, serverInfo);
         uid = false;
@@ -209,21 +204,19 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * Initializes a new {@link MailMessageFetchIMAPCommand}.
      *
      * @param imapFolder The IMAP folder providing connected protocol
-     * @param separator The separator character
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param uids The UIDs to fetch
      * @param fp The fetch profile to use
      * @param serverInfo The IMAP server information deduced from configuration
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, long[] uids, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, long[] uids, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             returnDefaultValue = true;
         }
-        this.separator = separator;
         lastHandlers = new HashSet<FetchItemHandler>();
         length = uids.length;
         uid2index = new TLongIntHashMap(length, Constants.DEFAULT_LOAD_FACTOR, 0, -1);
@@ -450,7 +443,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         boolean error = false;
         MailMessage mail;
         try {
-            mail = handleFetchRespone(fetchResponse, fullname, separator, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment);
+            mail = handleFetchRespone(fetchResponse, fullname, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment);
         } catch (final MessagingException e) {
             /*
              * Discard corrupt message
@@ -480,13 +473,12 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      *
      * @param fetchResponse The FETCH response to handle
      * @param fullName The full name of associated folder
-     * @param separator The separator character
      * @return The resulting mail message
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If an OX error occurs
      */
-    public static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName, final char separator) throws MessagingException, OXException {
-        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, null, false, false, false, false);
+    public static MailMessage handleFetchRespone(final FetchResponse fetchResponse, final String fullName) throws MessagingException, OXException {
+        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, null, false, false, false, false);
     }
 
     /**
@@ -495,20 +487,19 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param mail The message to apply to
      * @param fetchResponse The FETCH response to handle
      * @param fullName The full name of associated folder
-     * @param separator The separator character
      * @return The resulting mail message
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If an OX error occurs
      */
-    public static MailMessage handleFetchRespone(final IDMailMessage mail, final FetchResponse fetchResponse, final String fullName, final char separator) throws MessagingException, OXException {
-        return handleFetchRespone(mail, fetchResponse, fullName, separator, null, false, false, false, false);
+    public static MailMessage handleFetchRespone(final IDMailMessage mail, final FetchResponse fetchResponse, final String fullName) throws MessagingException, OXException {
+        return handleFetchRespone(mail, fetchResponse, fullName, null, false, false, false, false);
     }
 
-    private static MailMessage handleFetchRespone(FetchResponse fetchResponse, String fullName, char separator, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) throws MessagingException, OXException {
-        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, separator, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment);
+    private static MailMessage handleFetchRespone(FetchResponse fetchResponse, String fullName, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) throws MessagingException, OXException {
+        return handleFetchRespone(new IDMailMessage(null, fullName), fetchResponse, fullName, lastHandlers, determineAttachmentByHeader, checkICal, checkVCard, treatEmbeddedAsAttachment);
     }
 
-    private static MailMessage handleFetchRespone(IDMailMessage mail, FetchResponse fetchResponse, String fullName, char separator, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) throws MessagingException, OXException {
+    private static MailMessage handleFetchRespone(IDMailMessage mail, FetchResponse fetchResponse, String fullName, Set<FetchItemHandler> lastHandlers, boolean determineAttachmentByHeader, boolean checkICal, boolean checkVCard, boolean treatEmbeddedAsAttachment) throws MessagingException, OXException {
         final IDMailMessage m;
         if (null == mail) {
             m = new IDMailMessage(null, fullName);
@@ -517,9 +508,6 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             m.setFolder(fullName);
         }
         // mail.setRecentCount(recentCount);
-        if (separator != '\0') {
-            m.setSeparator(separator);
-        }
         m.setSeqnum(fetchResponse.getNumber());
         final int itemCount = fetchResponse.getItemCount();
         final Map<Class<? extends Item>, FetchItemHandler> map = MAP;

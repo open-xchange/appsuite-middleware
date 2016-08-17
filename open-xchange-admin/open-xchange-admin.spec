@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 7
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -251,6 +251,13 @@ if [ ${1:-0} -eq 2 ]; then
     ox_add_property ALLOW_CHANGING_QUOTA_IF_NO_FILESTORE_SET false /opt/open-xchange/etc/AdminUser.properties
 
     ox_add_property AVERAGE_USER_SIZE 100 /opt/open-xchange/etc/AdminUser.properties
+
+    # SoftwareChange_Request-3226
+    PFILE=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
+    VALUE=$(ox_read_property drive $PFILE)
+    if [ "infostore,deniedportal,readcreatesharedfolders,editpublicfolders" = "$VALUE" ]; then
+        ox_set_property drive 'infostore,deniedportal,contacts,collectemailaddresses' $PFILE
+    fi
 fi
 
 %clean
@@ -275,6 +282,16 @@ fi
 %doc com.openexchange.admin.rmi/javadoc
 
 %changelog
+* Tue Jul 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.2 release
+* Wed Jul 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.8.2 release
+* Wed Jun 29 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.2 release
+* Thu Jun 16 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.8.2 release
+* Wed Apr 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.2 release
 * Wed Mar 30 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.8.1 release
 * Fri Mar 25 2016 Marcus Klein <marcus.klein@open-xchange.com>

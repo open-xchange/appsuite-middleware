@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,15 +58,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryPattern;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveAction;
+import com.openexchange.drive.DriveClientType;
 import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveFileField;
@@ -97,6 +100,7 @@ import com.openexchange.drive.impl.comparison.FilteringDirectoryVersionMapper;
 import com.openexchange.drive.impl.comparison.FilteringFileVersionMapper;
 import com.openexchange.drive.impl.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.impl.comparison.ServerFileVersion;
+import com.openexchange.drive.impl.comparison.ThreeWayComparison;
 import com.openexchange.drive.impl.internal.tracking.SyncTracker;
 import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.drive.impl.storage.DriveStorage;
@@ -447,6 +451,8 @@ public class DriveServiceImpl implements DriveService {
         settings.setServerVersion(com.openexchange.version.Version.getInstance().getVersionString());
         settings.setMinApiVersion(String.valueOf(DriveConfig.getInstance().getMinApiVersion()));
         settings.setSupportedApiVersion(String.valueOf(DriveConstants.SUPPORTED_API_VERSION));
+        settings.setMinUploadChunk(Long.valueOf(syncSession.getOptimisticSaveThreshold()));
+        settings.setHasTrashFolder(syncSession.getStorage().hasTrashFolder());
         /*
          * add any localized folder names (up to a certain depth after which no localized names are expected anymore)
          */
@@ -472,7 +478,16 @@ public class DriveServiceImpl implements DriveService {
         if (capabilitySet.contains("share_links")) {
             capabilities.add("share_links");
         }
+        /*
+         * indicate ability to listen for changes in multiple root folders via long polling (bug #45919)
+         */
+        capabilities.add("multiple_folder_long_polling");
         settings.setCapabilities(capabilities);
+        /*
+         * add certain configuration values
+         */
+        ConfigurationService configService = DriveServiceLookup.getService(ConfigurationService.class);
+        settings.setMinSearchChars(configService.getIntProperty("com.openexchange.MinimumSearchCharacters", 0));
         return settings;
     }
 
@@ -559,6 +574,25 @@ public class DriveServiceImpl implements DriveService {
             StringBuilder allocator = new StringBuilder("File versions in directory " + path + " mapped to:\n");
             allocator.append(mapper).append('\n');
             session.trace(allocator);
+        }
+        /*
+         * check mapped client versions to protect from erroneous clients sending 0-byte versions from time to time
+         */
+        if (DriveClientType.ANDROID.equals(session.getDriveSession().getClientType()) || DriveClientType.IOS.equals(session.getDriveSession().getClientType())) {
+            int zeroByteClientVersionCount = 0;
+            for (Entry<String, ThreeWayComparison<FileVersion>> entry : mapper) {
+                ThreeWayComparison<FileVersion> comparison = entry.getValue();
+                if (null != comparison.getClientVersion() && DriveConstants.EMPTY_MD5.equals(comparison.getClientVersion().getChecksum()) && null != comparison.getOriginalVersion()) {
+                    zeroByteClientVersionCount++;
+                }
+            }
+            if (0 < zeroByteClientVersionCount && zeroByteClientVersionCount == clientVersions.size()) {
+                OXException error = DriveExceptionCodes.ZERO_BYTE_FILES.create(path);
+                LOG.warn("Client synchronization aborted for {}", session, error);
+                IntermediateSyncResult<FileVersion> errorResult = new IntermediateSyncResult<FileVersion>();
+                errorResult.addActionForClient(new ErrorFileAction(null, null, null, path, error, false, true));
+                return errorResult;
+            }
         }
         /*
          * determine sync actions

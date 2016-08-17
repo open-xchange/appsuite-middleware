@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -52,14 +52,22 @@ package com.openexchange.ajax.container;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.ajax.fileholder.FileRandomAccess;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.ajax.fileholder.InputStreamReadable;
+import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.log.LogProperties;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -71,12 +79,13 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 public final class TmpFileFileHolder implements IFileHolder {
 
     private final File tmpFile;
-    private long length;
+    private Long length;
     private String contentType;
     private String name;
     private String disposition;
     private String delivery;
     private final List<Runnable> tasks;
+    private final boolean autoManaged;
 
     /**
      * Initializes a new {@link TmpFileFileHolder}.
@@ -84,9 +93,20 @@ public final class TmpFileFileHolder implements IFileHolder {
      * @throws OXException If initialization fails
      */
     public TmpFileFileHolder() throws OXException {
+        this(true);
+    }
+
+    /**
+     * Initializes a new {@link TmpFileFileHolder}.
+     *
+     * @param autoManaged <code>true</code> to signal automatic management for the created file (deleted after processing threads terminates); otherwise <code>false</code> to let the caller control file's life-cycle
+     * @throws OXException If initialization fails
+     */
+    public TmpFileFileHolder(boolean autoManaged) throws OXException {
         super();
-        tmpFile = newTempFile();
-        length = -1L;
+        this.autoManaged = autoManaged;
+        tmpFile = newTempFile(autoManaged);
+        length = null;
         tasks = new LinkedList<Runnable>();
     }
 
@@ -123,6 +143,83 @@ public final class TmpFileFileHolder implements IFileHolder {
     }
 
     /**
+     * Writes the specified content to this file holder.
+     * <p>
+     * Orderly closes specified {@link InputStream} instance.
+     *
+     * @param in The content to be written.
+     * @return This file holder with content written
+     * @throws OXException If write attempt fails
+     */
+    public TmpFileFileHolder write(final InputStream in) throws OXException {
+        if (null == in) {
+            return this;
+        }
+        return write(new InputStreamReadable(in));
+    }
+
+    /**
+     * Writes the specified content to this file holder.
+     * <p>
+     * Orderly closes specified {@link InputStream} instance.
+     *
+     * @param in The content to be written.
+     * @return This file holder with content written
+     * @throws OXException If write attempt fails
+     */
+    public TmpFileFileHolder write(final Readable in) throws OXException {
+        if (null == in) {
+            return this;
+        }
+        OutputStream out = null;
+        try {
+            File tempFile = this.tmpFile;
+            // Stream to file.
+            out = new FileOutputStream(tempFile, true);
+            final int buflen = 0xFFFF; // 64KB
+            final byte[] buffer = new byte[buflen];
+            for (int len; (len = in.read(buffer, 0, buflen)) > 0;) {
+                out.write(buffer, 0, len);
+            }
+            out.flush();
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(in);
+            Streams.close(out);
+        }
+        return this;
+    }
+
+    /**
+     * Gets the MD5 sum for this file holder's content
+     *
+     * @return The MD5 sum
+     * @throws OXException If MD5 sum cannot be returned
+     */
+    public String getMD5() throws OXException {
+        File tempFile = this.tmpFile;
+        DigestInputStream digestStream = null;
+        try {
+            digestStream = new DigestInputStream(new FileInputStream(tempFile), MessageDigest.getInstance("MD5"));
+            byte[] buf = new byte[8192];
+            for (int read; (read = digestStream.read(buf, 0, 8192)) > 0;) {
+                ;
+            }
+            byte[] digest = digestStream.getMessageDigest().digest();
+            return jonelo.jacksum.util.Service.format(digest);
+        } catch (NoSuchAlgorithmException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(digestStream);
+        }
+    }
+
+    /**
      * Gets the newly created file.
      *
      * @return The file
@@ -153,7 +250,7 @@ public final class TmpFileFileHolder implements IFileHolder {
 
     @Override
     public long getLength() {
-        return length;
+        return null == length ? tmpFile.length() : length.longValue();
     }
 
     @Override
@@ -177,7 +274,7 @@ public final class TmpFileFileHolder implements IFileHolder {
      * @param length The length to set
      */
     public void setLength(final long length) {
-        this.length = length;
+        this.length = Long.valueOf(length);
     }
 
     /**

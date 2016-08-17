@@ -1,0 +1,66 @@
+/infostore?action=copy:
+  put:
+    operationId: copyInfoItem
+    tags:
+      - infostore
+    summary: Copies an infoitem.
+    description: |
+      This request cannot change or add files. Therefore it is necessary to use the `POST` method.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: Object ID of the infoitem that shall be copied.
+        required: true
+      - in: body
+        name: body
+        description: A JSON object containing the modified fields of the destination infoitem. The field `id` must not be present.
+        required: true
+        schema:
+          $ref: "#/definitions/InfoItemData"
+    responses:
+      200:
+        description: |
+          A JSON object with the object ID of the newly created infoitem. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/InfoItemUpdateResponse"
+  post:
+    operationId: copyInfoItemAdvanced
+    tags:
+      - infostore
+    summary: Copies an infoitem.
+    description: |
+      Copies an infoitem's data with the possibility to change the file. The normal request body must be placed as form-data using the
+      content-type `multipart/form-data`. The form field `json` contains the infoitem's data while the file
+      must be placed in a file field named `file` (see also [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads)).
+    consumes:
+      - multipart/form-data
+    produces:
+      - text/html
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: Object ID of the infoitem that shall be copies.
+        required: true
+      - in: formData
+        name: json
+        type: string
+        description: Represents the normal request body as JSON string containing the infoitem's data as described in the [InfoItemData](#/definitions/InfoItemData) model. Only modified fields must be specified but at least `{"folder_id":"destination"}`.
+        required: true
+      - in: formData
+        name: file
+        type: file
+        description: The metadata as per `<input type="file" />`.
+        required: true
+    responses:
+      200:
+        description: |
+          A HTML page as described in [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) containing the object ID of the infoitem or errors if some occurred.
+        schema:
+          type: string

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -74,6 +74,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.filemanagement.osgi.ManagedFileManagementActivator(),
         new com.openexchange.server.osgi.ServerActivator(),
         new com.openexchange.ajax.requesthandler.osgi.DispatcherActivator(),
+        new com.openexchange.ajax.printing.osgi.AJAXPrintingActivator(),
         new com.openexchange.groupware.attach.osgi.AttachmentActivator(),
         new com.openexchange.groupware.contact.osgi.ContactActivator(),
         new com.openexchange.groupware.infostore.osgi.InfostoreActivator(),
@@ -85,6 +86,7 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.ajax.login.osgi.LoginActivator(),
         new com.openexchange.tools.images.osgi.ImageToolsActivator(),
         new com.openexchange.mail.json.osgi.MailJSONActivator(),
+        new com.openexchange.mail.json.compose.share.osgi.ShareComposeActivator(),
         new com.openexchange.filemanagement.json.osgi.ManagedFileJSONActivator(),
         new com.openexchange.group.json.osgi.GroupJSONActivator(),
         new com.openexchange.resource.json.osgi.ResourceJSONActivator(),

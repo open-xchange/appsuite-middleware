@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -79,6 +79,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -189,9 +190,8 @@ public final class SessionCompositionParameters implements CompositionParameters
 
     @Override
     public String getTimeZoneID() throws OXException {
-        final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
-        final User user = userService.getUser(session.getUserId(), ctx);
-        return user.getTimeZone();
+        UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
+        return userService.getUser(session.getUserId(), ctx).getTimeZone();
     }
 
     @Override
@@ -203,11 +203,19 @@ public final class SessionCompositionParameters implements CompositionParameters
     public String getReplyToAddress() throws OXException {
         String replyTo = usm.getReplyToAddr();
         if (isEmpty(replyTo)) {
-            final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+            MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
             if (null != mass) {
-                final MailAccount mailAccount = mass.getMailAccount(accountId, session.getUserId(), session.getContextId());
-                if (!UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
-                    final String sReplyTo = mailAccount.getReplyTo();
+                if (mass.existsMailAccount(accountId, session.getUserId(), session.getContextId())) {
+                    MailAccount mailAccount = mass.getMailAccount(accountId, session.getUserId(), session.getContextId());
+                    if (!UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
+                        String sReplyTo = mailAccount.getReplyTo();
+                        if (!isEmpty(sReplyTo) && !toLowerCase(sReplyTo).startsWith("null")) {
+                            replyTo = sReplyTo;
+                        }
+                    }
+                } else {
+                    TransportAccount transportAccount = mass.getTransportAccount(accountId, session.getUserId(), session.getContextId());
+                    String sReplyTo = transportAccount.getReplyTo();
                     if (!isEmpty(sReplyTo) && !toLowerCase(sReplyTo).startsWith("null")) {
                         replyTo = sReplyTo;
                     }
@@ -224,7 +232,7 @@ public final class SessionCompositionParameters implements CompositionParameters
         try {
             return IDNA.toACE(address);
         } catch (AddressException e) {
-            throw MimeMailExceptionCode.INVALID_EMAIL_ADDRESS.create(address);
+            throw MimeMailExceptionCode.INVALID_EMAIL_ADDRESS.create(e, address);
         }
     }
 

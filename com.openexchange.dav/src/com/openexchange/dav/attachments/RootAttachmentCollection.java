@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.DAVFactory;
+import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.mixins.AddressbookHomeSet;
 import com.openexchange.dav.mixins.CalendarHomeSet;
 import com.openexchange.dav.mixins.CurrentUserPrincipal;
@@ -98,7 +99,7 @@ public class RootAttachmentCollection extends DAVRootCollection {
         try {
             metadata = AttachmentUtils.decodeName(name);
         } catch (IllegalArgumentException e) {
-            throw protocolException(e, HttpServletResponse.SC_NOT_FOUND);
+            throw DAVProtocol.protocolException(getUrl(), e, HttpServletResponse.SC_NOT_FOUND);
         }
         /*
          * re-load full metadata (necessary to signal appropriate headers in response)

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -119,8 +119,11 @@ public class UploadException extends OXException {
         /**
          * Upload file's content type "%1$s" does not fit to given file filter "%2$s"
          */
-        INVALID_FILE_TYPE("Upload file's content type \"%1$s\" does not match given file filter \"%2$s\"",
-            UploadExceptionMessage.INVALID_FILE_TYPE_MSG, CATEGORY_USER_INPUT, 11),
+        INVALID_FILE_TYPE("Upload file's content type \"%1$s\" does not match given file filter \"%2$s\"", UploadExceptionMessage.INVALID_FILE_TYPE_MSG, CATEGORY_USER_INPUT, 11),
+        /**
+         * Upload file is invalid or illegal
+         */
+        INVALID_FILE("Upload file is invalid or illegal", UploadExceptionMessage.INVALID_FILE_MSG, CATEGORY_USER_INPUT, 11),
         /**
          * An error occurred: %1$s
          */

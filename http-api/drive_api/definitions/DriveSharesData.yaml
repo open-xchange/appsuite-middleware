@@ -1,0 +1,12 @@
+type: object
+properties:
+  directories:
+    type: array
+    description: An array of metadata objects describing the shared folders.
+    items:
+      $ref: "#/definitions/DriveDirectoryMetadata"
+  files:
+    type: array
+    description: An array of metadata objects describing the shared files.
+    items:
+      $ref: "#/definitions/DriveFileMetadata"

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -51,6 +51,9 @@ package com.openexchange.xing.access.internal;
 
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
@@ -81,7 +84,9 @@ public final class XingEventHandler implements EventHandler {
                 if (null != contextId) {
                     Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
                     if (null != userId) {
-                        if (XingOAuthAccessRegistry.getInstance().removeAccessWhenNoActiveSession(userId, contextId)) {
+                        OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
+                        OAuthAccessRegistry registry = registryService.get(API.XING.getFullName());
+                        if (registry.removeIfLast(contextId, userId)) {
                             LOG.debug("XING session removed for user {} in context {}", userId, contextId);
                         }
                     }

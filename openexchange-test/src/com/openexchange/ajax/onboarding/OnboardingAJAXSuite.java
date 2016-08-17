@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -57,6 +57,7 @@ import com.openexchange.ajax.onboarding.tests.MailSyncProfileTest;
 import com.openexchange.ajax.onboarding.tests.PlistSMSRateLimitTest;
 import com.openexchange.ajax.onboarding.tests.PlistSMSTest;
 import com.openexchange.ajax.onboarding.tests.PlistSMSUserLimitTest;
+import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -74,10 +75,10 @@ public class OnboardingAJAXSuite {
         tests.addTestSuite(ConfigTest.class);
         tests.addTestSuite(DAVSyncProfileTest.class);
         tests.addTestSuite(EASSyncProfileTest.class);
-        tests.addTestSuite(EMClientURLTest.class);
-        tests.addTestSuite(PlistSMSTest.class);
-        tests.addTestSuite(PlistSMSUserLimitTest.class);
-        tests.addTestSuite(PlistSMSRateLimitTest.class);
+        tests.addTest(new JUnit4TestAdapter(EMClientURLTest.class));
+        tests.addTest(new JUnit4TestAdapter(PlistSMSTest.class));
+        tests.addTest(new JUnit4TestAdapter(PlistSMSUserLimitTest.class));
+        tests.addTest(new JUnit4TestAdapter(PlistSMSRateLimitTest.class));
         tests.addTestSuite(MailSyncProfileTest.class);
         return tests;
     }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -54,6 +54,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FolderStatsAware;
 import com.openexchange.file.storage.MediaFolderAwareFolderAccess;
 import com.openexchange.file.storage.PermissionAware;
 import com.openexchange.file.storage.Quota;
@@ -85,7 +86,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFolderAwareFolderAccess, PermissionAware {
+public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFolderAwareFolderAccess, PermissionAware, FolderStatsAware {
 
     private static final String INFOSTORE_FOLDER_ID = String.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID);
     private static final String TREE_ID = "1";
@@ -269,6 +270,16 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
         parsedFolder.setID(identifier);
         getFolderService().updateFolder(parsedFolder, null, session, initDecorator()).getResponse();
         return null != parsedFolder.getNewID() ? parsedFolder.getNewID() : identifier;
+    }
+
+    @Override
+    public long getNumFiles(String folderId) throws OXException {
+        return infostore.countDocuments(Long.parseLong(folderId), session);
+    }
+
+    @Override
+    public long getTotalSize(String folderId) throws OXException {
+        return infostore.getTotalSize(Long.parseLong(folderId), session);
     }
 
     /**

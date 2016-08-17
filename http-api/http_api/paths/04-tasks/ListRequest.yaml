@@ -1,0 +1,28 @@
+/tasks?action=list:
+  put:
+    operationId: getTaskList
+    tags:
+      - tasks
+    summary: Gets a list of tasks.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamTaskColumns"
+      - in: body
+        name: body
+        description: A JSON array of JSON objects with the id and folder of the tasks.
+        required: true
+        schema:
+          type: array
+          items:
+            $ref: "#/definitions/TaskListElement"
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with data for the requested tasks. Each array element describes one task and
+          is itself an array. The elements of each array contain the information specified by the corresponding
+          identifiers in the `columns` parameter. In case of errors the responsible fields in the response are
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/TasksResponse"

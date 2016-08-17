@@ -64,7 +64,7 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface MailFilterService {
 
     public enum FilterType {
-        antispam("antispam"), autoforward("autoforward"), vacation("vacation"), all(""), custom("custom");
+        antispam("antispam"), autoforward("autoforward"), vacation("vacation"), all(""), custom("custom"), category("category"), syscategory("syscategory");
 
         private final String flag;
 
@@ -111,6 +111,15 @@ public interface MailFilterService {
     public void deleteFilterRule(final Credentials credentials, final int uid) throws OXException;
 
     /**
+     * Delete the specified rules
+     *
+     * @param credentials user's credentials
+     * @param uids UIDs of the mail filter rules to delete
+     * @throws OXException
+     */
+    public void deleteFilterRules(final Credentials credentials, final int... uids) throws OXException;
+
+    /**
      * Delete all filters for the specified user
      *
      * @param credentials the user's credentials
@@ -136,7 +145,7 @@ public interface MailFilterService {
      * @return a list with all mail filter rules
      * @throws OXException
      */
-    public List<Rule> listRules(final Credentials credentials, final FilterType flag) throws OXException;
+    public List<Rule> listRules(final Credentials credentials, final String flag) throws OXException;
 
     /**
      * Return a list with all mail filter rules
@@ -146,7 +155,7 @@ public interface MailFilterService {
      * @return a list with all mail filter rules
      * @throws OXException
      */
-    public List<Rule> listRules(final Credentials credentials, final String flag) throws OXException;
+    public List<Rule> listRules(final Credentials credentials, final FilterType flag) throws OXException;
 
     /**
      * Return a list with all mail filters except those specified in the exclusion list
@@ -184,5 +193,14 @@ public interface MailFilterService {
      * @throws OXException
      */
     public Set<String> getCapabilities(final Credentials credentials) throws OXException;
+
+    /**
+     * Get a set with static capabilities
+     *
+     * @param credentials the user's credentials (but only used to determine host and port)
+     * @return a Set with static capabilities
+     * @throws OXException
+     */
+    public Set<String> getStaticCapabilities(Credentials credentials) throws OXException;
 
 }

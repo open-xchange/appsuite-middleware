@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,10 +52,13 @@ package com.openexchange.notification.osgi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.mime.MimeTypeMap;
+import com.openexchange.notification.FullNameBuilder;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.notification.mail.impl.NotificationMailFactoryImpl;
+import com.openexchange.notification.service.FullNameBuilderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link NotificationActivator}
@@ -75,6 +78,7 @@ public class NotificationActivator extends HousekeepingActivator {
         Services.set(this);
 
         trackService(MimeTypeMap.class);
+        trackService(UserService.class);
         openTrackers();
 
         NotificationMailFactoryImpl notificationMailFactory = new NotificationMailFactoryImpl(
@@ -82,6 +86,7 @@ public class NotificationActivator extends HousekeepingActivator {
             getService(TemplateService.class),
             getService(HtmlService.class));
         registerService(NotificationMailFactory.class, notificationMailFactory);
+        registerService(FullNameBuilderService.class, FullNameBuilder.getInstance());
     }
 
     @Override

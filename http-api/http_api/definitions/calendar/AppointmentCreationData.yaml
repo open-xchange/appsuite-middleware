@@ -1,0 +1,10 @@
+type: object
+properties:
+  id:
+    type: string
+    description: ID of the appointment.
+  conflicts:
+    type: array
+    description: An array of appointments which cause conflicts.
+    items:
+      $ref: "#/definitions/AppointmentCreationConflict"

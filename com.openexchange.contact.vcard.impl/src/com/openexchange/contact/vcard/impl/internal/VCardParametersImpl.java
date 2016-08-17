@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,6 +52,7 @@ package com.openexchange.contact.vcard.impl.internal;
 import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.VCardVersion;
 import com.openexchange.session.Session;
@@ -79,6 +80,7 @@ public class VCardParametersImpl implements VCardParameters {
     private boolean importAttachments;
     private boolean removeAttachmentsFromKeptVCard;
     private Map<String, Object> parameters;
+    private Set<String> propertyNames;
 
     /**
      * Initializes a new, empty {@link VCardParametersImpl}.
@@ -227,6 +229,17 @@ public class VCardParametersImpl implements VCardParameters {
     @Override
     public VCardParameters setRemoveAttachmentsFromKeptVCard(boolean removeAttachmentsFromKeptVCard) {
         this.removeAttachmentsFromKeptVCard = removeAttachmentsFromKeptVCard;
+        return this;
+    }
+
+    @Override
+    public Set<String> getPropertyNames() {
+        return propertyNames;
+    }
+
+    @Override
+    public VCardParameters setPropertyNames(Set<String> propertyNames) {
+        this.propertyNames = propertyNames;
         return this;
     }
 

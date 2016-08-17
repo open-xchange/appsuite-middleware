@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -46,11 +46,12 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.rss.preprocessors;
 
 import com.openexchange.html.HtmlService;
 import com.openexchange.rss.RssResult;
-import com.openexchange.rss.RssServices;
+import com.openexchange.rss.osgi.Services;
 
 /**
  * {@link SanitizingPreprocessor} - Sanitizes HTML content.
@@ -69,9 +70,9 @@ public class SanitizingPreprocessor extends AbstractPreprocessor {
         this.dropExternalImages = dropExternalImages;
     }
 
-	@Override
-	protected String innerProcess(String payload, RssResult rssResult) {
-	    final HtmlService htmlService = RssServices.getHtmlService();
+    @Override
+    protected String innerProcess(String payload, RssResult rssResult) {
+        final HtmlService htmlService = Services.getService(HtmlService.class);
         if (null == htmlService) {
             return payload;
         }
@@ -85,6 +86,6 @@ public class SanitizingPreprocessor extends AbstractPreprocessor {
         }
 
         return sanitized;
-	}
+    }
 
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -89,9 +89,9 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.TransportAuth;
-import com.openexchange.mailaccount.json.fields.MailAccountFields;
-import com.openexchange.mailaccount.json.parser.MailAccountParser;
-import com.openexchange.mailaccount.json.writer.MailAccountWriter;
+import com.openexchange.mailaccount.json.MailAccountFields;
+import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
+import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -104,8 +104,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.PUT, name = "update", description = "Update a mail account", parameters = { @Parameter(name = "session", description = "A session ID previously obtained from the login module.") }, requestBody = "A JSON object identifiying (field ID is present) and describing the account to update. See mail account data.", responseDescription = "A JSON object representing the updated mail account. See mail account data.")
 public final class UpdateAction extends AbstractMailAccountAction implements MailAccountFields {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateAction.class);
 
     public static final String ACTION = AJAXServlet.ACTION_UPDATE;
 
@@ -124,7 +122,7 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
         MailAccountDescription accountDescription = new MailAccountDescription();
         List<OXException> warnings = new LinkedList<OXException>();
-        Set<Attribute> fieldsToUpdate = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
+        Set<Attribute> fieldsToUpdate = DefaultMailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
 
         if (fieldsToUpdate.contains(Attribute.TRANSPORT_AUTH_LITERAL)) {
             TransportAuth transportAuth = accountDescription.getTransportAuth();
@@ -189,7 +187,7 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
             boolean pop3 = Strings.toLowerCase(accountDescription.getMailProtocol()).startsWith("pop3");
 
             if (fieldsToUpdate.contains(Attribute.MAIL_URL_LITERAL) && !toUpdate.generateMailServerURL().equals(accountDescription.generateMailServerURL())) {
-                if (!pop3 && !ValidateAction.checkMailServerURL(accountDescription, session, warnings)) {
+                if (!pop3 && !ValidateAction.checkMailServerURL(accountDescription, session, warnings, true)) {
                     final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
                     warning.setCategory(Category.CATEGORY_WARNING);
                     warnings.add(0, warning);
@@ -197,7 +195,7 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
                 clearStamp |= (pop3 && !toUpdate.getMailServer().equals(accountDescription.getMailServer()));
             }
             if (fieldsToUpdate.contains(Attribute.TRANSPORT_URL_LITERAL) && !toUpdate.generateTransportServerURL().equals(accountDescription.generateTransportServerURL())) {
-                if (!pop3 && !ValidateAction.checkTransportServerURL(accountDescription, session, warnings)) {
+                if (!pop3 && !ValidateAction.checkTransportServerURL(accountDescription, session, warnings, true)) {
                     final String transportLogin = accountDescription.getTransportLogin();
                     final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getTransportServer(), transportLogin == null ? accountDescription.getLogin() : transportLogin);
                     warning.setCategory(Category.CATEGORY_WARNING);
@@ -293,9 +291,9 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
         // Write to JSON structure
         final JSONObject jsonAccount;
         if (null == updatedAccount) {
-            jsonAccount = MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), contextId));
+            jsonAccount = DefaultMailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), contextId));
         } else {
-            jsonAccount = MailAccountWriter.write(updatedAccount);
+            jsonAccount = DefaultMailAccountWriter.write(updatedAccount);
         }
 
         return new AJAXRequestResult(jsonAccount).addWarnings(warnings);

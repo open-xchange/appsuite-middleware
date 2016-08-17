@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -779,7 +779,7 @@ public class DatabaseImpl extends DBService {
 
     /**
      * Get the document file store locations for the specified user in the specified context
-     * 
+     *
      * @param ctx The context
      * @param usr The user
      * @return A sorted set of all document file store locations for the specified user in the specified context
@@ -796,7 +796,7 @@ public class DatabaseImpl extends DBService {
 
     /**
      * Get the document file store locations for the specified user in the specified context
-     * 
+     *
      * @param ctx The context
      * @param usr The user
      * @param connection A read-only database connection for the specified context
@@ -1049,6 +1049,38 @@ public class DatabaseImpl extends DBService {
         return retval;
     }
 
+    /**
+     * Gets the total size of all document versions in a folder.
+     *
+     * @param context The context
+     * @param folderId The folder identifier
+     * @return The total size of all document versions in a folder
+     */
+    public long getTotalSize(Context context, long folderId) throws OXException {
+        String sql = new StringBuilder()
+            .append("SELECT SUM(infostore_document.file_size) ")
+            .append("FROM infostore LEFT JOIN infostore_document ")
+            .append("ON infostore.cid=infostore_document.cid AND infostore.id=infostore_document.infostore_id ")
+            .append("WHERE infostore.cid=? AND infostore.folder_id=?;")
+        .toString();
+        Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            connection = getReadConnection(context);
+            stmt = connection.prepareStatement(sql);
+            stmt.setInt(1, context.getContextId());
+            stmt.setLong(2, folderId);
+            result = stmt.executeQuery();
+            return result.next() ? result.getLong(1) : 0L;
+        } catch (SQLException e) {
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+        } finally {
+            close(stmt, result);
+            releaseReadConnection(context, connection);
+        }
+    }
+
     public boolean hasFolderForeignObjects(final long folderId, final Context ctx, final User user) throws OXException {
         boolean retval = true;
 
@@ -1111,16 +1143,22 @@ public class DatabaseImpl extends DBService {
 
     private static final List<String> tables = Arrays.asList("infostore", "infostore_document");
 
-    public void removeUser(final int id, final Context ctx, final ServerSession session, final EntityLockManager locks) throws OXException {
+    public void removeUser(final int id, final Context ctx, Integer destUser, final ServerSession session, final EntityLockManager locks) throws OXException {
+        if (destUser == null) {
+            destUser = ctx.getMailadmin();
+        }
         if (id != ctx.getMailadmin()) {
-            removePrivate(id, ctx, session);
-            assignToAdmin(id, ctx);
+            if (destUser <= 0) {
+                removeAllForUser(id, ctx, session, true);
+            } else {
+                removePrivate(id, ctx, session);
+                assignToUser(id, ctx, destUser);
+            }
         } else {
             removeAll(ctx, session);
         }
-
         removeFromDel(id, ctx);
-        locks.transferLocks(ctx, id, ctx.getMailadmin());
+        locks.transferLocks(ctx, id, destUser.intValue());
     }
 
     private void removeFromDel(final int id, final Context ctx) throws OXException {
@@ -1241,10 +1279,14 @@ public class DatabaseImpl extends DBService {
     }
 
     private void removePrivate(final int id, final Context ctx, final ServerSession session) throws OXException {
+        removeAllForUser(id, ctx, session, false);
+    }
+
+    private void removeAllForUser(final int id, final Context ctx, final ServerSession session, boolean includeShared) throws OXException {
         PreparedStatementHolder holder = null;
 
         try {
-            final List<FolderObject> foldersWithPrivateItems = new DelUserFolderDiscoverer(this).discoverFolders(id, ctx);
+            final List<FolderObject> foldersWithPrivateItems = new DelUserFolderDiscoverer(this).discoverFolders(id, ctx, includeShared);
             if (foldersWithPrivateItems.size() == 0) {
                 return;
             }
@@ -1340,7 +1382,7 @@ public class DatabaseImpl extends DBService {
         }
     }
 
-    private void assignToAdmin(final int id, final Context ctx) throws OXException {
+    private void assignToUser(final int id, final Context ctx, int destUser) throws OXException {
         Connection writeCon = null;
         Statement stmt = null;
         StringBuilder query = null;
@@ -1350,7 +1392,7 @@ public class DatabaseImpl extends DBService {
             for (final String table : tables) {
                 for (final String userField : userFields) {
                     query = new StringBuilder("UPDATE ").append(table).append(" SET ").append(userField).append(" = ").append(
-                        ctx.getMailadmin()).append(" WHERE cid = ").append(ctx.getContextId()).append(" AND ").append(userField).append(
+                        destUser).append(" WHERE cid = ").append(ctx.getContextId()).append(" AND ").append(userField).append(
                         " = ").append(id);
                     stmt.executeUpdate(query.toString());
                 }

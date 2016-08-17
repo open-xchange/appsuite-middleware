@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -69,6 +69,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
@@ -171,8 +172,13 @@ public final class LoginTools {
     }
 
     public static boolean parseStoreLanguage(HttpServletRequest req) {
-        final String value = req.getParameter(LoginFields.STORE_LANGUAGE);
-        return Boolean.parseBoolean(value);
+        String value = req.getParameter(LoginFields.STORE_LANGUAGE);
+        return AJAXRequestDataTools.parseBoolParameter(value);
+    }
+
+    public static boolean parseTransient(HttpServletRequest req) {
+        String value = req.getParameter(LoginFields.TRANSIENT);
+        return AJAXRequestDataTools.parseBoolParameter(value);
     }
 
     public static String parseParameter(HttpServletRequest req, String paramName, boolean strict, String fallback) throws OXException {
@@ -274,8 +280,7 @@ public final class LoginTools {
         b.hash(HashCalculator.getInstance().getHash(req, userAgent, client, additionalsForHash));
         b.iface(HTTP_JSON).headers(headers).cookies(cookies).secure(Tools.considerSecure(req, forceHTTPS));
         b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
-        b.language(parseLanguage(req));
-        b.storeLanguage(parseStoreLanguage(req));
+        b.language(parseLanguage(req)).storeLanguage(parseStoreLanguage(req)).tranzient(parseTransient(req));
         return b.build();
     }
 

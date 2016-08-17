@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -62,21 +62,29 @@ import com.openexchange.java.Strings;
  */
 public class AssertionHelper {
 
-    public static void assertSanitizedDoesNotContain(HtmlService service, String html, String mailiciousParam) {
-        assertSanitized(service, html, mailiciousParam, AssertExpression.NOT_CONTAINED);
+    public static void assertSanitizedDoesNotContain(HtmlService service, String html, String... mailiciousParams) {
+        assertSanitized(service, html, mailiciousParams, AssertExpression.NOT_CONTAINED);
     }
 
     public static void assertSanitizedEmpty(HtmlService service, String html) {
-        assertSanitized(service, html, null, AssertExpression.EMPTY);
+        assertSanitized(service, html, (String) null, AssertExpression.EMPTY);
     }
 
     public static void assertSanitized(HtmlService service, String html, String maliciousParam, AssertExpression ae) {
+        assertSanitized(service, html, null == maliciousParam ? null : new String[] { maliciousParam }, ae);
+    }
+
+    public static void assertSanitized(HtmlService service, String html, String[] maliciousParams, AssertExpression ae) {
         String sanitized = service.sanitize(html, null, false, null, null);
         if (!Strings.isEmpty(sanitized)) {
             sanitized = sanitized.toLowerCase();
         }
         if (AssertExpression.NOT_CONTAINED.equals(ae)) {
-            assertFalse("sanitized output: " + sanitized + " contains " + maliciousParam, StringUtils.containsIgnoreCase(sanitized, maliciousParam));
+            if (null != maliciousParams) {
+                for (String maliciousParam : maliciousParams) {
+                    assertFalse("sanitized output: " + sanitized + " contains " + maliciousParam, StringUtils.containsIgnoreCase(sanitized, maliciousParam));
+                }
+            }
         } else if (AssertExpression.EMPTY.equals(ae)) {
             assertTrue("expected html: " + html + " after sanitizing to be empty but contains " + sanitized, Strings.isEmpty(sanitized));
         }

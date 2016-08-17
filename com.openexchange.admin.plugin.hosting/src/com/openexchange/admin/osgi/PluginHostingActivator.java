@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -63,6 +63,7 @@ import com.openexchange.admin.storage.mysqlStorage.OXContextGroupMySQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.i18n.I18nService;
@@ -92,35 +93,37 @@ public class PluginHostingActivator extends HousekeepingActivator {
         final ConfigurationService configurationService = getService(ConfigurationService.class);
         AdminCache.compareAndSetConfigurationService(null, configurationService);
         AdminServiceRegistry.getInstance().addService(ConfigurationService.class, configurationService);
-        track(ThreadPoolService.class, new RegistryServiceTrackerCustomizer<ThreadPoolService>(context, AdminServiceRegistry.getInstance(), ThreadPoolService.class));
-        track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
+        final ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
+        AdminServiceRegistry.getInstance().addService(ConfigViewFactory.class, configViewFactory);
+        track(ThreadPoolService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), ThreadPoolService.class));
+        track(ContextService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), ContextService.class));
         track(I18nService.class, new I18nServiceCustomizer(context));
         track(ManagementService.class, new ManagementCustomizer(context));
-        track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
-        track(CacheService.class, new RegistryServiceTrackerCustomizer<CacheService>(context, AdminServiceRegistry.getInstance(), CacheService.class));
-        track(DatabaseService.class, new RegistryServiceTrackerCustomizer<DatabaseService>(context, AdminServiceRegistry.getInstance(), DatabaseService.class));
+        track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
+        track(CacheService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), CacheService.class));
+        track(DatabaseService.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), DatabaseService.class));
 
         // Register and track
         registerService(OXContextGroupStorageInterface.class, new OXContextGroupMySQLStorage());
-        track(OXContextGroupStorageInterface.class, new RegistryServiceTrackerCustomizer<OXContextGroupStorageInterface>(context, AdminServiceRegistry.getInstance(), OXContextGroupStorageInterface.class));
+        track(OXContextGroupStorageInterface.class, new RegistryServiceTrackerCustomizer<>(context, AdminServiceRegistry.getInstance(), OXContextGroupStorageInterface.class));
 
         // Plugin interfaces
         {
             final int defaultRanking = 100;
 
-            final RankingAwareNearRegistryServiceTracker<BasicAuthenticatorPluginInterface> batracker = new RankingAwareNearRegistryServiceTracker<BasicAuthenticatorPluginInterface>(context, BasicAuthenticatorPluginInterface.class, defaultRanking);
+            final RankingAwareNearRegistryServiceTracker<BasicAuthenticatorPluginInterface> batracker = new RankingAwareNearRegistryServiceTracker<>(context, BasicAuthenticatorPluginInterface.class, defaultRanking);
             rememberTracker(batracker);
 
-            final RankingAwareNearRegistryServiceTracker<OXContextPluginInterface> ctracker = new RankingAwareNearRegistryServiceTracker<OXContextPluginInterface>(context, OXContextPluginInterface.class, defaultRanking);
+            final RankingAwareNearRegistryServiceTracker<OXContextPluginInterface> ctracker = new RankingAwareNearRegistryServiceTracker<>(context, OXContextPluginInterface.class, defaultRanking);
             rememberTracker(ctracker);
 
-            final RankingAwareNearRegistryServiceTracker<OXUserPluginInterface> utracker = new RankingAwareNearRegistryServiceTracker<OXUserPluginInterface>(context, OXUserPluginInterface.class, defaultRanking);
+            final RankingAwareNearRegistryServiceTracker<OXUserPluginInterface> utracker = new RankingAwareNearRegistryServiceTracker<>(context, OXUserPluginInterface.class, defaultRanking);
             rememberTracker(utracker);
 
-            final RankingAwareNearRegistryServiceTracker<OXGroupPluginInterface> gtracker = new RankingAwareNearRegistryServiceTracker<OXGroupPluginInterface>(context, OXGroupPluginInterface.class, defaultRanking);
+            final RankingAwareNearRegistryServiceTracker<OXGroupPluginInterface> gtracker = new RankingAwareNearRegistryServiceTracker<>(context, OXGroupPluginInterface.class, defaultRanking);
             rememberTracker(gtracker);
 
-            final RankingAwareNearRegistryServiceTracker<OXResourcePluginInterface> rtracker = new RankingAwareNearRegistryServiceTracker<OXResourcePluginInterface>(context, OXResourcePluginInterface.class, defaultRanking);
+            final RankingAwareNearRegistryServiceTracker<OXResourcePluginInterface> rtracker = new RankingAwareNearRegistryServiceTracker<>(context, OXResourcePluginInterface.class, defaultRanking);
             rememberTracker(rtracker);
 
             final PluginInterfaces.Builder builder = new PluginInterfaces.Builder().basicAuthenticatorPlugins(batracker).contextPlugins(ctracker).groupPlugins(gtracker).resourcePlugins(rtracker).userPlugins(utracker);
@@ -153,6 +156,6 @@ public class PluginHostingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class };
+        return new Class<?>[] { ConfigurationService.class, AdminDaemonService.class, ConfigViewFactory.class };
     }
 }

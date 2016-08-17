@@ -1,0 +1,40 @@
+/calendar?action=freebusy:
+  get:
+    operationId: getFreeAndBusy
+    summary: Gets appointments between a specified time range.
+    tags:
+      - calendar
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: integer
+        description:  Internal user id. Must be obtained from the contact module.
+        required: true
+      - in: query
+        name: start
+        type: integer
+        format: int64
+        description: Lower inclusive limit of the queried range as a Date. Only appointments which end on or after this date are returned.
+        required: true
+      - in: query
+        name: end
+        type: integer
+        format: int64
+        description: Upper exclusive limit of the queried range as a Date. Only appointments which start before this date are returned.
+        required: true
+      - in: query
+        name: type
+        type: integer
+        description: Constant for user or resource (1 for users, 3 for resources).
+        required: true
+        enum:
+          - 1
+          - 3
+    responses:
+      200:
+        description: |
+          An array of objects identifying the appointments which lie between start and end as described. In
+          case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/AppointmentFreeBusyResponse"

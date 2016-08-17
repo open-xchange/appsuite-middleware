@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,10 +49,11 @@
 
 package com.openexchange.mail.messagestorage;
 
-import com.openexchange.exception.OXException;
 import java.util.Random;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -64,6 +65,7 @@ import com.openexchange.mail.mime.MessageHeaders;
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Ignore ("Causes OOM on client")
 public final class MailAppendTest extends MessageStorageTest {
 
     private static final String INBOX = "INBOX";

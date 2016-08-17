@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -585,7 +585,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
         try {
             POP3Config pop3Config = pop3Access.getPOP3Config();
             boolean forceSecure = pop3AccountId > 0 && (pop3Config.isStartTls() || pop3Config.isRequireTls() || pop3Config.getMailProperties().isEnforceSecureConnection());
-            final POP3StoreResult result = POP3StoreConnector.getPOP3Store(pop3Config, pop3Access.getMailProperties(), false, session, !expunge, forceSecure);
+            final POP3StoreResult result = POP3StoreConnector.getPOP3Store(pop3Config, pop3Access.getMailProperties(), false, pop3AccountId, session, !expunge, forceSecure);
             pop3Store = result.getPop3Store();
             boolean uidlNotSupported = false;
             if (result.containsWarnings()) {

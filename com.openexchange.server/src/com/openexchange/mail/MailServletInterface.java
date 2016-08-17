@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -357,7 +357,7 @@ public abstract class MailServletInterface implements Closeable {
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing all messages located in given folder.
      */
-    public abstract List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, boolean includeSent, boolean cache, int sortCol, int order, int[] fields, int[] fromToIndices, long lookAhead) throws OXException;
+    public abstract List<List<MailMessage>> getAllSimpleThreadStructuredMessages(String folder, boolean includeSent, boolean cache, int sortCol, int order, int[] fields, String[] headerFields, int[] fromToIndices, long lookAhead, com.openexchange.mail.search.SearchTerm<?> searchTerm) throws OXException;
 
     /**
      * Returns a thread-view-sorted instance of <code>SearchIterator</code> containing a selection of messages located in given folder.
@@ -488,6 +488,11 @@ public abstract class MailServletInterface implements Closeable {
     public abstract String sendMessage(ComposedMailMessage transportMail, ComposeType sendType, int accountId, UserSettingMail optUserSetting, MtaStatusInfo statusInfo, String remoteAddress) throws OXException;
 
     /**
+     * Sends messages.
+     */
+    public abstract List<String> sendMessages(List<? extends ComposedMailMessage> transportMails, ComposedMailMessage sentMail, ComposeType sendType, int accountId, UserSettingMail optUserSetting, MtaStatusInfo statusInfo, String remoteAddress) throws OXException;
+
+    /**
      * Appends given messages to given folder.
      *
      * @param destFolder The destination folder
@@ -569,7 +574,7 @@ public abstract class MailServletInterface implements Closeable {
     /**
      * Updates message's client-alterable system flags (e.g. //SEEN or //ANSWERED) and user flags. <code>flagVal</code> determines whether the affected
      * flags are set (<code>true</code>) or unset (<code>false</code>).
-     * 
+     *
      * @param folder The folder full name
      * @param mailIDs The mail IDs
      * @param flagBits The system flag bits
@@ -702,6 +707,14 @@ public abstract class MailServletInterface implements Closeable {
      * @throws OXException If opening the folder fails
      */
     public abstract void openFor(String folder) throws OXException;
+
+    /**
+     * Applies specified {@code MailAccess} instance to this {@link MailServletInterface}.
+     *
+     * @param mailAccess The mail access to apply
+     * @throws OXException If applying the mail access fails
+     */
+    public abstract void applyAccess(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException;
 
     /**
      * Gets the account ID to which the (primary) mail access is connected

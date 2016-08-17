@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -98,14 +98,14 @@ public class FormatDate {
      * @param String Format des gewuenschten Datums.
      * @return String - Formatiertes Datum
      */
-    public String formatDate(final String originalDate, String originalPattern, final String wantedPattern) throws ParseException {
+    public String formatDate(final String originalDate, String originalPattern, String wantedPattern) throws ParseException {
 
         if ((originalPattern == null) || (originalPattern.trim().length() <= 0)) {
             originalPattern = "MM.dd.yyyy HH:mm";
         }
 
         if ((wantedPattern == null) || (wantedPattern.trim().length() <= 0)) {
-            originalPattern = "dd.MM.yyyy HH:mm";
+            wantedPattern = "dd.MM.yyyy HH:mm";
         }
 
         final Locale l = new Locale(language, country);

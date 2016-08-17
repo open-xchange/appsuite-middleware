@@ -1,0 +1,4 @@
+requests:
+  - GetRequest.yaml
+  - FilestoreRequest.yaml
+  - MailRequest.yaml

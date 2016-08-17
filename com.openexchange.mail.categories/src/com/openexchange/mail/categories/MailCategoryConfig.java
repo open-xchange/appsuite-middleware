@@ -49,15 +49,11 @@
 
 package com.openexchange.mail.categories;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-
 /**
  * {@link MailCategoryConfig}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
 public class MailCategoryConfig {
@@ -70,9 +66,10 @@ public class MailCategoryConfig {
         private String category;
         private String flag;
         private boolean force;
-        private boolean active;
+        private boolean enabled;
         private String name;
-        private Map<Locale, String> names;
+        private String description;
+        private boolean isSystemCategory = false;
 
         /**
          * Initializes a new {@link Builder}.
@@ -116,20 +113,31 @@ public class MailCategoryConfig {
         }
 
         /**
-         * Sets the <code>active</code> flag.
+         * Sets the <code>enabled</code> flag.
          *
-         * @param active The <code>active</code> flag
+         * @param active The <code>enabled</code> flag
          * @return This builder
          */
-        public Builder active(boolean active) {
-            this.active = active;
+        public Builder enabled(boolean enabled) {
+            this.enabled = enabled;
+            return this;
+        }
+
+        /**
+         * Sets the <code>isSystemCategory</code> flag.
+         *
+         * @param isSystemCategory The <code>isSystemCategory</code> flag
+         * @return This builder
+         */
+        public Builder isSystemCategory(boolean isSystemCategory) {
+            this.isSystemCategory = isSystemCategory;
             return this;
         }
 
         /**
          * Sets the name.
          *
-         * @param active The name
+         * @param name The name
          * @return This builder
          */
         public Builder name(String name) {
@@ -138,39 +146,13 @@ public class MailCategoryConfig {
         }
 
         /**
-         * Adds specified localized name.
+         * Sets the description.
          *
-         * @param locale The locale
-         * @param name The localized name
+         * @param description The description
          * @return This builder
          */
-        public Builder addLocalizedName(Locale locale, String name) {
-            Map<Locale, String> ns = this.names;
-            if (null == ns) {
-                ns = new LinkedHashMap<Locale, String>(16, 0.9F);
-                this.names = ns;
-            }
-            ns.put(locale, name);
-            return this;
-        }
-
-        /**
-         * Adds specified localized names.
-         *
-         * @param names The localized names to add
-         * @return This builder
-         */
-        public Builder addLocalizedNames(Map<Locale, String> names) {
-            if (null == names || names.isEmpty()) {
-                return this;
-            }
-
-            Map<Locale, String> ns = this.names;
-            if (null == ns) {
-                ns = new LinkedHashMap<Locale, String>(16, 0.9F);
-                this.names = ns;
-            }
-            ns.putAll(names);
+        public Builder description(String description) {
+            this.description = description;
             return this;
         }
 
@@ -180,7 +162,7 @@ public class MailCategoryConfig {
          * @return The new {@link MailCategoryConfig} instance
          */
         public MailCategoryConfig build() {
-            return new MailCategoryConfig(category, flag, force, active, name, names);
+            return new MailCategoryConfig(category, flag, force, enabled, name, isSystemCategory, description);
         }
 
     }// End of class Builder
@@ -197,7 +179,17 @@ public class MailCategoryConfig {
             return null;
         }
 
-        return new MailCategoryConfig(categoryConfig.category, categoryConfig.flag, categoryConfig.force, active, categoryConfig.name, categoryConfig.names);
+        return new MailCategoryConfig(categoryConfig.category, categoryConfig.flag, categoryConfig.force, active, categoryConfig.name, categoryConfig.isSystemCategory, categoryConfig.description);
+    }
+
+    /**
+     * Creates a copy of specified instance..
+     *
+     * @param categoryConfig The instance to copy from
+     * @return The copied instance
+     */
+    public static MailCategoryConfig copyOf(MailCategoryConfig categoryConfig) {
+        return copyOf(categoryConfig, categoryConfig.enabled);
     }
 
     // ----------------------------------------------------------------------------------------------------------
@@ -205,21 +197,24 @@ public class MailCategoryConfig {
     private final String category;
     private final String flag;
     private final boolean force;
-    private final boolean active;
+    private final boolean enabled;
     private final String name;
-    private final Map<Locale, String> names;
+    private final boolean isSystemCategory;
+    private final String description;
 
     /**
      * Initializes a new {@link MailCategoryConfig}.
      */
-    MailCategoryConfig(String category, String flag, boolean force, boolean active, String name, Map<Locale, String> names) {
+    MailCategoryConfig(String category, String flag, boolean force, boolean enabled, String name, boolean isSystemCategory, String description) {
         super();
         this.category = category;
         this.flag = flag;
         this.force = force;
-        this.active = active;
+        this.enabled = enabled;
+        this.isSystemCategory = isSystemCategory;
         this.name = name;
-        this.names = null == names ? Collections.<Locale, String> emptyMap() : names;
+        this.description = description;
+
     }
 
     /**
@@ -255,30 +250,59 @@ public class MailCategoryConfig {
      * @return <code>true</code> if active; otherwise <code>false</code>
      */
     public boolean isActive() {
-        return force || active;
+        return force || enabled;
     }
 
     /**
-     * Gets the en_US name.
+     * Checks if the associated mail category is enabled.
      *
-     * @return The en_US name
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * Checks if the associated mail category is a system category.
+     *
+     * @return <code>true</code> if it is a system category; otherwise <code>false</code>
+     */
+    public boolean isSystemCategory() {
+        return isSystemCategory;
+    }
+
+    /**
+     * Gets the name.
+     *
+     * @return The name
      */
     public String getName() {
         return name;
     }
 
     /**
-     * Gets the localized names.
+     * Gets the description.
      *
-     * @return The localized names
+     * @return The description
      */
-    public Map<Locale, String> getNames() {
-        return names;
+    public String getDescription() {
+        return description;
     }
 
     @Override
     public String toString(){
         return getCategory();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof MailCategoryConfig) {
+            MailCategoryConfig other = (MailCategoryConfig) o;
+            if (this.getCategory().equals(other.getCategory())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

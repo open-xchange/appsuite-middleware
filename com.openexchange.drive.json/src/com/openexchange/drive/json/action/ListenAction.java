@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,9 +50,12 @@
 package com.openexchange.drive.json.action;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.ConfigurationService;
@@ -67,13 +70,17 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
-
 /**
  * {@link ListenAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ListenAction extends AbstractDriveAction {
+
+    @Override
+    protected boolean requiresRootFolderID() {
+        return false;
+    }
 
     @Override
     public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
@@ -92,11 +99,39 @@ public class ListenAction extends AbstractDriveAction {
             timeout = getDefaultTimeout();
         }
         /*
+         * get optional root folder identifiers, falling back to the session's default root folder id
+         */
+        List<String> rootFolderIDs = null;
+        Object data = requestData.getData();
+        if (null != data) {
+            if (false == JSONObject.class.isInstance(data)) {
+                throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+            }
+            JSONObject dataObject = (JSONObject) data;
+            JSONArray rootArray = dataObject.optJSONArray("root");
+            if (null != rootArray && 0 < rootArray.length()) {
+                rootFolderIDs = new ArrayList<String>(rootArray.length());
+                try {
+                    for (int i = 0; i < rootArray.length(); i++) {
+                        rootFolderIDs.add(rootArray.getString(i));
+                    }
+                } catch (JSONException e) {
+                    throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
+        }
+        if (null == rootFolderIDs) {
+            if (Strings.isEmpty(session.getRootFolderID())) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("root");
+            }
+            rootFolderIDs = Collections.singletonList(session.getRootFolderID());
+        }
+        /*
          * get or create a polling listener for this session and await result
          */
         AJAXRequestResult result = null;
         try {
-            LongPollingListener listener = ListenerRegistrar.getInstance().getOrCreate(session);
+            LongPollingListener listener = ListenerRegistrar.getInstance().getOrCreate(session, rootFolderIDs);
             result = listener.await(timeout);
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();

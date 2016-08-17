@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Report Serialization for Report Generation Framework
 Bundle-SymbolicName: com.openexchange.report.appsuite.serialization
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Activator: com.openexchange.report.appsuite.serialization.osgi.ReportSerializationActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -13,6 +13,7 @@ Import-Package: com.hazelcast.core,
  com.openexchange.hazelcast.serialization,
  com.openexchange.osgi,
  com.openexchange.tools.strings,
+ javax.management.openmbean,
  org.osgi.framework
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.report.appsuite.serialization

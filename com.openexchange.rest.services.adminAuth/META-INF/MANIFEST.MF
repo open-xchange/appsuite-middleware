@@ -2,15 +2,19 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Open-Xchange REST service for administrative authentication
 Bundle-SymbolicName: com.openexchange.rest.services.adminAuth
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.auth,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.osgi,
+ com.openexchange.rest.services,
+ com.openexchange.rest.services.annotation,
  com.openexchange.server,
  com.openexchange.tools.servlet,
+ javax.annotation,
+ javax.annotation.security,
  javax.ws.rs;version="[2.0.0,3.0.0)",
  javax.ws.rs.core;version="[2.0.0,3.0.0)",
  org.json,

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -54,7 +54,6 @@ import java.sql.SQLException;
 import java.util.Collections;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
-import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -65,6 +64,7 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.NonTransient;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -72,6 +72,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link ContactCollectorFolderCreator}
@@ -83,11 +84,14 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactCollectorFolderCreator.class);
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link ContactCollectorFolderCreator}.
      */
-    public ContactCollectorFolderCreator() {
+    public ContactCollectorFolderCreator(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -95,38 +99,45 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         if (!necessary()) {
             return;
         }
-        Session session = login.getSession();
-        Context ctx = login.getContext();
-        DatabaseService databaseService = CCServiceRegistry.getInstance().getService(DatabaseService.class);
-        final String folderName = StringHelper.valueOf(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
 
-        Connection con = databaseService.getReadOnly(ctx);
-        try {
-            if (exists(session, ctx, con)) {
-                return;
-            }
-        } finally {
-            databaseService.backReadOnly(ctx, con);
+        DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
+        if (null == databaseService) {
+            LOG.error("Cannot check for contact collector folder. Missing database service.");
+            return;
         }
 
-        con = databaseService.getWritable(ctx);
-        boolean modifiedData = false;
-        try {
-            modifiedData = create(login.getSession(), login.getContext(), folderName, con);
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            if (modifiedData) {
-                databaseService.backWritable(ctx, con);
-            } else {
-                databaseService.backWritableAfterReading(ctx, con);
+        Context ctx = login.getContext();
+
+        {
+            Connection con = databaseService.getReadOnly(ctx);
+            try {
+                Session session = login.getSession();
+                if (exists(session, ctx, con)) {
+                    return;
+                }
+            } finally {
+                databaseService.backReadOnly(ctx, con);
+            }
+        }
+
+        {
+            Connection con = databaseService.getWritable(ctx);
+            boolean modifiedData = false;
+            try {
+                String folderName = StringHelper.valueOf(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+                modifiedData = create(login.getSession(), login.getContext(), folderName, con);
+            } catch (final SQLException e) {
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                if (modifiedData) {
+                    databaseService.backWritable(ctx, con);
+                } else {
+                    databaseService.backWritableAfterReading(ctx, con);
+                }
             }
         }
     }
 
-    /**
-     * @return
-     */
     private boolean necessary() {
         ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (ContactCollectorServiceImpl.class.isInstance(ccs)) {
@@ -151,7 +162,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
                 return true;
             }
         }
-        if (!serverUserSetting.isContactCollectionEnabled(contextId, userId).booleanValue() && (null != folderId)) {
+        if (!isContactCollectionEnabled(session) && (null != folderId)) {
             // Both - collect-on-mail-access and collect-on-mail-transport - disabled
             LOG.debug("Considering contact-collect folder {} as existent as contact-collect feature NOT enabled for user {} in context {}", folderId, userId, contextId);
             return true;
@@ -161,6 +172,15 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
             LOG.debug("Considering contact-collect folder as absent as contact-collect feature enabled for user {} in context {}", userId, contextId);
         } else {
             LOG.debug("Considering contact-collect folder {} as absent as contact-collect feature enabled for user {} in context {}", folderId, userId, contextId);
+        }
+        return false;
+    }
+
+    private static boolean isContactCollectionEnabled(final Session session) {
+        try {
+            return ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses();
+        } catch (final OXException e) {
+            LOG.error("", e);
         }
         return false;
     }

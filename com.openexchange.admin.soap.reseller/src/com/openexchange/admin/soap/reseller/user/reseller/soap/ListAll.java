@@ -22,6 +22,8 @@ import com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials;
  *       &lt;sequence>
  *         &lt;element name="ctx" type="{http://dataobjects.soap.reseller.admin.openexchange.com/xsd}ResellerContext" minOccurs="0"/>
  *         &lt;element name="auth" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}Credentials" minOccurs="0"/>
+ *         &lt;element name="include_guests" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="exclude_users" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -33,7 +35,9 @@ import com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
     "ctx",
-    "auth"
+    "auth",
+    "includeGuests",
+    "excludeUsers"
 })
 @XmlRootElement(name = "listAll")
 public class ListAll {
@@ -42,6 +46,10 @@ public class ListAll {
     protected ResellerContext ctx;
     @XmlElement(nillable = true)
     protected Credentials auth;
+    @XmlElement(name = "include_guests", nillable = true)
+    protected Boolean includeGuests;
+    @XmlElement(name = "exclude_users", nillable = true)
+    protected Boolean excludeUsers;
 
     /**
      * Ruft den Wert der ctx-Eigenschaft ab.
@@ -89,6 +97,25 @@ public class ListAll {
      */
     public void setAuth(Credentials value) {
         this.auth = value;
+    }
+    
+    public Boolean getIncludeGuests() {
+        return includeGuests;
+    }
+
+    
+    public void setIncludeGuests(Boolean includeGuests) {
+        this.includeGuests = includeGuests;
+    }
+
+    
+    public Boolean getExcludeUsers() {
+        return excludeUsers;
+    }
+
+    
+    public void setExcludeUsers(Boolean excludeUsers) {
+        this.excludeUsers = excludeUsers;
     }
 
 }

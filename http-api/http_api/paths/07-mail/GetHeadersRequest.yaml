@@ -1,0 +1,39 @@
+# Different response formats cannot be specified in Swagger. To still allow different response
+# formats for /mail?action=get we seperate the request and make use of fixed query parameters
+/mail?action=get&hdr=1:
+  get:
+    operationId: getMailHeaders
+    tags:
+      - mail
+    summary: Gets the message headers as plain text.
+    description: |
+      #### Note
+      By setting the query parameter `hdr` to 1 the response type of the request action changes. Then
+      it is returned a JSON object with the field `data` containing the (formatted) message headers
+      as plain text.
+      The parameters below specify the ones that have an effect on the request.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamMailFolder"
+      - in: query
+        name: id
+        type: string
+        description: Object ID of the requested mail (can be substituded by `message_id` parameter).
+        required: false
+      - in: query
+        name: message_id
+        type: string
+        description: (Preliminary) The value of "Message-Id" header of the requested mail. This parameter is a substitute for "id" parameter.
+        required: false
+      - in: query
+        name: unseen
+        type: boolean
+        description: Use `true` to leave an unseen mail as unseen although its content is requested.
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object containing the message headers as plain text. In case of errors the responsible fields in the
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/MailHeadersResponse"

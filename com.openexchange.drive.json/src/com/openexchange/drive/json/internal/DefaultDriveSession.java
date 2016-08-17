@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,10 +55,12 @@ import com.openexchange.drive.DirectoryPattern;
 import com.openexchange.drive.DriveClientType;
 import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.DriveFileField;
+import com.openexchange.drive.DriveMetaMode;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.FilePattern;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -79,7 +81,7 @@ public class DefaultDriveSession implements DriveSession {
     private List<DriveFileField> fields;
     private List<FilePattern> fileExclusions;
     private List<DirectoryPattern> directoryExclusions;
-    private Boolean useDriveMeta;
+    private String driveMeta;
 
     /**
      * Initializes a new {@link DefaultDriveSession}.
@@ -147,13 +149,13 @@ public class DefaultDriveSession implements DriveSession {
     }
 
     /**
-     * Overrides if drive metadata synchronization should be enabled or not, independently of the used API version.
+     * Configures the .drive-meta mode, independently of the used API version.
      *
-     * @param useDriveMeta <code>true</code> to force drive meta synchronization, <code>false</code> to forcibly disable it, or
-     *        <code>null</code> to decide based on the API version
+     * @param driveMeta <code>true</code> to force (default) drive meta synchronization, <code>inline</code> to force inline drive meta
+     *        synchronization, <code>false</code> to forcibly disable it, or <code>null</code> to decide based on the API version
      */
-    public void setUseDriveMeta(Boolean useDriveMeta) {
-        this.useDriveMeta = useDriveMeta;
+    public void setDriveMeta(String driveMeta) {
+        this.driveMeta = driveMeta;
     }
 
     @Override
@@ -228,7 +230,18 @@ public class DefaultDriveSession implements DriveSession {
 
     @Override
     public boolean useDriveMeta() {
-        return null != useDriveMeta ? useDriveMeta.booleanValue() : 3 <= apiVersion;
+        if (Strings.isEmpty(driveMeta)) {
+            return 3 <= apiVersion;
+        }
+        return "inline".equalsIgnoreCase(driveMeta) || Boolean.parseBoolean(driveMeta);
+    }
+
+    @Override
+    public DriveMetaMode getDriveMetaMode() {
+        if ("inline".equalsIgnoreCase(driveMeta)) {
+            return DriveMetaMode.INLINE;
+        }
+        return useDriveMeta() ? DriveMetaMode.DEFAULT : DriveMetaMode.DISABLED;
     }
 
     @Override

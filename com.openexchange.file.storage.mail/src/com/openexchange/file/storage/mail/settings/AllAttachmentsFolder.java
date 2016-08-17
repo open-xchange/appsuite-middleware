@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,18 +49,8 @@
 
 package com.openexchange.file.storage.mail.settings;
 
-import org.slf4j.Logger;
-import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.mail.FullName.Type;
 import com.openexchange.file.storage.mail.MailDriveFileStorageService;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.jslob.ConfigTreeEquivalent;
-import com.openexchange.session.Session;
 
 /**
  * {@link AllAttachmentsFolder}
@@ -68,57 +58,12 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class AllAttachmentsFolder implements PreferencesItemService, ConfigTreeEquivalent {
-
-    /** The logger constant */
-    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AllAttachmentsFolder.class);
-
-    /** The Mail Drive service */
-    final MailDriveFileStorageService mailDriveService;
+public class AllAttachmentsFolder extends AbstractMailDriveSetting {
 
     /**
      * Initializes a new {@link AllAttachmentsFolder}.
      */
     public AllAttachmentsFolder(MailDriveFileStorageService mailDriveService) {
-        super();
-        this.mailDriveService = mailDriveService;
-    }
-
-    @Override
-    public String[] getPath() {
-        return new String[] { "modules", "mail", "allattachments" };
-    }
-
-    @Override
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
-
-            @Override
-            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                setting.setSingleValue(mailDriveService.getFullNameCollectionFor(session).fullNameAll);
-            }
-
-            @Override
-            public boolean isAvailable(UserConfiguration userConfig) {
-                try {
-                    return userConfig.hasWebMail() && mailDriveService.isEnabledFor(userConfig.getUserId(), userConfig.getContext().getContextId());
-                } catch (OXException e) {
-                    // Failed to check
-                    LOG.error("Failewd to check Mail Drive availability", e);
-                    return false;
-                }
-            }
-
-        };
-    }
-
-    @Override
-    public String getConfigTreePath() {
-        return "modules/mail/allattachments";
-    }
-
-    @Override
-    public String getJslobPath() {
-        return "io.ox/mail//allattachments";
+        super("all", Type.ALL, mailDriveService);
     }
 }

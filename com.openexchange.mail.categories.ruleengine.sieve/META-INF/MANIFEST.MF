@@ -2,13 +2,16 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Categories Sieve Implementation
 Bundle-SymbolicName: com.openexchange.mail.categories.ruleengine.sieve
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.openexchange.mail.categories.sieve.osgi.Activator
 Import-Package: com.openexchange.config,
+ com.openexchange.config.cascade,
  com.openexchange.exception,
+ com.openexchange.java,
  com.openexchange.jsieve.commands,
+ com.openexchange.jsieve.commands.test,
  com.openexchange.mail.categories,
  com.openexchange.mail.categories.ruleengine,
  com.openexchange.mailfilter,
@@ -17,18 +20,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.osgi.util,
  com.openexchange.server,
  com.openexchange.session,
- javax.crypto,
- javax.crypto.interfaces,
- javax.crypto.spec,
- javax.net,
- javax.net.ssl,
- javax.security.auth,
- javax.security.auth.callback,
- javax.security.auth.kerberos,
- javax.security.auth.login,
- javax.security.auth.spi,
- javax.security.auth.x500,
- javax.security.cert,
  org.apache.jsieve,
  org.apache.jsieve.parser.generated,
- org.osgi.framework
+ org.osgi.framework,
+ org.slf4j

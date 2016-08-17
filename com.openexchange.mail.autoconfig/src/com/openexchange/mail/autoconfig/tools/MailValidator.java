@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -83,20 +83,26 @@ public class MailValidator {
      * @param host The IMAP host
      * @param port The IMAP port
      * @param secure Whether to establish a secure connection
+     * @param requireTls Whether STARTTLS is required
      * @param user The login
      * @param pwd The password
      * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
      */
-    public static boolean validateImap(String host, int port, boolean secure, String user, String pwd) {
+    public static boolean validateImap(String host, int port, boolean secure, boolean requireTls, String user, String pwd) {
         Store store = null;
         try {
             String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
             Properties props = new Properties();
             if (secure) {
                 props.put("mail.imap.socketFactory.class", socketFactoryClass);
+            } else if (requireTls) {
+                props.put("mail.imap.starttls.required", true);
+                props.put("mail.imap.ssl.trust", "*");
             } else {
                 props.put("mail.imap.ssl.socketFactory.class", socketFactoryClass);
                 props.put("mail.imap.ssl.socketFactory.port", port);
+                props.put("mail.imap.starttls.enable", true);
+                props.put("mail.imap.ssl.trust", "*");
                 {
                     final ConfigurationService configuration = Services.getService(ConfigurationService.class);
                     final String sslProtocols = configuration.getProperty("com.openexchange.imap.ssl.protocols", "SSLv3 TLSv1").trim();
@@ -135,20 +141,26 @@ public class MailValidator {
      * @param host The POP3 host
      * @param port The POP3 port
      * @param secure Whether to establish a secure connection
+     * @param requireTls Whether STARTTLS is required
      * @param user The login
      * @param pwd The password
      * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
      */
-    public static boolean validatePop3(String host, int port, boolean secure, String user, String pwd) {
+    public static boolean validatePop3(String host, int port, boolean secure, boolean requireTls, String user, String pwd) {
         Store store = null;
         try {
             Properties props = new Properties();
             String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
             if (secure) {
                 props.put("mail.pop3.socketFactory.class", socketFactoryClass);
+            } else if (requireTls) {
+                props.put("mail.pop3.starttls.required", true);
+                props.put("mail.pop3.ssl.trust", "*");
             } else {
                 props.put("mail.pop3.ssl.socketFactory.class", socketFactoryClass);
                 props.put("mail.pop3.ssl.socketFactory.port", port);
+                props.put("mail.pop3.starttls.enable", true);
+                props.put("mail.pop3.ssl.trust", "*");
                 {
                     final ConfigurationService configuration = Services.getService(ConfigurationService.class);
                     final String sslProtocols = configuration.getProperty("com.openexchange.pop3.ssl.protocols", "SSLv3 TLSv1").trim();
@@ -191,8 +203,8 @@ public class MailValidator {
      * @param pwd The password
      * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
      */
-    public static boolean validateSmtp(String host, int port, boolean secure, String user, String pwd) {
-        return validateSmtp(host, port, secure, user, pwd, null);
+    public static boolean validateSmtp(String host, int port, boolean secure, boolean startTls, String user, String pwd) {
+        return validateSmtp(host, port, secure, startTls, user, pwd, null);
     }
 
     /**
@@ -201,21 +213,27 @@ public class MailValidator {
      * @param host The SMTP host
      * @param port The SMTP port
      * @param secure Whether to establish a secure connection
+     * @param requireTls Whether STARTTLS is required
      * @param user The login
      * @param pwd The password
      * @param optProperties The optional container for arbitrary properties
      * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
      */
-    public static boolean validateSmtp(String host, int port, boolean secure, String user, String pwd, Map<String, Object> optProperties) {
+    public static boolean validateSmtp(String host, int port, boolean secure, boolean requireTls, String user, String pwd, Map<String, Object> optProperties) {
         Transport transport = null;
         try {
             String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
             Properties props = new Properties();
             if (secure) {
                 props.put("mail.smtp.socketFactory.class", socketFactoryClass);
+            } else if (requireTls) {
+                props.put("mail.smtp.starttls.required", true);
+                props.put("mail.smtp.ssl.trust", "*");
             } else {
                 props.put("mail.smtp.ssl.socketFactory.class", socketFactoryClass);
                 props.put("mail.smtp.ssl.socketFactory.port", port);
+                props.put("mail.smtp.starttls.enable", true);
+                props.put("mail.smtp.ssl.trust", "*");
                 {
                     final ConfigurationService configuration = Services.getService(ConfigurationService.class);
                     final String sslProtocols = configuration.getProperty("com.openexchange.smtp.ssl.protocols", "SSLv3 TLSv1").trim();
@@ -268,6 +286,7 @@ public class MailValidator {
             } else {
                 s = new Socket();
             }
+
             /*
              * Set connect timeout
              */

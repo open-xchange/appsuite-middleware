@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -82,6 +82,14 @@ public enum RssExceptionCodes implements DisplayableOXExceptionCode {
      * Timeout while reading the RSS feed from URL: %1$s
      */
     TIMEOUT_ERROR("Timeout while reading the RSS feed from URL: %1$s", RssExceptionMessages.TIMEOUT_ERROR_MSG, CATEGORY_SERVICE_DOWN, 5),
+    /**
+     * The RSS feed is exceeding the maximum allowed size of '%1$s'
+     */
+    RSS_SIZE_EXCEEDED("The RSS feed is exceeding the maximum allowed size of '%1$s' (%1$s bytes)", RssExceptionMessages.RSS_SIZE_EXCEEDED, CATEGORY_USER_INPUT, 6),
+    /**
+     * Cannot connect to RSS with URL: %1$s.
+     */
+    RSS_CONNECTION_ERROR("Cannot connect to RSS with URL: %1$s.", RssExceptionMessages.RSS_CONNECTION_ERROR_MSG, CATEGORY_USER_INPUT, 7),
 
     ;
 

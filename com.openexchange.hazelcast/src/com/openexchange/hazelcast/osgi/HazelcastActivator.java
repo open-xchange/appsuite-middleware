@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -55,7 +55,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -95,7 +94,7 @@ public class HazelcastActivator implements BundleActivator {
     /** The logger */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastActivator.class);
 
-    private final AtomicBoolean stopped;
+    private boolean stopped; // Guarded by synchronized
 
     volatile ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> configTracker;
     volatile ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> inactiveTracker;
@@ -108,7 +107,7 @@ public class HazelcastActivator implements BundleActivator {
      */
     public HazelcastActivator() {
         super();
-        stopped = new AtomicBoolean(false);
+        stopped = false;
     }
 
     @Override
@@ -116,7 +115,9 @@ public class HazelcastActivator implements BundleActivator {
         /*
          * track HazelcastConfigurationService
          */
-        stopped.set(false);
+        synchronized (this) {
+            stopped = false;
+        }
         ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService> customizer =
             new ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService>() {
 
@@ -201,16 +202,22 @@ public class HazelcastActivator implements BundleActivator {
         stop();
     }
 
-    void stop() {
-        if (stopped.compareAndSet(false, true)) {
-            ServiceRegistration<HazelcastInstance> serviceRegistration = this.serviceRegistration;
-            if (null != serviceRegistration) {
-                serviceRegistration.unregister();
-                this.serviceRegistration = null;
-            }
-            closeTrackers();
-            stopHazelcastInstance();
+    /**
+     * Stops Hazelcast.
+     */
+    protected synchronized void stop() {
+        if (stopped) {
+            return;
         }
+
+        stopped = true;
+        ServiceRegistration<HazelcastInstance> serviceRegistration = this.serviceRegistration;
+        if (null != serviceRegistration) {
+            serviceRegistration.unregister();
+            this.serviceRegistration = null;
+        }
+        closeTrackers();
+        stopHazelcastInstance();
     }
 
     /**

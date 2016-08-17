@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -52,12 +52,12 @@ package com.openexchange.http.grizzly;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.osgi.Services;
@@ -76,8 +76,6 @@ public class GrizzlyConfig implements Initialization, Reloadable {
 
     private static final GrizzlyConfig instance = new GrizzlyConfig();
 
-    private static final String CONFIGFILE = "server.properties";
-    private static final String[] PROPERTIES = new String[] {"com.openexchange.server.knownProxies"};
     private final PropertyChangeSupport changes = new PropertyChangeSupport(this);
 
     public static GrizzlyConfig getInstance() {
@@ -93,6 +91,9 @@ public class GrizzlyConfig implements Initialization, Reloadable {
 
     /** The default port for the http network listener. */
     private int httpPort = 8009;
+
+    /** The default port for the https network listener. */
+    private int httpsPort = 8010;
 
     /** Enable grizzly monitoring via JMX? */
     private boolean isJMXEnabled = false;
@@ -120,6 +121,15 @@ public class GrizzlyConfig implements Initialization, Reloadable {
 
     /** The maximum header size for an HTTP request in bytes. */
     private int maxHttpHeaderSize = 8192;
+
+    /** Enable SSL */
+    private boolean isSslEnabled = false;
+
+    /** Path to keystore with X.509 certificates */
+    private String keystorePath = "";
+
+    /** Keystore password */
+    private String keystorePassword = "";
 
     // server properties
 
@@ -178,6 +188,8 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     /** Is autologin enabled in the session.d properties? */
     private boolean isSessionAutologin = false;
 
+    private List<String> enabledCiphers = null;
+
 
     @Override
     public void start() throws OXException {
@@ -208,6 +220,10 @@ public class GrizzlyConfig implements Initialization, Reloadable {
         this.isCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
         this.isAbsoluteRedirect = configService.getBoolProperty("com.openexchange.http.grizzly.doAbsoluteRedirect", false);
         this.maxHttpHeaderSize = configService.getIntProperty("com.openexchange.http.grizzly.maxHttpHeaderSize", 8192);
+        this.isSslEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasSSLEnabled", false);
+        this.keystorePath = configService.getProperty("com.openexchange.http.grizzly.keystorePath", "");
+        this.keystorePassword = configService.getProperty("com.openexchange.http.grizzly.keystorePassword", "");
+
 
         // server properties
         this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W"))).intValue();
@@ -241,12 +257,15 @@ public class GrizzlyConfig implements Initialization, Reloadable {
             this.httpHost="0.0.0.0";
         }
         this.httpPort = configService.getIntProperty("com.openexchange.connector.networkListenerPort", 8009);
+        this.httpsPort = configService.getIntProperty("com.openexchange.connector.networkSslListenerPort", 8010);
         this.maxRequestParameters = configService.getIntProperty("com.openexchange.connector.maxRequestParameters", 30);
         this.backendRoute = configService.getProperty("com.openexchange.server.backendRoute", "OX0");
         this.echoHeader = configService.getProperty("com.openexchange.servlet.echoHeaderName","X-Echo-Header");
 
         // sessiond properties
         this.isSessionAutologin = configService.getBoolProperty("com.openexchange.sessiond.autologin", false);
+
+        this.enabledCiphers = configService.getProperty("com.openexchange.http.grizzly.enabledCipherSuites", "", ",");
 
     }
 
@@ -284,6 +303,15 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      */
     public int getHttpPort() {
         return instance.httpPort;
+    }
+
+    /**
+     * Gets the httpsPort
+     *
+     * @return The httpsPort
+     */
+    public int getHttpsPort() {
+        return instance.httpsPort;
     }
 
     /**
@@ -526,6 +554,22 @@ public class GrizzlyConfig implements Initialization, Reloadable {
         return maxHttpHeaderSize;
     }
 
+    public boolean isSslEnabled() {
+        return isSslEnabled;
+    }
+
+    public String getKeystorePath() {
+        return keystorePath;
+    }
+
+    public String getKeystorePassword() {
+        return keystorePassword;
+    }
+
+    public List<String> getEnabledCiphers() {
+        return enabledCiphers;
+    }
+
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         String proxies = configService.getProperty("com.openexchange.server.knownProxies");
@@ -535,10 +579,8 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
+    public Interests getInterests() {
+        return DefaultInterests.builder().propertiesOfInterest("com.openexchange.server.knownProxies").build();
     }
 
     public void addPropertyListener(PropertyChangeListener listener) {

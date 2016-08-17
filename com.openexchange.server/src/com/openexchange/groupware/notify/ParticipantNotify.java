@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -1054,6 +1054,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
              * Check if appointment has attachments
              */
             Multipart mixedMultipart = null;
+            SearchIterator<?> iterator = null;
             try {
                 final AttachmentBase attachmentBase = Attachment.ATTACHMENT_BASE;
                 final int folderId = app.getParentFolderID();
@@ -1061,7 +1062,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 final Context context = session.getContext();
                 final User user = session.getUser();
                 final UserConfiguration config = session.getUserConfiguration();
-                final SearchIterator<?> iterator = attachmentBase.getAttachments(session, folderId, objectId, Types.APPOINTMENT, context, user, config).results();
+                iterator = attachmentBase.getAttachments(session, folderId, objectId, Types.APPOINTMENT, context, user, config).results();
                 if (iterator.hasNext()) {
                     try {
                         attachmentBase.startTransaction();
@@ -1118,7 +1119,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         }
                         LOG.error("File attachment(s) cannot be added.", e);
                     } finally {
-                        SearchIterators.close(iterator);
                         try {
                             attachmentBase.finish();
                         } catch (final OXException e) {
@@ -1128,6 +1128,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 }
             } catch (final Exception e) {
                 LOG.error("File attachment(s) cannot be added.", e);
+            } finally {
+                SearchIterators.close(iterator);
             }
             /*
              * Generate iCal for appointment

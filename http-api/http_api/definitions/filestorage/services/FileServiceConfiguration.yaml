@@ -1,0 +1,22 @@
+type: object
+properties:
+  widget:
+    type: string
+    description: The name of the widget.
+  name:
+    type: string
+    description: The name of the field.
+  displayName:
+    type: string
+    description: The display name of the field.
+  mandatory:
+    type: boolean
+    description: Indicates whether the field is mandatory.
+  options:
+    type: array
+    description: A list of available options in the field.
+    items:
+      type: object
+  defaultValue:
+    type: object
+    description: Can contain a default value.

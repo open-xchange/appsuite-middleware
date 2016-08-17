@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -83,6 +83,7 @@ import com.openexchange.folderstorage.DefaultPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.freebusy.FreeBusyData;
+import com.openexchange.freebusy.service.FreeBusyService;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.webdav.protocol.Protocol;
@@ -170,7 +171,7 @@ public class ScheduleOutboxCollection extends DAVCollection {
                 String[] resolvedAttendees = resolveCalendarUsers(requestedAttendees);
                 Map<String, FreeBusyData> freeBusy = null;
                 try {
-                    freeBusy = factory.getFreeBusyService().getMergedFreeBusy(factory.getSession(),
+                    freeBusy = factory.requireService(FreeBusyService.class).getMergedFreeBusy(factory.getSession(),
                         Arrays.asList(resolvedAttendees), freeBusyInformation.getStartDate(), freeBusyInformation.getEndDate());
                 } catch (OXException e) {
                     LOG.error("error getting free/busy information", e);

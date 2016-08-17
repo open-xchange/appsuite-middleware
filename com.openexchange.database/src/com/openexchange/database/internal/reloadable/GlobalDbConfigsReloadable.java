@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,12 +49,13 @@
 
 package com.openexchange.database.internal.reloadable;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.database.internal.GlobalDatabaseServiceImpl;
 import com.openexchange.database.internal.GlobalDbConfig;
@@ -73,8 +74,6 @@ import com.openexchange.exception.OXException;
 public class GlobalDbConfigsReloadable implements Reloadable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GlobalDbConfigsReloadable.class);
-
-    private static final String[] PROPERTIES = new String[] { "complete yaml file" };
 
     private static final AtomicReference<GlobalDatabaseServiceImpl> GLOBAL_DB_REF = new AtomicReference<>();
 
@@ -132,10 +131,8 @@ public class GlobalDbConfigsReloadable implements Reloadable {
      * {@inheritDoc}
      */
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(GlobalDbInit.CONFIGFILE, PROPERTIES);
-        return map;
+    public Interests getInterests() {
+        return DefaultInterests.builder().configFileNames(GlobalDbInit.CONFIGFILE).build();
     }
 
     public static void setGlobalDatabaseServiceRef(GlobalDatabaseServiceImpl lGlobalDatabaseServiceRef) {

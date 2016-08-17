@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -365,5 +365,21 @@ public interface IDBasedFolderAccess extends TransactionAware, WarningsAware {
      * @throws OXException If either folder does not exist or quota limit and/or quote usage cannot be determined
      */
     Quota[] getQuotas(String folder, Quota.Type[] types) throws OXException;
+
+    /**
+     * Gets the total number of files in a folder.
+     *
+     * @param folderId The folder identifier
+     * @return The number of files, or <code>-1</code> if unknown
+     */
+    long getNumFiles(String folderId) throws OXException;
+
+    /**
+     * Gets the total size of all files (and file versions) in a folder.
+     *
+     * @param folderId The folder identifier
+     * @return The total size of all document versions in a folder, or <code>-1</code> if unknown
+     */
+    long getTotalSize(String folderId) throws OXException;
 
 }

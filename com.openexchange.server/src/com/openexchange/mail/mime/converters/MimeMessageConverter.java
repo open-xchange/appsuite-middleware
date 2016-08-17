@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -71,7 +71,6 @@ import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.Flags;
@@ -96,11 +95,14 @@ import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.james.mime4j.stream.MimeConfig;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
@@ -492,7 +494,8 @@ public final class MimeMessageConverter {
             if (composedMail.getSession() == null) {
                 compositionParameters = new ContextCompositionParameters(composedMail.getContext());
             } else {
-                compositionParameters = new SessionCompositionParameters(composedMail.getSession(), composedMail.getContext(), UserSettingMailStorage.getInstance().getUserSettingMail(composedMail.getSession()));
+                UserSettingMail usm = null == composedMail.getMailSettings() ? UserSettingMailStorage.getInstance().getUserSettingMail(composedMail.getSession()) : composedMail.getMailSettings();
+                compositionParameters = new SessionCompositionParameters(composedMail.getSession(), composedMail.getContext(), usm);
             }
             final MimeMessageFiller filler = new MimeMessageFiller(compositionParameters);
             filler.setAccountId(composedMail.getAccountId());
@@ -2208,6 +2211,11 @@ public final class MimeMessageConverter {
                 final String[] contentTypeHdr = mailPart.getHeader(CONTENT_TYPE);
                 if (null != contentTypeHdr && contentTypeHdr.length > 0) {
                     mailPart.setContentType(MimeMessageUtility.decodeMultiEncodedHeader(contentTypeHdr[0]));
+                } else {
+                    String sct = part.getContentType();
+                    if (!Strings.isEmpty(sct)) {
+                        mailPart.setContentType(MimeMessageUtility.decodeMultiEncodedHeader(sct));
+                    }
                 }
             }
             {
@@ -2420,8 +2428,8 @@ public final class MimeMessageConverter {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.mail.mime.enableMime4j");
             }
         });
     }

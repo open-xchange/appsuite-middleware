@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -112,7 +112,6 @@ public class AddUUIDForDListTables extends UpdateTaskAdapter {
     public static void fillUUIDs(Connection con, String table, ProgressState progress) throws SQLException {
         Statement select = null;
         ResultSet result = null;
-        PreparedStatement upd = null;
         try {
             select = con.createStatement();
             result = select.executeQuery("SELECT intfield01, intfield02, intfield03, intfield04, field01, field02, field03, cid FROM " + table + " WHERE uuid IS NULL");
@@ -195,19 +194,22 @@ public class AddUUIDForDListTables extends UpdateTaskAdapter {
 
                 update += " LIMIT 1";
 
-                upd = con.prepareStatement(update);
-                for (int i = 0; i < values.size(); i++) {
-                    upd.setObject(i + 1, values.get(i));
-                }
-
-                int increment = upd.executeUpdate();
-                for (int i = 0; i < increment; i++) {
-                    progress.incrementState();
+                PreparedStatement upd = null;
+                try {
+                    upd = con.prepareStatement(update);
+                    for (int i = 0; i < values.size(); i++) {
+                        upd.setObject(i + 1, values.get(i));
+                    }
+                    int increment = upd.executeUpdate();
+                    for (int i = increment; i-- > 0;) {
+                        progress.incrementState();
+                    }
+                } finally {
+                    closeSQLStuff(upd);
                 }
             }
         } finally {
             closeSQLStuff(result, select);
-            closeSQLStuff(upd);
         }
     }
 

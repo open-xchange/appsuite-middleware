@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -58,6 +58,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.ajax.fields.AppointmentFields;
+import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
 import com.openexchange.calendar.CalendarField;
@@ -337,7 +338,7 @@ public class NotificationMail {
             LOG.debug("NotificationMail.shouldBeSend (2), User: {}, {}, {}, {}\nDiffering Fields: {}{}", id(), stateChanges(), changes(), aboutStateChangesOnly, diffs(), getUserDiff());
             return !aboutStateChangesOnly;
         }
-        LOG.debug("NotificationMail.shouldBeSend (3), User: {}, {}, {}, {}\nDiffering Fields: {}", id(), stateChanges(), changes(), aboutStateChangesOnly, diffs());
+        LOG.debug("NotificationMail.shouldBeSend (3), User: {}, {}, {}, {}\nDiffering Fields: {}{}", id(), stateChanges(), changes(), aboutStateChangesOnly, diffs(), getUserDiff());
         return true;
     }
 
@@ -368,11 +369,13 @@ public class NotificationMail {
                         FieldUpdate userChange = getDiff().getUpdateFor(AppointmentFields.USERS);
                         Difference extraInfo = (Difference) userChange.getExtraInfo();
                         if (!extraInfo.getAdded().isEmpty()) {
+                            sb.append("A: ");
                             for (Object added : extraInfo.getAdded()) {
                                 sb.append(((UserParticipant) added).getIdentifier()).append(", ");
                             }
                         }
                         if (!extraInfo.getRemoved().isEmpty()) {
+                            sb.append("R: ");
                             for (Object removed : extraInfo.getRemoved()) {
                                 sb.append(((UserParticipant) removed).getIdentifier()).append(", ");
                             }
@@ -439,6 +442,9 @@ public class NotificationMail {
         boolean onlyParticipantsChanged = appDiff.exactlyTheseChanged(CalendarField.getByColumn(CalendarObject.PARTICIPANTS).getJsonName());
         if (onlyParticipantsChanged) {
             FieldUpdate participantUpdate = appDiff.getUpdateFor(CalendarField.getByColumn(CalendarObject.PARTICIPANTS).getJsonName());
+            if (participantUpdate == null) {
+                return false;
+            }
             Participant[] oldParticipants = (Participant[]) participantUpdate.getOriginalValue();
             Participant[] newParticipants = (Participant[]) participantUpdate.getNewValue();
 
@@ -569,6 +575,10 @@ public class NotificationMail {
         if (isAttachmentUpdate()) {
             return false;
         }
+
+        if (isStateChangeExceptionCreate()) {
+            return true;
+        }
         return diff.isAboutStateChangesOnly(FIELDS_TO_REPORT);
     }
 
@@ -599,6 +609,14 @@ public class NotificationMail {
             return false;
         }
         return diff.isAboutCertainParticipantsStateChangeOnly(recipient.getEmail());
+    }
+    
+    public boolean isStateChangeExceptionCreate() {
+        boolean candidate = diff.exactlyTheseChanged(CalendarFields.CHANGE_EXCEPTIONS, CalendarFields.RECURRENCE_DATE_POSITION, CalendarFields.RECURRENCE_POSITION, CalendarFields.USERS);
+        if (candidate) {
+            return diff.isAboutStateChanges();
+        }
+        return false;
     }
 
     public void setActor(NotificationParticipant actor) {

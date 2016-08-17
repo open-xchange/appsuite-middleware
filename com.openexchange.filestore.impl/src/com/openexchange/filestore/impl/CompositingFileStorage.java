@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -50,6 +50,7 @@
 package com.openexchange.filestore.impl;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -57,6 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 
@@ -67,11 +69,23 @@ import com.openexchange.filestore.FileStorage;
  */
 public class CompositingFileStorage implements FileStorage {
 
-    private final Map<String, FileStorage> prefixedStores = new HashMap<String, FileStorage>();
+    private final Map<String, FileStorage> prefixedStores;
+    private final FileStorage standardFS;
+    private final String savePrefix;
 
-    private FileStorage standardFS;
-
-    private String savePrefix;
+    /**
+     * Initializes a new {@link CompositingFileStorage}.
+     *
+     * @param standardFS The fall-back storage to use in case no prefix is given
+     * @param savePrefix The standard prefix to assume when saving files
+     * @param prefixedStores The storages associated with a certain prefix; may be <code>null</code>
+     */
+    public CompositingFileStorage(FileStorage standardFS, String savePrefix, Map<String, FileStorage> prefixedStores) {
+        super();
+        this.standardFS = standardFS;
+        this.savePrefix = savePrefix;
+        this.prefixedStores = null == prefixedStores ? Collections.<String, FileStorage> emptyMap() : ImmutableMap.<String, FileStorage> copyOf(prefixedStores);
+    }
 
     @Override
     public boolean deleteFile(String identifier) throws OXException {
@@ -221,14 +235,12 @@ public class CompositingFileStorage implements FileStorage {
         return prepared.fs.getFile(prepared.name, offset, length);
     }
 
-    public void addStore(FileStorage fs) {
-        standardFS = fs;
-    }
-
-    public void addStore(String prefix, FileStorage fs) {
-        prefixedStores.put(prefix, fs);
-    }
-
+    /**
+     * Gets the name to file storage associated for given canonical name; e.g. <code>"hashed/ab/cd/ef/334234234"</code>.
+     *
+     * @param canonicalName The canonical name to resolve
+     * @return The name to file storage association
+     */
     protected ImmutablePreparedName prepareName(String canonicalName) {
         int idx = canonicalName.indexOf('/');
         if (idx < 0) {
@@ -259,10 +271,6 @@ public class CompositingFileStorage implements FileStorage {
             this.prefix = prefix;
         }
 
-    }
-
-    public void setSavePrefix(String savePrefix) {
-        this.savePrefix = savePrefix;
     }
 
 }

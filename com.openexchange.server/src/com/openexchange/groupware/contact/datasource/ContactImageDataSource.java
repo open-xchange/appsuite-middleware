@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -200,12 +200,21 @@ public final class ContactImageDataSource implements ImageDataSource {
         final DataProperties properties = new DataProperties(8);
         properties.put(DataProperties.PROPERTY_FOLDER_ID, Integer.toString(folder));
         properties.put(DataProperties.PROPERTY_ID, Integer.toString(objectId));
+
         if (imageBytes == null) {
-            LOG.warn("Requested a non-existing image in contact: object-id={} folder={} context={} session-user={}\nReturning an empty image as fallback.", objectId, folder, session.getContextId(), session.getUserId());
+            LOG.warn("Requested a non-existing image in contact: object-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", objectId, folder, session.getContextId(), session.getUserId());
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
             return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
         }
+
+        if (com.openexchange.ajax.helper.ImageUtils.isSvg(imageBytes)) {
+            LOG.warn("Detected a possibly harmful SVG image in contact: object-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", objectId, folder, session.getContextId(), session.getUserId());
+            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
+            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+            return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
+        }
+
         properties.put(DataProperties.PROPERTY_CONTENT_TYPE, contact.getImageContentType());
         properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(imageBytes.length));
         properties.put(DataProperties.PROPERTY_NAME, contact.getImageContentType().replace('/', '.'));

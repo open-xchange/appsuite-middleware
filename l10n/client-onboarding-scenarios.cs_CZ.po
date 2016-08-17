@@ -2,23 +2,22 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-06-22 11:50+0000\n"
 "PO-Revision-Date: 2016-02-24 00:54+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: cs_CZ\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"POT-Creation-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
-"Language: cs_CZ\n"
 "X-Generator: Poedit 1.8.7\n"
-"X-Poedit-Basepath: .\n"
 "X-Poedit-SearchPath-0: .\n"
+"X-Poedit-Basepath: .\n"
 
 # Drive Application
 msgid "Drive Application"
@@ -109,7 +108,8 @@ msgstr ""
 "sdílenými a systémovými složkami, s klienty Microsoft Outlook®."
 
 # Synchronize your Mail, Calendar and Address Book data with your device.
-msgid "Synchronize your Mail, Calendar and Address Book data with your device."
+msgid ""
+"Synchronize your Mail, Calendar and Address Book data with your device."
 msgstr "Synchronizujte své zprávy, kalendář a adresář se svým zařízením."
 
 # To manually setup your Mail, Calendar and Address Book accounts, please use the following information.

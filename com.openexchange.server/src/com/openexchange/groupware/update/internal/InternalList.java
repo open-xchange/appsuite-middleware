@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -62,6 +62,7 @@ import com.openexchange.groupware.update.tasks.AddUUIDForDListTables;
 import com.openexchange.groupware.update.tasks.AddUUIDForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.AddUUIDForUserAttributeTable;
+import com.openexchange.groupware.update.tasks.AllowNullValuesForStandardFolderNamesUpdateTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicContextAttributesTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAttributesTask;
 import com.openexchange.groupware.update.tasks.CorrectAttachmentCountInAppointments;
@@ -102,6 +103,7 @@ import com.openexchange.groupware.update.tasks.PrgDatesMembersPrimaryKeyUpdateTa
 import com.openexchange.groupware.update.tasks.PrgDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgLinksAddUuidUpdateTask;
+import com.openexchange.groupware.update.tasks.Release781UpdateTask;
 import com.openexchange.groupware.update.tasks.RemoveAliasInUserAttributesTable;
 import com.openexchange.groupware.update.tasks.RemoveRedundantKeysForBug26913UpdateTask;
 import com.openexchange.groupware.update.tasks.ResourceClearDelTablesTask;
@@ -601,12 +603,22 @@ public final class InternalList {
         // Checks and drops obsolete tables possibly created for managing POP3 accounts
         list.add(new com.openexchange.groupware.update.tasks.POP3CheckAndDropObsoleteTablesTaskV2());
 
-        //(Re-)adds department index in prg_contacts for "auto-complete" queries
+        // (Re-)adds department index in prg_contacts for "auto-complete" queries
         list.add(new com.openexchange.groupware.update.tasks.ContactsAddDepartmentIndex4AutoCompleteSearch());
 
         // +++++++++++++++++++++++++++++++++ Version 7.8.2 starts here. +++++++++++++++++++++++++++++++++
 
+        list.add(new Release781UpdateTask());
+
+        // Adds "starttls" column to "user_mail_account" and "user_transport_account" tables and attempts to set a reasonable default value for that column dependent on mail account data
         list.add(new AddStartTLSColumnForMailAccountTablesTask());
+
+        // Applies MEDIUM TEXT to "user_setting" table.
+        list.add(new com.openexchange.groupware.update.tasks.UserSettingMediumTextTask());
+
+        // +++++++++++++++++++++++++++++++++ Version 7.8.3 starts here. +++++++++++++++++++++++++++++++++
+
+        list.add(new AllowNullValuesForStandardFolderNamesUpdateTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

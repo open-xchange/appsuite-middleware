@@ -1,0 +1,44 @@
+type: object
+properties:
+  id:
+    type: string
+    description: A string defining the object itself (e.g. "keep" or "discard").
+  to:
+    type: string
+    description: A string containing where the mail should be redirected to (for redirect-command).
+  into:
+    type: string
+    description: This string takes the object id of the destination mail folder (for move-command).
+  text:
+    type: string
+    description: A string containing the reason why the mail is rejected (for reject-command) or a string containing the vacation text itself (for vacation-command).
+  days:
+    type: string
+    description: The days for which a vacation text is returned (for vacation-command).
+  addresses:
+    type: array
+    description: The addresses for which this vacation is responsible. That means for which addresses out of the aliases array of the user defining this filter, vacations will be sent.
+    items:
+      type: string
+  from:
+    type: object
+    description: 'Support for the ":from" tag. Specifies the value of the from header for the auto-reply mail, e.g. Foo Bear <foo.bear@ox.io> (Since 7.8.1). The array of strings should be a simple JSONArray with length 2; the first element should include the personal part of the e-mail address and the second element the actual e-mail address. If only the e-mail address is available, that should be the only element of the array. (for vacation-command)'
+  subject:
+    type: string
+    description: 'The new subject for the returned message (can be left empty, when only adding RE:) (for vacation-command).'
+  flags:
+    type: array
+    description: 'An array containing the flags which should be added to the mail. A flag can either be a system flag or a user flag. System flags begin with a backslash and can be: "seen", "answered", "flagged", "deleted", "draft" or "recent". User flags begin with a dollar sign and can contain any ASCII characters between 0x21 ("!") and 0x7E ("~") (inclusive), except for 0x22 ("), 0x25 (%), 0x28 ((), 0x29 ()), 0x2A (*), 0x5C (backslash), 0x5D (]) and 0x7B ({). Mail color flags as used by OX are implemented by user flags of the form `$cl_n`, where "n" is a number between 1 and 10 (inclusive). (for addflags-command)'
+    items:
+      type: string
+  message:
+    type: string
+    description: The content of the notification message (for notify-command).
+  method:
+    type: string
+    description: The method of the notification message, eg. `mailto:012345678@sms.gateway` (for notify-command).
+  keys:
+    type: array
+    description: The public keys which should be used for encryption (for pgp-command).
+    items:
+      type: string

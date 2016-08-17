@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -91,6 +91,7 @@ public final class LastLoginTimeStampTool {
 
         opts.addOption("d", "datepattern", true, "The optional date pattern used for formatting retrieved time stamp; e.g \"EEE, d MMM yyyy HH:mm:ss Z\" would yield \"Wed, 4 Jul 2001 12:08:56 -0700\"");
 
+        opts.addOption("H", "host", true, "The optional JMX host (default:localhost)");
         opts.addOption("p", "port", true, "The optional JMX port (default:9999)");
         opts.addOption("l", "login", true, "The optional JMX login (if JMX has authentication enabled)");
         opts.addOption("s", "password", true, "The optional JMX password (if JMX has authentication enabled)");
@@ -121,6 +122,13 @@ public final class LastLoginTimeStampTool {
             if (cmd.hasOption('h')) {
                 printHelp();
                 System.exit(0);
+            }
+            String host = "localhost";
+            if (cmd.hasOption('H')) {
+                String tmp = cmd.getOptionValue('H');
+                if (null != tmp) {
+                    host = tmp.trim();
+                }
             }
             int port = 9999;
             if (cmd.hasOption('p')) {
@@ -226,9 +234,8 @@ public final class LastLoginTimeStampTool {
                 environment.put(JMXConnector.CREDENTIALS, creds);
             }
 
-            final JMXServiceURL url =
-                new JMXServiceURL(new StringBuilder("service:jmx:rmi:///jndi/rmi://localhost:").append(port).append("/server").toString());
-            final JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
+            JMXServiceURL url = new JMXServiceURL(new StringBuilder("service:jmx:rmi:///jndi/rmi://").append(host).append(":").append(port).append("/server").toString());
+            JMXConnector jmxConnector = JMXConnectorFactory.connect(url, environment);
             try {
                 final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
                 final Object[] params = new Object[] { Integer.valueOf(userId), Integer.valueOf(contextId), client };

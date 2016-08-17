@@ -1,0 +1,10 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: object
+    description: |
+      Dependent on the request parameters: the payload may be a JSON object containing the quota modules as
+      fields that represent JSON objects itself with the properties "display_name" and "accounts" (array of account data objects)
+      or it may be a JSON array of account data objects if the parameter "module" specifies a certain quota module.
+      

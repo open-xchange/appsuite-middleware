@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -51,9 +51,14 @@ package com.openexchange.authentication.service;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.mail.internet.idn.IDNA;
+import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.BasicAuthenticationService;
+import com.openexchange.authentication.DefaultLoginInfo;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
@@ -84,25 +89,33 @@ public final class Authentication {
      * @return The resolved login information for the context as well as for the user
      * @throws OXException If something with the login info is wrong or needed service is absent
      */
-    public static Authenticated login(final String login, final String pass, final Map<String, Object> properties) throws OXException {
-        final AuthenticationService auth = SERVICE_REF.get();
+    public static Authenticated login(String login, String pass, Map<String, Object> properties) throws OXException {
+        AuthenticationService auth = SERVICE_REF.get();
         if (null == auth) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create( AuthenticationService.class.getName());
         }
-        return auth.handleLoginInfo(new LoginInfo() {
-            @Override
-            public String getPassword() {
-                return pass;
-            }
-            @Override
-            public String getUsername() {
-                return login;
-            }
-            @Override
-            public Map<String, Object> getProperties() {
-                return properties;
-            }
-        });
+
+        return login(new DefaultLoginInfo(login, pass, properties), auth);
+    }
+
+    /**
+     * Performs a login using given authentication service and login info.
+     *
+     * @param loginInfo The login info
+     * @param authenticationService The authentication service
+     * @return The resolved login information for the context as well as for the user
+     * @throws OXException If something with the login info is wrong
+     */
+    public static Authenticated login(LoginInfo loginInfo, AuthenticationService authenticationService) throws OXException {
+        try {
+            return authenticationService.handleLoginInfo(loginInfo);
+        } catch (OXException e) {
+            // Check for possible ACE/puny-code notation
+            String idn = checkAceNotation(loginInfo, e);
+
+            // Retry with IDN representation
+            return authenticationService.handleLoginInfo(new DefaultLoginInfo(idn, loginInfo.getPassword(), loginInfo.getProperties()));
+        }
     }
 
     /**
@@ -114,25 +127,63 @@ public final class Authentication {
      * @return The resolved login information for the context as well as for the user
      * @throws OXException If something with the login info is wrong or needed service is absent
      */
-    public static Authenticated autologin(final String login, final String pass, final Map<String, Object> properties) throws OXException {
-        final AuthenticationService auth = SERVICE_REF.get();
+    public static Authenticated autologin(String login, String pass, Map<String, Object> properties) throws OXException {
+        AuthenticationService auth = SERVICE_REF.get();
         if (null == auth) {
             return null;
         }
-        return auth.handleAutoLoginInfo(new LoginInfo() {
-            @Override
-            public String getPassword() {
-                return pass;
-            }
-            @Override
-            public String getUsername() {
-                return login;
-            }
-            @Override
-            public Map<String, Object> getProperties() {
-                return properties;
-            }
-        });
+
+        return autologin(new DefaultLoginInfo(login, pass, properties), auth);
+    }
+
+    /**
+     * Performs an auto-login using given authentication service and login info.
+     *
+     * @param loginInfo The login info
+     * @param authenticationService The authentication service
+     * @return The resolved login information for the context as well as for the user
+     * @throws OXException If something with the login info is wrong or needed service is absent
+     */
+    public static Authenticated autologin(LoginInfo loginInfo, AuthenticationService authenticationService) throws OXException {
+        try {
+            return authenticationService.handleAutoLoginInfo(loginInfo);
+        } catch (OXException e) {
+            // Check for possible ACE/puny-code notation
+            String idn = checkAceNotation(loginInfo, e);
+
+            return authenticationService.handleAutoLoginInfo(new DefaultLoginInfo(idn, loginInfo.getPassword(), loginInfo.getProperties()));
+        }
+    }
+
+    /**
+     * Checks if specified failed login info provides an ACE login string, to which an alternative IDN notation is available.
+     *
+     * @param loginInfo The login info to check
+     * @param e The login failure
+     * @return The IDN notation
+     * @throws OXException If no alternative IDN notation is available or it does not need to be checked
+     */
+    private static String checkAceNotation(LoginInfo loginInfo, OXException e) throws OXException {
+        if (false == LoginExceptionCodes.INVALID_CREDENTIALS_MISSING_USER_MAPPING.equals(e)) {
+            throw e;
+        }
+
+        LoginConfiguration loginConfiguration = LoginServlet.getLoginConfiguration();
+        if ((null == loginConfiguration) || (false == loginConfiguration.isCheckPunyCodeLoginString())) {
+            throw e;
+        }
+
+        String userName = loginInfo.getUsername();
+        if (userName.indexOf("xn--") < 0) {
+            throw e;
+        }
+
+        String idn = IDNA.toIDN(userName);
+        if (userName.equals(idn)) {
+            throw e;
+        }
+
+        return idn;
     }
 
     /**

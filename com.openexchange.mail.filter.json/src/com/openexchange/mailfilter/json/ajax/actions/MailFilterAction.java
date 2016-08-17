@@ -63,7 +63,8 @@ import org.json.JSONValue;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.Rule;
-import com.openexchange.jsieve.commands.TestCommand;
+import com.openexchange.jsieve.commands.test.ITestCommand;
+import com.openexchange.jsieve.registry.TestCommandRegistry;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.MailFilterService.FilterType;
@@ -302,8 +303,9 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
     }
 
     private JSONArray getTestArray(final Set<String> capabilities) throws JSONException {
+        TestCommandRegistry testCommandRegistry = Services.getService(TestCommandRegistry.class);
         final JSONArray testarray = new JSONArray();
-        for (final TestCommand.Commands command : TestCommand.Commands.values()) {
+        for (final ITestCommand command : testCommandRegistry.getCommands()) {
             final JSONObject object = new JSONObject();
             if (null == command.getRequired() || capabilities.contains(command.getRequired())) {
                 final JSONArray comparison = new JSONArray();

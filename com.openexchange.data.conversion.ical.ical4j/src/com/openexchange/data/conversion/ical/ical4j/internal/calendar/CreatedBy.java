@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -56,15 +56,21 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.parameter.Cn;
 import net.fortuna.ical4j.model.property.Organizer;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
-import com.openexchange.data.conversion.ical.ical4j.internal.EmitterTools;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.notify.NotificationConfig;
+import com.openexchange.groupware.notify.NotificationConfig.NotificationProperty;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.usersetting.UserSettingMail;
+import com.openexchange.mail.usersetting.UserSettingMailStorage;
 
 /**
  * Test implementation to write the organizer.
@@ -73,35 +79,27 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T, U> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CreatedBy.class);
-
     public static UserResolver userResolver = UserResolver.EMPTY;
 
     @Override
-    public void emit(final Mode mode, final int index, final U calendar, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
-        final Organizer organizer = new Organizer();
+    public void emit(Mode mode, int index, U calendar, T component, List<ConversionWarning> warnings, Context ctx, Object... args) {
         try {
-            String address;
-            if (calendar.getOrganizerId() > 0) {
-                address = EmitterTools.getFrom(calendar.getOrganizerId(), ctx);
-            } else if (calendar.getOrganizer() != null && !calendar.getOrganizer().trim().equals("")) {
-                address = calendar.getOrganizer();
-            } else if (calendar.getCreatedBy() > 0) {
-                address = EmitterTools.getFrom(calendar.getCreatedBy(), ctx);
+            if (0 < calendar.getOrganizerId()) {
+                component.getProperties().add(getOrganizer(ctx, calendar.getOrganizerId()));
+            } else if (Strings.isNotEmpty(calendar.getOrganizer())) {
+                component.getProperties().add(new Organizer("mailto:" + IDNA.toACE(calendar.getOrganizer())));
+            } else if (0 < calendar.getCreatedBy()) {
+                component.getProperties().add(getOrganizer(ctx, calendar.getCreatedBy()));
             } else {
                 warnings.add(new ConversionWarning(index, ConversionWarning.Code.UNEXPECTED_ERROR, "Unable to determine organizer."));
-                return;
             }
-            address = IDNA.toACE(address);
-            organizer.setValue("mailto:" + address);
-        } catch (final URISyntaxException e) {
+        } catch (URISyntaxException e) {
             warnings.add(new ConversionWarning(index, ConversionWarning.Code.UNEXPECTED_ERROR, e, "URI problem."));
-        } catch (final OXException e) {
+        } catch (OXException e) {
             warnings.add(new ConversionWarning(index, ConversionWarning.Code.UNEXPECTED_ERROR, e));
         } catch (AddressException e) {
             warnings.add(new ConversionWarning(index, ConversionWarning.Code.UNEXPECTED_ERROR, e, "Address Problem,"));
         }
-        component.getProperties().add(organizer);
     }
 
     @Override
@@ -121,4 +119,32 @@ public class CreatedBy<T extends CalendarComponent, U extends CalendarObject> ex
         organizer = IDNA.toIDN(organizer);
         calendar.setOrganizer(organizer);
     }
+
+    /**
+     * Constructs an {@link Organizer} property for an internal user, obeying the {@link NotificationProperty#FROM_SOURCE} setting.
+     *
+     * @param context The context
+     * @param userID The user identifier of the organizer
+     * @return The organizer
+     */
+    private static Organizer getOrganizer(Context context, int userID) throws AddressException, URISyntaxException, OXException {
+        User user = userResolver.loadUser(userID, context);
+        String displayName = user.getDisplayName();
+        String mail = null;
+        if ("defaultSenderAddress".equalsIgnoreCase(NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail"))) {
+            UserSettingMail userSettingMail = UserSettingMailStorage.getInstance().getUserSettingMail(userID, context);
+            if (null != userSettingMail) {
+                mail = userSettingMail.getSendAddr();
+            }
+        }
+        if (null == mail) {
+            mail = user.getDisplayName();
+        }
+        Organizer organizer = new Organizer("mailto:" + IDNA.toACE(mail));
+        if (Strings.isNotEmpty(displayName)) {
+            organizer.getParameters().add(new Cn(displayName));
+        }
+        return organizer;
+    }
+
 }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -57,18 +57,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
+import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.internal.DynamicList;
 import com.openexchange.groupware.update.internal.UpdateExecutor;
 import com.openexchange.groupware.update.internal.UpdateProcess;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -78,7 +85,9 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class UpdateTaskToolkit {
 
-    private static final Object LOCK = new Object();
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateTaskToolkit.class);
+
+    static final Object LOCK = new Object();
 
     /**
      * Initializes a new {@link UpdateTaskToolkit}.
@@ -147,20 +156,111 @@ public final class UpdateTaskToolkit {
         }
     }
 
-    public static void runUpdateOnAllSchemas() throws OXException {
-        synchronized (LOCK) {
-            // Get all available schemas
-            final Map<String, Set<Integer>> map = getSchemasAndContexts();
-            // ... and iterate them
-            final Iterator<Set<Integer>> iter = map.values().iterator();
-            while (iter.hasNext()) {
-                final Set<Integer> set = iter.next();
-                if (!set.isEmpty()) {
-                    final int contextId = set.iterator().next().intValue();
-                    new UpdateProcess(contextId).run();
+    /**
+     * Runs the update process on all available schemas
+     *
+     * @param throwExceptionOnFailure Whether a possible exception is supposed to abort process
+     * @return A status text reference
+     * @throws OXException If update process fails
+     */
+    public static UpdateTaskToolkitJob<Void> runUpdateOnAllSchemas(final boolean throwExceptionOnFailure) throws OXException {
+        // Get all available schemas
+        final Map<String, Set<Integer>> map = getSchemasAndContexts();
+        final int total = map.size();
+
+        // Status text
+        final AtomicReference<String> statusText = new AtomicReference<String>("Attempting to update " + total + " schemas in total...");
+
+        // Task...
+        Callable<Void> task = new Callable<Void>() {
+
+            @Override
+            public Void call() throws Exception {
+                synchronized (LOCK) {
+                    // Iterate schemas
+                    int count = 0;
+                    StringBuilder sb = new StringBuilder(32);
+                    Map<String, Queue<TaskInfo>> totalFailures = new HashMap<String, Queue<TaskInfo>>(32);
+                    for (Iterator<Set<Integer>> iter = map.values().iterator(); iter.hasNext();) {
+                        Set<Integer> set = iter.next();
+                        if (!set.isEmpty()) {
+                            int contextId = set.iterator().next().intValue();
+                            UpdateProcess updateProcess = new UpdateProcess(contextId, true, throwExceptionOnFailure);
+                            if (throwExceptionOnFailure) {
+                                try {
+                                    updateProcess.runUpdate();
+                                } catch (OXException e) {
+                                    LOG.error("", e);
+                                    statusText.set(e.getPlainLogMessage());
+                                    throw e;
+                                } catch (Exception e) {
+                                    LOG.error("", e);
+                                    statusText.set(e.getMessage());
+                                    throw e;
+                                }
+                            } else {
+                                updateProcess.run();
+
+                                // Check possible failures
+                                Queue<TaskInfo> failures = updateProcess.getFailures();
+                                if (null != failures && !failures.isEmpty()) {
+                                    for (TaskInfo taskInfo : failures) {
+                                        Queue<TaskInfo> schemaFailures = totalFailures.get(taskInfo.getSchema());
+                                        if (null == schemaFailures) {
+                                            schemaFailures = new LinkedList<TaskInfo>();
+                                            totalFailures.put(taskInfo.getSchema(), schemaFailures);
+                                        }
+                                        schemaFailures.offer(taskInfo);
+                                    }
+                                }
+                            }
+                        }
+                        count++;
+                        if (count < total) {
+                            sb.setLength(0);
+                            sb.append("Processed ").append(count).append(" of ").append(total).append(" schemas.");
+                            statusText.set(sb.toString());
+                        }
+                    }
+
+                    // Completed...
+                    sb.setLength(0);
+                    sb.append("Processed ").append(total).append(" of ").append(total).append(" schemas.");
+
+                    // Append failure information (if any)
+                    if (!totalFailures.isEmpty()) {
+                        sb.append("\\R\\R");
+                        boolean first = true;
+                        for (Map.Entry<String, Queue<TaskInfo>> failureEntry : totalFailures.entrySet()) {
+                            if (first) {
+                                first = false;
+                            } else {
+                                sb.append("\\R\\R");
+                            }
+                            sb.append("The following update task(s) failed on schema \"").append(failureEntry.getKey()).append("\": \\R");
+                            boolean firstTaskInfo = true;
+                            for (TaskInfo taskInfo : failureEntry.getValue()) {
+                                if (firstTaskInfo) {
+                                    firstTaskInfo = false;
+                                } else {
+                                    sb.append("\\R");
+                                }
+                                sb.append(' ').append(taskInfo.getTaskName()).append(" (schema=").append(taskInfo.getSchema()).append(')');
+                            }
+                        }
+                    }
+
+                    // Set new status text
+                    statusText.set(sb.toString());
                 }
+                return null;
             }
-        }
+        };
+
+        // Submit & return
+        UpdateTaskToolkitJob<Void> job = new UpdateTaskToolkitJob<>(task, statusText);
+        ThreadPools.getThreadPool().submit(ThreadPools.task(job, "RunAllUpdate"));
+        return job;
     }
 
     private static final String SQL_SELECT_SCHEMAS = "SELECT db_schema,cid FROM context_server2db_pool";

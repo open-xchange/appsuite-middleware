@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Rss Bundle
 Bundle-SymbolicName: com.openexchange.rss
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Activator: com.openexchange.rss.osgi.RssActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -17,6 +17,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.capabilities,
+ com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.documentation,
  com.openexchange.exception,
@@ -28,10 +29,12 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.tools,
  com.openexchange.tools.encoding,
  com.openexchange.tools.servlet,
  com.openexchange.tools.session,
  com.openexchange.tools.ssl,
+ com.openexchange.tools.stream,
  com.sun.syndication.feed.synd,
  com.sun.syndication.fetcher,
  com.sun.syndication.fetcher.impl,
@@ -44,6 +47,7 @@ Import-Package: com.fasterxml.jackson.core,
  javax.servlet,
  javax.servlet.http,
  javax.servlet.resources,
+ org.apache.commons.io,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,

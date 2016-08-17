@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -127,7 +127,17 @@ public enum ConfigurationProperty implements InitProperty {
      * change. Setting this to false will prevent the random token from being written as part of the login response and prevent logins via
      * the random token
      */
-    RANDOM_TOKEN("com.openexchange.ajax.login.randomToken", Boolean.FALSE.toString());
+    RANDOM_TOKEN("com.openexchange.ajax.login.randomToken", Boolean.FALSE.toString()),
+
+    /**
+     * Checks if specified login string appears to be in ACE/puny-code notation (see RFC3490 section 4.1); e.g. "someone@xn--mller-kva.de".
+     * <p>
+     * If set to <code>true</code> and ACE notation is detected, a failed login attempt is retried using IDN representation;
+     * e.g. "someone@m&uuml;ller.de". Default is <code>false</code>.
+     */
+    CHECK_PUNY_CODE_LOGIN("com.openexchange.ajax.login.checkPunyCodeLoginString", Boolean.FALSE.toString())
+
+    ;
 
     private final String propertyName;
 

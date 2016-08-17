@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -57,6 +57,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -98,11 +99,13 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
         DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
         Connection con = dbService.getForUpdateTask(contextId);
         PreparedStatement repairStmt = null;
+        Statement stmt = null;
         ResultSet rs = null;
         try {
             con.setAutoCommit(false);
 
-            rs = con.createStatement().executeQuery(SELECT);
+            stmt = con.createStatement();
+            rs = stmt.executeQuery(SELECT);
             repairStmt = con.prepareStatement(REPAIR);
             while (rs.next()) {
                 int cid = rs.getInt("cid");
@@ -125,7 +128,7 @@ public class AttachmentCountUpdateTask extends UpdateTaskAdapter {
         } finally {
             autocommit(con);
             DBUtils.closeSQLStuff(repairStmt);
-            DBUtils.closeSQLStuff(rs);
+            DBUtils.closeSQLStuff(rs, stmt);
             dbService.backForUpdateTask(contextId, con);
         }
 

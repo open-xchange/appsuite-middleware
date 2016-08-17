@@ -1,18 +1,18 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-#
 # Timothy <tjfriese@gmail.com>, 2016.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-06-22 12:01+0000\n"
 "PO-Revision-Date: 2016-02-20 10:07-0700\n"
 "Last-Translator: Timothy <tjfriese@gmail.com>\n"
 "Language-Team: English <kde-i18n-doc@kde.org>\n"
+"Language: en_GB\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: en_GB\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 2.0\n"
 
@@ -88,10 +88,10 @@ msgid ""
 "updates. You can download the updates from within the Updater."
 msgstr ""
 "When executing the downloaded file, an installation wizard will be launched. "
-"Follow the instructions and install the updater. The latest versions of "
-"the Windows® client software will be installed. The Updater automatically "
-"informs you of new updates. You can download the updates from within the"
-" Updater."
+"Follow the instructions and install the updater. The latest versions of the "
+"Windows® client software will be installed. The Updater automatically "
+"informs you of new updates. You can download the updates from within the "
+"Updater."
 
 # Connector for Microsoft Outlook®
 msgid "Connector for Microsoft Outlook®"
@@ -106,9 +106,9 @@ msgstr ""
 "Shared and System Folders to Microsoft Outlook® clients."
 
 # Synchronize your Mail, Calendar and Address Book data with your device.
-msgid "Synchronize your Mail, Calendar and Address Book data with your device."
-msgstr ""
-"Synchronise your Mail, Calendar and Address Book data with your device."
+msgid ""
+"Synchronize your Mail, Calendar and Address Book data with your device."
+msgstr "Synchronise your Mail, Calendar and Address Book data with your device."
 
 # To manually setup your Mail, Calendar and Address Book accounts, please use the following information.
 msgid ""
@@ -131,4 +131,3 @@ msgid ""
 "To manually setup your Mail account, please use the following information"
 msgstr ""
 "To manually setup your Mail account, please use the following information"
-

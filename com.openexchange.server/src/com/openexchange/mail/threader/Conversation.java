@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,7 +50,6 @@
 package com.openexchange.mail.threader;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -190,12 +189,21 @@ public final class Conversation {
                 return true;
             }
         }
+
+        String[] sReferences = this.references.isEmpty() ? null : message.getReferences();
+        if (null != sReferences && containsAny(this.references, sReferences)) {
+            return true;
+        }
+
         if (!this.messageIds.isEmpty()) {
-            final String[] sReferences = message.getReferences();
-            if (null != sReferences && containsAny(this.messageIds, Arrays.asList(sReferences))) {
+            if (null == sReferences) {
+                sReferences = message.getReferences();
+            }
+            if (null != sReferences && containsAny(this.messageIds, sReferences)) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -206,7 +214,19 @@ public final class Conversation {
      * @return <code>true</code> if references or referenced-by; otherwise <code>false</code>
      */
     public boolean referencesOrIsReferencedBy(final Conversation other) {
-        return (this.references.isEmpty() ? false : containsAny(this.references, other.messageIds)) || (other.references.isEmpty() ? false : containsAny(this.messageIds, other.references));
+        if (!this.references.isEmpty()) {
+            if (containsAny(this.references, other.messageIds) || (other.references.isEmpty() ? false : containsAny(this.references, other.references))) {
+                return true;
+            }
+        }
+
+        if (!other.references.isEmpty()) {
+            if (containsAny(this.messageIds, other.references)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -216,7 +236,7 @@ public final class Conversation {
      * @return <code>true</code> if references; otherwise <code>false</code>
      */
     public boolean references(final Conversation other) {
-        return this.references.isEmpty() ? false : containsAny(this.references, other.messageIds);
+        return this.references.isEmpty() ? false : (containsAny(this.references, other.messageIds) || (other.references.isEmpty() ? false : containsAny(this.references, other.references)));
     }
 
     /**
@@ -240,6 +260,22 @@ public final class Conversation {
         final Iterator<String> it = col.iterator();
         for (int i = col.size(); i-- > 0;) {
             if (set.contains(it.next())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Checks if at least one element is in both collections.
+     *
+     * @param set The first collection, must not be <code>null</code>
+     * @param arr The second collection, must not be <code>null</code>
+     * @return <code>true</code> if the intersection of the collections is non-empty
+     */
+    private static boolean containsAny(final Set<String> set, final String[] arr) {
+        for (int i = arr.length; i-- > 0;) {
+            if (set.contains(arr[i])) {
                 return true;
             }
         }

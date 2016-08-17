@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,7 @@
 
 package com.openexchange.osgi;
 
+import java.util.Iterator;
 import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -84,11 +85,19 @@ public class NearRegistryServiceTracker<S> extends ServiceTracker<S, S> implemen
     }
 
     @Override
+    public Iterator<S> iterator() {
+        return services.iterator();
+    }
+
+    @Override
     public S addingService(final ServiceReference<S> reference) {
-        final S service = context.getService(reference);
-        if (services.add(service)) {
+        S service = context.getService(reference);
+
+        S serviceToAdd = onServiceAvailable(service);
+        if (services.add(serviceToAdd)) {
             return service;
         }
+
         context.ungetService(reference);
         return null;
     }
@@ -97,6 +106,16 @@ public class NearRegistryServiceTracker<S> extends ServiceTracker<S, S> implemen
     public void removedService(final ServiceReference<S> reference, final S service) {
         services.remove(service);
         context.ungetService(reference);
+    }
+
+    /**
+     * Invoked when a tracked service is available.
+     *
+     * @param service The available service
+     * @return The service to add
+     */
+    protected S onServiceAvailable(S service) {
+        return service;
     }
 
 }

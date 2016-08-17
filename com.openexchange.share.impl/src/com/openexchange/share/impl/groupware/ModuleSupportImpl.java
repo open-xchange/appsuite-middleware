@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -93,13 +93,14 @@ import com.openexchange.userconf.UserPermissionService;
 public class ModuleSupportImpl implements ModuleSupport {
 
     private final ServiceLookup services;
-
     private final ModuleHandlerRegistry handlers;
+    private final ModuleAdjusterRegistry adjusters;
 
     public ModuleSupportImpl(ServiceLookup services) {
         super();
         this.services = services;
         handlers = new ModuleHandlerRegistry(services);
+        adjusters = new ModuleAdjusterRegistry(services);
     }
 
     @Override
@@ -123,17 +124,19 @@ public class ModuleSupportImpl implements ModuleSupport {
         }
 
         if (target.isFolder()) {
-            UserizedFolder folder = requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
+            UserizedFolder folder = requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolderToLoad(), session, null);
             return new FolderTargetProxy(target.getModule(), folder);
         }
 
-        return handlers.get(target.getModule()).loadTarget(target, session);
+        ModuleHandler moduleHandler = handlers.get(target.getModule());
+        return moduleHandler.loadTarget(target, session);
     }
 
     @Override
     public boolean isVisible(int module, String folder, String item, int contextID, int guestID) throws OXException {
         if (item != null) {
-            return handlers.get(module).isVisible(folder, item, contextID, guestID);
+            ModuleHandler moduleHandler = handlers.get(module);
+            return moduleHandler.isVisible(folder, item, contextID, guestID);
         }
 
         if (null == Module.getForFolderConstant(module)) {
@@ -256,6 +259,7 @@ public class ModuleSupportImpl implements ModuleSupport {
             // Currently we don't substitute any folder object IDs, so there is no need to load the according folder.
             return new ShareTargetPath(target.getModule(), target.getFolder(), target.getItem());
         }
+
         return handlers.get(target.getModule()).getPath(target, session);
     }
 
@@ -271,8 +275,11 @@ public class ModuleSupportImpl implements ModuleSupport {
     @Override
     public ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId) throws OXException {
         if (target.isFolder()) {
-            // Currently we don't substitute any folder object IDs, so there is no need to load the according folder.
-            return new ShareTarget(target);
+           ModuleAdjuster adjuster = adjusters.opt(target.getModule());
+           if (null == adjuster) {
+               return new ShareTarget(target);
+           }
+           return adjuster.adjustTarget(target, session, targetUserId);
         }
         return handlers.get(target.getModule()).adjustTarget(target, session, targetUserId);
     }
@@ -280,8 +287,11 @@ public class ModuleSupportImpl implements ModuleSupport {
     @Override
     public ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId) throws OXException {
         if (target.isFolder()) {
-            // Currently we don't substitute any folder object IDs, so there is no need to load the according folder.
-            return new ShareTarget(target);
+            ModuleAdjuster adjuster = adjusters.opt(target.getModule());
+            if (null == adjuster) {
+                return new ShareTarget(target);
+            }
+            return adjuster.adjustTarget(target, contextId, requestUserId, targetUserId);
         }
         return handlers.get(target.getModule()).adjustTarget(target, contextId, requestUserId, targetUserId);
     }
@@ -353,18 +363,14 @@ public class ModuleSupportImpl implements ModuleSupport {
 
         int folderID;
         try {
-            folderID = Integer.valueOf(folderId);
+            folderID = Integer.parseInt(folderId);
         } catch (NumberFormatException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
 
         OXFolderAccess folderAccess = new OXFolderAccess(context);
         FolderObject folder = folderAccess.getFolderObject(folderID);
-        if (item == null) {
-            return new AdministrativeFolderTargetProxy(folder);
-        } else {
-            return handlers.get(module).loadTarget(folderId, item, context, guestID);
-        }
+        return item == null ? new AdministrativeFolderTargetProxy(folder) : handlers.get(module).loadTarget(folderId, item, context, guestID);
     }
 
 }

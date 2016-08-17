@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -52,7 +52,6 @@ package com.openexchange.admin.reseller.storage.interfaces;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
-import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
 import com.openexchange.admin.reseller.rmi.exceptions.OXResellerException;
@@ -62,7 +61,6 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.admin.tools.PropertyHandler;
 
 /**
  * @author choeger
@@ -70,21 +68,9 @@ import com.openexchange.admin.tools.PropertyHandler;
  */
 public abstract class OXResellerStorageInterface {
 
-    /**
-     * Proxy attribute for the class implementing this interface.
-     */
-    private static Class<? extends OXResellerStorageInterface> implementingClass;
-
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXResellerStorageInterface.class);
 
-    protected static AdminCacheExtended cache = null;
-
-    protected static PropertyHandler prop = null;
-
-    static {
-        cache = ClientAdminThreadExtended.cache;
-        prop = cache.getProperties();
-    }
+    private static volatile OXResellerStorageInterface instance;
 
     /**
      * Creates a new instance implementing the reseller storage factory.
@@ -92,48 +78,56 @@ public abstract class OXResellerStorageInterface {
      * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
      */
     public static OXResellerStorageInterface getInstance() throws StorageException {
-        synchronized (OXResellerStorageInterface.class) {
-            if (null == implementingClass) {
-//                cache = ClientAdminThreadExtended.cache;
-//                prop = cache.getProperties();
-                final String className = prop.getProp(PropertyHandlerExtended.RESELLER_STORAGE, null);
-                if (null != className) {
+        OXResellerStorageInterface inst = instance;
+        if (null == inst) {
+            synchronized (OXResellerStorageInterface.class) {
+                inst = instance;
+                if (null == inst) {
+                    AdminCacheExtended cache = com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended.cache;
+                    PropertyHandlerExtended prop = cache.getProperties();
+                    Class<? extends OXResellerStorageInterface> implementingClass;
+                    final String className = prop.getProp(PropertyHandlerExtended.RESELLER_STORAGE, null);
+                    if (null != className) {
+                        try {
+                            implementingClass = Class.forName(className).asSubclass(OXResellerStorageInterface.class);
+                        } catch (final ClassNotFoundException e) {
+                            log.error("", e);
+                            throw new StorageException(e);
+                        }
+                    } else {
+                        final StorageException storageException = new StorageException("Property for reseller_storage not defined");
+                        log.error("", storageException);
+                        throw storageException;
+                    }
+
+                    Constructor<? extends OXResellerStorageInterface> cons;
                     try {
-                        implementingClass = Class.forName(className).asSubclass(OXResellerStorageInterface.class);
-                    } catch (final ClassNotFoundException e) {
+                        cons = implementingClass.getConstructor(new Class[] {});
+                        inst = cons.newInstance(new Object[] {});
+                        instance = inst;
+                    } catch (final SecurityException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final NoSuchMethodException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final IllegalArgumentException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final InstantiationException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final IllegalAccessException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final InvocationTargetException e) {
                         log.error("", e);
                         throw new StorageException(e);
                     }
-                } else {
-                    final StorageException storageException = new StorageException("Property for reseller_storage not defined");
-                    log.error("", storageException);
-                    throw storageException;
                 }
             }
         }
-        Constructor<? extends OXResellerStorageInterface> cons;
-        try {
-            cons = implementingClass.getConstructor(new Class[] {});
-            return cons.newInstance(new Object[] {});
-        } catch (final SecurityException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final NoSuchMethodException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final IllegalArgumentException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final InstantiationException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final IllegalAccessException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final InvocationTargetException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        }
+        return inst;
     }
 
     /**

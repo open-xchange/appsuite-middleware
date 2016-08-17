@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -88,6 +88,7 @@ import com.openexchange.image.ImageLocation;
 import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailSessionCache;
@@ -122,6 +123,7 @@ import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
+import com.openexchange.mailaccount.UnifiedInboxUID;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.regex.MatcherReplacer;
@@ -275,7 +277,7 @@ public final class MimeReply extends AbstractMimeProcessing {
     private static MailMessage getReplyMail(final MailMessage originalMsg, final MailPath msgref, final boolean replyAll, final boolean preferToAsRecipient, final Session session, final int accountId, final javax.mail.Session mailSession, final UserSettingMail userSettingMail, final boolean setFrom) throws OXException {
         try {
             originalMsg.setAccountId(accountId);
-            final MailMessage origMsg;
+            MailMessage origMsg;
             {
                 final ContentType contentType = originalMsg.getContentType();
                 if (contentType.startsWith("multipart/related") && ("application/smil".equals(asciiLowerCase(contentType.getParameter("type"))))) {
@@ -284,8 +286,8 @@ public final class MimeReply extends AbstractMimeProcessing {
                     origMsg = ManagedMimeMessage.clone(originalMsg);
                 }
             }
-            final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-            final UserSettingMail usm = userSettingMail == null ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : userSettingMail;
+            Context ctx = ContextStorage.getStorageContext(session.getContextId());
+            UserSettingMail usm = userSettingMail == null ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : userSettingMail;
             /*
              * New MIME message with a dummy session
              */
@@ -294,17 +296,17 @@ public final class MimeReply extends AbstractMimeProcessing {
              * Set headers of reply message
              */
             {
-                final String rawSubject;
+                String rawSubject;
                 {
-                    final String subjectHdrValue = MimeMessageUtility.checkNonAscii(origMsg.getHeader(MessageHeaders.HDR_SUBJECT, null));
+                    String subjectHdrValue = MimeMessageUtility.checkNonAscii(origMsg.getHeader(MessageHeaders.HDR_SUBJECT, null));
                     if (subjectHdrValue == null) {
                         rawSubject = "";
                     } else {
                         rawSubject = unfold(subjectHdrValue);
                     }
                 }
-                final String decodedSubject = MimeMessageUtility.decodeMultiEncodedHeader(rawSubject);
-                final String newSubject;
+                String decodedSubject = MimeMessageUtility.decodeMultiEncodedHeader(rawSubject);
+                String newSubject;
                 if (decodedSubject.regionMatches(true, 0, PREFIX_RE, 0, 4)) {
                     newSubject = decodedSubject;
                 } else {
@@ -315,8 +317,9 @@ public final class MimeReply extends AbstractMimeProcessing {
             /*
              * Set "From"
              */
+            InternetAddress from = null;
             if (setFrom) {
-                InternetAddress from = MimeProcessingUtility.determinePossibleFrom(false, origMsg, accountId, session, ctx);
+                from = MimeProcessingUtility.determinePossibleFrom(false, origMsg, accountId, session, ctx);
                 /*
                  * Set if a "From" candidate applies
                  */
@@ -328,7 +331,7 @@ public final class MimeReply extends AbstractMimeProcessing {
              * Set the appropriate recipients. Taken from RFC 822 section 4.4.4: If the "Reply-To" field exists, then the reply should go to
              * the addresses indicated in that field and not to the address(es) indicated in the "From" field.
              */
-            final InternetAddress[] recipientAddrs;
+            InternetAddress[] recipientAddrs;
             if (preferToAsRecipient) {
                 final String hdrVal = origMsg.getHeader(MessageHeaders.HDR_TO, MessageHeaders.HDR_ADDR_DELIM);
                 if (null == hdrVal) {
@@ -337,18 +340,18 @@ public final class MimeReply extends AbstractMimeProcessing {
                     recipientAddrs = parseAddressList(hdrVal, true);
                 }
             } else {
-                final Set<InternetAddress> tmpSet = new LinkedHashSet<InternetAddress>(4);
-                final boolean fromAdded;
+                Set<InternetAddress> tmpSet = new LinkedHashSet<InternetAddress>(4);
+                boolean fromAdded;
                 {
                     final String[] replyTo = origMsg.getHeader(MessageHeaders.HDR_REPLY_TO);
                     if (MimeMessageUtility.isEmptyHeader(replyTo)) {
-                        final String owner = null == msgref ? null : MimeProcessingUtility.getFolderOwnerIfShared(msgref.getFolder(), msgref.getAccountId(), session);
+                        String owner = null == msgref ? null : MimeProcessingUtility.getFolderOwnerIfShared(msgref.getFolder(), msgref.getAccountId(), session);
                         if (null != owner) {
                             final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
                             if (null != users && users.length > 0) {
-                                final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), false);
+                                InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), false);
                                 replyMsg.setFrom(onBehalfOf);
-                                final QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), false);
+                                QuotedInternetAddress sender = new QuotedInternetAddress(usm.getSendAddr(), false);
                                 replyMsg.setSender(sender);
                             }
                         }
@@ -379,7 +382,10 @@ public final class MimeReply extends AbstractMimeProcessing {
                 /*
                  * Create a filter which is used to sort out addresses before adding them to either field 'To' or 'Cc'
                  */
-                final Set<InternetAddress> filter = new HashSet<InternetAddress>();
+                Set<InternetAddress> filter = new HashSet<InternetAddress>();
+                if (null != from) {
+                    filter.add(from);
+                }
                 /*
                  * Add user's address to filter
                  */
@@ -390,11 +396,20 @@ public final class MimeReply extends AbstractMimeProcessing {
                     ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
                     UnifiedInboxManagement management = registry.getService(UnifiedInboxManagement.class);
                     if ((null != management) && (accountId == management.getUnifiedINBOXAccountID(session))) {
-                        int realAccountId = MimeProcessingUtility.resolveFrom2Account(session, origMsg.getFrom());
+                        int realAccountId;
+                        try {
+                            UnifiedInboxUID uid = new UnifiedInboxUID(origMsg.getMailId());
+                            realAccountId = uid.getAccountId();
+                        } catch (OXException e) {
+                            // No Unified Mail identifier
+                            FullnameArgument fa = UnifiedInboxUID.parsePossibleNestedFullName(origMsg.getFolder());
+                            realAccountId = null == fa ? MailAccount.DEFAULT_ID : fa.getAccountId();
+                        }
+
                         if (realAccountId == MailAccount.DEFAULT_ID) {
                             addUserAddresses(filter, mailSession, session, ctx);
                         } else {
-                            final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                            MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
                             if (null == mass) {
                                 addUserAddresses(filter, mailSession, session, ctx);
                             } else {
@@ -402,7 +417,7 @@ public final class MimeReply extends AbstractMimeProcessing {
                             }
                         }
                     } else {
-                        final MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
+                        MailAccountStorageService mass = registry.getService(MailAccountStorageService.class);
                         if (null == mass) {
                             addUserAddresses(filter, mailSession, session, ctx);
                         } else {

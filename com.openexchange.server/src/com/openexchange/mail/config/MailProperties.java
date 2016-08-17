@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -55,10 +55,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
@@ -73,6 +69,7 @@ import com.openexchange.mail.api.MailConfig.ServerSource;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.HostList;
 
 /**
  * {@link MailProperties} - Global mail properties read from properties file.
@@ -193,14 +190,11 @@ public final class MailProperties implements IMailProperties {
     /** Indicates whether MSISDN addresses should be supported or not. */
     private boolean supportMsisdnAddresses;
 
-    /** The ranges for account black-list */
-    private List<IPRange> accountBlacklistRanges;
-
     private boolean enforceSecureConnection;
 
     private int defaultArchiveDays;
 
-    private List<IPRange> ranges;
+    private HostList ranges;
 
     private boolean mailStartTls;
 
@@ -213,7 +207,7 @@ public final class MailProperties implements IMailProperties {
         super();
         loaded = new AtomicBoolean();
         defaultSeparator = '/';
-        ranges = Collections.emptyList();
+        ranges = HostList.EMPTY;
     }
 
     /**
@@ -299,10 +293,9 @@ public final class MailProperties implements IMailProperties {
         maxDriveAttachments = 20;
         authProxyDelimiter = null;
         supportMsisdnAddresses = false;
-        accountBlacklistRanges = null;
         enforceSecureConnection = false;
         defaultArchiveDays = 90;
-        ranges = Collections.emptyList();
+        ranges = HostList.EMPTY;
         mailStartTls = false;
         transportStartTls = false;
     }
@@ -636,36 +629,20 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
-            List<IPRange> ranges = new LinkedList<IPRange>();
+            HostList ranges = HostList.EMPTY;
             String tmp = configuration.getProperty("com.openexchange.mail.rateLimitDisabledRange", "").trim();
             if (false == Strings.isEmpty(tmp)) {
-                for (String range : Strings.splitByComma(tmp)) {
-                    if (null == range) {
-                        LOG.warn("Invalid IP range value: 'null'");
-                    } else {
-                        try {
-                            IPRange parsedRange = IPRange.parseRange(range.trim());
-                            if (null == parsedRange) {
-                                LOG.warn("Invalid IP range value: '{}'", range);
-                            } else {
-                                ranges.add(parsedRange);
-                            }
-                        } catch (Exception e) {
-                            LOG.warn("Invalid IP range value: '{}'", range, e);
-                        }
-                    }
-
-                }
+                ranges = HostList.valueOf(tmp);
             }
             this.ranges = ranges;
-            logBuilder.append("\tWhite-listed from send rate limit: ").append(ranges.isEmpty() ? "<none>" : ranges.toString()).append('\n');
+            logBuilder.append("\tWhite-listed from send rate limit: ").append(ranges).append('\n');
         }
 
         {
             final String tmp = configuration.getProperty("com.openexchange.mail.archive.defaultDays", "90").trim();
             try {
                 defaultArchiveDays = Strings.parseInt(tmp);
-                logBuilder.append("\tDefault archive days: ").append(rateLimit).append('\n');
+                logBuilder.append("\tDefault archive days: ").append(defaultArchiveDays).append('\n');
             } catch (final NumberFormatException e) {
                 defaultArchiveDays = 90;
                 logBuilder.append("\tDefault archive days: Invalid value \"").append(tmp).append("\". Setting to fallback ").append(
@@ -731,22 +708,6 @@ public final class MailProperties implements IMailProperties {
             final String supportMsisdnAddressesStr = configuration.getProperty("com.openexchange.mail.supportMsisdnAddresses", "false").trim();
             supportMsisdnAddresses = Boolean.parseBoolean(supportMsisdnAddressesStr);
             logBuilder.append("\tSupports MSISDN addresses: ").append(supportMsisdnAddresses).append('\n');
-        }
-
-        {
-            String tmp = configuration.getProperty("com.openexchange.mail.account.blacklist", "").trim();
-            if (!Strings.isEmpty(tmp)) {
-                tmp = Strings.unquote(tmp);
-                final List<IPRange> ranges = new LinkedList<IPRange>();
-                final String[] sRanges = Strings.splitByComma(tmp);
-                for (String sRange : sRanges) {
-                    sRange = sRange.replaceAll("\\s", "");
-                    if (!Strings.isEmpty(sRange)) {
-                        ranges.add(IPRange.parseRange(sRange));
-                    }
-                }
-                this.accountBlacklistRanges = ranges.isEmpty() ? null : ranges;
-            }
         }
 
         {
@@ -834,15 +795,6 @@ public final class MailProperties implements IMailProperties {
     @Override
     public void setEnforceSecureConnection(boolean enforceSecureConnection) {
         throw new UnsupportedOperationException("setEnforceSecureConnection() not allowed for static MailProperties");
-    }
-
-    /**
-     * Gets the ranges for account black-list
-     *
-     * @return The black-list ranges or <code>null</code> if not set
-     */
-    public List<IPRange> getAccountBlacklistRanges() {
-        return accountBlacklistRanges;
     }
 
     /**
@@ -1114,7 +1066,7 @@ public final class MailProperties implements IMailProperties {
      *
      * @return The IP ranges
      */
-    public Collection<IPRange> getDisabledRateLimitRanges() {
+    public HostList getDisabledRateLimitRanges() {
         return ranges;
     }
 

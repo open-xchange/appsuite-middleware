@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,8 @@
 package com.openexchange.datamining;
 
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * {@link Questions}
@@ -81,6 +83,8 @@ public class Questions {
     public static final String NUMBER_OF_USERS_WITH_LINKED_SOCIAL_NETWORKING_ACCOUNTS = "numberOfUsersWithLinkedSocialNetworkingAccounts";
 
     public static final String AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CONTACTS_AT_ALL = "averageNumberOfContactsPerUserWhoHasContactsAtAll";
+
+    public static final String AVERAGE_DRAFT_MAIL_USAGE = "averageDraftMailUsage";
 
     public static final String AVERAGE_NUMBER_OF_CONTACTS_PER_USER_WHO_HAS_CREATED_CONTACTS = "averageNumberOfContactsPerUserWhoHasCreatedContacts";
 
@@ -428,6 +432,31 @@ public class Questions {
                 }
             } else {
                 System.out.println("Error : Ranges in reportSliceAndDiceOnDocumentSize are not equal");
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    public static void reportSliceAndDiceOnDraftMailSize() {
+        try {
+            LinkedHashMap<Integer, Integer> dms = Datamining.draftMailOverAllSchemata(new int[]{5000,10000,500000});
+            int ll=1;
+            for(final Integer key : dms.keySet() ) {
+                Datamining.report(
+                    "draftMailSizeBetween" + Tools.humanReadableBytes(""+ll) + "And" + Tools.humanReadableBytes(""+key),
+                    dms.get(key).toString());
+                ll=key;
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    public static void reportSliceAndDiceOnExternalAccountUsage() {
+        try {
+            int MAXEXT = 5;
+            HashMap<Integer, Integer> eaos = Datamining.externalAccountsOverAllSchemata(MAXEXT);
+            for(final Integer key : eaos.keySet() ) {
+                Datamining.report("usersHaving" + (key < MAXEXT ? key : "MoreOrEqual" + key) + "ExternalAccounts", eaos.get(key).toString());
             }
         } catch (Exception e) {
         }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -242,8 +242,18 @@ public class PlistResult implements Result {
     // --------------------------------------------- SMS utils --------------------------------------------------------------
 
     private ResultObject generateSMSResult(OnboardingRequest request, Session session) throws OXException {
+        SMSServiceSPI smsService = Services.optService(SMSServiceSPI.class);
+        if (smsService == null) {
+            throw ServiceExceptionCode.absentService(SMSServiceSPI.class);
+        }
+
+        SMSBucketService smsBucketService = Services.optService(SMSBucketService.class);
+        if (smsBucketService == null) {
+            throw ServiceExceptionCode.absentService(SMSBucketService.class);
+        }
+
         long ratelimit = getSMSRateLimit(session);
-        int smsRemaining = checkSMSLimit(session, ratelimit);
+        int smsRemaining = checkSMSLimit(session, ratelimit, smsBucketService);
         String untranslatedText;
         {
             List<OnboardingProvider> providers = request.getScenario().getProviders(session);
@@ -264,10 +274,6 @@ public class PlistResult implements Result {
         String link = smsLinkProvider.getLink(request.getHostData(), session.getUserId(), session.getContextId(), request.getScenario().getId(), request.getDevice().getId());
         text = text + link;
 
-        SMSServiceSPI smsService = Services.getService(SMSServiceSPI.class);
-        if (smsService == null) {
-            throw ServiceExceptionCode.absentService(SMSServiceSPI.class);
-        }
         Map<String, Object> input = request.getInput();
         if (input == null) {
             throw OnboardingExceptionCodes.MISSING_INPUT_FIELD.create(SMS_KEY);
@@ -284,11 +290,9 @@ public class PlistResult implements Result {
         ResultObject resultObject;
         resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_SMS_SENT, session), "string");
         if (smsRemaining == 2) {
-            SMSBucketService smsBucketService = Services.getService(SMSBucketService.class);
             int hours = smsBucketService.getRefreshInterval(session);
             resultObject.addWarning(SMSBucketExceptionCodes.NEXT_TO_LAST_SMS_SENT.create(hours));
         }
-
 
         return resultObject;
     }
@@ -366,7 +370,7 @@ public class PlistResult implements Result {
         return property.get().longValue();
     }
 
-    private int checkSMSLimit(Session session, long ratelimit) throws OXException {
+    private int checkSMSLimit(Session session, long ratelimit, SMSBucketService smsBucketService) throws OXException {
         if (ratelimit > 0) {
             Long lastSMSSend = (Long) session.getParameter(OnboardingSMSConstants.SMS_LAST_SEND_TIMESTAMP);
 
@@ -376,7 +380,6 @@ public class PlistResult implements Result {
         }
 
         int remainingSMS = -1;
-        SMSBucketService smsBucketService = Services.getService(SMSBucketService.class);
         if (smsBucketService.isEnabled(session)) {
             remainingSMS = smsBucketService.getSMSToken(session);
         }

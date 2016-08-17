@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -51,6 +51,7 @@ package com.openexchange.admin.user.copy.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.i;
 import org.osgi.framework.BundleContext;
+import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -64,6 +65,7 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.exceptions.UserExistsException;
 import com.openexchange.admin.rmi.impl.BasicAuthenticator;
 import com.openexchange.admin.rmi.impl.OXCommonImpl;
+import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.user.copy.rmi.OXUserCopyInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.user.copy.UserCopyService;
@@ -131,14 +133,24 @@ public class OXUserCopy extends OXCommonImpl implements OXUserCopyInterface {
             throw e1;
         }
 
+        int srcContextId = i(src.getId());
+        int dstContextId = i(dest.getId());
+        int srcUserId = i(user.getId());
+
         final int newUserId;
         try {
-            newUserId = service.copyUser(i(src.getId()), i(dest.getId()), i(user.getId()));
+            newUserId = service.copyUser(srcContextId, dstContextId, srcUserId);
         } catch (final OXException e) {
             LOG.error("", e);
             final StorageException storageException = new StorageException(e.getMessage());
             setStackTraceSafe(storageException, e);
             throw new StorageException(e.getMessage());
+        }
+
+        try {
+            Filestore2UserUtil.copyFilestore2UserEntry(srcContextId, srcUserId, dstContextId, newUserId, AdminDaemon.getCache());
+        } catch (Exception e) {
+            LOG.info("Failed to copy filestore2User entry for user {} in context {} to user {} in context {}", user.getId(), src.getId(), newUserId, dest.getId());
         }
 
         LOG.info("User {} successfully copied to Context {} from Context {}", user.getId(), dest.getId(), src.getId());

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -61,13 +61,14 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
 import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserPermissionService;
 
 public class HaloActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] {
-            UserService.class, ContactService.class, SessionSpecificContainerRetrievalService.class, ConfigViewFactory.class };
+        return new Class[] { UserService.class, UserPermissionService.class, ContactService.class,
+            SessionSpecificContainerRetrievalService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -77,7 +78,7 @@ public class HaloActivator extends HousekeepingActivator {
         ContactDataSource cds = new ContactDataSource(this);
         halo.addContactDataSource(cds);
         halo.addContactImageSource(cds);
-        
+
         registerService(ContactHalo.class, halo);
 
         track(HaloContactDataSource.class, new SimpleRegistryListener<HaloContactDataSource>() {
@@ -93,7 +94,7 @@ public class HaloActivator extends HousekeepingActivator {
             }
 
         });
-        
+
         track(HaloContactImageSource.class, new SimpleRegistryListener<HaloContactImageSource>() {
 
             @Override

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -55,7 +55,7 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.json.fields.MailAccountFields;
+import com.openexchange.mailaccount.json.MailAccountFields;
 
 /**
  * {@link Attribute}.
@@ -114,8 +114,12 @@ public enum Attribute {
     ARCHIVE_FULLNAME_LITERAL(MailAccountFields.ARCHIVE_FULLNAME, 1042),
     // Transport auth information
     TRANSPORT_AUTH_LITERAL(MailAccountFields.TRANSPORT_AUTH, 1043),
+    // Whether STARTTLS is required for mail server
     MAIL_STARTTLS_LITERAL(MailAccountFields.MAIL_STARTTLS, 1044),
+    // Whether STARTTLS is required for transport server
     TRANSPORT_STARTTLS_LITERAL(MailAccountFields.TRANSPORT_STARTTLS, 1045),
+    // Root folder identifier
+    ROOT_FOLDER(MailAccountFields.ROOT_FOLDER, 1046),
 
     ;
 
@@ -266,6 +270,8 @@ public enum Attribute {
             return switcher.mailStartTls();
         case TRANSPORT_STARTTLS_LITERAL:
             return switcher.transportStartTls();
+        case ROOT_FOLDER:
+            return switcher.rootFolder();
         default:
             throw new IllegalArgumentException(getName());
         }

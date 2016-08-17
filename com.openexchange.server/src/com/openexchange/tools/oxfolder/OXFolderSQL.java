@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -2386,18 +2386,21 @@ public final class OXFolderSQL {
      * Deletes all permissions assigned to context's mail admin from given permission table.
      */
     static void handleMailAdminPermissions(final int mailAdmin, final String folderTable, final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
-        handleEntityPermissions(mailAdmin, null, -1L, folderTable, permTable, readConArg, writeConArg, ctx);
+        handleEntityPermissions(mailAdmin, null, null, -1L, folderTable, permTable, readConArg, writeConArg, ctx);
     }
 
     /**
      * Handles entity' permissions located in given permission table. If permission is associated with a private folder, it is going to be
      * deleted. Otherwise the permission is reassigned to mailadmin.
      */
-    static void handleEntityPermissions(final int entity, final int mailAdmin, final long lastModified, final String folderTable, final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
-        handleEntityPermissions(entity, Integer.valueOf(mailAdmin), lastModified, folderTable, permTable, readConArg, writeConArg, ctx);
+    static void handleEntityPermissions(final int entity, final int mailAdmin, Integer destUser, final long lastModified, final String folderTable, final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
+        handleEntityPermissions(entity, Integer.valueOf(mailAdmin), destUser, lastModified, folderTable, permTable, readConArg, writeConArg, ctx);
     }
 
-    private static void handleEntityPermissions(final int entity, final Integer mailAdmin, final long lastModified, final String folderTable, final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
+    private static void handleEntityPermissions(final int entity, final Integer mailAdmin, Integer destUserID, final long lastModified, final String folderTable, final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
+        if (destUserID == null) {
+            destUserID = ctx.getMailadmin();
+        }
         Connection readCon = readConArg;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
@@ -2428,7 +2431,7 @@ public final class OXFolderSQL {
                 int fuid = rs.getInt(1);
                 int type = rs.getInt(2);
                 int module = rs.getInt(3);
-                if (isMailAdmin || markForDeletion(type, module)) {
+                if (destUserID <= 0 || isMailAdmin || markForDeletion(type, module)) {
                     deletePerms.add(fuid);
                 } else {
                     reassignPerms.add(fuid);
@@ -2442,14 +2445,14 @@ public final class OXFolderSQL {
              * Delete
              */
             deletePermissions(deletePerms, entity, permTable, writeConArg, ctx);
-            if (!isMailAdmin) {
+            if (!isMailAdmin && destUserID > 0) {
                 /*
                  * Reassign
                  */
                 reassignPermissions(
                     reassignPerms,
                     entity,
-                    mailAdmin.intValue(),
+                    destUserID,
                     lastModified,
                     folderTable,
                     permTable,
@@ -2553,7 +2556,7 @@ public final class OXFolderSQL {
 
     private static final String SQL_REASSIGN_UPDATE_TIMESTAMP = "UPDATE " + TMPL_FOLDER_TABLE + " SET changed_from = ?, changing_date = ? WHERE cid = ? AND fuid = ?";
 
-    private static void reassignPermissions(final TIntSet reassignPerms, final int entity, final int mailAdmin, final long lastModified, final String folderTable, final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
+    private static void reassignPermissions(final TIntSet reassignPerms, final int entity, final int destUser, final long lastModified, final String folderTable, final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
         final int size = reassignPerms.size();
         if (size == 0) {
             return;
@@ -2581,11 +2584,11 @@ public final class OXFolderSQL {
             Next: for (int i = size; i-- > 0;) {
                 final int fuid = iter.next();
                 /*
-                 * Check if admin already holds permission on current folder
+                 * Check if user already holds permission on current folder
                  */
                 stmt = rc.prepareStatement("SELECT 1 FROM " + permTable + " WHERE cid = ? AND permission_id = ? AND fuid = ?");
                 stmt.setInt(1, ctx.getContextId());
-                stmt.setInt(2, mailAdmin);
+                stmt.setInt(2, destUser);
                 stmt.setInt(3, fuid);
                 rs = executeQuery(stmt);
                 final boolean hasPerm = rs.next();
@@ -2595,22 +2598,22 @@ public final class OXFolderSQL {
                 stmt = null;
                 if (hasPerm) {
                     /*
-                     * User (Mail Admin) already holds permission on this folder
+                     * User destUser already holds permission on this folder
                      */
                     try {
                         /*
                          * Set to merged permission
                          */
-                        final OCLPermission mergedPerm = getMergedPermission(entity, mailAdmin, fuid, permTable, readConArg, ctx);
+                        final OCLPermission mergedPerm = getMergedPermission(entity, destUser, fuid, permTable, readConArg, ctx);
                         deleteSingleEntityPermission(entity, fuid, permTable, wc, ctx);
-                        updateSingleEntityPermission(mergedPerm, mailAdmin, fuid, permTable, wc, ctx);
+                        updateSingleEntityPermission(mergedPerm, destUser, fuid, permTable, wc, ctx);
                     } catch (final Exception e) {
                         LOG.error("", e);
                         continue Next;
                     }
                 } else {
                     stmt = wc.prepareStatement(SQL_REASSIGN_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
-                    stmt.setInt(1, mailAdmin);
+                    stmt.setInt(1, destUser);
                     stmt.setInt(2, ctx.getContextId());
                     stmt.setInt(3, fuid);
                     stmt.setInt(4, entity);
@@ -2627,7 +2630,7 @@ public final class OXFolderSQL {
             stmt = wc.prepareStatement(SQL_REASSIGN_UPDATE_TIMESTAMP.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
             iter = reassignPerms.iterator();
             for (int i = size; i-- > 0;) {
-                stmt.setInt(1, mailAdmin);
+                stmt.setInt(1, destUser);
                 stmt.setLong(2, lastModified);
                 stmt.setInt(3, ctx.getContextId());
                 stmt.setInt(4, iter.next());
@@ -2665,7 +2668,7 @@ public final class OXFolderSQL {
 
     private static final String SQL_REASSIGN_UPDATE_PERM = "UPDATE " + TMPL_PERM_TABLE + " SET fp = ?, orp = ?, owp = ?, odp = ?, admin_flag = ?, group_flag = ? WHERE cid = ? AND permission_id = ? AND fuid = ?";
 
-    private static void updateSingleEntityPermission(final OCLPermission mergedPerm, final int mailAdmin, final int fuid, final String permTable, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
+    private static void updateSingleEntityPermission(final OCLPermission mergedPerm, final int destUser, final int fuid, final String permTable, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
         Connection wc = writeConArg;
         boolean close = false;
         PreparedStatement stmt = null;
@@ -2682,7 +2685,7 @@ public final class OXFolderSQL {
             stmt.setInt(5, mergedPerm.isFolderAdmin() ? 1 : 0);
             stmt.setInt(6, mergedPerm.isGroupPermission() ? 1 : 0);
             stmt.setInt(7, ctx.getContextId());
-            stmt.setInt(8, mailAdmin);
+            stmt.setInt(8, destUser);
             stmt.setInt(9, fuid);
             executeUpdate(stmt);
         } finally {
@@ -2692,7 +2695,7 @@ public final class OXFolderSQL {
 
     private static final String SQL_REASSIGN_SEL_PERM = "SELECT fp, orp, owp, odp, admin_flag FROM " + TMPL_PERM_TABLE + " WHERE cid = ? AND permission_id = ? AND fuid = ?";
 
-    private static OCLPermission getMergedPermission(final int entity, final int mailAdmin, final int fuid, final String permTable, final Connection readConArg, final Context ctx) throws SQLException, OXException {
+    private static OCLPermission getMergedPermission(final int entity, final int destUser, final int fuid, final String permTable, final Connection readConArg, final Context ctx) throws SQLException, OXException {
         Connection readCon = readConArg;
         boolean closeRead = false;
         PreparedStatement innerStmt = null;
@@ -2704,12 +2707,12 @@ public final class OXFolderSQL {
             }
             innerStmt = readCon.prepareStatement(SQL_REASSIGN_SEL_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
             innerStmt.setInt(1, ctx.getContextId());
-            innerStmt.setInt(2, mailAdmin);
+            innerStmt.setInt(2, destUser);
             innerStmt.setInt(3, fuid);
             innerRs = executeQuery(innerStmt);
             if (!innerRs.next()) {
                 /*
-                 * Merged permission is entity's permission since no permission is defined for admin
+                 * Merged permission is entity's permission since no permission is defined for user destUser
                  */
                 innerRs.close();
                 innerStmt.close();
@@ -2722,18 +2725,18 @@ public final class OXFolderSQL {
                     /*
                      * Empty permission
                      */
-                    return new OCLPermission(mailAdmin, fuid);
+                    return new OCLPermission(destUser, fuid);
                 }
-                final OCLPermission adminPerm = new OCLPermission(mailAdmin, fuid);
-                adminPerm.setAllPermission(innerRs.getInt(1), innerRs.getInt(2), innerRs.getInt(3), innerRs.getInt(4));
-                adminPerm.setFolderAdmin(innerRs.getInt(5) > 0);
-                adminPerm.setGroupPermission(false);
-                return adminPerm;
+                final OCLPermission destUserPerm = new OCLPermission(destUser, fuid);
+                destUserPerm.setAllPermission(innerRs.getInt(1), innerRs.getInt(2), innerRs.getInt(3), innerRs.getInt(4));
+                destUserPerm.setFolderAdmin(innerRs.getInt(5) > 0);
+                destUserPerm.setGroupPermission(false);
+                return destUserPerm;
             }
-            final OCLPermission adminPerm = new OCLPermission(mailAdmin, fuid);
-            adminPerm.setAllPermission(innerRs.getInt(1), innerRs.getInt(2), innerRs.getInt(3), innerRs.getInt(4));
-            adminPerm.setFolderAdmin(innerRs.getInt(5) > 0);
-            adminPerm.setGroupPermission(false);
+            final OCLPermission destUserPerm = new OCLPermission(destUser, fuid);
+            destUserPerm.setAllPermission(innerRs.getInt(1), innerRs.getInt(2), innerRs.getInt(3), innerRs.getInt(4));
+            destUserPerm.setFolderAdmin(innerRs.getInt(5) > 0);
+            destUserPerm.setGroupPermission(false);
             innerRs.close();
             innerStmt.close();
             innerStmt = readCon.prepareStatement(SQL_REASSIGN_SEL_PERM.replaceFirst(TMPL_PERM_TABLE, permTable));
@@ -2742,7 +2745,7 @@ public final class OXFolderSQL {
             innerStmt.setInt(3, fuid);
             innerRs = executeQuery(innerStmt);
             if (!innerRs.next()) {
-                return adminPerm;
+                return destUserPerm;
             }
             final OCLPermission entityPerm = new OCLPermission(entity, fuid);
             entityPerm.setAllPermission(innerRs.getInt(1), innerRs.getInt(2), innerRs.getInt(3), innerRs.getInt(4));
@@ -2750,12 +2753,12 @@ public final class OXFolderSQL {
             /*
              * Merge
              */
-            final OCLPermission mergedPerm = new OCLPermission(mailAdmin, fuid);
-            mergedPerm.setFolderPermission(Math.max(adminPerm.getFolderPermission(), entityPerm.getFolderPermission()));
-            mergedPerm.setReadObjectPermission(Math.max(adminPerm.getReadPermission(), entityPerm.getReadPermission()));
-            mergedPerm.setWriteObjectPermission(Math.max(adminPerm.getWritePermission(), entityPerm.getWritePermission()));
-            mergedPerm.setDeleteObjectPermission(Math.max(adminPerm.getDeletePermission(), entityPerm.getDeletePermission()));
-            mergedPerm.setFolderAdmin(adminPerm.isFolderAdmin() || entityPerm.isFolderAdmin());
+            final OCLPermission mergedPerm = new OCLPermission(destUser, fuid);
+            mergedPerm.setFolderPermission(Math.max(destUserPerm.getFolderPermission(), entityPerm.getFolderPermission()));
+            mergedPerm.setReadObjectPermission(Math.max(destUserPerm.getReadPermission(), entityPerm.getReadPermission()));
+            mergedPerm.setWriteObjectPermission(Math.max(destUserPerm.getWritePermission(), entityPerm.getWritePermission()));
+            mergedPerm.setDeleteObjectPermission(Math.max(destUserPerm.getDeletePermission(), entityPerm.getDeletePermission()));
+            mergedPerm.setFolderAdmin(destUserPerm.isFolderAdmin() || entityPerm.isFolderAdmin());
             mergedPerm.setGroupPermission(false);
             return mergedPerm;
         } finally {
@@ -2766,18 +2769,22 @@ public final class OXFolderSQL {
     // ------------------- DELETE FOLDERS --------------------------
 
     static void handleMailAdminFolders(final int mailAdmin, final String folderTable, final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
-        handleEntityFolders(mailAdmin, null, -1L, folderTable, permTable, readConArg, writeConArg, ctx);
+        handleEntityFolders(mailAdmin, null, null, -1L, folderTable, permTable, readConArg, writeConArg, ctx);
     }
 
-    static void handleEntityFolders(final int entity, final int mailAdmin, final long lastModified, final String folderTable, final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
-        handleEntityFolders(entity, Integer.valueOf(mailAdmin), lastModified, folderTable, permTable, readConArg, writeConArg, ctx);
+    static void handleEntityFolders(final int entity, final int mailAdmin, Integer destUser, final long lastModified, final String folderTable, final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
+        handleEntityFolders(entity, Integer.valueOf(mailAdmin), destUser, lastModified, folderTable, permTable, readConArg, writeConArg, ctx);
     }
 
     private static final String SQL_SEL_FOLDERS = "SELECT ot.fuid, ot.type, ot.module, ot.default_flag FROM #FOLDER# AS ot WHERE ot.cid = ? AND ot.created_from = ?";
 
     private static final String SQL_SEL_FOLDERS2 = "SELECT ot.fuid FROM #FOLDER# AS ot WHERE ot.cid = ? AND ot.changed_from = ?";
 
-    private static void handleEntityFolders(final int entity, final Integer mailAdmin, final long lastModified, final String folderTable, final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
+    private static void handleEntityFolders(final int entity, final Integer mailAdmin, Integer destUser, final long lastModified, final String folderTable, final String permTable, final Connection readConArg, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
+        if (destUser == null) {
+            destUser = ctx.getMailadmin();
+        }
+
         Connection readCon = readConArg;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
@@ -2799,7 +2806,7 @@ public final class OXFolderSQL {
                 int fuid = rs.getInt(1);
                 int type = rs.getInt(2);
                 int module = rs.getInt(3);
-                if (isMailAdmin || markForDeletion(type, module)) {
+                if (destUser <= 0 || isMailAdmin || markForDeletion(type, module)) {
                     deleteFolders.add(fuid);
                 } else {
                     reassignFolders.add(fuid);
@@ -2813,11 +2820,11 @@ public final class OXFolderSQL {
              * Delete
              */
             deleteFolders(deleteFolders, folderTable, permTable, writeConArg, ctx);
-            if (!isMailAdmin) {
+            if (!isMailAdmin && destUser > 0) {
                 /*
                  * Reassign
                  */
-                reassignFolders(reassignFolders, entity, mailAdmin.intValue(), lastModified, folderTable, writeConArg, ctx);
+                reassignFolders(reassignFolders, entity, destUser.intValue(), lastModified, folderTable, writeConArg, ctx);
             }
             /*
              * Remove from cache
@@ -2865,7 +2872,8 @@ public final class OXFolderSQL {
                 /*
                  * Reassign
                  */
-                reassignFolders(reassignFolders, entity, mailAdmin.intValue(), lastModified, folderTable, writeConArg, ctx);
+                int tmpDestination = destUser > 0 ? destUser : mailAdmin.intValue();
+                reassignFolders(reassignFolders, entity, tmpDestination, lastModified, folderTable, writeConArg, ctx);
             }
             /*
              * Remove from cache
@@ -2995,7 +3003,7 @@ public final class OXFolderSQL {
 
     private static final String SQL_REASSIGN_FOLDERS_WITH_NAME = "UPDATE #FOLDER# SET created_from = ?, changed_from = ?, changing_date = ?, default_flag = 0, fname = ? WHERE cid = ? AND fuid = ?";
 
-    private static void reassignFolders(final TIntSet reassignFolders, final int entity, final int mailAdmin, final long lastModified, final String folderTable, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
+    private static void reassignFolders(final TIntSet reassignFolders, final int entity, final int destUser, final long lastModified, final String folderTable, final Connection writeConArg, final Context ctx) throws OXException, SQLException {
         Connection wc = writeConArg;
         boolean closeWrite = false;
         PreparedStatement stmt = null;
@@ -3018,8 +3026,8 @@ public final class OXFolderSQL {
                             size--;
 
                             stmt = wc.prepareStatement(SQL_REASSIGN_FOLDERS_WITH_NAME.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
-                            stmt.setInt(1, mailAdmin);
-                            stmt.setInt(2, mailAdmin);
+                            stmt.setInt(1, destUser);
+                            stmt.setInt(2, destUser);
                             stmt.setLong(3, lastModified);
                             stmt.setString(4, new StringBuilder(defaultInfostoreFolder.name).append(fuid).toString());
                             stmt.setInt(5, ctx.getContextId());
@@ -3039,8 +3047,8 @@ public final class OXFolderSQL {
             TIntIterator iter = reassignFolders.iterator();
             stmt = wc.prepareStatement(SQL_REASSIGN_FOLDERS.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
             for (int i = size; i-- > 0;) {
-                stmt.setInt(1, mailAdmin);
-                stmt.setInt(2, mailAdmin);
+                stmt.setInt(1, destUser);
+                stmt.setInt(2, destUser);
                 stmt.setLong(3, lastModified);
                 stmt.setInt(4, ctx.getContextId());
                 stmt.setInt(5, iter.next());
@@ -3073,6 +3081,31 @@ public final class OXFolderSQL {
         } finally {
             closeResources(rs, stmt, null, true, ctx);
         }
+    }
+
+    private static final String SQL_CLEAN_LOCKS =   "DELETE FROM infostore_lock WHERE cid=? AND userid=? AND " + 
+                                                    "entity IN (SELECT id FROM infostore WHERE cid=? AND folder_id=?) AND " + 
+                                                    "entity NOT IN (SELECT object_id FROM object_permission where cid=? AND folder_id=?);";
+
+    static void cleanLocksForFolder(int folder, int[] userIds, Connection con, Context ctx) throws SQLException {
+
+        PreparedStatement stmt = null;
+        try {
+            for (int userId : userIds) {
+                stmt = con.prepareStatement(SQL_CLEAN_LOCKS);
+                stmt.setInt(1, ctx.getContextId());
+                stmt.setInt(2, userId);
+                stmt.setInt(3, ctx.getContextId());
+                stmt.setInt(4, folder);
+                stmt.setInt(5, ctx.getContextId());
+                stmt.setInt(6, folder);
+                stmt.execute();
+                closeSQLStuff(stmt);
+            }
+        } finally {
+            closeResources(null, stmt, null, true, ctx);
+        }
+
     }
 
     /**

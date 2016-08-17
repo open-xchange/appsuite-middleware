@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -148,7 +148,7 @@ public final class GetStructureAction extends AbstractMailAction {
                     final int contextId = session.getContextId();
                     final int userId = session.getUserId();
                     if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
-                        triggerContactCollector(session, mail);
+                        triggerContactCollector(session, mail, false);
                     }
                 } catch (final OXException e) {
                     LOG.warn("Contact collector could not be triggered.", e);
@@ -161,8 +161,7 @@ public final class GetStructureAction extends AbstractMailAction {
                 LOG.warn("Requested mail could not be found. Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.",
                     e);
                 try {
-                    final Object[] args = e.getDisplayArgs();
-                    final String uid = null == args || 0 == args.length || null == args[0] ? null : args[0].toString();
+                    final String uid = getUidFromException(e);
                     if ("undefined".equalsIgnoreCase(uid)) {
                         throw MailExceptionCode.PROCESSING_ERROR.create(e, new Object[0]);
                     }

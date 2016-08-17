@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -54,6 +54,7 @@ import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.java.Strings;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -77,6 +78,8 @@ public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> impl
     protected int leftHandLimit = -1;
 
     protected int rightHandLimit = -1;
+
+    protected String categoryId;
 
     public AbstractAllRequest(final String servletPath, final int folderId, final int[] columns, final int sort, final Order order, final boolean failOnError) {
         super();
@@ -160,6 +163,9 @@ public abstract class AbstractAllRequest<T extends AbstractColumnsResponse> impl
         if (validateLimit()) {
             params.add(new Parameter(AJAXServlet.LEFT_HAND_LIMIT, leftHandLimit));
             params.add(new Parameter(AJAXServlet.RIGHT_HAND_LIMIT, rightHandLimit));
+        }
+        if (!Strings.isEmpty(categoryId)) {
+            params.add(new Parameter("categoryid", categoryId));
         }
         return params.toArray(new Parameter[params.size()]);
     }

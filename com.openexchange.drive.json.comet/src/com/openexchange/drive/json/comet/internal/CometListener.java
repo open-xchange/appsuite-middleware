@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,23 +50,16 @@
 package com.openexchange.drive.json.comet.internal;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.locks.ReentrantLock;
 import org.glassfish.grizzly.comet.CometContext;
 import org.glassfish.grizzly.comet.CometEvent.Type;
-import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
-import com.openexchange.drive.DriveAction;
-import com.openexchange.drive.DriveVersion;
-import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.DriveSession;
+import com.openexchange.drive.events.DriveEvent;
 import com.openexchange.drive.json.DefaultLongPollingListener;
-import com.openexchange.drive.json.json.JsonDriveAction;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link CometListener}
@@ -87,9 +80,11 @@ public class CometListener extends DefaultLongPollingListener {
      * Initializes a new {@link CometListener}.
      *
      * @param session The session
+     * @param cometContext The comet context
+     * @param rootFolderIDs The root folder IDs to listen for changes in
      */
-    public CometListener(DriveSession session, CometContext<DriveEvent> cometContext) {
-        super(session);
+    public CometListener(DriveSession session, CometContext<DriveEvent> cometContext, List<String> rootFolderIDs) {
+        super(session, rootFolderIDs);
         this.cometContext = cometContext;
         this.lock = new ReentrantLock();
     }
@@ -103,7 +98,7 @@ public class CometListener extends DefaultLongPollingListener {
                  * wait for event inside comet handler
                  */
                 LOG.debug("Registering new comet handler for {} ...", driveSession);
-                cometHandler = new DriveCometHandler(driveSession);
+                cometHandler = new DriveCometHandler(driveSession, rootFolderIDs);
                 cometContext.addCometHandler(cometHandler);
                 /*
                  * return placeholder result for now
@@ -122,19 +117,6 @@ public class CometListener extends DefaultLongPollingListener {
             }
         } finally {
             lock.unlock();
-        }
-    }
-
-    protected AJAXRequestResult createResult(DriveEvent event) throws OXException {
-        /*
-         * create and return resulting actions if available
-         */
-        List<DriveAction<? extends DriveVersion>> actions = null != event ? event.getActions() :
-            new ArrayList<DriveAction<? extends DriveVersion>>(0);
-        try {
-            return new AJAXRequestResult(JsonDriveAction.serialize(actions, Locale.US), "json");
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -167,13 +149,9 @@ public class CometListener extends DefaultLongPollingListener {
         }
     }
 
-    private boolean isInteresting(DriveEvent event) {
-        return null != event && null != event.getFolderIDs() && event.getFolderIDs().contains(driveSession.getRootFolderID());
-    }
-
     @Override
     public String toString() {
-        return "CometListener [session=" + driveSession + "]";
+        return "CometListener [driveSession=" + driveSession + ", rootFolderIDs=" + rootFolderIDs + "]";
     }
 
 }

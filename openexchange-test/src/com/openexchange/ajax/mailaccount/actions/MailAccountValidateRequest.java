@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.TransportAuth;
-import com.openexchange.mailaccount.json.writer.MailAccountWriter;
+import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
 
 /**
  * {@link MailAccountValidateRequest}
@@ -90,7 +90,7 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
 
     @Override
     public Object getBody() throws JSONException {
-        final JSONObject json = MailAccountWriter.write(wrap(account));
+        final JSONObject json = DefaultMailAccountWriter.write(wrap(account));
         json.put("password", account.getPassword());
         json.put("transport_password", account.getTransportPassword());
         return json;
@@ -353,6 +353,11 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             @Override
             public boolean isTransportStartTls() {
                 return acc.isTransportStartTls();
+            }
+
+            @Override
+            public String getRootFolder() {
+                return null;
             }
         };
     }

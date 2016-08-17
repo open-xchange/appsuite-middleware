@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -56,8 +56,8 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.UrlInfo;
 import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -93,20 +93,16 @@ public abstract class TransportConfig extends MailConfig {
          */
         int userId = session.getUserId();
         int contextId = session.getContextId();
-        MailAccount mailAccount;
+        TransportAccount transportAccount;
         {
             MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            if (accountId == MailAccount.DEFAULT_ID) {
-                mailAccount = storage.getDefaultMailAccount(userId, contextId);
-            } else {
-                mailAccount = storage.getMailAccount(accountId, userId, contextId);
-            }
+            transportAccount = storage.getTransportAccount(accountId, userId, contextId);
         }
         transportConfig.accountId = accountId;
-        fillLoginAndPassword(transportConfig, session, UserStorage.getInstance().getUser(userId, contextId).getLoginInfo(), mailAccount);
-        transportConfig.setStartTls(mailAccount.isTransportStartTls());
+        fillLoginAndPassword(transportConfig, session, UserStorage.getInstance().getUser(userId, contextId).getLoginInfo(), transportAccount);
+        transportConfig.setStartTls(transportAccount.isTransportStartTls());
 
-        UrlInfo urlInfo = TransportConfig.getTransportServerURL(mailAccount);
+        UrlInfo urlInfo = TransportConfig.getTransportServerURL(transportAccount);
         String serverURL = urlInfo.getServerURL();
         if (serverURL == null) {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource())) {
@@ -124,24 +120,24 @@ public abstract class TransportConfig extends MailConfig {
             }
         }
         transportConfig.parseServerURL(urlInfo);
-        transportConfig.doCustomParsing(mailAccount, session);
+        transportConfig.doCustomParsing(transportAccount, session);
         return transportConfig;
     }
 
     /**
      * Gets the transport server URL appropriate to configured transport server source.
      *
-     * @param mailAccount The mail account
+     * @param transportAccount The mail account
      * @return The appropriate transport server URL or <code>null</code>
      */
-    public static UrlInfo getTransportServerURL(final MailAccount mailAccount) {
-        if (!mailAccount.isDefaultAccount()) {
-            return new UrlInfo(mailAccount.generateTransportServerURL(), mailAccount.isTransportStartTls());
+    public static UrlInfo getTransportServerURL(final TransportAccount transportAccount) {
+        if (!transportAccount.isDefaultAccount()) {
+            return new UrlInfo(transportAccount.generateTransportServerURL(), transportAccount.isTransportStartTls());
         }
         if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource())) {
             return new UrlInfo(MailProperties.getInstance().getTransportServer(), MailProperties.getInstance().isTransportStartTls());
         }
-        return new UrlInfo(mailAccount.generateTransportServerURL(), mailAccount.isTransportStartTls());
+        return new UrlInfo(transportAccount.generateTransportServerURL(), transportAccount.isTransportStartTls());
     }
 
     /**
@@ -154,7 +150,7 @@ public abstract class TransportConfig extends MailConfig {
      */
     public static UrlInfo getTransportServerURL(final Session session, final int accountId) throws OXException {
         final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-        return getTransportServerURL(storage.getMailAccount(accountId, session.getUserId(), session.getContextId()));
+        return getTransportServerURL(storage.getTransportAccount(accountId, session.getUserId(), session.getContextId()));
     }
 
     @Override

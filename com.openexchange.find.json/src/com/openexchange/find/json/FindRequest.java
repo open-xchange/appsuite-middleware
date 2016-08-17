@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -54,6 +54,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -69,8 +71,10 @@ import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.FacetType;
+import com.openexchange.find.facet.FacetTypeLookUp;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.mail.MailFacetType;
+import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.find.tasks.TasksFacetType;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -84,6 +88,55 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class FindRequest {
 
+    private static final class DefaultFacetTypeLookUp implements FacetTypeLookUp {
+
+        private static final ConcurrentMap<Module, DefaultFacetTypeLookUp> CACHE = new ConcurrentHashMap<Module, DefaultFacetTypeLookUp>(6);
+
+        static DefaultFacetTypeLookUp getInstanceFor(Module module) {
+            DefaultFacetTypeLookUp tmp = CACHE.get(module);
+            if (null == tmp) {
+                DefaultFacetTypeLookUp ntmp = new DefaultFacetTypeLookUp(module);
+                tmp = CACHE.putIfAbsent(module, ntmp);
+                if (null == tmp) {
+                    tmp = ntmp;
+                }
+            }
+            return tmp;
+        }
+
+        private final Module module;
+
+        private DefaultFacetTypeLookUp(Module module) {
+            super();
+            this.module = module;
+        }
+
+        @Override
+        public FacetType facetTypeFor(String id) {
+            return FindRequest.facetTypeFor(module, id);
+        }
+    }
+
+    private static final class FallbackFacetTypeLookUp implements FacetTypeLookUp {
+
+        private final Module module;
+        private final FacetTypeLookUp mainLookUp;
+
+        FallbackFacetTypeLookUp(FacetTypeLookUp mainLookUp, Module module) {
+            super();
+            this.mainLookUp = mainLookUp;
+            this.module = module;
+        }
+
+        @Override
+        public FacetType facetTypeFor(String id) {
+            FacetType facetType = mainLookUp.facetTypeFor(id);
+            return null == facetType ? DefaultFacetTypeLookUp.getInstanceFor(module).facetTypeFor(id) : facetType;
+        }
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------------
+
     private static final String PARAM_MODULE = "module";
     private static final String PARAM_PREFIX = "prefix";
     private static final String PARAM_START = "start";
@@ -94,20 +147,22 @@ public class FindRequest {
 
     // -------------------------------------------------------------------------------------------- //
 
-
     private final AJAXRequestData request;
     private final ServerSession session;
+    private final SearchServiceProvider searchServiceProvider;
 
     /**
      * Initializes a new {@link FindRequest}.
      *
-     * @param request
-     * @param session
+     * @param request The AJAX request data
+     * @param session The session providing user data
+     * @param services The OSGi service look-up
      */
-    public FindRequest(final AJAXRequestData request, final ServerSession session) {
+    public FindRequest(final AJAXRequestData request, final ServerSession session, SearchServiceProvider searchServiceProvider) {
         super();
         this.request = request;
         this.session = session;
+        this.searchServiceProvider = searchServiceProvider;
     }
 
     /**
@@ -208,12 +263,13 @@ public class FindRequest {
 
         try {
             Module module = requireModule();
+            FacetTypeLookUp facetTypeLookUp = getFacetTypeLookUp(module);
             final int length = jFacets.length();
             List<ActiveFacet> facets = new ArrayList<ActiveFacet>(length);
             for (int i = 0; i < length; i++) {
                 JSONObject jFacet = jFacets.getJSONObject(i);
                 String jType = jFacet.getString("facet");
-                FacetType type = facetTypeFor(module, jType);
+                FacetType type = facetTypeLookUp.facetTypeFor(jType);
                 if (type == null) {
                     throw FindExceptionCode.UNSUPPORTED_FACET.create(jType, module.getIdentifier());
                 }
@@ -239,6 +295,11 @@ public class FindRequest {
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
+    }
+
+    private FacetTypeLookUp getFacetTypeLookUp(Module module) throws OXException {
+        ModuleSearchDriver driver = searchServiceProvider.getSearchService().getDriver(module, session);
+        return driver instanceof FacetTypeLookUp ? new FallbackFacetTypeLookUp((FacetTypeLookUp) driver, module) : DefaultFacetTypeLookUp.getInstanceFor(module);
     }
 
     private static String getValueId(Object valueObj) {
@@ -362,7 +423,14 @@ public class FindRequest {
         return new Filter(fields, queries);
     }
 
-    private static FacetType facetTypeFor(Module module, String id) {
+    /**
+     * Gets the facet type for specified identifier by look-up standard modules' facet types.
+     *
+     * @param module The module
+     * @param id The identifier
+     * @return The facet type or <code>null</code>
+     */
+    static FacetType facetTypeFor(Module module, String id) {
         FacetType type = null;
         switch(module) {
             case MAIL:

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -66,7 +66,6 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.fileholder.Readable;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.CheckParametersAction;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.IDataWrapper;
 import com.openexchange.ajax.requesthandler.responseRenderers.actions.IFileResponseRendererAction;
@@ -85,13 +84,14 @@ import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link FileResponseRenderer}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FileResponseRenderer implements ResponseRenderer {
+public class FileResponseRenderer extends AbstractListenerCollectingResponseRenderer {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileResponseRenderer.class);
 
@@ -161,7 +161,7 @@ public class FileResponseRenderer implements ResponseRenderer {
     }
 
     @Override
-    public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
+    public void actualWrite(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest req, HttpServletResponse resp) {
         IFileHolder file = (IFileHolder) result.getResultObject();
         // Check if file is actually supplied by the request URL.
         if (file == null || hasNoFileItem(file)) {
@@ -204,17 +204,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         final long length = fileHolder.getLength();
         final List<Closeable> closeables = new LinkedList<Closeable>();
         final String fileContentType = fileHolder.getContentType();
-        IDataWrapper data = new DataWrapper().setContentTypeByParameter(false)
-            .setLength(length)
-            .setFile(fileHolder)
-            .setRequest(req)
-            .setFileContentType(fileContentType)
-            .setFileName(fileName)
-            .setRequestData(requestData)
-            .setResponse(resp)
-            .setCloseAbles(closeables)
-            .setResult(result)
-            .setTmpDirReference(tmpDirReference);
+        IDataWrapper data = new DataWrapper().setContentTypeByParameter(false).setLength(length).setFile(fileHolder).setRequest(req).setFileContentType(fileContentType).setFileName(fileName).setRequestData(requestData).setResponse(resp).setCloseAbles(closeables).setResult(result).setTmpDirReference(tmpDirReference);
 
         try {
             data.setUserAgent(AJAXUtility.sanitizeParam(req.getHeader("user-agent")));
@@ -269,7 +259,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private void sendErrorSafe(int sc, String msg, final HttpServletResponse resp) {
         try {
-            resp.sendError(sc, null == msg ? HttpStatus.getStatusText(sc) : msg);
+            Tools.sendErrorPage(resp, sc, msg);
         } catch (final Exception e) {
             // Ignore
         }
@@ -528,14 +518,14 @@ public class FileResponseRenderer implements ResponseRenderer {
         /** The status code to respond with */
         public final int statusCode;
 
-        /** The optional accompanying  message */
+        /** The optional accompanying message */
         public final String message;
 
         /**
          * Initializes a new {@link FileResponseRendererActionException}.
          *
          * @param statusCode The HTTP status code
-         * @param message The optional accompanying  message
+         * @param message The optional accompanying message
          */
         public FileResponseRendererActionException(int statusCode, String message) {
             super();
@@ -543,5 +533,4 @@ public class FileResponseRenderer implements ResponseRenderer {
             this.message = message;
         }
     } // End of class FileResponseRendererActionException
-
 }

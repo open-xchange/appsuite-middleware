@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -78,11 +78,9 @@ import com.openexchange.imap.notify.internal.IMAPNotifierRegistry;
 import com.openexchange.imap.osgi.console.ListLsubCommandProvider;
 import com.openexchange.imap.services.Services;
 import com.openexchange.imap.storecache.IMAPStoreCache;
-import com.openexchange.imap.threader.ThreadableCache;
-import com.openexchange.imap.threader.ThreadableLoginHandler;
 import com.openexchange.imap.threader.references.ConversationCache;
 import com.openexchange.imap.util.ExtAccountFolderField;
-import com.openexchange.login.LoginHandlerService;
+import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -158,6 +156,7 @@ public final class IMAPActivator extends HousekeepingActivator {
             track(MailcapCommandMap.class, new MailcapServiceTracker(context));
             track(CacheEventService.class, new ListLsubInvalidator(context));
             trackService(FolderService.class);
+            trackService(AuditLogService.class);
             openTrackers();
             /*
              * Command provider
@@ -206,9 +205,8 @@ public final class IMAPActivator extends HousekeepingActivator {
                 ConversationCache.initInstance(this);
             }
             /*
-             * Register login handler
+             * Register reloadbale
              */
-            registerService(LoginHandlerService.class, new ThreadableLoginHandler(this));
             registerService(Reloadable.class, IMAPReloadable.getInstance());
             /*
              * Register event handler
@@ -254,7 +252,6 @@ public final class IMAPActivator extends HousekeepingActivator {
                             if (null != userId) {
                                 ListLsubCache.dropFor(userId.intValue(), contextId.intValue(), false);
                                 IMAPStoreCache.getInstance().dropFor(userId.intValue(), contextId.intValue());
-                                ThreadableCache.dropFor(userId.intValue(), contextId.intValue());
 
                                 IMAPNotifierRegistry.getInstance().handleRemovedSession(userId.intValue(), contextId.intValue());
                                 ConversationCache.getInstance().removeUserConversations(userId.intValue(), contextId.intValue());
@@ -277,7 +274,6 @@ public final class IMAPActivator extends HousekeepingActivator {
                         Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
                         ListLsubCache.dropFor(session);
                         IMAPStoreCache.getInstance().dropFor(userId, contextId);
-                        ThreadableCache.dropFor(session);
                     }
 
                 };
@@ -328,7 +324,6 @@ public final class IMAPActivator extends HousekeepingActivator {
              */
             ConversationCache.releaseInstance();
             IMAPStoreCache.shutDownInstance();
-            ThreadableCache.getInstance().clear();
             Services.setServiceLookup(null);
             if (secretService != null) {
                 secretService.close();

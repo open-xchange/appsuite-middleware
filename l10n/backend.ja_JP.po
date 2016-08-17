@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: errors.ja_JP\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-03-17 13:31+0100\n"
+"PO-Revision-Date: 2016-06-20 14:45+0200\n"
 "Last-Translator: \n"
 "Language-Team: ja@li.org\n"
 "Language: ja_JP\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=0;\n"
-"X-Generator: Poedit 1.8.7\n"
+"X-Generator: Poedit 1.8.8\n"
 "Plural-Forms: nplurals=2; plural=0;\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
@@ -64,7 +64,7 @@ msgstr "仮承諾"
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
 msgid "Verification of client ticket failed."
-msgstr "クライアント チケットの検証に失敗しました。"
+msgstr "クライアントチケットの検証に失敗しました。"
 
 #. The Kerberos ticket granting service denied to issue a delegate ticket for the client.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:65
@@ -84,7 +84,7 @@ msgstr "Kerberos サーバでこのサービスの認証に失敗しました。
 #. When shutting down this service the termination of the service ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:74
 msgid "Problem while terminating service ticket."
-msgstr "サービス チケットの終了中に問題が発生しました。"
+msgstr "サービスチケットの終了中に問題が発生しました。"
 
 #. Written to the log file if the session contains a Kerberos subject that does not contain any ticket that needs a renewal.
 #. %1$s is replaced with the subjects principal name.
@@ -195,7 +195,7 @@ msgstr "%1$s日。毎 %2$sの日月"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:71
 msgid "On %1$s %2$s every %3$s. month"
-msgstr "毎 の %1$s %2$s%3$s日月"
+msgstr "%3$s毎の%1$s %2$s日月"
 
 #. On %1$s %2$s in %3$s; e.g "On third Tuesday in April"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:73
@@ -463,8 +463,8 @@ msgid ""
 "This invitation was sent to someone else, not you. This appointment would have to be created in a user's private folder to which you do not have "
 "write permissions."
 msgstr ""
-"この出席依頼は、あなたではなく、他のユーザ宛に送信されたものです。このアポイントは、あなたに書き込み権限のない、ユーザのプライベート フォルダに作"
-"成されます。"
+"この出席依頼は、あなたではなく、他のユーザ宛に送信されたものです。このアポイントは、あなたに書き込み権限のない、ユーザのプライベートフォルダに作成"
+"されます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:82
 msgid "The appointment's attachments have been changed"
@@ -607,7 +607,7 @@ msgstr "日時:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:176
 msgid "Direct link:"
-msgstr "ダイレクト リンク:"
+msgstr "ダイレクトリンク:"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:178
 msgid "Where:"
@@ -872,7 +872,7 @@ msgstr "送信済みオブジェクトの割当量を超えました。%1$s 秒�
 #. The download link is invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:85
 msgid "The download link is invalid."
-msgstr "指定されたダウンロード リンクは無効です。"
+msgstr "指定されたダウンロードリンクは無効です。"
 
 #. The download link is invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:88
@@ -982,7 +982,7 @@ msgstr "ユーザの LDAP 検索結果が多過ぎます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:68
 msgid "The LDAP search for the user object \"%s\" gave no results."
-msgstr "ユーザ オブジェクト \"%s\" の LDAP 検索では、該当する結果がありませんでした。"
+msgstr "ユーザオブジェクト \"%s\" の LDAP 検索では、該当する結果がありませんでした。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:69
 msgid "The LDAP search in distribution lists for specific attributes is not supported."
@@ -1006,7 +1006,7 @@ msgstr "名"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:66
 msgid "Middle name"
-msgstr "ミドル ネーム"
+msgstr "ミドルネーム"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:67
 msgid "Suffix"
@@ -1394,6 +1394,7 @@ msgstr "UID"
 #. A document's file name
 #. Task attribute name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.rdb/src/com/openexchange/contact/storage/rdb/mapping/Strings.java:159
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:64
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:76
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/AttributeNames.java:87
@@ -1435,7 +1436,7 @@ msgstr "vCardは最大許容サイズを超えており、インポートでき�
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.vcard.storage/src/com/openexchange/contact/vcard/storage/VCardStorageExceptionMessages.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:75
 msgid "Unable to access the file store."
-msgstr "ファイル ストアにアクセスできません。"
+msgstr "ファイルストアにアクセスできません。"
 
 #. Application 'xyz' requires following permissions:
 #. - Read all your contacts.
@@ -1504,7 +1505,7 @@ msgstr "プール %1$d に関する情報を取得できません。"
 #. %1$s is replace with some java class name representing the JDBC driver.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:85
 msgid "Driver class %1$s missing."
-msgstr "ドライバ クラス %1$s が見つかりません。"
+msgstr "ドライバクラス %1$s が見つかりません。"
 
 #. The pool throws this exception if it believes the connection does not belong to it.
 #. "Return" in terms of giving a previously obtained pooled connection back into connection pool.
@@ -1572,7 +1573,7 @@ msgstr "プール %1$d に関する情報がありません。"
 #. %1$d is replaced with the context identifier that is stored in the schema.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:125
 msgid "Transaction counter is missing for context %1$d."
-msgstr "コンテキスト %1$d のトランザクション カウンタが見つかりません。"
+msgstr "コンテキスト %1$d のトランザクションカウンタが見つかりません。"
 
 #. This error message may happen when provisioning contexts. Writing the database assigment or updating it failed in database.
 #. %1$d is replaced with the context identifier.
@@ -1584,12 +1585,12 @@ msgstr "コンテキスト %1$d およびサーバ %2$d のデータベースの
 #. %1$s is replaced with more details about the invalid configuration
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:133
 msgid "Invalid configuration for global databases: %1$s"
-msgstr "グローバル データベースの構成は無効です: %1$s"
+msgstr "グローバルデータベースの構成は無効です: %1$s"
 
 #. %1$s is replaced with the context group name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.database/src/com/openexchange/database/DBPoolingExceptionStrings.java:136
 msgid "No global database for context group \"%1$s\" found."
-msgstr "コンテキスト グループ \"%1$s\" のグローバル データベース は見つかりません。"
+msgstr "コンテキストグループ \"%1$s\" のグローバルデータベースは見つかりません。"
 
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveStrings.java:64
@@ -1610,7 +1611,7 @@ msgstr "指定された場所のファイルにアクセスできません。同
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:66
 msgid "The file version \"%1$s\" was not found at \"%3$s\". Please retry the synchronization."
-msgstr "\"%3$s\" にファイル バージョン \"%1$s\" が見つかりませんでした。同期をもう一度やり直してください。"
+msgstr "\"%3$s\" にファイルバージョン \"%1$s\" が見つかりませんでした。同期をもう一度やり直してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:67
 msgid "Integrity checks failed for uploaded file \"%2$s\". Please try again."
@@ -1618,7 +1619,7 @@ msgstr "アップロードされたファイル \"%2$s\" の整合性チェッ�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:68
 msgid "The directory version \"%1$s\" was not found. Please retry the synchronization."
-msgstr "ディレクトリ バージョン \"%1$s\" が見つかりませんでした。同期をもう一度やり直してください。"
+msgstr "ディレクトリバージョン \"%1$s\" が見つかりませんでした。同期をもう一度やり直してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:69
 msgid "You are not allowed to delete the file \"%1$s\" at \"%2$s\"."
@@ -1662,11 +1663,11 @@ msgstr "パス \"%1$s\" が競合しています。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:79
 msgid "The file version \"%1$s\" is invalid."
-msgstr "ファイル バージョン \"%1$s\" は無効です。"
+msgstr "ファイルバージョン \"%1$s\" は無効です。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:80
 msgid "The directory version \"%1$s\" is invalid."
-msgstr "ディレクトリ バージョン \"%1$s\" は無効です。"
+msgstr "ディレクトリバージョン \"%1$s\" は無効です。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:81
 msgid "Push updates are not available."
@@ -1690,11 +1691,11 @@ msgstr "ディレクトリ \"%1$s\" で、同期の問題が繰り返し発生�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:86
 msgid "The client application you're using is outdated and no longer supported - please upgrade to a newer version."
-msgstr "ご利用のクライアント アプリケーションは旧バージョンで、既にサポートが終了しています。最新バージョンにアップグレードしてください。"
+msgstr "ご利用のクライアントアプリケーションは旧バージョンで、既にサポートが終了しています。最新バージョンにアップグレードしてください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:87
 msgid "A newer version of your client application is available for download."
-msgstr "クライアント アプリケーションの最新バージョンがダウンロードできます。"
+msgstr "クライアントアプリケーションの最新バージョンがダウンロードできます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:88
 msgid "The pattern \"%1$s\" is invalid. Please use a valid pattern and try again."
@@ -1729,6 +1730,10 @@ msgstr "ディレクトリ %2$s のファイル数上限（%1$d）を超えて�
 msgid "The token \"%1$s\" is already registered."
 msgstr "トークン \"%1$s\" は登録済みです。"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:96
+msgid "Empty files indicated for directory \"%1$s\"."
+msgstr "ディレクトリ %1$s のファイルは空です。"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
@@ -1739,6 +1744,95 @@ msgstr "トークン \"%1$s\" は登録済みです。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.mslive/src/com/openexchange/subscribe/mslive/FormStrings.java:61
 msgid "Select an existing account"
 msgstr "既存のアカウントを選択"
+
+#. The name for the virtual folder containing all attachments from all messages
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:67
+msgid "All attachments"
+msgstr "すべての添付ファイル"
+
+#. The name for the virtual folder containing all attachments of received messages
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:70
+msgid "Received attachments"
+msgstr "受信済み添付ファイル"
+
+#. The name for the virtual folder containing all attachments of sent messages
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:73
+msgid "Sent attachments"
+msgstr "送信済み添付ファイル"
+
+#. The account display name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:76
+msgid "Mail Drive"
+msgstr "メールドライブ"
+
+#. Search in From sender.
+#. Search for mails sent from ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:81
+msgid "From"
+msgstr "差出人"
+
+#. Search in To recipient.
+#. Search for mails sent to ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:84
+msgid "To"
+msgstr "宛先"
+
+#. Search in original mail subject
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:73
+msgid "Subject"
+msgstr "件名。"
+
+#. Search in file type.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:81
+msgid "File type"
+msgstr "ファイルタイプ"
+
+#. Search in file size
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:84
+msgid "File size"
+msgstr "ファイルサイズ"
+
+#. ---------------------------------------------------------------------------------- //
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in file name.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:112
+msgid "in file name"
+msgstr "検索対象: ファイル名"
+
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in From sender.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:91
+msgid "in From sender"
+msgstr "差出人から"
+
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in To recipient.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:96
+msgid "in To recipient"
+msgstr "宛先から"
+
+#. Context: Searching in drive.
+#. Displayed as: [Search for] 'user input' in subject.
+#. The 'user input' part is always prepended, please heed this in translations.
+#. Context: Searching in appointments.
+#. Displayed as: [Search for] 'user input' in subject.
+#. The 'user input' part is always prepended, please heed this in translations.
+#. Context: Searching in mail.
+#. Displayed as: [Search for] 'user input' in subject.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/find/MailDriveStrings.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:64
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:67
+msgid "in subject"
+msgstr "検索対象: 件名"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:61
@@ -1805,7 +1899,7 @@ msgstr "ZIP アーカイブが最大許容サイズ %1$sを超えています。
 #. The file storage account is currently not accessible.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:92
 msgid "The file storage account is currently not accessible."
-msgstr "ファイル ストレージアカウントは現在アクセスができません。"
+msgstr "ファイルストレージアカウントは現在アクセスができません。"
 
 #. The folder \"%1$s\" cannot be moved to \"%2$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:95
@@ -1919,7 +2013,7 @@ msgstr "データが失われた可能性があるため、ファイル \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:80
 msgid "Bad or expired access token. Need to re-authenticate user."
-msgstr "アクセス トークンが無効か、期限が切れています。ユーザの再認証が必要です。"
+msgstr "アクセストークンが無効か、期限が切れています。ユーザの再認証が必要です。"
 
 #. Your rate limit has been exceeded and further access is not possible at the moment.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:163
@@ -2043,7 +2137,7 @@ msgstr "指定された URI を解析できませんでした。"
 #. Your key is too long.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:116
 msgid "Your key is too long."
-msgstr "キーが長過ぎます。"
+msgstr "鍵が長過ぎます。"
 
 #. Your request was too big.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:119
@@ -2062,7 +2156,7 @@ msgstr "指定されたバケットは存在しません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:127
 msgid "The specified key does not exist."
-msgstr "指定されたキーは存在しません。"
+msgstr "指定された鍵は存在しません。"
 
 #. Your account is not signed up for the Amazon S3 service.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:130
@@ -2110,7 +2204,7 @@ msgid ""
 "The S3 storage responds with \"Bad Request\". Please check whether com.openexchange.filestore.s3.[filestoreID].signerOverride is properly "
 "configured for this filestore."
 msgstr ""
-"S3 ストレージ パスの応は「Bad Request」です。com.openexchange.filestore.s3.[filestoreID].signerOverride の構成がこのファイルストアに対応しているか"
+"S3 ストレージパスの応は「Bad Request」です。com.openexchange.filestore.s3.[filestoreID].signerOverride の構成がこのファイルストアに対応しているか"
 "どうかを確認してください。"
 
 #. No such document: %1$s
@@ -2184,7 +2278,7 @@ msgstr "フォルダID \"%1$s\" はモジュール \"%2$s\" には無効です�
 #. The folder type \"%1$s\" is not supported.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:93
 msgid "The folder type \"%1$s\" is not supported."
-msgstr "フォルダ タイプ \"%1$s\" はサポートしていません。"
+msgstr "フォルダタイプ \"%1$s\" はサポートしていません。"
 
 #. The facet types \"%1$s\" and \"%2$s\" conflict with each other and must not be used within one request.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:96
@@ -2200,17 +2294,6 @@ msgstr "モジュール \"%1$s\"の検索は許可されていません。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:102
 msgid "The query yielded too many results to be displayed. Please refine your search options and try again."
 msgstr "クエリが表示する結果が多すぎます。検索オプションを変更して、もう一度やり直してください。"
-
-#. Context: Searching in appointments.
-#. Displayed as: [Search for] 'user input' in subject.
-#. The 'user input' part is always prepended, please heed this in translations.
-#. Context: Searching in mail.
-#. Displayed as: [Search for] 'user input' in subject.
-#. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:67
-msgid "in subject"
-msgstr "検索対象: 件名"
 
 #. Context: Searching in appointments.
 #. Displayed as: [Search for] 'user input' in description.
@@ -2243,7 +2326,7 @@ msgstr "検索対象: 添付ファイルの名前"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:81
 msgid "My Status"
-msgstr "マイ ステータス"
+msgstr "マイステータス"
 
 #. Search for items by their creation date
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:83
@@ -2300,9 +2383,11 @@ msgstr "アポイント全体"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:71
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:75
 msgid "Folder type"
-msgstr "フォルダ タイプ"
+msgstr "フォルダタイプ"
 
+#. The default name for a folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/common/CommonStrings.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:70
 msgid "Folder"
 msgstr "フォルダ"
 
@@ -2405,16 +2490,6 @@ msgstr "メンバ"
 msgid "File description"
 msgstr "ファイルの説明"
 
-#. Search in file type.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:81
-msgid "File type"
-msgstr "ファイル タイプ"
-
-#. Search in file size
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:84
-msgid "File size"
-msgstr "ファイル サイズ"
-
 #. -------------------------- i18n strings for file types ---------------------------- //
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:88
 msgid "Images"
@@ -2442,27 +2517,20 @@ msgstr "その他"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:101
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:64
 msgid "Public folders"
-msgstr "パブリック フォルダ"
+msgstr "パブリックフォルダ"
 
 #. Private folders
 #. Name of the parent folder for the private user folders.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:104
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:62
 msgid "Private folders"
-msgstr "プライベート フォルダ"
+msgstr "プライベートフォルダ"
 
 #. Shared folders
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:107
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:66
 msgid "Shared folders"
 msgstr "共有フォルダ"
-
-#. Context: Searching in drive.
-#. Displayed as: [Search for] 'user input' in file name.
-#. The 'user input' part is always prepended, please heed this in translations.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:112
-msgid "in file name"
-msgstr "検索対象: ファイル名"
 
 #. Context: Searching in drive.
 #. Displayed as: [Search for] 'user input' in file description.
@@ -2495,15 +2563,9 @@ msgstr "人物"
 msgid "From/To"
 msgstr "差出人/宛先"
 
-#. Search for mails sent from ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:81
-msgid "From"
-msgstr "差出人"
-
-#. Search for mails sent to ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:84
-msgid "To"
-msgstr "宛先"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/mail/MailStrings.java:86
+msgid "in attachment file names"
+msgstr "添付ファイル名から"
 
 #. ------------------------- i18n strings for facet types -------------------------------------- //
 #. Context: Searching in tasks.
@@ -2660,7 +2722,7 @@ msgstr "自動ログインはサポートされていません。"
 #. Indicates a deactivated user
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:101
 msgid "The user account is not activated."
-msgstr "ユーザ アカウントが有効になっていません。"
+msgstr "ユーザアカウントが有効になっていません。"
 
 #. You exceeded the maximum count of logins without password.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:104
@@ -2816,7 +2878,7 @@ msgstr "Guardエラーが発生しました： %1$s"
 #. A Guard error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:65
 msgid "A Guard server error occurred with HTTP status code %1$s. Error message: %2$s"
-msgstr "GuardサーバエラーがHTTPステータスコード %1$sで発生しました。エラー メッセージ: %2$s"
+msgstr "GuardサーバエラーがHTTPステータスコード %1$sで発生しました。エラーメッセージ: %2$s"
 
 #. Invalid Guard URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:68
@@ -2851,12 +2913,12 @@ msgstr "利用できる LinkedIn アカウントがありません。"
 #. Need an e-mail address to look up Linked-In data
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.halo.linkedin/src/com/openexchange/halo/linkedin/LinkedinHaloExceptionMessages.java:66
 msgid "Need an e-mail address to look up Linked-In data."
-msgstr "LinkedIn データを検索するには、メール アドレスが必要です。"
+msgstr "LinkedIn データを検索するには、メールアドレスが必要です。"
 
 #. Cannot search a contact that is neither an internal user nor has an e-mail address.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.halo/src/com/openexchange/halo/HaloExceptionMessages.java:63
 msgid "Cannot search a contact that is neither an internal user nor has an e-mail address."
-msgstr "内部ユーザ以外の連絡先とメール アドレスがない連絡先は検索できません。"
+msgstr "内部ユーザ以外の連絡先とメールアドレスがない連絡先は検索できません。"
 
 #. *
 #. * No connection available to access mailbox
@@ -2869,31 +2931,31 @@ msgstr "メールボックスにアクセスするのに利用可能な接続が
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:68
 msgid "No mail module access due to user configuration"
-msgstr "ユーザが設定した構成が原因でメール モジュールのアクセスができません。"
+msgstr "ユーザが設定した構成が原因でメールモジュールのアクセスができません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:70
 msgid "Access to mail folder is not permitted"
-msgstr "メール フォルダへのアクセスは許可されていません。"
+msgstr "メールフォルダへのアクセスは許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:72
 msgid "No lookup access to mail folder"
-msgstr "メール フォルダへの検索アクセス権限がありません。"
+msgstr "メールフォルダへの検索アクセス権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:74
 msgid "No read access to mail folder"
-msgstr "メール フォルダへの読み取りアクセス権限がありません。"
+msgstr "メールフォルダへの読み取りアクセス権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:76
 msgid "No delete access to mail folder"
-msgstr "メール フォルダへの削除アクセス権限がありません。"
+msgstr "メールフォルダへの削除アクセス権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:78
 msgid "No insert access to mail folder"
-msgstr "メール フォルダへの挿入アクセス権限がありません。"
+msgstr "メールフォルダへの挿入アクセス権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:80
 msgid "No administer access to mail folder"
-msgstr "メール フォルダへの管理者アクセス権限がありません。"
+msgstr "メールフォルダへの管理者アクセス権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:82
 msgid "No write access to IMAP folder"
@@ -2901,7 +2963,7 @@ msgstr "IMAP フォルダへの書き込みアクセス権限がありません�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:84
 msgid "No keep-seen access to mail folder"
-msgstr "メール フォルダへの未読/既読アクセス権限がありません。"
+msgstr "メールフォルダへの未読/既読アクセス権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:86
 msgid "Folder does not allow subfolders."
@@ -2910,7 +2972,7 @@ msgstr "フォルダの配下にサブフォルダの作成が許可されてい
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:88
 msgid "Mail folder \"%1$s\" could not be created (maybe due to insufficient permission on parent folder %2$s or due to an invalid folder name)"
 msgstr ""
-"メール フォルダ \"%1$s\" を作成できませんでした (親フォルダ %2$s に十分な権限が割り当てられていないか、フォルダ名が無効である可能性があります)。"
+"メールフォルダ \"%1$s\" を作成できませんでした (親フォルダ %2$s に十分な権限が割り当てられていないか、フォルダ名が無効である可能性があります)。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:90
 msgid ""
@@ -2973,7 +3035,7 @@ msgstr "IMAP検索が\"%1$s\"の理由で失敗しました。アプリケーシ
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:114
 msgid "IMAP sort failed due to reason \"%1$s\". Switching to application-based sorting."
-msgstr "IMAPソートは\"%1$s\"の理由で失敗しました。アプリケーションベースの検索に切り替えます。"
+msgstr "IMAPソートは\"%1$s\"の理由で失敗しました。アプリケーションベースのソートに切り替えます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:116
 msgid "Unknown search field: %1$s"
@@ -2981,7 +3043,7 @@ msgstr "次の検索フィールドが不明です: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:118
 msgid "Mail folder must not be moved to subsequent folder"
-msgstr "メール フォルダはその配下のフォルダに移動できません。"
+msgstr "メールフォルダはその配下のフォルダに移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:120
 msgid ""
@@ -3005,7 +3067,7 @@ msgstr "IMAP フォルダの読み取り専用チェックが失敗しました�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:128
 msgid "Unknown folder open mode %1$s"
-msgstr "次のフォルダ オープン モードが不明です: %1$s"
+msgstr "次のフォルダオープンモードが不明です: %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:130
 msgid "Message(s) %1$s in folder %2$s could not be deleted due to error \"%3$s\""
@@ -3041,15 +3103,15 @@ msgid ""
 "Error message: %2$s"
 msgstr ""
 "IMAP リクエストの実行中に次のプロトコル例外が発生しました: \"%1$s\"\n"
-"エラー メッセージ: %2$s"
+"エラーメッセージ: %2$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:144
 msgid "Mailbox' root folder must not be source or the destination full name of a move operation."
-msgstr "メールの移動操作で、メールボックスのルート フォルダを移動元または移動先フォルダとして指定できません。"
+msgstr "メールの移動操作で、メールボックスのルートフォルダを移動元または移動先フォルダとして指定できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:146
 msgid "Sort field %1$s is not supported via IMAP SORT command"
-msgstr "ソート フィールド %1$s は、IMAP SORT コマンドではサポートされていません。"
+msgstr "ソートフィールド %1$s は、IMAP SORT コマンドではサポートされていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:148
 msgid "Missing personal namespace"
@@ -3069,7 +3131,7 @@ msgstr "\"%3$s\" が原因で、フォルダ \"%1$s\" の名前を \"%2$s\" に�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:156
 msgid "No rename access to mail folder %1$s"
-msgstr "メール フォルダ %1$s の名前変更アクセス権限がありません。"
+msgstr "メールフォルダ %1$s の名前変更アクセス権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:158
 msgid "Unable to parse IMAP server URI \"%1$s\"."
@@ -3239,6 +3301,11 @@ msgstr "インポートする連絡先の上限を超えました。最初の %1
 msgid "The character encoding \"%1$s\" is not supported. Please choose another one."
 msgstr "文字エンコード \"%1$s\" はサポートされていません。別の名前を選んでください。"
 
+#. The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:139
+msgid "The contact with uid %1$s is too similar to the existing contact with uid %2$s in folder %3$s"
+msgstr "uid %1$s の連絡先はフォルダ %3$s 内の uid %2$s の付いている既存の連絡先に近すぎです。"
+
 #. Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:62
 msgid "Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done."
@@ -3250,19 +3317,50 @@ msgstr "MAIL-AUTOCONFIG"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
-msgstr "メール アドレス %1$s は無効です。"
+msgstr "メールアドレス %1$s は無効です。"
+
+#. Reorganizing of mails failed. Please try again later.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories.impl/src/com/openexchange/mail/categories/organizer/MailCategoriesOrganizeExceptionStrings.java:63
+msgid "Reorganizing of mails failed. Please try again later."
+msgstr "メールの整理に失敗しました。後でもう一度やり直してください。"
+
+#. The user category %1$s does not exist.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:63
+msgid "The user category %1$s does not exist."
+msgstr "ユーザ種類 %1$s は存在しません。"
+
+#. Invalid configuration: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:69
+msgid "Invalid configuration: %1$s"
+msgstr "次の構成は無効です: %1$s"
+
+#. The required service %1$s is temporary not available. Please try again later.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:72
+msgid "The required service %1$s is temporary not available. Please try again later."
+msgstr "要求されたサービス %1$s は現在利用できません。後でもう一度やり直してください。"
+
+#. You are not allowed to change the name of the category %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:75
+msgid "You are not allowed to change the name of the category %1$s."
+msgstr "種類 %1$s の名前変更は許可されていません。"
+
+#. You are not allowed to enable or disable the category %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:78
+msgid "You are not allowed to enable or disable the category %1$s."
+msgstr "種類 %1$s を有効または無効にすることは許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:60
 msgid "The redirect address \"%1$s\" is not valid."
-msgstr "リダイレクト アドレス \"%1$s\" は有効ではありません。"
+msgstr "リダイレクトアドレス \"%1$s\" は有効ではありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:62
 msgid "The redirect address \"%1$s\" has been rejected."
-msgstr "リダイレクト アドレス \"%1$s\" が拒否されました。"
+msgstr "リダイレクトアドレス \"%1$s\" が拒否されました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:64
 msgid "Invalid SIEVE rule specified. Please review your mail filter rules"
-msgstr "指定された SIEVE ルールが無効です。メール フィルタ ルールを見直してください。"
+msgstr "指定された SIEVE ルールが無効です。メールフィルタルールを見直してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:66
 msgid "Please review your mail filter rules as they seem to be invalid. Response from server: \"%1$s\""
@@ -3285,12 +3383,12 @@ msgstr "セッション %1$s に関連付けられているクライアント識
 #. Invalid Twitter messaging account. Please delete and re-create your Twitter messaging account.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/TwitterMessagingExceptionMessages.java:64
 msgid "Invalid Twitter messaging account. Please delete and re-create your Twitter messaging account."
-msgstr "Twitter メッセージ アカウントが無効です。Twitter メッセージング アカウントを削除して再作成してください。"
+msgstr "Twitter メッセージアカウントが無効です。Twitter メッセージングアカウントを削除して再作成してください。"
 
 #. A messaging error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:64
 msgid "A messaging error occurred: %1$s"
-msgstr "次のメッセージ エラーが発生しました: %1$s。"
+msgstr "次のメッセージエラーが発生しました: %1$s。"
 
 #. Wrongly formatted address: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:67
@@ -3300,7 +3398,7 @@ msgstr "次のアドレスのフォーマットが誤っています: %1$s"
 #. Unknown messaging content: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:70
 msgid "Unknown messaging content: %1$s."
-msgstr "次のメッセージ コンテンツが不明です: %1$s"
+msgstr "次のメッセージコンテンツが不明です: %1$s"
 
 #. Invalid parameter: %1$s with value '%2$s'.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:73
@@ -3315,7 +3413,7 @@ msgstr "次のメッセージ部分は読み取り専用です: %1$s"
 #. Unknown color label index: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:79
 msgid "Unknown color label index: %1$s"
-msgstr "次のカラー ラベルのインデックスが不明です: %1$s"
+msgstr "次のカラーラベルのインデックスが不明です: %1$s"
 
 #. A duplicate folder named "%1$s" already exists below parent folder "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:82
@@ -3325,7 +3423,7 @@ msgstr "フォルダ名 \"%1$s\" の複製が親フォルダ \"%2$s\" の配下�
 #. No create access on mail folder %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:85
 msgid "No create access on mail folder %1$s."
-msgstr "メール フォルダ %1$s へのアクセス権限を作成できません。"
+msgstr "メールフォルダ %1$s へのアクセス権限を作成できません。"
 
 #. Not connected
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:88
@@ -3393,7 +3491,7 @@ msgstr "アプリケーション %1$s はアカウントへの接続を要求し
 #. Sign in to OX App Suite to connect example.com with your account
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:66
 msgid "Sign in to %1$s to connect %2$s with your account"
-msgstr "%1$s にサイン インして、%2$s をアカウントに接続してください。"
+msgstr "%1$s にサインインして、%2$s をアカウントに接続してください。"
 
 #. The application example.com would like to access your account, and is requesting following permissions:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:69
@@ -3413,7 +3511,7 @@ msgstr "キャンセル"
 #. label of sign in button
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:78
 msgid "Sign in"
-msgstr "サイン イン"
+msgstr "サインイン"
 
 #. label of deny button
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:81
@@ -3520,7 +3618,7 @@ msgstr "関連付けられた OAuth プロバイダから有効な応答を取�
 #. There was a problem while creating a connection to the remote service.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:94
 msgid "There was a problem while creating a connection to the remote service."
-msgstr "リモート サービスに接続を確立中にエラーが発生しました。"
+msgstr "リモートサービスに接続を確立中にエラーが発生しました。"
 
 #. You need to grant additional %1$s permissions to access the resource.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:97
@@ -3572,42 +3670,42 @@ msgstr "パスワードは変更されませんでした。"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:75
 msgid "User %1$s has no mail module access due to user configuration"
-msgstr "ユーザが設定した構成が原因でユーザ %1$s がメール モジュールのアクセスができません。"
+msgstr "ユーザが設定した構成が原因でユーザ %1$s がメールモジュールのアクセスができません。"
 
 #. *
 #. * No access to mail folder %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:79
 msgid "You do not have the appropriate permissions to access the mail folder %1$s"
-msgstr "メール フォルダ %1$s にアクセスするための適切な権限がありません。"
+msgstr "メールフォルダ %1$s にアクセスするための適切な権限がありません。"
 
 #. *
 #. * No read access on mail folder %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:83
 msgid "You do not have the appropriate permissions to read mail folder %1$s"
-msgstr "メール フォルダ %1$s を読み取るための適切な権限がありません。"
+msgstr "メールフォルダ %1$s を読み取るための適切な権限がありません。"
 
 #. *
 #. * No delete access on mail folder %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:87
 msgid "You do not have the appropriate permissions to delete mail folder %1$s"
-msgstr "メール フォルダ %1$s を削除するための適切な権限がありません。"
+msgstr "メールフォルダ %1$s を削除するための適切な権限がありません。"
 
 #. *
 #. * No insert access on mail folder %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:91
 msgid "You do not have the appropriate permissions to insert to mail folder %1$s"
-msgstr "メール フォルダ %1$s に挿入するための適切な権限がありません。"
+msgstr "メールフォルダ %1$s に挿入するための適切な権限がありません。"
 
 #. *
 #. * No administer access on mail folder %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:95
 msgid "You do not have the appropriate permissions to administer mail folder %1$s"
-msgstr "メール フォルダ %1$s を管理するための適切な権限がありません。"
+msgstr "メールフォルダ %1$s を管理するための適切な権限がありません。"
 
 #. *
 #. * No write access to POP3 folder %1$s
@@ -3621,7 +3719,7 @@ msgstr "POP3 フォルダ %1$s に書き込むための適切な権限があり�
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:103
 msgid "You do not have the appropriate permissions for a Read/Unread access in the mail folder %1$s"
-msgstr "メール フォルダ %1$s に既読/未読アクセスするための適切な権限がありません。"
+msgstr "メールフォルダ %1$s に既読/未読アクセスするための適切な権限がありません。"
 
 #. *
 #. * Folder %1$s does not allow subfolders.
@@ -3635,7 +3733,7 @@ msgstr "フォルダ %1$s にサブフォルダを作成できません。"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:111
 msgid "POP3 does not support mail folder creation"
-msgstr "POP3 はメール フォルダの作成をサポートしていません。"
+msgstr "POP3 はメールフォルダの作成をサポートしていません。"
 
 #. *
 #. * The permissions set could not be applied to the new folder %1$s.
@@ -3682,7 +3780,7 @@ msgstr "POP3 の既定フォルダ %1$s を作成できませんでした。"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:136
 msgid "Missing default %1$s folder in user mail settings"
-msgstr "ユーザ メール設定に既定の %1$s フォルダが見つかりません。"
+msgstr "ユーザメール設定に既定の %1$s フォルダが見つかりません。"
 
 #. *
 #. * Update of folder %1$s failed
@@ -3717,7 +3815,7 @@ msgstr "POP3検索は次の理由で失敗しました： %1$sアプリケーシ
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:164
 msgid "POP3 sort failed due to the following reason: %1$s Switching to application-based sorting"
-msgstr "POP3 ソートが次の理由で失敗したため、アプリケーション ベースのソートに切り替えます: %1$s"
+msgstr "POP3 ソートが次の理由で失敗したため、アプリケーションベースのソートに切り替えます: %1$s"
 
 #. *
 #. * Unknown search field: %1$s
@@ -3771,7 +3869,7 @@ msgstr "POP3 フォルダの読み取り専用チェックに失敗しました�
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:193
 msgid "Unknown folder open mode %d"
-msgstr "次のフォルダ オープン モードが不明です: %d"
+msgstr "次のフォルダオープンモードが不明です: %d"
 
 #. *
 #. * Message(s) %1$s in folder %2$s could not be deleted due to following error: %3$s
@@ -3820,7 +3918,7 @@ msgstr "フォルダの移動はサーバでサポートされていません。
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:225
 msgid "The sort field you supplied is unsupported."
-msgstr "入力したソート フィールドはサポートされていません。"
+msgstr "入力したソートフィールドはサポートされていません。"
 
 #. *
 #. * Missing personal namespace
@@ -3904,7 +4002,7 @@ msgstr "既定の POP3 フォルダ %1$s の名前の変更は許可されてい
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:273
 msgid "The POP3 storage path is missing for user %1$s. Please provide one and try again."
-msgstr "ユーザ %1$s の POP3 ストレージ パスが見つかりません。正しい値を入力して、もう一度やり直してください。"
+msgstr "ユーザ %1$s の POP3 ストレージパスが見つかりません。正しい値を入力して、もう一度やり直してください。"
 
 #. *
 #. * Illegal move operation.
@@ -3919,7 +4017,7 @@ msgstr "実行した移動操作は許可されていません。"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:282
 msgid "Login delay denies connecting to server %1$s with login %2$s. Error message from server: %5$s"
-msgstr "ログインの遅延が原因で、ログイン %2$s のアクセス先サーバ %1$s の接続が拒否されました。サーバからのエラー メッセージ: %5$s"
+msgstr "ログインの遅延が原因で、ログイン %2$s のアクセス先サーバ %1$s の接続が拒否されました。サーバからのエラーメッセージ: %5$s"
 
 #. *
 #. * Login delay denies connecting to server %1$s with login %2$s (user=%3$s, context=%4$s). Try again in %5$s seconds.<br>
@@ -3928,14 +4026,14 @@ msgstr "ログインの遅延が原因で、ログイン %2$s のアクセス先
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:287
 msgid "Login delay denies connecting to server %1$s with login %2$s. Try again in %5$s seconds. Error message from server: %6$s"
 msgstr ""
-"ログインの遅延が原因で、ログイン %2$s のアクセス先サーバ %1$s の接続が拒否されました。%5$s 秒後に再試行します。サーバからのエラー メッセージ: %6$s"
+"ログインの遅延が原因で、ログイン %2$s のアクセス先サーバ %1$s の接続が拒否されました。%5$s 秒後に再試行します。サーバからのエラーメッセージ: %6$s"
 
 #. *
 #. * POP3 storage path "%1$s" cannot be created for user %2$s in context %3$s.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:291
 msgid "The POP3 storage path is invalid. POP3 storage path \"%1$s\" cannot be created for user %2$s"
-msgstr "POP3 ストレージ パスが無効です。ユーザ %2$s 用の POP3 ストレージ パス \"%1$s\" を作成できません。"
+msgstr "POP3 ストレージパスが無効です。ユーザ %2$s 用の POP3 ストレージパス \"%1$s\" を作成できません。"
 
 #. *
 #. * Validation of POP3 credentials is disabled due to possible login restrictions by provider. Otherwise subsequent login attempt might not work. Please be advised that while it is safe to ignore this warning, the POP3 account might not work if the supplied credentials are invalid.
@@ -3951,7 +4049,7 @@ msgstr ""
 #. POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:298
 msgid "POP3 messages cannot be imported because of existing quota constraints on primary mail account. Please free some space."
-msgstr "現在、既定のメール アカウントの割当量が制限されているため、POP3 メッセージをインポートできません。空き容量を増やしてください。"
+msgstr "現在、既定のメールアカウントの割当量が制限されているため、POP3 メッセージをインポートできません。空き容量を増やしてください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:62
 msgid "The following field(s) are too long: %1$s. Please shorten the values and try again"
@@ -3969,7 +4067,7 @@ msgstr "サムネイル画像は利用できません。"
 #. No preview service for MIME type %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.preview/src/com/openexchange/preview/PreviewExceptionMessages.java:70
 msgid "The preview service for MIME type %1$s is currently not available. Please try again later"
-msgstr "MIME タイプ %1$s のプレビュー サービスが一時的に利用できません。後でもう一度やり直してください。"
+msgstr "MIME タイプ %1$s のプレビューサービスが一時的に利用できません。後でもう一度やり直してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.proxy/src/com/openexchange/proxy/ProxyExceptionMessages.java:70
 msgid "Could not load data via proxy."
@@ -4025,7 +4123,7 @@ msgstr "ホスティング事業者"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:63
 msgid "Publish Infostore document"
-msgstr "インフォストア ドキュメントを公開"
+msgstr "インフォストアドキュメントを公開"
 
 #. Cannot find the requested publication site.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:63
@@ -4130,7 +4228,7 @@ msgstr "次のチャネルが不明です: %1$s"
 #. * "Obligatory key \"%1$s\" is missing from the Stanza"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:63
 msgid "Obligatory key \"%1$s\" is missing from the Stanza"
-msgstr "スタンザに必須キー \"%1$s\" が見つかりません。"
+msgstr "スタンザに必須鍵 \"%1$s\" が見つかりません。"
 
 #. * Malformed IQ Data
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.json/src/com/openexchange/realtime/json/JSONExceptionMessage.java:65
@@ -4186,6 +4284,16 @@ msgstr "次の URL から RSS フィードを読み取りに失敗しました�
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:75
 msgid "Failed to read RSS feed from URL: %2$s"
 msgstr "次の URL から RSS フィードを読み取りに失敗しました：%2$s"
+
+#. The RSS feed is exceeding the maximum allowed size of '%1$s'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:78
+msgid "The RSS feed is exceeding the maximum allowed size of '%1$s'"
+msgstr "RSS フィードは「%1$s」という最大許容サイズを超えています。"
+
+#. Cannot connect to RSS with URL: %1$s. Please change URL and try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:81
+msgid "Cannot connect to RSS with URL: %1$s. Please change URL and try again."
+msgstr "URL %1$s を使って、RSS への接続はできません。URL を変えて、もう一度やり直してください。"
 
 #. No appropriate anonymizer available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
@@ -4276,7 +4384,7 @@ msgstr "DTSTART が見つかりません。"
 #. Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:88
 msgid "Private appointments can not have attendees. Removing attendees and accepting appointment anyway."
-msgstr "プライベート アポイントに出席者を登録できません。出席者を削除し、そのままアポイントを承諾してください。"
+msgstr "プライベートアポイントに出席者を登録できません。出席者を削除し、そのままアポイントを承諾してください。"
 
 #. Not supported recurrence pattern: BYMONTH
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:91
@@ -4311,7 +4419,7 @@ msgstr "フォルダを表示する適切な権限がありません。"
 #. "The content type you provided is not allowed for the given folder.";
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:68
 msgid "The content type you provided is not allowed for the given folder."
-msgstr "入力したコンテンツ タイプは、指定されたフォルダに対して許可されていません。"
+msgstr "入力したコンテンツタイプは、指定されたフォルダに対して許可されていません。"
 
 #. You do not have appropriate permissions to move the folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:71
@@ -4342,7 +4450,7 @@ msgstr "サブフォルダを作成する適切な権限がありません。"
 #. It is not allowed to create a mail folder allowed below a public folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:89
 msgid "It is not allowed to create a mail folder below a public folder."
-msgstr "公開フォルダの配下にメール フォルダを作成することは許可されていません。"
+msgstr "公開フォルダの配下にメールフォルダを作成することは許可されていません。"
 
 #. The folder name "%1$s" is reserved. Please choose another name.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:92
@@ -4451,11 +4559,11 @@ msgstr "ゲストユーザ %1$dがグループに含まれます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:61
 msgid "Attachment cannot be saved. File store limit is exceeded."
-msgstr "添付ファイルを保存できません。ファイル ストアの制限を超えています。"
+msgstr "添付ファイルを保存できません。ファイルストアの制限を超えています。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:63
 msgid "Could not save file to the file store."
-msgstr "ファイル ストアにファイルを保存できませんでした。"
+msgstr "ファイルストアにファイルを保存できませんでした。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:65
 msgid "Attachments must contain a file."
@@ -4531,7 +4639,7 @@ msgstr "ラベル (%d) はサポートされていません。"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:92
 msgid "Private flag is only allowed inside of a private folder."
-msgstr "プライベート フラグは、プライベート フォルダ内でしか許可されていません。"
+msgstr "プライベートフラグは、プライベートフォルダ内でしか許可されていません。"
 
 #. *
 #. * Appointments marked as 'Private' can only be scheduled for the respective user (or owner of the calendar). Please remove additional
@@ -4613,7 +4721,7 @@ msgstr "フォルダのタイプが予定表ではありません。"
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:148
 msgid "Moving an appointment with private flag to a public folder is not allowed."
-msgstr "プライベートのフラグが付いたアポイントのパブリック フォルダへの移動は許可されていません。"
+msgstr "プライベートのフラグが付いたアポイントのパブリックフォルダへの移動は許可されていません。"
 
 #. *
 #. * You do not have the appropriate permissions to modify this object.
@@ -4669,14 +4777,14 @@ msgstr "プライベートのフラグが付いたアポイントの共有フォ
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:188
 msgid "You can not use different private flags for one element of a recurring appointment."
-msgstr "定期的なアポイントの要素に異なるプライベート フラグを使用できません。"
+msgstr "定期的なアポイントの要素に異なるプライベートフラグを使用できません。"
 
 #. *
 #. * You can not use the private flag in a non private folder.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:193
 msgid "You can not use the private flag in a non private folder."
-msgstr "プライベート フォルダ以外のフォルダにプライベート フラグを使用できません。"
+msgstr "プライベートフォルダ以外のフォルダにプライベートフラグを使用できません。"
 
 #. *
 #. * Invalid characters (%2$s) in field %1$s.
@@ -4697,7 +4805,7 @@ msgstr "定期的なアポイントの終了日が開始日よりも前になっ
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:208
 msgid "An external participant with the E-Mail address %1$s is already included. Please remove participant duplicate and retry."
-msgstr "メール アドレス %1$s の外部出席者は既に含まれています。重複した出席者を削除して、もう一度やり直してください。"
+msgstr "メールアドレス %1$s の外部出席者は既に含まれています。重複した出席者を削除して、もう一度やり直してください。"
 
 #. *
 #. * Moving a recurring appointment to another folder is not supported.
@@ -4726,8 +4834,8 @@ msgid "Sequence number is outdated."
 msgstr "シーケンス番号は無効です。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
-msgid "Invalid E-Mail address."
-msgstr "次のメール アドレスが無効です。"
+msgid "Invalid E-Mail address: '%s'. Please correct the E-Mail address."
+msgstr "「%s」というメールアドレスが無効です。メールアドレスを修正してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:63
 msgid "Unable to import this contact picture."
@@ -4827,7 +4935,7 @@ msgstr "画像サイズが大きすぎます。画像サイズ： %1$s. 最大�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:111
 msgid "Primary E-Mail address in system contact must not be edited."
-msgstr "システムの連絡先にある既定のメール アドレスは編集できません。"
+msgstr "システムの連絡先にある既定のメールアドレスは編集できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:113
 msgid "The contact %1$d is not located in folder %2$s (%3$d)."
@@ -4843,7 +4951,7 @@ msgstr "この連絡先の変更は許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
 msgid "An E-Mail address is mandatory for external distribution list members. Please add a valid E-Mail address."
-msgstr "外部の配布リストにあるメンバのメール アドレスは必須です。有効なメール アドレスを追加してください。"
+msgstr "外部の配布リストにあるメンバのメールアドレスは必須です。有効なメールアドレスを追加してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid "The object identifier is mandatory for distribution list members referencing existing contacts."
@@ -4896,7 +5004,7 @@ msgstr "保守でサーバがダウンしています。後でもう一度やり
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:64
 msgid "Could not connect to the context storage."
-msgstr "コンテキスト ストレージに接続できませんでした。"
+msgstr "コンテキストストレージに接続できませんでした。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:65
 msgid "The account \"%1$s\" was not found."
@@ -4919,7 +5027,7 @@ msgstr "共有アドレス帳"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:72
 msgid "Global address book"
-msgstr "グローバル アドレス帳"
+msgstr "グローバルアドレス帳"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:74
 msgid "OX folders"
@@ -4935,7 +5043,7 @@ msgstr "ユーザストア"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:80
 msgid "Public infostore"
-msgstr "パブリック インフォストア"
+msgstr "パブリックインフォストア"
 
 #. The internationalized name for the trash mail folder
 #. The name for trash folder
@@ -4962,7 +5070,7 @@ msgstr "他の連絡先フォルダ"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:90
 msgid "Other infostore folders"
-msgstr "他のインフォストア フォルダ"
+msgstr "他のインフォストアフォルダ"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:92
 msgid "Tasks"
@@ -4978,7 +5086,7 @@ msgstr "メールの添付ファイル"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:102
 msgid "My files"
-msgstr "マイ ファイル"
+msgstr "マイファイル"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
 msgid "Drive"
@@ -4986,7 +5094,7 @@ msgstr "ドライブ"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:108
 msgid "Public files"
-msgstr "パブリック ファイル"
+msgstr "パブリックファイル"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:112
 msgid "Other files"
@@ -5077,22 +5185,22 @@ msgstr "アーカイブ"
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:97
 msgid "Confirmed spam"
-msgstr "確認済みスパム メール"
+msgstr "確認済みスパムメール"
 
 #. The alternative internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:101
 msgid "confirmed-spam"
-msgstr "確認済みスパム メール"
+msgstr "確認済みスパムメール"
 
 #. The internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:105
 msgid "Confirmed ham"
-msgstr "確認済みハム メール"
+msgstr "確認済みハムメール"
 
 #. The alternative internationalized name for the confirmed-spam mail folder
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:109
 msgid "confirmed-ham"
-msgstr "確認済みハム メール"
+msgstr "確認済みハムメール"
 
 #. The internationalized subject for a read acknowledgement
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/MailStrings.java:114
@@ -6388,7 +6496,7 @@ msgstr "ドキュメントを読み込めません。もう一度やり直して
 #. The folder %1$s you requested is not an Infostore folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:68
 msgid "The folder %1$s you requested is not an Infostore folder."
-msgstr "要求されたフォルダ %1$s はインフォストア フォルダではありません。"
+msgstr "要求されたフォルダ %1$s はインフォストアフォルダではありません。"
 
 #. You do not have the appropriate permissions to read the document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:71
@@ -6468,7 +6576,7 @@ msgstr "ファイル名に無効な文字が含まれています。"
 #. New file versions can't be saved with an offset.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:119
 msgid "New file versions can't be saved with an offset."
-msgstr "指定されたオフセットで新規のファイル バージョンを保存できません。"
+msgstr "指定されたオフセットで新規のファイルバージョンを保存できません。"
 
 #. This folder is a virtual folder that cannot contain documents. Please choose another folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:122
@@ -6492,13 +6600,18 @@ msgstr "サポートされていない文字入力を修正してください。
 msgid "Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes."
 msgstr "ユーザ \"%1$s\" の機能が制限されているため、権限変更を適用できません。"
 
-#. Concurrent write attempt. Please await the previous save operation to terminate.
+#. Group %1$s can't be used for object permissions.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:134
+msgid "Group %1$s can't be used for object permissions."
+msgstr "グループ %1$s はオブジェクト権限に利用できません。"
+
+#. Concurrent write attempt. Please await the previous save operation to terminate.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
 msgid "Concurrent write attempt. Please await the previous save operation to terminate."
 msgstr "同時書き込み試行以前の保存操作が終了するのをお待ち下さい。"
 
 #. Your search took too long in order to be accomplished.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:140
 msgid "Your search took too long in order to be accomplished."
 msgstr "検索に時間がかかり過ぎて完了できませんでした。"
 
@@ -6528,7 +6641,7 @@ msgstr "オブジェクトをキャッシュに格納中に、またはキャッ
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:76
 msgid "Hash algorithm \"%s\" could not be found."
-msgstr "ハッシュ アルゴリズム \"%s\" は見つかりませんでした。"
+msgstr "ハッシュアルゴリズム \"%s\" は見つかりませんでした。"
 
 #. *
 #. * Encoding %s cannot be used.
@@ -6542,13 +6655,13 @@ msgstr "エンコーディング \"%s\" は使用できません。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:69
 msgid "No resource group found for identifier \"%1$d\"."
-msgstr "識別子 \"%1$d\" のリソース グループが見つかりません。"
+msgstr "識別子 \"%1$d\" のリソースグループが見つかりません。"
 
 #. Found resource groups with the same identifier %1$d.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:69
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:72
 msgid "Found resource groups with the same identifier \"%1$d\"."
-msgstr "同じ識別子 \"%1$d\" のリソース グループが見つかりました。"
+msgstr "同じ識別子 \"%1$d\" のリソースグループが見つかりました。"
 
 #. No resource found with identifier \"%1$d\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:71
@@ -6562,7 +6675,7 @@ msgstr "同じ識別子 \"%1$s.\" のリソースが見つかりました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/LdapExceptionMessage.java:75
 msgid "Cannot find user with E-Mail \"%s\"."
-msgstr "メール \"%s\" のユーザが見つかりません。"
+msgstr "「%s」のメールユーザが見つかりません。"
 
 #. *
 #. * Cannot find user with identifier %1$s in context %2$d.
@@ -6628,7 +6741,7 @@ msgstr "１人以上のユーザの読み込みに失敗しました。"
 #. * Alias entries are missing for user %1$d in context %2$d.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:124
 msgid "Alias entries are missing for user %1$d in context %2$d."
-msgstr "コンテキスト %2$d のユーザ %1$d 用のエイリアス エントリが見つかりません。"
+msgstr "コンテキスト %2$d のユーザ %1$d 用のエイリアスエントリが見つかりません。"
 
 #. * Updating attributes failed in context %1$d for user %2$d.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:127
@@ -6865,7 +6978,7 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:71
 msgid "Cannot create private task in public/shared folder."
-msgstr "パブリック フォルダ/共有フォルダにプライベートの仕事を作成できません。"
+msgstr "パブリックフォルダ/共有フォルダにプライベートの仕事を作成できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:73
 msgid "Error while updating task."
@@ -6905,7 +7018,7 @@ msgstr "オブジェクトを生成する適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:91
 msgid "Tasks with private flag cannot be delegated."
-msgstr "プライベート フラグが付いた仕事は委任できません。"
+msgstr "プライベートフラグが付いた仕事は委任できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:93
 msgid "Percent is %d but must be between 0 and 100."
@@ -6949,15 +7062,15 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
 msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
-msgstr "プライベート フラグが付いた仕事をパブリック フォルダ \"%1$s\" に移動できません。"
+msgstr "プライベートフラグが付いた仕事をパブリックフォルダ \"%1$s\" に移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:114
 msgid "Only the task creator is allowed to set the private flag."
-msgstr "プライベート フラグを設定できるのは仕事の作成者のみです。"
+msgstr "プライベートフラグを設定できるのは仕事の作成者のみです。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:116
 msgid "External participants without E-Mail address can not be added."
-msgstr "メール アドレスのない外部出席者は追加できません。"
+msgstr "メールアドレスのない外部出席者は追加できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:118
 msgid "You do not have the appropriate permisson to see the task %1$d in folder %2$s."
@@ -6997,7 +7110,7 @@ msgstr "次のスキーマ名が不明です: \"%1$s\""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:68
 msgid "Update task \"%1$s\" returned an unknown concurrency level. Running as blocking task."
-msgstr "更新タスク \"%1$s\" が不明な同時接続数を返しました。ブロック タスクとして動作します。"
+msgstr "更新タスク \"%1$s\" が不明な同時接続数を返しました。ブロックタスクとして動作します。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:70
 msgid ""
@@ -7018,7 +7131,7 @@ msgstr "スキーマ \"%1$s\" の更新に失敗しました。理由: \"%2$s\""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:78
 msgid "Blocking tasks (\"%1$s\") must be executed before background tasks can be executed (\"%2$s\")."
-msgstr "バックグラウンド タスク (\"%2$s\") の実行前にブロック タスク (\"%1$s\") を実行する必要があります。"
+msgstr "バックグラウンドタスク (\"%2$s\") の実行前にブロックタスク (\"%1$s\") を実行する必要があります。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:80
 msgid "Unknown task: \"%1$s\"."
@@ -7054,7 +7167,7 @@ msgstr "次の操作の値が不明です: \"%1$s\""
 #. Header "content-type" does not indicate multipart content
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:79
 msgid "Header \"content-type\" does not indicate multipart content."
-msgstr "ヘッダ \"コンテンツ タイプ\" はマルチパート コンテンツではありません。"
+msgstr "ヘッダ \"コンテンツタイプ\" はマルチパートコンテンツではありません。"
 
 #. Request rejected because its size (%1$s) exceeds the maximum configured size of %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:82
@@ -7084,13 +7197,13 @@ msgstr "次の操作の値は無効です: \"%1$s\""
 #. Upload file with id %1$s could not be found
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:97
 msgid "Upload file with id \"%1$s\" could not be found."
-msgstr "ID \"%1$s\" のアップロード ファイルが見つかりませんでした。"
+msgstr "ID \"%1$s\" のアップロードファイルが見つかりませんでした。"
 
 #. Upload file's content type \"%1$s\" does not match given file filter \"%2$s\"
 #. Thrown to indicate that currently uploaded file's MIME type does not obey a certain search criterion
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:101
 msgid "Upload file's content type \"%1$s\" does not match given file filter \"%2$s\"."
-msgstr "アップロード ファイルのコンテンツ タイプ \"%1$s\" は、指定されたファイル フィルタ \"%2$s\" と一致しません。"
+msgstr "アップロードファイルのコンテンツタイプ \"%1$s\" は、指定されたファイルフィルタ \"%2$s\" と一致しません。"
 
 #. Request rejected because its size exceeds the maximum configured size of %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:104
@@ -7162,23 +7275,23 @@ msgstr "入力したメールアドレスは空です！ゲスト管理に追加
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/guest/GuestExceptionMessage.java:67
 msgid "The new password might not be empty! Please provide a password."
-msgstr "新しいパスワードが空かもしれません。パスワードを入力してください。"
+msgstr "新しいパスワードが空にしてはいけません！パスワードを入力してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:68
 msgid "A messaging error occurred. Please try again later."
-msgstr "メッセージ エラーが発生しました。後でもう一度やり直してください。"
+msgstr "メッセージエラーが発生しました。後でもう一度やり直してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:70
 msgid "A messaging error occurred."
-msgstr "メッセージ エラーが発生しました。"
+msgstr "メッセージエラーが発生しました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:72
 msgid "Cannot initialize mail module."
-msgstr "メール モジュールを初期化できません。"
+msgstr "メールモジュールを初期化できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:74
 msgid "No mail module access permitted."
-msgstr "メール モジュールのアクセスは許可されていません。"
+msgstr "メールモジュールのアクセスは許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:76
 msgid "Error while converting contact to versit object."
@@ -7222,11 +7335,11 @@ msgstr "メール部分に内容がありません"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:94
 msgid "Message has been successfully sent. Due to exceeded quota a copy could not be placed in your sent folder though."
-msgstr "メッセージの送信に成功しました。しかし、割当量を超えたため、送信済みオブジェクト フォルダにコピーを保存できませんでした。"
+msgstr "メッセージの送信に成功しました。しかし、割当量を超えたため、送信済みオブジェクトフォルダにコピーを保存できませんでした。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:96
 msgid "Message has been successfully sent. A copy could not be placed in your sent folder though."
-msgstr "メッセージの送信に成功しました。送信済みオブジェクト フォルダにコピーを保存できませんでした。"
+msgstr "メッセージの送信に成功しました。送信済みオブジェクトフォルダにコピーを保存できませんでした。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:98
 msgid "Bad value \"%1$s\" in parameter \"%2$s\"."
@@ -7238,7 +7351,7 @@ msgstr "複数のメッセージには返信できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:102
 msgid "Attachment \"%1$s\" not found inside mail \"%2$s\" of mail folder \"%3$s\"."
-msgstr "メール フォルダ \"%3$s\" のメール \"%2$s\" に添付ファイル \"%1$s\" が見つかりません。"
+msgstr "メールフォルダ \"%3$s\" のメール \"%2$s\" に添付ファイル \"%1$s\" が見つかりません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:104
 msgid "Folder \"%1$s\" does not hold messages and is therefore not selectable"
@@ -7246,15 +7359,15 @@ msgstr "フォルダ \"%1$s\" にメッセージがないため、選択でき�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:106
 msgid "Root folder must not be modified or deleted."
-msgstr "ルート フォルダは変更または削除できません。"
+msgstr "ルートフォルダは変更または削除できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:108
 msgid "Image attachment with content id \"%1$s\" not found inside mail \"%2$s\" of mail folder \"%3$s\"."
-msgstr "メール フォルダ \"%3$s\" のメール \"%2$s\" に ID \"%1$s\" の画像の添付ファイルが見つかりません。"
+msgstr "メールフォルダ \"%3$s\" のメール \"%2$s\" に ID \"%1$s\" の画像の添付ファイルが見つかりません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:110
 msgid "The specified E-Mail address \"%1$s\" is not covered by allowed E-Mail address aliases."
-msgstr "指定されたメール アドレス \"%1$s\" は、許可されたメール アドレス エイリアスに含まれていません。"
+msgstr "指定されたメールアドレス \"%1$s\" は、許可されたメールアドレスエイリアスに含まれていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:112
 msgid "Checking default folders failed for user %2$s."
@@ -7262,15 +7375,15 @@ msgstr "ユーザ %2$s の既定フォルダのチェックに失敗しました
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:114
 msgid "The types of specified data source are not supported."
-msgstr "指定されたデータ ソースのタイプはサポートされていません。"
+msgstr "指定されたデータソースのタイプはサポートされていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:116
 msgid "Mail cannot be parsed. Invalid or incomplete mail data."
-msgstr "メールを解析できません。メール データが無効か、不十分です。"
+msgstr "メールを解析できません。メールデータが無効か、不十分です。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:118
 msgid "Mail folder cannot be created/renamed. Empty folder name."
-msgstr "メール フォルダの作成または名前の変更ができません。フォルダ名は空です。"
+msgstr "メールフォルダの作成または名前の変更ができません。フォルダ名は空です。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:120
 msgid "Invalid folder name. Please avoid the following characters: %2$s"
@@ -7278,15 +7391,15 @@ msgstr "フォルダ名が無効です。次の文字は使用しないでくだ
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:124
 msgid "No create access on mail folder \"%1$s\"."
-msgstr "メール フォルダ \"%1$s\" への作成アクセス権限がありません。"
+msgstr "メールフォルダ \"%1$s\" への作成アクセス権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:126
 msgid "Mail account \"%1$s\" with ID \"%2$s\" does not support mail transport."
-msgstr "ID \"%2$s\" のメール アカウント \"%1$s\" はメール トランスポートをサポートしていません。"
+msgstr "ID \"%2$s\" のメールアカウント \"%1$s\" はメールトランスポートをサポートしていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:128
 msgid "Mail folder could not be found."
-msgstr "メール フォルダが見つかりませんでした。"
+msgstr "メールフォルダが見つかりませんでした。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:130
 msgid "Referenced mail \"%1$s\" could not be found in folder \"%2$s\"."
@@ -7294,23 +7407,23 @@ msgstr "参照先のメール \"%1$s\" がフォルダ \"%2$s\" に見つかり�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:134
 msgid "Mail folder must not be deleted."
-msgstr "メール フォルダは削除できません。"
+msgstr "メールフォルダは削除できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:136
 msgid "No delete access on mail folder \"%1$s\"."
-msgstr "メール フォルダ \"%1$s\" への削除アクセス権限がありません。"
+msgstr "メールフォルダ \"%1$s\" への削除アクセス権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:138
 msgid "Mail folder must not be moved."
-msgstr "メール フォルダは移動できません。"
+msgstr "メールフォルダは移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:140
 msgid "Mail folder must not be updated."
-msgstr "メール フォルダは更新できません。"
+msgstr "メールフォルダは更新できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:142
 msgid "No write access on mail folder \"%1$s\"."
-msgstr "メール フォルダ \"%1$s\" への書き込みアクセス権限がありません。"
+msgstr "メールフォルダ \"%1$s\" への書き込みアクセス権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:146
 msgid "Mail could not be found in folder \"%1$s\" by message identifier."
@@ -7326,7 +7439,7 @@ msgstr "受信者を %1$s (宛先/CC/BCC を含む) に制限し、再度「送�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:152
 msgid "Unable to parse mail server URI \"%1$s\"."
-msgstr "メール サーバの URI \"%1$s\" を解析できません。"
+msgstr "メールサーバの URI \"%1$s\" を解析できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:154
 msgid "Mail attachment expired or absent."
@@ -7334,7 +7447,7 @@ msgstr "メールの添付ファイルが期限切れか、存在しません。
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:156
 msgid "Account has been checked successfully but with a non-secure connection."
-msgstr "アカウントのチェックに成功しましたが、安全でない接続で実行されました。"
+msgstr "アカウントのチェックに成功しましたが、セキュリティ保護されていない接続で実行されました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:158
 msgid "Cannot forward more than %1$s messages at once. Please divide the messages to forward in chunks of appropriate size."
@@ -7342,7 +7455,7 @@ msgstr "%1$s を超える数のメッセージを一度に転送することは�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:160
 msgid "Your account has been created but will not use a secure connection."
-msgstr "アカウントを作成しましたが、安全な接続を使用しません。"
+msgstr "アカウントを作成しましたが、セキュリティ保護された接続を使用しません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:162
 msgid "Your E-Mail has been successfully sent, but the original E-Mail could not be flagged as \"replied\" and/or \"forwarded\"."
@@ -7350,7 +7463,7 @@ msgstr "メールの送信に成功しましたが、元のメールを \"返信
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:164
 msgid "Mail folder cannot be created/renamed. Folder name exceeds max length of %1$s."
-msgstr "メール フォルダの作成または名前の変更ができません。フォルダ名が最大文字数 %1$s を超えています。"
+msgstr "メールフォルダの作成または名前の変更ができません。フォルダ名が最大文字数 %1$s を超えています。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:166
 msgid ""
@@ -7382,11 +7495,11 @@ msgstr "認証情報が無効であるため、サーバ %1$s の検証に失敗
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:178
 msgid "Server %1$s does not support being accessed using a secure connection."
-msgstr "サーバ %1$s はセキュアな接続を使用したアクセスをサポートしていません。"
+msgstr "サーバ %1$s はセキュリティ保護された接続を使用したアクセスをサポートしていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:180
 msgid "Mail access is disabled for context administrator."
-msgstr "コンテキストの管理者のメール アクセスが無効になっています。"
+msgstr "コンテキストの管理者のメールアクセスが無効になっています。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:182
 msgid "The maximum number of files that may be attached to an E-Mail is exceeded. Max. is %1$s."
@@ -7414,7 +7527,7 @@ msgstr "既定のフォルダは削除できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:199
 msgid "Archive folder does not allow subfolders."
-msgstr "アーカイブ フォルダには、サブフォルダが許可されていません。"
+msgstr "アーカイブフォルダには、サブフォルダが許可されていません。"
 
 #. The user tries to import a file as a RFC822 message, that is not valid
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:202
@@ -7430,6 +7543,76 @@ msgstr "メールの部分が読めませんでした。"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:208
 msgid "The content of the mail is too big."
 msgstr "メール内容が大きすぎます。"
+
+#. Invalid parameter value: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:211
+msgid "Invalid parameter value: %1$s"
+msgstr "次のパラメータ値が無効です: %1$s"
+
+#. The flag name %1$s is not valid. Flags may not begin with a leading '\\'.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:214
+msgid "The flag name %1$s is not valid. Flags may not begin with a leading '\\'."
+msgstr "フラグ名 %1$s は無効です。フラグ名の最初に「\\」はあってはなりません。"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:216
+msgid ""
+"The attachments to this E-Mail exceeded the size limit for attachments. Instead of sending the attachments with the E-Mail, the attachments are "
+"shared and the links are added to your E-Mail. Whoever receives the E-Mail can then access the attachments."
+msgstr ""
+"このメールの添付ファイルはサイズの上限を超えています。ファイルの添付をやめ、そのファイルを共有し、リンクをメールに追加されます。このメールを受信し"
+"たすべてのユーザは、公開された添付ファイルをアクセスできます。"
+
+#. User wants to compose a share message but does not hold sufficient permissions/capabilities to do so
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:219
+msgid "You are not allowed to compose a message containing share links"
+msgstr "共有リンクを含むメッセージの作成は許可されていません。"
+
+#. User wants to compose a share message but does not specify an expiration date which is required
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:222
+msgid "Please specify an expiration date in order to compose a message containing share links"
+msgstr "共有リンクを含むメッセージを作成するには利用期限を指定してください。"
+
+#. The default name for a file
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
+msgid "File"
+msgstr "ファイル"
+
+#. -----------------------------------------------------------------------------------------------------------------------------------
+#. The name of the folder holding the attachments, which were shared to other recipients.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:78
+msgid "My shared mail attachments"
+msgstr "共有のメール添付ファイル"
+
+#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+#. Hints to the available attachments for affected message
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:82
+msgid "The available attachments for this E-Mail can be accessed via the link %1$s"
+msgstr "このメールの添付ファイルは、リンクからアクセスできます: %1$s"
+
+#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+#. Indicates the elapsed date for affected message's attachments
+#. * The link will expire on 01/01/16 *
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:236
+msgid "The link will expire on %1$s"
+msgstr "リンクの有効期限は %1$s です。"
+
+#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+#. Indicates the password for affected message's attachments
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:90
+msgid "Please use the following password to access the attachments %1$s"
+msgstr "添付ファイル %1$s をアクセスするために次のパスワードを使ってください。"
+
+#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
+#. Indicates the file names for affected message's attachments
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:94
+msgid "The following attachments are accessible:"
+msgstr "次の添付ファイルにアクセスができます："
+
+#. Fall-back name if a file has no valid name
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:97
+msgid "Unnamed"
+msgstr "無題"
 
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
@@ -7455,21 +7638,21 @@ msgstr "入力したログイン情報が間違っている可能性がありま
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:75
 msgid "The provided login information to access mail server %1$s seem to be wrong. Please try again."
-msgstr "メール サーバ %1$s にアクセスするためのログイン情報が間違っている可能性があります。もう一度やり直してください。"
+msgstr "メールサーバ %1$s にアクセスするためのログイン情報が間違っている可能性があります。もう一度やり直してください。"
 
 #. *
 #. * Mail folder "%1$s" could not be found.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:80
 msgid "Mail folder \"%1$s\" could not be found."
-msgstr "メール フォルダ \"%1$s\" が見つかりませんでした。"
+msgstr "メールフォルダ \"%1$s\" が見つかりませんでした。"
 
 #. *
 #. * Mail folder "%1$s" could not be found on mail server %2$s.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:85
 msgid "Mail folder \"%1$s\" could not be found on mail server %2$s."
-msgstr "メール サーバ %2$s にメール フォルダ \"%1$s\" が見つかりませんでした。"
+msgstr "メールサーバ %2$s にメールフォルダ \"%1$s\" が見つかりませんでした。"
 
 #. *
 #. * Folder "%1$s" has been closed. Probably your request took too long.
@@ -7483,7 +7666,7 @@ msgstr "フォルダ \"%1$s\" が閉じられました。要求に時間がか�
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:95
 msgid "Folder \"%1$s\" has been closed on mail server %2$s. Probably your request took too long."
-msgstr "メール サーバ %2$s 上のフォルダ \"%1$s\" が閉じられました。要求に時間がかかり過ぎた可能性があります。"
+msgstr "メールサーバ %2$s 上のフォルダ \"%1$s\" が閉じられました。要求に時間がかかり過ぎた可能性があります。"
 
 #. *
 #. * Mail(s) could not be found in the given folder.
@@ -7497,7 +7680,7 @@ msgstr "指定されたフォルダにメールが見つかりませんでした
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:105
 msgid "The given E-Mail address \"%1$s\" is invalid."
-msgstr "指定されたメール アドレス \"%1$s\" は無効です。"
+msgstr "指定されたメールアドレス \"%1$s\" は無効です。"
 
 #. *
 #. * You do not have the appropriate permissions to change the content of folder "%1$s".
@@ -7553,49 +7736,49 @@ msgstr "次の宛先にメッセージを送信できませんでした: %1$s (%
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:145
 msgid "Message could not be sent. Error message from mail transport server: %1$s"
-msgstr "メッセージを送信できませんでした:。メール トランスポート サーバからのエラー メッセージ: %1$s"
+msgstr "メッセージを送信できませんでした:。メールトランスポートサーバからのエラーメッセージ: %1$s"
 
 #. *
 #. * Message could not be sent. Error message from mail transport server: %1$s (%2$s)
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:150
 msgid "Message could not be sent. Error message from mail transport server: %1$s (%2$s)"
-msgstr "メッセージを送信できませんでした:。メール トランスポート サーバからのエラー メッセージ: %1$s (%2$s)"
+msgstr "メッセージを送信できませんでした:。メールトランスポートサーバからのエラーメッセージ: %1$s (%2$s)"
 
 #. *
 #. * Lost connection to mail server.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
 msgid "Lost connection to mail server."
-msgstr "メール サーバへの接続が失われました。"
+msgstr "メールサーバへの接続が失われました。"
 
 #. *
 #. * Connection closed to mail server %1$s.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
 msgid "Connection closed to mail server %1$s."
-msgstr "メール サーバ %1$s への接続が失われました。"
+msgstr "メールサーバ %1$s への接続が失われました。"
 
 #. *
 #. * The connection to remote server %1$s was refused or timed out while attempting to connect.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
 msgid "The connection to remote server %1$s was refused or timed out while attempting to connect."
-msgstr "リモート サーバ %1$s への接続試行中に接続が拒否されたか、タイムアウトしました。"
+msgstr "リモートサーバ %1$s への接続試行中に接続が拒否されたか、タイムアウトしました。"
 
 #. *
 #. * The allowed quota on mail server exceeded.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
 msgid "The allowed quota on mail server exceeded."
-msgstr "メール サーバ上の割当量を超えました。"
+msgstr "メールサーバ上の割当量を超えました。"
 
 #. *
 #. * The allowed quota on mail server "%1$s" exceeded.
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
 msgid "The allowed quota on mail server \"%1$s\" exceeded."
-msgstr "メール サーバ \"%1$s\" 上の割当量を超えました。"
+msgstr "メールサーバ \"%1$s\" 上の割当量を超えました。"
 
 #. *
 #. * The mailbox is already in use. Please try again later.
@@ -7610,13 +7793,13 @@ msgstr "このメールボックスは既に使用されています。後でも
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
 msgid "The mailbox on mail server %1$s for login %2$s is already in use by one of your other processes or clients. Please try again later."
 msgstr ""
-"ログイン %2$s 用メール サーバ %1$s 上のメールボックスが他の処理またはクライエントによって既に使用されています。後でもう一度やり直してください。"
+"ログイン %2$s 用メールサーバ %1$s 上のメールボックスが他の処理またはクライエントによって既に使用されています。後でもう一度やり直してください。"
 
 #. Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:188
 msgid "Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials."
 msgstr ""
-"メール トランスポート サーバ %1$s にアクセスするためのログイン データが誤っているか見つかりません。関連付けられているアカウントの設定/認証情報を"
+"メールトランスポートサーバ %1$s にアクセスするためのログインデータが誤っているか見つかりません。関連付けられているアカウントの設定/認証情報を"
 "チェックしてください。"
 
 #. *
@@ -7634,12 +7817,12 @@ msgstr "次の宛先へ送信中にタイムアウトしました: %1$s"
 #. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
 msgid "Cannot find mail account for user \"%2$s\"."
-msgstr "ユーザ \"%2$s\" のメール アカウントが見つかりません。"
+msgstr "ユーザ \"%2$s\" のメールアカウントが見つかりません。"
 
 #. Shown when a mail account that already exists should be created
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:65
 msgid "Found two mail accounts with same identifier %1$s for user %2$s."
-msgstr "ユーザ %2$s の同じ識別子 %1$s のメール アカウントが２つ見つかりました。"
+msgstr "ユーザ %2$s の同じ識別子 %1$s のメールアカウントが２つ見つかりました。"
 
 #. Shown when the requested host cannot be resolved
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:68
@@ -7659,17 +7842,17 @@ msgstr "このオブジェクトを移動する適切な権限がありません
 #. The default mail account already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:77
 msgid "The default mail account already exists."
-msgstr "既定のメール アカウントは既に存在します。"
+msgstr "既定のメールアカウントは既に存在します。"
 
 #. The Unified Mail account already exists
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:80
 msgid "The Unified Mail account already exists."
-msgstr "統合メール アカウントは既に存在します。"
+msgstr "統合メールアカウントは既に存在します。"
 
 #. It is not allowed to create a new mail account for Unified Mail.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:83
 msgid "It is not allowed to create a new mail account for Unified Mail."
-msgstr "統合メールの新規メール アカウントを作成できません。"
+msgstr "統合メールの新規メールアカウントを作成できません。"
 
 #. Validation for Unified Mail failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:86
@@ -7684,17 +7867,17 @@ msgstr "オブジェクトを生成する適切な権限がありません。"
 #. A mail account with the given E-Mail address already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:92
 msgid "A mail account with the given E-Mail address already exists."
-msgstr "入力したメール アドレスのメール アカウントは既に存在します。"
+msgstr "入力したメールアドレスのメールアカウントは既に存在します。"
 
 #. The mail account name "%1$s" is not valid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:95
 msgid "The mail account name \"%1$s\" is not valid."
-msgstr "メール アカウント名 \"%1$s\" は有効ではありません。"
+msgstr "メールアカウント名 \"%1$s\" は有効ではありません。"
 
 #. The selected mail account name already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:98
 msgid "The selected mail account name already exists."
-msgstr "選択されたメール アカウント名は既に存在します。"
+msgstr "選択されたメールアカウント名は既に存在します。"
 
 #. Shown when the transport account already exists
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:101
@@ -7704,32 +7887,33 @@ msgstr "コンテキスト %2$s のユーザ %1$s の転送アカウントが重
 #. Shown when a connection to the mail server is not possible for the given login
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:104
 msgid "Could not connect to mail server \"%1$s\" for login %2$s. Please review your settings."
-msgstr "ログイン %2$s では、メール サーバ \"%1$s\" に接続できませんでした。設定を見直してください。"
+msgstr "ログイン %2$s では、メールサーバ \"%1$s\" に接続できませんでした。設定を見直してください。"
 
 #. Shown when a connection to the mail transport server is not possible for the given login
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:107
 msgid "Could not connect to transport server \"%1$s\" for login %2$s. Please review your settings."
-msgstr "ログイン %2$s では、トランスポート サーバ \"%1$s\" に接続できませんでした。設定を見直してください。"
+msgstr "ログイン %2$s では、トランスポートサーバ \"%1$s\" に接続できませんでした。設定を見直してください。"
 
 #. Shown when no SSL port was set but SSL enabled
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:110
 msgid "Default port specified for mail protocol \"%1$s\", but SSL is enabled. Please review if appropriate."
-msgstr "メール プロトコル \"%1$s\" に指定された既定のポートの SSL が有効になっています。この設定が適切かどうか確認してください。"
+msgstr "メールプロトコル \"%1$s\" に指定された既定のポートの SSL が有効になっています。この設定が適切かどうか確認してください。"
 
 #. Shown when SSL port was set but SSL not enabled
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:113
 msgid "Secure port specified for mail protocol \"%1$s\", but SSL is not enabled. Please review if appropriate."
-msgstr "メール プロトコル \"%1$s\" に指定されたセキュア ポートの SSL が有効になっていません。この設定が適切かどうか確認してください。"
+msgstr "メールプロトコル \"%1$s\" に指定されたセキュリティ保護されたポートの SSL が有効になっていません。この設定が適切かどうか確認してください。"
 
 #. Shown when no SSL port was set for transport protocol but SSL enabled
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:116
 msgid "Default port specified for transport protocol \"%1$s\", but SSL is enabled. Please review if appropriate."
-msgstr "トランスポート プロトコル \"%1$s\" に指定された既定のポートの SSL が有効になっています。この設定が適切かどうか確認してください。"
+msgstr "トランスポートプロトコル \"%1$s\" に指定された既定のポートの SSL が有効になっています。この設定が適切かどうか確認してください。"
 
 #. Shown when SSL port was set for transport protocol but SSL not enabled
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:119
 msgid "Secure port specified for transport protocol \"%1$s\", but SSL is not enabled. Please review if appropriate."
-msgstr "トランスポート プロトコル \"%1$s\" に指定されたセキュア ポートの SSL が有効になっていません。この設定が適切かどうか確認してください。"
+msgstr ""
+"トランスポートプロトコル \"%1$s\" に指定されたセキュリティ保護されたポートの SSL が有効になっていません。この設定が適切かどうか確認してください。"
 
 #. The given host name "%1$s" is invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:122
@@ -7764,7 +7948,7 @@ msgstr "入力した設備識別子 \"%1$s\" に無効な文字が含まれて�
 #. The provided E-Mail address \"%1$s\" for resource is invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:87
 msgid "The provided E-Mail address \"%1$s\" for resource is invalid."
-msgstr "入力した設備のメール アドレス \"%1$s\" は無効です。"
+msgstr "入力した設備のメールアドレス \"%1$s\" は無効です。"
 
 #. There is already a resource with E-Mail address "%1$s". Please choose another one.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:90
@@ -7791,7 +7975,7 @@ msgstr "ご利用のアカウントでは共有フォルダは利用できませ
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:72
 msgid "You do not have appropriate permissions for the public folder."
-msgstr "パブリック フォルダの適切な権限がありません。"
+msgstr "パブリックフォルダの適切な権限がありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:73
 msgid "You do not have appropriate permissions to create subfolders."
@@ -7803,7 +7987,7 @@ msgstr "該当するフォルダがありません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:75
 msgid "The folder has been changed in the meantime. Please reload the view and try again."
-msgstr "フォルダ は既に変更されています。ビューを再読み込みして、もう一度やり直してください。"
+msgstr "フォルダは既に変更されています。ビューを再読み込みして、もう一度やり直してください。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:76
 msgid "This operation requires administrative permissions for the folder."
@@ -7811,7 +7995,7 @@ msgstr "この操作には、フォルダの管理者権限が必要です。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:77
 msgid "The folder is a default folder and cannot be renamed."
-msgstr "フォルダ は既定のフォルダであるため、名前の変更はできません。"
+msgstr "フォルダは既定のフォルダであるため、名前の変更はできません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:78
 msgid "The folder already contains a folder with such a name."
@@ -7827,11 +8011,11 @@ msgstr "モジュール \"%2$s\" のフォルダをこのフォルダの配下�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:81
 msgid "Only one user may have administrative permission roles in a private folder."
-msgstr "プライベート フォルダの管理者権限のロールは １名のユーザにしか割り当てることができません。"
+msgstr "プライベートフォルダの管理者権限のロールは１名のユーザにしか割り当てることができません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:82
 msgid "Administrative permissions for a group are not allowed in a private folder."
-msgstr "グループの管理者権限はプライベート フォルダには許可されていません。"
+msgstr "グループの管理者権限はプライベートフォルダには許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:83
 msgid "Only the owner of a private folder may hold administrative permissions."
@@ -7843,7 +8027,7 @@ msgstr "管理者権限が付与されたユーザが １名以上必要です�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:85
 msgid "The folder is a default folder and cannot be moved."
-msgstr "フォルダ は既定のフォルダであるため、移動できません。"
+msgstr "フォルダは既定のフォルダであるため、移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:86
 msgid "The folder is shared and cannot be moved."
@@ -7855,15 +8039,15 @@ msgstr "共有フォルダにフォルダを移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:88
 msgid "The folder is a system folder and cannot be moved."
-msgstr "フォルダ はシステム フォルダであるため、移動できません。"
+msgstr "フォルダはシステムフォルダであるため、移動できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:89
 msgid "The private folder can only be moved to another private folder."
-msgstr "プライベート フォルダは別のプライベート フォルダのみに移動できます。"
+msgstr "プライベートフォルダは別のプライベートフォルダのみに移動できます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:90
 msgid "The public folder can only be moved to another public folder."
-msgstr "パブリック フォルダ は別のパブリック フォルダのみに移動できます。"
+msgstr "パブリックフォルダは別のパブリックフォルダのみに移動できます。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:91
 msgid "The destination folder is the same as the source folder."
@@ -7895,7 +8079,7 @@ msgstr "モジュール \"%1$s\" のフォルダをモジュール \"%2$s\" の�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:98
 msgid "The shared folder cannot be updated."
-msgstr "共有フォルダ を更新できません。"
+msgstr "共有フォルダを更新できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:99
 msgid "The value for attribute %1$s contains more than the allowed number of %2$d characters. Current length: %3$d characters."
@@ -7997,11 +8181,11 @@ msgstr "フォルダを \"%2$s\"に共有することは許可されていませ
 #. You are not allowed to change the permissions of the trash folder or any of its subfolders
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:133
 msgid "You are not allowed to change the permissions of the trash folder or any of its subfolders"
-msgstr "ゴミ箱フォルダやそのサブフォルダの権限を変更することが許可されていません。"
+msgstr "ゴミ箱フォルダやそのサブフォルダの権限を変更することは許可されていません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:62
 msgid "The requested operation is not permitted via a non-secure connection."
-msgstr "要求された操作は、安全でない接続では実行できません。"
+msgstr "要求された操作は、セキュリティ保護されていない接続では実行できません。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:63
 msgid "The requested operation is disabled."
@@ -8086,6 +8270,10 @@ msgstr "次のユーザ名の認証に失敗しました: %1$s"
 msgid "No session found for identifier: %1$s"
 msgstr "次の識別子のセッションが見つかりません: %1$s"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.limit/src/com/openexchange/share/limit/limiter/exceptions/DownloadLimitedExceptionMessages.java:63
+msgid "Download denied because download limits have been exceeded. Please try again later."
+msgstr "ダウンロード制限を越えたため、ダウンロードはできません。後でもう一度やり直してください。"
+
 #. subject
 #. * $username has shared file "$filename" with you.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:65
@@ -8135,7 +8323,7 @@ msgstr "%1$s がファイル %2$s をグループ %3$s と共有しています�
 #. * $username has shared $number_of_files files with the group "Sales Dept.".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:92
 msgid "%1$s has shared %2$s files with the group \"%3$s\"."
-msgstr "%1$s がファイル %2$sつ をグループ %3$s と共有しています。"
+msgstr "%1$s がファイル %2$sつをグループ %3$s と共有しています。"
 
 #. * $username has shared image "$filename" with the group "Sales Dept.".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:95
@@ -8145,7 +8333,7 @@ msgstr "%1$s が画像 %2$s をグループ %3$s と共有しています。"
 #. * $username has shared $number_of_images images with the group "Sales Dept.".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:98
 msgid "%1$s has shared %2$s images with the group \"%3$s\"."
-msgstr "%1$s が画像 %2$sつ をグループ %3$s と共有しています。"
+msgstr "%1$s が画像 %2$sつをグループ %3$s と共有しています。"
 
 #. * $username has shared item "$filename" with the group "Sales Dept.".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:101
@@ -8155,7 +8343,7 @@ msgstr "%1$s が項目 %2$s をグループ %3$s と共有しています。"
 #. * $username has shared $number items with the group "Sales Dept.".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:104
 msgid "%1$s has shared %2$s items with the group \"%3$s\"."
-msgstr "%1$s が項目 %2$sつ をグループ %3$s と共有しています。"
+msgstr "%1$s が項目 %2$sつをグループ %3$s と共有しています。"
 
 #. * $username has shared folder "$folder" with the group "Sales Dept.".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:107
@@ -8165,7 +8353,7 @@ msgstr "%1$s がフォルダ %2$s をグループ %3$s と共有しています�
 #. * $username has shared $number folders with the group "Sales Dept.".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:110
 msgid "%1$s has shared %2$d folders with the group \"%3$s\"."
-msgstr "%1$s がフォルダ %2$dつ をグループ %3$s と共有しています。"
+msgstr "%1$s がフォルダ %2$dつをグループ %3$s と共有しています。"
 
 #. detailed body
 #. * $username ($user_email) has shared file "$filename" with you. Please click the button below to view it.
@@ -8216,7 +8404,7 @@ msgstr "%1$s (%2$s) がファイル %3$s をグループ%4$sと共有してい�
 #. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept.". Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:141
 msgid "%1$s (%2$s) has shared %3$s files with the group \"%4$s\". Please click the button below to view them."
-msgstr "%1$s (%2$s) がファイル %3$s つ をグループ \"%4$s\"と共有しています。下のボタンをクリックして表示してください。"
+msgstr "%1$s (%2$s) がファイル %3$s つをグループ \"%4$s\"と共有しています。下のボタンをクリックして表示してください。"
 
 #. * $username ($user_email) has shared image "$filename" with the group "Sales Dept.". Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:144
@@ -8226,7 +8414,7 @@ msgstr "%1$s (%2$s) が画像 %3$s をグループ%4$sと共有しています�
 #. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept.". Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:147
 msgid "%1$s (%2$s) has shared %3$s images with the group \"%4$s\". Please click the button below to view them."
-msgstr "%1$s (%2$s) が画像 %3$s つ をグループ \"%4$s\"と共有しています。下のボタンをクリックして表示してください。"
+msgstr "%1$s (%2$s) が画像 %3$s つをグループ \"%4$s\"と共有しています。下のボタンをクリックして表示してください。"
 
 #. * $username ($user_email) has shared item "$filename" with the group "Sales Dept.". Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:150
@@ -8236,7 +8424,7 @@ msgstr "%1$s (%2$s) が項目 %3$s をグループ%4$sと共有しています�
 #. * $username ($user_email) has shared $number items with the group "Sales Dept.". Please click the button below to view them.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:153
 msgid "%1$s (%2$s) has shared %3$s items with the group \"%4$s\". Please click the button below to view them."
-msgstr "%1$s (%2$s) が画像 %3$s つ をグループ %4$sと共有しています。下のボタンをクリックして表示してください。"
+msgstr "%1$s (%2$s) が画像 %3$s つをグループ %4$sと共有しています。下のボタンをクリックして表示してください。"
 
 #. * $username ($user_email) has shared folder $folder with the group "Sales Dept.". Please click the button below to view it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:156
@@ -8368,11 +8556,6 @@ msgstr "アイテムを表示"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:233
 msgid "View items"
 msgstr "アイテムを表示"
-
-#. * The link will expire on 01/01/16 *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:236
-msgid "The link will expire on %1$s"
-msgstr "リンクの有効期限は %1$s です。"
 
 #. * The link is password protected. To see it you must use the following password: kac7Nede *
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:239
@@ -8733,8 +8916,8 @@ msgstr "無効または有害な画像データを削除します。"
 
 #. Thrown if a user tries to create a snippet/signature referencing to an image which is too big
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:74
-msgid "The maximum allowed size of '%1$s' for an image in the signature is reached."
-msgstr "署名内の画像の最大許容サイズ '%1$s' に達しました。"
+msgid "The signature image exceeds the maximum allowed size of '%1$s'."
+msgstr "署名の画像は「%1$s」という最大許容サイズを超えています。"
 
 #. Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.snippet/src/com/openexchange/snippet/SnippetStrings.java:77
@@ -8816,7 +8999,7 @@ msgstr "この操作を完了する適切な権限がありません。"
 #. The message displayed if a non valid email address is inserted.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:78
 msgid "Please specify your full E-Mail address as login name."
-msgstr "ログイン名として完全なメール アドレスを入力してください。"
+msgstr "ログイン名として完全なメールアドレスを入力してください。"
 
 #. The message displayed if a required service (e. g. for adding a subscription) is currently not available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:81
@@ -8839,8 +9022,8 @@ msgid ""
 "The service provider asked for an identity confirmation. This happens for some accounts and cannot fixed by us. It is in the provider's "
 "responsibility. For this reason, the subscription cannot be completed."
 msgstr ""
-"サービス プロバイダから本人確認が求められています。本人確認は一部のアカウントに対して行われ、Open-Xchangeでは変更することが出来ません。これはプロ"
-"バイダの責任になります。このため、登録を完了できません。"
+"サービスプロバイダから本人確認が求められています。本人確認は一部のアカウントに対して行われ、Open-Xchangeでは変更することが出来ません。これはプロバ"
+"イダの責任になります。このため、登録を完了できません。"
 
 #. You already have such a subscription.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:93
@@ -8863,7 +9046,7 @@ msgstr "仕事の作成、変更、削除。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "File access denied."
-msgstr "ファイル アクセスが拒否されました。"
+msgstr "ファイルアクセスが拒否されました。"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:70
 msgid "This template was not whitelisted,"
@@ -8941,7 +9124,7 @@ msgstr "統合メールでは、メールフォルダの作成はサポートさ
 #. Unified Mail does not support to clear INBOX folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:97
 msgid "Unified Mail does not support to clear INBOX folder."
-msgstr "統合メールでは、受信トレイ フォルダのクリアはサポートされていません。"
+msgstr "統合メールでは、受信トレイフォルダのクリアはサポートされていません。"
 
 #. No connection available to access mailbox
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.unifiedinbox/src/com/openexchange/unifiedinbox/UnifiedInboxExceptionMessage.java:100
@@ -9033,17 +9216,17 @@ msgstr "アカウント \"%1$s\" の構成が見つかりません。"
 #. E-Mail address is invalid
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:83
 msgid "E-Mail address is invalid"
-msgstr "メール アドレスは無効です。"
+msgstr "メールアドレスは無効です。"
 
 #. Already sent an invitation to E-Mail address: \"%1$s\"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:86
 msgid "Already sent an invitation to E-Mail address: \"%1$s\""
-msgstr "次のメール アドレスに既に出席依頼が送信されています: \"%1$s\""
+msgstr "次のメールアドレスに既に出席依頼が送信されています: \"%1$s\""
 
 #. The E-Mail address already belongs to a XING user
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:89
 msgid "The E-Mail address already belongs to a XING user"
-msgstr "このメール アドレスは既に XING ユーザに割り当てられています。"
+msgstr "このメールアドレスは既に XING ユーザに割り当てられています。"
 
 #. Invitation attempt failed for any reason
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:92
@@ -9053,7 +9236,7 @@ msgstr "何らかの理由によって、出席依頼送信の試行が失敗し
 #. The E-Mail address does not belongs to a XING user
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:95
 msgid "The E-Mail address does not belongs to a XING user"
-msgstr "このメール アドレスは XING ユーザに割り当てられていません。"
+msgstr "このメールアドレスは XING ユーザに割り当てられていません。"
 
 #. XING user is already directly connected.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:98
@@ -9068,17 +9251,17 @@ msgstr "コメントのサイズが、許可された最大サイズである 60
 #. The status message size exceeds the maximum allowed number of 600 characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:104
 msgid "The status message size exceeds the maximum allowed number of 420 characters."
-msgstr "ステータス メッセージのサイズが、許可された最大サイズである 420 文字を超えています。"
+msgstr "ステータスメッセージのサイズが、許可された最大サイズである 420 文字を超えています。"
 
 #. The status message size exceeds the maximum allowed number of 600 characters.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:107
 msgid "The text message size exceeds the maximum allowed number of 140 characters."
-msgstr "テキスト メッセージのサイズが、許可された最大サイズである 140 文字を超えています。"
+msgstr "テキストメッセージのサイズが、許可された最大サイズである 140 文字を超えています。"
 
 #. The mandatory parameter \"%1$s\ is missing in the request body.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:110
 msgid "The mandatory parameter \"%1$s\" is missing in the request body"
-msgstr "リクエスト ボディに必須パラメータ \"%1$s\" が見つかりません。"
+msgstr "リクエストボディに必須パラメータ \"%1$s\" が見つかりません。"
 
 #. The XING server is not available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:113
@@ -9088,7 +9271,7 @@ msgstr "XING サーバは利用できません。"
 #. A XING account has already been requested for E-Mail address %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:116
 msgid "A XING account has already been requested for E-Mail address %1$s."
-msgstr "メール アドレス %1$s では、XINGアカウントが既に求められています。"
+msgstr "メールアドレス %1$s では、XINGアカウントが既に求められています。"
 
 #. The XING app that you are using does not hold the required permissions in order to perform the requested action
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:119
@@ -9482,7 +9665,7 @@ msgstr "アメリカ/チワワ"
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:97
 msgid "America/Coral Harbour"
-msgstr "アメリカ/コーラル ハーバー"
+msgstr "アメリカ/コーラルハーバー"
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:98
 msgid "America/Cordoba"
@@ -10546,7 +10729,7 @@ msgstr "ブラジル/アクレ州"
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:363
 msgid "Brazil/DeNoronha"
-msgstr "ブラジル/デ ノローニャ島"
+msgstr "ブラジル/デノローニャ島"
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:364
 msgid "Brazil/East"
@@ -11054,7 +11237,7 @@ msgstr "太平洋/ヌメア"
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:490
 msgid "Pacific/Pago Pago"
-msgstr "太平洋/パゴ パゴ"
+msgstr "太平洋/パゴパゴ"
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:491
 msgid "Pacific/Palau"
@@ -11191,6 +11374,12 @@ msgstr "UTC (協定世界時)"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "ズールー"
+
+#~ msgid "Invalid E-Mail address."
+#~ msgstr "次のメール アドレスが無効です。"
+
+#~ msgid "The maximum allowed size of '%1$s' for an image in the signature is reached."
+#~ msgstr "署名内の画像の最大許容サイズ '%1$s' に達しました。"
 
 #~ msgid "Asia/Riyadh87"
 #~ msgstr "アジア/リヤド 87"
@@ -13964,9 +14153,6 @@ msgstr "ズールー"
 
 #~ msgid "Cannot load class \"%1$s\"."
 #~ msgstr "クラス \"%1$s\" を読み込めません。"
-
-#~ msgid "Invalid configuration: %1$s"
-#~ msgstr "次の構成は無効です: %1$s"
 
 #~ msgid "Property %1$s is not an integer"
 #~ msgstr "プロパティ %1$s は整数ではありません。"

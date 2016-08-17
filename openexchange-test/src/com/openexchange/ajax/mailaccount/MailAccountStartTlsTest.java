@@ -55,8 +55,6 @@ import com.openexchange.ajax.mailaccount.actions.MailAccountGetRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountGetResponse;
 import com.openexchange.ajax.mailaccount.actions.MailAccountInsertRequest;
 import com.openexchange.ajax.mailaccount.actions.MailAccountInsertResponse;
-import com.openexchange.ajax.mailaccount.actions.MailAccountUpdateRequest;
-import com.openexchange.ajax.mailaccount.actions.MailAccountUpdateResponse;
 import com.openexchange.mailaccount.MailAccountDescription;
 
 /**
@@ -66,19 +64,19 @@ import com.openexchange.mailaccount.MailAccountDescription;
  * @since v7.8.2
  */
 public class MailAccountStartTlsTest extends AbstractMailAccountTest {
-    
+
     private MailAccountDescription mailAccount;
 
     public MailAccountStartTlsTest(String name) {
         super(name);
     }
-    
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
         mailAccount = null;
     }
-    
+
     @Override
     public void tearDown() throws Exception {
         if (null != mailAccount) {
@@ -87,7 +85,7 @@ public class MailAccountStartTlsTest extends AbstractMailAccountTest {
         }
         super.tearDown();
     }
-    
+
     public void testCreateMailAccountWithStartTls() throws Exception {
         MailAccountDescription acc = createMailAccountObject();
         acc.setName(UUID.randomUUID().toString());
@@ -97,7 +95,7 @@ public class MailAccountStartTlsTest extends AbstractMailAccountTest {
         MailAccountInsertResponse resp = client.execute(req);
         assertFalse(resp.getErrorMessage(), resp.hasError());
         resp.fillObject(acc);
-        
+
         MailAccountGetRequest getReq = new MailAccountGetRequest(acc.getId());
         MailAccountGetResponse getResp = client.execute(getReq);
         assertFalse(getResp.getErrorMessage(), getResp.hasError());
@@ -105,35 +103,35 @@ public class MailAccountStartTlsTest extends AbstractMailAccountTest {
         assertTrue(mailAccount.isMailStartTls());
         assertTrue(mailAccount.isTransportStartTls());
     }
-    
-    public void testUpdateMailAccountWithStartTls() throws Exception {
-        MailAccountDescription acc = createMailAccountObject();
-        acc.setName(UUID.randomUUID().toString());
-        MailAccountInsertRequest req = new MailAccountInsertRequest(acc, false);
-        MailAccountInsertResponse resp = client.execute(req);
-        assertFalse(resp.getErrorMessage(), resp.hasError());
-        resp.fillObject(acc);
-        
-        MailAccountGetRequest getReq = new MailAccountGetRequest(acc.getId());
-        MailAccountGetResponse getResp = client.execute(getReq);
-        assertFalse(getResp.getErrorMessage(), getResp.hasError());
-        mailAccount = getResp.getAsDescription();
-        assertFalse(mailAccount.isMailStartTls());
-        assertFalse(mailAccount.isTransportStartTls());
-        mailAccount.setMailStartTls(true);
-        mailAccount.setTransportStartTls(true);
-        MailAccountUpdateRequest updateReq = new MailAccountUpdateRequest(mailAccount);
-        MailAccountUpdateResponse updateResp = client.execute(updateReq);
-        assertFalse(updateResp.getErrorMessage(), updateResp.hasError());
-        
-        getReq = new MailAccountGetRequest(mailAccount.getId());
-        getResp = client.execute(getReq);
-        assertFalse(getResp.getErrorMessage(), getResp.hasError());
-        mailAccount = getResp.getAsDescription();
-        assertTrue(mailAccount.isMailStartTls());
-        assertTrue(mailAccount.isTransportStartTls());
-    }
-    
+
+    //    public void testUpdateMailAccountWithStartTls() throws Exception {
+    //        MailAccountDescription acc = createMailAccountObject();
+    //        acc.setName(UUID.randomUUID().toString());
+    //        MailAccountInsertRequest req = new MailAccountInsertRequest(acc, false);
+    //        MailAccountInsertResponse resp = client.execute(req);
+    //        assertFalse(resp.getErrorMessage(), resp.hasError());
+    //        resp.fillObject(acc);
+    //        
+    //        MailAccountGetRequest getReq = new MailAccountGetRequest(acc.getId());
+    //        MailAccountGetResponse getResp = client.execute(getReq);
+    //        assertFalse(getResp.getErrorMessage(), getResp.hasError());
+    //        mailAccount = getResp.getAsDescription();
+    //        assertFalse(mailAccount.isMailStartTls());
+    //        assertFalse(mailAccount.isTransportStartTls());
+    //        mailAccount.setMailStartTls(true);
+    //        mailAccount.setTransportStartTls(true);
+    //        MailAccountUpdateRequest updateReq = new MailAccountUpdateRequest(mailAccount);
+    //        MailAccountUpdateResponse updateResp = client.execute(updateReq);
+    //        assertFalse(updateResp.getErrorMessage(), updateResp.hasError());
+    //        
+    //        getReq = new MailAccountGetRequest(mailAccount.getId());
+    //        getResp = client.execute(getReq);
+    //        assertFalse(getResp.getErrorMessage(), getResp.hasError());
+    //        mailAccount = getResp.getAsDescription();
+    //        assertTrue(mailAccount.isMailStartTls());
+    //        assertTrue(mailAccount.isTransportStartTls());
+    //    }
+
     public void testCreateMailAccountWithDefaults() throws Exception {
         MailAccountDescription acc = createMailAccountObject();
         acc.setName(UUID.randomUUID().toString());
@@ -141,7 +139,7 @@ public class MailAccountStartTlsTest extends AbstractMailAccountTest {
         MailAccountInsertResponse resp = client.execute(req);
         assertFalse(resp.getErrorMessage(), resp.hasError());
         resp.fillObject(acc);
-        
+
         MailAccountGetRequest getReq = new MailAccountGetRequest(acc.getId());
         MailAccountGetResponse getResp = client.execute(getReq);
         assertFalse(getResp.getErrorMessage(), getResp.hasError());

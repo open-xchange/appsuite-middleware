@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -58,7 +58,6 @@ import java.io.OutputStream;
 import java.io.PipedOutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.Map;
 import javax.activation.DataHandler;
 import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
@@ -70,7 +69,9 @@ import javax.mail.internet.MimeMultipart;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
@@ -146,8 +147,8 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.mail.mime.useMimeMultipartMailPart");
             }
         });
     }
@@ -449,6 +450,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 final PushbackInputStream in = new PushbackInputStream(part.getInputStream());
                 final int read = in.read();
                 if (read < 0) {
+                    Streams.close(in);
                     return Streams.EMPTY_INPUT_STREAM;
                 }
                 in.unread(read);

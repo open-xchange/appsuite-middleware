@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -52,13 +52,9 @@ package com.openexchange.mail.loginhandler;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
-import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
-import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
-import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -86,20 +82,6 @@ public final class TransportLoginHandler implements LoginHandlerService {
             final Context ctx = login.getContext();
             final ServerSession serverSession = getServerSessionFrom(login.getSession(), ctx);
             final UserPermissionBits permissionBits = serverSession.getUserPermissionBits();
-            if (permissionBits.hasWebMail() && TransportProperties.getInstance().isPublishOnExceededQuota() && permissionBits.hasInfostore()) {
-                // Get attachment storage
-                MailAttachmentStorage attachmentStorage = DefaultMailAttachmentStorageRegistry.getInstance().getMailAttachmentStorage();
-
-                // Folder name
-                String name = TransportProperties.getInstance().getPublishingInfostoreFolder();
-                if ("i18n-defined".equals(name)) {
-                    name = FolderStrings.DEFAULT_EMAIL_ATTACHMENTS_FOLDER_NAME;
-                }
-
-                boolean checkForExpiredAttachments = TransportProperties.getInstance().publishedDocumentsExpire();
-                long timeToLive = TransportProperties.getInstance().getPublishedDocumentTimeToLive();
-                attachmentStorage.prepareStorage(name, checkForExpiredAttachments, timeToLive, serverSession);
-            }
         } catch (final RuntimeException e) {
             throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
         }

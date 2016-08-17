@@ -60,7 +60,7 @@ import com.openexchange.tools.net.URIParser;
 endpointInterface = "com.openexchange.admin.soap.user.soap.OXUserServicePortType")
 public class OXUserServicePortTypeImpl implements OXUserServicePortType {
 
-    public static final AtomicReference<OXUserInterface> RMI_REFERENCE = new AtomicReference<OXUserInterface>();
+    public static final AtomicReference<OXUserInterface> RMI_REFERENCE = new AtomicReference<>();
 
     private static OXUserInterface getUserInterface() throws RemoteException_Exception {
         final OXUserInterface userInterface = RMI_REFERENCE.get();
@@ -369,7 +369,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
                 return "There are no capabilities set for user " + user.getId() + " in context " + ctx.getId();
             }
 
-            final Iterator<String> iterator = new TreeSet<String>(capabilities).iterator();
+            final Iterator<String> iterator = new TreeSet<>(capabilities).iterator();
             final StringBuilder sb = new StringBuilder(capabilities.size() << 4);
             sb.append(iterator.next());
             for (int i = capabilities.size(); i-- > 1;) {
@@ -532,7 +532,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         }
         // Split
         final String[] arr = s.split(" *, *", 0);
-        final Set<String> set = new HashSet<String>(arr.length);
+        final Set<String> set = new HashSet<>(arr.length);
         for (String element : arr) {
             final String cap = element;
             if (!com.openexchange.java.Strings.isEmpty(cap)) {
@@ -673,14 +673,21 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
     }
 
     @Override
-    public java.util.List<User> listAll(final Context ctx, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
+    public java.util.List<User> listAll(final Context ctx, final Credentials auth, Boolean includeGuests, Boolean excludeUsers) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
+        if (null == includeGuests) {
+            includeGuests = Boolean.FALSE;
+        }
+
+        if (null == excludeUsers) {
+            excludeUsers = Boolean.FALSE;
+        }
         try {
-            final com.openexchange.admin.rmi.dataobjects.User[] users = userInterface.listAll(soap2Context(ctx), soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.User[] users = userInterface.listAll(soap2Context(ctx), soap2Credentials(auth), includeGuests, excludeUsers);
             if (null == users) {
                 return Collections.emptyList();
             }
-            final java.util.List<User> list = new ArrayList<User>(users.length);
+            final java.util.List<User> list = new ArrayList<>(users.length);
             for (final com.openexchange.admin.rmi.dataobjects.User user : users) {
                 list.add(user2Soap(user));
             }
@@ -803,7 +810,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
     public void delete(final Delete parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
         try {
-            userInterface.delete(soap2Context(parameters.ctx), soap2User(parameters.user), soap2Credentials(parameters.auth));
+            userInterface.delete(soap2Context(parameters.ctx), soap2User(parameters.user), parameters.getReassign(), soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.user.soap.RemoteException faultDetail = new com.openexchange.admin.soap.user.soap.RemoteException();
             com.openexchange.admin.soap.user.rmi.RemoteException value = new com.openexchange.admin.soap.user.rmi.RemoteException();
@@ -844,6 +851,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         }
     }
 
+
     @Override
     public void deleteMultiple(final DeleteMultiple parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
@@ -853,7 +861,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             for (int i = 0; i < users.length; i++) {
                 users[i] = soap2User(list.get(i));
             }
-            userInterface.delete(soap2Context(parameters.ctx), users, soap2Credentials(parameters.auth));
+            userInterface.delete(soap2Context(parameters.ctx), users, parameters.getReassign(), soap2Credentials(parameters.auth));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.user.soap.RemoteException faultDetail = new com.openexchange.admin.soap.user.soap.RemoteException();
             com.openexchange.admin.soap.user.rmi.RemoteException value = new com.openexchange.admin.soap.user.rmi.RemoteException();
@@ -959,7 +967,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
                 return Collections.emptyList();
             }
             final int length = retUsers.length;
-            final java.util.List<User> ret = new ArrayList<User>(length);
+            final java.util.List<User> ret = new ArrayList<>(length);
             for (int i = 0; i < length; i++) {
                 ret.add(user2Soap(retUsers[i]));
             }
@@ -1090,17 +1098,28 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
     }
 
     @Override
-    public java.util.List<User> list(final Context ctx, final java.lang.String searchPattern, final Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
+    public java.util.List<User> list(final Context ctx, final java.lang.String searchPattern, final Credentials auth, Boolean includeGuests, Boolean excludeUsers) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
+
+        if (null == includeGuests) {
+            includeGuests = Boolean.FALSE;
+        }
+
+        if (null == excludeUsers) {
+            excludeUsers = Boolean.FALSE;
+        }
+
         try {
             final com.openexchange.admin.rmi.dataobjects.User[] users = userInterface.list(
                 soap2Context(ctx),
                 com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern,
-                soap2Credentials(auth));
+                soap2Credentials(auth),
+                includeGuests,
+                excludeUsers);
             if (null == users) {
                 return Collections.emptyList();
             }
-            final java.util.List<User> list = new ArrayList<User>(users.length);
+            final java.util.List<User> list = new ArrayList<>(users.length);
             for (final com.openexchange.admin.rmi.dataobjects.User user : users) {
                 list.add(user2Soap(user));
             }
@@ -1151,7 +1170,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             if (null == users) {
                 return Collections.emptyList();
             }
-            final java.util.List<User> list = new ArrayList<User>(users.length);
+            final java.util.List<User> list = new ArrayList<>(users.length);
             for (final com.openexchange.admin.rmi.dataobjects.User user : users) {
                 list.add(user2Soap(user));
             }
@@ -2625,7 +2644,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             return null;
         }
         final java.util.List<SOAPMapEntry> entries = soapStringMapMap.getEntries();
-        final Map<String, Map<String, String>> map = new HashMap<String, Map<String, String>>(entries.size());
+        final Map<String, Map<String, String>> map = new HashMap<>(entries.size());
         for (final SOAPMapEntry soapMapEntry : entries) {
             if (null != soapMapEntry) {
                 map.put(soapMapEntry.getKey(), soap2Map(soapMapEntry.getValue()));
@@ -2639,7 +2658,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             return null;
         }
         final java.util.List<Entry> entries = soapStringMap.getEntries();
-        final Map<String, String> map = new HashMap<String, String>(entries.size());
+        final Map<String, String> map = new HashMap<>(entries.size());
         for (final Entry entry : entries) {
             if (null != entry) {
                 map.put(entry.getKey(), entry.getValue());
@@ -2653,7 +2672,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             return null;
         }
         final SOAPStringMapMap soapMapMap = new SOAPStringMapMap();
-        final java.util.List<SOAPMapEntry> entries = new ArrayList<SOAPMapEntry>(mapmap.size());
+        final java.util.List<SOAPMapEntry> entries = new ArrayList<>(mapmap.size());
         for (final Map.Entry<String, Map<String, String>> mapmapEntry : mapmap.entrySet()) {
             final SOAPMapEntry mapEntry = new SOAPMapEntry();
             mapEntry.setKey(mapmapEntry.getKey());
@@ -2669,7 +2688,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             return null;
         }
         final SOAPStringMap soapMap = new SOAPStringMap();
-        final java.util.List<Entry> entries = new ArrayList<Entry>(map.size());
+        final java.util.List<Entry> entries = new ArrayList<>(map.size());
         for (final Map.Entry<String, String> mapEntry : map.entrySet()) {
             final Entry entry = new Entry();
             entry.setKey(mapEntry.getKey());
@@ -2688,7 +2707,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             if (null == users) {
                 return Collections.emptyList();
             }
-            final java.util.List<User> list = new ArrayList<User>(users.length);
+            final java.util.List<User> list = new ArrayList<>(users.length);
             for (final com.openexchange.admin.rmi.dataobjects.User user : users) {
                 list.add(user2Soap(user));
             }

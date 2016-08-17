@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -223,6 +223,16 @@ public enum Privilege {
      * @see <a href="https://tools.ietf.org/html/rfc3744#section-3.10">RFC 3744, section 3.10</a>
      */
     UNBIND("unbind", "Remove resources from the collection"),
+
+    /**
+     * <b>DAV:share Privilege</b>
+     * <p/>
+     * The share element is a WebDAV ACL [RFC3744] privilege that allows a
+     * client to inspect whether a user may be allowed to share a resource.
+     *
+     * @see <a href="https://tools.ietf.org/html/draft-pot-webdav-resource-sharing-03#section-5.2">draft-pot-webdav-resource-sharing, section 5.2</a>
+     */
+    SHARE("share", "Share the collection"),
 
     /**
      * <b>DAV: Privilege</b>

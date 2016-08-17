@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -58,6 +58,37 @@ import org.osgi.framework.ServiceReference;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class RankedService<S> implements Comparable<RankedService<S>> {
+
+    /**
+     * Creates a new <code>RankedService</code> instance wrapping specified service using default ranking of <code>0</code> (zero).
+     * <p>
+     * Specified <code>ServiceReference</code> is used to determine <code>"service.ranking"</code> property.<br>
+     * See {@link Constants#SERVICE_RANKING}.
+     *
+     * @param reference The service reference to determine service ranking
+     * @param service The service instance
+     * @return The newly created ranked service
+     */
+    public static <S> RankedService<S> newRankedService(ServiceReference<S> reference, S service) {
+        return newRankedService(reference, service, 0);
+    }
+
+    /**
+     * Creates a new <code>RankedService</code> instance wrapping specified service using given default ranking.
+     * <p>
+     * Specified <code>ServiceReference</code> is used to determine <code>"service.ranking"</code> property.<br>
+     * See {@link Constants#SERVICE_RANKING}.
+     *
+     * @param reference The service reference to determine service ranking
+     * @param service The service instance
+     * @param defaultRanking The default ranking to use
+     * @return The newly created ranked service
+     */
+    public static <S> RankedService<S> newRankedService(ServiceReference<S> reference, S service, int defaultRanking) {
+        return new RankedService<S>(service, getRanking(reference, defaultRanking));
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * The service.

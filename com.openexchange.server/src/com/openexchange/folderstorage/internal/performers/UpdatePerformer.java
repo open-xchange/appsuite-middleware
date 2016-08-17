@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -63,6 +63,7 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
+import com.openexchange.folderstorage.LockCleaningFolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
@@ -378,6 +379,18 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                             checkOpenedStorage(realStorage, openedStorages);
                             realStorage.updateFolder(folder, storageParameters);
                             storage.updateFolder(folder, storageParameters);
+
+                            if(comparedPermissions.hasRemovedUsers()){
+                                if (realStorage instanceof LockCleaningFolderStorage) {
+                                    List<Permission> removedPermissions = comparedPermissions.getRemovedUserPermissions();
+                                    int[] removedUserPermissions = new int[removedPermissions.size()];
+                                    int x=0;
+                                    for(Permission perm: removedPermissions){
+                                        removedUserPermissions[x++] = perm.getEntity();
+                                    }
+                                    ((LockCleaningFolderStorage)realStorage).cleanLocksFor(folder, removedUserPermissions, storageParameters);
+                                }
+                            }
                         }
                     }
                     /*

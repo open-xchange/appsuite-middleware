@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -67,6 +67,7 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.AJAXRequestResultPostProcessor;
 import com.openexchange.ajax.requesthandler.AJAXState;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.contactcollector.ContactCollectorService;
@@ -78,9 +79,9 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
-import com.openexchange.mail.json.Column;
 import com.openexchange.mail.json.MailActionConstants;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.json.utils.Column;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -90,6 +91,7 @@ import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.TransportAccount;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -104,6 +106,20 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailAction.class);
 
+    private final class MailInterfacePostProcessor implements AJAXRequestResultPostProcessor {
+
+        private final MailServletInterface newMailInterface;
+
+        MailInterfacePostProcessor(MailServletInterface newMailInterface) {
+            this.newMailInterface = newMailInterface;
+        }
+
+        @Override
+        public void doPostProcessing(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e) {
+            newMailInterface.close();
+        }
+    }
+
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
     public static final @NonNull int[] FIELDS_ALL_ALIAS = new int[] { 600, 601 };
@@ -113,6 +129,8 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     public static final @NonNull Column[] COLUMNS_ALL_ALIAS = new Column[] { Column.field(600), Column.field(601) };
 
     public static final @NonNull Column[] COLUMNS_LIST_ALIAS = new Column[] { Column.field(600), Column.field(601), Column.field(614), Column.field(602), Column.field(611), Column.field(603), Column.field(612), Column.field(607), Column.field(652), Column.field(610), Column.field(608), Column.field(102) };
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
 
     private final ServiceLookup services;
 
@@ -127,9 +145,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     /**
      * Cachable formats: <code>"apiResponse"</code>, <code>"json"</code>.
      */
-    protected static final Set<String> CACHABLE_FORMATS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(
-        "apiResponse",
-        "json")));
+    protected static final Set<String> CACHABLE_FORMATS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("apiResponse", "json")));
 
     /**
      * Gets the service of specified type
@@ -149,17 +165,22 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @throws OXException If mail interface cannot be initialized
      */
     protected MailServletInterface getMailInterface(final MailRequest mailRequest) throws OXException {
-        /*
-         * Get mail interface
-         */
-        final AJAXState state = mailRequest.getRequest().getState();
-        MailServletInterface mailInterface = null;
+        // Get mail interface
+        AJAXState state = mailRequest.getRequest().getState();
         if (state == null) {
-            return MailServletInterface.getInstance(mailRequest.getSession());
+            // No AJAX state
+            MailServletInterface mailInterface = mailRequest.getMailServletInterface();
+            if (mailInterface == null) {
+                MailServletInterface newMailInterface = MailServletInterface.getInstance(mailRequest.getSession());
+                mailRequest.setMailServletInterface(newMailInterface);
+                mailInterface = newMailInterface;
+            }
+            return mailInterface;
         }
-        mailInterface = state.optProperty(PROPERTY_MAIL_IFACE);
+
+        MailServletInterface mailInterface = state.optProperty(PROPERTY_MAIL_IFACE);
         if (mailInterface == null) {
-            final MailServletInterface newMailInterface = MailServletInterface.getInstance(mailRequest.getSession());
+            MailServletInterface newMailInterface = MailServletInterface.getInstance(mailRequest.getSession());
             mailInterface = state.putProperty(PROPERTY_MAIL_IFACE, newMailInterface);
             if (null == mailInterface) {
                 mailInterface = newMailInterface;
@@ -199,8 +220,11 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail");
         }
 
+        MailRequest req = new MailRequest(requestData, session);
+        AJAXRequestResult result = null;
         try {
-            return perform(new MailRequest(requestData, session));
+            result = perform(req);
+            return result;
         } catch (final IllegalStateException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
@@ -217,7 +241,12 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             throw e;
         } finally {
             requestData.cleanUploads();
-
+            if (null != result) {
+                MailServletInterface mailInterface = req.getMailServletInterface();
+                if (null != mailInterface) {
+                    result.addPostProcessor(new MailInterfacePostProcessor(mailInterface));
+                }
+            }
         }
     }
 
@@ -260,15 +289,37 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      *
      * @param session The session
      * @param mail The mail
+     * @param incrementUseCount Whether the associated contacts' use-count is supposed to be incremented
      * @throws OXException
      */
-    public static void triggerContactCollector(final ServerSession session, final MailMessage mail) throws OXException {
+    public static void triggerContactCollector(ServerSession session, MailMessage mail, boolean incrementUseCount) throws OXException {
+        triggerContactCollector(session, Collections.singletonList(mail), incrementUseCount);
+    }
+
+    /**
+     * Triggers the contact collector for specified mail's addresses.
+     *
+     * @param session The session
+     * @param mails The mails
+     * @param incrementUseCount Whether the associated contacts' use-count is supposed to be incremented
+     * @throws OXException
+     */
+    public static void triggerContactCollector(ServerSession session, Collection<? extends MailMessage> mails, boolean incrementUseCount) throws OXException {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
-            Set<InternetAddress> addrs = AddressUtility.getUnknownAddresses(mail, session);
+            Set<InternetAddress> addrs = null;
+            for (MailMessage mail : mails) {
+                if (null != mail) {
+                    if (null == addrs) {
+                        addrs = AddressUtility.getAddresses(mail, session);
+                    } else {
+                        addrs.addAll(AddressUtility.getAddresses(mail, session));
+                    }
+                }
+            }
 
-            if (!addrs.isEmpty()) {
-                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
+            if (null != addrs && !addrs.isEmpty()) {
+                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), incrementUseCount, session);
             }
         }
     }
@@ -356,13 +407,13 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                 // The special ACE notation always starts with "xn--" prefix
                 if (address.indexOf("xn--") >= 0) {
                     // Seems to be in ACE notation; therefore try with its IDN representation
-                    accountId = storageService.getByPrimaryAddress(IDNA.toIDN(address), user, cid);
+                    accountId = storageService.getTransportByPrimaryAddress(IDNA.toIDN(address), user, cid);
                     if (accountId < 0) {
                         // Retry with ACE representation
-                        accountId = storageService.getByPrimaryAddress(address, user, cid);
+                        accountId = storageService.getTransportByPrimaryAddress(address, user, cid);
                     }
                 } else {
-                    accountId = storageService.getByPrimaryAddress(address, user, cid);
+                    accountId = storageService.getTransportByPrimaryAddress(address, user, cid);
                 }
             }
             if (accountId >= 0) {
@@ -371,7 +422,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
                     throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(user), Integer.valueOf(cid));
                 }
                 if (checkTransportSupport) {
-                    final MailAccount account = storageService.getMailAccount(accountId, user, cid);
+                    final TransportAccount account = storageService.getTransportAccount(accountId, user, cid);
                     // Check if determined account supports mail transport
                     if (null == account.getTransportServer()) {
                         // Account does not support mail transport
@@ -456,5 +507,22 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         }
 
         return fields;
+    }
+
+    /**
+     * Extracts the mail uid (if available) from the specified {@link OXException}
+     *
+     * @param e The {@link OXException}
+     * @return The extracted mail uid, if available, or <code>null</code>
+     */
+    String getUidFromException(OXException e) {
+        final Object[] args = e.getDisplayArgs();
+        final String uid;
+        if (null == args || 0 == args.length) {
+            uid = null;
+        } else {
+            uid = args[0] == null ? null : args[0].toString();
+        }
+        return uid;
     }
 }

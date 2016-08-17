@@ -1,0 +1,29 @@
+/mail?action=copy:
+  put:
+    operationId: copyMail
+    tags:
+      - mail
+    summary: Copies a mail to another folder.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: id
+        type: string
+        description: Object ID of the requested mail that shall be copied.
+        required: true
+      - $ref: "#/parameters/gblQueryParamMailFolder"
+      - in: body
+        name: body
+        description: A JSON object containing the id of the destination folder.
+        required: true
+        schema:
+          $ref: "#/definitions/MailDestinationBody"
+    responses:
+      200:
+        description: |
+          A JSON object containing the object ID and the folder ID of the copied mail. In case of errors the responsible fields in the
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/MailDestinationResponse"

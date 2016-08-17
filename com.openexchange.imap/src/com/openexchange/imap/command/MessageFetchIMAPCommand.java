@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -158,7 +158,6 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
         }
     }
 
-    private final char separator;
     private String[] args;
     private final String command;
     private SeqNumFetcher seqNumFetcher;
@@ -206,7 +205,6 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             returnDefaultValue = true;
         }
         this.loadBody = loadBody;
-        separator = imapFolder.getSeparator();
         command = getFetchCommand(isRev1, fp, loadBody, serverInfo);
         set(arr, isSequential, keepOrder);
     }
@@ -350,7 +348,6 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             returnDefaultValue = true;
         }
         this.loadBody = loadBody;
-        separator = imapFolder.getSeparator();
         if (0 == fetchLen) {
             returnDefaultValue = true;
         }
@@ -462,7 +459,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
             }
         }
         index++;
-        final ExtendedMimeMessage msg = new ExtendedMimeMessage(imapFolder.getFullName(), separator, seqnum);
+        final ExtendedMimeMessage msg = new ExtendedMimeMessage(imapFolder.getFullName(), seqnum);
         boolean error = false;
         try {
             final int itemCount = fetchResponse.getItemCount();

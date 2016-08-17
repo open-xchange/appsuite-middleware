@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -66,7 +66,7 @@ import com.openexchange.tools.sql.DBUtils;
 
 /**
  * The {@link DBVersionChecker} implements the VersionChecker interface. It caches version data for a schema and module for 30 minutes.
- * 
+ *
  * @see VersionChecker
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
@@ -75,7 +75,7 @@ public class DBVersionChecker implements VersionChecker {
 
     private static final Logger LOG = LoggerFactory.getLogger(DBVersionChecker.class);
 
-    private Cache<Key, String> versionCache = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).build();
+    private final Cache<Key, String> versionCache = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).build();
 
     @Override
     public String isUpToDate(Object id, final Connection con, final String module, String versionId) throws OXException {
@@ -108,7 +108,6 @@ public class DBVersionChecker implements VersionChecker {
     public String updateVersion(Connection con, String module, String oldVersionId, String newVersionId) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
-
         try {
             if (oldVersionId.equals("")) {
                 stmt = con.prepareStatement("INSERT IGNORE INTO serviceSchemaVersion (module, version) VALUES (?, ?)");
@@ -117,7 +116,7 @@ public class DBVersionChecker implements VersionChecker {
 
                 int update = stmt.executeUpdate();
                 DBUtils.closeSQLStuff(stmt);
-                
+
                 if (update == 1) {
                     return null;
                 }
@@ -132,6 +131,7 @@ public class DBVersionChecker implements VersionChecker {
                 return null;
             }
 
+            DBUtils.closeSQLStuff(stmt);
             stmt = con.prepareStatement("SELECT version FROM serviceSchemaVersion WHERE module = ?");
             stmt.setString(1, module);
 
@@ -161,8 +161,8 @@ public class DBVersionChecker implements VersionChecker {
 
     private static final class LoadVersion implements Callable<String> {
 
-        private Connection con;
-        private String module;
+        private final Connection con;
+        private final String module;
 
         public LoadVersion(Connection con, String module) {
             super();
@@ -193,8 +193,8 @@ public class DBVersionChecker implements VersionChecker {
 
     private static final class Key {
 
-        private String module;
-        private Object connectionKey;
+        private final String module;
+        private final Object connectionKey;
 
         public Key(Object connectionKey, String module) {
             this.module = module;
@@ -212,23 +212,30 @@ public class DBVersionChecker implements VersionChecker {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             Key other = (Key) obj;
             if (connectionKey == null) {
-                if (other.connectionKey != null)
+                if (other.connectionKey != null) {
                     return false;
-            } else if (!connectionKey.equals(other.connectionKey))
+                }
+            } else if (!connectionKey.equals(other.connectionKey)) {
                 return false;
+            }
             if (module == null) {
-                if (other.module != null)
+                if (other.module != null) {
                     return false;
-            } else if (!module.equals(other.module))
+                }
+            } else if (!module.equals(other.module)) {
                 return false;
+            }
             return true;
         }
     }
@@ -252,6 +259,7 @@ public class DBVersionChecker implements VersionChecker {
             if (rs.next()) {
                 return false;
             }
+            DBUtils.closeSQLStuff(stmt);
 
             //   CREATE LOCK
             stmt = con.prepareStatement("INSERT IGNORE INTO serviceSchemaMigrationLock (module, expires) VALUES (?, ?)");

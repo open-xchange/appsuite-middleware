@@ -195,6 +195,10 @@ public enum MailFilterExceptionCode implements DisplayableOXExceptionCode {
      * Mailfilter not available for user %1$d in context %1$d.
      */
     MAILFILTER_NOT_AVAILABLE("Mailfilter not available for user %1$d in context %1$d.", MAILFILTER_NOT_AVAILABLE_MSG, CATEGORY_PERMISSION_DENIED, 27),
+    /**
+     * The specified 'reorder' array is invalid as the size (%1$d) exceeds the amount (%2$d) of rules for user '%3$d' in context '%4$d'. 
+     */
+    INVALID_REORDER_ARRAY("The specified 'reorder' array is invalid as the size (%1$d) exceeds the amount (%2$d) of rules for user '%3$d' in context '%4$d'.", CATEGORY_ERROR, 28),
     ;
 
     private final String message;

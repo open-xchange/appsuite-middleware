@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,6 +49,7 @@
 
 package com.openexchange.halo.mail;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -62,24 +63,31 @@ import com.openexchange.exception.OXException;
 import com.openexchange.halo.AbstractContactHalo;
 import com.openexchange.halo.HaloContactDataSource;
 import com.openexchange.halo.HaloContactQuery;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.json.utils.Column;
+import com.openexchange.mail.json.utils.ColumnCollection;
 import com.openexchange.mail.search.CcTerm;
 import com.openexchange.mail.search.FromTerm;
 import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.ToTerm;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.Tools;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 public class EmailContactHalo extends AbstractContactHalo implements HaloContactDataSource {
@@ -96,6 +104,77 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
         this.services = ExceptionOnAbsenceServiceLookup.valueOf(services);
     }
 
+    /**
+     * Checks for columns.
+     *
+     * @return The column collection
+     * @throws OXException If parameter is missing
+     */
+    private ColumnCollection requireColumns(AJAXRequestData requestData) throws OXException {
+        String parameter = requestData.getParameter(AJAXServlet.PARAMETER_COLUMNS);
+        if (null == parameter) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_COLUMNS);
+        }
+
+        List<Column> l;
+        {
+            String[] sa = Strings.splitByComma(parameter);
+            l = new ArrayList<Column>(sa.length);
+            for (String s : sa) {
+                int field = Tools.getUnsignedInteger(s);
+                l.add(field > 0 ? Column.field(field) : Column.header(s));
+            }
+        }
+
+        return new ColumnCollection(l);
+    }
+
+    private MailField[] checkFields(MailField[] fields) {
+        MailField idField = MailField.ID;
+        for (int i = fields.length; i-- > 0;) {
+            if (idField == fields[i]) {
+                return fields;
+            }
+        }
+
+        MailField[] newFields = new MailField[fields.length + 1];
+        newFields[0] = idField;
+        System.arraycopy(fields, 0, newFields, 1, fields.length);
+        return newFields;
+    }
+
+    private RetrievalResult retrieveMessages(int limit, SearchTerm<?> senderTerm, SearchTerm<?> recipientTerm, MailField[] fields, String[] headers, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        String sentFullName = mailAccess.getFolderStorage().getSentFolder();
+        IndexRange indexRange = new IndexRange(0, limit);
+
+        if (null == headers || 0 >= headers.length) {
+            // No headers requested
+            List<MailMessage> inboxMessages = Arrays.asList(mailAccess.getMessageStorage().searchMessages("INBOX", indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, senderTerm, fields));
+            List<MailMessage> sentMessages = Arrays.asList(mailAccess.getMessageStorage().searchMessages(sentFullName, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, recipientTerm, fields));
+            return new RetrievalResult(inboxMessages, sentMessages);
+        }
+
+        // Check for extended message storage
+        IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+        if (messageStorage instanceof IMailMessageStorageExt) {
+            IMailMessageStorageExt extMsgStorage = (IMailMessageStorageExt) messageStorage;
+            List<MailMessage> inboxMessages = Arrays.asList(extMsgStorage.searchMessages("INBOX", indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, senderTerm, fields, headers));
+            List<MailMessage> sentMessages = Arrays.asList(extMsgStorage.searchMessages(sentFullName, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, recipientTerm, fields, headers));
+            return new RetrievalResult(inboxMessages, sentMessages);
+        }
+
+        // Headers are required to be fetched dedicatedly; therefore we need the mail identifier to be contained in requested fields
+        MailField[] cols = checkFields(fields);
+        MailMessage[] mails = mailAccess.getMessageStorage().searchMessages("INBOX", indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, senderTerm, cols);
+        MessageUtility.enrichWithHeaders("INBOX", mails, headers, messageStorage);
+        List<MailMessage> inboxMessages = Arrays.asList(mails);
+
+        mails = mailAccess.getMessageStorage().searchMessages(sentFullName, indexRange, MailSortField.RECEIVED_DATE, OrderDirection.DESC, recipientTerm, cols);
+        MessageUtility.enrichWithHeaders(sentFullName, mails, headers, messageStorage);
+        List<MailMessage> sentMessages = Arrays.asList(mails);
+        return new RetrievalResult(inboxMessages, sentMessages);
+    }
+
     @Override
     public String getId() {
         return "com.openexchange.halo.mail";
@@ -103,9 +182,15 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 
     @Override
     public AJAXRequestResult investigate(final HaloContactQuery query, final AJAXRequestData req, final ServerSession session) throws OXException {
-        final MailService mailService = services.getService(MailService.class);
+        MailService mailService = services.getService(MailService.class);
 
-        final int[] params = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
+        String[] headers;
+        MailField[] requestedFields;
+        {
+            ColumnCollection columnCollection = requireColumns(req);
+            requestedFields = MailField.getFields(columnCollection.getFields());
+            headers = columnCollection.getHeaders();
+        }
         int limit = req.getIntParameter(AJAXServlet.PARAMETER_LIMIT);
         limit = limit < 0 ? 10 : limit;
 
@@ -113,9 +198,6 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
         if (isUserThemselves(session.getUser(), addresses)) {
             return new AJAXRequestResult(Collections.<MailMessage> emptyList(), "mail");
         }
-
-        final MailField[] requestedFields = MailField.getFields(params);
-
 
         MailAccount[] userMailAccounts;
         {
@@ -127,18 +209,17 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
             }
         }
 
+        SearchTerm<?> senderTerm = generateSenderSearch(addresses);
+        SearchTerm<?> recipientTerm = generateRecipientSearch(addresses);
         List<MailMessage> messages = new LinkedList<MailMessage>();
-        for (final MailAccount mailAccount : userMailAccounts) {
+        for (MailAccount mailAccount : userMailAccounts) {
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
             try {
                 mailAccess = mailService.getMailAccess(session, mailAccount.getId());
                 mailAccess.connect();
-                List<MailMessage> moreMessages = Arrays.asList(mailAccess.getMessageStorage().searchMessages("INBOX", new IndexRange(0, limit), MailSortField.RECEIVED_DATE, OrderDirection.DESC, generateSenderSearch(addresses), requestedFields));
-                messages.addAll(moreMessages);
-
-                final String sentFullName = mailAccess.getFolderStorage().getSentFolder();
-                moreMessages = Arrays.asList(mailAccess.getMessageStorage().searchMessages(sentFullName, new IndexRange(0, limit), MailSortField.RECEIVED_DATE, OrderDirection.DESC, generateRecipientSearch(addresses), requestedFields));
-                messages.addAll(moreMessages);
+                RetrievalResult retrievees = retrieveMessages(limit, senderTerm, recipientTerm, requestedFields, headers, mailAccess);
+                messages.addAll(retrievees.inboxMessages);
+                messages.addAll(retrievees.sentMessage);
             } finally {
                 if (mailAccess != null) {
                     mailAccess.close(true);
@@ -196,5 +277,22 @@ public class EmailContactHalo extends AbstractContactHalo implements HaloContact
 
     protected boolean searchingExternalMailboxesIsFast() {
         return false; // TODO: once indexing is implemented, this should check whether it is turned on.
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------
+
+    private static final class RetrievalResult {
+
+        /** The messages queried from INBOX folder */
+        final List<MailMessage> inboxMessages;
+
+        /** The messages queried from standard sent folder */
+        final List<MailMessage> sentMessage;
+
+        RetrievalResult(List<MailMessage> inboxMessages, List<MailMessage> sentMessage) {
+            super();
+            this.inboxMessages = inboxMessages;
+            this.sentMessage = sentMessage;
+        }
     }
 }

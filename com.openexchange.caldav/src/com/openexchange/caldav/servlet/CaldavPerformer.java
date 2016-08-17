@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -111,25 +111,25 @@ public class CaldavPerformer extends DAVPerformer {
      */
     private EnumMap<WebdavMethod, WebdavAction> initActions() {
         EnumMap<WebdavMethod, WebdavAction> actions = new EnumMap<WebdavMethod, WebdavAction>(WebdavMethod.class);
-        actions.put(WebdavMethod.UNLOCK, prepare(new WebdavUnlockAction(), true, true, factory, new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.PROPPATCH, prepare(new WebdavProppatchAction(PROTOCOL), true, true, factory, new WebdavExistsAction(), new WebdavIfAction(0, true, false)));
-        actions.put(WebdavMethod.PROPFIND, prepare(new WebdavPropfindAction(PROTOCOL), true, true, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.REPORT, prepare(new WebdavReportAction(PROTOCOL), true, true, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.OPTIONS, prepare(new WebdavOptionsAction(), true, true, false, factory, new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.MOVE, prepare(new WebdavMoveAction(factory), true, true, factory, new WebdavExistsAction(), new WebdavIfAction(0, true, true)));
-        actions.put(WebdavMethod.MKCOL, prepare(new ExtendedMKCOLAction(PROTOCOL), true, true, factory, new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.LOCK, prepare(new WebdavLockAction(), true, true, factory, new WebdavIfAction(0, true, false)));
-        actions.put(WebdavMethod.COPY, prepare(new WebdavCopyAction(factory), true, true, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, true)));
-        actions.put(WebdavMethod.DELETE, prepare(new WebdavDeleteAction(), true, true, factory, new WebdavExistsAction(), new WebdavIfMatchAction(), new WebdavIfAction(0, true, false)));
-        actions.put(WebdavMethod.GET, prepare(new WebdavGetAction(), true, true, false, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
-        actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, false, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
-        actions.put(WebdavMethod.POST, prepare(new CalDAVPOSTAction(factory), true, true, factory, new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.MKCALENDAR, prepare(new MKCALENDARAction(PROTOCOL), true, true, factory, new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.ACL, prepare(new ACLAction(PROTOCOL), true, true, factory, new WebdavIfAction(0, true, false)));
-        actions.put(WebdavMethod.TRACE, prepare(new WebdavTraceAction(), true, true, factory, new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.UNLOCK, prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.PROPPATCH, prepare(new WebdavProppatchAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false)));
+        actions.put(WebdavMethod.PROPFIND, prepare(new WebdavPropfindAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.REPORT, prepare(new WebdavReportAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.OPTIONS, prepare(new WebdavOptionsAction(), true, true, false, null, new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.MOVE, prepare(new WebdavMoveAction(factory), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, true)));
+        actions.put(WebdavMethod.MKCOL, prepare(new ExtendedMKCOLAction(PROTOCOL), true, true, new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.LOCK, prepare(new WebdavLockAction(), true, true, new WebdavIfAction(0, true, false)));
+        actions.put(WebdavMethod.COPY, prepare(new WebdavCopyAction(factory), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, true)));
+        actions.put(WebdavMethod.DELETE, prepare(new WebdavDeleteAction(), true, true, new WebdavExistsAction(), new WebdavIfMatchAction(), new WebdavIfAction(0, true, false)));
+        actions.put(WebdavMethod.GET, prepare(new WebdavGetAction(), true, true, false, null, new WebdavExistsAction(), new WebdavIfAction(0, false, false), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
+        actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, false, null, new WebdavExistsAction(), new WebdavIfAction(0, false, false), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
+        actions.put(WebdavMethod.POST, prepare(new CalDAVPOSTAction(factory), true, true, new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.MKCALENDAR, prepare(new MKCALENDARAction(PROTOCOL), true, true, new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.ACL, prepare(new ACLAction(PROTOCOL), true, true, new WebdavIfAction(0, true, false)));
+        actions.put(WebdavMethod.TRACE, prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false)));
         OXWebdavPutAction oxWebdavPut = new OXWebdavPutAction();
         OXWebdavMaxUploadSizeAction oxWebdavMaxUploadSize = new OXWebdavMaxUploadSizeAction(this);
-        actions.put(WebdavMethod.PUT, prepare(oxWebdavPut, true, true, factory, new WebdavIfMatchAction(), oxWebdavMaxUploadSize));
+        actions.put(WebdavMethod.PUT, prepare(oxWebdavPut, true, true, new WebdavIfMatchAction(), oxWebdavMaxUploadSize));
         makeLockNullTolerant(actions);
         return actions;
     }

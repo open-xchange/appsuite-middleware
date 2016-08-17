@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,6 +49,7 @@
 
 package com.openexchange.pop3.connect;
 
+import static com.openexchange.pop3.services.POP3ServiceRegistry.getServiceRegistry;
 import static com.openexchange.pop3.util.POP3StorageUtil.parseLoginDelaySeconds;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -59,6 +60,7 @@ import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -69,10 +71,14 @@ import javax.mail.MessagingException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.log.audit.AuditLogService;
+import com.openexchange.log.audit.DefaultAttribute;
+import com.openexchange.log.audit.DefaultAttribute.Name;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
+import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.POP3Provider;
 import com.openexchange.pop3.config.IPOP3Properties;
@@ -227,12 +233,13 @@ public final class POP3StoreConnector {
      * @param pop3Config The POP3 configuration providing credentials and server settings
      * @param pop3Properties Optional additional POP3 properties applied to POP3 session (may be <code>null</code>)
      * @param monitorFailedAuthentication <code>true</code> to monitor failed authentication; otherwise <code>false</code>
+     * @param accountId The account identifier
      * @param session The session providing user information
      * @param errorOnMissingUIDL <code>true</code> to throw an error on missing UIDL; otherwise <code>false</code> to ignore
      * @return A connected instance of {@link POP3Store}
      * @throws OXException If establishing a connected instance of {@link POP3Store} fails
      */
-    public static POP3StoreResult getPOP3Store(final POP3Config pop3Config, final Properties pop3Properties, final boolean monitorFailedAuthentication, final Session session, final boolean errorOnMissingUIDL, final boolean forceSecure) throws OXException {
+    public static POP3StoreResult getPOP3Store(POP3Config pop3Config, Properties pop3Properties, boolean monitorFailedAuthentication, int accountId, Session session, boolean errorOnMissingUIDL, boolean forceSecure) throws OXException {
         try {
             final boolean tmpDownEnabled = (POP3Properties.getInstance().getPOP3TemporaryDown() > 0);
             if (tmpDownEnabled) {
@@ -380,6 +387,14 @@ public final class POP3StoreConnector {
             String capabilities = staticCapabilities;
             try {
                 pop3Store.connect(server, port, login, tmpPass);
+
+                // Log connect
+                AuditLogService auditLogService = getServiceRegistry().getOptionalService(AuditLogService.class);
+                if (null != auditLogService) {
+                    String eventId = MailAccount.DEFAULT_ID == accountId ? "pop3.primary.login" : "pop3.external.login";
+                    auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("pop3.login", login), DefaultAttribute.arbitraryFor("pop3.server", server), DefaultAttribute.arbitraryFor("pop3.port", Integer.toString(port)));
+                }
+
                 // Fetch capabilities again
                 final Map<String, String> caps = pop3Store.reinitCapabilities();
                 if (!caps.isEmpty()) {

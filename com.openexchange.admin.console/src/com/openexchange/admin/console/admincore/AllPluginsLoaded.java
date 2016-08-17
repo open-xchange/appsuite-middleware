@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -53,7 +53,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-
+import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.rmi.OXAdminCoreInterface;
 
@@ -63,12 +63,22 @@ public class AllPluginsLoaded extends BasicCommandlineOptions {
         super();
     }
 
-    public static void main(final String[] args) {
-        new AllPluginsLoaded().internalMain();
+    @Override
+    protected void setDefaultCommandLineOptionsWithoutContextID(final AdminParser parser) {
+        // Do nothing
     }
 
-    private void internalMain() {
+    public static void main(final String[] args) {
+        new AllPluginsLoaded().internalMain(args);
+    }
+
+    private void internalMain(String[] args) {
+        AdminParser parser = new AdminParser("allpluginsloaded");
+        setDefaultCommandLineOptionsWithoutContextID(parser);
+
         try {
+            parser.ownparse(args);
+
             final OXAdminCoreInterface oxadmincore = (OXAdminCoreInterface) Naming.lookup(RMI_HOSTNAME+OXAdminCoreInterface.RMI_NAME);
             if (oxadmincore.allPluginsLoaded()) {
                 sysexit(0);
@@ -88,6 +98,9 @@ public class AllPluginsLoaded extends BasicCommandlineOptions {
             printServerException(e,null);
             sysexit(SYSEXIT_REMOTE_ERROR);
         } catch (final NotBoundException e) {
+            printServerException(e,null);
+            sysexit(1);
+        } catch (final Exception e) {
             printServerException(e,null);
             sysexit(1);
         }

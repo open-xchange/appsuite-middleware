@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Open-Xchange On-Boarding Bundle
 Bundle-SymbolicName: com.openexchange.client.onboarding
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.ajax,
@@ -60,6 +60,7 @@ Import-Package: com.openexchange.ajax,
 Bundle-Activator: com.openexchange.client.onboarding.osgi.OnboardingActivator
 Export-Package: com.openexchange.client.onboarding,
  com.openexchange.client.onboarding.download,
+ com.openexchange.client.onboarding.net,
  com.openexchange.client.onboarding.notification,
  com.openexchange.client.onboarding.notification.mail,
  com.openexchange.client.onboarding.rmi,

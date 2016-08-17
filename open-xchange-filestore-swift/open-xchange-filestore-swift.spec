@@ -67,6 +67,16 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Jul 12 2016 Thorben Betten <thorben.betten@open-xchange.com>
+Second candidate for 7.8.2 release
+* Wed Jul 06 2016 Thorben Betten <thorben.betten@open-xchange.com>
+First candidate for 7.8.2 release
+* Wed Jun 29 2016 Thorben Betten <thorben.betten@open-xchange.com>
+Second candidate for 7.8.2 release
+* Thu Jun 16 2016 Thorben Betten <thorben.betten@open-xchange.com>
+First candidate for 7.8.2 release
+* Wed Apr 06 2016 Thorben Betten <thorben.betten@open-xchange.com>
+prepare for 7.8.2 release
 * Wed Mar 30 2016 Thorben Betten <thorben.betten@open-xchange.com>
 Second candidate for 7.8.1 release
 * Fri Mar 25 2016 Thorben Betten <thorben.betten@open-xchange.com>

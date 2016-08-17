@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -454,7 +454,8 @@ public class Multiple extends SessionServlet {
             if (handles) {
                 final AJAXRequestData request = parse(req, moduleCandidate.toString(), module.substring(moduleCandidate.length()), action, jsonObj, session, Tools.considerSecure(req));
                 jsonWriter.object();
-                final AJAXRequestResult result;
+                AJAXRequestResult requestResult = null;
+                Exception exc = null;
                 try {
                     if (action == null || action.length() == 0) {
                     	request.setAction("GET"); // Backwards Compatibility
@@ -462,32 +463,39 @@ public class Multiple extends SessionServlet {
                     if (state == null) {
                         state = dispatcher.begin();
                     }
-                    result = dispatcher.perform(request, state, session);
+                    requestResult = dispatcher.perform(request, state, session);
 
-                    if (result.getTimestamp() != null) {
+                    Date timestamp = requestResult.getTimestamp();
+                    if (timestamp != null) {
                         jsonWriter.key(ResponseFields.TIMESTAMP);
-                        jsonWriter.value(result.getTimestamp().getTime());
+                        jsonWriter.value(timestamp.getTime());
                     }
+
                     jsonWriter.key(ResponseFields.DATA);
-                    jsonWriter.value(result.getResultObject());
-                    if (null != result.getException()) {
+                    jsonWriter.value(requestResult.getResultObject());
+
+                    if (null != requestResult.getException()) {
                         boolean includeStackTraceOnError = AJAXRequestDataTools.parseBoolParameter("includeStackTraceOnError", request);
-                        ResponseWriter.writeException(result.getException(), jsonWriter, localeFrom(session), includeStackTraceOnError);
+                        ResponseWriter.writeException(requestResult.getException(), jsonWriter, localeFrom(session), includeStackTraceOnError);
                     }
-                    if (null != result.getWarnings() && 0 < result.getWarnings().size()) {
-                        ResponseWriter.writeWarnings(new ArrayList<OXException>(result.getWarnings()), jsonWriter, localeFrom(session));
+
+                    if (false == requestResult.getWarnings().isEmpty()) {
+                        ResponseWriter.writeWarnings(new ArrayList<OXException>(requestResult.getWarnings()), jsonWriter, localeFrom(session));
                     }
-                } catch (final OXException e) {
+                } catch (OXException e) {
+                    exc = e;
                     logError(e.getMessage(), session, e);
                     ResponseWriter.writeException(e, jsonWriter, localeFrom(session), AJAXRequestDataTools.parseBoolParameter("includeStackTraceOnError", request));
                     return state;
-                } catch (final RuntimeException rte) {
+                } catch (RuntimeException rte) {
+                    exc = rte;
                     logError(rte.getMessage(), session, rte);
                     final OXException e = AjaxExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
                     ResponseWriter.writeException(e, jsonWriter, localeFrom(session), AJAXRequestDataTools.parseBoolParameter("includeStackTraceOnError", request));
                     return state;
                 } finally {
                 	jsonWriter.endObject();
+                	Dispatchers.signalDone(requestResult, exc);
                 }
                 return state;
             }

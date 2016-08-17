@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -66,6 +66,9 @@ public class DriveSettings {
     private String minApiVersion;
     private Map<String, String> localizedFolders;
     private Set<String> capabilities;
+    private Long minUploadChunk;
+    private int minSearchChars;
+    private boolean hasTrashFolder;
 
     /**
      * Initializes a new {@link DriveSettings}.
@@ -198,6 +201,60 @@ public class DriveSettings {
      */
     public void setCapabilities(Set<String> capabilities) {
         this.capabilities = capabilities;
+    }
+
+    /**
+     * Gets the minUploadChunk
+     *
+     * @return The minUploadChunk
+     */
+    public Long getMinUploadChunk() {
+        return minUploadChunk;
+    }
+
+    /**
+     * Sets the minUploadChunk
+     *
+     * @param minUploadChunk The minUploadChunk to set
+     */
+    public void setMinUploadChunk(Long minUploadChunk) {
+        this.minUploadChunk = minUploadChunk;
+    }
+
+    /**
+     * Gets the minSearchChars
+     *
+     * @return The minSearchChars
+     */
+    public int getMinSearchChars() {
+        return minSearchChars;
+    }
+
+    /**
+     * Sets the minSearchChars
+     *
+     * @param minSearchChars The minSearchChars to set
+     */
+    public void setMinSearchChars(int minSearchChars) {
+        this.minSearchChars = minSearchChars;
+    }
+
+    /**
+     * Gets the hasTrashFolder
+     *
+     * @return The hasTrashFolder
+     */
+    public boolean hasTrashFolder() {
+        return hasTrashFolder;
+    }
+
+    /**
+     * Sets the hasTrashFolder
+     *
+     * @param hasTrashFolder The hasTrashFolder to set
+     */
+    public void setHasTrashFolder(boolean hasTrashFolder) {
+        this.hasTrashFolder = hasTrashFolder;
     }
 
 }

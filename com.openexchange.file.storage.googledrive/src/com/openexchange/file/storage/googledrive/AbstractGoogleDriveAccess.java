@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -58,7 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.googledrive.access.GoogleDriveAccess;
+import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
 import com.openexchange.session.Session;
 
 /**
@@ -71,7 +71,7 @@ public abstract class AbstractGoogleDriveAccess {
     private static final String MIME_TYPE_DIRECTORY = GoogleDriveConstants.MIME_TYPE_DIRECTORY;
     // private static final String QUERY_STRING_DIRECTORIES_ONLY = GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY;
 
-    protected final GoogleDriveAccess googleDriveAccess;
+    protected final GoogleDriveOAuthAccess googleDriveAccess;
     protected final Session session;
     protected final FileStorageAccount account;
     protected String rootFolderIdentifier;
@@ -79,7 +79,7 @@ public abstract class AbstractGoogleDriveAccess {
     /**
      * Initializes a new {@link AbstractGoogleDriveAccess}.
      */
-    protected AbstractGoogleDriveAccess(final GoogleDriveAccess googleDriveAccess, final FileStorageAccount account, final Session session) {
+    protected AbstractGoogleDriveAccess(final GoogleDriveOAuthAccess googleDriveAccess, final FileStorageAccount account, final Session session) {
         super();
         this.googleDriveAccess = googleDriveAccess;
         this.account = account;
@@ -99,7 +99,7 @@ public abstract class AbstractGoogleDriveAccess {
             rootFolderId = (String) session.getParameter(key);
             if (null == rootFolderId) {
                 try {
-                    Drive drive = googleDriveAccess.getDrive(session);
+                    Drive drive = (Drive) googleDriveAccess.getClient().client;
                     rootFolderId = drive.files().get("root").execute().getId();
                     session.setParameter(key, rootFolderId);
                 } catch (HttpResponseException e) {

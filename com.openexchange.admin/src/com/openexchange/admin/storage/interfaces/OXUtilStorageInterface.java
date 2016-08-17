@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -75,21 +75,9 @@ import com.openexchange.admin.tools.PropertyHandlerExtended;
  */
 public abstract class OXUtilStorageInterface {
 
-    /**
-     * Proxy attribute for the class implementing this interface.
-     */
-    private static Class<? extends OXUtilStorageInterface> implementingClass;
-
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXUtilStorageInterface.class);
 
-    protected static AdminCacheExtended cache = null;
-
-    protected static PropertyHandler prop = null;
-
-    static {
-        cache = ClientAdminThreadExtended.cache;
-        prop = cache.getProperties();
-    }
+    private static volatile OXUtilStorageInterface instance;
 
     /**
      * Creates a new instance implementing the group storage interface.
@@ -97,46 +85,56 @@ public abstract class OXUtilStorageInterface {
      * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
      */
     public static OXUtilStorageInterface getInstance() throws StorageException {
-        synchronized (OXUtilStorageInterface.class) {
-            if (null == implementingClass) {
-                final String className = prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null);
-                if (null != className) {
+        OXUtilStorageInterface inst = instance;
+        if (null == inst) {
+            synchronized (OXUtilStorageInterface.class) {
+                inst = instance;
+                if (null == inst) {
+                    Class<? extends OXUtilStorageInterface> implementingClass;
+                    AdminCacheExtended cache = ClientAdminThreadExtended.cache;
+                    PropertyHandler prop = cache.getProperties();
+                    final String className = prop.getProp(PropertyHandlerExtended.UTIL_STORAGE, null);
+                    if (null != className) {
+                        try {
+                            implementingClass = Class.forName(className).asSubclass(OXUtilStorageInterface.class);
+                        } catch (final ClassNotFoundException e) {
+                            log.error("", e);
+                            throw new StorageException(e);
+                        }
+                    } else {
+                        final StorageException storageException = new StorageException("Property for util_storage not defined");
+                        log.error("", storageException);
+                        throw storageException;
+                    }
+
+                    Constructor<? extends OXUtilStorageInterface> cons;
                     try {
-                        implementingClass = Class.forName(className).asSubclass(OXUtilStorageInterface.class);
-                    } catch (final ClassNotFoundException e) {
+                        cons = implementingClass.getConstructor(new Class[] {});
+                        inst = cons.newInstance(new Object[] {});
+                        instance = inst;
+                    } catch (final SecurityException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final NoSuchMethodException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final IllegalArgumentException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final InstantiationException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final IllegalAccessException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final InvocationTargetException e) {
                         log.error("", e);
                         throw new StorageException(e);
                     }
-                } else {
-                    final StorageException storageException = new StorageException("Property for util_storage not defined");
-                    log.error("", storageException);
-                    throw storageException;
                 }
             }
         }
-        Constructor<? extends OXUtilStorageInterface> cons;
-        try {
-            cons = implementingClass.getConstructor(new Class[] {});
-            return cons.newInstance(new Object[] {});
-        } catch (final SecurityException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final NoSuchMethodException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final IllegalArgumentException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final InstantiationException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final IllegalAccessException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final InvocationTargetException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        }
+        return inst;
     }
 
     /**

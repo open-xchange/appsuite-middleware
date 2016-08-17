@@ -1,0 +1,20 @@
+/messaging/account?action=all:
+  get:
+    operationId: getAllMessagingAccounts
+    tags:
+      - messaging
+    summary: Gets all messaging accounts.
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: query
+        name: messagingService
+        type: string
+        description: List only those accounts that belong to the given `messagingService`.
+        required: false
+    responses:
+      200:
+        description: |
+          A JSON object containing an array with account objects. In case of errors the responsible
+          fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        schema:
+          $ref: "#/definitions/MessagingAccountsResponse"

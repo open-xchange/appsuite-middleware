@@ -84,7 +84,7 @@ public class IMAPInputStream extends InputStream {
 				boolean peek) {
 	this.msg = msg;
 	this.section = section;
-	this.max = max;
+	this.max = max > 0 ? max : -1;
 	this.peek = peek;
 	pos = 0;
 	blksize = msg.getFetchBlockSize();

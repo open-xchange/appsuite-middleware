@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.mail;
 
+import com.openexchange.file.storage.FileStorageFolder;
+
 /**
  * {@link FullName}
  *
@@ -60,13 +62,41 @@ public class FullName {
     /** A full name's type */
     public static enum Type {
         /** The virtual attachment folder containing all attachments */
-        ALL,
+        ALL(FileStorageFolder.ROOT_FULLNAME),
         /** The virtual attachment folder containing received attachments */
-        RECEIVED,
+        RECEIVED("received"),
         /** The virtual attachment folder containing sent attachments */
-        SENT,
-        /** The default folder */
-        DEFAULT;
+        SENT("sent");
+
+        private final String folderId;
+
+        private Type(String folderId) {
+            this.folderId = folderId;
+        }
+
+        /**
+         * Gets the virtual folder identifier
+         *
+         * @return The folder identifier
+         */
+        public String getFolderId() {
+            return folderId;
+        }
+
+        /**
+         * Gets the type for specified folder identifier
+         *
+         * @param folderId The folder identifier to look-up by
+         * @return The associated type
+         */
+        public static Type typeByFolderId(String folderId) {
+            for (Type type : Type.values()) {
+                if (type.folderId.equals(folderId)) {
+                    return type;
+                }
+            }
+            return null;
+        }
     }
 
     // ------------------------------------------------------------------------------------
@@ -81,13 +111,12 @@ public class FullName {
      *
      * @param fullName The full name
      * @param type The type
-     * @param folderId The original folder identifier
      */
-    public FullName(String fullName, Type type, String folderId) {
+    public FullName(String fullName, Type type) {
         super();
         this.fullName = fullName;
         this.type = type;
-        this.folderId = folderId;
+        this.folderId = type.getFolderId();
         hash = 31 * 1 + ((fullName == null) ? 0 : fullName.hashCode());
     }
 
@@ -97,7 +126,7 @@ public class FullName {
      * @return <code>true</code> if full name denotes the default folder; otherwise <code>false</code>
      */
     public boolean isDefaultFolder() {
-        return 0 == fullName.length();
+        return Type.ALL.equals(type);
     }
 
     /**
@@ -107,6 +136,15 @@ public class FullName {
      */
     public boolean isNotDefaultFolder() {
         return !isDefaultFolder();
+    }
+
+    /**
+     * Checks if this full name denotes the virtual "all attachments" folder.
+     *
+     * @return <code>true</code> if this full name denotes the virtual "all attachments" folder; otherwise <code>false</code>
+     */
+    public boolean isAllFolder() {
+        return Type.ALL == type;
     }
 
     /**

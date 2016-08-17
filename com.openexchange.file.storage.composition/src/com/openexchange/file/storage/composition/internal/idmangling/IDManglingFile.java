@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.file.storage.DelegatingFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileID;
@@ -63,7 +64,7 @@ import com.openexchange.file.storage.composition.FolderID;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class IDManglingFile implements File {
+public class IDManglingFile implements DelegatingFile {
 
     private final File file;
     private final String id;
@@ -81,6 +82,21 @@ public class IDManglingFile implements File {
         id = new FileID(service, account, file.getFolderId(), file.getId()).toUniqueID();
         folder = new FolderID(service, account, file.getFolderId()).toUniqueID();
         this.file = file;
+    }
+
+    @Override
+    public File getDelegate() {
+        return file;
+    }
+
+    @Override
+    public boolean isAccurateSize() {
+        return file.isAccurateSize();
+    }
+
+    @Override
+    public void setAccurateSize(boolean accurateSize) {
+        file.setAccurateSize(accurateSize);
     }
 
     @Override

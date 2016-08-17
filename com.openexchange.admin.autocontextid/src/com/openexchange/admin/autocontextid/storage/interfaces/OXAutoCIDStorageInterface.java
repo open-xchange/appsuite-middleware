@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -63,21 +63,9 @@ import com.openexchange.admin.tools.PropertyHandler;
  */
 public abstract class OXAutoCIDStorageInterface {
 
-    /**
-     * Proxy attribute for the class implementing this interface.
-     */
-    private static Class<? extends OXAutoCIDStorageInterface> implementingClass;
-
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXAutoCIDStorageInterface.class);
 
-    protected static AdminCacheExtended cache = null;
-
-    protected static PropertyHandler prop = null;
-
-    static {
-        cache = ClientAdminThreadExtended.cache;
-        prop = cache.getProperties();
-    }
+    private static volatile OXAutoCIDStorageInterface instance;
 
     /**
      * Creates a new instance implementing the autocid storage factory.
@@ -85,48 +73,56 @@ public abstract class OXAutoCIDStorageInterface {
      * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
      */
     public static OXAutoCIDStorageInterface getInstance() throws StorageException {
-        synchronized (OXAutoCIDStorageInterface.class) {
-            if (null == implementingClass) {
-                cache = ClientAdminThreadExtended.cache;
-                prop = cache.getProperties();
-                final String className = prop.getProp(PropertyHandlerExtended.AUTOCID_STORAGE, null);
-                if (null != className) {
+        OXAutoCIDStorageInterface inst = instance;
+        if (null == inst) {
+            synchronized (OXAutoCIDStorageInterface.class) {
+                inst = instance;
+                if (null == inst) {
+                    Class<? extends OXAutoCIDStorageInterface> implementingClass;
+                    AdminCacheExtended cache = ClientAdminThreadExtended.cache;
+                    PropertyHandler prop = cache.getProperties();
+                    final String className = prop.getProp(PropertyHandlerExtended.AUTOCID_STORAGE, null);
+                    if (null != className) {
+                        try {
+                            implementingClass = Class.forName(className).asSubclass(OXAutoCIDStorageInterface.class);
+                        } catch (final ClassNotFoundException e) {
+                            log.error("", e);
+                            throw new StorageException(e);
+                        }
+                    } else {
+                        final StorageException storageException = new StorageException("Property for autocid_storage not defined");
+                        log.error("", storageException);
+                        throw storageException;
+                    }
+
+                    Constructor<? extends OXAutoCIDStorageInterface> cons;
                     try {
-                        implementingClass = Class.forName(className).asSubclass(OXAutoCIDStorageInterface.class);
-                    } catch (final ClassNotFoundException e) {
+                        cons = implementingClass.getConstructor(new Class[] {});
+                        inst = cons.newInstance(new Object[] {});
+                        instance = inst;
+                    } catch (final SecurityException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final NoSuchMethodException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final IllegalArgumentException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final InstantiationException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final IllegalAccessException e) {
+                        log.error("", e);
+                        throw new StorageException(e);
+                    } catch (final InvocationTargetException e) {
                         log.error("", e);
                         throw new StorageException(e);
                     }
-                } else {
-                    final StorageException storageException = new StorageException("Property for autocid_storage not defined");
-                    log.error("", storageException);
-                    throw storageException;
                 }
             }
         }
-        Constructor<? extends OXAutoCIDStorageInterface> cons;
-        try {
-            cons = implementingClass.getConstructor(new Class[] {});
-            return cons.newInstance(new Object[] {});
-        } catch (final SecurityException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final NoSuchMethodException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final IllegalArgumentException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final InstantiationException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final IllegalAccessException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        } catch (final InvocationTargetException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        }
+        return inst;
     }
 
     /**

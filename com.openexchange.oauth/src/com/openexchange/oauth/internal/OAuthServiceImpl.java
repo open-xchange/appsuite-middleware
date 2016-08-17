@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -84,6 +84,7 @@ import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
@@ -105,6 +106,9 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.OAuthToken;
+import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.services.Services;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
@@ -305,10 +309,14 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 try {
                     URI uri = new URI(cbUrl);
 
-                    DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
-                    String path = new StringBuilder(prefixService.getPrefix()).append("defer").toString();
-                    if (!path.startsWith("/")) {
-                        path = new StringBuilder(path.length() + 1).append('/').append(path).toString();
+                    String path;
+                    {
+                        DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
+                        StringBuilder pathBuilder = new StringBuilder(prefixService.getPrefix()).append("defer");
+                        if (pathBuilder.charAt(0) != '/') {
+                            pathBuilder.insert(0, '/');
+                        }
+                        path = pathBuilder.toString();
                     }
 
                     String prevCbUrl = cbUrl;
@@ -604,7 +612,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
 
     private static Session getUserSession(final int userId, final int contextId) {
-     // Firstly let's see if the currently active session matches the one we need here and prefer that one.
+        // Firstly let's see if the currently active session matches the one we need here and prefer that one.
         final SessionHolder sessionHolder = Services.getService(SessionHolder.class);
         if (sessionHolder != null) {
             final Session session = sessionHolder.getSessionObject();
@@ -649,10 +657,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             stmt.setInt(pos, accountId);
             final int rows = stmt.executeUpdate();
             if (rows <= 0) {
-                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(
-                    Integer.valueOf(accountId),
-                    Integer.valueOf(user),
-                    Integer.valueOf(contextId));
+                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(accountId), Integer.valueOf(user), Integer.valueOf(contextId));
             }
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -676,10 +681,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             stmt.setInt(3, accountId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
-                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(
-                    Integer.valueOf(accountId),
-                    Integer.valueOf(user),
-                    Integer.valueOf(contextId));
+                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(accountId), Integer.valueOf(user), Integer.valueOf(contextId));
             }
             final DefaultOAuthAccount account = new DefaultOAuthAccount();
             account.setId(accountId);
@@ -759,6 +761,19 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             executeUpdate(contextId, update, values);
             /*
+             * Re-authorise
+             */
+            OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
+            OAuthAccessRegistry oAuthAccessRegistry = registryService.get(serviceMetaData);
+            OAuthAccess access = oAuthAccessRegistry.get(contextId, user);
+            // No need to re-authorise if access not present
+            if (access != null) {
+                // First revoke the old token
+                access.revoke();
+                // Then initialise the access with the new one
+                access.initialise();
+            }
+            /*
              * Return the account
              */
             return account;
@@ -771,14 +786,14 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
     protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OXException {
         switch (type) {
-        case OUT_OF_BAND:
-            obtainTokenByOutOfBand(arguments, account);
-            break;
-        case CALLBACK:
-            obtainTokenByCallback(arguments, account);
-            break;
-        default:
-            break;
+            case OUT_OF_BAND:
+                obtainTokenByOutOfBand(arguments, account);
+                break;
+            case CALLBACK:
+                obtainTokenByCallback(arguments, account);
+                break;
+            default:
+                break;
         }
     }
 
@@ -970,6 +985,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e.getMessage());
         } finally {
+            Databases.closeSQLStuff(stmt);
             provider.releaseWriteConnection(context, con);
         }
     }

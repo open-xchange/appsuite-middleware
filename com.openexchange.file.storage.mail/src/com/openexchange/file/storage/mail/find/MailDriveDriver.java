@@ -49,8 +49,8 @@
 
 package com.openexchange.file.storage.mail.find;
 
-import static com.openexchange.file.storage.mail.MailDriveFileAccess.FETCH_PROFILE_GET_FOR_VIRTUAL;
-import static com.openexchange.find.basic.drive.Constants.QUERY_FIELDS;
+import static com.openexchange.file.storage.mail.MailDriveFileAccess.FETCH_PROFILE_VIRTUAL;
+import static com.openexchange.file.storage.mail.sort.MailDriveSortUtility.performEsort;
 import static com.openexchange.find.common.CommonConstants.FIELD_DATE;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
@@ -88,6 +88,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.mail.AbstractMailDriveResourceAccess;
 import com.openexchange.file.storage.mail.FullName;
 import com.openexchange.file.storage.mail.MailDriveAccountAccess;
@@ -118,6 +119,8 @@ import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.FacetType;
+import com.openexchange.find.facet.FacetTypeLookUp;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Facets;
 import com.openexchange.find.facet.Filter;
@@ -125,12 +128,9 @@ import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.find.spi.SearchConfiguration;
 import com.openexchange.find.util.TimeFrame;
 import com.openexchange.imap.IMAPMessageStorage;
-import com.openexchange.imap.sort.IMAPSort;
-import com.openexchange.imap.sort.IMAPSort.SortPartialResult;
 import com.openexchange.java.ConcurrentPriorityQueue;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
-import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -149,7 +149,7 @@ import com.sun.mail.imap.SortTerm;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> implements ModuleSearchDriver {
+public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSearchDriver> implements ModuleSearchDriver, FacetTypeLookUp {
 
     private static final List<Field> DEFAULT_FIELDS = new ArrayList<Field>(10);
     static {
@@ -172,6 +172,11 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
         trackedDrivers = new ConcurrentPriorityQueue<RankedService<ModuleSearchDriver>>();
         myRanking = ModuleSearchDriver.RANKING_SUPERIOR;
         this.mailDriveService = mailDriveService;
+    }
+
+    @Override
+    public FacetType facetTypeFor(String id) {
+        return MailDriveFacetType.getById(id);
     }
 
     // ---------------------------------------------------------------------------------------------------------
@@ -248,6 +253,19 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
         }
 
         return (MailDriveConstants.ID.equals(idParts.get(0)) && MailDriveConstants.ACCOUNT_ID.equals(idParts.get(1)));
+    }
+
+    private String getMailDriveFolderId(String folderId) throws OXException {
+        if (Strings.isEmpty(folderId)) {
+            return null;
+        }
+
+        FolderID compositeFolderId = new FolderID(folderId);
+        if ((!MailDriveConstants.ID.equals(compositeFolderId.getService()) || !MailDriveConstants.ACCOUNT_ID.equals(compositeFolderId.getAccountId()))) {
+            throw FindExceptionCode.INVALID_FOLDER_ID.create(folderId, Module.DRIVE.getIdentifier());
+        }
+
+        return compositeFolderId.getFolderId();
     }
 
     @Override
@@ -332,6 +350,8 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
             if (null == folderId) {
                 fullNames = mailDriveService.getFullNameCollectionFor(session).asList();
             } else {
+                // E.g. "maildrive://0/all"
+                folderId = getMailDriveFolderId(folderId);
                 FullName fullName = MailDriveAccountAccess.optFolderId(folderId, mailDriveService.getFullNameCollectionFor(session));
                 if (null == fullName) {
                     throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, MailDriveConstants.ACCOUNT_ID, MailDriveConstants.ID, session.getUserId(), session.getContextId());
@@ -403,7 +423,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                             }
 
                             // Fetch messages
-                            imapFolder.fetch(messages, FETCH_PROFILE_GET_FOR_VIRTUAL);
+                            imapFolder.fetch(messages, FETCH_PROFILE_VIRTUAL);
 
                             int i = 0;
                             for (int k = messages.length; k-- > 0;) {
@@ -412,7 +432,10 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                                 if (uid < 0) {
                                     uid = imapFolder.getUID(message);
                                 }
-                                files.add(new MailDriveFile(fullName.getFolderId(), Long.toString(uid), userId, rootFolderId).parseMessage(message, fields));
+                                MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, rootFolderId, fields);
+                                if (null != mailDriveFile) {
+                                    files.add(mailDriveFile);
+                                }
                             }
                         }
                     } finally {
@@ -443,7 +466,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                         }
 
                         // Fetch messages
-                        imapFolder.fetch(messages, FETCH_PROFILE_GET_FOR_VIRTUAL);
+                        imapFolder.fetch(messages, FETCH_PROFILE_VIRTUAL);
 
                         int i = 0;
                         for (int k = messages.length; k-- > 0;) {
@@ -452,7 +475,10 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                             if (uid < 0) {
                                 uid = imapFolder.getUID(message);
                             }
-                            files.add(new MailDriveFile(fullName.getFolderId(), Long.toString(uid), userId, rootFolderId).parseMessage(message, fields));
+                            MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, rootFolderId, fields);
+                            if (null != mailDriveFile) {
+                                files.add(mailDriveFile);
+                            }
                         }
                     }
                 } finally {
@@ -465,6 +491,11 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             MailAccess.closeInstance(mailAccess);
+        }
+
+        // Empty?
+        if (files.isEmpty()) {
+            return new SearchResult(-1, searchRequest.getStart(), Collections.<Document> emptyList(), searchRequest.getActiveFacets());
         }
 
         // Check whether to sort manually
@@ -486,11 +517,13 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                 }
                 files = files.subList(start, toIndex);
             }
+
+            // Empty after slicing?
+            if (files.isEmpty()) {
+                return new SearchResult(-1, searchRequest.getStart(), Collections.<Document> emptyList(), searchRequest.getActiveFacets());
+            }
         }
 
-        if (files.isEmpty()) {
-            return new SearchResult(-1, searchRequest.getStart(), Collections.<Document> emptyList(), searchRequest.getActiveFacets());
-        }
 
         List<Document> results = new ArrayList<Document>(files.size());
         for (File file : files) {
@@ -513,33 +546,6 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
 
         SortTerm sortTerm = SortTerm.SUBJECT;
         return new SortTerm[] {sortTerm};
-    }
-
-    private Message[] performEsort(SortTerm[] sortTerms, SearchTerm searchTerm, int startIndex, int endIndex, IMAPFolder imapFolder) throws MessagingException {
-        SortPartialResult result = IMAPSort.sortReturnPartial(sortTerms, searchTerm, new IndexRange(startIndex, endIndex), imapFolder);
-        switch (result.reason) {
-            case SUCCESS:
-                {
-                    int[] seqNums = result.seqnums;
-                    if (null != seqNums) {
-                        // SORT RETURN PARTIAL command succeeded
-                        return imapFolder.getMessages(seqNums);
-                    }
-                }
-                break;
-            case COMMAND_FAILED:
-                break;
-            case FOLDER_CLOSED:
-                {
-                    // Apparently, SORT RETURN PARTIAL command failed
-                    try {    imapFolder.close(false);    } catch (Exception x) { /*Ignore*/ }
-                    try {    imapFolder.open(IMAPFolder.READ_ONLY);    } catch (Exception x) { /*Ignore*/ }
-                }
-                break;
-            default:
-                break;
-        }
-        return null;
     }
 
     // ------------------------------------------------ Facets stuff ----------------------------------------------------------------- //
@@ -725,7 +731,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
             return null;
         }
 
-        return termFor(QUERY_FIELDS, queries, OP.OR, OP.AND);
+        return termFor(MailDriveFindConstants.QUERY_FIELDS, queries, OP.OR, OP.AND);
     }
 
     private SearchTerm prepareFilterTerm(List<Filter> filters, OP fieldOP, OP queryOP) throws OXException {

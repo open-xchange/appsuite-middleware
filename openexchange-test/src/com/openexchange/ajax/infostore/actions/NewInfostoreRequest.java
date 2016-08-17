@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -71,12 +71,14 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
     private final InputStream input;
     private Transport notificationTransport;
     private String notificationMessage;
+    private boolean tryAddVersion;
 
     /**
      * Initializes a new {@link NewInfostoreRequest}.
      */
     public NewInfostoreRequest() {
         this(null, (InputStream) null);
+        this.tryAddVersion = false;
     }
 
     /**
@@ -86,6 +88,18 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
      */
     public NewInfostoreRequest(com.openexchange.file.storage.File data) {
         this(data, (InputStream) null);
+        this.tryAddVersion = false;
+    }
+
+    /**
+     * Initializes a new {@link NewInfostoreRequest}.
+     *
+     * @param data The document
+     * @param tryAddVersion <code>true</code> to add a new file version
+     */
+    public NewInfostoreRequest(com.openexchange.file.storage.File data, boolean tryAddVersion) {
+        this(data, (InputStream) null);
+        this.tryAddVersion = tryAddVersion;
     }
 
     /**
@@ -96,6 +110,19 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
      */
     public NewInfostoreRequest(com.openexchange.file.storage.File data, File upload) throws FileNotFoundException {
         this(data, new FileInputStream(upload));
+    }
+
+    /**
+     * Initializes a new {@link NewInfostoreRequest}.
+     *
+     * @param data The document
+     * @param upload The file data
+     * @param tryAddVersion <code>true</code> to add a new file version
+     * @throws FileNotFoundException
+     */
+    public NewInfostoreRequest(com.openexchange.file.storage.File data, File upload, boolean tryAddVersion) throws FileNotFoundException {
+        this(data, new FileInputStream(upload));
+        this.tryAddVersion = tryAddVersion;
     }
 
     /**
@@ -182,6 +209,7 @@ public class NewInfostoreRequest extends AbstractInfostoreRequest<NewInfostoreRe
     public Parameter[] getParameters() throws JSONException {
         List<Parameter> tmp = new ArrayList<Parameter>(3);
         tmp.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_NEW));
+        tmp.add(new Parameter("try_add_version", tryAddVersion));
         if (null != input) {
             tmp.add(new FieldParameter("json", getBody()));
             tmp.add(new FileParameter("file", metadata.getFileName(), input, metadata.getFileMIMEType()));

@@ -18,7 +18,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:        @OXVERSION@
-%define        ox_release 7
+%define        ox_release 4
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -83,6 +83,13 @@ if [ ${1:-0} -eq 2 ]; then
     if ox_exists_property com.openexchange.twitter.http.useSSL $PFILE; then
         ox_remove_property com.openexchange.twitter.http.useSSL $PFILE
     fi
+
+    # SoftwareChange_Request-3255
+    ox_add_property com.openexchange.messaging.rss.feed.size 4194304 /opt/open-xchange/etc/rssmessaging.properties
+
+    # SoftwareChange_Request-3260
+    ox_add_property com.openexchange.messaging.rss.feed.blacklist "127.0.0.1-127.255.255.255, localhost"  /opt/open-xchange/etc/rssmessaging.properties
+    ox_add_property com.openexchange.messaging.rss.feed.whitelist.ports "80,443"  /opt/open-xchange/etc/rssmessaging.properties
 fi
 
 %clean
@@ -97,6 +104,16 @@ fi
 %dir /opt/open-xchange/etc/
 
 %changelog
+* Tue Jul 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.2 release
+* Wed Jul 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.8.2 release
+* Wed Jun 29 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.2 release
+* Thu Jun 16 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.8.2 release
+* Wed Apr 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.2 release
 * Wed Mar 30 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.8.1 release
 * Fri Mar 25 2016 Marcus Klein <marcus.klein@open-xchange.com>

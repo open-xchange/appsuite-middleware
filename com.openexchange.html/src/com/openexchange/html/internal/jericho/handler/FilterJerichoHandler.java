@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -81,6 +81,7 @@ import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.Tag;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.HtmlServiceImpl;
+import com.openexchange.html.internal.css.CSSMatcher;
 import com.openexchange.html.internal.jericho.JerichoHandler;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
@@ -115,7 +116,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private final static char[] IMMUNE_HTMLATTR = { ',', '.', '-', '_', '/', ';', '=', ' ' };
 
-    private static final Set<String> NUM_ATTRIBS = new HashSet<String>(0);
+    private static final Set<String> NUM_ATTRIBS = new HashSet<>(0);
 
     private static volatile Map<String, Map<String, Set<String>>> staticHTMLMap;
 
@@ -131,8 +132,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
     private static final Set<String> SINGLE_TAGS;
 
     static {
-        IMAGE_STYLE_MAP = new HashMap<String, Set<String>>();
-        Set<String> values = new HashSet<String>();
+        IMAGE_STYLE_MAP = new HashMap<>();
+        Set<String> values = new HashSet<>();
         /*
          * background
          */
@@ -150,7 +151,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
         values.add("repeat-y");
         values.add("no-repeat");
         IMAGE_STYLE_MAP.put("background", values);
-        values = new HashSet<String>();
+        values = new HashSet<>();
         /*
          * background-image
          */
@@ -159,14 +160,15 @@ public final class FilterJerichoHandler implements JerichoHandler {
         /*
          * ALL tags
          */
-        Set<String> s = new HashSet<String>(HTMLElements.getElementNames());
+        Set<String> s = new HashSet<>(HTMLElements.getElementNames());
         s.add("smarttagtype");
         ALL = Collections.unmodifiableSet(s);
         /*
          * Single tags
          */
-        s = new HashSet<String>();
+        s = new HashSet<>();
         s.add("wbr");
+        s.add("time");
         SINGLE_TAGS = Collections.unmodifiableSet(s);
     }
 
@@ -219,6 +221,11 @@ public final class FilterJerichoHandler implements JerichoHandler {
     private int skipLevel;
 
     /**
+     * Used to track script tags
+     */
+    private boolean insideScriptTag = false;
+
+    /**
      * Used to track all subsequent elements of a tag from which only its tag elements ought to be removed.
      */
     private int depth;
@@ -244,7 +251,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
      */
     public FilterJerichoHandler(final int capacity, final HtmlServiceImpl htmlService) {
         super();
-        tablePaddings = new LinkedList<FilterJerichoHandler.CellPadding>();
+        tablePaddings = new LinkedList<>();
         this.htmlService = htmlService;
         this.maxContentSize = -1;
         this.maxContentSizeExceeded = false;
@@ -264,7 +271,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
      */
     public FilterJerichoHandler(final int capacity, final String mapStr, final HtmlServiceImpl htmlService) {
         super();
-        tablePaddings = new LinkedList<FilterJerichoHandler.CellPadding>();
+        tablePaddings = new LinkedList<>();
         this.htmlService = htmlService;
         this.maxContentSize = -1;
         this.maxContentSizeExceeded = false;
@@ -536,6 +543,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             }
         } else {
             skipLevel--;
+            insideScriptTag = false;
         }
     }
 
@@ -543,6 +551,10 @@ public final class FilterJerichoHandler implements JerichoHandler {
     public void handleStartTag(final StartTag startTag) {
         if (maxContentSizeExceeded) {
             // Do not append more elements
+            return;
+        }
+        if (insideScriptTag) {
+            //ignore script tags completely
             return;
         }
         final String tagName = startTag.getName();
@@ -591,6 +603,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     /*
                      * Remove whole tag incl. subsequent content and tags
                      */
+                    insideScriptTag = true;
                     skipLevel++;
                 } else {
                     /*
@@ -662,7 +675,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             if (null != width) {
                 String height = attrMap.get("height");
                 if (null != height) {
-                    prependToStyle("width: " + width + "px; height: " + height + "px;", attrMap);
+                    prependToStyle(mapFor("width", width + "px", "height", height + "px"), attrMap);
                 }
             }
         } else if (HTMLElementName.TABLE == tagName) {
@@ -844,10 +857,61 @@ public final class FilterJerichoHandler implements JerichoHandler {
         attrMap.put("style", style);
     }
 
+    private void prependToStyle(Map<String, String> styleNvps, Map<String, String> attrMap) {
+        String style = attrMap.get("style");
+        if (null == style) {
+            style = generateStyleString(styleNvps);
+        } else {
+            // Filter out existing entries
+            Map<String, Set<String>> styleMap = new HashMap<>(this.styleMap);
+            styleMap.keySet().removeAll(styleNvps.keySet());
+            CSSMatcher.checkCSSElements(cssBuffer.append(style), styleMap, true);
+            style = cssBuffer.toString();
+            cssBuffer.setLength(0);
+            style = generateStyleString(styleNvps) + " " + style;
+        }
+        attrMap.put("style", style);
+    }
+
+    private String generateStyleString(Map<String, String> styleNvps) {
+        if (null == styleNvps || styleNvps.isEmpty()) {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder(styleNvps.size() << 2);
+        boolean first = true;
+        for (Map.Entry<String, String> nvp : styleNvps.entrySet()) {
+            if (first) {
+                first = false;
+            } else {
+                sb.append(' ');
+            }
+            sb.append(nvp.getKey()).append(": ").append(nvp.getValue()).append(';');
+        }
+        return sb.toString();
+    }
+
     private Map<String, String> createMapFrom(List<Attribute> attributes) {
-        Map<String, String> map = new LinkedHashMap<String, String>(attributes.size());
+        Map<String, String> map = new LinkedHashMap<>(attributes.size());
         for (Attribute attribute : attributes) {
             map.put(attribute.getKey(), attribute.getValue());
+        }
+        return map;
+    }
+
+    private Map<String, String> mapFor(String... args) {
+        if (null == args) {
+            return null;
+        }
+
+        int length = args.length;
+        if (0 == length || (length % 2) != 0) {
+            return null;
+        }
+
+        Map<String, String> map = new LinkedHashMap<>(length >> 1);
+        for (int i = 0; i < length; i+=2) {
+            map.put(args[i], args[i+1]);
         }
         return map;
     }
@@ -976,8 +1040,9 @@ public final class FilterJerichoHandler implements JerichoHandler {
     public void handleComment(final String comment) {
         if (isCss) {
             if (false == maxContentSizeExceeded) {
-                checkCSS(cssBuffer.append(comment), styleMap, cssPrefix);
-                String checkedCSS = cssBuffer.toString();
+                String cleanCss = removeSurroundingHTMLComments(comment);
+                checkCSS(cssBuffer.append(cleanCss), styleMap, cssPrefix);
+                String checkedCSS = "\n<!--\n" + cssBuffer.toString() + "\n-->\n";
                 cssBuffer.setLength(0);
                 if (dropExternalImages) {
                     imageURLFound |= checkCSS(cssBuffer.append(checkedCSS), IMAGE_STYLE_MAP, null, false);
@@ -998,6 +1063,14 @@ public final class FilterJerichoHandler implements JerichoHandler {
     /*-
      * ########################## HELPERS #######################################
      */
+
+    private String removeSurroundingHTMLComments(String css) {
+        String retval = css;
+        if (css.startsWith("<!--") && css.endsWith("-->")) {
+            retval = css.substring(4, css.length() - 3);
+        }
+        return retval;
+    }
 
     private static final byte[] DEFAULT_WHITELIST = String
         .valueOf(
@@ -1224,7 +1297,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
      */
     private static Map<String, Map<String, Set<String>>> parseHTMLMap(final String htmlMapStr) {
         final Matcher m = PATTERN_TAG_LINE.matcher(htmlMapStr);
-        final Map<String, Map<String, Set<String>>> tagMap = new HashMap<String, Map<String, Set<String>>>();
+        final Map<String, Map<String, Set<String>>> tagMap = new HashMap<>();
         while (m.find()) {
             final String attributes = m.group(2);
             final String tagName = toLowerCase(m.group(1));
@@ -1232,7 +1305,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 tagMap.put(tagName, null);
             } else {
                 final Matcher attribMatcher = PATTERN_ATTRIBUTE.matcher(attributes);
-                final Map<String, Set<String>> attribMap = new HashMap<String, Set<String>>();
+                final Map<String, Set<String>> attribMap = new HashMap<>();
                 while (attribMatcher.find()) {
                     final String values = attribMatcher.group(2);
                     final String attributeName = toLowerCase(attribMatcher.group(1));
@@ -1241,7 +1314,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                     } else if (values.length() == 0) {
                         attribMap.put(attributeName, NUM_ATTRIBS);
                     } else {
-                        final Set<String> valueSet = new HashSet<String>();
+                        final Set<String> valueSet = new HashSet<>();
                         final String[] valArr = values.charAt(0) == ':' ? values.substring(1).split("\\s*:\\s*") : values
                             .split("\\s*:\\s*");
                         for (final String value : valArr) {
@@ -1270,7 +1343,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
          * Parse style map
          */
         final Matcher m = PATTERN_STYLE_LINE.matcher(styleMapStr);
-        final Map<String, Set<String>> styleMap = new HashMap<String, Set<String>>();
+        final Map<String, Set<String>> styleMap = new HashMap<>();
         while (m.find()) {
             final String values = m.group(2);
             if (values.length() == 0) {
@@ -1284,7 +1357,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                  * Parse values
                  */
                 final Matcher valueMatcher = PATTERN_VALUE.matcher(m.group(2));
-                final Set<String> valueSet = new HashSet<String>();
+                final Set<String> valueSet = new HashSet<>();
                 while (valueMatcher.find()) {
                     valueSet.add(valueMatcher.group());
                 }
@@ -1305,10 +1378,10 @@ public final class FilterJerichoHandler implements JerichoHandler {
      */
     private static Map<String, Set<String>> parseCombiMap(final String combiMapStr) {
         final Matcher m = PATTERN_COMBI_LINE.matcher(combiMapStr);
-        final Map<String, Set<String>> combiMap = new HashMap<String, Set<String>>();
+        final Map<String, Set<String>> combiMap = new HashMap<>();
         while (m.find()) {
             final Matcher valueMatcher = PATTERN_VALUE.matcher(m.group(2));
-            final Set<String> valueSet = new HashSet<String>();
+            final Set<String> valueSet = new HashSet<>();
             while (valueMatcher.find()) {
                 valueSet.add(valueMatcher.group());
             }

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -67,6 +67,9 @@ public final class OXExceptionStrings implements LocalizableStrings {
 
     // The default message displayed to user when a re-try is recommended
     public static final String MESSAGE_RETRY = "A temporary error occurred inside the server which prevented it from fulfilling the request. Please try again later.";
+
+    // The default message displayed to user when processing was intentionally denied.
+    public static final String MESSAGE_DENIED = "The server is refusing to process the request.";
 
     // The general message for a conflicting update operation.
     public static final String MESSAGE_CONFLICT = "The object has been changed in the meantime.";

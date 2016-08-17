@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -65,6 +65,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.internet.MimeUtility;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.cascade.ConfigProperty;
@@ -267,7 +268,7 @@ public class SnippetProcessor {
 
             int contentLength = con.getContentLength();
             if (contentLength > 0 && contentLength > maxImageSize) {
-                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(Long.valueOf(maxImageSize));
+                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(FileUtils.byteCountToDisplaySize(Long.valueOf(maxImageSize)), maxImageSize);
             }
 
             String contentType = con.getHeaderField("content-type");
@@ -316,7 +317,7 @@ public class SnippetProcessor {
 
             int contentLength = httpCon.getContentLength();
             if (contentLength > 0 && contentLength > maxImageSize) {
-                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(Long.valueOf(maxImageSize));
+                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(FileUtils.byteCountToDisplaySize(Long.valueOf(maxImageSize)), maxImageSize);
             }
 
             String contentType = httpCon.getHeaderField("content-type");
@@ -436,7 +437,7 @@ public class SnippetProcessor {
                     }
 
                     if (mf.getSize() > maxImageSize) {
-                        throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(Long.valueOf(maxImageSize));
+                        throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(FileUtils.byteCountToDisplaySize(Long.valueOf(maxImageSize)), maxImageSize);
                     }
 
                     // Replace "src" attribute
@@ -509,7 +510,6 @@ public class SnippetProcessor {
             {
                 ContentDisposition cd = new ContentDisposition();
                 cd.setInline();
-                cd.setFilenameParameter(fileName);
                 att.setContentDisposition(cd.toString());
             }
             att.setContentType(mf.getContentType());
@@ -517,7 +517,6 @@ public class SnippetProcessor {
             att.setId(mf.getID());
             att.setSize(mf.getSize());
             att.setStreamProvider(new ManagedFileInputStreamProvider(mf));
-            att.setFilename(fileName);
             attachments.add(att);
         }
         return id;

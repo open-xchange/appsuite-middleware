@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -52,7 +52,9 @@ package com.openexchange.filemanagement.json.actions;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -70,6 +72,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -109,11 +112,37 @@ public final class RangeAction implements AJAXActionService {
             if (len < 0) {
                 throw UploadException.UploadCode.MISSING_PARAM.create("len").setAction("range");
             }
-            final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-            final ManagedFile file = management.getByID(id);
-            /*
-             * Content type
-             */
+
+            // Look-up managed file
+            ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+            ManagedFile file;
+            try {
+                file = management.getByID(id);
+                // Check affiliation
+                {
+                    String affiliation = file.getAffiliation();
+                    if (null != affiliation && !affiliation.equals(session.getSessionID())) {
+                        throw ManagedFileExceptionErrorMessage.NOT_FOUND.create(id);
+                    }
+                }
+            } catch (OXException e) {
+                if (requestData.setResponseHeader("Content-Type", "text/html; charset=UTF-8")) {
+                    if (ManagedFileExceptionErrorMessage.NOT_FOUND.equals(e) || ManagedFileExceptionErrorMessage.FILE_NOT_FOUND.equals(e)) {
+                        try {
+                            HttpServletResponse resp = requestData.optHttpServletResponse();
+                            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                            String desc = "An error occurred inside the server which prevented it from fulfilling the request.";
+                            SessionServlet.writeErrorPage(HttpServletResponse.SC_NOT_FOUND, desc, resp);
+                            return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
+                        } catch (IOException ioe) {
+                            throw AjaxExceptionCodes.IO_ERROR.create(ioe, ioe.getMessage());
+                        }
+                    }
+                }
+                throw e;
+            }
+
+            // Content type
             final String fileName = file.getFileName();
             final String disposition = file.getContentDisposition();
             final ContentType contentType = new ContentType(file.getContentType());

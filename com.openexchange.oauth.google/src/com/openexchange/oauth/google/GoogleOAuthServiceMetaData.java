@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -71,7 +71,7 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
      * @param services the service lookup instance
      */
     public GoogleOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, "com.openexchange.oauth.google", "Google");
+        super(services, API.GOOGLE);
     }
 
     @Override
@@ -94,11 +94,6 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
         // https://www.googleapis.com/auth/userinfo.email -> View your email address
         // https://www.googleapis.com/auth/userinfo.profile -> View basic information about your account"
         return "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/drive";
-    }
-
-    @Override
-    public API getAPI() {
-        return API.GOOGLE;
     }
 
     @Override

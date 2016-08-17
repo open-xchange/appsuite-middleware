@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.Type;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
@@ -76,7 +77,8 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "sort", optional = true, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified."),
     @Parameter(name = "order", optional = true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
     @Parameter(name = "start", optional = true, description = "The start index (inclusive) in the ordered search, that is requested."),
-    @Parameter(name = "end", optional = true, description = "The last index (inclusive) from the ordered search, that is requested.") },
+    @Parameter(name = "end", optional = true, description = "The last index (inclusive) from the ordered search, that is requested."),
+    @Parameter(name = "includeSubfolders", type=Type.BOOLEAN, description = "Optional, defaults to \"false\". If set to \"true\" and a \"folder\" is specified, this folder and all of its subfolders are considered by the search.") },
     requestBody = "The search pattern string in a JSON object named \"pattern\".", responseDescription = "")
 public class SearchAction extends AbstractListingAction {
 
@@ -99,6 +101,7 @@ public class SearchAction extends AbstractListingAction {
             columns.add(File.Field.ID);
         }
 
+        boolean includeSubfolders = request.getBoolParameter("includeSubfolders");
         Field sortingField = request.getSortingField();
         SortDirection sortingOrder = request.getSortingOrder();
         IDBasedFileAccess fileAccess = request.getFileAccess();
@@ -106,6 +109,7 @@ public class SearchAction extends AbstractListingAction {
             request.getSearchQuery(),
             columns,
             request.getSearchFolderId(),
+            includeSubfolders,
             sortingField,
             sortingOrder,
             request.getStart(),

@@ -1,0 +1,17 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The client's ID.
+  name:
+    type: string
+    description: The client's/service's name.
+  description:
+    type: string
+    description: A description of the client.
+  website:
+    type: string
+    description: A URL to the client's website.
+  icon:
+    type: string
+    description: A URL or path to obtain the client's icon via the image module.

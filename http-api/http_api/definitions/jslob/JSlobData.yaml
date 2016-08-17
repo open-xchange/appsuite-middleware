@@ -1,0 +1,11 @@
+type: object
+properties:
+  id:
+    type: string
+    description: The identifier of the JSlob.
+  tree:
+    type: object
+    description: The JSON object that is stored in the JSlob.
+  meta:
+    type: object
+    description: A JSON object containing meta data.
