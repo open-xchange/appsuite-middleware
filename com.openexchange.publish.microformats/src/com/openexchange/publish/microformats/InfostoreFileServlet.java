@@ -134,7 +134,13 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
-        final Map<String, String> args = getPublicationArguments(req);
+        Map<String, String> args;
+        try {
+            args = getPublicationArguments(req);
+        } catch (OXException e1) {
+            resp.sendError(400, e1.getMessage());
+            return;
+        }
         boolean startedWriting = false;
         try {
             final Context ctx = contexts.getContext(Integer.parseInt(args.get(CONTEXTID)));
@@ -240,11 +246,14 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         return fileAccess.getDocument(String.valueOf(infoId), FileStorageFileAccess.CURRENT_VERSION);
     }
 
-    private Map<String, String> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException {
+    private Map<String, String> getPublicationArguments(final HttpServletRequest req) throws UnsupportedEncodingException, OXException {
         // URL format is: /publications/files/[cid]/[siteName]/[infostoreID]/[version]?secret=[secret]
-
-        final String[] path = SPLIT.split(req.getPathInfo(), 0);
-        final List<String> normalized = new ArrayList<String>(path.length);
+        String pathInfo = req.getPathInfo();
+        if (Strings.isEmpty(pathInfo)) {
+            throw new OXException(1, "Request is missing the necessary path info.");
+        }
+        final String[] path = SPLIT.split(pathInfo, 0);
+        final List<String> normalized = new ArrayList<>(path.length);
         for (int i = 0; i < path.length; i++) {
             if (!path[i].equals("")) {
                 normalized.add(path[i]);
@@ -252,7 +261,7 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
         }
 
         final String site = Strings.join(HelperClass.decode(normalized.subList(1, normalized.size()-2), req, SPLIT2), "/");
-        final Map<String, String> args = new HashMap<String, String>(6);
+        final Map<String, String> args = new HashMap<>(6);
         args.put(CONTEXTID, normalized.get(0));
         args.put(SITE, site);
         args.put(SECRET, req.getParameter(SECRET));
