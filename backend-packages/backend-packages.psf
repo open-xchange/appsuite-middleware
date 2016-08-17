@@ -53,7 +53,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-gui-help-plugin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-halo"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-cluster-upgrade-from-76x"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-cluster-upgrade-to-783"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-cluster-upgrade-from-780-782"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-hostname-config-cascade"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-hostname-ldap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,open-xchange-imap"/>
