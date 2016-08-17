@@ -164,12 +164,7 @@ import com.openexchange.html.vulntests.Bug47781VulTest;
     Bug36275Test.class,
     Bug36412Test.class,
     Bug40189Test.class,
-<<<<<<< HEAD
-=======
-    Bug43387Test.class,
-    Bug46894VulTest.class,
     Bug47781VulTest.class,
->>>>>>> 0c40017... Fix for bug 47781: Drop possibly harmful HTML content in anchors
     CSSMatcherTest.class,
     ConformHtmlTest.class,
     HtmlServiceImplTest.class,
