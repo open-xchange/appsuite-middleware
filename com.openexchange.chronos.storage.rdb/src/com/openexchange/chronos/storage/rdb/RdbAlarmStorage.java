@@ -56,6 +56,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +69,11 @@ import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.reminder.ReminderExceptionCode;
+import com.openexchange.groupware.reminder.ReminderHandler;
+import com.openexchange.groupware.reminder.ReminderObject;
 
 /**
  * {@link CalendarStorage}
@@ -108,6 +113,22 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
+    public void registerTrigger(int folderID, int objectID, int userID, Date triggerDate, boolean forSeries) throws OXException {
+        int updated = 0;
+        Connection connection = null;
+        try {
+            connection = dbProvider.getWriteConnection(context);
+            txPolicy.setAutoCommit(connection, false);
+            updated += insertOrUpdateTrigger(context, connection, folderID, objectID, userID, triggerDate, forSeries);
+            txPolicy.commit(connection);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            release(connection, updated);
+        }
+    }
+
+    @Override
     public void insertAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException {
         updateAlarms(objectID, userID, alarms);
     }
@@ -119,7 +140,11 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = updateReminder(connection, context.getContextId(), objectID, userID, Event2Appointment.getReminder(alarms));
+            Integer reminder = Event2Appointment.getReminder(alarms);
+            updated += updateReminder(connection, context.getContextId(), objectID, userID, reminder);
+            if (null == reminder) {
+                updated += deleteTrigger(context, connection, objectID, userID);
+            }
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
@@ -147,13 +172,72 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
         try {
             connection = dbProvider.getWriteConnection(context);
             txPolicy.setAutoCommit(connection, false);
-            updated = updateReminders(connection, context.getContextId(), objectID, null);
+            updated += updateReminders(connection, context.getContextId(), objectID, null);
+            updated += deleteTriggers(context, connection, objectID);
             txPolicy.commit(connection);
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
             release(connection, updated);
         }
+    }
+
+    private static int deleteTriggers(Context context, Connection connection, int objectID) throws OXException {
+        try {
+            new ReminderHandler(context).deleteReminder(objectID, Types.APPOINTMENT, connection);
+            return 1;
+        } catch (OXException e) {
+            if (ReminderExceptionCode.NOT_FOUND.equals(e)) {
+                return 0;
+            }
+            throw e;
+        }
+    }
+
+    private static int deleteTrigger(Context context, Connection connection, int objectID, int userID) throws OXException {
+        ReminderHandler reminderHandler = new ReminderHandler(context);
+        if (false == reminderHandler.existsReminder(objectID, userID, Types.APPOINTMENT, connection)) {
+            return 0;
+        }
+        try {
+            reminderHandler.deleteReminder(objectID, Types.APPOINTMENT, connection);
+            return 1;
+        } catch (OXException e) {
+            if (ReminderExceptionCode.NOT_FOUND.equals(e)) {
+                return 0;
+            }
+            throw e;
+        }
+    }
+
+    private static int insertOrUpdateTrigger(Context context, Connection connection, int folderID, int objectID, int userID, Date trigger, boolean forSeries) throws OXException {
+        ReminderHandler reminderHandler = new ReminderHandler(context);
+        ReminderObject reminder;
+        try {
+            reminder = reminderHandler.loadReminder(objectID, userID, Types.APPOINTMENT, connection);
+        } catch (OXException e) {
+            if (false == ReminderExceptionCode.NOT_FOUND.equals(e)) {
+                throw e;
+            }
+            reminder = null;
+        }
+        if (null != reminder) {
+            reminder.setDate(trigger);
+            reminder.setFolder(folderID);
+            reminder.setRecurrenceAppointment(forSeries);
+            reminderHandler.updateReminder(reminder, connection);
+        } else {
+            reminder = new ReminderObject();
+            reminder.setModule(Types.APPOINTMENT);
+            reminder.setFolder(folderID);
+            reminder.setTargetId(objectID);
+            reminder.setUser(userID);
+            reminder.setDate(trigger);
+            reminder.setFolder(folderID);
+            reminder.setRecurrenceAppointment(forSeries);
+            reminderHandler.insertReminder(reminder, connection);
+        }
+        return 1;
     }
 
     private static Map<Integer, List<Alarm>> selectAlarms(Connection connection, int contextID, int[] objectIDs, int userID) throws SQLException {

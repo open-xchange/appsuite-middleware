@@ -70,16 +70,23 @@ import static com.openexchange.folderstorage.Permission.READ_FOLDER;
 import static com.openexchange.folderstorage.Permission.READ_OWN_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.UUID;
+import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventID;
+import com.openexchange.chronos.RecurrenceService;
+import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -222,8 +229,53 @@ public class CalendarWriter extends CalendarReader {
         storage.getAttendeeStorage().insertAttendees(objectID, new AttendeeHelper(session, folder, null, event.getAttendees()).getAttendeesToInsert());
         if (userizedEvent.containsAlarms() && null != userizedEvent.getAlarms() && 0 < userizedEvent.getAlarms().size()) {
             storage.getAlarmStorage().insertAlarms(objectID, calendarUser.getId(), userizedEvent.getAlarms());
+            registerTriggers(i(folder), calendarUser.getId(), event, userizedEvent.getAlarms());
         }
         return readEvent(folder, objectID);
+    }
+
+    private void registerTriggers(int folderID, int userID, Event event, List<Alarm> alarms) throws OXException {
+        if (null != alarms && 0 < alarms.size()) {
+            boolean forSeries = isSeriesMaster(event);
+            for (Alarm alarm : alarms) {
+                Date nextTrigger = getNextTrigger(event, alarm.getTrigger());
+                if (null != nextTrigger) {
+                    storage.getAlarmStorage().registerTrigger(folderID, event.getId(), userID, nextTrigger, forSeries);
+                }
+            }
+        }
+    }
+
+    private Date getNextTrigger(Event event, Trigger trigger) {
+        if (null == trigger) {
+            return null;
+        }
+        if (null != trigger.getDateTime()) {
+            return trigger.getDateTime();
+        }
+        if (null == trigger.getDuration()) {
+            return null;
+        }
+        Date now = new Date();
+        Event nextEvent;
+        if (isSeriesMaster(event)) {
+            TimeZone timeZone = null != event.getStartTimezone() ? TimeZone.getTimeZone(event.getStartTimezone()) : CalendarUtils.getTimeZone(session);
+            Calendar calendar = CalendarUtils.initCalendar(timeZone, now);
+            Iterator<Event> occurrenceIterator = Services.getService(RecurrenceService.class).calculateInstances(event, calendar, null, 1);
+            if (false == occurrenceIterator.hasNext()) {
+                return null;
+            }
+            nextEvent = occurrenceIterator.next();
+        } else {
+            nextEvent = event;
+        }
+        long duration = CalendarUtils.getTriggerDuration(trigger.getDuration());
+        Date relatedDate = Trigger.Related.END.equals(trigger.getRelated()) ? nextEvent.getEndDate() : nextEvent.getStartDate();
+        if (event.isAllDay()) {
+            relatedDate = CalendarUtils.getDateInTimeZone(relatedDate, CalendarUtils.getTimeZone(session));
+        }
+        Date nextTrigger = new Date(relatedDate.getTime() + duration);
+        return nextTrigger.after(now) ? nextTrigger : null;
     }
 
     private UserizedEvent updateEvent(UserizedFolder folder, int objectID, UserizedEvent userizedEvent, long clientTimestamp) throws OXException {
@@ -254,16 +306,6 @@ public class CalendarWriter extends CalendarReader {
             UserizedFolder targetFolder = getFolder(userizedEvent.getFolderId());
             moveEvent(originalEvent, folder, targetFolder);
             folder = targetFolder;
-        }
-        /*
-         * update alarms for calendar user
-         */
-        if (userizedEvent.containsAlarms()) {
-            if (null == userizedEvent.getAlarms()) {
-                storage.getAlarmStorage().deleteAlarms(objectID, calendarUser.getId());
-            } else {
-                storage.getAlarmStorage().updateAlarms(objectID, calendarUser.getId(), userizedEvent.getAlarms());
-            }
         }
         /*
          * process any attendee updates
@@ -328,7 +370,36 @@ public class CalendarWriter extends CalendarReader {
         eventUpdate.setSequence(originalEvent.getSequence() + 1);
         storage.getEventStorage().updateEvent(eventUpdate);
 
-        return readEvent(folder, objectID);
+        UserizedEvent reloadedEvent = readEvent(folder, objectID);
+        /*
+         * update alarms for calendar user
+         */
+        if (userizedEvent.containsAlarms()) {
+            if (null == userizedEvent.getAlarms() && null != reloadedEvent.getAlarms()) {
+                storage.getAlarmStorage().deleteAlarms(objectID, calendarUser.getId());
+            } else {
+                if (null == reloadedEvent.getAlarms()) {
+                    storage.getAlarmStorage().insertAlarms(objectID, calendarUser.getId(), userizedEvent.getAlarms());
+                } else {
+                    storage.getAlarmStorage().updateAlarms(objectID, calendarUser.getId(), userizedEvent.getAlarms());
+                }
+                registerTriggers(i(folder), calendarUser.getId(), reloadedEvent.getEvent(), userizedEvent.getAlarms());
+            }
+        }
+        /*
+         * update any alarm triggers if folder or time of event was changed
+         */
+        if (false == EventMapper.getInstance().equalsByFields(originalEvent, reloadedEvent.getEvent(), EventField.PUBLIC_FOLDER_ID, EventField.ALL_DAY, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.RECURRENCE_ID)) {
+            List<Attendee> attendees = storage.getAttendeeStorage().loadAttendees(objectID);
+            for (Attendee userAttendee : filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
+                List<Alarm> alarms = storage.getAlarmStorage().loadAlarms(objectID, userAttendee.getEntity());
+                if (null != alarms) {
+                    registerTriggers(userAttendee.getFolderID(), userAttendee.getEntity(), reloadedEvent.getEvent(), alarms);
+                }
+            }
+        }
+
+        return reloadedEvent;
     }
 
     private void moveEvent(Event event, UserizedFolder folder, UserizedFolder targetFolder) throws OXException {
@@ -439,7 +510,15 @@ public class CalendarWriter extends CalendarReader {
                 } else {
                     attendeeUpdate.setFolderID(AttendeeHelper.getDefaultFolderID(session.getContext(), getUser(originalAttendee.getEntity())));
                 }
+                storage.getAttendeeStorage().insertTombstoneAttendee(objectID, AttendeeMapper.getInstance().getTombstone(originalAttendee));
                 storage.getAttendeeStorage().updateAttendee(objectID, attendeeUpdate);
+            }
+            /*
+             * ensure to add default calendar user if not already present
+             */
+            if (false == contains(originalAttendees, targetCalendarUser.getId())) {
+                Attendee defaultAttendee = new AttendeeHelper(session, targetFolder, null, null).getAttendeesToInsert().get(0);
+                storage.getAttendeeStorage().insertAttendees(objectID, Collections.singletonList(defaultAttendee));
             }
             /*
              * remove previous public folder id from event & touch event

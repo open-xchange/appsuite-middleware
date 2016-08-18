@@ -62,7 +62,9 @@ import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarParameters;
@@ -793,6 +795,54 @@ public class CalendarUtils {
      */
     static User getProxyUser(UserizedFolder folder) throws OXException {
         return SharedType.getInstance().equals(folder.getType()) ? folder.getUser() : null;
+    }
+
+    /**
+     * Parses a trigger duration string.
+     *
+     * @param duration The duration to parse
+     * @return The total milliseconds of the parsed duration
+     * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.3.6">RFC 5545, section 3.3.6</a>
+     */
+    static long getTriggerDuration(String duration) {
+        long totalMillis = 0;
+        boolean negative = false;
+        String token = null;
+        String previousToken = null;
+        StringTokenizer tokenizer = new StringTokenizer(duration.toUpperCase(), "+-PWDTHMS", true);
+        while (tokenizer.hasMoreTokens()) {
+            token = tokenizer.nextToken();
+            switch (token) {
+                case "+":
+                    negative = false;
+                    break;
+                case "-":
+                    negative = true;
+                    break;
+                case "W":
+                    totalMillis += TimeUnit.DAYS.toMillis(7 * Long.parseLong(previousToken));
+                    break;
+                case "D":
+                    totalMillis += TimeUnit.DAYS.toMillis(Long.parseLong(previousToken));
+                    break;
+                case "H":
+                    totalMillis += TimeUnit.HOURS.toMillis(Long.parseLong(previousToken));
+                    break;
+                case "M":
+                    totalMillis += TimeUnit.MINUTES.toMillis(Long.parseLong(previousToken));
+                    break;
+                case "S":
+                    totalMillis += TimeUnit.SECONDS.toMillis(Long.parseLong(previousToken));
+                    break;
+                case "T":
+                case "P":
+                default:
+                    // skip
+                    break;
+            }
+            previousToken = token;
+        }
+        return negative ? -1 * totalMillis : totalMillis;
     }
 
 }

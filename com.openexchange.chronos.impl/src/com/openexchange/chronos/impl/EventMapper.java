@@ -105,6 +105,24 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
     }
 
     /**
+     * Gets a value indicating whether specific properties of one event are equal to those properties of a second event.
+     *
+     * @param event1 The first event to compare
+     * @param event2 The second event to compare
+     * @param fields The event fields to compare
+     * @return <code>true</code> if all fields are equal, <code>false</code>, otherwise
+     * @throws OXException
+     */
+    public boolean equalsByFields(Event event1, Event event2, EventField... fields) throws OXException {
+        for (EventField field : fields) {
+            if (false == get(field).equals(event1, event2)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Copies data from one event to another. Only <i>set</i> fields are transferred.
      *
      * @param from The source event
