@@ -49,8 +49,17 @@
 
 package com.openexchange.report.appsuite.defaultHandlers;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -59,6 +68,11 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Scanner;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
@@ -77,6 +91,7 @@ import com.openexchange.report.appsuite.UserReport;
 import com.openexchange.report.appsuite.UserReportCumulator;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
+import com.openexchange.report.appsuite.serialization.Report.JsonObjectType;
 import com.openexchange.tools.file.QuotaFileStorage;
 
 /**
@@ -89,6 +104,7 @@ import com.openexchange.tools.file.QuotaFileStorage;
 public class CapabilityHandler implements ReportUserHandler, ReportContextHandler, UserReportCumulator, ContextReportCumulator, ReportFinishingTouches {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CapabilityHandler.class);
+    private final int MAX_LOCK_FILE_ATTEMPTS = 20;
 
     @Override
     public boolean appliesTo(String reportType) {
@@ -181,8 +197,8 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             handleInternalUser(userReport, contextReport);
         }
     }
-    
- // The system report contains an overall count of unique capability and quota combinations
+
+    // The system report contains an overall count of unique capability and quota combinations
     // So the numbers from the context report have to be added to the numbers already in the report
     @Override
     public void merge(ContextReport contextReport, Report report) {
@@ -221,7 +237,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                 savedCounts.put(Report.CONTEXT_USERS_AVG, 0l);
             }
             // And add our counts to it
-            add(savedCounts, counts);
+            add(savedCounts, counts, false);
             // Save it back to the report
             report.set(Report.MACDETAIL, capSpec, savedCounts);
         }
@@ -246,6 +262,17 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                 }
             }
         }
+
+        if (macdetail.values().size() >= report.getMaxChunkSize()) {
+            report.setNeedsComposition(true);
+            Map<String, Object> reportMacdetail = report.getNamespace(Report.MACDETAIL);
+
+            ArrayList values = new ArrayList(reportMacdetail.values());
+            this.sumClientsInSingleMap(values);
+            report.clearNamespace(Report.MACDETAIL);
+            report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, values);
+            storeAndMergeReportParts(report);
+        }
         //What to do with multi-tenant deployment
     }
 
@@ -255,22 +282,124 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         Map<String, Object> macdetail = report.getNamespace(Report.MACDETAIL);
 
         ArrayList values = new ArrayList(macdetail.values());
-        this.sumClientsInSingleMap(values);
+        // TODO QS-VS: warum auskommentiert?
+        //        this.sumClientsInSingleMap(values);
+
+        // Merge all stored data into report files, if neccessary
+        if (report.isNeedsComposition()) {
+            storeAndMergeReportParts(report);
+        }
 
         if (report.getType().equals("extended")) {
             for (Entry<String, LinkedHashMap<String, Object>> currentTenant : report.getTenantMap().entrySet()) {
                 for (Entry<String, Object> currentCapS : currentTenant.getValue().entrySet()) {
-                    addDriveMetrics((HashMap<String, Object>) macdetail.get(currentCapS.getKey()), (LinkedHashMap<Integer, ArrayList<Integer>>) currentCapS.getValue(), new Date(report.getConsideredTimeframeStart()), new Date(report.getConsideredTimeframeEnd()), report);
+                    String compositionCapS = currentCapS.getKey().substring(0, currentCapS.getKey().lastIndexOf(","));
+                    ArrayList<String> compositionCapSList = null;
+                    if (report.isNeedsComposition()) {
+                        macdetail.put(currentCapS.getKey(), new HashMap<>());
+                        compositionCapSList = new ArrayList<>(Arrays.asList(compositionCapS.split(",")));
+                    }
+                    addDriveMetrics((HashMap<String, Object>) macdetail.get(currentCapS.getKey()), (LinkedHashMap<Integer, ArrayList<Integer>>) currentCapS.getValue(), new Date(report.getConsideredTimeframeStart()), new Date(report.getConsideredTimeframeEnd()), report, compositionCapSList);
                 }
             }
-
             // calculate correct drive average values
             this.calculateCorrectDriveAvg(report.get(Report.TOTAL, Report.DRIVE_TOTAL, LinkedHashMap.class));
         }
 
+        // Compose the report-content, if neccessary
+        if (report.isNeedsComposition()) {
+            report.composeReportFromStoredParts(Report.CAPABILITY_SETS, JsonObjectType.ARRAY, Report.MACDETAIL, 1);
+        }
         report.clearNamespace(Report.MACDETAIL);
 
         report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, values);
+    }
+
+    @Override
+    public void storeAndMergeReportParts(Report report) {
+        // create storage folder, if not already exists
+        File storageFolder = new File(report.getStorageFolderPath());
+        if (!storageFolder.exists()) {
+            if (!storageFolder.mkdir()) {
+                LOG.error("Failed to create storage folder");
+                return;
+            }
+        }
+
+        // Get all capability sets
+        ArrayList<HashMap<String, Object>> capSets = report.get(Report.MACDETAIL, Report.CAPABILITY_SETS, ArrayList.class);
+        // serialize each capability set into a single HashMap and merge the data if a file for the
+        // given capability set already exists
+        for (HashMap<String, Object> singleCapS : capSets) {
+            try {
+                this.storeCapSContentToFiles(report.getUUID(), report.getStorageFolderPath(), singleCapS);
+            } catch (JSONException e) {
+                final OXException oxException = new OXException(e);
+                LOG.error("Error while trying create JSONObject from stored capability-set data. " + oxException.getMessage(), oxException);
+            } catch (IOException e) {
+                final OXException oxException = new OXException(e);
+                LOG.error("Error while trying to read stored capability-set data. " + oxException.getMessage(), oxException);
+            }
+        }
+        // remove whole capability set content
+        report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, new ArrayList<>());
+    }
+
+    private void storeCapSContentToFiles(String reportUUID, String folderPath, HashMap<String, Object> data) throws JSONException, IOException {
+        String filename = reportUUID + "_" + data.get(Report.CAPABILITIES).hashCode() + ".part";
+        File storedDataFile = new File(folderPath + "/" + filename);
+        FileLock fileLock = null;
+        RandomAccessFile raf = null;
+        FileWriter fw = null;
+        int fileLockAttempts = 0;
+        try {
+            if (storedDataFile.exists()) {
+                // Lock this file, so that no new data is added while we merge
+
+                raf = new RandomAccessFile(storedDataFile, "rw");
+                while (fileLock == null && fileLockAttempts <= MAX_LOCK_FILE_ATTEMPTS) {
+                    try {
+                        fileLock = raf.getChannel().tryLock();
+                    } catch (OverlappingFileLockException e) {
+                        Thread.sleep(1000);
+                        fileLockAttempts++;
+                        continue;
+                    }
+                }
+                // unable to get file lock for more then 20 seconds
+                if (fileLock == null) {
+                    if (raf != null) {
+                        raf.close();
+                    }
+                    throw new IOException("Unable to get file lock on file: " + storedDataFile.getAbsolutePath());
+                }
+                // Load and parse the existing data first into an Own JSONObject
+                Scanner sc = new Scanner(storedDataFile);
+                String content = sc.useDelimiter("\\Z").next();
+                sc.close();
+                HashMap<String, Object> storedData = (HashMap<String, Object>) JSONCoercion.parseAndCoerceToNative(content);
+                // Merge the data of the two files into dataToStore
+                merge(data, storedData);
+            }
+            // overwrite the so far stored data
+            JSONObject jsonData = (JSONObject) JSONCoercion.coerceToJSON(data);
+
+            fw = new FileWriter(storedDataFile);
+            fw.write(jsonData.toString(2));
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            if (fileLock != null) {
+                fileLock.release();
+            }
+            if (raf != null) {
+                raf.close();
+            }
+            if (fw != null) {
+                fw.close();
+            }
+        }
     }
 
     /**
@@ -298,7 +427,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
 
         // Get the users client logins and save them also to this context/capability-set
-        HashMap<String,Long> userLogins = userReport.get(Report.MACDETAIL, Report.USER_LOGINS, HashMap.class);
+        HashMap<String, Long> userLogins = userReport.get(Report.MACDETAIL, Report.USER_LOGINS, HashMap.class);
         for (Entry<String, Long> clientName : userLogins.entrySet()) {
             incCount(counts, (String) clientName.getKey());
         }
@@ -355,9 +484,6 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         elementMap.put(keyInMap, value + 1);
     }
 
-    
-
-    
     /**
      * Calculate drive specific average-metrics and clean up the given map form unneeded parameters.
      * 
@@ -401,7 +527,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
      * @param consideredTimeframeEnd, end of potential timeframe for calculating file count
      * @param report, the report with all values
      */
-    private void addDriveMetrics(HashMap<String, Object> capSMap, LinkedHashMap<Integer, ArrayList<Integer>> usersInContext, Date consideredTimeframeStart, Date consideredTimeframeEnd, Report report) {
+    private void addDriveMetrics(HashMap<String, Object> capSMap, LinkedHashMap<Integer, ArrayList<Integer>> usersInContext, Date consideredTimeframeStart, Date consideredTimeframeEnd, Report report, ArrayList<String> compositionCapS) {
         InfostoreInformationService informationService = Services.getService(InfostoreInformationService.class);
         LinkedHashMap<String, Integer> driveUserMetrics = new LinkedHashMap<>();
         LinkedHashMap<String, Integer> driveMetrics = new LinkedHashMap<>();
@@ -474,6 +600,12 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             }
         }
         report.set(Report.TOTAL, Report.DRIVE_TOTAL, totalDrive);
+        // Merge drive metrics into files and remove the data from the report, if neccessary
+        if (report.isNeedsComposition()) {
+            capSMap.put(Report.CAPABILITIES, compositionCapS);
+            report.get(Report.MACDETAIL, Report.CAPABILITY_SETS, ArrayList.class).add(capSMap);
+            storeAndMergeReportParts(report);
+        }
     }
 
     /**
@@ -483,8 +615,12 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
      * @param savedCounts
      * @param counts
      */
-    private void add(HashMap<String, Object> savedCounts, HashMap<String, Object> counts) {
-        savedCounts.put(Report.CONTEXTS, (Long) savedCounts.get(Report.CONTEXTS) + 1);
+    private void add(HashMap<String, Object> savedCounts, HashMap<String, Object> counts, boolean sumContexts) {
+        Long additionalContexts = 1l;
+        if (sumContexts && counts.get(Report.CONTEXTS) != null) {
+            additionalContexts = Long.parseLong(String.valueOf(counts.get(Report.CONTEXTS)));
+        }
+        savedCounts.put(Report.CONTEXTS, Long.parseLong(String.valueOf(savedCounts.get(Report.CONTEXTS))) + additionalContexts);
         for (Map.Entry<String, Object> entry : counts.entrySet()) {
             if (entry.getValue() instanceof Long) {
                 Long value = (Long) savedCounts.get(entry.getKey());
@@ -501,7 +637,53 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                         savedCounts.put(Report.CONTEXT_USERS_MIN, newValue);
                     }
                     savedCounts.put(Report.CONTEXT_USERS_AVG, (Long) savedCounts.get(Report.TOTAL) / (Long) savedCounts.get(Report.CONTEXTS));
+                    if (sumContexts) {
+                        savedCounts.put(Report.TOTAL, value + newValue);
+                    }
+                } else if (sumContexts && !entry.getKey().contains("context")) {
+                    savedCounts.put(entry.getKey(), value + (Long) entry.getValue());
                 }
+            }
+        }
+    }
+
+    /**
+     * Add all values from counts to saveCounts. Also calculate Context-users-min/max/avg in savedCounts, depending
+     * on the new values.
+     * 
+     * @param additionalCounts
+     * @param storedCounts
+     */
+    private void merge(HashMap<String, Object> additionalCounts, HashMap<String, Object> storedCounts) {
+        if (storedCounts.get(Report.CONTEXTS) != null && additionalCounts.get(Report.CONTEXTS) != null) {
+            Long additionalContexts = Long.parseLong(String.valueOf(storedCounts.get(Report.CONTEXTS)));
+            additionalCounts.put(Report.CONTEXTS, Long.parseLong(String.valueOf(additionalCounts.get(Report.CONTEXTS))) + additionalContexts);
+        }
+        for (Map.Entry<String, Object> entry : storedCounts.entrySet()) {
+            String key = entry.getKey();
+            // loaded file data can be either Long or integer
+            if (!additionalCounts.containsKey(key)) {
+                additionalCounts.put(key, entry.getValue());
+                continue;
+            }
+            if (entry.getValue() instanceof Integer || entry.getValue() instanceof Long) {
+                Long value = (Long) additionalCounts.get(key);
+                Long storedValue = Long.parseLong(String.valueOf(entry.getValue()));
+                if (!StringUtils.containsIgnoreCase(key, "context") && !key.equals(Report.TOTAL)) {
+                    additionalCounts.put(key, value + storedValue);
+                } else if (key.equals(Report.TOTAL)) {
+                    additionalCounts.put(Report.TOTAL, value + storedValue);
+                    additionalCounts.put(Report.CONTEXT_USERS_AVG, (Long) additionalCounts.get(Report.TOTAL) / (Long) additionalCounts.get(Report.CONTEXTS));
+                } else if (key.equals(Report.CONTEXT_USERS_MAX) && storedValue > (Long) additionalCounts.get(Report.CONTEXT_USERS_MAX)) {
+                    additionalCounts.put(Report.CONTEXT_USERS_MAX, storedValue);
+                } else if (key.equals(Report.CONTEXT_USERS_MIN) && storedValue < (Long) additionalCounts.get(Report.CONTEXT_USERS_MIN) || (Long) additionalCounts.get(Report.CONTEXT_USERS_MIN) == 0l) {
+                    additionalCounts.put(Report.CONTEXT_USERS_MIN, storedValue);
+                }
+            } else if (entry.getValue() instanceof HashMap) {
+                //                if (additionalCounts.get(entry.getValue()) == null) {
+                //                    additionalCounts.put(entry.getKey(), new HashMap<String, Object>());
+                //                }
+                merge((HashMap<String, Object>) additionalCounts.get(entry.getKey()), (HashMap<String, Object>) entry.getValue());
             }
         }
     }

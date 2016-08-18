@@ -49,6 +49,9 @@
 
 package com.openexchange.report.client.impl;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
@@ -57,6 +60,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
+import java.util.Set;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
@@ -69,7 +74,10 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.report.appsuite.serialization.ReportConfigs;
+import com.openexchange.report.appsuite.serialization.osgi.ReportSerializationActivator;
+import com.openexchange.report.client.configuration.ReportConfiguration;
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.MacDetail;
@@ -295,8 +303,12 @@ public class ReportClientBase extends AbstractJMXTools {
                     isShowMailMetrics = true;
                 }
             }
-
-            ReportConfigs reportConfigs = new ReportConfigs(reportType, false, isCustomTimeframe, timeframeStart.getTime(), timeframeEnd.getTime(), isSingleTenant, singeTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics);
+            
+            ReportConfiguration reportConfiguration = new ReportConfiguration();
+            String storagePath = reportConfiguration.getReportStorage().trim();
+            int chunkSize = Integer.parseInt(reportConfiguration.getMaxChunkSize().trim());
+            
+            ReportConfigs reportConfigs = new ReportConfigs(reportType, false, isCustomTimeframe, timeframeStart.getTime(), timeframeEnd.getTime(), isSingleTenant, singeTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics, storagePath, chunkSize);
 
             //Start the report generation
             System.out.println("Starting the Open-Xchange report client. Note that the report generation may take a little while.");
@@ -907,13 +919,48 @@ public class ReportClientBase extends AbstractJMXTools {
             System.out.println("Avg. time per context: " + prettyPrintTimeInterval(timePerContext));
             System.out.println("Report was finished: " + new Date(end));
             System.out.println("\n------ report -------");
-            System.out.println(new JSONObject((String) report.get("data")).toString(4));
+            JSONObject data = new JSONObject((String) report.get("data"));
+            //TODO QS-VS: Korrektur der Methode zum Output der Daten, Einrückungen werden komplett ignoriert
+            if (data.getBoolean("needsComposition")) {
+                System.out.println("{");
+                for (String string : data.keySet()) {
+                    if (data.get(string) instanceof String) {
+                        System.out.println("  \"" + string + "\" : \"" + data.get(string) + "\",");
+                    } else if(data.get(string) instanceof Boolean) {
+                        System.out.println("  \"" + string + "\" : " + data.get(string) + ",");
+                        // TODO QS-VS: Besser aus dem Report selbst herauslesen welcher Parameter das Lesen von Platte triggert
+                    } else if (string.equals("macdetail") || string.equals("oxaas")){
+                       try {
+                        Report.printStoredReportContentToConsole((String) report.get("storageFolderPath"), (String) report.get("uuid"));
+                       } catch (IOException e) {
+                        e.printStackTrace();
+                       } 
+                    } else {
+                        JSONObject obj = (JSONObject) data.get(string);
+                        System.out.println("  " + string + " : " + obj.toString(2, 1) + ",");
+                    }
+                }
+                System.out.println("}");
+            } else {
+                System.out.println(data.toString(20));
+            }
             System.out.println("------ end -------\n");
         } catch (JSONException e) {
             System.out.println("Illegal data sent from server!");
             e.printStackTrace();
         }
     }
+    
+    /**
+     * Fetches the stored report in the storage folder defined by the given path and print the whole
+     * report to console. Very memory friendly because of utilizing {@link Scanner} operations.
+     * 
+     * The whole report-file is identified by the ".report" ending.
+     * 
+     * @param reportFolderPath, the path to the folder where the report-file is stored
+     * @throws IOException
+     */
+    
 
     /**
      * Convert milliseconds to a pretty time output String.

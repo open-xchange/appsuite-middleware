@@ -145,4 +145,18 @@ public class ReportConfiguration {
         }
         return "";
     }
+    
+    public String getReportStorage() {
+        if (null != properties.getProperty("com.openexchange.report.client.fileStorage")) {
+            return properties.getProperty("com.openexchange.report.client.fileStorage");
+        }
+        return "";
+    }
+    
+    public String getMaxChunkSize() {
+        if (null != properties.getProperty("com.openexchange.report.client.maxChunkSize")) {
+            return properties.getProperty("com.openexchange.report.client.maxChunkSize");
+        }
+        return "";
+    }
 }

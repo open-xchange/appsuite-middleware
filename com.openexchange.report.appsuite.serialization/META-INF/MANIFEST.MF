@@ -9,11 +9,15 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.hazelcast.core,
  com.hazelcast.nio,
  com.hazelcast.nio.serialization,
+ com.openexchange.ajax.tools,
+ com.openexchange.config,
  com.openexchange.exception,
  com.openexchange.hazelcast.serialization,
  com.openexchange.osgi,
  com.openexchange.tools.strings,
  javax.management.openmbean,
+ org.json,
  org.osgi.framework
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.report.appsuite.serialization
+Require-Bundle: com.openexchange.test

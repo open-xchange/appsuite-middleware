@@ -2,6 +2,7 @@
 package com.openexchange.report.appsuite.serialization.osgi;
 
 import static com.openexchange.report.appsuite.serialization.osgi.StringParserServiceRegistry.getServiceRegistry;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
@@ -22,7 +23,7 @@ public class ReportSerializationActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] {
-            StringParser.class
+            StringParser.class, ConfigurationService.class
         };
     }
 

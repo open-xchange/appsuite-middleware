@@ -136,4 +136,10 @@ public class Total implements ContextReportCumulator{
         timeframeMap.put(Report.TIMEFRAME_END, report.getConsideredTimeframeEnd());
         report.set(Report.TOTAL, Report.TIMEFRAME, timeframeMap);
     }
+
+    @Override
+    public void storeAndMergeReportParts(Report report) {
+        // TODO Auto-generated method stub
+        
+    }
 }

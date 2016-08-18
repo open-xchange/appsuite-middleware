@@ -2,13 +2,36 @@
 package com.openexchange.report.appsuite.defaultHandlers;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileLock;
+import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +39,7 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
@@ -37,11 +61,31 @@ public class CapabilityHandlerTest {
     private final String CAPS2 = "active_sync, autologin, boxcom, caldav, calendar, carddav, client-onboarding, collect_email_addresses, conflict_handling, contacts";
     private final String CAPS3 = "active_sync, autologin, boxcom, caldav, calendar, carddav, client-onboarding, collect_email_addresses";
 
+    //--------------------Report for storage tests--------------------
+    private Report reportStoring;
+    private final String REPORT_UUID = "storageUID";
+    private final String REPORT_UUID_LOCKS = "locksUID";
+    private final String REPORT_PATH = "./test/testfiles/storage";
+    private final String REPORT_TYPE = "default";
+    private final Long REPORT_TIME = new Date().getTime();
+    private Report reportStoringLocks;
+
+    ExecutorService eService = null;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         this.contextReport = initContextReport(2);
         this.initReport("default");
+        this.initReportForStorage();
+        this.initReportForStorageWithLocks();
+        this.eService = Executors.newFixedThreadPool(2);
+    }
+
+    @After
+    public void reset() {
+        restoreDefaultForComposureTests();
+        cleanUpDataForLocks();
     }
     //-------------------Tests-------------------
 
@@ -180,7 +224,7 @@ public class CapabilityHandlerTest {
         PowerMockito.when(Services.getService(InfostoreInformationService.class)).thenReturn(informationService);
         this.initReport("extended");
         initTenantMapForReport();
-        addFirstCapSToReport();
+        addCapSToReport(report, CAPS1);
         capabilityHandlerTest.finish(report);
         validateDriveTotalAvgs(report.get(Report.TOTAL, Report.DRIVE_TOTAL, LinkedHashMap.class), 15l, 15l, 1l, 1l, 1l, 1l);
     }
@@ -263,10 +307,140 @@ public class CapabilityHandlerTest {
         PowerMockito.when(Services.getService(InfostoreInformationService.class)).thenReturn(informationService);
         this.initReport("extended");
         initTenantMapForReport();
-        addFirstCapSToReport();
+        addCapSToReport(report, CAPS1);
         addSecondCapSToReport();
         capabilityHandlerTest.finish(report);
         validateDriveTotalAvgs(report.get(Report.TOTAL, Report.DRIVE_TOTAL, LinkedHashMap.class), 33l, 33l, 1l, 1l, 9l, 1l);
+    }
+
+    @Test
+    public void testStoreAndMergeReportPartsStore() {
+        capabilityHandlerTest.storeAndMergeReportParts(reportStoring);
+        LinkedList<File> parts = getFilesFromReportFolder(reportStoring, ".part");
+        // Have all 4 .part files been created?
+        assertEquals("Not all capability-set entrys were stored into a file", 4, parts.size());
+        File result = new File(reportStoring.getStorageFolderPath() + "/" + reportStoring.getUUID() + "_-1364233380.part");
+        assertTrue("Report content was not composed. ", result.exists());
+        File expected = new File(reportStoring.getStorageFolderPath() + "/" + "newCapS-1364233380.test");
+        try {
+            byte[] resultBytes = Files.readAllBytes(result.toPath());
+            byte[] expectedBytes = Files.readAllBytes(expected.toPath());
+            // Has a newly created .part-file the expected content?
+            assertTrue("Composed report-content is not like expected.", Arrays.equals(resultBytes, expectedBytes));
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail("Failed to compare the newly created file with expectation");
+        }
+        File resultMerge = new File(reportStoring.getStorageFolderPath() + "/" + reportStoring.getUUID() + "_-1051342765.part");
+        Scanner sc;
+        try {
+            sc = new Scanner(resultMerge);
+            String content = sc.useDelimiter("\\Z").next();
+            sc.close();
+            HashMap<String, Object> mergedData = (HashMap<String, Object>) JSONCoercion.parseAndCoerceToNative(content);
+            // Have the merged .part file the correct content?
+            assertEquals("Merged total users are wrong", 70, mergedData.get(Report.TOTAL));
+            assertEquals("Merged context-users-max are wrong", 30, mergedData.get(Report.CONTEXT_USERS_MAX));
+            assertEquals("Merged context-users-min are wrong", 5, mergedData.get(Report.CONTEXT_USERS_MIN));
+            assertEquals("Merged context-users-avg are wrong", 5, mergedData.get(Report.CONTEXT_USERS_AVG));
+            // Are loaded Long-values also calculated correctly
+            assertEquals(100000000001l, mergedData.get(Report.ADMIN));
+            // Are client login informations also calculated correctly?
+            int appsuiteClients = ((HashMap<String, Integer>) mergedData.get("client-list")).get("open-xchange-appsuite");
+            assertEquals(2, appsuiteClients);
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testStoreAndMergeReportPartsCleanUp() {
+        capabilityHandlerTest.storeAndMergeReportParts(reportStoring);
+        assertEquals("Not all capability-set entrys were removed after storing and merge", 0, reportStoring.get(Report.MACDETAIL, Report.CAPABILITY_SETS, ArrayList.class).size());
+    }
+
+    @Test
+    public void testStoreAndMergeReportsPartsWithLocks() {
+        // Prepare wrong data
+        initWrongDataForLocks();
+        // Start thread that locks the existing file and replaces the data inside with correct data
+        eService.execute(new Runnable() {
+
+            @Override
+            public void run() {
+                FileLock fileLock = null;
+                RandomAccessFile raf = null;
+                try {
+                    raf = new RandomAccessFile(new File(reportStoringLocks.getStorageFolderPath() + "/" + reportStoringLocks.getUUID() + "_-853702361.part"), "rw");
+                    // Lock file
+                    fileLock = raf.getChannel().tryLock();
+                    // Sleep
+                    Thread.sleep(1000);
+                    // replace
+                    replaceWrongWithCorrectDataForLocks();
+                    // release lock
+                    if (fileLock != null) {
+                        fileLock.release();
+                    }
+                    if (raf != null) {
+                        raf.close();
+                    }
+                } catch (FileNotFoundException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        eService.execute(new Runnable() {
+
+            @Override
+            public void run() {
+                capabilityHandlerTest.storeAndMergeReportParts(reportStoringLocks);
+            }
+        });
+        try {
+            eService.awaitTermination(2, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        // Analyze the stored and manipulated file
+        File result = new File(reportStoringLocks.getStorageFolderPath() + "/" + reportStoringLocks.getUUID() + "_-853702361.part");
+        Scanner sc;
+        try {
+            sc = new Scanner(result);
+            String content = sc.useDelimiter("\\Z").next();
+            sc.close();
+            HashMap<String, Object> mergedData = (HashMap<String, Object>) JSONCoercion.parseAndCoerceToNative(content);
+            // Have the merged .part file the correct content?
+            assertEquals("Merged total users are wrong", 20, mergedData.get(Report.TOTAL));
+            assertEquals("Merged disabled users are wrong", 1, mergedData.get(Report.DISABLED));
+            // Are loaded Long-values also calculated correctly
+            // Are client login informations also calculated correctly?
+            int appsuiteClients = ((HashMap<String, Integer>) mergedData.get("client-list")).get("open-xchange-appsuite");
+            assertEquals(2, appsuiteClients);
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void test() {
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+
+        executorService.shutdown();
     }
 
     //-------------------Validation-------------------
@@ -292,6 +466,86 @@ public class CapabilityHandlerTest {
     }
 
     //-------------------Helpers-------------------
+    private void initWrongDataForLocks() {
+        try {
+            copyFileUsingStream(new File(reportStoringLocks.getStorageFolderPath() + "/filelock_test_wrong.init"), new File(reportStoringLocks.getStorageFolderPath() + "/" + reportStoringLocks.getUUID() + "_-853702361.part"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void replaceWrongWithCorrectDataForLocks() {
+        try {
+            copyFileUsingStream(new File(reportStoringLocks.getStorageFolderPath() + "/filelock_test_right.init"), new File(reportStoringLocks.getStorageFolderPath() + "/" + reportStoringLocks.getUUID() + "_-853702361.part"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void cleanUpDataForLocks() {
+        File toDelete = new File(reportStoringLocks.getStorageFolderPath() + "/" + reportStoringLocks.getUUID() + "_-853702361.part");
+        if (toDelete.exists()) {
+            toDelete.delete();
+        }
+    }
+
+    private static void copyFileUsingStream(File source, File dest) throws IOException {
+        InputStream is = null;
+        OutputStream os = null;
+        try {
+            is = new FileInputStream(source);
+            os = new FileOutputStream(dest);
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = is.read(buffer)) > 0) {
+                os.write(buffer, 0, length);
+            }
+        } finally {
+            is.close();
+            os.close();
+        }
+    }
+
+    private void restoreDefaultForComposureTests() {
+        LinkedList<File> parts = getFilesFromReportFolder(reportStoring, ".part");
+        String stayingPartName = reportStoring.getStorageFolderPath() + "/" + reportStoring.getUUID() + "_-1051342765.part";
+        String stayingPartContentName = reportStoring.getStorageFolderPath() + "/" + "storedCapS-1051342765.test";
+        for (File file : parts) {
+            if (!file.getName().equals(stayingPartName)) {
+                file.delete();
+            }
+        }
+        File stayingFile = new File(stayingPartName);
+        File stayingFileContent = new File(stayingPartContentName);
+        try {
+            // Load and parse the existing data first into an Own JSONObject
+            Scanner sc = new Scanner(stayingFileContent);
+            String content = sc.useDelimiter("\\Z").next();
+            sc.close();
+            // overwrite the so far stored data
+            JSONObject jsonData = (JSONObject) JSONCoercion.coerceToJSON(JSONCoercion.parseAndCoerceToNative(content));
+            FileWriter fw = null;
+
+            fw = new FileWriter(stayingFile);
+            fw.write(jsonData.toString(2));
+            fw.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private LinkedList<File> getFilesFromReportFolder(Report report, final String endsWith) {
+        File partsFolder = new File(report.getStorageFolderPath());
+        LinkedList<File> files = new LinkedList<>((Arrays.asList(partsFolder.listFiles(new FilenameFilter() {
+
+            @Override
+            public boolean accept(File dir, String name) {
+                return (endsWith != null ? name.endsWith(endsWith) : true);
+            }
+        }))));
+        return files;
+    }
+
     private ContextReport initContextReport(Integer contextId) {
 
         ContextImpl ctx = new ContextImpl(contextId);
@@ -327,12 +581,112 @@ public class CapabilityHandlerTest {
         report = new Report(UUID.randomUUID().toString(), type, new Date().getTime());
         report.setConsideredTimeframeStart(new Date().getTime() - 100000);
         report.setConsideredTimeframeEnd(new Date().getTime());
+        report.setMaxChunkSize(100);
     }
 
-    private void addFirstCapSToReport() {
-        Map<String, Object> macdetail = report.getNamespace(Report.MACDETAIL);
-        macdetail.put(CAPS1, new HashMap<String, Object>());
+    private void initReportForStorage() {
+        reportStoring = new Report(REPORT_UUID, REPORT_TYPE, REPORT_TIME);
+        reportStoring.setStorageFolderPath(REPORT_PATH);
+        HashMap<String, Object> singleCaps = initDefaultValuesForCapS();
+        singleCaps.put(Report.CONTEXT_USERS_MAX, 10l);
+        singleCaps.put(Report.CONTEXTS, 1l);
+        HashMap<String, Object> singleCaps2 = initDefaultValuesForCapS();
+        HashMap<String, Object> singleCaps3 = initDefaultValuesForCapS();
+        HashMap<String, Object> singleCaps4 = initDefaultValuesForCapS();
+        ArrayList<HashMap<String, Object>> capabilitySets = new ArrayList<>();
 
+        HashMap<String, Long> clientList = new HashMap<>();
+        clientList.put("open-xchange-appsuite", 1l);
+
+        singleCaps.put("client-list", clientList);
+        singleCaps2.put("client-list", clientList);
+        singleCaps3.put("client-list", clientList);
+        singleCaps4.put("client-list", clientList);
+
+        List<String> capabilities = new ArrayList<>();
+        capabilities.add("active_sync");
+        capabilities.add("autologin");
+        capabilities.add("boxcom");
+        capabilities.add("caldav");
+        singleCaps.put("capabilities", capabilities);
+        singleCaps.put("total", 10l);
+        capabilitySets.add(singleCaps);
+
+        List<String> capabilities2 = new ArrayList<>();
+        capabilities2.add("active_sync");
+        capabilities2.add("autologin");
+        capabilities2.add("boxcom");
+        singleCaps2.put("capabilities", capabilities2);
+        singleCaps2.put("total", 10l);
+        capabilitySets.add(singleCaps2);
+
+        List<String> capabilities3 = new ArrayList<>();
+        capabilities3.add("active_sync");
+        capabilities3.add("autologin");
+        singleCaps3.put("capabilities", capabilities3);
+        singleCaps3.put("total", 10l);
+        capabilitySets.add(singleCaps3);
+
+        List<String> capabilities4 = new ArrayList<>();
+        capabilities4.add("active_sync");
+        singleCaps4.put("capabilities", capabilities4);
+        singleCaps4.put("total", 60l);
+        singleCaps4.put("guests", 1l);
+        singleCaps4.put("admin", 1l);
+        singleCaps4.put("disabled", 1l);
+        singleCaps4.put("Context-users-max", 30l);
+        singleCaps4.put("Context-users-min", 5l);
+        singleCaps4.put("Context-users-avg", 20l);
+        singleCaps4.put("contexts", 3l);
+
+        capabilitySets.add(singleCaps4);
+        reportStoring.set(Report.MACDETAIL, Report.CAPABILITY_SETS, capabilitySets);
+    }
+
+    private void initReportForStorageWithLocks() {
+        reportStoringLocks = new Report(REPORT_UUID_LOCKS, REPORT_TYPE, REPORT_TIME);
+        reportStoringLocks.setStorageFolderPath(REPORT_PATH);
+        HashMap<String, Object> singleCaps3 = initDefaultValuesForCapS();
+        ArrayList<HashMap<String, Object>> capabilitySets = new ArrayList<>();
+
+        HashMap<String, Long> clientList = new HashMap<>();
+        clientList.put("open-xchange-appsuite", 1l);
+
+        singleCaps3.put("client-list", clientList);
+
+        List<String> capabilities3 = new ArrayList<>();
+        capabilities3.add("active_sync");
+        capabilities3.add("autologin");
+        singleCaps3.put("capabilities", capabilities3);
+        singleCaps3.put("total", 10l);
+        singleCaps3.put("admin", 1l);
+        singleCaps3.put("disabled", 1l);
+        singleCaps3.put("Context-users-max", 10l);
+        singleCaps3.put("Context-users-min", 10l);
+        singleCaps3.put("Context-users-avg", 10l);
+        singleCaps3.put("contexts", 1l);
+        capabilitySets.add(singleCaps3);
+
+        reportStoringLocks.set(Report.MACDETAIL, Report.CAPABILITY_SETS, capabilitySets);
+    }
+
+    private HashMap<String, Object> initDefaultValuesForCapS() {
+        HashMap<String, Object> capSMap = new HashMap<>();
+        capSMap.put(Report.ADMIN, 0l);
+        capSMap.put(Report.DISABLED, 0l);
+        capSMap.put(Report.TOTAL, 0l);
+        capSMap.put(Report.GUESTS, 0l);
+        capSMap.put(Report.LINKS, 0l);
+        capSMap.put(Report.CONTEXTS, 0l);
+        capSMap.put(Report.CONTEXT_USERS_MAX, 0l);
+        capSMap.put(Report.CONTEXT_USERS_MIN, 0l);
+        capSMap.put(Report.CONTEXT_USERS_AVG, 0l);
+        return capSMap;
+    }
+
+    private void addCapSToReport(Report currentReport, String capS) {
+        Map<String, Object> macdetail = currentReport.getNamespace(Report.MACDETAIL);
+        macdetail.put(capS, new HashMap<String, Object>());
     }
 
     private void addSecondCapSToReport() {

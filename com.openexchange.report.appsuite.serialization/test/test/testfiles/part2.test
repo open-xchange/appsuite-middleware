@@ -1,0 +1,7 @@
+{
+  "test-key2.1" : 1,
+  "test-key2.2" : 2,
+  "test-list2.1" : {
+    "list-entry" : 3
+  }
+}

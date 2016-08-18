@@ -26,6 +26,10 @@ public class ReportConfigs implements Serializable, CompositeData{
     private Long consideredTimeframeEnd;
 
     private boolean isConfigTimerange;
+    
+    private String storagePath;
+    
+    private int maxChunkSize;
 
     //--------------------OXCS-Report, relevant attributes--------------------
 
@@ -92,10 +96,12 @@ public class ReportConfigs implements Serializable, CompositeData{
                                 (Long) cd.get("singleTenantId"), 
                                 (boolean) cd.get("isAdminIgnore"), 
                                 (boolean) cd.get("isShowDriveMetrics"), 
-                                (boolean) cd.get("isShowMailMetrics"));
+                                (boolean) cd.get("isShowMailMetrics"),
+                                (String) cd.get("storagePath"),
+                                (int) cd.get("maxChunkSize"));
     }
 
-    public ReportConfigs(String type, boolean isSingleDeployment, boolean isConfigTimerange, Long consideredTimeframeStart, Long consideredTimeframeEnd, boolean isShowSingleTenant, Long singleTenantId, boolean isAdminIgnore, boolean isShowDriveMetrics, boolean isShowMailMetrics) {
+    public ReportConfigs(String type, boolean isSingleDeployment, boolean isConfigTimerange, Long consideredTimeframeStart, Long consideredTimeframeEnd, boolean isShowSingleTenant, Long singleTenantId, boolean isAdminIgnore, boolean isShowDriveMetrics, boolean isShowMailMetrics, String storagePath, int maxChunkSize) {
         super();
         this.type = type;
         this.isSingleDeployment = isSingleDeployment;
@@ -107,6 +113,8 @@ public class ReportConfigs implements Serializable, CompositeData{
         this.isAdminIgnore = isAdminIgnore;
         this.isShowDriveMetrics = isShowDriveMetrics;
         this.isShowMailMetrics = isShowMailMetrics;
+        this.storagePath = storagePath;
+        this.maxChunkSize = maxChunkSize;
         this.attributeMap = new HashMap<>();
         this.attributeMap.put("type", type);
         this.attributeMap.put("isSingleDeployment", isSingleDeployment);
@@ -118,6 +126,8 @@ public class ReportConfigs implements Serializable, CompositeData{
         this.attributeMap.put("isAdminIgnore", isAdminIgnore);
         this.attributeMap.put("isShowDriveMetrics", isShowDriveMetrics);
         this.attributeMap.put("isShowMailMetrics", isShowMailMetrics);
+        this.attributeMap.put("storagePath", storagePath);
+        this.attributeMap.put("maxChunkSize", maxChunkSize);
         
     }
 
@@ -204,7 +214,20 @@ public class ReportConfigs implements Serializable, CompositeData{
     public void setConfigTimerange(boolean isConfigTimerange) {
         this.isConfigTimerange = isConfigTimerange;
     }
+    
+    public String getStoragePath() {
+        return storagePath;
+    }
+    
+    public void setStoragePath(String storagePath) {
+        this.storagePath = storagePath;
+    }
+    
+    public int getMaxChunkSize() {
+        return maxChunkSize;
+    }
 
-   
-
+    public void setMaxChunkSize(int maxChunkSize) {
+        this.maxChunkSize = maxChunkSize;
+    }
 }

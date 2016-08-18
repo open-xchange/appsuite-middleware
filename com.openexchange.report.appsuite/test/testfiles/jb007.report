@@ -1,0 +1,40 @@
+  "macdetail" : {
+    "capabilitySets" : [
+      {
+          "client-list": {
+            "open-xchange-appsuite": 4
+          },
+          "capabilities": [
+            "active_sync"
+          ],
+          "total": 10
+      },
+      {
+          "client-list": {
+            "open-xchange-appsuite": 4
+          },
+          "capabilities": [
+            "active_sync, "autologin"
+          ],
+          "total": 11
+      },
+      {
+          "client-list": {
+            "open-xchange-appsuite": 6
+          },
+          "capabilities": [
+            "active_sync, "autologin", "boxcom"
+          ],
+          "total": 12
+      },
+      {
+          "client-list": {
+            "open-xchange-appsuite": 7
+          },
+          "capabilities": [
+            "active_sync, "autologin", "boxcom", "caldav"
+          ],
+          "total": 13
+      }
+    ]
+  },

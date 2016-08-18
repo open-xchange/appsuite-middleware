@@ -49,13 +49,31 @@
 
 package com.openexchange.report.appsuite.serialization;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
+import org.json.JSONException;
+import org.json.JSONObject;
+import java.util.Scanner;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.report.appsuite.serialization.osgi.StringParserServiceRegistry;
 import com.openexchange.tools.strings.StringParser;
 
@@ -146,7 +164,7 @@ public class Report implements Serializable {
     private int pendingTasks;
 
     private LinkedHashMap<String, LinkedHashMap<String, Object>> tenantMap;
-    
+
     private int tenantIdCounter;
 
     private boolean isSingleDeployment = true;
@@ -154,6 +172,12 @@ public class Report implements Serializable {
     private Long consideredTimeframeStart;
 
     private Long consideredTimeframeEnd;
+
+    private int maxChunkSize;
+
+    private String storageFolderPath;
+
+    private boolean needsComposition;
 
     //--------------------OXCS-Report, relevant attributes--------------------
 
@@ -242,7 +266,7 @@ public class Report implements Serializable {
         this.isShowDriveMetrics = isShowDriveMetrics;
         this.isShowMailMetrics = isShowMailMetrics;
     }
-    
+
     public Report(String uuid, long startTime, ReportConfigs reportConfig) {
         this.uuid = uuid;
         this.type = reportConfig.getType();
@@ -268,6 +292,9 @@ public class Report implements Serializable {
         this.isAdminIgnore = reportConfig.isAdminIgnore();
         this.isShowDriveMetrics = reportConfig.isShowDriveMetrics();
         this.isShowMailMetrics = reportConfig.isShowMailMetrics();
+        this.storageFolderPath = reportConfig.getStoragePath();
+        this.maxChunkSize = reportConfig.getMaxChunkSize();
+        this.needsComposition = false;
     }
 
     private static Class[] allowedTypes = new Class[] { Integer.class, Long.class, Float.class, Short.class, Double.class, Byte.class, Boolean.class, String.class };
@@ -518,5 +545,188 @@ public class Report implements Serializable {
 
     public void setShowMailMetrics(boolean isShowMailMetrics) {
         this.isShowMailMetrics = isShowMailMetrics;
+    }
+
+    public void setMaxChunkSize(int maxChunkSize) {
+        this.maxChunkSize = maxChunkSize;
+    }
+
+    public int getMaxChunkSize() {
+        return maxChunkSize;
+    }
+
+    public String getStorageFolderPath() {
+        return storageFolderPath;
+    }
+
+    public void setStorageFolderPath(String storageFolderPath) {
+        this.storageFolderPath = storageFolderPath;
+    }
+
+    public boolean isNeedsComposition() {
+        return needsComposition;
+    }
+
+    public void setNeedsComposition(boolean needsComposition) {
+        this.needsComposition = needsComposition;
+    }
+
+    // Attention, if you add values, also correct the composeReportFromStoredPats(...) method
+    public static enum JsonObjectType {
+        MAP, ARRAY
+    };
+
+    // TODO QS-VS: Exception handling verbessern OXExceptions verwenden
+    /**
+     * Gather all report parts and merge them into a report-file, with a ".report" ending, inside the
+     * reports folder-path. The result is stored in the same folder . The "*.part" files are deleted in the process
+     * after the successful creation of the result.
+     * <br><br>
+     * The <code>rootAttribute</code> will be the first key of the map, the <code>contentContainer</code>
+     * the first value. Every other value will be either an entry in a list or a key/value pair, depending
+     * on the given <code>contentContainerType</code> ({@link JsonObjectType}). The <code>defaultIndentation</code> will add
+     * two whitespace per count to each line.
+     * <br><br>
+     * The result will be stored inside this reports <code>storageFolderPath</code> in a file which name 
+     * is <code>uuid</code>.report.
+     * <br><br>
+     * Every .part file will be deleted afterwards.
+     * 
+     * @param contentContainer, the first level container above the content, that is gathered from the .part files
+     * @param contentContainerType, the type of the first level container, either Map or Array
+     * @param rootAttribute, the highest level container, contentContainer will be this containers first entry
+     * @param defaultIndentation, the number of whitespace before each entry * 2
+     */
+    public void composeReportFromStoredParts(String contentContainer, JsonObjectType contentContainerType, String rootAttribute, int defaultIndentation) {
+        // Check for any existing parts inside the reports folder and load filenames into a list
+        File partsFolder = new File(storageFolderPath);
+        int indentationLevel = defaultIndentation;
+        LinkedList<File> parts = new LinkedList<>((Arrays.asList(partsFolder.listFiles(new FilenameFilter() {
+
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".part");
+            }
+        }))));
+        if (parts.size() == 0) {
+            return;
+
+        }
+        if (contentContainer != null && contentContainer.length() > 0 && contentContainerType == null) {
+            return;
+        }
+        File reportContent = new File(storageFolderPath + "/" + uuid + ".report");
+        try {
+            OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(reportContent), "UTF-8");
+            // create a new line with the rootAttribute and container attribute and open brackets depending on the given JsonObjectType
+            if (rootAttribute != null && rootAttribute.length() > 0) {
+                osw.write(getIndentation(indentationLevel++) + "\"" + rootAttribute + "\"" + " : {\n");
+            }
+            if (contentContainer != null && contentContainer.length() > 0) {
+                osw.write(getIndentation(indentationLevel++) + "\"" + contentContainer + "\"" + " : " + (contentContainerType == JsonObjectType.MAP ? "{" : "[") + "\n");
+            }
+            // Paste the stored files content
+            for (ListIterator<File> fileIterator = parts.listIterator(); fileIterator.hasNext();) {
+                File file = fileIterator.next();
+                // Dont touch parts of other reports
+                if (file.getName().contains(uuid)) {
+                    appendReportParts(osw, file, fileIterator.hasNext(), getIndentation(indentationLevel));
+                }
+            }
+            // Append the closing attributes
+            if (contentContainer != null && contentContainer.length() > 0) {
+                osw.write(getIndentation(--indentationLevel) + (contentContainerType == JsonObjectType.MAP ? "}" : "]") + "\n");
+            }
+            if (rootAttribute != null && rootAttribute.length() > 0) {
+                osw.write(getIndentation(--indentationLevel) + "},\n");
+            }
+            osw.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        for (File file : parts) {
+            file.delete();
+        }
+    }
+
+
+    /**
+     * Fetches the stored report in the storage folder defined by the given path and print the whole
+     * report to console. Very memory friendly because of utilizing {@link Scanner} operations.
+     * 
+     * The whole report-file is identified by the ".report" ending.
+     * 
+     * @param reportFolderPath, the path to the folder where the report-file is stored
+     * @throws IOException
+     */
+    public void printStoredReportContentToConsole() throws IOException {
+        FileInputStream is = null;
+        Scanner sc = null;
+        try {
+            is = new FileInputStream(this.storageFolderPath + "/" + this.uuid + ".report");
+            sc = new Scanner(is, "UTF-8");
+            while (sc.hasNext()) {
+                System.out.println(sc.nextLine());
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+            if (sc != null) {
+                sc.close();
+            }
+        }
+    }
+
+    public void appendReportParts(OutputStreamWriter osw, File appendingFile, boolean hasNext, String indentation) {
+        // load every part-file of the report 
+        BufferedReader br;
+        try {
+            br = new BufferedReader(new FileReader(appendingFile));
+            String line = br.readLine();
+            while (line != null) {
+                osw.write(indentation + line + ((line = br.readLine()) == null && hasNext ? "," : "") + "\n");
+            }
+            br.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void printStoredReportContentToConsole(String storageFolderPath, String uuid) throws IOException {
+        FileInputStream is = null;
+        Scanner sc = null;
+        try {
+            is = new FileInputStream(storageFolderPath + "/" + uuid + ".report");
+            sc = new Scanner(is, "UTF-8");
+            while (sc.hasNext()) {
+                System.out.println(sc.nextLine());
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+            if (sc != null) {
+                sc.close();
+            }
+        }
+    }
+
+    public String getIndentation(int level) {
+        String result = "";
+        for (int i = 0; i < level; i++) {
+            result += "  ";
+        }
+        return result;
     }
 }

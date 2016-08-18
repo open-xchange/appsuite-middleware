@@ -105,6 +105,12 @@ public class PortableReport extends AbstractCustomPortable {
     public static final String PARAMETER_IS_DRIVE_METRICS = "driveMetrics";
     
     public static final String PARAMETER_IS_MAIL_METRICS = "mailMetrics";
+    
+    public static final String PARAMETER_STORAGE_PATH = "storagePath";
+    
+    public static final String PARAMETER_MAX_CHUNK_SIZE = "maxChunkSize";
+    
+    public static final String PARAMETER_NEEDS_COMPOSITION = "needsComposition";
 
     private String uuid;
 
@@ -137,6 +143,12 @@ public class PortableReport extends AbstractCustomPortable {
     private boolean isShowDriveMetrics;
     
     private boolean isShowMailMetrics;
+    
+    private int maxChunkSize;
+
+    private String storageFolderPath;
+    
+    private boolean needsComposition;
 
     public PortableReport() {
         super();
@@ -170,6 +182,9 @@ public class PortableReport extends AbstractCustomPortable {
         writer.writeBoolean(PARAMETER_IS_ADMIN_IGNORE, isIgnoreAdmin);
         writer.writeBoolean(PARAMETER_IS_DRIVE_METRICS, isShowDriveMetrics);
         writer.writeBoolean(PARAMETER_IS_MAIL_METRICS, isShowMailMetrics);
+        writer.writeUTF(PARAMETER_STORAGE_PATH, storageFolderPath);
+        writer.writeInt(PARAMETER_MAX_CHUNK_SIZE, maxChunkSize);
+        writer.writeBoolean(PARAMETER_NEEDS_COMPOSITION, needsComposition);
         writer.getRawDataOutput().writeObject(namespaces);
     }
 
@@ -198,6 +213,9 @@ public class PortableReport extends AbstractCustomPortable {
         isIgnoreAdmin = reader.readBoolean(PARAMETER_IS_ADMIN_IGNORE);
         isShowDriveMetrics = reader.readBoolean(PARAMETER_IS_DRIVE_METRICS);
         isShowMailMetrics = reader.readBoolean(PARAMETER_IS_MAIL_METRICS);
+        storageFolderPath = reader.readUTF(PARAMETER_STORAGE_PATH);
+        maxChunkSize = reader.readInt(PARAMETER_MAX_CHUNK_SIZE);
+        needsComposition = reader.readBoolean(PARAMETER_NEEDS_COMPOSITION);
         namespaces = reader.getRawDataInput().readObject();
     }
 
@@ -229,6 +247,9 @@ public class PortableReport extends AbstractCustomPortable {
         portableReport.isIgnoreAdmin = report.isAdminIgnore();
         portableReport.isShowDriveMetrics = report.isShowDriveMetrics();
         portableReport.isShowMailMetrics = report.isShowMailMetrics();
+        portableReport.storageFolderPath = report.getStorageFolderPath();
+        portableReport.maxChunkSize = report.getMaxChunkSize();
+        portableReport.needsComposition = report.isNeedsComposition();
         return portableReport;
     }
 
@@ -256,6 +277,9 @@ public class PortableReport extends AbstractCustomPortable {
         report.setAdminIgnore(portableReport.isIgnoreAdmin);
         report.setShowDriveMetrics(portableReport.isShowDriveMetrics);
         report.setShowMailMetrics(portableReport.isShowMailMetrics);
+        report.setStorageFolderPath(portableReport.storageFolderPath);
+        report.setMaxChunkSize(portableReport.maxChunkSize);
+        report.setNeedsComposition(portableReport.needsComposition);
         return report;
     }
 
