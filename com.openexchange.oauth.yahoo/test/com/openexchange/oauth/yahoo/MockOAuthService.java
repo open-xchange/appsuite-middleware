@@ -51,6 +51,7 @@ package com.openexchange.oauth.yahoo;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
@@ -59,6 +60,7 @@ import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
 
 
@@ -138,6 +140,12 @@ public class MockOAuthService implements OAuthService {
 				// Nothing to do
 				return null;
 			}
+
+            @Override
+            public Set<OAuthScope> getEnabledScopes() {
+                // TODO Auto-generated method stub
+                return null;
+            }
 
         };
     }
