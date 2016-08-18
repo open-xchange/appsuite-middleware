@@ -51,6 +51,7 @@ package com.openexchange.oauth.json.osgi;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
@@ -58,6 +59,7 @@ import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
 
 /**
@@ -79,13 +81,13 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
     }
 
     @Override
-    public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
-        return getService0().createAccount(serviceMetaData, arguments, user, contextId);
+    public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
+        return getService0().createAccount(serviceMetaData, arguments, user, contextId, scopes);
     }
 
     @Override
-    public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
-        return getService0().createAccount(serviceMetaData, type, arguments, user, contextId);
+    public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
+        return getService0().createAccount(serviceMetaData, type, arguments, user, contextId, scopes);
     }
 
     @Override
@@ -118,8 +120,8 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
     }
 
     @Override
-    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, final String host, final Session session) throws OXException {
-        return getService0().initOAuth(serviceMetaData, callbackUrl, host, session);
+    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, final String host, final Session session, Set<OAuthScope> scopes) throws OXException {
+        return getService0().initOAuth(serviceMetaData, callbackUrl, host, session, scopes);
     }
 
     @Override
@@ -132,9 +134,8 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
         return getService0().updateAccount(accountId, serviceMetaData, type, arguments, user, contextId);
     }
 
-	@Override
-	public OAuthAccount getDefaultAccount(API api, Session session) throws OXException {
-		return getService0().getDefaultAccount(api, null);
-	}
-
+    @Override
+    public OAuthAccount getDefaultAccount(API api, Session session) throws OXException {
+        return getService0().getDefaultAccount(api, null);
+    }
 }

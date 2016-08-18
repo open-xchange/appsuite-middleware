@@ -51,21 +51,24 @@ package com.openexchange.messaging.twitter;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountManager;
 import com.openexchange.messaging.twitter.osgi.Services;
 import com.openexchange.messaging.twitter.session.TwitterAccessRegistry;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.secret.SecretService;
 import com.openexchange.session.Session;
 import com.openexchange.twitter.Paging;
 import com.openexchange.twitter.TwitterAccess;
 import com.openexchange.twitter.TwitterService;
-
 
 /**
  * {@link AbstractTwitterMessagingAccess} - Generic access to twitter.
@@ -132,7 +135,9 @@ public abstract class AbstractTwitterMessagingAccess {
                                 arguments.put(OAuthConstants.ARGUMENT_TOKEN, token);
                                 arguments.put(OAuthConstants.ARGUMENT_SECRET, tokenSecret);
                                 arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
-                                oAuthAccount = oAuthService.createAccount("com.openexchange.oauth.twitter", arguments, userId, contextId);
+                                OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
+                                Set<OAuthScope> scopes = scopeRegistry.getAvailableScopes(API.TWITTER);
+                                oAuthAccount = oAuthService.createAccount("com.openexchange.oauth.twitter", arguments, userId, contextId, scopes);
                                 /*
                                  * Write to configuration
                                  */

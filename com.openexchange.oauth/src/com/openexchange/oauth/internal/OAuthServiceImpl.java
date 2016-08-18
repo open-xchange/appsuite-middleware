@@ -66,6 +66,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.scribe.builder.ServiceBuilder;
@@ -109,6 +110,7 @@ import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.services.Services;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
@@ -250,7 +252,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
 
     @Override
-    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, final String currentHost, final Session session) throws OXException {
+    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, final String currentHost, final Session session, Set<OAuthScope> scopes) throws OXException {
         try {
             final int contextId = session.getContextId();
             final int userId = session.getUserId();
@@ -342,9 +344,16 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Add optional scope
              */
             {
-                final String scope = metaData.getScope();
-                if (scope != null && authorizationURL.indexOf("&scope=") < 0) {
-                    authorizationURL.append("&scope=").append(urlEncode(scope));
+                StringBuilder builder = new StringBuilder();
+                for (OAuthScope scope : scopes) {
+                    builder.append(scope.getMapping()).append(" ");
+                }
+                if (builder.length() > 0) {
+                    builder.setLength(builder.length() - 1);
+                    final String scope = builder.toString();
+                    if (scope != null && authorizationURL.indexOf("&scope=") < 0) {
+                        authorizationURL.append("&scope=").append(urlEncode(scope));
+                    }
                 }
             }
             /*
@@ -405,7 +414,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
 
     @Override
-    public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
+    public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
         try {
             /*
              * Create appropriate OAuth account instance
@@ -439,6 +448,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             }
             account.setToken(encrypt(account.getToken(), session));
             account.setSecret(encrypt(account.getSecret(), session));
+            account.setEnabledScopes(scopes);
             /*
              * Create INSERT command
              */
@@ -459,7 +469,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
 
     @Override
-    public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
+    public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
         try {
             /*
              * Create appropriate OAuth account instance
@@ -498,6 +508,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 throw OAuthExceptionCodes.MISSING_ARGUMENT.create(OAuthConstants.ARGUMENT_SECRET);
             }
             account.setSecret(encrypt(account.getSecret(), session));
+            account.setEnabledScopes(scopes);
             /*
              * Create INSERT command
              */

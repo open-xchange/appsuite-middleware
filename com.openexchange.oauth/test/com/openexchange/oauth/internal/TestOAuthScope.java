@@ -47,41 +47,52 @@
  *
  */
 
-package com.openexchange.oauth.scope;
+package com.openexchange.oauth.internal;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.java.Strings;
+import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OAuthScope;
 
 /**
- * {@link Module} - Defines the AppSuite's available scopes/features
+ * {@link TestOAuthScope}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum Module {
-    mail, calendar, contacts, drive;
+public enum TestOAuthScope implements OAuthScope {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Module.class);
+    calendar("some scopes the OAuth provider specifies for CALENDAR", Module.calendar),
+    drive("some scopes the OAuth provider specifies for DRIVE", Module.drive),
+    ;
+
+    private String mapping;
+    private Module module;
 
     /**
-     * Resolves the specified comma separated string of {@link Module}s to an array of {@link Module} values
-     * 
-     * @param string A comma separated String containing the {@link Module} strings
-     * @return An array with the resolved {@link Module} values
+     * Initialises a new {@link TestOAuthScope}.
      */
-    public static final Module[] valuesOf(String string) {
-        List<Module> list = new ArrayList<>();
-        String[] split = Strings.splitByComma(string);
-        for (String s : split) {
-            try {
-                list.add(valueOf(s));
-            } catch (IllegalArgumentException e) {
-                LOG.warn("The specified string '{}' cannot be resolved to a valud module. It will be skipped from the scopes.", s);
-            }
-        }
+    private TestOAuthScope(String mapping, Module module) {
+        this.mapping = mapping;
+        this.module = module;
 
-        return list.toArray(new Module[list.size()]);
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
+     */
+    @Override
+    public String getMapping() {
+        return mapping;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.scope.OAuthScope#getModule()
+     */
+    @Override
+    public Module getModule() {
+        return module;
+    }
+
 }

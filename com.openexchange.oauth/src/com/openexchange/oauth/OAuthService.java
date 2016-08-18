@@ -51,7 +51,9 @@ package com.openexchange.oauth;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
@@ -61,6 +63,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 @SingletonService
 public interface OAuthService {
@@ -96,15 +99,16 @@ public interface OAuthService {
     List<OAuthAccount> getAccounts(String serviceMetaData, Session session, int user, int contextId) throws OXException;
 
     /**
-     * Initializes a new OAuth account.
+     * Initialises a new OAuth account.
      *
      * @param serviceMetaData The identifier of service meta data
      * @param callbackUrl The optional call-back URL
      * @param currentHost The name of this host
-     * @throws OXException If initialization fails
+     * @param a {@link Set} with {@link OAuthScope}s to enable for the {@link OAuthAccount}
+     * @throws OXException If initialisation fails
      * @return The OAuth interaction providing needed steps
      */
-    OAuthInteraction initOAuth(String serviceMetaData, String callbackUrl, String currentHost, Session session) throws OXException;
+    OAuthInteraction initOAuth(String serviceMetaData, String callbackUrl, String currentHost, Session session, Set<OAuthScope> scopes) throws OXException;
 
     /**
      * Creates a new OAuth account completely from specified arguments.
@@ -113,10 +117,11 @@ public interface OAuthService {
      * @param arguments The arguments providing {@link OAuthConstants#ARGUMENT_TOKEN}, {@link OAuthConstants#ARGUMENT_SECRET}, {@link OAuthConstants#ARGUMENT_PASSWORD}, and optional {@link OAuthConstants#ARGUMENT_DISPLAY_NAME}
      * @param user The user identifier
      * @param contextId The context identifier
+     * @param a {@link Set} with {@link OAuthScope}s to enable for the {@link OAuthAccount}
      * @return The newly created account
      * @throws OXException If creation fails
      */
-    OAuthAccount createAccount(String serviceMetaData, Map<String, Object> arguments, int user, int contextId) throws OXException;
+    OAuthAccount createAccount(String serviceMetaData, Map<String, Object> arguments, int user, int contextId, Set<OAuthScope> scopes) throws OXException;
 
     /**
      * Create a new OAuth account from specified arguments.
@@ -134,10 +139,11 @@ public interface OAuthService {
      * @param arguments The arguments appropriate for interaction type
      * @param user The user identifier
      * @param contextId The context identifier
+     * @param a {@link Set} with {@link OAuthScope}s to enable for the {@link OAuthAccount}
      * @throws OXException If creation fails
      * @return The newly created account
      */
-    OAuthAccount createAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OXException;
+    OAuthAccount createAccount(String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId, Set<OAuthScope> scopes) throws OXException;
 
     /**
      * Deletes the specified account.
@@ -163,10 +169,24 @@ public interface OAuthService {
      * @param arguments The arguments to update
      * @param user The user identifier
      * @param contextId The context identifier
+     * @param a {@link Set} with {@link OAuthScope}s to enable for the {@link OAuthAccount}
      * @throws OXException If deletion fails
      */
     void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId) throws OXException;
 
+    /**
+     * Updates the specified account
+     * 
+     * @param accountId
+     * @param serviceMetaData
+     * @param type
+     * @param arguments
+     * @param user
+     * @param contextId
+     * @param a {@link Set} with {@link OAuthScope}s to enable for the {@link OAuthAccount}
+     * @return
+     * @throws OXException
+     */
     OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OXException;
 
     /**
@@ -183,11 +203,12 @@ public interface OAuthService {
 
     /**
      * Gets a default account for the given API type. Throws an exception if no account for the API can be found.
+     * 
      * @param api The API type
      * @param session The session
      * @return The default account for this API type
      * @throws OXException
      */
-	OAuthAccount getDefaultAccount(API api, Session session) throws OXException;
+    OAuthAccount getDefaultAccount(API api, Session session) throws OXException;
 
 }
