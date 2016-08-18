@@ -56,8 +56,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -166,13 +168,13 @@ public class LocalReportService extends AbstractReportService {
             }
         }
         // Mark context as done, thereby decreasing the number of pending tasks
-        report.markTaskAsDone();
+//        report.markTaskAsDone();
 
         pendingReports.put(report.getUUID(), report);
 
-        if (report.getNumberOfPendingTasks() == 0) {
-            finishUpReport(reportType, pendingReports, report);
-        }
+//        if (report.getNumberOfPendingTasks() == 0) {
+//            finishUpReport(reportType, pendingReports, report);
+//        }
     }
 
     /**
@@ -191,12 +193,12 @@ public class LocalReportService extends AbstractReportService {
             return;
         }
         // Mark context as done
-        report.markTaskAsDone();
+//        report.markTaskAsDone();
         pendingReports.put(report.getUUID(), report);
 
-        if (report.getNumberOfPendingTasks() == 0) {
-            finishUpReport(reportType, pendingReports, report);
-        }
+//        if (report.getNumberOfPendingTasks() == 0) {
+//            finishUpReport(reportType, pendingReports, report);
+//        }
     }
 
     @Override
@@ -277,6 +279,8 @@ public class LocalReportService extends AbstractReportService {
 
     //--------------------Private helper methods--------------------
     private void setUpContextAnalyzer(String uuid, String reportType, List<Integer> allContextIds, Report report) throws OXException {
+        DatabaseService databaseService = Services.getService(DatabaseService.class);
+        int remainingWorkload = 0;
         ExecutorService newFixedThreadPool = Executors.newFixedThreadPool(20, new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {
@@ -298,6 +302,7 @@ public class LocalReportService extends AbstractReportService {
         ArrayList<Integer> contextsToProcess = new ArrayList<>(allContextIds);
         LOG.info("{} contexts in total will get processed!", contextsToProcess.size());
         while (!contextsToProcess.isEmpty()) {
+            remainingWorkload++;
             Integer firstRemainingContext = contextsToProcess.get(0);
             DataloaderMySQL dataloaderMySQL = new DataloaderMySQL();
             ArrayList<Integer> contextsInSameSchema = null;
@@ -314,12 +319,24 @@ public class LocalReportService extends AbstractReportService {
             if (EXECUTOR_SERVICE_REF.get().isShutdown()) {
                 break;
             }
-            if (report != null) {
-                EXECUTOR_SERVICE_REF.get().submit(new AnalyzeContextBatch(uuid, report, contextsInSameSchema));
-            } else {
-                EXECUTOR_SERVICE_REF.get().submit(new AnalyzeContextBatch(uuid, reportType, contextsInSameSchema));
+            Future<Integer> finishedContexts = EXECUTOR_SERVICE_REF.get().submit(new AnalyzeContextBatch(uuid, report, contextsInSameSchema));
+                
+            try {
+                if (finishedContexts.get() != 0) {
+                    report.setTaskState(report.getNumberOfTasks(), report.getNumberOfPendingTasks() - finishedContexts.get());
+                    System.out.println(report.getNumberOfPendingTasks() + " : " + report.getNumberOfTasks());
+                    if (report.getNumberOfPendingTasks() <= 0) {
+                        finishUpReport(reportType, cache.asMap().get(PENDING_REPORTS_PRE_KEY + reportType), report);
+                    }
+                }
+                    
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
             }
-            LOG.info("{} assigned. {} contexts still to assign.", contextsInSameSchema.size(), contextsToProcess.size());
+            
+            LOG.debug("{} assigned. {} contexts still to assign.", contextsInSameSchema.size(), contextsToProcess.size());
         }
         LOG.info("All {} contexts assigned.", allContextIds.size());
     }
