@@ -1768,7 +1768,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         Quota amountQuota = CalendarQuotaProvider.getAmountQuota(session, connection, viewFactory, this);
         long limit = amountQuota.getLimit();
         long usage = amountQuota.getUsage();
-        if (limit > 0 && amountQuota.getUsage() >= limit) {
+        if (limit == 0 || (limit > 0 && amountQuota.getUsage() >= limit)) {
             throw QuotaExceptionCodes.QUOTA_EXCEEDED_CALENDAR.create(usage, limit);
         }
     }

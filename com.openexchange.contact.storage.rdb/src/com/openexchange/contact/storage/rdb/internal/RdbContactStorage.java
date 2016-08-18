@@ -205,8 +205,11 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              * check quota restrictions
              */
             final Quota quota = RdbContactQuotaProvider.getAmountQuota(serverSession, executor, connection);
-            if (null != quota && 0 < quota.getLimit() && 1 + quota.getUsage() > quota.getLimit()) {
-                throw QuotaExceptionCodes.QUOTA_EXCEEDED_CONTACTS.create(quota.getUsage(), quota.getLimit());
+            if (null != quota) {
+                long limit = quota.getLimit();
+                if (limit == 0 || (0 < limit && 1 + quota.getUsage() > limit)) {
+                    throw QuotaExceptionCodes.QUOTA_EXCEEDED_CONTACTS.create(quota.getUsage(), limit);
+                }
             }
             /*
              * prepare insert

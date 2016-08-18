@@ -173,7 +173,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             }
             final long newUsage = oldUsage + usage;
             final long quota = this.quota;
-            if (quota > 0 && newUsage > quota) {
+            if ((quota == 0) || (quota > 0 && newUsage > quota)) {
                 return true;
             }
             ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=? AND user=?");
@@ -340,6 +340,9 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     @Override
     public String saveNewFile(InputStream is, long sizeHint) throws OXException {
+        if (quota == 0) {
+            throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
+        }
         if (0 < sizeHint) {
             checkAvailable(sizeHint);
         }
@@ -475,6 +478,9 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     @Override
     public long appendToFile(InputStream is, String name, long offset, long sizeHint) throws OXException {
+        if (quota == 0) {
+            throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
+        }
         if (0 < sizeHint) {
             checkAvailable(sizeHint);
         }
@@ -514,8 +520,8 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     private void checkAvailable(long required) throws OXException {
         if (0 < required) {
-            long quota = getQuota();
-            if (0 < quota && quota < getUsage() + required) {
+            long quota = this.quota;
+            if ((quota == 0) || (quota > 0 && quota < getUsage() + required)) {
                 throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
             }
         }

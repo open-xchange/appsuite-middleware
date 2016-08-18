@@ -69,7 +69,7 @@ public interface FileStorageInfo extends Serializable {
     /**
      * Gets the file storage quota
      *
-     * @return The quota for the file storage or <code>0</code> if there is no quota.
+     * @return The quota for the file storage, <code>0</code> (zero) if no quota at all (deny all), or less than <code>0</code> (zero) for unlimited/not set
      */
     long getFileStorageQuota();
 
