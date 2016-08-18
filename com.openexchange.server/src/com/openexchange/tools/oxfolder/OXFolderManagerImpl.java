@@ -274,7 +274,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         } else {
             this.cSql = null;
         }
-        warnings = new LinkedList<OXException>();
+        warnings = new LinkedList<>();
     }
 
     @Override
@@ -736,7 +736,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     private Map<Integer, Integer> determineCurrentOwnerships(FolderObject folder) throws OXException {
         Map<Integer, Integer> folderId2OldOwner;
-        List<Integer> folderIds = new ArrayList<Integer>(8);
+        List<Integer> folderIds = new ArrayList<>(8);
         folderIds.add(Integer.valueOf(folder.getObjectID()));
         if (folder.hasSubfolders()) {
             try {
@@ -745,7 +745,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
             }
         }
-        folderId2OldOwner = new LinkedHashMap<Integer, Integer>(folderIds.size());
+        folderId2OldOwner = new LinkedHashMap<>(folderIds.size());
         for (Integer folderId : folderIds) {
             folderId2OldOwner.put(folderId, Integer.valueOf(getFolderFromMaster(folderId.intValue()).getCreatedBy()));
         }
@@ -753,7 +753,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     private void adjustFileStorageLocations(Map<Integer, Integer> folderId2OldOwner) throws OXException {
-        List<Map<Integer, List<VersionControlResult>>> results = new LinkedList<Map<Integer, List<VersionControlResult>>>();
+        List<Map<Integer, List<VersionControlResult>>> results = new LinkedList<>();
         boolean error = true;
         try {
             for (Entry<Integer, Integer> f2o : folderId2OldOwner.entrySet()) {
@@ -814,10 +814,10 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     }
 
     protected void update(FolderObject fo, int options, FolderObject storageObj, long lastModified, boolean handDown) throws OXException {
-        doUpdate(fo, options, storageObj, lastModified, handDown, new TIntHashSet());
+        doUpdate(fo, options, storageObj, lastModified, handDown, new TIntObjectHashMap<TIntSet>());
     }
 
-    void doUpdate(FolderObject fo, int options, FolderObject storageObj, long lastModified, boolean handDown, TIntSet alreadyCheckedParents) throws OXException {
+    void doUpdate(FolderObject fo, int options, FolderObject storageObj, long lastModified, boolean handDown, TIntObjectMap<TIntSet> alreadyCheckedParents) throws OXException {
         if (fo.getObjectID() <= 0) {
             throw OXFolderExceptionCode.INVALID_OBJECT_ID.create(Integer.valueOf(fo.getObjectID()));
         }
@@ -911,7 +911,15 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     new CheckPermissionOnRemove(session, writeCon, ctx).checkPermissionsOnUpdate(fo.getObjectID(), removedPerms, lastModified);
                 }
             }
-            if (alreadyCheckedParents.add(storageObj.getParentFolderID())) {
+
+            // add a TIntSet for each permission entity
+            boolean allChecked = true;
+            for (OCLPermission perm : fo.getNonSystemPermissionsAsArray()) {
+                if (null == alreadyCheckedParents.putIfAbsent(perm.getEntity(), new TIntHashSet())) {
+                    allChecked = false;
+                }
+            }
+            if (!allChecked) {
                 new CheckPermissionOnUpdate(session, writeCon, ctx).checkParentPermissions(storageObj.getParentFolderID(), fo.getNonSystemPermissionsAsArray(), storageObj.getNonSystemPermissionsAsArray(), lastModified, alreadyCheckedParents);
             }
         }
@@ -1005,7 +1013,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
     }
 
-    protected void handDown(final int folderId, final int options, final List<OCLPermission> permissions, final long lastModified, final TIntSet alreadyCheckedParents, final FolderCacheManager cacheManager) throws OXException, SQLException {
+    protected void handDown(final int folderId, final int options, final List<OCLPermission> permissions, final long lastModified, final TIntObjectMap<TIntSet> alreadyCheckedParents, final FolderCacheManager cacheManager) throws OXException, SQLException {
         final Context ctx = this.ctx;
         final TIntList subfolders = OXFolderSQL.getSubfolderIDs(folderId, writeCon, ctx);
         if (!subfolders.isEmpty()) {
@@ -1336,7 +1344,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 if (false == recursive || false == sourceFolder.hasSubfolders()) {
                     folderIDs = Collections.singletonList(Integer.valueOf(sourceFolder.getObjectID()));
                 } else {
-                    folderIDs = new ArrayList<Integer>();
+                    folderIDs = new ArrayList<>();
                     folderIDs.add(Integer.valueOf(sourceFolder.getObjectID()));
                     children = OXFolderSQL.getSubfolderIDs(sourceFolder.getObjectID(), readCon, ctx, true);
                     folderIDs.addAll(children);
@@ -1380,7 +1388,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 if (false == recursive || false == fo.hasSubfolders()) {
                     folderIDs = Collections.singletonList(Integer.valueOf(fo.getObjectID()));
                 } else {
-                    folderIDs = new ArrayList<Integer>();
+                    folderIDs = new ArrayList<>();
                     folderIDs.add(Integer.valueOf(fo.getObjectID()));
                     children = OXFolderSQL.getSubfolderIDs(fo.getObjectID(), readCon, ctx, true);
                     folderIDs.addAll(children);
@@ -1502,7 +1510,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             /*
              * Gather all deletable subfolders recursively
              */
-            TIntObjectMap<TIntObjectMap<?>> deleteableFolders = new TIntObjectHashMap<TIntObjectMap<?>>();
+            TIntObjectMap<TIntObjectMap<?>> deleteableFolders = new TIntObjectHashMap<>();
             try {
                 TIntList subfolders = OXFolderSQL.getSubfolderIDs(fo.getObjectID(), readCon, ctx);
                 for (int i = 0; i < subfolders.size(); i++) {
@@ -1681,7 +1689,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      * @throws OXException If deletion fails for any folder
      */
     void deleteValidatedFolders(final TIntObjectMap<TIntObjectMap<?>> deleteableIDs, final long lastModified, final int type) throws OXException {
-        final Set<Integer> validatedFolders = new LinkedHashSet<Integer>();
+        final Set<Integer> validatedFolders = new LinkedHashSet<>();
         TIntObjectProcedure<TIntObjectMap<?>> procedure = new TIntObjectProcedure<TIntObjectMap<?>>() {
 
             @Override
@@ -2009,7 +2017,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      * Gathers all folders which are allowed to be deleted
      */
     private TIntObjectMap<TIntObjectMap<?>> gatherDeleteableFolders(final int folderID, final int userId, final UserPermissionBits userPerms, final String permissionIDs) throws OXException, OXException, SQLException {
-        final TIntObjectMap<TIntObjectMap<?>> deleteableIDs = new TIntObjectHashMap<TIntObjectMap<?>>();
+        final TIntObjectMap<TIntObjectMap<?>> deleteableIDs = new TIntObjectHashMap<>();
         final Integer[] specials = new Integer[1];
         // Initialize special folders that must not be deleted
         {
@@ -2086,7 +2094,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             deleteableIDs.put(folderID, null);
             return;
         }
-        final TIntObjectMap<TIntObjectMap<?>> subMap = new TIntObjectHashMap<TIntObjectMap<?>>();
+        final TIntObjectMap<TIntObjectMap<?>> subMap = new TIntObjectHashMap<>();
         final int size = subfolders.size();
         for (int i = 0; i < size; i++) {
             gatherDeleteableSubfoldersRecursively(subfolders.get(i), userId, userPerms, permissionIDs, subMap, initParent, specials);
@@ -2104,7 +2112,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      * @throws OXException
      */
     private String[] getFolderPath(FolderObject folder, FolderObject parentFolder, Connection connection) throws OXException {
-        List<String> folderPath = new ArrayList<String>();
+        List<String> folderPath = new ArrayList<>();
         folderPath.add(String.valueOf(folder.getObjectID()));
         int startID;
         if (null == parentFolder) {
@@ -2157,7 +2165,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     private static Map<String, Integer> fieldMapping;
 
     static {
-        final Map<String, Integer> fieldMapping = new HashMap<String, Integer>(9);
+        final Map<String, Integer> fieldMapping = new HashMap<>(9);
         fieldMapping.put("fuid", Integer.valueOf(DataObject.OBJECT_ID));
         fieldMapping.put("parent", Integer.valueOf(FolderChildObject.FOLDER_ID));
         fieldMapping.put("fname", Integer.valueOf(FolderObject.FOLDER_NAME));
@@ -2320,6 +2328,15 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
         final Integer i = (Integer) session.getParameter(MailSessionParameterNames.getParamPublishingInfostoreFolderID());
         return null == i ? -1 : i.intValue();
+    }
+
+    @Override
+    public void cleanLocksForFolder(FolderObject folder, int[] userIds) throws OXException {
+        try {
+            OXFolderSQL.cleanLocksForFolder(folder.getObjectID(), userIds, this.writeCon, ctx);
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        }
     }
 
 }

@@ -99,7 +99,7 @@ public class EndpointPool {
      * @param heartbeatInterval
      * @param timerService
      */
-    public EndpointPool(String filestoreId, List<String> endpointUris, HttpClient httpClient, int heartbeatInterval, TimerService timerService) {
+    public EndpointPool(String filestoreId, List<String> endpointUris, HttpClient httpClient, int heartbeatInterval, Token initialToken, TimerService timerService) {
         super();
         int size = endpointUris.size();
         if (size <= 0) {
@@ -114,7 +114,11 @@ public class EndpointPool {
 
         EndpointFactory endpointFactory = EndpointFactory.getInstance();
         for (String endpointUri : endpointUris) {
-            available.add(endpointFactory.createEndpointFor(endpointUri));
+            Endpoint endpoint = endpointFactory.createEndpointFor(endpointUri);
+            if (null != initialToken) {
+                endpoint.setToken(initialToken);
+            }
+            available.add(endpoint);
         }
 
         LOG.debug("Swift end-point pool [{}]: Scheduling heartbeat timer task", filestoreId);

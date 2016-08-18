@@ -6,7 +6,8 @@ Bundle-Version: 19.0
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-BuddyPolicy: registered
-Bundle-ClassPath: lib/guava-19.0.jar
+Bundle-ClassPath: lib/guava-19.0.jar,
+ lib/j2objc-annotations-1.1.jar
 Export-Package: com.google.common.annotations;version="19.0.0",
  com.google.common.base;version="19.0.0",
  com.google.common.base.internal;version="19.0.0",
@@ -24,4 +25,7 @@ Export-Package: com.google.common.annotations;version="19.0.0",
  com.google.common.util.concurrent;version="19.0.0",
  com.google.common.xml;version="19.0.0",
  com.google.thirdparty.publicsuffix;version="19.0.0"
-Import-Package: sun.misc
+Import-Package: javax.annotation,
+ javax.annotation.concurrent,
+ javax.annotation.meta,
+ sun.misc

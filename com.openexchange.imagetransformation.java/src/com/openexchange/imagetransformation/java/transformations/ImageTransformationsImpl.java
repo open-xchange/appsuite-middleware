@@ -257,7 +257,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
         }
 
         this.sourceImage = sourceImage;
-        this.transformations = new ArrayList<ImageTransformation>();
+        this.transformations = new ArrayList<>();
         this.transformationContext = new TransformationContext();
     }
 
@@ -640,32 +640,36 @@ public class ImageTransformationsImpl implements ImageTransformations {
              * prefer a suitable thumbnail in stream if possible when downscaling images
              */
             float preferThumbnailThreshold = preferThumbnailThreshold();
-            if (0 <= preferThumbnailThreshold && reader.hasThumbnails(imageIndex)) {
-                if (null != requiredResolution && (requiredResolution.width < width || requiredResolution.height < height)) {
-                    int requiredWidth = (int) (preferThumbnailThreshold * requiredResolution.width);
-                    int requiredHeight = (int) (preferThumbnailThreshold * requiredResolution.height);
-                    for (int i = 0; i < reader.getNumThumbnails(imageIndex); i++) {
-                        int thumbnailWidth = reader.getThumbnailWidth(imageIndex, i);
-                        int thumbnailHeight = reader.getThumbnailHeight(imageIndex, i);
-                        if (thumbnailWidth >= requiredWidth && thumbnailHeight >= requiredHeight) {
-                            LOG.trace("Using thumbnail of {}x{}px (requested: {}x{}px)",
-                                thumbnailWidth, thumbnailHeight, requiredResolution.width, requiredResolution.height);
-                            /*
-                             * use thumbnail & skip any additional scale transformations / compressions
-                             */
-                            compress = false;
-                            for (Iterator<ImageTransformation> iterator = transformations.iterator(); iterator.hasNext();) {
-                                ImageTransformation transformation = iterator.next();
-                                if (ScaleTransformation.class.isInstance(transformation)) {
-                                    iterator.remove();
+            try {
+                if (0 <= preferThumbnailThreshold && reader.hasThumbnails(imageIndex)) {
+                    if (null != requiredResolution && (requiredResolution.width < width || requiredResolution.height < height)) {
+                        int requiredWidth = (int) (preferThumbnailThreshold * requiredResolution.width);
+                        int requiredHeight = (int) (preferThumbnailThreshold * requiredResolution.height);
+                        for (int i = 0; i < reader.getNumThumbnails(imageIndex); i++) {
+                            int thumbnailWidth = reader.getThumbnailWidth(imageIndex, i);
+                            int thumbnailHeight = reader.getThumbnailHeight(imageIndex, i);
+                            if (thumbnailWidth >= requiredWidth && thumbnailHeight >= requiredHeight) {
+                                LOG.trace("Using thumbnail of {}x{}px (requested: {}x{}px)", thumbnailWidth, thumbnailHeight, requiredResolution.width, requiredResolution.height);
+                                /*
+                                 * use thumbnail & skip any additional scale transformations / compressions
+                                 */
+                                compress = false;
+                                for (Iterator<ImageTransformation> iterator = transformations.iterator(); iterator.hasNext();) {
+                                    ImageTransformation transformation = iterator.next();
+                                    if (ScaleTransformation.class.isInstance(transformation)) {
+                                        iterator.remove();
+                                    }
                                 }
+                                imageInformation = new ImageInformation(orientation, thumbnailWidth, thumbnailHeight);
+                                onImageRead(signaler);
+                                return reader.readThumbnail(imageIndex, i);
                             }
-                            imageInformation = new ImageInformation(orientation, thumbnailWidth, thumbnailHeight);
-                            onImageRead(signaler);
-                            return reader.readThumbnail(imageIndex, i);
                         }
                     }
                 }
+            } catch (IOException e) {
+                LOG.debug(e.getMessage(), e);
+                // fallback to image transformation
             }
             /*
              * check image size against limitations prior reading source image

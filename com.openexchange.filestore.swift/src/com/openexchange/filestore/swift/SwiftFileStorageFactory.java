@@ -52,6 +52,7 @@ package com.openexchange.filestore.swift;
 import static com.openexchange.osgi.Tools.requireService;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -64,6 +65,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.utils.URIBuilder;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -72,9 +76,12 @@ import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.swift.chunkstorage.ChunkStorage;
 import com.openexchange.filestore.swift.chunkstorage.RdbChunkStorage;
 import com.openexchange.filestore.swift.impl.AuthInfo;
+import com.openexchange.filestore.swift.impl.ConfigType;
 import com.openexchange.filestore.swift.impl.EndpointPool;
 import com.openexchange.filestore.swift.impl.SwiftClient;
 import com.openexchange.filestore.swift.impl.SwiftConfig;
+import com.openexchange.filestore.swift.impl.TokenAndResponse;
+import com.openexchange.filestore.swift.impl.token.Token;
 import com.openexchange.filestore.swift.impl.token.TokenStorage;
 import com.openexchange.filestore.swift.impl.token.TokenStorageImpl;
 import com.openexchange.java.Strings;
@@ -276,15 +283,20 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
         }
         String authValue = requireProperty(filestoreID, "authValue", config);
 
+        // Config type
+        ConfigType configType;
+        {
+            String sConfigType = config.getProperty(property(filestoreID, "configType"), ConfigType.MANUAL.getId());
+            configType = ConfigType.configTypeFor(sConfigType);
+            if (null == configType) {
+                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".configType': " + sConfigType);
+            }
+        }
+
         // Tenant name, identity URL, and domain
         String tenantName = optProperty(filestoreID, "tenantName", config);
         String identityUrl = optProperty(filestoreID, "identityUrl", config);
         String domain = optProperty(filestoreID, "domain", config);
-
-        // End-point configuration
-        String protocol = requireProperty(filestoreID, "protocol", config);
-        String path = requireProperty(filestoreID, "path", config);
-        String hosts = requireProperty(filestoreID, "hosts", config);
 
         // HTTP client configuration
         int maxConnections = config.getIntProperty(property(filestoreID, "maxConnections"), 100);
@@ -293,45 +305,101 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
         int socketReadTimeout = config.getIntProperty(property(filestoreID, "socketReadTimeout"), 15000);
         int heartbeatInterval = config.getIntProperty(property(filestoreID, "heartbeatInterval"), 60000);
 
-        List<String> urls = new LinkedList<String>();
-        for (String host : Strings.splitAndTrim(hosts, ",")) {
-            URIBuilder uriBuilder = new URIBuilder().setScheme(protocol);
-            String[] hostAndPort = Strings.splitByColon(host);
-            if (hostAndPort.length == 1) {
-                uriBuilder.setHost(host);
-            } else if (hostAndPort.length == 2) {
-                try {
-                    uriBuilder.setHost(hostAndPort[0]).setPort(Integer.parseInt(hostAndPort[1]));
-                } catch (NumberFormatException e) {
-                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
-                }
-            } else {
-                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
-            }
-
-            uriBuilder.setPath(path);
-            try {
-                String baseUrl = uriBuilder.build().toString();
-                if (baseUrl.endsWith("/")) {
-                    baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
-                }
-                urls.add(baseUrl);
-            } catch (URISyntaxException e) {
-                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Swift configuration leads to invalid URI: " + uriBuilder.toString());
-            }
-        }
-
-        if (urls.isEmpty()) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
-        }
-
+        // Create the HTTP client
         HttpClient httpClient = HttpClients.getHttpClient(ClientConfig.newInstance()
             .setMaxTotalConnections(maxConnections)
             .setMaxConnectionsPerRoute(maxConnectionsPerHost)
             .setConnectionTimeout(connectionTimeout)
             .setSocketReadTimeout(socketReadTimeout));
-        EndpointPool endpointPool = new EndpointPool(filestoreID, urls, httpClient, heartbeatInterval, requireService(TimerService.class, services));
-        return new SwiftConfig(filestoreID, userName, new AuthInfo(authValue, authType, tenantName, domain, identityUrl), httpClient, endpointPool);
+
+        // Create the auth info
+        AuthInfo authInfo = new AuthInfo(authValue, authType, tenantName, domain, identityUrl);
+
+        // End-points...
+        EndpointPool endpointPool;
+        if (ConfigType.MANUAL == configType) {
+            // Manual end-point configuration
+            String protocol = requireProperty(filestoreID, "protocol", config);
+            String path = requireProperty(filestoreID, "path", config);
+            String hosts = requireProperty(filestoreID, "hosts", config);
+
+            List<String> urls = new LinkedList<String>();
+            for (String host : Strings.splitAndTrim(hosts, ",")) {
+                URIBuilder uriBuilder = new URIBuilder().setScheme(protocol);
+                String[] hostAndPort = Strings.splitByColon(host);
+                if (hostAndPort.length == 1) {
+                    uriBuilder.setHost(host);
+                } else if (hostAndPort.length == 2) {
+                    try {
+                        uriBuilder.setHost(hostAndPort[0]).setPort(Integer.parseInt(hostAndPort[1]));
+                    } catch (NumberFormatException e) {
+                        throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
+                    }
+                } else {
+                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
+                }
+
+                uriBuilder.setPath(path);
+                try {
+                    String baseUrl = uriBuilder.build().toString();
+                    if (baseUrl.endsWith("/")) {
+                        baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+                    }
+                    urls.add(baseUrl);
+                } catch (URISyntaxException e) {
+                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Swift configuration leads to invalid URI: " + uriBuilder.toString());
+                }
+            }
+
+            if (urls.isEmpty()) {
+                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
+            }
+
+            endpointPool = new EndpointPool(filestoreID, urls, httpClient, heartbeatInterval, null, requireService(TimerService.class, services));
+        } else {
+            if (AuthInfo.Type.PASSWORD_V3 != authInfo.getType()) {
+                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".configType': " + configType.getId() + ". Only supported for " + AuthInfo.Type.PASSWORD_V3.getId() + " auth type.");
+            }
+
+            // By interface, region and container name
+            String sInterface = requireProperty(filestoreID, "interface", config);
+            String region = requireProperty(filestoreID, "region", config);
+            String containerName = requireProperty(filestoreID, "containerName", config);
+
+            try {
+                TokenAndResponse tokenAndResponse = SwiftClient.doAcquireNewToken(userName, authInfo, httpClient);
+                Token initialToken = tokenAndResponse.getToken();
+                JSONArray jCatalog = tokenAndResponse.getJsonResponse().getJSONObject("token").getJSONArray("catalog");
+                JSONArray jEndpoints = null;
+                for (int k = jCatalog.length(), i = 0; null == jEndpoints && k-- > 0; i++) {
+                    JSONObject jCatalogEntry = jCatalog.getJSONObject(i);
+                    if ("swift".equals(jCatalogEntry.optString("name", null)) && "object-store".equals(jCatalogEntry.optString("type", null))) {
+                        jEndpoints = jCatalogEntry.getJSONArray("endpoints");
+                    }
+                }
+                if (null == jEndpoints) {
+                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No such catalog entry with \"name\"=\"swift\" and \"type\"=\"object-store\".");
+                }
+
+                List<String> urls = new ArrayList<String>(jEndpoints.length());
+                for (int k = jEndpoints.length(), i = 0; k-- > 0; i++) {
+                    JSONObject jEndpoint = jEndpoints.getJSONObject(i);
+                    if (sInterface.equals(jEndpoint.optString("interface", null)) && region.equals(jEndpoint.optString("region", null))) {
+                        urls.add(jEndpoint.getString("url") + "/" + containerName);
+                    }
+                }
+
+                if (urls.isEmpty()) {
+                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No such end-points for \"interface\"=\"" + sInterface + "\" and \"region\"=\"" + region + "\".");
+                }
+
+                endpointPool = new EndpointPool(filestoreID, urls, httpClient, heartbeatInterval, initialToken, requireService(TimerService.class, services));
+            } catch (JSONException e) {
+                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Unexpected JSON response.");
+            }
+        }
+
+        return new SwiftConfig(filestoreID, userName, authInfo, httpClient, endpointPool);
     }
 
     private static String requireProperty(String filestoreID, String property, ConfigurationService config) throws OXException {

@@ -31,6 +31,10 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.pns.DefaultPushNotification;
+import com.openexchange.pns.KnownTopic;
+import com.openexchange.pns.PushNotificationField;
+import com.openexchange.pns.PushNotificationService;
 import com.openexchange.push.Container;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.push.PushListenerService;
@@ -108,6 +112,11 @@ public class DovecotPushRESTService {
                     int userId = userAndContext[0];
                     String folder = data.getString("folder");
                     long uid = data.getLong("imap-uid");
+
+                    PushNotificationService pushNotificationService = Services.optService(PushNotificationService.class);
+                    if (null != pushNotificationService) {
+                        sendViaNotificationService(userId, contextId, uid, folder, data, pushNotificationService);
+                    }
 
                     SessiondService sessiondService = Services.getService(SessiondService.class);
                     Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
@@ -190,6 +199,7 @@ public class DovecotPushRESTService {
                         LOGGER.warn("Could not look-up an appropriate session for user {} in context {}. Hence cannot push 'new-message' event.", userId, contextId);
                     } else {
                         Map<String, Object> props = new LinkedHashMap<String, Object>(4);
+                        props.put(PushEventConstants.PROPERTY_NO_FORWARD, Boolean.TRUE); // Do not redistribute through com.openexchange.pns.impl.event.PushEventHandler!
                         setEventProperties(uid, folder, data.optString("from", null), data.optString("subject", null), data.optInt("unread", -1), props);
                         PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX"), session, props, true, true);
                         LOGGER.info("Successfully parsed & triggered 'new-message' event for user {} in context {}", userId, contextId);
@@ -201,6 +211,38 @@ public class DovecotPushRESTService {
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private void sendViaNotificationService(int userId, int contextId, long uid, String folder, JSONObject data, PushNotificationService pushNotificationService) throws OXException {
+        Map<String, Object> messageData = new LinkedHashMap<>(6);
+        messageData.put(PushNotificationField.FOLDER.getId(), MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, folder));
+        messageData.put(PushNotificationField.ID.getId(), Long.toString(uid));
+        {
+            String from = data.optString("from", null);
+            if (null != from) {
+                messageData.put(PushNotificationField.MAIL_SENDER.getId(), from);
+            }
+        }
+        {
+            String subject = data.optString("subject", null);
+            if (null != subject) {
+                messageData.put(PushNotificationField.MAIL_SUBJECT.getId(), subject);
+            }
+        }
+        {
+            int unread = data.optInt("unread", -1);
+            if (unread >= 0) {
+                messageData.put(PushNotificationField.MAIL_UNREAD.getId(), Integer.valueOf(unread));
+            }
+        }
+
+        DefaultPushNotification notification = DefaultPushNotification.builder()
+            .contextId(contextId)
+            .userId(userId)
+            .topic(KnownTopic.MAIL_NEW.getName())
+            .messageData(messageData)
+            .build();
+        pushNotificationService.handle(notification);
     }
 
     private void setEventProperties(long uid, String fullName, String from, String subject, int unread, Map<String, Object> props) {

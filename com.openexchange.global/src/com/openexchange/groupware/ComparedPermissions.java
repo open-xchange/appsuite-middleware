@@ -77,6 +77,7 @@ public abstract class ComparedPermissions<P, GP extends P> {
     private Map<Integer, P> addedUsers;
     private List<P> addedGroups;
     private List<P> removedGuests;
+    private List<P> removedUsers;
     private Map<Integer, P> modifiedGuests;
     private boolean hasChanges;
 
@@ -123,23 +124,25 @@ public abstract class ComparedPermissions<P, GP extends P> {
             addedUsers = Collections.emptyMap();
             addedGroups = Collections.emptyList();
             removedGuests = Collections.emptyList();
+            removedUsers = Collections.emptyList();
             modifiedGuests = Collections.emptyMap();
             hasChanges = false;
             return;
         } else {
-            newGuests = new LinkedList<GP>();
-            addedGuests = new LinkedHashMap<Integer, P>();
-            addedUsers = new LinkedHashMap<Integer, P>();
-            addedGroups = new LinkedList<P>();
-            removedGuests = new LinkedList<P>();
-            modifiedGuests = new LinkedHashMap<Integer, P>();
+            newGuests = new LinkedList<>();
+            addedGuests = new LinkedHashMap<>();
+            addedUsers = new LinkedHashMap<>();
+            addedGroups = new LinkedList<>();
+            removedGuests = new LinkedList<>();
+            removedUsers = new LinkedList<>();
+            modifiedGuests = new LinkedHashMap<>();
         }
 
         /*
          * Calculate added permissions
          */
-        final Map<Integer, P> newUsers = new HashMap<Integer, P>();
-        final Map<Integer, P> newGroups = new HashMap<Integer, P>();
+        final Map<Integer, P> newUsers = new HashMap<>();
+        final Map<Integer, P> newGroups = new HashMap<>();
         for (P permission : newPermissions) {
             if (isSystemPermission(permission)) {
                 continue;
@@ -160,8 +163,8 @@ public abstract class ComparedPermissions<P, GP extends P> {
         /*
          * Calculate removed permissions
          */
-        final Map<Integer, P> oldUsers = new HashMap<Integer, P>();
-        final Map<Integer, P> oldGroups = new HashMap<Integer, P>();
+        final Map<Integer, P> oldUsers = new HashMap<>();
+        final Map<Integer, P> oldGroups = new HashMap<>();
         if (null != originalPermissions) {
             for (P permission : originalPermissions) {
                 if (isSystemPermission(permission)) {
@@ -177,19 +180,19 @@ public abstract class ComparedPermissions<P, GP extends P> {
         }
 
         boolean permissionsChanged = newGuests.size() > 0;
-        Set<Integer> addedUserIds = new HashSet<Integer>(newUsers.keySet());
+        Set<Integer> addedUserIds = new HashSet<>(newUsers.keySet());
         addedUserIds.removeAll(oldUsers.keySet());
         permissionsChanged |= addedUserIds.size() > 0;
 
-        Set<Integer> addedGroupIds = new HashSet<Integer>(newGroups.keySet());
+        Set<Integer> addedGroupIds = new HashSet<>(newGroups.keySet());
         addedGroupIds.removeAll(oldGroups.keySet());
         permissionsChanged |= addedGroupIds.size() > 0;
 
-        Set<Integer> removedUserIds = new HashSet<Integer>(oldUsers.keySet());
+        Set<Integer> removedUserIds = new HashSet<>(oldUsers.keySet());
         removedUserIds.removeAll(newUsers.keySet());
         permissionsChanged |= removedUserIds.size() > 0;
 
-        Set<Integer> removedGroupIds = new HashSet<Integer>(oldGroups.keySet());
+        Set<Integer> removedGroupIds = new HashSet<>(oldGroups.keySet());
         removedGroupIds.removeAll(newGroups.keySet());
         permissionsChanged |= removedGroupIds.size() > 0;
 
@@ -229,6 +232,7 @@ public abstract class ComparedPermissions<P, GP extends P> {
             if (isGuestUser(removed)) {
                 removedGuests.add(oldUsers.get(removed));
             }
+            removedUsers.add(oldUsers.get(removed));
         }
 
         hasChanges = permissionsChanged;
@@ -274,6 +278,13 @@ public abstract class ComparedPermissions<P, GP extends P> {
      */
     public boolean hasRemovedGuests() {
         return !removedGuests.isEmpty();
+    }
+
+    /**
+     * @return <code>true</code> if guest permissions have been removed
+     */
+    public boolean hasRemovedUsers() {
+        return !removedUsers.isEmpty();
     }
 
     /**
@@ -327,6 +338,13 @@ public abstract class ComparedPermissions<P, GP extends P> {
      */
     public List<P> getRemovedGuestPermissions() {
         return removedGuests;
+    }
+
+    /**
+     * @return A list of removed user permissions; never <code>null</code>
+     */
+    public List<P> getRemovedUserPermissions() {
+        return removedUsers;
     }
 
     /**

@@ -81,8 +81,8 @@ import com.openexchange.cli.AbstractRmiCLI;
  */
 public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
 
-    private static final String OPT_USER_SHORT = "u";
-    private static final String OPT_USER_LONG = "user";
+    private static final String OPT_USER_SHORT = "i";
+    private static final String OPT_USER_LONG = "userid";
     private static final String OPT_CONTEXT_SHORT = "c";
     private static final String OPT_CONTEXT_LONG = "context";
     private static final String OPT_CONFIGURATION_SHORT = "o";
