@@ -54,7 +54,6 @@ import org.json.JSONObject;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteraction;
-import com.openexchange.oauth.json.oauthmeta.MetaDataField;
 
 /**
  * The OAuth account writer
@@ -82,8 +81,7 @@ public class AccountWriter {
         jAccount.put(AccountField.ID.getName(), account.getId());
         jAccount.put(AccountField.DISPLAY_NAME.getName(), account.getDisplayName());
         jAccount.put(AccountField.SERVICE_ID.getName(), account.getMetaData().getId());
-        jAccount.put(AccountField.SCOPE.getName(), account.getMetaData().getScope()); // TODO change to active scopes instead of all
-        jAccount.put(MetaDataField.AVAILABLE_SCOPE.getName(), account.getMetaData().getScope());
+        jAccount.put(AccountField.SCOPE.getName(), account.getEnabledScopes());
         return jAccount;
     }
 
