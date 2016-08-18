@@ -66,12 +66,12 @@ import com.openexchange.server.ServiceLookup;
 public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
 
     /**
-     * Initializes a new {@link MsLiveConnectOAuthServiceMetaData}.
+     * Initialises a new {@link MsLiveConnectOAuthServiceMetaData}.
      * 
      * @param services the service lookup instance
      */
     public MsLiveConnectOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, API.MS_LIVE_CONNECT);
+        super(services, API.MS_LIVE_CONNECT, MSLiveConnectOAuthScope.values());
     }
 
     @Override

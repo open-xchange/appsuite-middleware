@@ -67,7 +67,7 @@ import com.openexchange.server.ServiceLookup;
 public class OAuthServiceMetaDataLinkedInImpl extends AbstractScribeAwareOAuthServiceMetaData {
 
     public OAuthServiceMetaDataLinkedInImpl(ServiceLookup services) {
-        super(services, API.LINKEDIN);
+        super(services, API.LINKEDIN, LinkedInOAuthScope.values());
     }
 
     @Override

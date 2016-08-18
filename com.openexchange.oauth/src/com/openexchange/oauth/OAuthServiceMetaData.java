@@ -50,9 +50,10 @@
 package com.openexchange.oauth;
 
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link OAuthServiceMetaData} - Represents the OAuth service meta data.
@@ -96,6 +97,7 @@ public interface OAuthServiceMetaData {
 
     /**
      * Gets the API key that belongs to a given session
+     * 
      * @param session
      * @return The API key
      * @throws OXException
@@ -104,6 +106,7 @@ public interface OAuthServiceMetaData {
 
     /**
      * Use {@link #getAPISecret(Session)} and also implement {@link #getAPISecret(Session)}
+     * 
      * @return The API secret
      */
     @Deprecated
@@ -111,6 +114,7 @@ public interface OAuthServiceMetaData {
 
     /**
      * Gets the API secret that belongs to a given session
+     * 
      * @param session
      * @return The API key
      * @throws OXException
@@ -119,12 +123,14 @@ public interface OAuthServiceMetaData {
 
     /**
      * Get the consumer key (upsell)
+     * 
      * @return the consumer key
      */
     String getConsumerKey();
 
     /**
      * Get the consumer secret (upsell)
+     * 
      * @return the consumer secret
      */
     String getConsumerSecret();
@@ -141,6 +147,7 @@ public interface OAuthServiceMetaData {
      * Gets the optional scope; a comma-separated list of scope items.
      *
      * @return The scope or <code>null</code>
+     * @deprecated Use {@link #getAvailableScopes()} instead.
      */
     String getScope();
 
@@ -208,15 +215,15 @@ public interface OAuthServiceMetaData {
      *
      * @return The API reference
      */
-	API getAPI();
+    API getAPI();
 
-	/**
-	 * Whether to register a token based deferrer.
-	 * <p>
-	 * Note: This method is only considered if {@link #doCustomRegistration(String, CallbackRegistry)} did not return <code>null</code>
-	 *
-	 * @return <code>true</code> to register a token based deferrer; otherwise <code>false</code>
-	 */
+    /**
+     * Whether to register a token based deferrer.
+     * <p>
+     * Note: This method is only considered if {@link #doCustomRegistration(String, CallbackRegistry)} did not return <code>null</code>
+     *
+     * @return <code>true</code> to register a token based deferrer; otherwise <code>false</code>
+     */
     boolean registerTokenBasedDeferrer();
 
     /**
@@ -228,4 +235,10 @@ public interface OAuthServiceMetaData {
      */
     String getRegisterToken(String authUrl);
 
+    /**
+     * Returns an unmodifiable {@link Set} with all available {@link OAuthScope}s
+     * 
+     * @return an unmodifiable {@link Set} with all available {@link OAuthScope}s
+     */
+    Set<OAuthScope> getAvailableScopes();
 }

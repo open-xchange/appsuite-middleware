@@ -51,13 +51,18 @@ package com.openexchange.oauth;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.services.Services;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
@@ -69,6 +74,8 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaData {
+
+    private final Set<OAuthScope> availableScopes;
 
     protected enum OAuthPropertyID {
         apiKey, apiSecret, consumerKey, consumerSecret, redirectUrl
@@ -84,9 +91,11 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     /**
      * Initializes a new {@link AbstractOAuthServiceMetaData}.
      */
-    protected AbstractOAuthServiceMetaData() {
+    protected AbstractOAuthServiceMetaData(OAuthScope... scopes) {
         super();
         properties = new ConcurrentHashMap<OAuthPropertyID, OAuthConfigurationProperty>(OAuthPropertyID.values().length, 0.9f, 1);
+        Set<OAuthScope> s = new HashSet<>(Arrays.asList(scopes));
+        availableScopes = Collections.unmodifiableSet(s);
     }
 
     /**
@@ -278,6 +287,16 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     @Override
     public String getRegisterToken(String authUrl) {
         return null;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.OAuthServiceMetaData#getAvailableScopes()
+     */
+    @Override
+    public Set<OAuthScope> getAvailableScopes() {
+        return availableScopes;
     }
 
     /**

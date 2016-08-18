@@ -71,7 +71,7 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
      * @param services the service lookup instance
      */
     public GoogleOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, API.GOOGLE);
+        super(services, API.GOOGLE, GoogleOAuthScope.values());
     }
 
     @Override

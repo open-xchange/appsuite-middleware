@@ -51,9 +51,11 @@ package com.openexchange.oauth.internal;
 
 import static com.openexchange.junit.Assert.assertEqualAttributes;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.context.SimContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.id.SimIDGenerator;
@@ -65,6 +67,7 @@ import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.SimOAuthServiceMetaDataRegistry;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.tools.sql.SQLTestCase;
 
 /**
@@ -124,6 +127,11 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
 			public API getAPI() {
 				return API.OTHER;
 			}
+
+            @Override
+            public Set<OAuthScope> getAvailableScopes() {
+                return Collections.emptySet();
+            }
 
         });
 
