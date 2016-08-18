@@ -310,21 +310,12 @@ public class Orchestration implements ReportService {
                     cumulator.merge(contextReport, report);
                 }
             }
-            // Mark context as done, thereby decreasing the number of pending tasks
-            report.markTaskAsDone();
-
             // Save it back to hazelcast
             pendingReports.put(contextReport.getUUID(), PortableReport.wrap(report));
         } finally {
             if (lock != null) {
                 lock.unlock();
             }
-        }
-
-        if (report.getNumberOfPendingTasks() == 0) {
-            finishUpReport(reportType, hazelcast, pendingReports, lock, report);
-            
-            resetLogLevels();
         }
     }
     
@@ -362,10 +353,8 @@ public class Orchestration implements ReportService {
         lock.destroy();
     }
 
-    public void abort(String uuid, String reportType) {
-        // This contextReport failed, so at least decrease the number of pending tasks
+    public void updateProcessedContexts(int processedContexts, String reportType, String uuid) {
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-
         IMap<String, PortableReport> pendingReports = hazelcast.getMap(PENDING_REPORTS_PRE_KEY + reportType);
 
         ILock lock = hazelcast.getLock(REPORTS_MERGE_PRE_KEY + reportType);
@@ -387,7 +376,7 @@ public class Orchestration implements ReportService {
                 return;
             }
             // Mark context as done
-            report.markTaskAsDone();
+            report.setTaskState(report.getNumberOfTasks(), report.getNumberOfPendingTasks() - processedContexts);
             // Save it back to hazelcast
             pendingReports.put(report.getUUID(), PortableReport.wrap(report));
         } finally {
