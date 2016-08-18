@@ -227,17 +227,27 @@ public class HazelcastActivator implements BundleActivator {
         ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> tracker = this.configTracker;
         if (null != tracker) {
             this.configTracker = null;
-            tracker.close();
+            closeTrackerSafe(tracker);
         }
         ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> inactiveTracker = this.inactiveTracker;
         if (null != inactiveTracker) {
             this.inactiveTracker = null;
-            inactiveTracker.close();
+            closeTrackerSafe(inactiveTracker);
         }
         ServiceTracker<ManagementService, ManagementService> managementTracker = this.managementTracker;
         if (null != managementTracker) {
             this.managementTracker = null;
-            managementTracker.close();
+            closeTrackerSafe(managementTracker);
+        }
+    }
+
+    private <S, T> void closeTrackerSafe(ServiceTracker<S, T> tracker) {
+        if (null != tracker) {
+            try {
+                tracker.close();
+            } catch (java.lang.IllegalStateException e) {
+                // Apparently already closed, since BundleContext is no longer valid
+            }
         }
     }
 

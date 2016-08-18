@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Bundle to invalidate nodes running a hazelcast v3.5.5 cluster during upgrade
+Bundle-SymbolicName: com.openexchange.hazelcast.upgrade355
+Bundle-Version: 7.8.2
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.caching.events,
+ com.openexchange.config,
+ com.openexchange.configuration,
+ com.openexchange.exception,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.tools.arrays,
+ com.openexchange.tools.strings,
+ javax.security.auth.login,
+ org.osgi.framework,
+ org.slf4j
+Bundle-Activator: com.openexchange.hazelcast.upgrade355.osgi.HazelcastUpgradeActivator
+Bundle-ClassPath: lib/hazelcast-all-3.5.5.jar,
+ .

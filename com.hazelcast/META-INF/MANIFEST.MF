@@ -2,12 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Hazelcast
 Bundle-SymbolicName: com.hazelcast
-Bundle-Version: 3.5.2
+Bundle-Version: 3.6.4
 Bundle-Vendor: Hazelcast Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: .,
- lib/hazelcast-3.5.5.jar
+ lib/hazelcast-3.6.4.jar
 Import-Package: com.openexchange.config,
  javax.crypto,
  javax.crypto.interfaces,
@@ -15,7 +15,12 @@ Import-Package: com.openexchange.config,
  javax.management,
  javax.net,
  javax.net.ssl,
+ javax.security.auth,
+ javax.security.auth.callback,
  javax.security.auth.login,
+ javax.security.auth.spi,
+ javax.security.auth.x500,
+ javax.security.cert,
  javax.transaction.xa,
  javax.xml,
  javax.xml.parsers,

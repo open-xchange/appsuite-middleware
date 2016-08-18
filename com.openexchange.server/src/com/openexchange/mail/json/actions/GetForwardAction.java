@@ -186,18 +186,12 @@ public final class GetForwardAction extends AbstractMailAction {
             /*
              * Overwrite settings with request's parameters
              */
-            if (null != view) {
-                if (VIEW_TEXT.equals(view)) {
-                    usmNoSave.setDisplayHtmlInlineContent(false);
-                } else if (VIEW_HTML.equals(view)) {
-                    usmNoSave.setDisplayHtmlInlineContent(true);
-                    usmNoSave.setAllowHTMLImages(true);
-                } else if (VIEW_HTML_BLOCKED_IMAGES.equals(view)) {
-                    usmNoSave.setDisplayHtmlInlineContent(true);
-                    usmNoSave.setAllowHTMLImages(false);
-                } else {
-                    LOG.warn("Unknown value in parameter {}: {}. Using user's mail settings as fallback.", Mail.PARAMETER_VIEW, view);
-                }
+            detectDisplayMode(true, view, usmNoSave);
+            if (AJAXRequestDataTools.parseBoolParameter(req.getParameter("dropPrefix"))) {
+                usmNoSave.setDropReplyForwardPrefix(true);
+            }
+            if (AJAXRequestDataTools.parseBoolParameter(req.getParameter("attachOriginalMessage"))) {
+                usmNoSave.setAttachOriginalMessage(true);
             }
             boolean setFrom = AJAXRequestDataTools.parseBoolParameter(req.getParameter("setFrom"));
             MailServletInterface mailInterface = getMailInterface(req);
