@@ -5,15 +5,7 @@ Bundle-SymbolicName: liquibase.core
 Bundle-Version: 3.0.7
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-ClassPath: lib/ant-1.6.5.jar,
- lib/jetty-server-8.1.15.v20140411.jar,
- lib/jetty-util-8.1.15.v20140411.jar,
- lib/junit-4.12-SNAPSHOT.jar,
- lib/snakeyaml-1.11.jar,
- lib/velocity-1.7.jar,
- lib/spring-core-4.0.5.RELEASE.jar,
- lib/spring-context-4.0.5.RELEASE.jar,
- lib/spring-beans-4.0.5.RELEASE.jar,
+Bundle-ClassPath: lib/snakeyaml-1.11.jar,
  .
 Import-Package: javax.servlet,
  javax.servlet.http,
