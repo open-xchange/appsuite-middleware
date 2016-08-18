@@ -230,7 +230,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             parent = FolderStorage.PRIVATE_ID;
         } else {
             String parentFullName = MailFolderUtility.prepareFullname(accountId, mailFolder.getParentFullname());
-            if (parentFullName.equals(id)) {
+            if (parentFullName != null && parentFullName.equals(id)) {
                 parent = determineParentFrom(accountId, mailFolder.getParentFullname(), mailFolder.containsSeparator() ? mailFolder.getSeparator() : mailAccess.getRootFolder().getSeparator());
                 LOG.warn("Mail folder \"{}\" references itself as parent. Assuming \"{}\" instead... (user={}, context={})", id, parent, I(userId), I(contextId));
             } else {
