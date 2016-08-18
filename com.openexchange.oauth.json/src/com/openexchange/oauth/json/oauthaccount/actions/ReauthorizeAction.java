@@ -114,7 +114,7 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
         /*
          * By now it doesn't matter which interaction type is passed
          */
-        oAuthService.updateAccount(id, serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId());
+        oAuthService.updateAccount(id, serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId(), scopes);
         /*
          * Return appropriate result
          */
