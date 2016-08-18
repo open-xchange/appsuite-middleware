@@ -21,8 +21,6 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.2.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.2-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.lang_2.6.0.v201205030909.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.lang.source_2.6.0.v201205030909.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/httpclient-4.2.1.jar" sourcepath="lib/source/httpcomponents-client-4.2.1-src.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/httpcore-4.2.1.jar" sourcepath="lib/source/httpcomponents-core-4.2.1-src.zip"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.calendar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.conversion"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.conversion.engine"/>
@@ -145,5 +143,7 @@
 	<classpathentry kind="src" path="/com.openexchange.mail.categories"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.templating.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.reseller.rmi"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.apache.httpcomponents.httpclient"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.apache.httpcomponents.httpcore"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
