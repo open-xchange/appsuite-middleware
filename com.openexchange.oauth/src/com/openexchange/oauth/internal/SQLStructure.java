@@ -54,7 +54,9 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.sql.grammar.Column;
 import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.INSERT;
@@ -84,10 +86,10 @@ public class SQLStructure {
         DISPLAY_NAME("displayName"),
         ACCESS_TOKEN("accessToken"),
         ACCESS_SECRET("accessSecret"),
-        SERVICE_ID("serviceId");
+        SERVICE_ID("serviceId"),
+        SCOPE("scope");
 
         public static Set<OAUTH_COLUMN> updateableColumns = EnumSet.complementOf(EnumSet.of(CID, USER, ID, SERVICE_ID));
-
 
         private final Column column;
 
@@ -114,20 +116,25 @@ public class SQLStructure {
          */
         public Object get(final OAuthAccount account, final int cid, final int userId) {
             switch (this) {
-            case CID:
-                return Integer.valueOf(cid);
-            case USER:
-                return Integer.valueOf(userId);
-            case ID:
-                return Integer.valueOf(account.getId());
-            case DISPLAY_NAME:
-                return account.getDisplayName();
-            case ACCESS_TOKEN:
-                return account.getToken();
-            case ACCESS_SECRET:
-                return account.getSecret();
-            case SERVICE_ID:
-                return account.getMetaData().getId();
+                case CID:
+                    return Integer.valueOf(cid);
+                case USER:
+                    return Integer.valueOf(userId);
+                case ID:
+                    return Integer.valueOf(account.getId());
+                case DISPLAY_NAME:
+                    return account.getDisplayName();
+                case ACCESS_TOKEN:
+                    return account.getToken();
+                case ACCESS_SECRET:
+                    return account.getSecret();
+                case SERVICE_ID:
+                    return account.getMetaData().getId();
+                case SCOPE:
+                    Set<OAuthScope> enabledScopes = account.getEnabledScopes();
+                    return Strings.concat(",", enabledScopes.toArray(new Object[enabledScopes.size()]));
+                default:
+                    break;
             }
             return null;
         }
