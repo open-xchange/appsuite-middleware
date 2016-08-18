@@ -284,7 +284,8 @@ public class EventConverter {
         //appointment.getNotification();
         //appointment.getRecurrenceCalculator();
         if (appointment.containsParticipants()) {
-            event.setAttendees(getAttendees(appointment.getParticipants()));
+            UserParticipant[] users = appointment.containsUserParticipants() ? appointment.getUsers() : null;
+            event.setAttendees(getAttendees(appointment.getParticipants(), users));
         }
         if (appointment.containsOrganizerId() || appointment.containsOrganizer()) {
             event.setOrganizer(getOrganizer(appointment.getOrganizerId(), appointment.getOrganizer()));
@@ -512,31 +513,48 @@ public class EventConverter {
             attendee.setCn(participant.getDisplayName());
         }
         if (ConfirmableParticipant.class.isInstance(participant)) {
-            int confirm = ((ConfirmableParticipant) participant).getConfirm();
-            if (0 < confirm) {
-                attendee.setPartStat(Appointment2Event.getParticipationStatus(confirm));
+            ConfirmableParticipant confirmableParticipant = (ConfirmableParticipant) participant;
+            if (confirmableParticipant.containsStatus()) {
+                attendee.setPartStat(Appointment2Event.getParticipationStatus(confirmableParticipant.getConfirm()));
             }
-            String message = ((ConfirmableParticipant) participant).getMessage();
-            if (null != message) {
-                attendee.setComment(message);
+            if (confirmableParticipant.containsMessage()) {
+                attendee.setComment(confirmableParticipant.getMessage());
             }
         }
         if (UserParticipant.class.isInstance(participant)) {
-            String message = ((UserParticipant) participant).getConfirmMessage();
-            if (null != message) {
-                attendee.setComment(message);
+            UserParticipant userParticipant = (UserParticipant) participant;
+            if (userParticipant.containsConfirm()) {
+                attendee.setPartStat(Appointment2Event.getParticipationStatus(userParticipant.getConfirm()));
+            }
+            if (userParticipant.containsConfirmMessage()) {
+                attendee.setComment(userParticipant.getConfirmMessage());
             }
         }
         return attendee;
     }
 
-    private static List<Attendee> getAttendees(Participant[] participants) {
+    /**
+     * Converts an array of participants into their corresponding attendees.
+     *
+     * @param participants The participants to convert
+     * @param users The optionally defined user participant data, or <code>null</code> if not set
+     * @return The attendees
+     */
+    private static List<Attendee> getAttendees(Participant[] participants, UserParticipant[] users) {
         if (null == participants) {
             return null;
         }
         List<Attendee> attendees = new ArrayList<Attendee>(participants.length);
         for (Participant participant : participants) {
             attendees.add(getAttendee(participant));
+        }
+        if (null != users) {
+            for (UserParticipant user : users) {
+                Attendee existingAttendee = find(attendees, user.getIdentifier());
+                if (null != existingAttendee) {
+                    copyProperties(getAttendee(user), existingAttendee);
+                }
+            }
         }
         return attendees;
     }
@@ -700,6 +718,68 @@ public class EventConverter {
         } finally {
             session.set(CalendarParameters.PARAMETER_FIELDS, oldFields);
         }
+    }
+
+    /**
+     * Looks up a specific internal attendee in a collection of attendees based on its entity identifier.
+     *
+     * @param attendees The attendees to search
+     * @param entity The entity identifier to lookup
+     * @return The matching attendee, or <code>null</code> if not found
+     */
+    private static Attendee find(List<Attendee> attendees, int entity) {
+        if (null != attendees && 0 < attendees.size()) {
+            for (Attendee attendee : attendees) {
+                if (entity == attendee.getEntity()) {
+                    return attendee;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Copies all <i>set</i> properties from one attendee to another.
+     *
+     * @param from The source attendee to copy the <i>set</i> properties from
+     * @param to The target attendee to copy the properties to
+     * @return The passed target attendee reference
+     */
+    private static Attendee copyProperties(Attendee from, Attendee to) {
+        if (from.containsCn()) {
+            to.setCn(from.getCn());
+        }
+        if (from.containsComment()) {
+            to.setComment(from.getComment());
+        }
+        if (from.containsCuType()) {
+            to.setCuType(from.getCuType());
+        }
+        if (from.containsEntity()) {
+            to.setEntity(from.getEntity());
+        }
+        if (from.containsFolderID()) {
+            to.setFolderID(from.getFolderID());
+        }
+        if (from.containsMember()) {
+            to.setMember(from.getMember());
+        }
+        if (from.containsPartStat()) {
+            to.setPartStat(from.getPartStat());
+        }
+        if (from.containsRole()) {
+            to.setRole(from.getRole());
+        }
+        if (from.containsRsvp()) {
+            to.setRsvp(from.getRsvp());
+        }
+        if (from.containsSentBy()) {
+            to.setSentBy(from.getSentBy());
+        }
+        if (from.containsUri()) {
+            to.setUri(from.getUri());
+        }
+        return to;
     }
 
 }
