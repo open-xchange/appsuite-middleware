@@ -1,0 +1,5 @@
+open-xchange-cluster-upgrade-from-780-782 (7.8.2-0) unstable; urgency=low
+
+  * Initial release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 17 Aug 2016 12:56:27 +0200
