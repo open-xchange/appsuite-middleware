@@ -294,7 +294,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
             Map<String, Object> arguments = new HashMap<String, Object>(3);
             arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
             arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
-            oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId());
+            oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId(), boxOAuthAccount.getEnabledScopes());
 
             // Reload
             return oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
