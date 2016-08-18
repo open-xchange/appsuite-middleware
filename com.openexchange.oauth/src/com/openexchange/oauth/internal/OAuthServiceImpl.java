@@ -652,8 +652,8 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
 
     @Override
-    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
-        final List<Setter> list = setterFrom(arguments);
+    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
+        final List<Setter> list = setterFrom(arguments, scopes);
         if (list.isEmpty()) {
             /*
              * Nothing to update
@@ -750,7 +750,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
 
     @Override
-    public OAuthAccount updateAccount(final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
+    public OAuthAccount updateAccount(final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
         try {
             /*
              * Create appropriate OAuth account instance
@@ -780,6 +780,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             }
             account.setToken(encrypt(account.getToken(), session));
             account.setSecret(encrypt(account.getSecret(), session));
+            account.setEnabledScopes(scopes);
             /*
              * Create UPDATE command
              */
@@ -932,7 +933,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         int set(int pos, PreparedStatement stmt) throws SQLException;
     }
 
-    private List<Setter> setterFrom(final Map<String, Object> arguments) throws OXException {
+    private List<Setter> setterFrom(final Map<String, Object> arguments, final Set<OAuthScope> scopes) throws OXException {
         final List<Setter> ret = new ArrayList<Setter>(4);
         /*
          * Check for display name
@@ -982,6 +983,24 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 }
             });
         }
+        /*
+         * Scopes
+         */
+        ret.add(new Setter() {
+
+            @Override
+            public void appendTo(StringBuilder stmtBuilder) {
+                stmtBuilder.append("scope = ?");
+            }
+
+            @Override
+            public int set(int pos, PreparedStatement stmt) throws SQLException {
+                String scope = Strings.concat(",", scopes.toArray());
+                stmt.setString(pos, scope);
+                return ++pos;
+            }
+
+        });
         /*
          * Other arguments?
          */

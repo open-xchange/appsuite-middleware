@@ -172,7 +172,7 @@ public interface OAuthService {
      * @param a {@link Set} with {@link OAuthScope}s to enable for the {@link OAuthAccount}
      * @throws OXException If deletion fails
      */
-    void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId) throws OXException;
+    void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId, Set<OAuthScope> scopes) throws OXException;
 
     /**
      * Updates the specified account
@@ -187,7 +187,7 @@ public interface OAuthService {
      * @return
      * @throws OXException
      */
-    OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId) throws OXException;
+    OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId, Set<OAuthScope> scopes) throws OXException;
 
     /**
      * Gets the specified account.
