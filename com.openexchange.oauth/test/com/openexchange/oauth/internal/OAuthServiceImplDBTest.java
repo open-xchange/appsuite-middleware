@@ -274,10 +274,14 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
     public void testUpdateAccount() throws Exception {
         exec("INSERT INTO oauthAccounts (cid, user, id, displayName, accessToken, accessSecret, serviceId) VALUES (1,23,1,'account1', '1234', '4321', 'com.openexchange.test');");
 
+        Set<OAuthScope> scopes = new HashSet<>();
+        scopes.add(TestOAuthScope.calendar);
+        scopes.add(TestOAuthScope.drive);
+        
         final Map<String, Object> update = new HashMap<String, Object>();
         update.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "updatedDisplayName");
         update.put(OAuthConstants.ARGUMENT_SESSION, null);
-        oauth.updateAccount(1, update, 23, 1);
+        oauth.updateAccount(1, update, 23, 1, scopes);
 
         assertResult("SELECT 1 FROM oauthAccounts WHERE cid = 1 AND user = 23 AND displayName = 'updatedDisplayName' AND id = 1");
     }
@@ -333,10 +337,14 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
 
     public void testUnknownIdOnUpdate() {
         try {
+            Set<OAuthScope> scopes = new HashSet<>();
+            scopes.add(TestOAuthScope.calendar);
+            scopes.add(TestOAuthScope.drive);
+            
             final Map<String, Object> update = new HashMap<String, Object>();
             update.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "updatedDisplayName");
             update.put(OAuthConstants.ARGUMENT_SESSION, null);
-            oauth.updateAccount(12, update, 23, 1);
+            oauth.updateAccount(12, update, 23, 1, scopes);
             fail("Should have died");
         } catch (final OXException x) {
             // Hooray!
