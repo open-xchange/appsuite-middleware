@@ -198,7 +198,7 @@ public class Recurrence {
 
         long millis = masterPeriod.getStartDate().getTime();
         RecurrenceRuleIterator iterator;
-        if (rule.hasPart(Part.BYDAY) || rule.hasPart(Part.BYMONTH) || rule.hasPart(Part.BYMONTHDAY) || rule.hasPart(Part.BYWEEKNO) || rule.hasPart(Part.BYYEARDAY)) {
+        if (rule.hasPart(Part.BYMONTH) || rule.hasPart(Part.BYMONTHDAY) || rule.hasPart(Part.BYWEEKNO) || rule.hasPart(Part.BYYEARDAY)) {
             // keine ahnung ???
             calendar.setTime(masterPeriod.getStartDate());
             calendar.add(Calendar.DAY_OF_YEAR, -500);
@@ -222,7 +222,7 @@ public class Recurrence {
         calendar.set(Calendar.SECOND, startSecond);
         Date startDate = calendar.getTime();
 
-        for (int i = 2; i < 1000 && iterator.hasNext(); millis = iterator.nextMillis(), i++)
+        for (int i = 1; i < 1000 && iterator.hasNext(); millis = iterator.nextMillis(), i++)
             ;
         calendar.setTimeInMillis(millis);
         calendar.set(Calendar.HOUR_OF_DAY, endHour);
@@ -230,6 +230,15 @@ public class Recurrence {
         calendar.set(Calendar.SECOND, endSecond);
         calendar.add(Calendar.DAY_OF_YEAR, (int) masterPeriod.getTotalDays());
         Date endDate = calendar.getTime();
+        /*
+         * adjust end date if it falls into other timzone observance with different offset, just like it's done at
+         * com.openexchange.calendar.CalendarOperation.calculateImplictEndOfSeries(CalendarDataObject, String, boolean)
+         */
+        int startOffset = timeZone.getOffset(startDate.getTime());
+        int endOffset = timeZone.getOffset(endDate.getTime());
+        if (startOffset != endOffset) {
+            endDate.setTime(endDate.getTime() + endOffset - startOffset);
+        }
         return new Period(startDate, endDate, masterPeriod.isAllDay());
     }
 
