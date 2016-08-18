@@ -53,11 +53,11 @@ import java.util.Date;
 import java.util.Iterator;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.FolderTestManager;
 
@@ -116,7 +116,7 @@ public class Bug48149Test extends AbstractAJAXSession {
             }
         }
         privateFolder2.setLastModified(new Date(Long.MAX_VALUE));
-        ftm2.updateFolderOnServer(privateFolder1);
+        ftm2.updateFolderOnServer(privateFolder2);
         
         // Add new shared folder.
         sharedFolder1 = ftm1.generateSharedFolder("Shared Folder"+System.currentTimeMillis(), FolderObject.CALENDAR, client.getValues().getPrivateAppointmentFolder(), client.getValues().getUserId(), client3.getValues().getUserId());
@@ -137,11 +137,17 @@ public class Bug48149Test extends AbstractAJAXSession {
         app2.setEndDate(TimeTools.D("07.08.2016 09:00"));
         app2.setIgnoreConflicts(true);
         app2.setParentFolderID(client2.getValues().getPrivateAppointmentFolder());
-        ctm.insert(app2);
+        ctm2.insert(app2);
     }
 
     public void testLoadAppointmentFromUserWithShared() throws Exception {
-        ctm3.get(sharedFolder1.getObjectID(), app1.getObjectID());
+        try {
+            ctm3.get(sharedFolder1.getObjectID(), app1.getObjectID());
+        } catch (Exception e) {
+            // ignore
+        }
+        assertTrue("Expected error.", ctm3.getLastResponse().hasError());
+        assertTrue("Excpected something with permissions. ("+ctm3.getLastResponse().getErrorMessage()+")", ctm3.getLastResponse().getErrorMessage().contains("ermission"));
     }
 
     public void testLoadAppointmentFromUserWithoutAnyShares() throws Exception {
@@ -151,7 +157,7 @@ public class Bug48149Test extends AbstractAJAXSession {
             // ignore
         }
         assertTrue("Expected error.", ctm3.getLastResponse().hasError());
-        assertTrue("Excpected something with permissions...", ctm3.getLastResponse().getErrorMessage().contains("ermission"));
+        assertTrue("Excpected something with permissions. ("+ctm3.getLastResponse().getErrorMessage()+")", ctm3.getLastResponse().getErrorMessage().contains("ermission"));
     }
 
     @Override
