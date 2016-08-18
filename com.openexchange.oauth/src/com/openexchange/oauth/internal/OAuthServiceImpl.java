@@ -110,7 +110,9 @@ import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
+import com.openexchange.oauth.scope.Module;
 import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.oauth.services.Services;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
@@ -170,12 +172,13 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     @Override
     public List<OAuthAccount> getAccounts(final Session session, final int user, final int contextId) throws OXException {
         final SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
+        final OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
         final Context context = getContext(contextId);
         final Connection con = getConnection(true, context);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, serviceId FROM oauthAccounts WHERE cid = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, serviceId, scope FROM oauthAccounts WHERE cid = ? AND user = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, user);
             rs = stmt.executeQuery();
@@ -195,6 +198,10 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                     } catch (final OXException e) {
                         // IGNORE
                     }
+                    String scopes = rs.getString(6);
+                    Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), Module.valuesOf(scopes));
+                    account.setEnabledScopes(enabledScopes);
+
                     accounts.add(account);
                 } catch (final OXException e) {
                     if (!OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.equals(e)) {
@@ -215,12 +222,13 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     @Override
     public List<OAuthAccount> getAccounts(final String serviceMetaData, final Session session, final int user, final int contextId) throws OXException {
         final SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
+        final OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
         final Context context = getContext(contextId);
         final Connection con = getConnection(true, context);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ?");
+            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, scope FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, user);
             stmt.setString(3, serviceMetaData);
@@ -240,6 +248,9 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                     // IGNORE
                 }
                 account.setMetaData(registry.getService(serviceMetaData, user, contextId));
+                String scopes = rs.getString(5);
+                Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), Module.valuesOf(scopes));
+                account.setEnabledScopes(enabledScopes);
                 accounts.add(account);
             } while (rs.next());
             return accounts;
@@ -458,6 +469,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Execute INSERT command
              */
             executeUpdate(contextId, insert, values);
+            // TODO: Decide whether we want the scopes in the following info log entry
             LOG.info("Created new {} account with ID {} for user {} in context {}", serviceMetaData, account.getId(), user, contextId);
             /*
              * Return newly created account
@@ -518,6 +530,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Execute INSERT command
              */
             executeUpdate(contextId, insert, values);
+            // TODO: Decide whether we want the scopes in the following info log entry
             LOG.info("Created new {} account with ID {} for user {} in context {}", serviceMetaData, account.getId(), user, contextId);
             /*
              * Return newly created account
@@ -681,12 +694,13 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     @Override
     public OAuthAccount getAccount(final int accountId, final Session session, final int user, final int contextId) throws OXException {
         final SecretEncryptionService<PWUpdate> encryptionService = Services.getService(SecretEncryptionFactoryService.class).createService(this);
+        final OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
         final Context context = getContext(contextId);
         final Connection con = getConnection(true, context);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT displayName, accessToken, accessSecret, serviceId FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
+            stmt = con.prepareStatement("SELECT displayName, accessToken, accessSecret, serviceId, scope FROM oauthAccounts WHERE cid = ? AND user = ? and id = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, user);
             stmt.setInt(3, accountId);
@@ -699,7 +713,11 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             account.setDisplayName(rs.getString(1));
             account.setToken(encryptionService.decrypt(session, rs.getString(2), new PWUpdate("accessToken", contextId, accountId)));
             account.setSecret(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessSecret", contextId, accountId)));
+
             account.setMetaData(registry.getService(rs.getString(4), user, contextId));
+            String scopes = rs.getString(5);
+            Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), Module.valuesOf(scopes));
+            account.setEnabledScopes(enabledScopes);
             return account;
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
