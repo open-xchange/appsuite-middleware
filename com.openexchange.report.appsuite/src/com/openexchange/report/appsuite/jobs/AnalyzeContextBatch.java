@@ -76,7 +76,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
-public class AnalyzeContextBatch implements Callable<Void>, Serializable {
+public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
 
     private static final long serialVersionUID = -578253218760102061L;
 
@@ -120,7 +120,7 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
    }
 
     @Override
-    public Void call() throws Exception {
+    public Integer call() throws Exception {
         Thread currentThread = Thread.currentThread();
         int previousPriority = currentThread.getPriority();
         currentThread.setPriority(Thread.MIN_PRIORITY);
@@ -164,7 +164,7 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
         } finally {
             currentThread.setPriority(previousPriority);
         }
-        return null;
+        return contextIds.size();
     }
 
     /**
