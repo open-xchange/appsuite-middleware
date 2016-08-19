@@ -5,7 +5,7 @@ BuildArch:      noarch
 BuildRequires:  ant-nodeps
 BuildRequires:  java-devel >= 1.6.0
 Version:        @OXVERSION@
-%define         ox_release 58
+%define         ox_release 59
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -45,6 +45,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc settin
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
+* Fri Aug 19 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2016-08-29 (3518)
 * Fri Jul 22 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-08-01 (3463)
 * Thu Jun 30 2016 Marcus Klein <marcus.klein@open-xchange.com>
