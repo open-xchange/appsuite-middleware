@@ -63,8 +63,10 @@ import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.report.InfostoreInformationService;
 import com.openexchange.report.LoginCounterService;
 import com.openexchange.report.appsuite.ContextReport;
@@ -77,7 +79,7 @@ import com.openexchange.report.appsuite.UserReport;
 import com.openexchange.report.appsuite.UserReportCumulator;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
-import com.openexchange.tools.file.QuotaFileStorage;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * The {@link CapabilityHandler} analyzes a users capabilities and filestore quota. It sums up unique combinations of capabilities and quota and gives counts for
@@ -101,7 +103,12 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         // Grab the file store quota from the context and save them in the report
         Context ctx = contextReport.getContext();
         try {
-            long quota = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx).getQuota();
+            QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
+            if (null == storageService) {
+                throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
+            }
+            QuotaFileStorage userStorage = storageService.getQuotaFileStorage(ctx.getContextId());
+            long quota = userStorage.getQuota();
             contextReport.set(Report.MACDETAIL_QUOTA, Report.QUOTA, quota);
         } catch (OXException e) {
             LOG.error("", e);
@@ -181,7 +188,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             handleInternalUser(userReport, contextReport);
         }
     }
-    
+
  // The system report contains an overall count of unique capability and quota combinations
     // So the numbers from the context report have to be added to the numbers already in the report
     @Override
@@ -276,7 +283,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     /**
      * Set the user specific data for the given {@link ContextReport}. The capability-set specific values
      * like total, admin... are incremented depending on the given {@link UserReport}.
-     * 
+     *
      * @param userReport
      * @param contextReport
      */
@@ -300,7 +307,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         // Get the users client logins and save them also to this context/capability-set
         HashMap<String,Long> userLogins = userReport.get(Report.MACDETAIL, Report.USER_LOGINS, HashMap.class);
         for (Entry<String, Long> clientName : userLogins.entrySet()) {
-            incCount(counts, (String) clientName.getKey());
+            incCount(counts, clientName.getKey());
         }
 
         incCount(counts, Report.TOTAL);
@@ -322,7 +329,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     /**
      * Distinguish the guest type (link or guest) and increment the predestined parameter in the
      * given context report
-     * 
+     *
      * @param userReport
      * @param contextReport
      */
@@ -343,24 +350,24 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
 
     /**
      * Increments the value of an element in the given map, identified by the given key
-     * 
+     *
      * @param elementMap
      * @param keyInMap
      */
     private void incCount(HashMap<String, Long> elementMap, String keyInMap) {
-        Long value = (Long) elementMap.get(keyInMap);
+        Long value = elementMap.get(keyInMap);
         if (value == null) {
             value = Long.valueOf(0);
         }
         elementMap.put(keyInMap, value + 1);
     }
 
-    
 
-    
+
+
     /**
      * Calculate drive specific average-metrics and clean up the given map form unneeded parameters.
-     * 
+     *
      * @param driveTotalMap, the map with all relevant drive metrics.
      */
     private void calculateCorrectDriveAvg(LinkedHashMap<String, Long> driveTotalMap) {
@@ -386,15 +393,16 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             driveTotalMap.remove("quota-usage-percent-sum");
         }
 
-        if (driveTotalMap.get("external-storages-users") != null && driveTotalMap.get("external-storages-users") != 0)
+        if (driveTotalMap.get("external-storages-users") != null && driveTotalMap.get("external-storages-users") != 0) {
             driveTotalMap.put("external-storages-avg", driveTotalMap.get("external-storages-total") / driveTotalMap.get("external-storages-users"));
+        }
     }
 
     /**
      * Get all drive metrics from db for the given usersInContext map. The result is saved into the given
      * capSMap. All new total values on report level are then recalculated and saved into the given
      * report.
-     * 
+     *
      * @param capSMap, the capability-set key/value pairs
      * @param usersInContext, all relevant contexts and users for this capability-set
      * @param consideredTimeframeStart, beginning of potential timeframe for calculating file count
@@ -456,8 +464,9 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                     totalDrive.put(entry.getKey(), entry.getValue().longValue());
                 } else if (entry.getKey().contains("max") && entry.getValue() > value) {
                     totalDrive.put(entry.getKey(), entry.getValue().longValue());
-                } else if (entry.getKey().contains("total") || entry.getKey().contains("sum") || entry.getKey().contains("users"))
+                } else if (entry.getKey().contains("total") || entry.getKey().contains("sum") || entry.getKey().contains("users")) {
                     totalDrive.put(entry.getKey(), totalDrive.get(entry.getKey()) + entry.getValue());
+                }
             }
 
         }
@@ -479,7 +488,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     /**
      * Add all values from counts to saveCounts. Also calculate Context-users-min/max/avg in savedCounts, depending
      * on the new values.
-     * 
+     *
      * @param savedCounts
      * @param counts
      */
@@ -510,7 +519,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
      * Sum all clients of the given attribute list in one single Map and remove them from from the given {@link ArrayList} afterwards.
      * A client is identified by the preceding string "client:". In the new Map, this preceding string is removed and the rest
      * represents the key. The value is the amount. The result is added to the given ArrayList.
-     * 
+     *
      * @param capSValueMap - A list of {@link HashMap}<String, Object>s with the counted values of a capability-set
      */
     private void sumClientsInSingleMap(ArrayList capSValueMap) {
