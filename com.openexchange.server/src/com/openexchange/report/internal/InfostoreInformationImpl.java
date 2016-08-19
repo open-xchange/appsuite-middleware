@@ -72,12 +72,12 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * The {@link InfostoreInformationImpl} class is an implementations of {@link InfostoreInformationService} class. 
+ * The {@link InfostoreInformationImpl} class is an implementations of {@link InfostoreInformationService} class.
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public class InfostoreInformationImpl implements InfostoreInformationService {
 
-    
+
     /**
      * nececarryConnections, stores all schema connections, that are needed for executing all
      * functions with the same set of contextIds/userIds
@@ -106,8 +106,9 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
         LinkedHashMap<String, Integer> resultMap = new LinkedHashMap<>();
 
         // DB Connection
-        if (this.nececarryConnections.size() == 0)
+        if (this.nececarryConnections.size() == 0) {
             this.loadAllNecessaryDBConnections(usersInContext);
+        }
 
         String whereQuery = buildWhereClause(usersInContext, "created_by");
         PreparedStatement stmt = null;
@@ -165,8 +166,9 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
         LinkedHashMap<String, Integer> resultMap = new LinkedHashMap<>();
 
         // DB Connection
-        if (this.nececarryConnections.size() == 0)
+        if (this.nececarryConnections.size() == 0) {
             this.loadAllNecessaryDBConnections(usersInContext);
+        }
 
         String whereQuery = buildWhereClause(usersInContext, "created_by");
         PreparedStatement stmt = null;
@@ -200,7 +202,8 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
         for (Entry<Integer, ArrayList<Integer>> contexts : usersInContext.entrySet()) {
             for (Integer userId : contexts.getValue()) {
                 QuotaFileStorage userStorage = storageService.getQuotaFileStorage(userId, contexts.getKey());
-                Long percent = userStorage.getUsage() * 100 / userStorage.getQuota();
+                long quota = userStorage.getQuota();
+                Long percent = quota < 0 ? 0 : (quota == 0 ? 100 : userStorage.getUsage() * 100 / quota);
                 filestoreMap.put(userStorage.getUri().toString(), percent.intValue());
             }
         }
@@ -227,8 +230,9 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         for (Connection currentConnection : this.nececarryConnections) {
             try {
-                if (!currentConnection.isClosed())
+                if (!currentConnection.isClosed()) {
                     dbService.backReadOnly(currentConnection);
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -241,10 +245,10 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
     /**
      * Compose the where clause for the given contextId/userId map. Each contexdID/userID entry forms a query and
      * gets concatenated by an OR. Everything is wrapped in parentheses and gets a WHERE prefix.
-     * 
+     *
      * Example:
      * WHERE ((cid="1" AND @param userIdColumn in (1,2,3)) OR (cid="2" AND @param userIdColumn in (5,7,9)))
-     * 
+     *
      * @param usersInContext, map with context ids and users in a list, that belong to that context
      * @param userIdColumn, the colums that contains the userId
      * @return a where query with all contextIds/userIds like in the example
@@ -257,8 +261,9 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
             if (isFirst) {
                 whereQuery += contextUserQuery;
                 isFirst = false;
-            } else
+            } else {
                 whereQuery += " OR " + contextUserQuery;
+            }
         }
         whereQuery += ")";
         return whereQuery;
@@ -266,10 +271,10 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
 
     /**
      * Combine the given contextId and the given userIds {@link ArrayList} to a part of a where query.
-     * 
+     *
      * Example:
      * (cid="1" AND @param userIdColumn in (1,2,3))
-     * 
+     *
      * @param contextId, the contextId
      * @param userIds, all user Ids in the context
      * @param userIdColumn, the column that contains the userId
@@ -282,8 +287,9 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
             if (isFirst) {
                 resultQuery += id;
                 isFirst = false;
-            } else
+            } else {
                 resultQuery += "," + id;
+            }
         }
         resultQuery += "))";
         return resultQuery;
@@ -292,7 +298,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
     /**
      * Load all necessary Connections for all schemas, that contain the given contextIds. The connections are
      * saved locally.
-     * 
+     *
      * @param contextUserMap, map with context ids and users in a list, that belong to that context
      * @throws SQLException
      * @throws OXException
@@ -305,8 +311,9 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
 
         for (Entry<Integer, ArrayList<Integer>> current : contextUserMap.entrySet()) {
 
-            if (alreadyProcessed.contains(current.getKey()))
+            if (alreadyProcessed.contains(current.getKey())) {
                 continue;
+            }
 
             if (this.dbService == null) {
                 this.dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
@@ -322,7 +329,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
 
     /**
      * Calculate min,max values and add all other values with each other, as long as the key is not "avg".
-     * 
+     *
      * @param oldValues, map with values calculated so far
      * @param newValues, new values to manipulate old ones
      */
@@ -350,7 +357,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
 
     /**
      * Perform the given query for all schemas that are relevant, determined from the given contextId/userId map.
-     * 
+     *
      * @param usersInContext, map with context ids and users in a list, that belong to that context
      * @param query, the query that should be performed
      * @param counter, the counter for calculating "avg"-key
@@ -372,8 +379,9 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
     private LinkedHashMap<String, Integer> getDataFromDB(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext, String query, String counter, boolean deleteCounter, boolean hasTimerange, Date start, Date end) throws SQLException, OXException {
         LinkedHashMap<String, Integer> resultMap = new LinkedHashMap<>();
         // DB Connection
-        if (this.nececarryConnections.size() == 0)
+        if (this.nececarryConnections.size() == 0) {
             this.loadAllNecessaryDBConnections(usersInContext);
+        }
 
         PreparedStatement stmt = null;
         ResultSet sqlResult = null;
@@ -400,10 +408,12 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
                 closeSQLStuff(sqlResult, stmt);
             }
         }
-        if (resultMap.get(counter) != 0)
+        if (resultMap.get(counter) != 0) {
             resultMap.put("avg", resultMap.get("total") / resultMap.get(counter));
-        if (deleteCounter)
+        }
+        if (deleteCounter) {
             resultMap.remove(counter);
+        }
         return resultMap;
     }
 }

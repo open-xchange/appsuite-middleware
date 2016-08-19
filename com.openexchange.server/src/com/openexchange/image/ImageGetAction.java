@@ -63,6 +63,7 @@ import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -155,10 +156,10 @@ public class ImageGetAction implements AJAXActionService {
             }
             return requestResult;
         } catch (OXException e) {
-            LOG.warn("Retrieving image failed.", e);
-            if (ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
+            if (ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e) || MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e)) {
                 throw AjaxExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(HttpServletResponse.SC_NOT_FOUND), e.getSoleMessage());
             }
+            LOG.warn("Retrieving image failed.", e);
             throw AjaxExceptionCodes.BAD_REQUEST.create(e, new Object[0]);
         } catch (IllegalArgumentException e) {
             LOG.warn("Retrieving image failed.", e);

@@ -69,6 +69,7 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -100,6 +101,8 @@ import com.openexchange.tools.strings.StringParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJAXRequestData {
+
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AJAXRequestData.class);
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -725,6 +728,10 @@ public class AJAXRequestData {
      * @throws NullPointerException If name is <code>null</code>
      */
     public void putParameter(final @Nullable String name, final @Nullable String value) {
+        putParameter0(name, value, true);
+    }
+
+    private void putParameter0(final @Nullable String name, final @Nullable String value, boolean writeThrough) {
         if (null == name) {
             throw new NullPointerException("name is null");
         }
@@ -733,10 +740,16 @@ public class AJAXRequestData {
         } else {
             params.put(name, value);
         }
-        final Parameterizable parameterizable = this.parameterizable;
-        if (null != parameterizable) {
-            // Write-though
-            parameterizable.putParameter(name, value);
+        if (writeThrough) {
+            Parameterizable parameterizable = this.parameterizable;
+            if (null != parameterizable) {
+                // Write-though
+                try {
+                    parameterizable.putParameter(name, value);
+                } catch (Exception e) {
+                    LOGGER.debug("Failed to add parameter {} to underlying {} instance", name, parameterizable.getClass().getName(), e);
+                }
+            }
         }
     }
 
@@ -1031,7 +1044,7 @@ public class AJAXRequestData {
     public @Nullable Object getData() {
         return data;
     }
-    
+
     public @Nullable <T> T getData(Class<T> klazz) throws OXException {
         final Object local = this.data;
         if ((local == null) || (klazz == null)) {
@@ -1372,7 +1385,7 @@ public class AJAXRequestData {
                 final Iterator<String> names = uploadEvent.getFormFieldNames();
                 while (names.hasNext()) {
                     final String name = names.next();
-                    putParameter(name, uploadEvent.getFormField(name));
+                    putParameter0(name, uploadEvent.getFormField(name), false);
                 }
             }
         }
@@ -1608,7 +1621,7 @@ public class AJAXRequestData {
      * Gets the normalized module, e.g. <code>"files/myFile.txt"</code> will return <code>"files"</code>.
      * <p>
      * With '/' concatenated module identifiers will still be returned as they are, e. g. <code>"oauth/account"</code> will stay as it is.
-     * 
+     *
      * @return The normalized module
      */
     public String getNormalizedModule() {

@@ -203,7 +203,8 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         final DatabaseService dbService = getDBService();
         long globalQuota = getGlobalQuota(userId, contextId);
 
-        if (fitsQuotas(dataProvider.getSize(), globalQuota, userId, contextId)) {
+        long size = dataProvider.getSize();
+        if (fitsQuotas(size, globalQuota, userId, contextId)) {
             /*
              * If the resource fits the quotas we store it even if we exceed the quota when storing it.
              * Removing old cache entries is done asynchronously in the finally block.
@@ -215,7 +216,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
             newMetadata.setResourceId(id);
             newMetadata.setFileName(prepareFileName(optName));
             newMetadata.setFileType(prepareFileType(optType));
-            newMetadata.setSize(dataProvider.getSize());
+            newMetadata.setSize(size);
             newMetadata.setCreatedAt(System.currentTimeMillis());
             newMetadata.setRefId(refId);
 

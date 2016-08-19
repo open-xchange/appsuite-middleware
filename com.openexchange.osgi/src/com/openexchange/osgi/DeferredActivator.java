@@ -64,6 +64,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.osgi.console.DeferredActivatorServiceStateLookup;
 import com.openexchange.osgi.console.ServiceStateLookup;
@@ -433,15 +434,11 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                         t = t.getCause();
                     }
                     final Bundle bundle = context.getBundle();
-                    final StringBuilder errorBuilder = new StringBuilder(64);
-                    errorBuilder.append("\nStart-up of bundle \"").append(bundle.getSymbolicName()).append("\" failed: ");
-                    final String errorMsg = t instanceof OXException ? ((OXException) t).getLogMessage() : t.getMessage();
+                    String errorMsg = t instanceof OXException ? ((OXException) t).getLogMessage() : t.getMessage();
                     if (null == errorMsg || "null".equals(errorMsg)) {
-                        errorBuilder.append(t.getClass().getName());
-                    } else {
-                        errorBuilder.append(errorMsg);
+                        errorMsg = t.getClass().getName();
                     }
-                    LOG.error(errorBuilder.toString(), t);
+                    LOG.error("{}Start-up of bundle \"{}\" failed: {}", Strings.getLineSeparator(), bundle.getSymbolicName(), errorMsg, t);
                     reset();
                     /*
                      * Shut-down
@@ -454,11 +451,11 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
 
                             @Override
                             public void run() {
-                                shutDownBundle(bundle, errorBuilder);
+                                shutDownBundle(bundle);
                             }
                         }).start();
                     } else {
-                        shutDownBundle(bundle, errorBuilder);
+                        shutDownBundle(bundle);
                     }
                 }
             }
@@ -469,19 +466,17 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * Shuts-down specified bundle.
      *
      * @param bundle The bundle to shut-down
-     * @param errorBuilder The error string builder
      */
-    protected static void shutDownBundle(final Bundle bundle, final StringBuilder errorBuilder) {
+    protected static void shutDownBundle(Bundle bundle) {
+        String sep = Strings.getLineSeparator();
         try {
             /*
              * Stop with Bundle.STOP_TRANSIENT set to zero
              */
             bundle.stop();
-            errorBuilder.setLength(0);
-            LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" stopped.\n").toString());
+            LOG.error("{}{}Bundle \"{}\" stopped.{}", sep, sep, bundle.getSymbolicName(), sep);
         } catch (final BundleException e) {
-            errorBuilder.setLength(0);
-            LOG.error(errorBuilder.append("\n\nBundle \"").append(bundle.getSymbolicName()).append("\" could not be stopped.\n").toString());
+            LOG.error("{}{}Bundle \"{}\" could not be stopped.{}", sep, sep, bundle.getSymbolicName(), sep, e);
         }
     }
 
