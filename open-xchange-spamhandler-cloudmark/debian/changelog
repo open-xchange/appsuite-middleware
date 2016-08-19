@@ -1,3 +1,9 @@
+open-xchange-spamhandler-cloudmark (7.6.3-15) stable; urgency=medium
+
+  * Build for patch 2016-08-29 (3519)
+
+ -- Wolfgang Rosenauer <wolfgang.rosenauer@open-xchange.com>  Fri, 19 Aug 2016 15:47:40 +0200
+
 open-xchange-spamhandler-cloudmark (7.6.3-14) stable; urgency=medium
 
   * Build for patch 2016-08-01 (3464)
