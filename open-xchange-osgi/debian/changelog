@@ -1,3 +1,9 @@
+open-xchange-osgi (7.8.1-20) stable; urgency=medium
+
+  * Build for patch 2016-08-29 (3521)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 19 Aug 2016 17:26:00 +0200
+
 open-xchange-osgi (7.8.1-19) stable; urgency=medium
 
   * Build for patch 2016-08-15 (3489)
