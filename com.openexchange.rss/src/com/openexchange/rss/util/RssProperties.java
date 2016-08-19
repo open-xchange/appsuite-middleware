@@ -118,21 +118,6 @@ public class RssProperties {
         return blacklistedHosts().contains(hostName);
     }
 
-    /**
-     * Checks if specified host name is black-listed.
-     * <p>
-     * The host name can either be a machine name, such as "<code>java.sun.com</code>", or a textual representation of its IP address.
-     *
-     * @param hostName The host name; either a machine name or a textual representation of its IP address
-     * @return <code>true</code> if black-listed; otherwise <code>false</code>
-     */
-    public static boolean isBlacklisted(String hostName) {
-        if (Strings.isEmpty(hostName)) {
-            return false;
-        }
-        return blacklistedHosts().contains(hostName);
-    }
-
     private static final String PORT_WHITELIST_KEY = "com.openexchange.messaging.rss.feed.whitelist.ports";
 
     public static final String PORT_WHITELIST_DEFAULT = "80,443";
