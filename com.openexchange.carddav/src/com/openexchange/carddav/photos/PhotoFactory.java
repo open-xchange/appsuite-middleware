@@ -47,38 +47,64 @@
  *
  */
 
-package com.openexchange.dav.carddav.tests;
+package com.openexchange.carddav.photos;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.dav.DAVFactory;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavCollection;
+import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
- * {@link CardDAVTestSuite} - Testsuite for the CardDAV interface.
+ * {@link PhotoFactory}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.3
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    CurrentUserPrincipalTest.class,
-    OptionsTest.class,
-    CollectionsTest.class,
-    PrincipalPropertiesTest.class,
-    AddressbookPropertiesTest.class,
-    NewTest.class,
-    UpdateTest.class,
-    DeleteTest.class,
-    MoveTest.class,
-    UpgradeTest.class,
-    ImageTest.class,
-    CookieTest.class,
-    BasicTest.class,
-    BulkImportTest.class,
-    AddressbookQueryTest.class,
-    AddressbookQueryPartialRetrievalTest.class,
-    AddressbookMultigetPartialRetrievalTest.class,
-    ImageURITest.class
-})
-public final class CardDAVTestSuite {
+public class PhotoFactory extends DAVFactory {
+
+    /**
+     * Initializes a new {@link PhotoFactory}.
+     *
+     * @param protocol The protocol
+     * @param services A service lookup reference
+     * @param sessionHolder The session holder to use
+     */
+    public PhotoFactory(Protocol protocol, ServiceLookup services, SessionHolder sessionHolder) {
+        super(protocol, services, sessionHolder);
+    }
+
+    @Override
+    public WebdavResource resolveResource(WebdavPath url) throws WebdavProtocolException {
+        WebdavPath path = sanitize(url);
+        if (isRoot(path)) {
+            return new RootPhotoCollection(this);
+        }
+        if (1 == path.size()) {
+            return mixin(new RootPhotoCollection(this).getChild(url.name()));
+        }
+        if (2 == path.size()) {
+            return mixin(new RootPhotoCollection(this).getChild(url.parent().name()));
+        }
+        throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_NOT_FOUND);
+    }
+
+    @Override
+    public WebdavCollection resolveCollection(WebdavPath url) throws WebdavProtocolException {
+        WebdavPath path = sanitize(url);
+        if (isRoot(path)) {
+            return mixin(new RootPhotoCollection(this));
+        }
+        throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_NOT_FOUND);
+    }
+
+    @Override
+    protected String getURLPrefix() {
+        return "/photos/";
+    }
 
 }

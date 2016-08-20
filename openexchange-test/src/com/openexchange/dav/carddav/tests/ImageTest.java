@@ -55,9 +55,6 @@ import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
 import javax.imageio.ImageIO;
-import net.sourceforge.cardme.vcard.arch.EncodingType;
-import net.sourceforge.cardme.vcard.types.PhotoType;
-import net.sourceforge.cardme.vcard.types.media.ImageMediaType;
 import org.junit.Assert;
 import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
@@ -65,6 +62,9 @@ import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.dav.carddav.VCardResource;
 import com.openexchange.groupware.container.Contact;
+import net.sourceforge.cardme.vcard.arch.EncodingType;
+import net.sourceforge.cardme.vcard.types.PhotoType;
+import net.sourceforge.cardme.vcard.types.media.ImageMediaType;
 
 /**
  * {@link ImageTest} - Tests contact images via the CardDAV interface
@@ -73,7 +73,7 @@ import com.openexchange.groupware.container.Contact;
  */
 public class ImageTest extends CardDAVTest {
 
-    private static final byte[] PNG_100x100 = {
+    static final byte[] PNG_100x100 = {
         -119, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 100, 0, 0, 0, 100, 8, 2, 0, 0, 0, -1, -128, 2, 3, 0, 0, 0,
         -30, 73, 68, 65, 84, 120, -38, -19, -40, 73, 14, -124, 32, 16, 64, 81, 19, -18, 127, 102, 76, 92, 58, 20, -72, 64, 9, -11, -2, -82,
         -23, -87, -6, 69, 13, -19, -74, -87, -81, 82, 10, 4, 73, -54, 83, -43, 17, 44, 88, -80, 96, -63, -126, 37, 88, -80, 96, -63, -126,
@@ -86,7 +86,20 @@ public class ImageTest extends CardDAVTest {
         118, 0, 0, 0, 0, 73, 69, 78, 68, -82, 66, 96, -126
     };
 
-    private static final byte[] JPG_400x250 = {
+    static final byte[] GIF_100x100 = {
+        -119, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 100, 0, 0, 0, 100, 8, 2, 0, 0, 0, -1, -128, 2, 3, 0, 0, 0,
+        -30, 73, 68, 65, 84, 120, -38, -19, -40, 73, 14, -124, 32, 16, 64, 81, 19, -18, 127, 102, 76, 92, 58, 20, -72, 64, 9, -11, -2, -82,
+        -23, -87, -6, 69, 13, -19, -74, -87, -81, 82, 10, 4, 73, -54, 83, -43, 17, 44, 88, -80, 96, -63, -126, 37, 88, -80, 96, -63, -126,
+        5, 75, -80, 96, -63, -126, 5, 11, -106, 96, -63, -126, 5, 11, 22, 44, -63, -126, 5, 11, 22, 44, 88, -126, 5, 11, 22, 44, 88, -80,
+        4, 11, 22, 44, 88, -80, 96, 13, -99, -32, 52, -54, -85, 23, 92, -97, 26, 52, -10, 44, 88, -63, -105, 54, 71, -6, 108, -20, -119,
+        -80, -98, 86, 94, 61, -68, 93, 89, -16, 52, 124, 90, 12, 78, -52, -98, -73, -61, -126, 5, 11, -42, 15, 23, -8, 24, 43, -41, 5, -66,
+        -71, 117, 8, 14, -100, 116, 91, -121, -98, 77, 105, 115, 37, -53, -90, 116, -2, -49, 92, 4, -85, 121, -36, -63, -86, -3, -1, -121,
+        96, 69, 63, -61, 45, 26, -73, 104, 96, -63, 18, 44, 88, -80, 96, -63, -126, 37, 88, -80, 96, -63, -126, 5, 75, -80, 96, -63, -126,
+        5, 11, -106, 96, -63, -126, 5, 11, 22, 44, -63, -126, 5, 11, -42, 122, 88, -110, 36, 37, 107, 7, 58, -3, 68, -102, -42, 88, 97,
+        118, 0, 0, 0, 0, 73, 69, 78, 68, -82, 66, 96, -126
+    };
+
+    static final byte[] JPG_400x250 = {
         -1, -40, -1, -32, 0, 16, 74, 70, 73, 70, 0, 1, 1, 1, 0, 72, 0, 72, 0, 0, -1, -31, 0, 22, 69, 120, 105, 102, 0, 0, 77, 77, 0,
         42, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, -1, -2, 0, 19, 67, 114, 101, 97, 116, 101, 100, 32, 119, 105, 116, 104, 32, 71, 73, 77, 80,
         -1, -37, 0, 67, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,

@@ -52,6 +52,7 @@ package com.openexchange.carddav.osgi;
 import org.osgi.service.http.HttpService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.carddav.Tools;
+import com.openexchange.carddav.photos.PhotoPerformer;
 import com.openexchange.carddav.servlet.CardDAV;
 import com.openexchange.carddav.servlet.CarddavPerformer;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -59,9 +60,12 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.similarity.ContactSimilarityService;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
+import com.openexchange.dav.DAVServlet;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.imagetransformation.ImageTransformationService;
+import com.openexchange.login.Interface;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -108,10 +112,15 @@ public class CarddavActivator extends HousekeepingActivator {
                 }
             });
             /*
+             * register Photo performer for referenced contact images in vCards
+             */
+            getService(HttpService.class).registerServlet("/servlet/dav/photos", new DAVServlet(new PhotoPerformer(this), Interface.CARDDAV), null, null);
+            /*
              * track optional services
              */
             trackService(VCardStorageFactory.class);
             trackService(ContactSimilarityService.class);
+            trackService(ImageTransformationService.class);
             openTrackers();
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).error("", e);
