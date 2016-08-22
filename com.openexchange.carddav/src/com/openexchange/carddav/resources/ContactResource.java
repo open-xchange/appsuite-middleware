@@ -53,6 +53,7 @@ import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -61,6 +62,7 @@ import org.jdom2.Element;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.Tools;
+import com.openexchange.carddav.photos.PhotoUtils;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardExport;
 import com.openexchange.contact.vcard.VCardImport;
@@ -79,6 +81,7 @@ import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.tools.webdav.WebDAVRequestContext;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -353,13 +356,17 @@ public class ContactResource extends CommonResource<Contact> {
             /*
              * import vCard and merge with existing contact, ensuring that some important properties don't change
              */
-            String uid = object.getUid();
-            int parentFolderID = object.getParentFolderID();
-            int contextID = object.getContextId();
-            Date lastModified = object.getLastModified();
-            int objectID = object.getObjectID();
-            String vCardID = object.getVCardId();
-            vCardImport = factory.requireService(VCardService.class).importVCard(inputStream, object, parameters);
+            Contact contact = factory.getContactService().getContact(
+                factory.getSession(), String.valueOf(object.getParentFolderID()), String.valueOf(object.getObjectID()));
+            String uid = contact.getUid();
+            int parentFolderID = contact.getParentFolderID();
+            int contextID = contact.getContextId();
+            Date lastModified = contact.getLastModified();
+            int objectID = contact.getObjectID();
+            String vCardID = contact.getVCardId();
+            contact.setProperty("com.openexchange.contact.vcard.photo.uri", PhotoUtils.buildURI(getHostData(), contact));
+            contact.setProperty("com.openexchange.contact.vcard.photo.contentType", contact.getImageContentType());
+            vCardImport = factory.requireService(VCardService.class).importVCard(inputStream, contact, parameters);
             vCardImport.getContact().setUid(uid);
             vCardImport.getContact().setParentFolderID(parentFolderID);;
             vCardImport.getContact().setContextId(contextID);;
@@ -506,6 +513,10 @@ public class ContactResource extends CommonResource<Contact> {
         Contact contact = factory.getContactService().getContact(
             factory.getSession(), String.valueOf(object.getParentFolderID()), String.valueOf(object.getObjectID()), contactFields);
         applyAttachments(contact);
+        if (isExportPhotoAsURI() && 0 < contact.getNumberOfImages()) {
+            contact.setProperty("com.openexchange.contact.vcard.photo.uri", PhotoUtils.buildURI(getHostData(), contact));
+            contact.setProperty("com.openexchange.contact.vcard.photo.contentType", contact.getImageContentType());
+        }
         /*
          * export contact data & return resulting vCard stream
          */
@@ -608,6 +619,42 @@ public class ContactResource extends CommonResource<Contact> {
             return propertyNames;
         }
         return null;
+    }
+
+    /**
+     * Gets a value indicating whether the value of the <code>PHOTO</code>-property in vCards should be exported as URI or not, based on
+     * the <code>Prefer</code>-header sent by the client.
+     *
+     * @return <code>true</code> if the photo should be exported as URI, <code>false</code>, otherwise
+     */
+    private boolean isExportPhotoAsURI() {
+        /*
+         * evaluate "Prefer" header first
+         */
+        WebDAVRequestContext requestContext = DAVProtocol.getRequestContext();
+        if (null != requestContext) {
+            Enumeration<?> preferHeaders = requestContext.getHeaders("Prefer");
+            if (null != preferHeaders && preferHeaders.hasMoreElements()) {
+                do {
+                    String value = String.valueOf(preferHeaders.nextElement());
+                    if ("photo=uri".equalsIgnoreCase(value)) {
+                        return true;
+                    }
+                    if ("photo=binary".equalsIgnoreCase(value)) {
+                        return false;
+                    }
+                } while (preferHeaders.hasMoreElements());
+            }
+        }
+        /*
+         * default to configuration
+         */
+        try {
+            return "uri".equalsIgnoreCase(factory.getConfigValue("com.openexchange.carddav.preferredPhotoEncoding", "binary"));
+        } catch (OXException e) {
+            LOG.warn("Error getting \"com.openexchange.carddav.preferredPhotoEncoding\", falling back 'binary'.", e);
+        }
+        return false;
     }
 
 }

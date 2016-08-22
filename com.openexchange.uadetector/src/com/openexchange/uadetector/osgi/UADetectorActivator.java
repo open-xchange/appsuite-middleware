@@ -79,6 +79,7 @@ public class UADetectorActivator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         LoggerFactory.getLogger(UADetectorActivator.class).info("starting bundle: \"com.openexchange.uadetector\"");
         CachingUserAgentParser parser = new CachingUserAgentParser(false);
+        this.parser = parser;
         registerService(UserAgentParser.class, parser);
     }
 
