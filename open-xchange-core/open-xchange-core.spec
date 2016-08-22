@@ -1407,6 +1407,9 @@ ox_remove_property com.openexchange.mail.transport.externalRecipientsLocale /opt
 # SoftwareChange_Request-3482
 ox_add_property com.openexchange.secret.recovery.fast.enabled true /opt/open-xchange/etc/secret.properties
 
+# SoftwareChange_Request-3528
+ox_add_property html.tag.code '""' /opt/open-xchange/etc/whitelist.properties
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
