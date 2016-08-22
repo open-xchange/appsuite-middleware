@@ -62,8 +62,8 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.session.Session;
 
@@ -77,7 +77,7 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
     private final FileStorageAccount account;
     private final Session session;
     private final FileStorageService service;
-    private OAuthAccess dropboxOAuthAccess;
+    private volatile OAuthAccess dropboxOAuthAccess;
 
     /**
      * Initializes a new {@link DropboxAccountAccess}.
@@ -107,14 +107,16 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
     public void connect() throws OXException {
         OAuthAccessRegistryService service = DropboxServices.getService(OAuthAccessRegistryService.class);
         OAuthAccessRegistry registry = service.get(API.DROPBOX.getFullName());
-        dropboxOAuthAccess = registry.get(session.getContextId(), session.getUserId());
+        OAuthAccess dropboxOAuthAccess = registry.get(session.getContextId(), session.getUserId());
         if (dropboxOAuthAccess == null) {
             DropboxOAuthAccess newInstance = new DropboxOAuthAccess(account, session);
-            registry.add(session.getContextId(), session.getUserId(), newInstance);
-            if (dropboxOAuthAccess == null) {
+            dropboxOAuthAccess = registry.add(session.getContextId(), session.getUserId(), newInstance);
+            if (null == dropboxOAuthAccess) {
+                newInstance.initialize();
                 dropboxOAuthAccess = newInstance;
             }
         }
+        this.dropboxOAuthAccess = dropboxOAuthAccess;
     }
 
     @Override
@@ -144,6 +146,7 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
 
     @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
+        OAuthAccess dropboxOAuthAccess = this.dropboxOAuthAccess;
         if (null == dropboxOAuthAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
@@ -152,6 +155,7 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
+        OAuthAccess dropboxOAuthAccess = this.dropboxOAuthAccess;
         if (null == dropboxOAuthAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }

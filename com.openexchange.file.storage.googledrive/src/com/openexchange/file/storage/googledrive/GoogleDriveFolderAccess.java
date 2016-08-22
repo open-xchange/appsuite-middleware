@@ -114,7 +114,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     private boolean exists(String folderId, int retryCount) throws OXException {
         try {
-            Drive drive = (Drive) googleDriveAccess.getClient().client;
+            Drive drive = googleDriveAccess.<Drive>getClient().client;
             com.google.api.services.drive.model.File file = drive.files().get(toGoogleDriveFolderId(folderId)).execute();
             Boolean explicitlyTrashed = file.getExplicitlyTrashed();
             return isDir(file) && (null == explicitlyTrashed || !explicitlyTrashed.booleanValue());
@@ -151,7 +151,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     private FileStorageFolder getFolder(String folderId, int retryCount) throws OXException {
         try {
-            Drive drive = (Drive) googleDriveAccess.getClient().client;
+            Drive drive = googleDriveAccess.<Drive>getClient().client;
             com.google.api.services.drive.model.File dir = drive.files().get(toGoogleDriveFolderId(folderId)).execute();
             checkDirValidity(dir);
             return parseGoogleDriveFolder(dir, drive);
@@ -205,7 +205,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     private FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all, int retryCount) throws OXException {
         try {
-            Drive drive = (Drive) googleDriveAccess.getClient().client;
+            Drive drive = googleDriveAccess.<Drive>getClient().client;
 
             Drive.Children.List list = drive.children().list(toGoogleDriveFolderId(parentIdentifier));
             list.setQ(GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
@@ -277,7 +277,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
     private String createFolder(FileStorageFolder toCreate, int retryCount) throws OXException {
         String parentId = toGoogleDriveFolderId(toCreate.getParentId());
         try {
-            Drive drive = (Drive) googleDriveAccess.getClient().client;
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
 
             Drive.Children.List list = drive.children().list(parentId);
             list.setQ("title='" + toCreate.getName() + "' and " + GoogleDriveConstants.QUERY_STRING_DIRECTORIES_ONLY_EXCLUDING_TRASH);
@@ -337,7 +337,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
         String fid = toGoogleDriveFolderId(folderId);
         String nfid = toGoogleDriveFolderId(newParentId);
         try {
-            Drive drive = (Drive) googleDriveAccess.getClient().client;
+            Drive drive = googleDriveAccess.<Drive>getClient().client;
 
             String title = null == newName ? drive.files().get(fid).execute().getTitle() : newName;
 
@@ -389,7 +389,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
     private String renameFolder(String folderId, String newName, int retryCount) throws OXException {
         String fid = toGoogleDriveFolderId(folderId);
         try {
-            Drive drive = (Drive) googleDriveAccess.getClient().client;
+            Drive drive = googleDriveAccess.<Drive>getClient().client;
             /*
              * get folder to rename
              */
@@ -449,7 +449,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     private String deleteFolder(String folderId, boolean hardDelete, int retryCount) throws OXException {
         try {
-            Drive drive = (Drive) googleDriveAccess.getClient().client;
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
 
             String fid = toGoogleDriveFolderId(folderId);
             if (hardDelete || isTrashed(fid, drive)) {
@@ -498,7 +498,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     private void clearFolder(String folderId, boolean hardDelete, int retryCount) throws OXException {
         try {
-            Drive drive = (Drive) googleDriveAccess.getClient().client;
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             /*
              * build request to list all files in a folder
              */
@@ -551,7 +551,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     private FileStorageFolder[] getPath2DefaultFolder(String folderId, int retryCount) throws OXException {
         try {
-            Drive drive = (Drive) googleDriveAccess.getClient().client;
+            Drive drive = googleDriveAccess.<Drive>getClient().client;
 
             List<FileStorageFolder> list = new LinkedList<FileStorageFolder>();
 
@@ -599,7 +599,7 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
 
     private Quota getStorageQuota(String folderId, int retryCount) throws OXException {
         try {
-            Drive drive = (Drive) googleDriveAccess.getClient().client;
+            Drive drive = googleDriveAccess.<Drive>getClient().client;
             About about = drive.about().get().setFields("quotaType,quotaBytesUsed,quotaBytesTotal").execute();
             if ("UNLIMITED".equals(about.getQuotaType())) {
                 return Type.STORAGE.getUnlimited();

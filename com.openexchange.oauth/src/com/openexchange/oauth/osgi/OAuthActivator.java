@@ -98,6 +98,7 @@ public final class OAuthActivator extends HousekeepingActivator {
 
     private volatile OSGiDelegateServiceMap delegateServices;
     private volatile ScheduledTimerTask timerTask;
+    private volatile OAuthAccessRegistryServiceImpl accessRegistryService;
 
     /**
      * Initializes a new {@link OAuthActivator}.
@@ -130,11 +131,12 @@ public final class OAuthActivator extends HousekeepingActivator {
             final OSGiMetaDataRegistry registry = OSGiMetaDataRegistry.getInstance();
             final BundleContext context = this.context;
             registry.start(context);
-            
-            OAuthAccessRegistryService accessRegistryService = new OAuthAccessRegistryServiceImpl();
+
+            OAuthAccessRegistryServiceImpl accessRegistryService = new OAuthAccessRegistryServiceImpl();
+            this.accessRegistryService = accessRegistryService;
             registerService(OAuthAccessRegistryService.class, accessRegistryService);
             trackService(OAuthAccessRegistryService.class);
-            
+
             /*
              * Start other trackers
              */
@@ -182,7 +184,7 @@ public final class OAuthActivator extends HousekeepingActivator {
                 registry,
                 delegateServices.get(ContextService.class),
                 cbRegistry);
-            
+
             registerService(CallbackRegistry.class, cbRegistry);
             registerService(CustomRedirectURLDetermination.class, cbRegistry);
             registerService(OAuthService.class, oauthService);
@@ -239,6 +241,12 @@ public final class OAuthActivator extends HousekeepingActivator {
                     this.timerTask = null;
                     timerTask.cancel();
                 }
+            }
+
+            OAuthAccessRegistryServiceImpl accessRegistryService = this.accessRegistryService;
+            if (null != accessRegistryService) {
+                this.accessRegistryService = null;
+                accessRegistryService.clear();
             }
 
             DeleteListenerRegistry.releaseInstance();

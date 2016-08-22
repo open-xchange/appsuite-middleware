@@ -61,9 +61,7 @@ import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveEventHandler;
 import com.openexchange.mime.MimeTypeMap;
-import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -110,9 +108,6 @@ public final class GoogleDriveActivator extends HousekeepingActivator {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
             registerService(EventHandler.class, new GoogleDriveEventHandler(), serviceProperties);
-
-            OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
-            registryService.add(API.GOOGLE.getFullName(), new OAuthAccessRegistry(API.GOOGLE.getFullName()));
         } catch (final Exception e) {
             logger.error("", e);
             throw e;
