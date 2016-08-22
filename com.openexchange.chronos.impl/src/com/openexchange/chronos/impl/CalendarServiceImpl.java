@@ -55,6 +55,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarSession;
+import com.openexchange.chronos.CreateResult;
 import com.openexchange.chronos.EventID;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.exception.OXException;
@@ -200,14 +201,16 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public UserizedEvent createEvent(CalendarSession session, final UserizedEvent event) throws OXException {
-        return new WriteOperation<UserizedEvent>(session) {
+    public CreateResult createEvent(CalendarSession session, final UserizedEvent event) throws OXException {
+        CreateResult result = new WriteOperation<CreateResult>(session) {
 
             @Override
-            protected UserizedEvent execute(CalendarWriter writer) throws OXException {
+            protected CreateResult execute(CalendarWriter writer) throws OXException {
                 return writer.insertEvent(event);
             }
         }.execute();
+
+        return result;
     }
 
     @Override

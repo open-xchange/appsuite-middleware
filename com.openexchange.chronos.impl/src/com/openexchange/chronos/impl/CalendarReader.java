@@ -199,6 +199,16 @@ public class CalendarReader {
         return events;
     }
 
+    protected Event readAdditionalEventData(Event event, EventField[] fields) throws OXException {
+        if (null != event && (null == fields || contains(fields, EventField.ATTENDEES))) {
+            event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
+        }
+        if (null != event && (null == fields || contains(fields, EventField.ATTACHMENTS))) {
+            event.setAttachments(storage.getAttachmentStorage().loadAttachments(event.getId()));
+        }
+        return event;
+    }
+
     public boolean[] hasEventsBetween(int userID, Date from, Date until) throws OXException {
         /*
          * interpret range as "utc" dates

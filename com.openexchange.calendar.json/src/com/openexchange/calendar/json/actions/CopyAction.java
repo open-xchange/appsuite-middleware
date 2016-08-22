@@ -70,6 +70,7 @@ import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarSession;
+import com.openexchange.chronos.CreateResult;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -176,8 +177,8 @@ public final class CopyAction extends ChronosAction {
             event.setAlarms(originalEvent.getAlarms());
         }
         event.setFolderId(targetFolderID);
-        UserizedEvent copiedEvent = calendarService.createEvent(calendarSession, event);
-        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, copiedEvent.getEvent().getId()), copiedEvent.getEvent().getLastModified(), "json");
+        CreateResult result = calendarService.createEvent(calendarSession, event);
+        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, result.getCreatedEvent().getId()), result.getCreatedEvent().getLastModified(), "json");
     }
 
 }

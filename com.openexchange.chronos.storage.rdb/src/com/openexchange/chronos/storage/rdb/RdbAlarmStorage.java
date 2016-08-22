@@ -95,6 +95,19 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
     }
 
     @Override
+    public Map<Integer, List<Alarm>> loadAlarms(int objectID) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return selectAlarms(connection, context.getContextId(), objectID);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
     public List<Alarm> loadAlarms(int objectID, int userID) throws OXException {
         return loadAlarms(new int[] { objectID }, userID).get(I(objectID));
     }
@@ -258,6 +271,28 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
                     int reminder = resultSet.getInt("reminder");
                     if (false == resultSet.wasNull()) {
                         alarmsById.put(I(resultSet.getInt("object_id")), Collections.singletonList(Appointment2Event.getAlarm(reminder)));
+                    }
+                }
+            }
+        }
+        return alarmsById;
+    }
+
+    private static Map<Integer, List<Alarm>> selectAlarms(Connection connection, int contextID, int objectID) throws SQLException {
+        Map<Integer, List<Alarm>> alarmsById = new HashMap<Integer, List<Alarm>>();
+        String sql = new StringBuilder()
+            .append("SELECT member_uid,reminder FROM prg_dates_members ")
+            .append("WHERE cid=? AND object_id=?;")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            stmt.setInt(parameterIndex++, objectID);
+            try (ResultSet resultSet = logExecuteQuery(stmt)) {
+                if (resultSet.next()) {
+                    int reminder = resultSet.getInt("reminder");
+                    if (false == resultSet.wasNull()) {
+                        alarmsById.put(I(resultSet.getInt("member_uid")), Collections.singletonList(Appointment2Event.getAlarm(reminder)));
                     }
                 }
             }

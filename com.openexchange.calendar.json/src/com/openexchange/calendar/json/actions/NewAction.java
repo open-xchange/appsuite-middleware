@@ -67,6 +67,7 @@ import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarSession;
+import com.openexchange.chronos.CreateResult;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -95,7 +96,7 @@ public final class NewAction extends ChronosAction {
 
     /**
      * Initializes a new {@link NewAction}.
-     * 
+     *
      * @param services
      */
     public NewAction(final ServiceLookup services) {
@@ -172,9 +173,8 @@ public final class NewAction extends ChronosAction {
         calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
 
         UserizedEvent event = getEventConverter().getEvent(calendarSession, appointment, null);
-        UserizedEvent createdEvent = calendarService.createEvent(calendarSession, event);
-
-        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, createdEvent.getEvent().getId()), createdEvent.getEvent().getLastModified(), "json");
+        CreateResult result = calendarService.createEvent(calendarSession, event);
+        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, result.getCreatedEvent().getId()), result.getCreatedEvent().getLastModified(), "json");
     }
 
 }

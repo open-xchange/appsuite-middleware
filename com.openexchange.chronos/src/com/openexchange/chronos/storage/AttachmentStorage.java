@@ -64,4 +64,6 @@ public interface AttachmentStorage {
 
     Map<Integer, List<Attachment>> loadAttachments(int[] objectIDs) throws OXException;
 
+    List<Attachment> loadAttachments(int objectID) throws OXException;
+
 }

@@ -47,38 +47,46 @@
  *
  */
 
-package com.openexchange.chronos.storage;
+package com.openexchange.chronos;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import com.openexchange.chronos.Alarm;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link AlarmStorage}
+ * {@link CreateResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface AlarmStorage {
+public interface CreateResult {
 
-    void insertAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException;
+    /**
+     * Gets the underlying calendar session.
+     *
+     * @return The calendar session
+     */
+    CalendarSession getSession();
 
-    Map<Integer, List<Alarm>> loadAlarms(int objectID) throws OXException;
+    /**
+     * Gets the created event.
+     *
+     * @return The event
+     */
+    Event getCreatedEvent();
 
-    List<Alarm> loadAlarms(int objectID, int userID) throws OXException;
+    /**
+     * Gets the inserted alarms for a specific user.
+     *
+     * @param userID The identifier of the user to get the alarms for
+     * @return The alarms, or <code>null</code> if there are none
+     */
+    List<Alarm> getAlarms(int userID);
 
-    Map<Integer, List<Alarm>> loadAlarms(int[] objectIDs, int userID) throws OXException;
-
-    void deleteAlarms(int objectID, int userID) throws OXException;
-
-    void deleteAlarms(int objectID, int[] userIDs) throws OXException;
-
-    void updateAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException;
-
-    void deleteAlarms(int objectID) throws OXException;
-
-    void registerTrigger(int folderID, int objectID, int userID, Date triggerDate, boolean forSeries) throws OXException;
+    /**
+     * Gets the identifier of the folder the event has been created in.
+     *
+     * @return The folder identifier
+     */
+    int getFolderID();
 
 }
+

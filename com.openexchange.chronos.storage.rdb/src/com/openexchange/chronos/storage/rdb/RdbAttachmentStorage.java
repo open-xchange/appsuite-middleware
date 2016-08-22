@@ -89,6 +89,11 @@ public class RdbAttachmentStorage extends RdbStorage implements AttachmentStorag
     }
 
     @Override
+    public List<Attachment> loadAttachments(int objectID) throws OXException {
+        return loadAttachments(new int[] { objectID }).get(I(objectID));
+    }
+
+    @Override
     public Map<Integer, List<Attachment>> loadAttachments(int[] objectIDs) throws OXException {
         Connection connection = null;
         try {

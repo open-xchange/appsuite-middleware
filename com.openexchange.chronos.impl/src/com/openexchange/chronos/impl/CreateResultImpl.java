@@ -47,38 +47,55 @@
  *
  */
 
-package com.openexchange.chronos.storage;
+package com.openexchange.chronos.impl;
 
-import java.util.Date;
+import static com.openexchange.java.Autoboxing.I;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Alarm;
-import com.openexchange.exception.OXException;
+import com.openexchange.chronos.CalendarSession;
+import com.openexchange.chronos.CreateResult;
+import com.openexchange.chronos.Event;
 
 /**
- * {@link AlarmStorage}
+ * {@link CreateResultImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface AlarmStorage {
+public class CreateResultImpl implements CreateResult {
 
-    void insertAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException;
+    private final CalendarSession session;
+    private final int folderID;
+    private final Event createdEvent;
+    private final Map<Integer, List<Alarm>> alarmsByUser;
 
-    Map<Integer, List<Alarm>> loadAlarms(int objectID) throws OXException;
+    public CreateResultImpl(CalendarSession session, int folderID, Event createdEvent, Map<Integer, List<Alarm>> alarmsByUser) {
+        super();
+        this.session = session;
+        this.folderID = folderID;
+        this.createdEvent = createdEvent;
+        this.alarmsByUser = alarmsByUser;
+    }
 
-    List<Alarm> loadAlarms(int objectID, int userID) throws OXException;
+    @Override
+    public CalendarSession getSession() {
+        return session;
+    }
 
-    Map<Integer, List<Alarm>> loadAlarms(int[] objectIDs, int userID) throws OXException;
+    @Override
+    public Event getCreatedEvent() {
+        return createdEvent;
+    }
 
-    void deleteAlarms(int objectID, int userID) throws OXException;
+    @Override
+    public List<Alarm> getAlarms(int userID) {
+        return alarmsByUser.get(I(userID));
+    }
 
-    void deleteAlarms(int objectID, int[] userIDs) throws OXException;
-
-    void updateAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException;
-
-    void deleteAlarms(int objectID) throws OXException;
-
-    void registerTrigger(int folderID, int objectID, int userID, Date triggerDate, boolean forSeries) throws OXException;
+    @Override
+    public int getFolderID() {
+        return folderID;
+    }
 
 }

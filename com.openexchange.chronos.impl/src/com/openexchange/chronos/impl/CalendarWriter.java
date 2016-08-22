@@ -82,6 +82,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.CreateResult;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventID;
@@ -124,7 +125,7 @@ public class CalendarWriter extends CalendarReader {
         super(session, storage);
     }
 
-    public UserizedEvent insertEvent(UserizedEvent event) throws OXException {
+    public CreateResult insertEvent(UserizedEvent event) throws OXException {
         return insertEvent(getFolder(event.getFolderId()), event);
     }
 
@@ -193,7 +194,7 @@ public class CalendarWriter extends CalendarReader {
         }
     }
 
-    private UserizedEvent insertEvent(UserizedFolder folder, UserizedEvent userizedEvent) throws OXException {
+    private CreateResult insertEvent(UserizedFolder folder, UserizedEvent userizedEvent) throws OXException {
         requireCalendarPermission(folder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
         Event event = userizedEvent.getEvent();
         User calendarUser = getCalendarUser(folder);
@@ -231,7 +232,9 @@ public class CalendarWriter extends CalendarReader {
             storage.getAlarmStorage().insertAlarms(objectID, calendarUser.getId(), userizedEvent.getAlarms());
             registerTriggers(i(folder), calendarUser.getId(), event, userizedEvent.getAlarms());
         }
-        return readEvent(folder, objectID);
+        return new CreateResultImpl(session, i(folder), 
+            readAdditionalEventData(storage.getEventStorage().loadEvent(objectID, null), null), 
+            storage.getAlarmStorage().loadAlarms(objectID));
     }
 
     private void registerTriggers(int folderID, int userID, Event event, List<Alarm> alarms) throws OXException {
