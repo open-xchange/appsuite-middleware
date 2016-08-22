@@ -109,7 +109,7 @@ public final class BoxAccountAccess implements CapabilityAware {
         OAuthAccess boxAccess = registry.get(session.getContextId(), session.getUserId());
         if (boxAccess == null) {
             BoxOAuthAccess access = new BoxOAuthAccess(account, session);
-            boxAccess = registry.add(session.getContextId(), session.getUserId(), access);
+            boxAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), access);
             if (null == boxAccess) {
                 access.initialize();
                 boxAccess = access;
