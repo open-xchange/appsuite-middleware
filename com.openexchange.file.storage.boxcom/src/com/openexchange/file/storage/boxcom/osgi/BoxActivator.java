@@ -60,10 +60,8 @@ import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.boxcom.Services;
 import com.openexchange.file.storage.boxcom.access.BoxEventHandler;
 import com.openexchange.mime.MimeTypeMap;
-import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -109,11 +107,6 @@ public final class BoxActivator extends HousekeepingActivator {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
             registerService(EventHandler.class, new BoxEventHandler(), serviceProperties);
-            /*
-             * Register the access registry
-             */
-            OAuthAccessRegistryService oAuthAccessRegistryService = Services.getService(OAuthAccessRegistryService.class);
-            oAuthAccessRegistryService.add(API.BOX_COM.getFullName(), new OAuthAccessRegistry(API.BOX_COM.getFullName()));
         } catch (final Exception e) {
             logger.error("", e);
             throw e;

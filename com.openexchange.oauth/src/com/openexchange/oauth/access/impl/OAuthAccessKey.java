@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oauth.access;
+package com.openexchange.oauth.access.impl;
 
 /**
  * {@link OAuthAccessKey}
@@ -62,7 +62,7 @@ final class OAuthAccessKey {
 
     /**
      * Initialises a new {@link OAuthAccessKey}.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      */
@@ -79,21 +79,11 @@ final class OAuthAccessKey {
         hash = result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
     @Override
     public int hashCode() {
         return hash;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
@@ -105,11 +95,8 @@ final class OAuthAccessKey {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final OAuthAccessKey other = (OAuthAccessKey) obj;
+        OAuthAccessKey other = (OAuthAccessKey) obj;
         if (contextId != other.contextId) {
-            return false;
-        }
-        if (hash != other.hash) {
             return false;
         }
         if (userId != other.userId) {
@@ -117,4 +104,5 @@ final class OAuthAccessKey {
         }
         return true;
     }
+
 }

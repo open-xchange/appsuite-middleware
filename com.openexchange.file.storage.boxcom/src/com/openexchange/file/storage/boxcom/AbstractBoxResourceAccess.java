@@ -207,7 +207,7 @@ public abstract class AbstractBoxResourceAccess {
      */
     protected BoxOAuthAccess handleAuthError(BoxSDKException e, Session session) throws OXException {
         try {
-            boxAccess.initialise();
+            boxAccess.initialize();
             return boxAccess;
         } catch (OXException oxe) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractBoxResourceAccess.class);

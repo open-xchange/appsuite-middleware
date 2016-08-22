@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,108 +49,70 @@
 
 package com.openexchange.oauth.access;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import com.openexchange.java.Strings;
-
 /**
- * {@link OAuthAccessRegistry}
+ * {@link OAuthAccessRegistry} - A registry for in-use OAuth accesses by a certain user.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class OAuthAccessRegistry {
-
-    private final ConcurrentMap<OAuthAccessKey, OAuthAccess> map;
-    private final String serviceId;
-
-    /**
-     * Initialises a new {@link OAuthAccessRegistry}.
-     * 
-     * @param serviceId the service identifier
-     */
-    public OAuthAccessRegistry(String serviceId) {
-        super();
-        if (Strings.isEmpty(serviceId)) {
-            throw new IllegalArgumentException("The service identifier can be neither 'null' nor empty");
-        }
-        map = new ConcurrentHashMap<>();
-        this.serviceId = serviceId;
-    }
+public interface OAuthAccessRegistry {
 
     /**
      * Adds the specified {@link OAuthAccess} to the registry
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
      * @param oauthAccess The {@link OAuthAccess}
      * @return The previous associated {@link OAuthAccess}, or <code>null</code> if there was none
      */
-    public OAuthAccess add(int contextId, int userId, OAuthAccess oauthAccess) {
-        OAuthAccessKey key = new OAuthAccessKey(contextId, userId);
-        return map.putIfAbsent(key, oauthAccess);
-    }
+    OAuthAccess add(int contextId, int userId, OAuthAccess oauthAccess);
 
     /**
      * Checks the presence of the {@link OAuthAccess} associated with the givent user/context/account tuple
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
      * @return <code>true if such an {@link OAuthAccess} is present; <code>false</code> otherwise
      */
-    public boolean contains(int contextId, int userId) {
-        OAuthAccess access = map.get(new OAuthAccessKey(contextId, userId));
-        return access != null;
-    }
+    boolean contains(int contextId, int userId);
 
     /**
      * Retrieves the {@link OAuthAccess} associated with the given user/context/account tuple
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
      * @return The {@link OAuthAccess} that is associated with the tuple, or <code>null</code> if none exists
      */
-    public OAuthAccess get(int contextId, int userId) {
-        return map.get(new OAuthAccessKey(contextId, userId));
-    }
+    OAuthAccess get(int contextId, int userId);
 
     /**
      * Removes the {@link OAuthAccess} associated with the specified user/context tuple, if no more accesses for that tuple are present
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return <code>true</code> if an {@link OAuthAccess} for the specified tuple was found and removed; <code>false</code> otherwise
      */
-    public boolean removeIfLast(int contextId, int userId) {
-        OAuthAccess access = map.remove(new OAuthAccessKey(contextId, userId));
-        if (null == access) {
-            return false;
-        }
-        access.dispose();
-        return true;
-    }
+    boolean removeIfLast(int contextId, int userId);
 
     /**
      * Purges the {@link OAuthAccess} associated with the specified user/context/account tuple.
-     * 
+     *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
      * @return <code>true</code> if an {@link OAuthAccess} for the specified tuple was found and purged; <code>false</code> otherwise
      */
-    public boolean purgeUserAccess(int contextId, int userId) {
-        OAuthAccessKey key = new OAuthAccessKey(contextId, userId);
-        return map.remove(key) != null;
-    }
+    boolean purgeUserAccess(int contextId, int userId);
 
     /**
      * Returns the service identifier of this registry
-     * 
+     *
      * @return the service identifier of this registry
      */
-    public String getServiceId() {
-        return serviceId;
-    }
+    String getServiceId();
+
 }

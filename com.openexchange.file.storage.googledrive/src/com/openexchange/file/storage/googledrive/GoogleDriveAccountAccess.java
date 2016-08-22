@@ -62,8 +62,8 @@ import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
 import com.openexchange.file.storage.googledrive.osgi.Services;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.session.Session;
 
@@ -77,7 +77,7 @@ public final class GoogleDriveAccountAccess implements CapabilityAware {
     private final FileStorageAccount account;
     private final Session session;
     private final FileStorageService service;
-    private OAuthAccess googleDriveAccess;
+    private volatile OAuthAccess googleDriveAccess;
 
     /**
      * Initializes a new {@link GoogleDriveAccountAccess}.
@@ -107,15 +107,17 @@ public final class GoogleDriveAccountAccess implements CapabilityAware {
     public void connect() throws OXException {
         OAuthAccessRegistryService service = Services.getService(OAuthAccessRegistryService.class);
         OAuthAccessRegistry registry = service.get(API.GOOGLE.getFullName());
-        googleDriveAccess = registry.get(session.getContextId(), session.getUserId());
+        OAuthAccess googleDriveAccess = registry.get(session.getContextId(), session.getUserId());
         if (googleDriveAccess == null) {
             GoogleDriveOAuthAccess access = new GoogleDriveOAuthAccess(account, session);
-            registry.add(session.getContextId(), session.getUserId(), access);
-            if (googleDriveAccess == null) {
+            googleDriveAccess = registry.add(session.getContextId(), session.getUserId(), access);
+            if (null == googleDriveAccess) {
+                access.initialize();
                 googleDriveAccess = access;
             }
+            this.googleDriveAccess = googleDriveAccess;
         } else {
-            googleDriveAccess = googleDriveAccess.ensureNotExpired();
+           this. googleDriveAccess = googleDriveAccess.ensureNotExpired();
         }
     }
 

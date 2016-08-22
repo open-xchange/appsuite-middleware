@@ -49,64 +49,76 @@
 
 package com.openexchange.oauth.access.impl;
 
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
-import com.openexchange.oauth.access.OAuthAccessRegistryService;
+import com.openexchange.oauth.access.OAuthAccess;
 
 /**
- * {@link OAuthAccessRegistryServiceImpl}
+ * {@link OAuthAccessRegistryImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OAuthAccessRegistryServiceImpl implements OAuthAccessRegistryService {
+public class OAuthAccessRegistryImpl implements OAuthAccessRegistry, Iterable<OAuthAccess> {
 
-    private final AtomicReference<ConcurrentMap<String, OAuthAccessRegistryImpl>> mapRef;
+    private final ConcurrentMap<OAuthAccessKey, OAuthAccess> map;
+    private final String serviceId;
 
     /**
-     * Initializes a new {@link OAuthAccessRegistryServiceImpl}.
+     * Initialises a new {@link OAuthAccessRegistryImpl}.
+     *
+     * @param serviceId The service identifier
      */
-    public OAuthAccessRegistryServiceImpl() {
+    public OAuthAccessRegistryImpl(String serviceId) {
         super();
-        mapRef = new AtomicReference<ConcurrentMap<String,OAuthAccessRegistryImpl>>(new ConcurrentHashMap<String, OAuthAccessRegistryImpl>());
+        if (Strings.isEmpty(serviceId)) {
+            throw new IllegalArgumentException("The service identifier can be neither 'null' nor empty");
+        }
+        map = new ConcurrentHashMap<>();
+        this.serviceId = serviceId;
     }
 
     @Override
-    public OAuthAccessRegistry get(String serviceId) throws OXException {
-        ConcurrentMap<String, OAuthAccessRegistryImpl> map = mapRef.get();
-        if (null == map) {
-            throw new OXException(new IllegalStateException("Shut-down initiated"));
-        }
-
-        OAuthAccessRegistry registry = map.get(serviceId);
-        if (registry == null) {
-            OAuthAccessRegistryImpl newRegistry = new OAuthAccessRegistryImpl(serviceId);
-            registry = map.putIfAbsent(serviceId, newRegistry);
-            if (null == registry) {
-                registry = newRegistry;
-            }
-        }
-        return registry;
+    public Iterator<OAuthAccess> iterator() {
+        return map.values().iterator();
     }
 
-    /**
-     * Clears this registry
-     */
-    public void clear() {
-        ConcurrentMap<String, OAuthAccessRegistryImpl> map = mapRef.getAndSet(null);
-        if (null != map) {
-            for (OAuthAccessRegistryImpl registry : map.values()) {
-                for (OAuthAccess oAuthAccess : registry) {
-                    if (null != oAuthAccess) {
-                        oAuthAccess.dispose();
-                    }
-                }
-            }
-            map.clear();
+    @Override
+    public OAuthAccess add(int contextId, int userId, OAuthAccess oauthAccess) {
+        OAuthAccessKey key = new OAuthAccessKey(contextId, userId);
+        return map.putIfAbsent(key, oauthAccess);
+    }
+
+    @Override
+    public boolean contains(int contextId, int userId) {
+        return map.containsKey(new OAuthAccessKey(contextId, userId));
+    }
+
+    @Override
+    public OAuthAccess get(int contextId, int userId) {
+        return map.get(new OAuthAccessKey(contextId, userId));
+    }
+
+    @Override
+    public boolean removeIfLast(int contextId, int userId) {
+        OAuthAccess access = map.remove(new OAuthAccessKey(contextId, userId));
+        if (null == access) {
+            return false;
         }
+        access.dispose();
+        return true;
+    }
+
+    @Override
+    public boolean purgeUserAccess(int contextId, int userId) {
+        return map.remove(new OAuthAccessKey(contextId, userId)) != null;
+    }
+
+    @Override
+    public String getServiceId() {
+        return serviceId;
     }
 
 }

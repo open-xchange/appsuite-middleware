@@ -78,7 +78,7 @@ public abstract class AbstractDropboxAccess {
 
     /**
      * Initialises a new {@link AbstractDropboxAccess}.
-     * 
+     *
      * @throws OXException
      */
     @SuppressWarnings("unchecked")
@@ -88,7 +88,7 @@ public abstract class AbstractDropboxAccess {
         this.account = account;
         this.session = session;
         // Other fields
-        this.dropboxAPI = (DropboxAPI<WebAuthSession>) dropboxOAuthAccess.getClient().client;
+        this.dropboxAPI = dropboxOAuthAccess.<DropboxAPI<WebAuthSession>> getClient().client;
     }
 
     /**

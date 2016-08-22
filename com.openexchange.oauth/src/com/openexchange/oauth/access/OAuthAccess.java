@@ -53,34 +53,34 @@ import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
 
 /**
- * {@link OAuthAccess}
+ * {@link OAuthAccess} - Wraps the concrete client that is supposed to be used to access OAuth account's resources.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface OAuthAccess {
 
     /**
-     * Initialises the {@link OAuthAccess}
+     * Initializes the {@link OAuthAccess}
      * <ul>
-     * <li>Read the {@link OAuthAccount} from the database</li>
+     * <li>Get & set the {@link OAuthAccount}</li>
      * <li>Create the relevant {@link OAuthClient}</li>
      * <li>Apply the access token to the {@link OAuthClient}</li>
      * </ul>
-     * 
-     * @throws OXException if the {@link OAuthAccess} cannot be initialised or if the access token is '<code>null</code>' or empty.
+     *
+     * @throws OXException if the {@link OAuthAccess} cannot be initialized
      */
-    void initialise() throws OXException;
+    void initialize() throws OXException;
 
     /**
-     * Revokes the OAuth Token from this {@link OAuthAccess}
-     * 
+     * Revokes the OAuth token from this {@link OAuthAccess}
+     *
      * @throws OXException if the token cannot be revoked
      */
     void revoke() throws OXException;
 
     /**
      * Ensures that the access is not expired
-     * 
+     *
      * @return The non-expired access
      * @throws OXException if the check fails
      */
@@ -88,14 +88,14 @@ public interface OAuthAccess {
 
     /**
      * Returns the {@link OAuthAccount} that is bound with this {@link OAuthAccess}
-     * 
+     *
      * @return The {@link OAuthAccount}
      */
     OAuthAccount getOAuthAccount();
 
     /**
-     * Pings the account
-     * 
+     * Pings the account to check accessibility/availability.
+     *
      * @return <code>true</code>for a successful ping attempt; <code>false</code>otherwise
      * @throws OXException If the account cannot be pinged
      */
@@ -108,16 +108,16 @@ public interface OAuthAccess {
 
     /**
      * Retrieves the client
-     * 
+     *
      * @param type the client type
      * @return The {@link OAuthClient}
      * @throws OXException if the client cannot be initialised or returned
      */
-    OAuthClient<?> getClient() throws OXException;
+    <T> OAuthClient<T> getClient() throws OXException;
 
     /**
      * Returns the account identifier of this {@link OAuthAccess}
-     * 
+     *
      * @return the account identifier of this {@link OAuthAccess}
      */
     int getAccountId() throws OXException;
