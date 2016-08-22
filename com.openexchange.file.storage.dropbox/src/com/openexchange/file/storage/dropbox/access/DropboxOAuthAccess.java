@@ -147,7 +147,7 @@ public class DropboxOAuthAccess extends AbstractOAuthAccess {
 
     @Override
     public void revoke() throws OXException {
-        // TODO: revoke the token
+        // Nothing to do
     }
 
     @Override
