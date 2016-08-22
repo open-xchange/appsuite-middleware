@@ -510,6 +510,7 @@ public class SnippetProcessor {
             {
                 ContentDisposition cd = new ContentDisposition();
                 cd.setInline();
+                cd.setFilenameParameter(fileName);
                 att.setContentDisposition(cd.toString());
             }
             att.setContentType(mf.getContentType());
@@ -517,6 +518,7 @@ public class SnippetProcessor {
             att.setId(mf.getID());
             att.setSize(mf.getSize());
             att.setStreamProvider(new ManagedFileInputStreamProvider(mf));
+            att.setFilename(fileName);
             attachments.add(att);
         }
         return id;
