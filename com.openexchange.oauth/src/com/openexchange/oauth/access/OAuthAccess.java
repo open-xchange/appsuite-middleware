@@ -61,8 +61,13 @@ public interface OAuthAccess {
 
     /**
      * Initialises the {@link OAuthAccess}
+     * <ul>
+     * <li>Read the {@link OAuthAccount} from the database</li>
+     * <li>Create the relevant {@link OAuthClient}</li>
+     * <li>Apply the access token to the {@link OAuthClient}</li>
+     * </ul>
      * 
-     * @throws OXException if the {@link OAuthAccess} cannot be initialised
+     * @throws OXException if the {@link OAuthAccess} cannot be initialised or if the access token is '<code>null</code>' or empty.
      */
     void initialise() throws OXException;
 
