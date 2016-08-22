@@ -101,7 +101,6 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
 
     private final FileStorageAccount fsAccount;
     private final Session session;
-    private boolean revoked;
 
     /**
      * Initializes a new {@link BoxOAuthAccess}.
@@ -110,7 +109,6 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         super();
         this.fsAccount = fsAccount;
         this.session = session;
-        revoked = false;
     }
 
     @Override
@@ -121,12 +119,6 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
             OAuthService oAuthService = Services.getService(OAuthService.class);
             OAuthAccount boxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
             setOAuthAccount(boxOAuthAccount);
-
-            boolean considerExpired = false;
-            if (revoked) {
-                revoked = false;
-                considerExpired = true;
-            }
 
             OAuthAccount newAccount = recreateTokenIfExpired(true);
             if (newAccount != null) {
@@ -149,7 +141,6 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
                 HttpResponse httpResponse = httpClient.execute(request);
                 int statusCode = httpResponse.getStatusLine().getStatusCode();
                 if (statusCode == 200) {
-                    revoked = true;
                     return;
                 }
 
