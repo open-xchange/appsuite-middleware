@@ -60,6 +60,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.file.storage.dropbox.DropboxServices;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
@@ -101,6 +102,9 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
             final OAuthAccount oauthAccount = oAuthService.getAccount(getAccountId(), session, session.getUserId(), session.getContextId());
             DbxRequestConfig config = new DbxRequestConfig(DropboxConfiguration.getInstance().getProductName());
             String accessToken = oauthAccount.getToken();
+            if (Strings.isEmpty(accessToken)) {
+                throw FileStorageExceptionCodes.UNLINKED_ERROR.create();                
+            }
             DbxClientV2 dbxClient = new DbxClientV2(config, accessToken);
             OAuthClient<DbxClientV2> oAuthClient = new OAuthClient<DbxClientV2>(dbxClient, accessToken);
             setOAuthClient(oAuthClient);
