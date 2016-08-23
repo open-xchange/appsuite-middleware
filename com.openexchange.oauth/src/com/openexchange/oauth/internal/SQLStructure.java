@@ -133,7 +133,7 @@ public class SQLStructure {
                     return account.getMetaData().getId();
                 case SCOPE:
                     Set<OAuthScope> enabledScopes = account.getEnabledScopes();
-                    return Strings.concat(",", enabledScopes.toArray(new Object[enabledScopes.size()]));
+                    return Strings.concat(" ", enabledScopes.toArray(new Object[enabledScopes.size()]));
                 default:
                     break;
             }
