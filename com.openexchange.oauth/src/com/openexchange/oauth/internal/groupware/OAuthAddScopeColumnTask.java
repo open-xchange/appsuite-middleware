@@ -67,6 +67,7 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.API;
+import com.openexchange.oauth.scope.Module;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
@@ -152,18 +153,30 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
 
     private enum Scope {
 
-        GOOGLE(API.GOOGLE.getFullName(), "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/drive"),
-        MSLIVE_CONNECT(API.MS_LIVE_CONNECT.getFullName(), "wl.offline_access wl.signin wl.basic wl.skydrive wl.skydrive_update wl.contacts_birthday wl.contacts_photos wl.contacts_skydrive wl.contacts_emails wl.photos wl.postal_addresses"),
-        LINKEDIN(API.LINKEDIN.getFullName(), "r_basicprofile,r_emailaddress"),
-        VKONTAKTE(API.VKONTAKTE.getFullName(), "friends,wall,offline");
+        BOXCOM(API.BOX_COM.getFullName(), Module.drive),
+        DROPBOX(API.DROPBOX.getFullName(), Module.drive),
+        GOOGLE(API.GOOGLE.getFullName(), Module.calendar, Module.contacts, Module.drive),
+        MSLIVE_CONNECT(API.MS_LIVE_CONNECT.getFullName(), Module.calendar, Module.contacts, Module.drive),
+        LINKEDIN(API.LINKEDIN.getFullName(), Module.contacts),
+        VKONTAKTE(API.VKONTAKTE.getFullName(), Module.contacts),
+        XING(API.XING.getFullName(), Module.contacts),
+        YAHOO(API.YAHOO.getFullName(), Module.contacts),
+        ;
 
         private String scope;
 
         private String serviceId;
 
-        Scope(String serviceId, String scope) {
-            this.scope = scope;
+        Scope(String serviceId, Module... modules) {
             this.serviceId = serviceId;
+            StringBuilder builder = new StringBuilder();
+            for (Module m : modules) {
+                builder.append(m.name()).append(" ");
+            }
+            if (builder.length() > 0) {
+                builder.setLength(builder.length() - 1);
+            }
+            scope = builder.toString();
         }
 
         String getScope() {
@@ -249,4 +262,3 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
     }
 
 }
-
