@@ -52,7 +52,7 @@ package com.openexchange.mailaccount;
 import java.io.Serializable;
 
 /**
- * {@link Account}
+ * {@link Account} - The super interface for both - mail and transport account.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
@@ -191,22 +191,22 @@ public interface Account extends Serializable {
     /**
      * Checks if STARTTLS should be used to connect to transport server
      *
-     * @return
+     * @return <code>true</code> if STARTTLS is mandatory; otherwise <code>false</code>
      */
     boolean isTransportStartTls();
 
     /**
-     * Checks if this transport account is able to authenticate via oauth or not.
-     * 
-     * @return true if the account is able to authenticate via oauth, otherwise false.
+     * Checks if transport server expects to authenticate via OAuth or not.
+     *
+     * @return <code>true</code> for OAuth authentication, otherwise <code>false</code>.
      */
-    boolean isOAuthAble();
+    boolean isTransportOAuthAble();
 
     /**
-     * Retrieves the oauthAccount identifier.
-     * 
-     * @return The oauthAccount id or null;
+     * Gets the identifier of the associated OAuth account (if any) to authenticate against transport server.
+     *
+     * @return The OAuth account identifier or <code>-1</code> if there is no associated OAuth account
      */
-    Long getOAuthID();
+    int getTransportOAuthId();
 
 }

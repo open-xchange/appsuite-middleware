@@ -406,13 +406,23 @@ public class SimMailAccount implements MailAccount {
     }
 
     @Override
-    public boolean isOAuthAble() {
+    public int getMailOAuthId() {
+        return -1;
+    }
+
+    @Override
+    public int getTransportOAuthId() {
+        return -1;
+    }
+
+    @Override
+    public boolean isMailOAuthAble() {
         return false;
     }
 
     @Override
-    public Long getOAuthID() {
-        return null;
+    public boolean isTransportOAuthAble() {
+        return false;
     }
 
     @Override

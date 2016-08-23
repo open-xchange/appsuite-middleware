@@ -75,7 +75,6 @@ public class TransportAccountDescription {
     private String personal;
     private String primaryAddress;
     private String replyTo;
-    private Long oAuth;
     private TransportAuth transportAuth;
     private int transportPort;
     private String transportProtocol;
@@ -84,45 +83,7 @@ public class TransportAccountDescription {
     private boolean transportStartTls;
     private String transportUrl;
     private Map<String, String> transportProperties;
-
-
-    /**
-     * Initializes a new {@link TransportAccountDescription}.
-     * 
-     * @param id
-     * @param login
-     * @param name
-     * @param password
-     * @param personal
-     * @param primaryAddress
-     * @param replyTo
-     * @param oAuth
-     * @param transportAuth
-     * @param transportPort
-     * @param transportProtocol
-     * @param transportSecure
-     * @param transportServer
-     * @param transportStartTls
-     * @param transportUrl
-     */
-    public TransportAccountDescription(int id, String login, String name, String password, String personal, String primaryAddress, String replyTo, Long oAuth, TransportAuth transportAuth, int transportPort, String transportProtocol, boolean transportSecure, String transportServer, boolean transportStartTls, String transportUrl) {
-        super();
-        this.id = id;
-        this.transportLogin = login;
-        this.name = name;
-        this.transportPassword = password;
-        this.personal = personal;
-        this.primaryAddress = primaryAddress;
-        this.replyTo = replyTo;
-        this.oAuth = oAuth;
-        this.transportAuth = transportAuth;
-        this.transportPort = transportPort;
-        this.transportProtocol = transportProtocol;
-        this.transportSecure = transportSecure;
-        this.transportServer = transportServer;
-        this.transportStartTls = transportStartTls;
-        this.transportUrl = transportUrl;
-    }
+    private int transportOAuthId;
 
     /**
      * Initializes a new {@link TransportAccountDescription}.
@@ -134,6 +95,7 @@ public class TransportAccountDescription {
         transportPort = 25;
         transportProtocol = "smtp";
         id = -1;
+        transportOAuthId = -1;
     }
 
     /**
@@ -152,6 +114,44 @@ public class TransportAccountDescription {
         } catch (final URISyntaxException e) {
             throw MailAccountExceptionCodes.INVALID_HOST_NAME.create(e, transportServerURL);
         }
+    }
+
+    /**
+     * Initializes a new {@link TransportAccountDescription}.
+     *
+     * @param id
+     * @param login
+     * @param name
+     * @param password
+     * @param personal
+     * @param primaryAddress
+     * @param replyTo
+     * @param transportOAuthId
+     * @param transportAuth
+     * @param transportPort
+     * @param transportProtocol
+     * @param transportSecure
+     * @param transportServer
+     * @param transportStartTls
+     * @param transportUrl
+     */
+    public TransportAccountDescription(int id, String login, String name, String password, String personal, String primaryAddress, String replyTo, int transportOAuthId, TransportAuth transportAuth, int transportPort, String transportProtocol, boolean transportSecure, String transportServer, boolean transportStartTls, String transportUrl) {
+        super();
+        this.id = id;
+        this.transportLogin = login;
+        this.name = name;
+        this.transportPassword = password;
+        this.personal = personal;
+        this.primaryAddress = primaryAddress;
+        this.replyTo = replyTo;
+        this.transportOAuthId = transportOAuthId < 0 ? -1 : transportOAuthId;
+        this.transportAuth = transportAuth;
+        this.transportPort = transportPort;
+        this.transportProtocol = transportProtocol;
+        this.transportSecure = transportSecure;
+        this.transportServer = transportServer;
+        this.transportStartTls = transportStartTls;
+        this.transportUrl = transportUrl;
     }
 
     /**
@@ -444,8 +444,31 @@ public class TransportAccountDescription {
         return transportStartTls;
     }
 
-    public Long getOAuth() {
-        return oAuth;
+    /**
+     * Checks if transport server expects to authenticate via OAuth or not.
+     *
+     * @return <code>true</code> for OAuth authentication, otherwise <code>false</code>.
+     */
+    public boolean isTransportOAuthAble() {
+        return transportOAuthId >= 0;
+    }
+
+    /**
+     * Gets the identifier of the associated OAuth account (if any) to authenticate against transport server.
+     *
+     * @return The OAuth account identifier or <code>-1</code> if there is no associated OAuth account
+     */
+    public int getTransportOAuthId() {
+        return transportOAuthId < 0 ? -1 : transportOAuthId;
+    }
+
+    /**
+     * Sets the identifier of the associated OAuth account for transport server
+     *
+     * @param transportOAuthId The OAuth account identifier or <code>-1</code> to signal none
+     */
+    public void setTransportOAuthId(int transportOAuthId) {
+        this.transportOAuthId = transportOAuthId < 0 ? -1 : transportOAuthId;
     }
 
     /**

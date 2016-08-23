@@ -117,7 +117,8 @@ public abstract class AbstractMailAccount implements MailAccount {
     protected Map<String, String> transportProperties;
     protected boolean mailStartTls;
     protected boolean transportStartTls;
-    protected Long oauth;
+    protected int mailOAuthId;
+    protected int transportOAuthId;
     protected String rootFolder;
 
     /**
@@ -134,6 +135,8 @@ public abstract class AbstractMailAccount implements MailAccount {
         transportProtocol = transportProvider == null ? "smtp" : transportProvider;
         final String mailProvider = MailProperties.getInstance().getDefaultMailProvider();
         mailProtocol = mailProvider == null ? "imap" : mailProvider;
+        mailOAuthId = -1;
+        transportOAuthId = -1;
     }
 
     @Override
@@ -802,8 +805,46 @@ public abstract class AbstractMailAccount implements MailAccount {
     }
 
     @Override
+    public boolean isMailOAuthAble() {
+        return mailOAuthId >= 0;
+    }
+
+    @Override
+    public int getMailOAuthId() {
+        return mailOAuthId < 0 ? -1 : mailOAuthId;
+    }
+
+    /**
+     * Sets the identifier of the associated OAuth account for mail server
+     *
+     * @param mailOauthId The OAuth account identifier or <code>-1</code> to signal none
+     */
+    public void setMailOAuthId(int mailOauthId) {
+        this.mailOAuthId = mailOauthId < 0 ? -1 : mailOauthId;
+    }
+
+    @Override
     public boolean isTransportStartTls() {
         return transportStartTls;
+    }
+
+    @Override
+    public boolean isTransportOAuthAble() {
+        return transportOAuthId >= 0;
+    }
+
+    @Override
+    public int getTransportOAuthId() {
+        return transportOAuthId < 0 ? -1 : transportOAuthId;
+    }
+
+    /**
+     * Sets the identifier of the associated OAuth account for transport server
+     *
+     * @param transportOAuthId The OAuth account identifier or <code>-1</code> to signal none
+     */
+    public void setTransportOAuthId(int transportOAuthId) {
+        this.transportOAuthId = transportOAuthId < 0 ? -1 : transportOAuthId;
     }
 
     @Override
@@ -892,17 +933,4 @@ public abstract class AbstractMailAccount implements MailAccount {
         return sb.toString();
     }
 
-    @Override
-    public boolean isOAuthAble() {
-        return oauth != null && oauth >= 0;
-    };
-
-    @Override
-    public Long getOAuthID() {
-        return oauth;
-    }
-
-    public void setOAuthID(Long id) {
-        this.oauth = id;
-    }
 }

@@ -185,6 +185,13 @@ public class DefaultMailAccountParser extends DataParser {
                 attributes.add(Attribute.MAIL_STARTTLS_LITERAL);
             }
         }
+        if (json.hasAndNotNull(MailAccountFields.MAIL_OAUTH)) {
+            int mailOAuthAccountId = json.optInt(MailAccountFields.MAIL_OAUTH, account.getMailOAuthId());
+            if (mailOAuthAccountId != account.getMailOAuthId()) {
+                account.setMailOAuthId(mailOAuthAccountId);
+                attributes.add(Attribute.MAIL_OAUTH_LITERAL);
+            }
+        }
         // Expect URL or separate fields for protocol, server, port, and secure
         if (json.hasAndNotNull(MailAccountFields.MAIL_URL)) {
             account.parseMailServerURL(parseString(json, MailAccountFields.MAIL_URL).trim());
@@ -240,6 +247,13 @@ public class DefaultMailAccountParser extends DataParser {
             if (transportStartTls != account.isTransportStartTls()) {
                 account.setTransportStartTls(transportStartTls);
                 attributes.add(Attribute.TRANSPORT_STARTTLS_LITERAL);
+            }
+        }
+        if (json.hasAndNotNull(MailAccountFields.TRANSPORT_OAUTH)) {
+            int transportOAuthAccountId = json.optInt(MailAccountFields.TRANSPORT_OAUTH, account.getTransportOAuthId());
+            if (transportOAuthAccountId != account.getTransportOAuthId()) {
+                account.setTransportOAuthId(transportOAuthAccountId);
+                attributes.add(Attribute.TRANSPORT_OAUTH_LITERAL);
             }
         }
         if (json.hasAndNotNull(MailAccountFields.TRANSPORT_URL)) {

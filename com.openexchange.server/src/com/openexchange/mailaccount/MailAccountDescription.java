@@ -113,7 +113,8 @@ public final class MailAccountDescription implements Serializable {
     private String confirmedHamFullname;
     private Map<String, String> properties;
     private Map<String, String> transportProperties;
-    private Long oauth;
+    private int mailOAuthId;
+    private int transportOAuthId;
 
     /**
      * Initializes a new {@link MailAccountDescription}.
@@ -128,6 +129,8 @@ public final class MailAccountDescription implements Serializable {
         transportProtocol = "smtp";
         mailProtocol = "imap";
         id = -1;
+        mailOAuthId = -1;
+        transportOAuthId = -1;
     }
 
     /**
@@ -304,7 +307,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets if STARTTLS should be used to connect to mail server
-     * 
+     *
      * @return
      */
     public void setMailStartTls(boolean mailStartTls) {
@@ -313,7 +316,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Checks if STARTTLS should be used to connect to mail server
-     * 
+     *
      * @return
      */
     public boolean isMailStartTls() {
@@ -419,7 +422,7 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Sets if STARTTLS should be used to connect to transport server
-     * 
+     *
      * @return
      */
     public void setTransportStartTls(boolean transportStartTls) {
@@ -428,11 +431,65 @@ public final class MailAccountDescription implements Serializable {
 
     /**
      * Checks if STARTTLS should be used to connect to transport server
-     * 
+     *
      * @return
      */
     public boolean isTransportStartTls() {
         return transportStartTls;
+    }
+
+    /**
+     * Checks if mail server expects to authenticate via OAuth or not.
+     *
+     * @return <code>true</code> for OAuth authentication, otherwise <code>false</code>.
+     */
+    public boolean isMailOAuthAble() {
+        return mailOAuthId >= 0;
+    }
+
+    /**
+     * Gets the identifier of the associated OAuth account (if any) to authenticate against mail server.
+     *
+     * @return The OAuth account identifier or <code>-1</code> if there is no associated OAuth account
+     */
+    public int getMailOAuthId() {
+        return mailOAuthId < 0 ? -1 : mailOAuthId;
+    }
+
+    /**
+     * Sets the identifier of the associated OAuth account for mail server
+     *
+     * @param mailOAuthId The OAuth account identifier or <code>-1</code> to signal none
+     */
+    public void setMailOAuthId(int mailOAuthId) {
+        this.mailOAuthId = mailOAuthId < 0 ? -1 : mailOAuthId;
+    }
+
+    /**
+     * Checks if transport server expects to authenticate via OAuth or not.
+     *
+     * @return <code>true</code> for OAuth authentication, otherwise <code>false</code>.
+     */
+    public boolean isTransportOAuthAble() {
+        return transportOAuthId >= 0;
+    }
+
+    /**
+     * Gets the identifier of the associated OAuth account (if any) to authenticate against transport server.
+     *
+     * @return The OAuth account identifier or <code>-1</code> if there is no associated OAuth account
+     */
+    public int getTransportOAuthId() {
+        return transportOAuthId < 0 ? -1 : transportOAuthId;
+    }
+
+    /**
+     * Sets the identifier of the associated OAuth account for transport server
+     *
+     * @param transportOAuthId The OAuth account identifier or <code>-1</code> to signal none
+     */
+    public void setTransportOAuthId(int transportOAuthId) {
+        this.transportOAuthId = transportOAuthId < 0 ? -1 : transportOAuthId;
     }
 
     /**
@@ -1090,15 +1147,4 @@ public final class MailAccountDescription implements Serializable {
         return new Object[] { server.subSequence(0, pos), Integer.valueOf(port) };
     }
 
-    public boolean isOAuthAble() {
-        return oauth != null && oauth >= 0;
-    }
-
-    public Long getOAuthID() {
-        return oauth;
-    }
-
-    public void setOAuthID(Long oauthId) {
-        this.oauth = oauthId;
-    }
 }

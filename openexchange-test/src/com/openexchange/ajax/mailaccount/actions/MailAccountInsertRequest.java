@@ -347,13 +347,23 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             }
 
             @Override
-            public boolean isOAuthAble() {
-                return acc.isOAuthAble();
+            public int getMailOAuthId() {
+                return acc.getMailOAuthId();
             }
 
             @Override
-            public Long getOAuthID() {
-                return acc.getOAuthID();
+            public int getTransportOAuthId() {
+                return acc.getTransportOAuthId();
+            }
+
+            @Override
+            public boolean isMailOAuthAble() {
+                return acc.isMailOAuthAble();
+            }
+
+            @Override
+            public boolean isTransportOAuthAble() {
+                return acc.isTransportOAuthAble();
             }
 
             @Override

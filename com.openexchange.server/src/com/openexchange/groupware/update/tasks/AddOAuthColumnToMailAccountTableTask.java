@@ -62,14 +62,20 @@ import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link AddOAuthColumnToMailAccountTableTask} adds a oauth column to the user_transport_account table.
+ * {@link AddOAuthColumnToMailAccountTableTask} - Adds "oauth" column to the "user_mail_account" and "user_transport_account" tables.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.2
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
 public class AddOAuthColumnToMailAccountTableTask extends UpdateTaskAdapter {
 
-    private static final String[] TABLES = new String[] { "user_transport_account", "user_mail_account" };
+    /**
+     * Initializes a new {@link AddOAuthColumnToMailAccountTableTask}.
+     */
+    public AddOAuthColumnToMailAccountTableTask() {
+        super();
+    }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
@@ -79,8 +85,8 @@ public class AddOAuthColumnToMailAccountTableTask extends UpdateTaskAdapter {
         try {
             con = dbService.getForUpdateTask(contextId);
             con.setAutoCommit(false);
-            Column column = new Column("oauth", "INT UNSIGNED");
-            for (String table : TABLES) {
+            Column column = new Column("oauth", "INT(10) UNSIGNED DEFAULT NULL");
+            for (String table : new String[] { "user_transport_account", "user_mail_account" }) {
                 Tools.addColumns(con, table, new Column[] { column });
             }
             con.commit();
