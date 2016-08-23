@@ -152,7 +152,7 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
 
     private enum Scope {
 
-        GOOGLE(API.GOOGLE.getFullName(), "\"https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/drive\""),
+        GOOGLE(API.GOOGLE.getFullName(), "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/drive"),
         MSLIVE_CONNECT(API.MS_LIVE_CONNECT.getFullName(), "wl.offline_access wl.signin wl.basic wl.skydrive wl.skydrive_update wl.contacts_birthday wl.contacts_photos wl.contacts_skydrive wl.contacts_emails wl.photos wl.postal_addresses"),
         LINKEDIN(API.LINKEDIN.getFullName(), "r_basicprofile,r_emailaddress"),
         VKONTAKTE(API.VKONTAKTE.getFullName(), "friends,wall,offline");
