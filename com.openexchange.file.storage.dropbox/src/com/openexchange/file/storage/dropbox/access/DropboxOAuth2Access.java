@@ -99,11 +99,10 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
         final OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
         try {
             final OAuthAccount oauthAccount = oAuthService.getAccount(getAccountId(), session, session.getUserId(), session.getContextId());
+            verifyAccount(oauthAccount);
+            
             DbxRequestConfig config = new DbxRequestConfig(DropboxConfiguration.getInstance().getProductName());
             String accessToken = oauthAccount.getToken();
-            if (Strings.isEmpty(accessToken)) {
-                throw FileStorageExceptionCodes.UNLINKED_ERROR.create();                
-            }
             DbxClientV2 dbxClient = new DbxClientV2(config, accessToken);
             OAuthClient<DbxClientV2> oAuthClient = new OAuthClient<DbxClientV2>(dbxClient, accessToken);
             setOAuthClient(oAuthClient);
