@@ -49,28 +49,22 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.chronos.common.CalendarUtils.contains;
+import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.StringTokenizer;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
-import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.CalendarUser;
-import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -100,12 +94,12 @@ import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.user.UserService;
 
 /**
- * {@link CalendarUtils}
+ * {@link Utils}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CalendarUtils {
+public class Utils {
 
     /** A collection of fields that are always included when querying events from the storage */
     static final List<EventField> MANDATORY_FIELDS = Arrays.asList(
@@ -125,13 +119,13 @@ public class CalendarUtils {
     /**
      * Gets the event fields to include when querying events from the storage based on the client-requested fields defined in the
      * supplied calendar parameters. <p/>
-     * Specific {@link CalendarUtils#MANDATORY_FIELDS} are included implicitly, further required ones may be defined explicitly, too.
+     * Specific {@link Utils#MANDATORY_FIELDS} are included implicitly, further required ones may be defined explicitly, too.
      *
      * @param parameters The calendar parameters to get the requested fields from
      * @param requiredFields Additionally required fields to add, or <code>null</code> if not defined
      * @return The fields to use when querying events from the storage
      * @see CalendarParameters#PARAMETER_FIELDS
-     * @see CalendarUtils#MANDATORY_FIELDS
+     * @see Utils#MANDATORY_FIELDS
      */
     static EventField[] getFields(CalendarParameters parameters, EventField... requiredFields) {
         return getFields(parameters.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class), requiredFields);
@@ -184,12 +178,12 @@ public class CalendarUtils {
 
     /**
      * Gets the event fields to include when querying events from the storage based on the supplied client-requested fields. <p/>
-     * Specific {@link CalendarUtils#MANDATORY_FIELDS} are included implicitly, further required ones may be defined explicitly, too.
+     * Specific {@link Utils#MANDATORY_FIELDS} are included implicitly, further required ones may be defined explicitly, too.
      *
      * @param requestedFields The fields requested by the client, or <code>null</code> to retrieve all fields
      * @param requiredFields Additionally required fields to add, or <code>null</code> if not defined
      * @return The fields to use when querying events from the storage
-     * @see CalendarUtils#MANDATORY_FIELDS
+     * @see Utils#MANDATORY_FIELDS
      */
     static EventField[] getFields(EventField[] requestedFields, EventField... requiredFields) {
         if (null == requestedFields) {
@@ -202,113 +196,6 @@ public class CalendarUtils {
         }
         fields.addAll(Arrays.asList(requestedFields));
         return fields.toArray(new EventField[fields.size()]);
-    }
-
-    /**
-     * Looks up a specific internal attendee in a collection of attendees, utilizing the
-     * {@link CalendarUtils#matches(Attendee, Attendee)} routine.
-     *
-     * @param attendees The attendees to search
-     * @param attendee The attendee to lookup
-     * @return The matching attendee, or <code>null</code> if not found
-     * @see CalendarUtils#matches(Attendee, Attendee)
-     */
-    static Attendee find(List<Attendee> attendees, Attendee attendee) {
-        if (null != attendees && 0 < attendees.size()) {
-            for (Attendee candidateAttendee : attendees) {
-                if (matches(attendee, candidateAttendee)) {
-                    return candidateAttendee;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Gets a value indicating whether a specific attendee is present in a collection of attendees, utilizing the
-     * {@link CalendarUtils#matches(Attendee, Attendee)} routine.
-     *
-     * @param attendees The attendees to search
-     * @param attendee The attendee to lookup
-     * @return <code>true</code> if the attendee is contained in the collection of attendees, <code>false</code>, otherwise
-     * @see CalendarUtils#matches(Attendee, Attendee)
-     */
-    static boolean contains(List<Attendee> attendees, Attendee attendee) {
-        return null != find(attendees, attendee);
-    }
-
-    /**
-     * Gets a value indicating whether one attendee matches another, by comparing the entity identifier for internal attendees,
-     * or trying to match the attendee's URI for external ones.
-     *
-     * @param attendee1 The first attendee to check
-     * @param attendee2 The second attendee to check
-     * @return <code>true</code> if the attendees match, i.e. are targeting the same calendar user, <code>false</code>, otherwise
-     */
-    static boolean matches(Attendee attendee1, Attendee attendee2) {
-        if (null == attendee1) {
-            return null == attendee2;
-        } else if (null != attendee2) {
-            if (0 < attendee1.getEntity() && attendee1.getEntity() == attendee2.getEntity()) {
-                return true;
-            }
-            if (null != attendee1.getUri() && attendee1.getUri().equals(attendee2.getUri())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Looks up a specific internal attendee in a collection of attendees based on its entity identifier.
-     *
-     * @param attendees The attendees to search
-     * @param entity The entity identifier to lookup
-     * @return The matching attendee, or <code>null</code> if not found
-     */
-    static Attendee find(List<Attendee> attendees, int entity) {
-        if (null != attendees && 0 < attendees.size()) {
-            for (Attendee attendee : attendees) {
-                if (entity == attendee.getEntity()) {
-                    return attendee;
-                }
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Gets a value indicating whether a collection of attendees contains a specific internal attendee based on its entity identifier or
-     * not.
-     *
-     * @param attendees The attendees to search
-     * @param entity The entity identifier to lookup
-     * @return <code>true</code> if the attendee was found, <code>false</code>, otherwise
-     */
-    static boolean contains(List<Attendee> attendees, int entity) {
-        return null != find(attendees, entity);
-    }
-
-    /**
-     * Gets a value indicating whether a specific user is the organizer of an event or not.
-     *
-     * @param event The event
-     * @param userId The identifier of the user to check
-     * @return <code>true</code> if the user with the supplied identifier is the organizer, <code>false</code>, otherwise
-     */
-    static boolean isOrganizer(Event event, int userId) {
-        return null != event.getOrganizer() && userId == event.getOrganizer().getEntity();
-    }
-
-    /**
-     * Gets a value indicating whether a specific user is an attendee of an event or not.
-     *
-     * @param event The event
-     * @param userId The identifier of the user to check
-     * @return <code>true</code> if the user with the supplied identifier is an attendee, <code>false</code>, otherwise
-     */
-    static boolean isAttendee(Event event, int userId) {
-        return contains(event.getAttendees(), userId);
     }
 
     /**
@@ -356,34 +243,6 @@ public class CalendarUtils {
         calendarUser.setCn(user.getDisplayName());
         calendarUser.setUri(getCalAddress(user));
         return calendarUser;
-    }
-
-    /**
-     * Truncates the time part of the supplied date, i.e. sets the fields {@link Calendar#HOUR_OF_DAY}, {@link Calendar#MINUTE},
-     * {@link Calendar#SECOND} and {@link Calendar#MILLISECOND} to <code>0</code>.
-     *
-     * @param date The date to truncate the time part for
-     * @param timeZone The timezone to consider
-     * @return A new date instance based on the supplied date with the time fraction truncated
-     */
-    public static Date truncateTime(Date date, TimeZone timeZone) {
-        return truncateTime(initCalendar(timeZone, date)).getTime();
-    }
-
-    /**
-     * Truncates the time part in the supplied calendar reference, i.e. sets the fields {@link Calendar#HOUR_OF_DAY},
-     * {@link Calendar#MINUTE}, {@link Calendar#SECOND} and {@link Calendar#MILLISECOND} to <code>0</code>.
-     *
-     * @param calendar The calendar reference to truncate the time part in
-     * @param timeZone The timezone to consider
-     * @return The calendar reference
-     */
-    public static Calendar truncateTime(Calendar calendar) {
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        return calendar;
     }
 
     /**
@@ -486,66 +345,6 @@ public class CalendarUtils {
     }
 
     /**
-     * Converts a so-called <i>floating</i> date into a date in a concrete timezone by applying the actual timezone offset on that date.
-     *
-     * @param floatingDate The floating date to convert (usually the raw date in <code>UTC</code>)
-     * @param timeZone The target timezone
-     * @return The date in the target timezone, with the corresponding timezone offset applied
-     */
-    static Date getDateInTimeZone(Date floatingDate, TimeZone timeZone) {
-        return new Date(floatingDate.getTime() - timeZone.getOffset(floatingDate.getTime()));
-    }
-
-    /**
-     * Gets the identifiers of the supplied events in an array.
-     *
-     * @param events The events to get the identifiers for
-     * @return The object identifiers
-     */
-    static int[] getObjectIDs(List<Event> events) {
-        int[] objectIDs = new int[events.size()];
-        for (int i = 0; i < events.size(); i++) {
-            objectIDs[i] = events.get(i).getId();
-        }
-        return objectIDs;
-    }
-
-    /**
-     * Gets a value indicating whether the supplied event is considered as the <i>master</i> event of a recurring series or not, based
-     * on the properties {@link EventField#ID} and {@link EventField#SERIES_ID} for equality.
-     *
-     * @param event The event to check
-     * @return <code>true</code> if the event is the series master, <code>false</code>, otherwise
-     */
-    static boolean isSeriesMaster(Event event) {
-        return null != event && event.getId() == event.getSeriesId();
-    }
-
-    /**
-     * Gets a value indicating whether the supplied event is considered as an exceptional event of a recurring series or not, based on
-     * the properties {@link EventField#ID} and {@link EventField#SERIES_ID}.
-     *
-     * @param event The event to check
-     * @return <code>true</code> if the event is the series master, <code>false</code>, otherwise
-     */
-    static boolean isSeriesException(Event event) {
-        return null != event && 0 < event.getSeriesId() && event.getSeriesId() != event.getId();
-    }
-
-    /**
-     * Initializes a new calendar in a specific timezone and sets the initial time.
-     *
-     * @param timeZone The timezone to use for the calendar
-     * @param time The initial time to set
-     * @return A new calendar instance
-     */
-    static Calendar initCalendar(TimeZone timeZone, Date time) {
-        Calendar calendar = GregorianCalendar.getInstance(timeZone);
-        calendar.setTime(time);
-        return calendar;
-    }
-
-    /**
      * Parses a folder's numerical folder identifier.
      *
      * @param folder The folder to get the identifier for
@@ -557,22 +356,6 @@ public class CalendarUtils {
         } catch (NumberFormatException e) {
             throw OXException.general("unsupported folder id: " + folder.getID());//TODO
         }
-    }
-
-    /**
-     * Gets a value indicating whether a specific event falls (at least partly) into a time range.
-     *
-     * @param event The event to check
-     * @param from The lower inclusive limit of the range, i.e. the event should start on or after this date, or <code>null</code> for no limit
-     * @param until The upper exclusive limit of the range, i.e. the event should end before this date, or <code>null</code> for no limit
-     * @param timeZone The timezone to consider if the event has <i>floating</i> dates
-     * @return <code>true</code> if the event falls into the time range, <code>false</code>, otherwise
-     */
-    static boolean isInRange(Event event, Date from, Date until, TimeZone timeZone) {
-        // TODO floating events that are not "all-day"
-        Date startDate = event.isAllDay() ? getDateInTimeZone(event.getStartDate(), timeZone) : event.getStartDate();
-        Date endDate = event.isAllDay() ? getDateInTimeZone(event.getEndDate(), timeZone) : event.getEndDate();
-        return (null == until || startDate.before(until)) && (null == from || endDate.after(from));
     }
 
     /**
@@ -730,49 +513,6 @@ public class CalendarUtils {
     }
 
     /**
-     * Filters a list of attendees based on their calendaruser type, and whether they represent "internal" attendees or not.
-     *
-     * @param attendees The attendees to filter
-     * @param internal {@link Boolean#TRUE} to only consider internal entities, {@link Boolean#FALSE} for non-internal ones,
-     *            or <code>null</code> to not filter by internal/external
-     * @param cuType The {@link CalendarUserType} to consider, or <code>null</code> to not filter by calender user type
-     * @return The filtered attendees
-     */
-    static List<Attendee> filter(List<Attendee> attendees, Boolean internal, CalendarUserType cuType) {
-        if (null == attendees) {
-            return null;
-        }
-        List<Attendee> filteredAttendees = new ArrayList<Attendee>(attendees.size());
-        for (Attendee attendee : attendees) {
-            if (null == cuType || cuType.equals(attendee.getCuType())) {
-                if (null == internal || internal.equals(Boolean.valueOf(0 < attendee.getEntity()))) {
-                    filteredAttendees.add(attendee);
-                }
-            }
-        }
-        return filteredAttendees;
-    }
-
-    /**
-     * Gets the entity identifiers of all attendees representing internal users.
-     *
-     * @param attendees The attendees to extract the user identifiers for
-     * @return The user identifiers, or an empty array if there are none
-     */
-    static int[] getUserIDs(List<Attendee> attendees) {
-        if (null == attendees || 0 == attendees.size()) {
-            return new int[0];
-        }
-        List<Integer> userIDs = new ArrayList<Integer>(attendees.size());
-        for (Attendee attendee : attendees) {
-            if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && 0 < attendee.getEntity()) {
-                userIDs.add(I(attendee.getEntity()));
-            }
-        }
-        return I2i(userIDs);
-    }
-
-    /**
      * Gets the actual target calendar user for a specific folder. This is either the current session's user for "private" or "public"
      * folders, or the folder owner for "shared" calendar folders.
      *
@@ -795,54 +535,6 @@ public class CalendarUtils {
      */
     static User getProxyUser(UserizedFolder folder) throws OXException {
         return SharedType.getInstance().equals(folder.getType()) ? folder.getUser() : null;
-    }
-
-    /**
-     * Parses a trigger duration string.
-     *
-     * @param duration The duration to parse
-     * @return The total milliseconds of the parsed duration
-     * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.3.6">RFC 5545, section 3.3.6</a>
-     */
-    static long getTriggerDuration(String duration) {
-        long totalMillis = 0;
-        boolean negative = false;
-        String token = null;
-        String previousToken = null;
-        StringTokenizer tokenizer = new StringTokenizer(duration.toUpperCase(), "+-PWDTHMS", true);
-        while (tokenizer.hasMoreTokens()) {
-            token = tokenizer.nextToken();
-            switch (token) {
-                case "+":
-                    negative = false;
-                    break;
-                case "-":
-                    negative = true;
-                    break;
-                case "W":
-                    totalMillis += TimeUnit.DAYS.toMillis(7 * Long.parseLong(previousToken));
-                    break;
-                case "D":
-                    totalMillis += TimeUnit.DAYS.toMillis(Long.parseLong(previousToken));
-                    break;
-                case "H":
-                    totalMillis += TimeUnit.HOURS.toMillis(Long.parseLong(previousToken));
-                    break;
-                case "M":
-                    totalMillis += TimeUnit.MINUTES.toMillis(Long.parseLong(previousToken));
-                    break;
-                case "S":
-                    totalMillis += TimeUnit.SECONDS.toMillis(Long.parseLong(previousToken));
-                    break;
-                case "T":
-                case "P":
-                default:
-                    // skip
-                    break;
-            }
-            previousToken = token;
-        }
-        return negative ? -1 * totalMillis : totalMillis;
     }
 
 }

@@ -47,73 +47,73 @@
  *
  */
 
-package com.openexchange.chronos.impl.osgi;
+package com.openexchange.chronos;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.CalendarHandler;
-import com.openexchange.chronos.CalendarService;
-import com.openexchange.chronos.RecurrenceService;
-import com.openexchange.chronos.impl.CalendarServiceImpl;
-import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.group.GroupService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceSet;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.user.UserService;
+import java.util.Set;
 
 /**
- * {@link ChronosActivator}
+ * {@link UpdateResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ChronosActivator extends HousekeepingActivator {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ChronosActivator.class);
+public interface UpdateResult {
 
     /**
-     * Initializes a new {@link ChronosActivator}.
+     * Gets the underlying calendar session.
+     *
+     * @return The calendar session
      */
-    public ChronosActivator() {
-        super();
-    }
+    CalendarSession getSession();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CalendarStorageFactory.class, FolderService.class, UserService.class,
-            GroupService.class, ResourceService.class, DatabaseService.class, RecurrenceService.class };
-    }
+    /**
+     * Gets the original event.
+     *
+     * @return The original event
+     */
+    Event getOriginalEvent();
 
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: \"com.openexchange.chronos.impl\"");
-            Services.setServiceLookup(this);
-            /*
-             * track calendar handlers
-             */
-            ServiceSet<CalendarHandler> calendarHandlers = new ServiceSet<CalendarHandler>();
-            track(CalendarHandler.class, calendarHandlers);
-            openTrackers();
-            /*
-             * register services
-             */
-            registerService(CalendarService.class, new CalendarServiceImpl(calendarHandlers));
-        } catch (Exception e) {
-            LOG.error("error starting \"com.openexchange.chronos.impl\"", e);
-            throw e;
-        }
-    }
+    /**
+     * Gets the updated event.
+     *
+     * @return The updated event
+     */
+    Event getUpdatedEvent();
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: \"com.openexchange.chronos.impl\"");
-        Services.setServiceLookup(null);
-        super.stopBundle();
-    }
+    /**
+     * Gets the identifier of the folder the event has been updated in.
+     *
+     * @return The original folder identifier
+     */
+    int getOriginalFolderID();
+
+    /**
+     * Gets the identifier of the folder the event has been moved into.
+     *
+     * @return The updated folder identifier, or the original folder identifier if no move took place
+     */
+    int getUpdatedFolderID();
+
+    /**
+     * Gets a set of fields that were modified through the update operation.
+     *
+     * @return The updated fields
+     */
+    Set<EventField> getUpdatedFields();
+
+    /**
+     * Gets the attendee-related modifications performed through the update operation.
+     *
+     * @return The attendee updates, or an empty attendee diff if there were no attendee-related changes
+     */
+    AttendeeDiff getAttendeeUpdates();
+
+    /**
+     * Gets a value indicating whether at least one of the specified fields has been modified through the update operation.
+     *
+     * @param fields The event fields to check
+     * @return <code>true</code> if at least one field was updated, <code>false</code>, otherwise
+     */
+    boolean containsAnyChangeOf(EventField... fields);
 
 }

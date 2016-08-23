@@ -61,6 +61,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 
@@ -117,9 +118,9 @@ public class Consistency {
             organizer = new Organizer();
             event.setOrganizer(organizer);
         }
-        organizer = CalendarUtils.applyProperties(organizer, user);
+        organizer = Utils.applyProperties(organizer, user);
         if (null != sentBy && sentBy.getId() != user.getId()) {
-            organizer.setSentBy(CalendarUtils.getCalAddress(sentBy));
+            organizer.setSentBy(Utils.getCalAddress(sentBy));
         }
         return organizer;
     }

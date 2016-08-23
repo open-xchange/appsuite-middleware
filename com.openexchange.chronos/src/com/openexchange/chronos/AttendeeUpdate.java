@@ -47,73 +47,76 @@
  *
  */
 
-package com.openexchange.chronos.impl.osgi;
+package com.openexchange.chronos;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.CalendarHandler;
-import com.openexchange.chronos.CalendarService;
-import com.openexchange.chronos.RecurrenceService;
-import com.openexchange.chronos.impl.CalendarServiceImpl;
-import com.openexchange.chronos.storage.CalendarStorageFactory;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.group.GroupService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceSet;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.user.UserService;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * {@link ChronosActivator}
+ * {@link AttendeeUpdate}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class ChronosActivator extends HousekeepingActivator {
+public class AttendeeUpdate {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ChronosActivator.class);
+    private final Attendee originalAttendee;
+    private final Attendee updatedAttendee;
+    private final Set<AttendeeField> updatedFields;
 
     /**
-     * Initializes a new {@link ChronosActivator}.
+     * Initializes a new {@link AttendeeUpdate}.
+     *
+     * @param originalAttendee The attendee in the original event, or <code>null</code> for a newly added attendee
+     * @param updatedAttendee The attendee in the updated event, or <code>null</code> for a removed attendee
+     * @param updatedFields The attendee fields that were modified through the update
      */
-    public ChronosActivator() {
+    public AttendeeUpdate(Attendee originalAttendee, Attendee updatedAttendee, AttendeeField[] updatedFields) {
+        this(originalAttendee, updatedAttendee, Collections.unmodifiableSet(new HashSet<AttendeeField>(Arrays.asList(updatedFields))));
+    }
+
+    /**
+     * Initializes a new {@link AttendeeUpdate}.
+     *
+     * @param originalAttendee The attendee in the original event, or <code>null</code> for a newly added attendee
+     * @param updatedAttendee The attendee in the updated event, or <code>null</code> for a removed attendee
+     * @param updatedFields The attendee fields that were modified through the update
+     */
+    public AttendeeUpdate(Attendee originalAttendee, Attendee updatedAttendee, Set<AttendeeField> updatedFields) {
         super();
+        this.originalAttendee = originalAttendee;
+        this.updatedAttendee = updatedAttendee;
+        this.updatedFields = updatedFields;
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CalendarStorageFactory.class, FolderService.class, UserService.class,
-            GroupService.class, ResourceService.class, DatabaseService.class, RecurrenceService.class };
+    /**
+     * Gets the attendee in the original event.
+     *
+     * @return The attendee in the original event, or <code>null</code> for a newly added attendee
+     */
+    public Attendee getOriginalAttendee() {
+        return originalAttendee;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: \"com.openexchange.chronos.impl\"");
-            Services.setServiceLookup(this);
-            /*
-             * track calendar handlers
-             */
-            ServiceSet<CalendarHandler> calendarHandlers = new ServiceSet<CalendarHandler>();
-            track(CalendarHandler.class, calendarHandlers);
-            openTrackers();
-            /*
-             * register services
-             */
-            registerService(CalendarService.class, new CalendarServiceImpl(calendarHandlers));
-        } catch (Exception e) {
-            LOG.error("error starting \"com.openexchange.chronos.impl\"", e);
-            throw e;
-        }
+    /**
+     * Gets the attendee in the updated event.
+     *
+     * @return The attendee in the updated event, or <code>null</code> for a removed attendee
+     */
+    public Attendee getUpdatedAttendee() {
+        return updatedAttendee;
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: \"com.openexchange.chronos.impl\"");
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    /**
+     * Gets the attendee fields that were modified through the update
+     *
+     * @return The updated fields
+     */
+    public Set<AttendeeField> getUpdatedFields() {
+        return updatedFields;
     }
 
 }
+

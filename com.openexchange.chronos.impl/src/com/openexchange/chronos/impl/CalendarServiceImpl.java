@@ -52,13 +52,16 @@ package com.openexchange.chronos.impl;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarHandler;
 import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.CreateResult;
 import com.openexchange.chronos.EventID;
+import com.openexchange.chronos.UpdateResult;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.ServiceSet;
 
 /**
  * {@link CalendarService}
@@ -68,11 +71,16 @@ import com.openexchange.exception.OXException;
  */
 public class CalendarServiceImpl implements CalendarService {
 
+    private final ServiceSet<CalendarHandler> calendarHandlers;
+
     /**
      * Initializes a new {@link CalendarServiceImpl}.
+     *
+     * @param calendarHandlers The calendar handlers
      */
-    public CalendarServiceImpl() {
+    public CalendarServiceImpl(ServiceSet<CalendarHandler> calendarHandlers) {
         super();
+        this.calendarHandlers = calendarHandlers;
     }
 
     @Override
@@ -202,28 +210,46 @@ public class CalendarServiceImpl implements CalendarService {
 
     @Override
     public CreateResult createEvent(CalendarSession session, final UserizedEvent event) throws OXException {
-        CreateResult result = new WriteOperation<CreateResult>(session) {
+        /*
+         * insert event
+         */
+        CreateResultImpl result = new WriteOperation<CreateResultImpl>(session) {
 
             @Override
-            protected CreateResult execute(CalendarWriter writer) throws OXException {
+            protected CreateResultImpl execute(CalendarWriter writer) throws OXException {
                 return writer.insertEvent(event);
             }
         }.execute();
-
+        /*
+         * notify handlers
+         */
+        for (CalendarHandler handler : calendarHandlers) {
+            handler.eventCreated(result);
+        }
         return result;
     }
 
     @Override
-    public UserizedEvent updateEvent(CalendarSession session, final EventID eventID, final UserizedEvent event) throws OXException {
+    public UpdateResult updateEvent(CalendarSession session, final EventID eventID, final UserizedEvent event) throws OXException {
+        /*
+         * update event
+         */
         Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
         final long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
-        return new WriteOperation<UserizedEvent>(session) {
+        UpdateResultImpl result = new WriteOperation<UpdateResultImpl>(session) {
 
             @Override
-            protected UserizedEvent execute(CalendarWriter writer) throws OXException {
+            protected UpdateResultImpl execute(CalendarWriter writer) throws OXException {
                 return writer.updateEvent(eventID, event, clientTimestamp);
             }
         }.execute();
+        /*
+         * notify handlers
+         */
+        for (CalendarHandler handler : calendarHandlers) {
+            handler.eventUpdated(result);
+        }
+        return result;
     }
 
     @Override

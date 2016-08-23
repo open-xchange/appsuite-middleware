@@ -47,15 +47,28 @@
  *
  */
 
-package com.openexchange.chronos.common;
-
+package com.openexchange.chronos;
 
 /**
- * {@link DefaultVAlarmImport}
+ * {@link CalendarHandler}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class Recurrrr {
+public interface CalendarHandler {
+
+    /**
+     * Invoked after an event has been created.
+     *
+     * @param result The create result holding information about the created event
+     */
+    void eventCreated(CreateResult result);
+
+    /**
+     * Invoked after an event has been update.
+     *
+     * @param result The create result holding information about the updated event
+     */
+    void eventUpdated(UpdateResult result);
 
 }

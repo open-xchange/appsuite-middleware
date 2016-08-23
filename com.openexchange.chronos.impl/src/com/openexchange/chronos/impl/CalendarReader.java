@@ -49,27 +49,29 @@
 
 package com.openexchange.chronos.impl;
 
-import static com.openexchange.chronos.impl.CalendarUtils.anonymizeIfNeeded;
-import static com.openexchange.chronos.impl.CalendarUtils.appendCommonTerms;
-import static com.openexchange.chronos.impl.CalendarUtils.find;
-import static com.openexchange.chronos.impl.CalendarUtils.getCalendarUser;
-import static com.openexchange.chronos.impl.CalendarUtils.getFields;
-import static com.openexchange.chronos.impl.CalendarUtils.getFolderIdTerm;
-import static com.openexchange.chronos.impl.CalendarUtils.getFrom;
-import static com.openexchange.chronos.impl.CalendarUtils.getObjectIDs;
-import static com.openexchange.chronos.impl.CalendarUtils.getSearchTerm;
-import static com.openexchange.chronos.impl.CalendarUtils.getTimeZone;
-import static com.openexchange.chronos.impl.CalendarUtils.getUntil;
-import static com.openexchange.chronos.impl.CalendarUtils.i;
-import static com.openexchange.chronos.impl.CalendarUtils.initCalendar;
-import static com.openexchange.chronos.impl.CalendarUtils.isAttendee;
-import static com.openexchange.chronos.impl.CalendarUtils.isExcluded;
-import static com.openexchange.chronos.impl.CalendarUtils.isInRange;
-import static com.openexchange.chronos.impl.CalendarUtils.isIncludePrivate;
-import static com.openexchange.chronos.impl.CalendarUtils.isResolveOccurrences;
-import static com.openexchange.chronos.impl.CalendarUtils.isSeriesMaster;
-import static com.openexchange.chronos.impl.CalendarUtils.sort;
+import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.common.CalendarUtils.getObjectIDs;
+import static com.openexchange.chronos.common.CalendarUtils.initCalendar;
+import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
+import static com.openexchange.chronos.common.CalendarUtils.isInRange;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.chronos.impl.Utils.anonymizeIfNeeded;
+import static com.openexchange.chronos.impl.Utils.appendCommonTerms;
+import static com.openexchange.chronos.impl.Utils.find;
+import static com.openexchange.chronos.impl.Utils.getCalendarUser;
+import static com.openexchange.chronos.impl.Utils.getFields;
+import static com.openexchange.chronos.impl.Utils.getFolderIdTerm;
+import static com.openexchange.chronos.impl.Utils.getFrom;
+import static com.openexchange.chronos.impl.Utils.getSearchTerm;
+import static com.openexchange.chronos.impl.Utils.getTimeZone;
+import static com.openexchange.chronos.impl.Utils.getUntil;
+import static com.openexchange.chronos.impl.Utils.i;
+import static com.openexchange.chronos.impl.Utils.isExcluded;
+import static com.openexchange.chronos.impl.Utils.isIncludePrivate;
+import static com.openexchange.chronos.impl.Utils.isResolveOccurrences;
+import static com.openexchange.chronos.impl.Utils.sort;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.READ_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.READ_FOLDER;
@@ -214,9 +216,9 @@ public class CalendarReader {
          * interpret range as "utc" dates
          */
         Calendar calendar = initCalendar(TimeZone.getTimeZone("UTC"), from);
-        Date rangeStart = CalendarUtils.truncateTime(calendar).getTime();
+        Date rangeStart = truncateTime(calendar).getTime();
         calendar.setTime(until);
-        CalendarUtils.truncateTime(calendar);
+        truncateTime(calendar);
         calendar.add(Calendar.DAY_OF_YEAR, 1);
         Date rangeEnd = calendar.getTime();
         /*

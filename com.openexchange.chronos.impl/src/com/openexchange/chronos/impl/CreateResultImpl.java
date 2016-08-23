@@ -49,10 +49,6 @@
 
 package com.openexchange.chronos.impl;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.CreateResult;
 import com.openexchange.chronos.Event;
@@ -68,14 +64,19 @@ public class CreateResultImpl implements CreateResult {
     private final CalendarSession session;
     private final int folderID;
     private final Event createdEvent;
-    private final Map<Integer, List<Alarm>> alarmsByUser;
 
-    public CreateResultImpl(CalendarSession session, int folderID, Event createdEvent, Map<Integer, List<Alarm>> alarmsByUser) {
+    /**
+     * Initializes a new {@link CreateResultImpl}.
+     *
+     * @param session The calendar session
+     * @param folderID The identifier of the folder the event has been created in.
+     * @param createdEvent The created event
+     */
+    public CreateResultImpl(CalendarSession session, int folderID, Event createdEvent) {
         super();
         this.session = session;
         this.folderID = folderID;
         this.createdEvent = createdEvent;
-        this.alarmsByUser = alarmsByUser;
     }
 
     @Override
@@ -86,11 +87,6 @@ public class CreateResultImpl implements CreateResult {
     @Override
     public Event getCreatedEvent() {
         return createdEvent;
-    }
-
-    @Override
-    public List<Alarm> getAlarms(int userID) {
-        return alarmsByUser.get(I(userID));
     }
 
     @Override

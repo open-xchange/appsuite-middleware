@@ -53,28 +53,32 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeDiff;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.AttendeeUpdate;
+import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link AttendeeDiff}
+ * {@link AttendeeDiffImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class AttendeeDiff {
+public class AttendeeDiffImpl implements AttendeeDiff {
 
     private final List<Attendee> removedAttendees;
     private final List<Attendee> addedAttendees;
-    private final List<Attendee[]> updatedAttendees;
+    private final List<AttendeeUpdate> updatedAttendees;
 
     /**
-     * Initializes a new {@link AttendeeDiff}.
+     * Initializes a new {@link AttendeeDiffImpl}.
      *
      * @param originalAttendees The attendees of the original event, or <code>null</code> for new events
      * @param newAttendees The attendees of the updated event, or <code>null</code> for event deletions
      */
-    public AttendeeDiff(List<Attendee> originalAttendees, List<Attendee> newAttendees) throws OXException {
+    public AttendeeDiffImpl(List<Attendee> originalAttendees, List<Attendee> newAttendees) throws OXException {
         super();
         if (null == originalAttendees || 0 == originalAttendees.size()) {
             removedAttendees = Collections.emptyList();
@@ -90,16 +94,20 @@ public class AttendeeDiff {
             addedAttendees = Collections.emptyList();
         } else {
             addedAttendees = new ArrayList<Attendee>();
-            updatedAttendees = new ArrayList<Attendee[]>();
+            updatedAttendees = new ArrayList<AttendeeUpdate>();
             removedAttendees = new ArrayList<Attendee>();
             for (Attendee newAttendee : newAttendees) {
                 Attendee originalAttendee = CalendarUtils.find(originalAttendees, newAttendee);
                 if (null == originalAttendee) {
                     addedAttendees.add(newAttendee);
-                } else if (isUpdated(originalAttendee, newAttendee)) {
-                    updatedAttendees.add(new Attendee[] { originalAttendee, newAttendee });
                 } else {
-                    // not changed
+                    Attendee deltaAttendee = AttendeeMapper.getInstance().getDifferences(originalAttendee, newAttendee);
+                    AttendeeField[] updatedFields = AttendeeMapper.getInstance().getAssignedFields(deltaAttendee);
+                    if (0 < updatedFields.length) {
+                        updatedAttendees.add(new AttendeeUpdate(originalAttendee, newAttendee, updatedFields));
+                    } else {
+                        // not changed
+                    }
                 }
             }
             for (Attendee originalAttendee : originalAttendees) {
@@ -111,38 +119,47 @@ public class AttendeeDiff {
         }
     }
 
-    /**
-     * Gets a list of removed attendees, i.e. attendees that are no longer present in the updated list of attendees.
-     *
-     * @return The removed attendees
-     */
+    @Override
     public List<Attendee> getRemovedAttendees() {
         return removedAttendees;
     }
 
-    /**
-     * Gets a list of updated attendees, i.e. attendees that were not present in the original list of attendees.
-     *
-     * @return The added attendees
-     */
+    @Override
+    public List<Attendee> getRemovedAttendees(Boolean internal, CalendarUserType cuType) {
+        return CalendarUtils.filter(removedAttendees, internal, cuType);
+    }
+
+    @Override
     public List<Attendee> getAddedAttendees() {
         return addedAttendees;
     }
 
-    /**
-     * Gets a list of updated attendees, i.e. attendees that are considered as modified between the original and updated lists of
-     * attendees.
-     *
-     * @return The updated attendees
-     */
-    public List<Attendee[]> getUpdatedAttendees() {
+    @Override
+    public List<Attendee> getAddedAttendees(Boolean internal, CalendarUserType cuType) {
+        return CalendarUtils.filter(addedAttendees, internal, cuType);
+    }
+
+    @Override
+    public List<AttendeeUpdate> getUpdatedAttendees() {
         return updatedAttendees;
     }
 
-    private boolean isUpdated(Attendee originalAttendee, Attendee newAttendee) throws OXException {
-        Attendee deltaAttendee = AttendeeMapper.getInstance().getDifferences(originalAttendee, newAttendee);
-        AttendeeField[] updatedFields = AttendeeMapper.getInstance().getAssignedFields(deltaAttendee);
-        return 0 < updatedFields.length;
+    @Override
+    public List<AttendeeUpdate> getUpdatedAttendees(Boolean internal, CalendarUserType cuType) {
+        List<AttendeeUpdate> filteredUpdates = new ArrayList<AttendeeUpdate>(updatedAttendees.size());
+        for (AttendeeUpdate attendeeUpdate : updatedAttendees) {
+            if (null == cuType || cuType.equals(attendeeUpdate.getOriginalAttendee().getCuType())) {
+                if (null == internal || internal.equals(Boolean.valueOf(0 < attendeeUpdate.getOriginalAttendee().getEntity()))) {
+                    filteredUpdates.add(attendeeUpdate);
+                }
+            }
+        }
+        return filteredUpdates;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return 0 == removedAttendees.size() && 0 == addedAttendees.size() && 0 == updatedAttendees.size();
     }
 
     @Override

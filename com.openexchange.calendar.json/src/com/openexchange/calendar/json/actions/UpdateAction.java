@@ -68,6 +68,7 @@ import com.openexchange.chronos.CalendarParameters;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.EventID;
+import com.openexchange.chronos.UpdateResult;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -178,8 +179,8 @@ public final class UpdateAction extends ChronosAction {
         calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
 
         UserizedEvent event = getEventConverter().getEvent(calendarSession, appointment, eventID);
-        UserizedEvent updatedEvent = calendarService.updateEvent(calendarSession, eventID, event);
-        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, updatedEvent.getEvent().getId()), updatedEvent.getEvent().getLastModified(), "json");
+        UpdateResult result = calendarService.updateEvent(calendarSession, eventID, event);
+        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, result.getUpdatedEvent().getId()), result.getUpdatedEvent().getLastModified(), "json");
     }
 
 }

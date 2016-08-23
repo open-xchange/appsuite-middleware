@@ -49,19 +49,20 @@
 
 package com.openexchange.chronos.impl;
 
-import static com.openexchange.chronos.impl.CalendarUtils.applyProperties;
-import static com.openexchange.chronos.impl.CalendarUtils.contains;
-import static com.openexchange.chronos.impl.CalendarUtils.filter;
-import static com.openexchange.chronos.impl.CalendarUtils.find;
-import static com.openexchange.chronos.impl.CalendarUtils.getCalAddress;
-import static com.openexchange.chronos.impl.CalendarUtils.getCalendarUser;
-import static com.openexchange.chronos.impl.CalendarUtils.i;
+import static com.openexchange.chronos.common.CalendarUtils.contains;
+import static com.openexchange.chronos.common.CalendarUtils.filter;
+import static com.openexchange.chronos.common.CalendarUtils.find;
+import static com.openexchange.chronos.impl.Utils.applyProperties;
+import static com.openexchange.chronos.impl.Utils.getCalAddress;
+import static com.openexchange.chronos.impl.Utils.getCalendarUser;
+import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.AttendeeUpdate;
 import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ParticipationStatus;
@@ -170,7 +171,7 @@ public class AttendeeHelper {
     }
 
     private void processUpdatedEvent(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
-        AttendeeDiff attendeeDiff = new AttendeeDiff(originalAttendees, updatedAttendees);
+        AttendeeDiffImpl attendeeDiff = new AttendeeDiffImpl(originalAttendees, updatedAttendees);
         List<Attendee> attendeeList = new ArrayList<Attendee>(originalAttendees);
         /*
          * delete removed attendees
@@ -187,11 +188,11 @@ public class AttendeeHelper {
         /*
          * apply updated attendee data
          */
-        for (Attendee[] updatedAttendee : attendeeDiff.getUpdatedAttendees()) {
-            Attendee attendeeUpdate = new Attendee();
-            AttendeeMapper.getInstance().copy(updatedAttendee[0], attendeeUpdate, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
-            AttendeeMapper.getInstance().copy(updatedAttendee[1], attendeeUpdate, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
-            attendeesToUpdate.add(attendeeUpdate);
+        for (AttendeeUpdate attendeeUpdate : attendeeDiff.getUpdatedAttendees()) {
+            Attendee attendee = new Attendee();
+            AttendeeMapper.getInstance().copy(attendeeUpdate.getOriginalAttendee(), attendee, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
+            AttendeeMapper.getInstance().copy(attendeeUpdate.getUpdatedAttendee(), attendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
+            attendeesToUpdate.add(attendee);
         }
         /*
          * prepare & add all new attendees
@@ -232,7 +233,7 @@ public class AttendeeHelper {
                     continue;
                 }
                 Attendee memberAttendee = getAttendeeForInsert(getUser(memberID), null, folder.getType());
-                memberAttendee.setMember(CalendarUtils.getCalAddress(session.getContext().getContextId(), group));
+                memberAttendee.setMember(Utils.getCalAddress(session.getContext().getContextId(), group));
                 attendees.add(memberAttendee);
             }
         }

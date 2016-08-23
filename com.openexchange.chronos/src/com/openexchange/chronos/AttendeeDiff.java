@@ -49,34 +49,72 @@
 
 package com.openexchange.chronos;
 
+import java.util.List;
+
 /**
- * {@link CreateResult}
+ * {@link AttendeeDiff}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CreateResult {
+public interface AttendeeDiff {
 
     /**
-     * Gets the underlying calendar session.
+     * Gets the list of newly added attendees.
      *
-     * @return The calendar session
+     * @return The added attendees, or an empty list if there are none
      */
-    CalendarSession getSession();
+    List<Attendee> getAddedAttendees();
 
     /**
-     * Gets the created event.
+     * Gets a filtered list of newly added attendees.
      *
-     * @return The event
+     * @param internal {@link Boolean#TRUE} to only consider internal entities, {@link Boolean#FALSE} for non-internal ones,
+     *            or <code>null</code> to not filter by internal/external
+     * @param cuType The {@link CalendarUserType} to consider, or <code>null</code> to not filter by calendar user type
+     * @return The added attendees, or an empty list if there are none
      */
-    Event getCreatedEvent();
+    List<Attendee> getAddedAttendees(Boolean internal, CalendarUserType cuType);
 
     /**
-     * Gets the identifier of the folder the event has been created in, representing the view of the calendar user.
+     * Gets the list of removed attendees.
      *
-     * @return The folder identifier
+     * @return The removed attendees, or an empty list if there are none
      */
-    int getFolderID();
+    List<Attendee> getRemovedAttendees();
+
+    /**
+     * Gets a filtered list of removed attendees.
+     *
+     * @param internal {@link Boolean#TRUE} to only consider internal entities, {@link Boolean#FALSE} for non-internal ones,
+     *            or <code>null</code> to not filter by internal/external
+     * @param cuType The {@link CalendarUserType} to consider, or <code>null</code> to not filter by calendar user type
+     * @return The removed attendees, or an empty list if there are none
+     */
+    List<Attendee> getRemovedAttendees(Boolean internal, CalendarUserType cuType);
+
+    /**
+     * Gets the list of updated attendees.
+     *
+     * @return The updated attendees, or an empty list if there are none
+     */
+    List<AttendeeUpdate> getUpdatedAttendees();
+
+    /**
+     * Gets a filtered list of updated attendees.
+     *
+     * @param internal {@link Boolean#TRUE} to only consider internal entities, {@link Boolean#FALSE} for non-internal ones,
+     *            or <code>null</code> to not filter by internal/external
+     * @param cuType The {@link CalendarUserType} to consider, or <code>null</code> to not filter by calendar user type
+     * @return The updated attendees, or an empty list if there are none
+     */
+    List<AttendeeUpdate> getUpdatedAttendees(Boolean internal, CalendarUserType cuType);
+
+    /**
+     * Gets a value indicating whether the attendee diff is empty, if there are changes of any kind or not.
+     *
+     * @return <code>true</code> if there were no changes at all, <code>false</code>, otherwise
+     */
+    boolean isEmpty();
 
 }
-

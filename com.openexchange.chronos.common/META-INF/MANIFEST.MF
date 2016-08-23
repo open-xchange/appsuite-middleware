@@ -23,7 +23,8 @@ Import-Package: com.openexchange.ajax.container,
  org.osgi.framework,
  org.osgi.service.event,
  org.slf4j
-Export-Package: org.dmfs.rfc5545,
+Export-Package: com.openexchange.chronos.common,
+ org.dmfs.rfc5545,
  org.dmfs.rfc5545.calendarmetrics,
  org.dmfs.rfc5545.recur,
  org.dmfs.rfc5545.recurrenceset
