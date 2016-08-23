@@ -90,7 +90,7 @@ public class SQLStructure {
         SERVICE_ID("serviceId"),
         SCOPE("scope");
 
-        public static Set<OAUTH_COLUMN> updateableColumns = EnumSet.complementOf(EnumSet.of(CID, USER, ID, SERVICE_ID, SCOPE));
+        public static Set<OAUTH_COLUMN> updateableColumns = EnumSet.complementOf(EnumSet.of(CID, USER, ID, SERVICE_ID));
 
         private final Column column;
 
