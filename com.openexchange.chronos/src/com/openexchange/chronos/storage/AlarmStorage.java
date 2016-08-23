@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.storage;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Alarm;
@@ -78,7 +77,5 @@ public interface AlarmStorage {
     void updateAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException;
 
     void deleteAlarms(int objectID) throws OXException;
-
-    void registerTrigger(int folderID, int objectID, int userID, Date triggerDate, boolean forSeries) throws OXException;
 
 }

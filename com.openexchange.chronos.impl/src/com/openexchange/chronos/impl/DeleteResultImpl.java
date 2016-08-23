@@ -47,54 +47,50 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.impl;
 
-import java.util.Date;
-import java.util.List;
+import com.openexchange.chronos.CalendarSession;
+import com.openexchange.chronos.DeleteResult;
+import com.openexchange.chronos.Event;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link CalendarService}
+ * {@link DeleteResultImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarService {
+public class DeleteResultImpl extends UpdateResultImpl implements DeleteResult {
 
-    int resolveByUID(CalendarSession session, String uid) throws OXException;
+    /**
+     * Initializes a new {@link DeleteResultImpl}.
+     *
+     * @param session The calendar session
+     * @param originalFolderID The original folder identifier
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event, in case the delete operation lead to an update instead, or <code>null</code>, if the event was deleted
+     */
+    public DeleteResultImpl(CalendarSession session, int originalFolderID, Event originalEvent, Event updatedEvent) throws OXException {
+        super(session, originalFolderID, originalEvent, originalFolderID, updatedEvent);
+    }
 
-    long getSequenceNumber(CalendarSession session, int folderID) throws OXException;
+    /**
+     * Gets a value indicating whether the delete operation resulted in an event update instead of a deletion.
+     *
+     * @return <code>true</code> if the result represents an update, <code>false</code>, otherwise
+     */
+    public boolean wasUpdate() {
+        return null != getUpdatedEvent();
+    }
 
-    boolean[] hasEventsBetween(CalendarSession session, Date from, Date until) throws OXException;
+    @Override
+    public Event getDeletedEvent() {
+        return getOriginalEvent();
+    }
 
-    List<UserizedEvent> searchEvents(CalendarSession session, int[] folderIDs, String pattern) throws OXException;
-
-    List<UserizedEvent> getChangeExceptions(CalendarSession session, int folderID, int objectID) throws OXException;
-
-    UserizedEvent getEvent(CalendarSession session, int folderID, int objectID) throws OXException;
-
-    List<UserizedEvent> getEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
-
-    List<UserizedEvent> getEventsInFolder(CalendarSession session, int folderID) throws OXException;
-
-    List<UserizedEvent> getEventsOfUser(CalendarSession session) throws OXException;
-
-    CreateResult createEvent(CalendarSession session, UserizedEvent event) throws OXException;
-
-    UpdateResult updateEvent(CalendarSession session, EventID eventID, UserizedEvent event) throws OXException;
-
-    //    UserizedEvent moveEvent(CalendarSession session, EventID eventID, int targetFolderID) throws OXException;
-
-    UpdateResult updateAttendee(CalendarSession session, int folderID, int objectID, Attendee attendee) throws OXException;
-
-    void deleteEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
-
-    List<UserizedEvent> getUpdatedEventsInFolder(CalendarSession session, int folderID, Date updatedSince) throws OXException;
-
-    List<UserizedEvent> getDeletedEventsInFolder(CalendarSession session, int folderID, Date deletedSince) throws OXException;
-
-    List<UserizedEvent> getUpdatedEventsOfUser(CalendarSession session, Date updatedSince) throws OXException;
-
-    List<UserizedEvent> getDeletedEventsOfUser(CalendarSession session, Date deletedSince) throws OXException;
+    @Override
+    public int getFolderID() {
+        return getOriginalFolderID();
+    }
 
 }

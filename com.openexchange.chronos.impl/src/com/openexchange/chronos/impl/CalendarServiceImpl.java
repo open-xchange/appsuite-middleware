@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
@@ -253,30 +254,56 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public UserizedEvent updateAttendee(CalendarSession session, final int folderID, final int objectID, final Attendee attendee) throws OXException {
-        return new WriteOperation<UserizedEvent>(session) {
+    public UpdateResult updateAttendee(CalendarSession session, final int folderID, final int objectID, final Attendee attendee) throws OXException {
+        /*
+         * update event
+         */
+        UpdateResultImpl result = new WriteOperation<UpdateResultImpl>(session) {
 
             @Override
-            protected UserizedEvent execute(CalendarWriter writer) throws OXException {
+            protected UpdateResultImpl execute(CalendarWriter writer) throws OXException {
                 return writer.updateAttendee(folderID, objectID, attendee);
             }
         }.execute();
+        /*
+         * notify handlers
+         */
+        for (CalendarHandler handler : calendarHandlers) {
+            handler.eventUpdated(result);
+        }
+        return result;
     }
 
     @Override
     public void deleteEvents(CalendarSession session, final List<EventID> eventIDs) throws OXException {
         Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
         final long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
-        new WriteOperation<Void>(session) {
+        List<DeleteResultImpl> results = new WriteOperation<List<DeleteResultImpl>>(session) {
 
             @Override
-            protected Void execute(CalendarWriter writer) throws OXException {
+            protected List<DeleteResultImpl> execute(CalendarWriter writer) throws OXException {
+                List<DeleteResultImpl> results = new ArrayList<DeleteResultImpl>(eventIDs.size());
                 for (EventID eventID : eventIDs) {
-                    writer.deleteEvent(eventID.getFolderID(), eventID.getObjectID(), clientTimestamp);
+                    results.add(writer.deleteEvent(eventID.getFolderID(), eventID.getObjectID(), clientTimestamp));
                 }
-                return null;
+                return results;
             }
         }.execute();
+        /*
+         * notify handlers
+         */
+        for (DeleteResultImpl result : results) {
+            if (result.wasUpdate()) {
+                for (CalendarHandler handler : calendarHandlers) {
+                    handler.eventUpdated(result);
+                }
+            } else {
+                for (CalendarHandler handler : calendarHandlers) {
+                    handler.eventDeleted(result);
+                }
+            }
+        }
+        //        return results;
     }
 
 }

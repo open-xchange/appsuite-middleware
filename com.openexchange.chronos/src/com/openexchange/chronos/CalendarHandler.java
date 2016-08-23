@@ -60,15 +60,22 @@ public interface CalendarHandler {
     /**
      * Invoked after an event has been created.
      *
-     * @param result The create result holding information about the created event
+     * @param result The result holding information about the created event
      */
     void eventCreated(CreateResult result);
 
     /**
      * Invoked after an event has been update.
      *
-     * @param result The create result holding information about the updated event
+     * @param result The result holding information about the updated event
      */
     void eventUpdated(UpdateResult result);
+
+    /**
+     * Invoked after an event has been deleted.
+     *
+     * @param result The result holding information about the deleted event
+     */
+    void eventDeleted(DeleteResult result);
 
 }

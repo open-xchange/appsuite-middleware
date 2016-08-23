@@ -65,7 +65,7 @@ import com.openexchange.calendar.json.actions.chronos.EventConverter;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarSession;
-import com.openexchange.chronos.UserizedEvent;
+import com.openexchange.chronos.UpdateResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -170,8 +170,8 @@ public final class ConfirmAction extends ChronosAction {
         if ((0 == participant.getType() || Participant.USER == participant.getType()) && 0 == participant.getIdentifier()) {
             attendee.setEntity(jsonObject.has(AJAXServlet.PARAMETER_ID) ? jsonObject.getInt(AJAXServlet.PARAMETER_ID) : calendarSession.getUser().getId());
         }
-        UserizedEvent updatedEvent = calendarService.updateAttendee(calendarSession, folderID, objectID, attendee);
-        return new AJAXRequestResult(new JSONObject(0), updatedEvent.getEvent().getLastModified(), "json");
+        UpdateResult result = calendarService.updateAttendee(calendarSession, folderID, objectID, attendee);
+        return new AJAXRequestResult(new JSONObject(0), result.getUpdatedEvent().getLastModified(), "json");
     }
 
 }

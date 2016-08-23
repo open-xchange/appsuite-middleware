@@ -92,8 +92,13 @@ public class UpdateResultImpl implements UpdateResult {
         this.originalEvent = originalEvent;
         this.updatedFolderID = updatedFolderID;
         this.updatedEvent = updatedEvent;
-        this.updatedFields = Collections.unmodifiableSet(getUpdatedFields(originalEvent, updatedEvent));
-        this.attendeeDiff = new AttendeeDiffImpl(originalEvent.getAttendees(), updatedEvent.getAttendees());
+        if (null != updatedEvent) {
+            this.updatedFields = Collections.unmodifiableSet(getUpdatedFields(originalEvent, updatedEvent));
+            this.attendeeDiff = new AttendeeDiffImpl(originalEvent.getAttendees(), updatedEvent.getAttendees());
+        } else {
+            this.updatedFields = Collections.emptySet();
+            this.attendeeDiff = new AttendeeDiffImpl(null, null);
+        }
     }
 
     @Override
