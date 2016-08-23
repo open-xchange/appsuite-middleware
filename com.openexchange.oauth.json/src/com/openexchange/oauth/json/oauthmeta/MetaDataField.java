@@ -70,7 +70,7 @@ public enum MetaDataField {
     /**
      * The available oauth scopes for the serviceId
      */
-    AVAILABLE_SCOPE("availableScope"),
+    AVAILABLE_SCOPES("availableScopes"),
 
     ;
 

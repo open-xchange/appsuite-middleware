@@ -53,7 +53,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.json.AbstractOAuthWriter;
-import com.openexchange.oauth.json.oauthaccount.AccountField;
 
 /**
  * The OAuth service meta data writer
@@ -80,7 +79,7 @@ public class MetaDataWriter extends AbstractOAuthWriter {
         final JSONObject metaDataJSON = new JSONObject();
         metaDataJSON.put(MetaDataField.ID.getName(), metaData.getId());
         metaDataJSON.put(MetaDataField.DISPLAY_NAME.getName(), metaData.getDisplayName());
-        metaDataJSON.put(AccountField.AVAILABLE_SCOPES.getName(), write(metaData.getAvailableScopes()));
+        metaDataJSON.put(MetaDataField.AVAILABLE_SCOPES.getName(), write(metaData.getAvailableScopes()));
         return metaDataJSON;
     }
 
