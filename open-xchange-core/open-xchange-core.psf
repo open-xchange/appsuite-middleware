@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.ctc.wstx"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.google.android.gcm"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.google.guava"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.hazelcast"/>
@@ -199,8 +198,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,liquibase.core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,net.fortuna.ical4j"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,org.apache.felix.eventadmin.monitoring"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,org.apache.httpcomponents.httpclient"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,org.apache.httpcomponents.httpcore"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,org.apache.tika"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,org.fishwife.jrugged"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,org.yaml"/>
