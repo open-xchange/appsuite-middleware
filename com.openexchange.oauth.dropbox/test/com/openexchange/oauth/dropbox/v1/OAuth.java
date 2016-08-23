@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oauth.dropbox;
+package com.openexchange.oauth.dropbox.v1;
 
 import java.io.IOException;
 import com.dropbox.client2.DropboxAPI;
@@ -56,6 +56,7 @@ import com.dropbox.client2.session.AccessTokenPair;
 import com.dropbox.client2.session.AppKeyPair;
 import com.dropbox.client2.session.RequestTokenPair;
 import com.dropbox.client2.session.Session.AccessType;
+import com.openexchange.oauth.dropbox.OAuthToken;
 import com.dropbox.client2.session.WebAuthSession;
 
 /**

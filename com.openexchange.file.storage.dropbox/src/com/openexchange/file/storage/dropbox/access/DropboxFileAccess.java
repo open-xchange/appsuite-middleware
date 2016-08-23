@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox.v2;
+package com.openexchange.file.storage.dropbox.access;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,20 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox.v1;
+package com.openexchange.file.storage.dropbox.access;
 
-import com.dropbox.client2.DropboxAPI;
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.exception.DropboxServerException;
-import com.dropbox.client2.session.AccessTokenPair;
-import com.dropbox.client2.session.AppKeyPair;
-import com.dropbox.client2.session.Session.AccessType;
-import com.dropbox.client2.session.WebAuthSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.dropbox.core.DbxException;
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.v2.DbxClientV2;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.file.storage.dropbox.DropboxServices;
-import com.openexchange.file.storage.dropbox.Utils;
-import com.openexchange.file.storage.dropbox.auth.TrustAllWebAuthSession;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
@@ -72,70 +69,96 @@ import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.session.Session;
 
 /**
- * {@link DropboxOAuthAccess}
+ * {@link DropboxOAuth2Access}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropboxOAuthAccess extends AbstractOAuthAccess {
+public class DropboxOAuth2Access extends AbstractOAuthAccess {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DropboxOAuth2Access.class);
 
     private final FileStorageAccount fsAccount;
     private final Session session;
 
     /**
-     * Initializes a new {@link DropboxOAuthAccess}.
+     * Initialises a new {@link DropboxOAuth2Access}.
      */
-    public DropboxOAuthAccess(FileStorageAccount fsAccount, Session session) {
+    public DropboxOAuth2Access(FileStorageAccount fsAccount, Session session) throws OXException {
         super();
         this.fsAccount = fsAccount;
         this.session = session;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#initialise()
+     */
+    @Override
+    public void initialize() throws OXException {
+        final OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
+        try {
+            final OAuthAccount oauthAccount = oAuthService.getAccount(getAccountId(), session, session.getUserId(), session.getContextId());
+            DbxRequestConfig config = new DbxRequestConfig(DropboxConfiguration.getInstance().getProductName());
+            String accessToken = oauthAccount.getToken();
+            if (Strings.isEmpty(accessToken)) {
+                throw FileStorageExceptionCodes.UNLINKED_ERROR.create();                
+            }
+            DbxClientV2 dbxClient = new DbxClientV2(config, accessToken);
+            OAuthClient<DbxClientV2> oAuthClient = new OAuthClient<DbxClientV2>(dbxClient, accessToken);
+            setOAuthClient(oAuthClient);
+        } catch (RuntimeException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#revoke()
+     */
+    @Override
+    public void revoke() throws OXException {
+        try {
+            DbxClientV2 client = (DbxClientV2) getClient().client;
+            client.auth().tokenRevoke();
+        } catch (DbxException e) {
+            // Simply log the revoke attempt, we can't do anything about it
+            LOG.debug("{}", e.getMessage(), e);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
+     */
+    @Override
+    public OAuthAccess ensureNotExpired() throws OXException {
+        return this;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#ping()
+     */
     @Override
     public boolean ping() throws OXException {
         try {
-            DropboxAPI<WebAuthSession> client = this.<DropboxAPI<WebAuthSession>> getClient().client;
-            client.accountInfo();
+            DbxClientV2 client = (DbxClientV2) getClient().client;
+            client.users().getCurrentAccount();
             return true;
-        } catch (DropboxException e) {
-            if (DropboxServerException.class.isInstance(e)) {
-                DropboxServerException serverException = (DropboxServerException) e;
-                int error = serverException.error;
-                if (DropboxServerException._401_UNAUTHORIZED == error || DropboxServerException._403_FORBIDDEN == error) {
-                    return false;
-                }
-            }
-            throw Utils.handle(e, null);
+        } catch (DbxException e) {
+            throw DropboxExceptionHandler.handle(e);
         }
     }
 
-    @Override
-    public void initialize() throws OXException {
-        synchronized (this) {
-            try {
-                int oauthAccountId = getAccountId();
-                OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
-                OAuthAccount dropboxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
-                setOAuthAccount(dropboxOAuthAccount);
-
-                /*-
-                 * Retrieve information about the user's Dropbox account.
-                 *
-                 * See: https://www.dropbox.com/developers/reference/api#account-info
-                 */
-                final AppKeyPair appKeys = new AppKeyPair(DropboxConfiguration.getInstance().getApiKey(), DropboxConfiguration.getInstance().getSecretKey());
-                WebAuthSession webAuthSession = new TrustAllWebAuthSession(appKeys, AccessType.DROPBOX);
-                DropboxAPI<WebAuthSession> dropboxApi = new DropboxAPI<WebAuthSession>(webAuthSession);
-                // Re-auth specific stuff
-                final AccessTokenPair reAuthTokens = new AccessTokenPair(dropboxOAuthAccount.getToken(), dropboxOAuthAccount.getSecret());
-                dropboxApi.getSession().setAccessTokenPair(reAuthTokens);
-
-                setOAuthClient(new OAuthClient<DropboxAPI<WebAuthSession>>(dropboxApi, dropboxOAuthAccount.getToken()));
-            } catch (RuntimeException e) {
-                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            }
-        }
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getAccountId()
+     */
     @Override
     public int getAccountId() throws OXException {
         try {
@@ -144,15 +167,4 @@ public class DropboxOAuthAccess extends AbstractOAuthAccess {
             throw FileStorageExceptionCodes.MISSING_CONFIG.create(DropboxConstants.ID, fsAccount.getId());
         }
     }
-
-    @Override
-    public void revoke() throws OXException {
-        // Nothing to do
-    }
-
-    @Override
-    public OAuthAccess ensureNotExpired() throws OXException {
-        return this;
-    }
-
 }

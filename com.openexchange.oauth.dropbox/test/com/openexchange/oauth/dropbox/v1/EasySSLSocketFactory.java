@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oauth.dropbox;
+package com.openexchange.oauth.dropbox.v1;
 
 import java.io.IOException;
 import java.net.InetAddress;

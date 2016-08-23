@@ -53,10 +53,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.dropbox.DropboxOAuth2ServiceMetaData;
 import com.openexchange.oauth.dropbox.DropboxOAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
-
 
 /**
  * {@link DropboxOAuthActivator}
@@ -76,8 +74,7 @@ public final class DropboxOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        //DropboxOAuthServiceMetaData service = new DropboxOAuthServiceMetaData(this);
-        DropboxOAuth2ServiceMetaData service = new DropboxOAuth2ServiceMetaData(this);
+        DropboxOAuthServiceMetaData service = new DropboxOAuthServiceMetaData(this);
         registerService(OAuthServiceMetaData.class, service);
         registerService(Reloadable.class, service);
     }

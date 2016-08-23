@@ -47,79 +47,38 @@
  *
  */
 
-package com.openexchange.oauth.dropbox;
+package com.openexchange.oauth.dropbox.v1;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import org.scribe.builder.api.Api;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractExtendedScribeAwareOAuthServiceMetaData;
-import com.openexchange.server.ServiceLookup;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import javax.net.ssl.X509TrustManager;
 
 /**
- * {@link DropboxOAuth2ServiceMetaData}
+ * The No-Op trust manager.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DropboxOAuth2ServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+public final class TrivialTrustManager implements X509TrustManager {
 
     /**
-     * Initialises a new {@link DropboxOAuth2ServiceMetaData}.
+     * Initializes a new {@link TrivialTrustManager}.
      */
-    public DropboxOAuth2ServiceMetaData(ServiceLookup serviceLookup) {
-        super(serviceLookup, API.DROPBOX);
+    public TrivialTrustManager() {
+        super();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.ScribeAware#getScribeService()
-     */
     @Override
-    public Class<? extends Api> getScribeService() {
-        return DropboxApi2.class;
+    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        // No-op
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthServiceMetaData#getAPI()
-     */
     @Override
-    public API getAPI() {
-        return API.DROPBOX;
+    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        // No-op
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData#getPropertyId()
-     */
     @Override
-    protected String getPropertyId() {
-        return "dropbox";
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#needsRequestToken()
-     */
-    @Override
-    public boolean needsRequestToken() {
-        return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData#getExtraPropertyNames()
-     */
-    @Override
-    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
-        Collection<OAuthPropertyID> propertyNames = new ArrayList<OAuthPropertyID>(2);
-        Collections.addAll(propertyNames, OAuthPropertyID.redirectUrl, OAuthPropertyID.productName);
-        return propertyNames;
+    public X509Certificate[] getAcceptedIssuers() {
+        return new X509Certificate[0];
     }
 }

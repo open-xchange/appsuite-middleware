@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox.v2;
+package com.openexchange.file.storage.dropbox.access;
 
 import java.util.ArrayList;
 import java.util.List;

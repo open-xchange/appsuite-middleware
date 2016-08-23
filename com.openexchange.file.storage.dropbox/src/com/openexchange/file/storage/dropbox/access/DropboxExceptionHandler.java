@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox.v2;
+package com.openexchange.file.storage.dropbox.access;
 
 import com.dropbox.core.InvalidAccessTokenException;
 import com.dropbox.core.ProtocolException;
