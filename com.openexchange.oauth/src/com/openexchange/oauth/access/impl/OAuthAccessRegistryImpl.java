@@ -50,10 +50,13 @@
 package com.openexchange.oauth.access.impl;
 
 import java.util.Iterator;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.access.OAuthAccess;
 
 /**
@@ -67,7 +70,7 @@ public class OAuthAccessRegistryImpl implements OAuthAccessRegistry, Iterable<OA
     private final String serviceId;
 
     /**
-     * Initialises a new {@link OAuthAccessRegistryImpl}.
+     * Initializes a new {@link OAuthAccessRegistryImpl}.
      *
      * @param serviceId The service identifier
      */
@@ -86,9 +89,31 @@ public class OAuthAccessRegistryImpl implements OAuthAccessRegistry, Iterable<OA
     }
 
     @Override
-    public OAuthAccess add(int contextId, int userId, OAuthAccess oauthAccess) {
+    public OAuthAccess addIfAbsent(int contextId, int userId, OAuthAccess oauthAccess) {
+        return map.putIfAbsent(new OAuthAccessKey(contextId, userId), oauthAccess);
+    }
+
+    @Override
+    public <V> OAuthAccess addIfAbsent(int contextId, int userId, OAuthAccess oauthAccess, Callable<V> executeIfAdded) throws OXException {
         OAuthAccessKey key = new OAuthAccessKey(contextId, userId);
-        return map.putIfAbsent(key, oauthAccess);
+        OAuthAccess existing = map.putIfAbsent(key, oauthAccess);
+        if (null != existing) {
+            // There is already such an OAuthAccess instance
+            return existing;
+        }
+
+        // Execute task (if any) since given OAuthAccess instance was added
+        if (null != executeIfAdded) {
+            try {
+                executeIfAdded.call();
+            } catch (OXException e) {
+                throw e;
+            } catch (Exception e) {
+                throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        }
+
+        return null;
     }
 
     @Override

@@ -200,7 +200,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         try {
             return getAccountId(fsAccount.getConfiguration());
         } catch (IllegalArgumentException e) {
-            throw FileStorageExceptionCodes.MISSING_CONFIG.create(BoxConstants.ID, fsAccount.getId());
+            throw FileStorageExceptionCodes.MISSING_CONFIG.create(e, BoxConstants.ID, fsAccount.getId());
         }
     }
 
@@ -208,10 +208,12 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
     public OAuthAccess ensureNotExpired() throws OXException {
         if (isExpired()) {
             synchronized (this) {
-                OAuthAccount newAccount = recreateTokenIfExpired(false);
-                if (newAccount != null) {
-                    setOAuthAccount(newAccount);
-                    createOAuthClient(newAccount);
+                if (isExpired()) {
+                    OAuthAccount newAccount = recreateTokenIfExpired(false);
+                    if (newAccount != null) {
+                        setOAuthAccount(newAccount);
+                        createOAuthClient(newAccount);
+                    }
                 }
             }
         }

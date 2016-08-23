@@ -49,6 +49,9 @@
 
 package com.openexchange.oauth.access;
 
+import java.util.concurrent.Callable;
+import com.openexchange.exception.OXException;
+
 /**
  * {@link OAuthAccessRegistry} - A registry for in-use OAuth accesses by a certain user.
  *
@@ -59,18 +62,31 @@ package com.openexchange.oauth.access;
 public interface OAuthAccessRegistry {
 
     /**
-     * Adds the specified {@link OAuthAccess} to the registry
+     * Adds the specified {@link OAuthAccess} to the registry if there is none associated with specified user, yet.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
-     * @param accountId The account identifier
      * @param oauthAccess The {@link OAuthAccess}
-     * @return The previous associated {@link OAuthAccess}, or <code>null</code> if there was none
+     * @return The previous associated {@link OAuthAccess}, or <code>null</code> if there was none (and specified instance was added)
      */
-    OAuthAccess add(int contextId, int userId, OAuthAccess oauthAccess);
+    OAuthAccess addIfAbsent(int contextId, int userId, OAuthAccess oauthAccess);
 
     /**
-     * Checks the presence of the {@link OAuthAccess} associated with the givent user/context/account tuple
+     * Adds the specified {@link OAuthAccess} to the registry if there is none associated with specified user, yet.
+     * <p>
+     * Executes the given <code>executeIfAdded</code> instance (if not <code>null</code>) in case the given {@link OAuthAccess} instance is successfully added to this registry.
+     *
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param oauthAccess The {@link OAuthAccess}
+     * @param executeIfAdded An optional task to perform in case given {@link OAuthAccess} instance is added
+     * @return The previous associated {@link OAuthAccess}, or <code>null</code> if there was none (and specified instance was added)
+     * @throws OXException If executing the optional task fails
+     */
+    <V> OAuthAccess addIfAbsent(int contextId, int userId, OAuthAccess oauthAccess, Callable<V> executeIfAdded) throws OXException;
+
+    /**
+     * Checks the presence of the {@link OAuthAccess} associated with the given user/context/account tuple
      *
      * @param contextId The context identifier
      * @param userId The user identifier

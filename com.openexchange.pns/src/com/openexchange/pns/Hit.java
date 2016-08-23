@@ -74,7 +74,7 @@ public interface Hit {
     String getTransportId();
 
     /**
-     * Gets the subscriptions associated with the transport.
+     * Gets the subscriptions associated with the client and transport.
      *
      * @return The subscriptions
      */

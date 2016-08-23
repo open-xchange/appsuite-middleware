@@ -47,76 +47,36 @@
  *
  */
 
-package com.openexchange.pns.transport.websocket.osgi;
+package com.openexchange.oauth.access;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import org.osgi.framework.BundleContext;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
-import com.openexchange.pns.transport.websocket.internal.WebSocketToClientResolverRegistry;
+import java.util.concurrent.Callable;
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link WebSocketToClientResolverTracker}
+ * {@link InitializeCallable} - Initializes the specified {@code OAuthAccess} instance.
+ * <p>
+ * Intended to be used for {@link OAuthAccessRegistry#addIfAbsent(int, int, OAuthAccess, Callable)} call.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class WebSocketToClientResolverTracker extends RankingAwareNearRegistryServiceTracker<WebSocketToClientResolver> implements WebSocketToClientResolverRegistry {
+public class InitializeCallable implements Callable<Void> {
 
-    private final ConcurrentMap<String, Boolean> supportedClients;
+    private final OAuthAccess oAuthAccess;
 
     /**
-     * Initializes a new {@link WebSocketToClientResolverTracker}.
+     * Initializes a new {@link InitializeCallable}.
      */
-    public WebSocketToClientResolverTracker(BundleContext context) {
-        super(context, WebSocketToClientResolver.class, 0);
-        supportedClients = new ConcurrentHashMap<>(16, 0.9F, 1);
+    public InitializeCallable(OAuthAccess oAuthAccess) {
+        super();
+        this.oAuthAccess = oAuthAccess;
     }
 
     @Override
-    protected boolean onServiceAppeared(WebSocketToClientResolver resolver) {
-        List<String> toRemove = new LinkedList<>();
-        boolean invalid = true;
-        try {
-            Set<String> clients = resolver.getSupportedClients();
-            for (String clientToAdd : clients) {
-                if (null != supportedClients.putIfAbsent(clientToAdd, Boolean.TRUE)) {
-                    // There is already such a client...
-                    return false;
-                }
-            }
-            invalid = false;
-            return true;
-        } finally {
-            if (invalid) {
-                for (String clientToRemove : toRemove) {
-                    supportedClients.remove(clientToRemove);
-                }
-            }
-        }
-    }
-
-    @Override
-    protected void onServiceRemoved(WebSocketToClientResolver resolver) {
-        Set<String> clients = resolver.getSupportedClients();
-        for (String clientToRemove : clients) {
-            supportedClients.remove(clientToRemove);
-        }
-    }
-
-    @Override
-    public Set<String> getAllSupportedClients() {
-        return Collections.unmodifiableSet(supportedClients.keySet());
-    }
-
-    @Override
-    public boolean containsClient(String client) {
-        return null != client && supportedClients.containsKey(client);
+    public Void call() throws OXException {
+        oAuthAccess.initialize();
+        return null;
     }
 
 }

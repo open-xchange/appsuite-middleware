@@ -110,7 +110,7 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
         OAuthAccess dropboxOAuthAccess = registry.get(session.getContextId(), session.getUserId());
         if (dropboxOAuthAccess == null) {
             DropboxOAuthAccess newInstance = new DropboxOAuthAccess(account, session);
-            dropboxOAuthAccess = registry.add(session.getContextId(), session.getUserId(), newInstance);
+            dropboxOAuthAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), newInstance);
             if (null == dropboxOAuthAccess) {
                 newInstance.initialize();
                 dropboxOAuthAccess = newInstance;

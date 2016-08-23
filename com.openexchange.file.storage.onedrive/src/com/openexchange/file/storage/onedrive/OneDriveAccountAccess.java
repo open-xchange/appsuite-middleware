@@ -113,7 +113,7 @@ public final class OneDriveAccountAccess implements FileStorageAccountAccess, Ca
         OAuthAccess oneDriveAccess = registry.get(session.getContextId(), session.getUserId());
         if (oneDriveAccess == null) {
             OneDriveOAuthAccess access = new OneDriveOAuthAccess(account, session);
-            oneDriveAccess = registry.add(session.getContextId(), session.getUserId(), access);
+            oneDriveAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), access);
             if (oneDriveAccess == null) {
                 access.initialize();
                 oneDriveAccess = access;

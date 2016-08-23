@@ -61,6 +61,7 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.InitializeCallable;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -134,9 +135,8 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
                     // Create
                     XingOAuthAccessImpl newInstance = new XingOAuthAccessImpl(session, oAuthAccount);
                     // Add to registry & return
-                    oAuthAccess = registry.add(session.getContextId(), session.getUserId(), newInstance);
+                    oAuthAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), newInstance, new InitializeCallable(newInstance));
                     if (null == oAuthAccess) {
-                        newInstance.initialize();
                         oAuthAccess = newInstance;
                     }
                 }

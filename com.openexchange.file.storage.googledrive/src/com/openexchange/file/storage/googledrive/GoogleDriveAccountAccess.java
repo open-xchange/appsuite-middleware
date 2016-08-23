@@ -110,7 +110,7 @@ public final class GoogleDriveAccountAccess implements CapabilityAware {
         OAuthAccess googleDriveAccess = registry.get(session.getContextId(), session.getUserId());
         if (googleDriveAccess == null) {
             GoogleDriveOAuthAccess access = new GoogleDriveOAuthAccess(account, session);
-            googleDriveAccess = registry.add(session.getContextId(), session.getUserId(), access);
+            googleDriveAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), access);
             if (null == googleDriveAccess) {
                 access.initialize();
                 googleDriveAccess = access;
