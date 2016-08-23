@@ -47,41 +47,30 @@
  *
  */
 
-package com.openexchange.oauth.json.oauthmeta;
+package com.openexchange.oauth.json;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.json.AbstractOAuthWriter;
-import com.openexchange.oauth.json.oauthaccount.AccountField;
+import java.util.Set;
+import org.json.JSONArray;
+import com.openexchange.oauth.scope.OAuthScope;
 
 /**
- * The OAuth service meta data writer
+ * {@link AbstractOAuthWriter}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MetaDataWriter extends AbstractOAuthWriter {
+public abstract class AbstractOAuthWriter {
 
     /**
-     * Initializes a new {@link MetaDataWriter}.
+     * Writes the specified {@link Set} with {@link OAuthScope}s as a {@link JSONArray}
+     * 
+     * @param scopes The {@link Set} with {@link OAuthScope}s to write
+     * @return The {@link JSONArray} with the {@link OAuthScope}s
      */
-    private MetaDataWriter() {
-        super();
+    protected static JSONArray write(Set<OAuthScope> scopes) {
+        JSONArray scopeArray = new JSONArray();
+        for (OAuthScope scope : scopes) {
+            scopeArray.put(scope.getModule());
+        }
+        return scopeArray;
     }
-
-    /**
-     * Writes specified meta data as a JSON object.
-     *
-     * @param metaData The meta data
-     * @return The JSON object
-     * @throws JSONException If writing to JSON fails
-     */
-    public static JSONObject write(final OAuthServiceMetaData metaData) throws JSONException {
-        final JSONObject metaDataJSON = new JSONObject();
-        metaDataJSON.put(MetaDataField.ID.getName(), metaData.getId());
-        metaDataJSON.put(MetaDataField.DISPLAY_NAME.getName(), metaData.getDisplayName());
-        metaDataJSON.put(AccountField.AVAILABLE_SCOPES.getName(), write(metaData.getAvailableScopes()));
-        return metaDataJSON;
-    }
-
 }

@@ -49,21 +49,19 @@
 
 package com.openexchange.oauth.json.oauthaccount;
 
-import java.util.Set;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteraction;
-import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.oauth.json.AbstractOAuthWriter;
 
 /**
  * The OAuth account writer
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AccountWriter {
+public class AccountWriter extends AbstractOAuthWriter {
 
     /**
      * Initializes a new {@link AccountWriter}.
@@ -104,19 +102,5 @@ public class AccountWriter {
         jInteraction.put(AccountField.TOKEN.getName(), interaction.getRequestToken().getToken());
         jInteraction.put(OAuthConstants.SESSION_PARAM_UUID, uuid);
         return jInteraction;
-    }
-
-    /**
-     * Writes the specified {@link Set} with {@link OAuthScope}s as a {@link JSONArray}
-     * 
-     * @param scopes The {@link Set} with {@link OAuthScope}s to write
-     * @return The {@link JSONArray} with the {@link OAuthScope}s
-     */
-    private static JSONArray write(Set<OAuthScope> scopes) {
-        JSONArray scopeArray = new JSONArray();
-        for (OAuthScope scope : scopes) {
-            scopeArray.put(scope.getModule());
-        }
-        return scopeArray;
     }
 }
