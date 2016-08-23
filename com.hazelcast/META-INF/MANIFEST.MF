@@ -9,6 +9,9 @@ Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: .,
  lib/hazelcast-3.6.4.jar
 Import-Package: com.openexchange.config,
+ edu.umd.cs.findbugs.annotations,
+ javax.annotation,
+ javax.annotation.meta,
  javax.crypto,
  javax.crypto.interfaces,
  javax.crypto.spec,

@@ -116,12 +116,25 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
 
     private static final EnumSet<Attribute> DEFAULT = EnumSet.of(Attribute.ARCHIVE_FULLNAME_LITERAL, Attribute.ARCHIVE_LITERAL, Attribute.CONFIRMED_HAM_FULLNAME_LITERAL, Attribute.CONFIRMED_HAM_LITERAL, Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL, Attribute.CONFIRMED_SPAM_LITERAL, Attribute.DRAFTS_FULLNAME_LITERAL, Attribute.DRAFTS_LITERAL, Attribute.SENT_FULLNAME_LITERAL, Attribute.SENT_LITERAL, Attribute.SPAM_FULLNAME_LITERAL, Attribute.SPAM_LITERAL, Attribute.TRASH_FULLNAME_LITERAL, Attribute.TRASH_LITERAL);
 
-    private static final Set<Attribute> WEBMAIL_ALLOWED = EnumSet.of(Attribute.ID_LITERAL, Attribute.PERSONAL_LITERAL, Attribute.REPLY_TO_LITERAL, Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
+    private static final Set<Attribute> WEBMAIL_ALLOWED = EnumSet.of(   Attribute.ID_LITERAL, 
+                                                                        Attribute.PERSONAL_LITERAL, 
+                                                                        Attribute.REPLY_TO_LITERAL, 
+                                                                        Attribute.UNIFIED_INBOX_ENABLED_LITERAL, 
+                                                                        Attribute.ARCHIVE_LITERAL, 
+                                                                        Attribute.ARCHIVE_FULLNAME_LITERAL, 
+                                                                        Attribute.SENT_LITERAL, 
+                                                                        Attribute.SENT_FULLNAME_LITERAL, 
+                                                                        Attribute.TRASH_LITERAL, 
+                                                                        Attribute.TRASH_FULLNAME_LITERAL, 
+                                                                        Attribute.SPAM_LITERAL, 
+                                                                        Attribute.SPAM_FULLNAME_LITERAL, 
+                                                                        Attribute.DRAFTS_LITERAL, 
+                                                                        Attribute.DRAFTS_FULLNAME_LITERAL);
 
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
         MailAccountDescription accountDescription = new MailAccountDescription();
-        List<OXException> warnings = new LinkedList<OXException>();
+        List<OXException> warnings = new LinkedList<>();
         Set<Attribute> fieldsToUpdate = DefaultMailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
 
         if (fieldsToUpdate.contains(Attribute.TRANSPORT_AUTH_LITERAL)) {
@@ -204,12 +217,12 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
                 clearStamp |= (pop3 && !toUpdate.getTransportServer().equals(accountDescription.getTransportServer()));
             }
 
-            // Check standard folder names against full names
-            if (false == isPop3(toUpdate)) {
-                fillMailConfig(accountDescription, fieldsToUpdate, toUpdate, session);
-                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccess(accountDescription, session, warnings);
-                Tools.checkNames(accountDescription, fieldsToUpdate, Tools.getSeparator(mailAccess));
-            }
+        }
+        // Check standard folder names against full names
+        if (false == isPop3(toUpdate)) {
+            fillMailConfig(accountDescription, fieldsToUpdate, toUpdate, session);
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccess(accountDescription, session, warnings);
+            Tools.checkNames(accountDescription, fieldsToUpdate, Tools.getSeparator(mailAccess));
         }
 
         // Update
@@ -314,7 +327,11 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
         }
         if (!fieldsToUpdate.contains(Attribute.PASSWORD_LITERAL)) {
             String password = toUpdate.getPassword();
-            password = MailPasswordUtil.decrypt(password, session, toUpdate.getId(), toUpdate.getLogin(), toUpdate.getMailServer());
+            if (toUpdate.isDefaultAccount() || password == null) {
+                password = session.getPassword();
+            } else {
+                password = MailPasswordUtil.decrypt(password, session, toUpdate.getId(), toUpdate.getLogin(), toUpdate.getMailServer());
+            }
             accountDescription.setPassword(password);
         }
         if (!fieldsToUpdate.contains(Attribute.MAIL_PORT_LITERAL)) {
