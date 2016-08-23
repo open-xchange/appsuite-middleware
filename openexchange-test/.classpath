@@ -100,7 +100,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.search"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.xing"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.control.clt"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.ctc.wstx"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.config.cascade"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.google.api.client"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.google.guava"/>
@@ -145,5 +144,6 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/stax2-api-3.1.4.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.2.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.5.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/woodstox-core-asl-4.4.1.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
