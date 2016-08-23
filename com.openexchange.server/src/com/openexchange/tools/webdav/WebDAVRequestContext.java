@@ -76,6 +76,7 @@ public class WebDAVRequestContext extends DefaultRequestContext {
         super();
         this.request = request;
         this.session = session;
+        setUserAgent(request.getHeader("user-agent"));
         if (null != session) {
             boolean isGuest = Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST));
             setHostData(Tools.createHostData(request, session.getContextId(), session.getUserId(), isGuest));
