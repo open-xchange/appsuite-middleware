@@ -114,4 +114,9 @@ public class WebSocketToClientResolverTracker extends RankingAwareNearRegistrySe
         return Collections.unmodifiableSet(supportedClients.keySet());
     }
 
+    @Override
+    public boolean containsClient(String client) {
+        return null != client && supportedClients.containsKey(client);
+    }
+
 }

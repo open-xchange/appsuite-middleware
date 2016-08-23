@@ -67,4 +67,12 @@ public interface WebSocketToClientResolverRegistry extends Iterable<WebSocketToC
      */
     Set<String> getAllSupportedClients();
 
+    /**
+     * Checks whether there is a resolver for specified client identifier.
+     *
+     * @param client The client identifier to check
+     * @return <code>true</code> if there is a resolver associated with given client identifier; otherwise <code>false</code>
+     */
+    boolean containsClient(String client);
+
 }
