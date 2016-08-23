@@ -87,7 +87,6 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
         super();
         this.fsAccount = fsAccount;
         this.session = session;
-        initialise();
     }
 
     /*
@@ -96,7 +95,7 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
      * @see com.openexchange.oauth.access.OAuthAccess#initialise()
      */
     @Override
-    public void initialise() throws OXException {
+    public void initialize() throws OXException {
         final OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
         try {
             final OAuthAccount oauthAccount = oAuthService.getAccount(getAccountId(), session, session.getUserId(), session.getContextId());
@@ -136,7 +135,7 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
      */
     @Override
     public OAuthAccess ensureNotExpired() throws OXException {
-        throw new UnsupportedOperationException("The Dropbox OAuth token never expires.");
+        return this;
     }
 
     /*
