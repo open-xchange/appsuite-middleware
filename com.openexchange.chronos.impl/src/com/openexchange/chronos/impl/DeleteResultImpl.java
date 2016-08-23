@@ -49,9 +49,9 @@
 
 package com.openexchange.chronos.impl;
 
-import com.openexchange.chronos.CalendarSession;
-import com.openexchange.chronos.DeleteResult;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.exception.OXException;
 
 /**

@@ -55,13 +55,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 

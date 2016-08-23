@@ -53,11 +53,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.chronos.AttendeeDiff;
-import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.UpdateResult;
+import com.openexchange.chronos.service.AttendeeDiff;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 
 /**

@@ -51,8 +51,8 @@ package com.openexchange.chronos.recurrence.osgi;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.RecurrenceService;
 import com.openexchange.chronos.recurrence.service.RecurrenceServiceImpl;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**

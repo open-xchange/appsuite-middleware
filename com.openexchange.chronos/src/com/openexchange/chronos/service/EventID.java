@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,67 @@
  *
  */
 
-package com.openexchange.chronos;
-
-import java.util.Calendar;
-import java.util.Iterator;
+package com.openexchange.chronos.service;
 
 /**
- * {@link RecurrenceService}
+ * {@link EventID}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface RecurrenceService {
+public class EventID {
+
+    private final int folderID;
+    private final int objectID;
 
     /**
-     * Calculates the expanded instances of a recurring event with optional boundaries and an optional limit.
-     * If no limit is given an internal limit kicks in avoiding an endless calculation.
-     * If no boundaries are given the calculation starts with the first occurrence and lasts until the end of the series.
+     * Initializes a new {@link EventID}.
      * 
-     * @param master
-     * @param start
-     * @param limit
-     * @return
+     * @param folderID The folder ID
+     * @param objectID The object ID
      */
-    public Iterator<Event> calculateInstances(Event master, Calendar start, Calendar end, int limit);
+    public EventID(int folderID, int objectID) {
+        super();
+        this.folderID = folderID;
+        this.objectID = objectID;
+    }
 
-    /**
-     * Calculates a reccurrence date position for a given 1-based position of a recurring event.
-     *
-     * @param master
-     * @param position
-     * @return
-     */
-    public Calendar calculateRecurrenceDatePosition(Event master, int position);
+    public int getFolderID() {
+        return folderID;
+    }
 
-    /**
-     * Calculates a 1-based recurrence position for a given reccurence date position of a recurring event.
-     * 
-     * @param master
-     * @param datePosition
-     * @return
-     */
-    public int calculateRecurrencePosition(Event master, Calendar datePosition);
+    public int getObjectID() {
+        return objectID;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + folderID;
+        result = prime * result + objectID;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        EventID other = (EventID) obj;
+        if (folderID != other.folderID)
+            return false;
+        if (objectID != other.objectID)
+            return false;
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "EventID [folderID=" + folderID + ", objectID=" + objectID + "]";
+    }
 
 }

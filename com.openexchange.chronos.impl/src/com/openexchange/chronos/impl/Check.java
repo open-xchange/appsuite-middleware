@@ -51,9 +51,9 @@ package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.impl.Utils.i;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarService;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;

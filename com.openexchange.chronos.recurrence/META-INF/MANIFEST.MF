@@ -7,6 +7,7 @@ Bundle-Activator: com.openexchange.chronos.recurrence.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.chronos,
+ com.openexchange.chronos.service,
  com.openexchange.osgi,
  com.openexchange.server,
  org.osgi.framework,

@@ -47,12 +47,14 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.service;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
+import com.openexchange.chronos.Classification;
+import com.openexchange.chronos.EventField;
 
 /**
  * {@link CalendarParameters}

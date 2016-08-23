@@ -53,11 +53,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.AttendeeDiff;
 import com.openexchange.chronos.AttendeeField;
-import com.openexchange.chronos.AttendeeUpdate;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.service.AttendeeDiff;
+import com.openexchange.chronos.service.AttendeeUpdate;
 import com.openexchange.exception.OXException;
 
 /**

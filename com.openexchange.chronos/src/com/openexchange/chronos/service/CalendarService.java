@@ -47,35 +47,55 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.service;
+
+import java.util.Date;
+import java.util.List;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link CalendarHandler}
+ * {@link CalendarService}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarHandler {
+public interface CalendarService {
 
-    /**
-     * Invoked after an event has been created.
-     *
-     * @param result The result holding information about the created event
-     */
-    void eventCreated(CreateResult result);
+    int resolveByUID(CalendarSession session, String uid) throws OXException;
 
-    /**
-     * Invoked after an event has been update.
-     *
-     * @param result The result holding information about the updated event
-     */
-    void eventUpdated(UpdateResult result);
+    long getSequenceNumber(CalendarSession session, int folderID) throws OXException;
 
-    /**
-     * Invoked after an event has been deleted.
-     *
-     * @param result The result holding information about the deleted event
-     */
-    void eventDeleted(DeleteResult result);
+    boolean[] hasEventsBetween(CalendarSession session, Date from, Date until) throws OXException;
+
+    List<UserizedEvent> searchEvents(CalendarSession session, int[] folderIDs, String pattern) throws OXException;
+
+    List<UserizedEvent> getChangeExceptions(CalendarSession session, int folderID, int objectID) throws OXException;
+
+    UserizedEvent getEvent(CalendarSession session, int folderID, int objectID) throws OXException;
+
+    List<UserizedEvent> getEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
+
+    List<UserizedEvent> getEventsInFolder(CalendarSession session, int folderID) throws OXException;
+
+    List<UserizedEvent> getEventsOfUser(CalendarSession session) throws OXException;
+
+    CreateResult createEvent(CalendarSession session, UserizedEvent event) throws OXException;
+
+    UpdateResult updateEvent(CalendarSession session, EventID eventID, UserizedEvent event) throws OXException;
+
+    //    UserizedEvent moveEvent(CalendarSession session, EventID eventID, int targetFolderID) throws OXException;
+
+    UpdateResult updateAttendee(CalendarSession session, int folderID, int objectID, Attendee attendee) throws OXException;
+
+    void deleteEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
+
+    List<UserizedEvent> getUpdatedEventsInFolder(CalendarSession session, int folderID, Date updatedSince) throws OXException;
+
+    List<UserizedEvent> getDeletedEventsInFolder(CalendarSession session, int folderID, Date deletedSince) throws OXException;
+
+    List<UserizedEvent> getUpdatedEventsOfUser(CalendarSession session, Date updatedSince) throws OXException;
+
+    List<UserizedEvent> getDeletedEventsOfUser(CalendarSession session, Date deletedSince) throws OXException;
 
 }

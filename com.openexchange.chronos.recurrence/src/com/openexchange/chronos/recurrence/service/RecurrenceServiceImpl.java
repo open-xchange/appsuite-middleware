@@ -56,7 +56,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.RecurrenceService;
+import com.openexchange.chronos.service.RecurrenceService;
 
 /**
  * {@link RecurrenceServiceImpl}

@@ -50,8 +50,8 @@
 package com.openexchange.chronos.impl;
 
 import java.sql.Connection;
-import com.openexchange.chronos.CalendarSession;
 import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.database.DatabaseService;

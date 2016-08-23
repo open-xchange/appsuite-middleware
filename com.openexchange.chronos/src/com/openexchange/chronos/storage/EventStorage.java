@@ -52,7 +52,7 @@ package com.openexchange.chronos.storage;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.SortOptions;
+import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.search.SearchTerm;

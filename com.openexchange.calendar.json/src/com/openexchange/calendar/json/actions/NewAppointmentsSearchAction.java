@@ -64,10 +64,10 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
-import com.openexchange.chronos.CalendarParameters;
-import com.openexchange.chronos.CalendarService;
-import com.openexchange.chronos.CalendarSession;
-import com.openexchange.chronos.UserizedEvent;
+import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -223,7 +223,7 @@ public final class NewAppointmentsSearchAction extends ChronosAction {
         }
     }
 
-    private static final String[] REQUIRED_PARAMETERS = { 
+    private static final String[] REQUIRED_PARAMETERS = {
         CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END
     };
 

@@ -47,67 +47,38 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.service;
+
+import com.openexchange.chronos.Event;
 
 /**
- * {@link EventID}
+ * {@link DeleteResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class EventID {
-
-    private final int folderID;
-    private final int objectID;
+public interface DeleteResult {
 
     /**
-     * Initializes a new {@link EventID}.
-     * 
-     * @param folderID The folder ID
-     * @param objectID The object ID
+     * Gets the underlying calendar session.
+     *
+     * @return The calendar session
      */
-    public EventID(int folderID, int objectID) {
-        super();
-        this.folderID = folderID;
-        this.objectID = objectID;
-    }
+    CalendarSession getSession();
 
-    public int getFolderID() {
-        return folderID;
-    }
+    /**
+     * Gets the created event.
+     *
+     * @return The event
+     */
+    Event getDeletedEvent();
 
-    public int getObjectID() {
-        return objectID;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + folderID;
-        result = prime * result + objectID;
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        EventID other = (EventID) obj;
-        if (folderID != other.folderID)
-            return false;
-        if (objectID != other.objectID)
-            return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "EventID [folderID=" + folderID + ", objectID=" + objectID + "]";
-    }
+    /**
+     * Gets the identifier of the folder the event has been deleted in, representing the view of the calendar user.
+     *
+     * @return The folder identifier
+     */
+    int getFolderID();
 
 }
+

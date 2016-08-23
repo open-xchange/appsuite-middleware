@@ -47,15 +47,19 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.service;
+
+import java.util.Set;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 
 /**
- * {@link CreateResult}
+ * {@link UpdateResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CreateResult {
+public interface UpdateResult {
 
     /**
      * Gets the underlying calendar session.
@@ -65,18 +69,53 @@ public interface CreateResult {
     CalendarSession getSession();
 
     /**
-     * Gets the created event.
+     * Gets the original event.
      *
-     * @return The event
+     * @return The original event
      */
-    Event getCreatedEvent();
+    Event getOriginalEvent();
 
     /**
-     * Gets the identifier of the folder the event has been created in, representing the view of the calendar user.
+     * Gets the updated event.
      *
-     * @return The folder identifier
+     * @return The updated event
      */
-    int getFolderID();
+    Event getUpdatedEvent();
+
+    /**
+     * Gets the identifier of the folder the event has been updated in.
+     *
+     * @return The original folder identifier
+     */
+    int getOriginalFolderID();
+
+    /**
+     * Gets the identifier of the folder the event has been moved into.
+     *
+     * @return The updated folder identifier, or the original folder identifier if no move took place
+     */
+    int getUpdatedFolderID();
+
+    /**
+     * Gets a set of fields that were modified through the update operation.
+     *
+     * @return The updated fields
+     */
+    Set<EventField> getUpdatedFields();
+
+    /**
+     * Gets the attendee-related modifications performed through the update operation.
+     *
+     * @return The attendee updates, or an empty attendee diff if there were no attendee-related changes
+     */
+    AttendeeDiff getAttendeeUpdates();
+
+    /**
+     * Gets a value indicating whether at least one of the specified fields has been modified through the update operation.
+     *
+     * @param fields The event fields to check
+     * @return <code>true</code> if at least one field was updated, <code>false</code>, otherwise
+     */
+    boolean containsAnyChangeOf(EventField... fields);
 
 }
-

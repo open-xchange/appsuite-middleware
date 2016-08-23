@@ -47,9 +47,11 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.service;
 
 import java.util.List;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Event;
 import com.openexchange.tools.session.ServerSession;
 
 /**

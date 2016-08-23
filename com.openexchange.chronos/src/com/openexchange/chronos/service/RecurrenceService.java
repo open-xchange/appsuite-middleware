@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,62 +47,48 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.service;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.tools.session.ServerSession;
+import java.util.Calendar;
+import java.util.Iterator;
+import com.openexchange.chronos.Event;
 
 /**
- * {@link CalendarSession}
+ * {@link RecurrenceService}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class CalendarSession extends CalendarParameters {
-
-    private final ServerSession session;
+public interface RecurrenceService {
 
     /**
-     * Initializes a new {@link CalendarSession}.
-     *
-     * @param session The underlying server session
+     * Calculates the expanded instances of a recurring event with optional boundaries and an optional limit.
+     * If no limit is given an internal limit kicks in avoiding an endless calculation.
+     * If no boundaries are given the calculation starts with the first occurrence and lasts until the end of the series.
+     * 
+     * @param master
+     * @param start
+     * @param limit
+     * @return
      */
-    public CalendarSession(ServerSession session) {
-        super();
-        this.session = session;
-    }
+    public Iterator<Event> calculateInstances(Event master, Calendar start, Calendar end, int limit);
 
     /**
-     * Gets the underlying server session.
+     * Calculates a reccurrence date position for a given 1-based position of a recurring event.
      *
-     * @return The underlying server session
+     * @param master
+     * @param position
+     * @return
      */
-    public ServerSession getSession() {
-        return session;
-    }
+    public Calendar calculateRecurrenceDatePosition(Event master, int position);
 
     /**
-     * Gets the session's user.
-     *
-     * @return The user
+     * Calculates a 1-based recurrence position for a given reccurence date position of a recurring event.
+     * 
+     * @param master
+     * @param datePosition
+     * @return
      */
-    public User getUser() {
-        return session.getUser();
-    }
-
-    /**
-     * Gets the session's context.
-     *
-     * @return The context
-     */
-    public Context getContext() {
-        return session.getContext();
-    }
-
-    @Override
-    public String toString() {
-        return "CalendarSession [context=" + session.getContextId() + ", user=" + session.getUserId() + ", sessionId=" + session.getSessionID() + "]";
-    }
+    public int calculateRecurrencePosition(Event master, Calendar datePosition);
 
 }

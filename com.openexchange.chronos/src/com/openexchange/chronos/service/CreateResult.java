@@ -47,15 +47,17 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.service;
+
+import com.openexchange.chronos.Event;
 
 /**
- * {@link DeleteResult}
+ * {@link CreateResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface DeleteResult {
+public interface CreateResult {
 
     /**
      * Gets the underlying calendar session.
@@ -69,10 +71,10 @@ public interface DeleteResult {
      *
      * @return The event
      */
-    Event getDeletedEvent();
+    Event getCreatedEvent();
 
     /**
-     * Gets the identifier of the folder the event has been deleted in, representing the view of the calendar user.
+     * Gets the identifier of the folder the event has been created in, representing the view of the calendar user.
      *
      * @return The folder identifier
      */

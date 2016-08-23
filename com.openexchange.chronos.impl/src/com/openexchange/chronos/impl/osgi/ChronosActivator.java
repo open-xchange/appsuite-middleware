@@ -51,10 +51,10 @@ package com.openexchange.chronos.impl.osgi;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.CalendarHandler;
-import com.openexchange.chronos.CalendarService;
-import com.openexchange.chronos.RecurrenceService;
 import com.openexchange.chronos.impl.CalendarServiceImpl;
+import com.openexchange.chronos.service.CalendarHandler;
+import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;

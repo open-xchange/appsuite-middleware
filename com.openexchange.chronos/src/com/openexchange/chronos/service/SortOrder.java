@@ -47,73 +47,99 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.service;
 
-import java.util.Set;
+import com.openexchange.chronos.EventField;
 
 /**
- * {@link UpdateResult}
+ * {@link SortOrder}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface UpdateResult {
+public class SortOrder {
 
     /**
-     * Gets the underlying calendar session.
+     * Initializes a new ascending {@link SortOrder} for a specific event field.
      *
-     * @return The calendar session
+     * @param by The event field to use for ordering
+     * @return The sort order
      */
-    CalendarSession getSession();
+    public static SortOrder ASC(EventField by) {
+        return new SortOrder(by, false);
+    }
 
     /**
-     * Gets the original event.
+     * Initializes a new descending {@link SortOrder} for a specific event field.
      *
-     * @return The original event
+     * @param by The event field to use for ordering
+     * @return The sort order
      */
-    Event getOriginalEvent();
+    public static SortOrder DESC(EventField by) {
+        return new SortOrder(by, true);
+    }
+
+    private final EventField by;
+    private final boolean descending;
 
     /**
-     * Gets the updated event.
+     * Initializes a new {@link SortOrder}.
      *
-     * @return The updated event
+     * @param by The event field to use for ordering
+     * @param descending <code>true</code> if descending, <code>false</code>, otherwise
      */
-    Event getUpdatedEvent();
+    private SortOrder(EventField by, boolean descending) {
+        super();
+        this.by = by;
+        this.descending = descending;
+    }
 
     /**
-     * Gets the identifier of the folder the event has been updated in.
+     * Gets the event field to use for ordering.
      *
-     * @return The original folder identifier
+     * @return The event field to use for ordering
      */
-    int getOriginalFolderID();
+    public EventField getBy() {
+        return by;
+    }
 
     /**
-     * Gets the identifier of the folder the event has been moved into.
+     * Gets a value indicating whether a descending or ascending direction is defined.
      *
-     * @return The updated folder identifier, or the original folder identifier if no move took place
+     * @return <code>true</code> if descending, <code>false</code> if ascending
      */
-    int getUpdatedFolderID();
+    public boolean isDescending() {
+        return descending;
+    }
 
-    /**
-     * Gets a set of fields that were modified through the update operation.
-     *
-     * @return The updated fields
-     */
-    Set<EventField> getUpdatedFields();
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((by == null) ? 0 : by.hashCode());
+        result = prime * result + (descending ? 1231 : 1237);
+        return result;
+    }
 
-    /**
-     * Gets the attendee-related modifications performed through the update operation.
-     *
-     * @return The attendee updates, or an empty attendee diff if there were no attendee-related changes
-     */
-    AttendeeDiff getAttendeeUpdates();
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        SortOrder other = (SortOrder) obj;
+        if (by != other.by)
+            return false;
+        if (descending != other.descending)
+            return false;
+        return true;
+    }
 
-    /**
-     * Gets a value indicating whether at least one of the specified fields has been modified through the update operation.
-     *
-     * @param fields The event fields to check
-     * @return <code>true</code> if at least one field was updated, <code>false</code>, otherwise
-     */
-    boolean containsAnyChangeOf(EventField... fields);
+    @Override
+    public String toString() {
+        return by + (descending ? " DESC" : " ASC");
+    }
 
 }

@@ -47,9 +47,10 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.service;
 
 import java.util.Arrays;
+import com.openexchange.chronos.EventField;
 
 /**
  * {@link SortOptions}

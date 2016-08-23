@@ -47,97 +47,78 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.service;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 
 /**
- * {@link SortOrder}
+ * {@link AttendeeUpdate}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class SortOrder {
+public class AttendeeUpdate {
+
+    private final Attendee originalAttendee;
+    private final Attendee updatedAttendee;
+    private final Set<AttendeeField> updatedFields;
 
     /**
-     * Initializes a new ascending {@link SortOrder} for a specific event field.
+     * Initializes a new {@link AttendeeUpdate}.
      *
-     * @param by The event field to use for ordering
-     * @return The sort order
+     * @param originalAttendee The attendee in the original event, or <code>null</code> for a newly added attendee
+     * @param updatedAttendee The attendee in the updated event, or <code>null</code> for a removed attendee
+     * @param updatedFields The attendee fields that were modified through the update
      */
-    public static SortOrder ASC(EventField by) {
-        return new SortOrder(by, false);
+    public AttendeeUpdate(Attendee originalAttendee, Attendee updatedAttendee, AttendeeField[] updatedFields) {
+        this(originalAttendee, updatedAttendee, Collections.unmodifiableSet(new HashSet<AttendeeField>(Arrays.asList(updatedFields))));
     }
 
     /**
-     * Initializes a new descending {@link SortOrder} for a specific event field.
+     * Initializes a new {@link AttendeeUpdate}.
      *
-     * @param by The event field to use for ordering
-     * @return The sort order
+     * @param originalAttendee The attendee in the original event, or <code>null</code> for a newly added attendee
+     * @param updatedAttendee The attendee in the updated event, or <code>null</code> for a removed attendee
+     * @param updatedFields The attendee fields that were modified through the update
      */
-    public static SortOrder DESC(EventField by) {
-        return new SortOrder(by, true);
-    }
-
-    private final EventField by;
-    private final boolean descending;
-
-    /**
-     * Initializes a new {@link SortOrder}.
-     *
-     * @param by The event field to use for ordering
-     * @param descending <code>true</code> if descending, <code>false</code>, otherwise
-     */
-    private SortOrder(EventField by, boolean descending) {
+    public AttendeeUpdate(Attendee originalAttendee, Attendee updatedAttendee, Set<AttendeeField> updatedFields) {
         super();
-        this.by = by;
-        this.descending = descending;
+        this.originalAttendee = originalAttendee;
+        this.updatedAttendee = updatedAttendee;
+        this.updatedFields = updatedFields;
     }
 
     /**
-     * Gets the event field to use for ordering.
+     * Gets the attendee in the original event.
      *
-     * @return The event field to use for ordering
+     * @return The attendee in the original event, or <code>null</code> for a newly added attendee
      */
-    public EventField getBy() {
-        return by;
+    public Attendee getOriginalAttendee() {
+        return originalAttendee;
     }
 
     /**
-     * Gets a value indicating whether a descending or ascending direction is defined.
+     * Gets the attendee in the updated event.
      *
-     * @return <code>true</code> if descending, <code>false</code> if ascending
+     * @return The attendee in the updated event, or <code>null</code> for a removed attendee
      */
-    public boolean isDescending() {
-        return descending;
+    public Attendee getUpdatedAttendee() {
+        return updatedAttendee;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((by == null) ? 0 : by.hashCode());
-        result = prime * result + (descending ? 1231 : 1237);
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        SortOrder other = (SortOrder) obj;
-        if (by != other.by)
-            return false;
-        if (descending != other.descending)
-            return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return by + (descending ? " DESC" : " ASC");
+    /**
+     * Gets the attendee fields that were modified through the update
+     *
+     * @return The updated fields
+     */
+    public Set<AttendeeField> getUpdatedFields() {
+        return updatedFields;
     }
 
 }
+

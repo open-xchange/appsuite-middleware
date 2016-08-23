@@ -49,9 +49,9 @@
 
 package com.openexchange.chronos.impl;
 
-import com.openexchange.chronos.CalendarSession;
-import com.openexchange.chronos.CreateResult;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CreateResult;
 
 /**
  * {@link CreateResultImpl}

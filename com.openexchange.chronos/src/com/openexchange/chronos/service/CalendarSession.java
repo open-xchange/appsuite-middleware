@@ -47,76 +47,62 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.service;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AttendeeUpdate}
+ * {@link CalendarSession}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class AttendeeUpdate {
+public class CalendarSession extends CalendarParameters {
 
-    private final Attendee originalAttendee;
-    private final Attendee updatedAttendee;
-    private final Set<AttendeeField> updatedFields;
+    private final ServerSession session;
 
     /**
-     * Initializes a new {@link AttendeeUpdate}.
+     * Initializes a new {@link CalendarSession}.
      *
-     * @param originalAttendee The attendee in the original event, or <code>null</code> for a newly added attendee
-     * @param updatedAttendee The attendee in the updated event, or <code>null</code> for a removed attendee
-     * @param updatedFields The attendee fields that were modified through the update
+     * @param session The underlying server session
      */
-    public AttendeeUpdate(Attendee originalAttendee, Attendee updatedAttendee, AttendeeField[] updatedFields) {
-        this(originalAttendee, updatedAttendee, Collections.unmodifiableSet(new HashSet<AttendeeField>(Arrays.asList(updatedFields))));
-    }
-
-    /**
-     * Initializes a new {@link AttendeeUpdate}.
-     *
-     * @param originalAttendee The attendee in the original event, or <code>null</code> for a newly added attendee
-     * @param updatedAttendee The attendee in the updated event, or <code>null</code> for a removed attendee
-     * @param updatedFields The attendee fields that were modified through the update
-     */
-    public AttendeeUpdate(Attendee originalAttendee, Attendee updatedAttendee, Set<AttendeeField> updatedFields) {
+    public CalendarSession(ServerSession session) {
         super();
-        this.originalAttendee = originalAttendee;
-        this.updatedAttendee = updatedAttendee;
-        this.updatedFields = updatedFields;
+        this.session = session;
     }
 
     /**
-     * Gets the attendee in the original event.
+     * Gets the underlying server session.
      *
-     * @return The attendee in the original event, or <code>null</code> for a newly added attendee
+     * @return The underlying server session
      */
-    public Attendee getOriginalAttendee() {
-        return originalAttendee;
+    public ServerSession getSession() {
+        return session;
     }
 
     /**
-     * Gets the attendee in the updated event.
+     * Gets the session's user.
      *
-     * @return The attendee in the updated event, or <code>null</code> for a removed attendee
+     * @return The user
      */
-    public Attendee getUpdatedAttendee() {
-        return updatedAttendee;
+    public User getUser() {
+        return session.getUser();
     }
 
     /**
-     * Gets the attendee fields that were modified through the update
+     * Gets the session's context.
      *
-     * @return The updated fields
+     * @return The context
      */
-    public Set<AttendeeField> getUpdatedFields() {
-        return updatedFields;
+    public Context getContext() {
+        return session.getContext();
+    }
+
+    @Override
+    public String toString() {
+        return "CalendarSession [context=" + session.getContextId() + ", user=" + session.getUserId() + ", sessionId=" + session.getSessionID() + "]";
     }
 
 }
-
