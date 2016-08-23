@@ -58,7 +58,7 @@ import com.openexchange.oauth.scope.OAuthScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum MSLiveConnectOAuthScope implements OAuthScope {
-    mail("wl.imap wl_offline_access", Module.mail),
+    mail("wl.imap", Module.mail),
     calendar("wl.calendars", Module.calendar),
     contacts("wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses", Module.contacts),
     drive("wl.skydrive wl.skydrive_update", Module.drive);
