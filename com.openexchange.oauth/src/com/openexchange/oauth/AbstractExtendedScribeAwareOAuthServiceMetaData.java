@@ -63,6 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -82,12 +83,12 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
      * @param id
      * @param displayName
      */
-    public AbstractExtendedScribeAwareOAuthServiceMetaData(ServiceLookup services, API api) {
-        this(services, api, false, true);
+    public AbstractExtendedScribeAwareOAuthServiceMetaData(ServiceLookup services, API api, OAuthScope... scopes) {
+        this(services, api, false, true, scopes);
     }
 
-    public AbstractExtendedScribeAwareOAuthServiceMetaData(ServiceLookup services, API api, boolean needsRequestToken, boolean registerTokenBasedDeferrer) {
-        super(services, api);
+    public AbstractExtendedScribeAwareOAuthServiceMetaData(ServiceLookup services, API api, boolean needsRequestToken, boolean registerTokenBasedDeferrer, OAuthScope... scopes) {
+        super(services, api, scopes);
         this.needsRequestToken = needsRequestToken;
         this.registerTokenBasedDeferrer = registerTokenBasedDeferrer;
     }

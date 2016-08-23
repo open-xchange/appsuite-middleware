@@ -75,7 +75,7 @@ public final class XingOAuthServiceMetaData extends AbstractExtendedScribeAwareO
      * @throws IllegalStateException If either API key or secret is missing
      */
     public XingOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, API.XING, true, true);
+        super(services, API.XING, true, true, XingOAuthScope.values());
     }
 
     @Override

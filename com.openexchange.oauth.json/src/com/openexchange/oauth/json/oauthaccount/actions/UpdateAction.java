@@ -113,7 +113,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
              * Update account
              */
             final OAuthService oAuthService = getOAuthService();
-            final Map<String, Object> arguments = new HashMap<String, Object>(1);
+            final Map<String, Object> arguments = new HashMap<>(1);
 
             final String displayName = account.getDisplayName();
             if (null != displayName) {
@@ -127,7 +127,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
 
             if (!arguments.isEmpty()) {
                 arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
-                oAuthService.updateAccount(id, arguments, session.getUserId(), session.getContextId());
+                oAuthService.updateAccount(id, arguments, session.getUserId(), session.getContextId(), account.getEnabledScopes());
             }
 
             /*

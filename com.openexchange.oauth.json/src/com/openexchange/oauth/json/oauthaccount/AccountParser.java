@@ -89,6 +89,9 @@ public class AccountParser {
             final OAuthServiceMetaDataRegistry registry = Services.getService(OAuthService.class).getMetaDataRegistry();
             account.setMetaData(registry.getService(serviceId, user, contextId));
         }
+        if (accountJSON.hasAndNotNull(AccountField.SCOPE.getName())) {
+            //TODO set scope
+        }
 
         return account;
     }

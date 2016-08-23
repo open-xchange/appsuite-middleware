@@ -76,6 +76,8 @@ import com.openexchange.oauth.internal.CallbackRegistryImpl;
 import com.openexchange.oauth.internal.DeleteListenerRegistry;
 import com.openexchange.oauth.internal.InvalidationListenerRegistry;
 import com.openexchange.oauth.internal.OAuthServiceImpl;
+import com.openexchange.oauth.scope.OAuthScopeRegistry;
+import com.openexchange.oauth.scope.impl.OAuthScopeRegistryImpl;
 import com.openexchange.oauth.services.Services;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -109,9 +111,7 @@ public final class OAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class, SessionHolder.class,
-            CryptoService.class, ConfigViewFactory.class, TimerService.class, DispatcherPrefixService.class, UserService.class };
+        return new Class<?>[] { DatabaseService.class, SessiondService.class, EventAdmin.class, SecretEncryptionFactoryService.class, SessionHolder.class, CryptoService.class, ConfigViewFactory.class, TimerService.class, DispatcherPrefixService.class, UserService.class };
     }
 
     @Override
@@ -132,10 +132,13 @@ public final class OAuthActivator extends HousekeepingActivator {
             final BundleContext context = this.context;
             registry.start(context);
 
-            OAuthAccessRegistryServiceImpl accessRegistryService = new OAuthAccessRegistryServiceImpl();
-            this.accessRegistryService = accessRegistryService;
+            OAuthAccessRegistryService accessRegistryService = new OAuthAccessRegistryServiceImpl();
             registerService(OAuthAccessRegistryService.class, accessRegistryService);
             trackService(OAuthAccessRegistryService.class);
+
+            OAuthScopeRegistry oauthScopeRegistry = new OAuthScopeRegistryImpl();
+            registerService(OAuthScopeRegistry.class, oauthScopeRegistry);
+            trackService(OAuthScopeRegistry.class);
 
             /*
              * Start other trackers
@@ -178,12 +181,7 @@ public final class OAuthActivator extends HousekeepingActivator {
             delegateServices.put(IDGeneratorService.class, new OSGiIDGeneratorService().start(context));
             delegateServices.startAll(context);
 
-            final OAuthServiceImpl oauthService = new OAuthServiceImpl(
-                delegateServices.get(DBProvider.class),
-                delegateServices.get(IDGeneratorService.class),
-                registry,
-                delegateServices.get(ContextService.class),
-                cbRegistry);
+            final OAuthServiceImpl oauthService = new OAuthServiceImpl(delegateServices.get(DBProvider.class), delegateServices.get(IDGeneratorService.class), registry, delegateServices.get(ContextService.class), cbRegistry);
 
             registerService(CallbackRegistry.class, cbRegistry);
             registerService(CustomRedirectURLDetermination.class, cbRegistry);
@@ -194,25 +192,22 @@ public final class OAuthActivator extends HousekeepingActivator {
             registerService(EncryptedItemCleanUpService.class, oauthService);
 
             final ScribeHTTPClientFactoryImpl oauthFactory = new ScribeHTTPClientFactoryImpl();
-			registerService(OAuthHTTPClientFactory.class, oauthFactory);
+            registerService(OAuthHTTPClientFactory.class, oauthFactory);
 
-			SimpleRegistryListener<HTTPResponseProcessor> listener = new SimpleRegistryListener<HTTPResponseProcessor>() {
+            SimpleRegistryListener<HTTPResponseProcessor> listener = new SimpleRegistryListener<HTTPResponseProcessor>() {
 
-				@Override
-                public void added(ServiceReference<HTTPResponseProcessor> ref,
-						HTTPResponseProcessor service) {
-					oauthFactory.registerProcessor(service);
-				}
+                @Override
+                public void added(ServiceReference<HTTPResponseProcessor> ref, HTTPResponseProcessor service) {
+                    oauthFactory.registerProcessor(service);
+                }
 
-				@Override
-                public void removed(ServiceReference<HTTPResponseProcessor> ref,
-						HTTPResponseProcessor service) {
-					oauthFactory.forgetProcessor(service);
-				}
+                @Override
+                public void removed(ServiceReference<HTTPResponseProcessor> ref, HTTPResponseProcessor service) {
+                    oauthFactory.forgetProcessor(service);
+                }
 
-
-			};
-			track(HTTPResponseProcessor.class, listener );
+            };
+            track(HTTPResponseProcessor.class, listener);
 
         } catch (final Exception e) {
             log.error("Starting bundle \"com.openexchange.oauth\" failed.", e);

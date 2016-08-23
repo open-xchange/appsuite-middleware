@@ -56,6 +56,7 @@ import org.scribe.builder.api.YahooApi;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.yahoo.YahooOAuthScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -69,7 +70,7 @@ import com.openexchange.session.Session;
 public class OAuthServiceMetaDataYahooImpl extends AbstractScribeAwareOAuthServiceMetaData {
 
     public OAuthServiceMetaDataYahooImpl(ServiceLookup services) {
-        super(services, API.YAHOO);
+        super(services, API.YAHOO, YahooOAuthScope.values());
     }
 
     @Override

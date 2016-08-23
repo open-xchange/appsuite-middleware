@@ -57,6 +57,7 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -75,14 +76,14 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
     private API api;
 
     /**
-     * Initializes a new {@link AbstractScribeAwareOAuthServiceMetaData}.
+     * Initialises a new {@link AbstractScribeAwareOAuthServiceMetaData}.
      *
      * @param services the service lookup instance
      * @param id The OAuth identifier
      * @param displayName The display name
      */
-    public AbstractScribeAwareOAuthServiceMetaData(final ServiceLookup services, API api) {
-        super();
+    public AbstractScribeAwareOAuthServiceMetaData(final ServiceLookup services, API api, OAuthScope... scopes) {
+        super(scopes);
         this.services = services;
         this.api = api;
 

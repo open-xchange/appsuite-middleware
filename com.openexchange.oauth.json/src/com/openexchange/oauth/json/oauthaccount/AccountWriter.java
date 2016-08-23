@@ -81,6 +81,7 @@ public class AccountWriter {
         jAccount.put(AccountField.ID.getName(), account.getId());
         jAccount.put(AccountField.DISPLAY_NAME.getName(), account.getDisplayName());
         jAccount.put(AccountField.SERVICE_ID.getName(), account.getMetaData().getId());
+        jAccount.put(AccountField.SCOPE.getName(), account.getEnabledScopes());
         return jAccount;
     }
 

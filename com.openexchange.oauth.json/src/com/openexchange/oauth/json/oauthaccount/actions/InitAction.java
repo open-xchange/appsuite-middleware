@@ -58,6 +58,7 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
@@ -74,6 +75,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -86,6 +88,9 @@ import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.Tools;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
+import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -95,9 +100,10 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.GET, name = "init", description = "Initialize creation of an OAuth account", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "serviceId", description = "The service meta data identifier; e.g. \"com.openexchange.oauth.twitter\"")
+@Action(method = RequestMethod.GET, name = "init", description = "Initialize creation of an OAuth account", parameters = { 
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."), 
+    @Parameter(name = "serviceId", description = "The service meta data identifier; e.g. \"com.openexchange.oauth.twitter\""), 
+    @Parameter(name = "scope", description = "A comma separated list with scopes"),
 }, responseDescription = "An JSON representation of the resulting interaction providing needed information to complete account creation. See OAuth interaction data.")
 public final class InitAction extends AbstractOAuthAJAXActionService {
 
@@ -123,7 +129,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
              */
             return reauthorizeCallbackAction(accountId, request, session);
         } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -138,12 +144,16 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
              */
             final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
             if (serviceId == null) {
-                throw AjaxExceptionCodes.MISSING_PARAMETER.create( AccountField.SERVICE_ID.getName());
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(AccountField.SERVICE_ID.getName());
             }
             final String name = AccountField.DISPLAY_NAME.getName();
             final String displayName = request.getParameter(name);
             if (isEmpty(displayName)) {
                 throw OAuthExceptionCodes.MISSING_DISPLAY_NAME.create();
+            }
+            final String scope = request.getParameter(AccountField.SCOPE.getName());
+            if (isEmpty(scope)) {
+                throw OAuthExceptionCodes.MISSING_SCOPE.create();
             }
             /*
              * Generate UUID
@@ -166,22 +176,26 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
                 callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
                 callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
                 callbackUrlBuilder.append('&').append(Session.PARAM_TOKEN).append('=').append(oauthSessionToken);
+                callbackUrlBuilder.append('&').append(AccountField.SCOPE.getName()).append('=').append(scope);
                 final String cb = request.getParameter("cb");
                 if (!isEmpty(cb)) {
-                	callbackUrlBuilder.append("&callback=").append(cb);
+                    callbackUrlBuilder.append("&callback=").append(cb);
                 }
                 callbackUrl = callbackUrlBuilder.toString();
             }
+            // Get the scopes
+            OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
+            Set<OAuthScope> scopes = scopeRegistry.getAvailableScopes(API.resolveFromServiceId(serviceId), Module.valuesOf(scope));
             /*
              * Invoke
              */
             final String currentHost = determineHost(request, session);
-            final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrl, currentHost, session);
+            final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrl, currentHost, session, scopes);
             final OAuthToken requestToken = interaction.getRequestToken();
             /*
              * Create a container to set some state information: Request token's secret, call-back URL, whatever
              */
-            final Map<String, Object> oauthState = new HashMap<String, Object>();
+            final Map<String, Object> oauthState = new HashMap<>();
             if (interaction instanceof Parameterizable) {
                 final Parameterizable params = (Parameterizable) interaction;
                 for (final String key : params.getParamterNames()) {
@@ -240,6 +254,10 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
     }
 
     private AJAXRequestResult reauthorizeCallbackAction(final String accountId, final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
+        final String scope = request.getParameter(AccountField.SCOPE.getName());
+        if (isEmpty(scope)) {
+            throw OAuthExceptionCodes.MISSING_SCOPE.create();
+        }
         final OAuthService oAuthService = getOAuthService();
         /*
          * Get account by identifier
@@ -271,19 +289,23 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
         callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
         callbackUrlBuilder.append('&').append(Session.PARAM_TOKEN).append('=').append(oauthSessionToken);
+        callbackUrlBuilder.append('&').append(AccountField.SCOPE.getName()).append('=').append(scope);
         final String cb = request.getParameter("cb");
         if (!isEmpty(cb)) {
-        	callbackUrlBuilder.append("&callback=").append(cb);
+            callbackUrlBuilder.append("&callback=").append(cb);
         }
+        // Get the scopes
+        OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
+        Set<OAuthScope> scopes = scopeRegistry.getAvailableScopes(API.resolveFromServiceId(serviceId), Module.valuesOf(scope));
         /*
          * Invoke
          */
-        final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrlBuilder.toString(), determineHost(request, session), session);
+        final OAuthInteraction interaction = oAuthService.initOAuth(serviceId, callbackUrlBuilder.toString(), determineHost(request, session), session, scopes);
         final OAuthToken requestToken = interaction.getRequestToken();
         /*
          * Create a container to set some state information: Request token's secret, call-back URL, whatever
          */
-        final Map<String, Object> oauthState = new HashMap<String, Object>();
+        final Map<String, Object> oauthState = new HashMap<>();
         if (interaction instanceof Parameterizable) {
             final Parameterizable params = (Parameterizable) interaction;
             for (final String key : params.getParamterNames()) {

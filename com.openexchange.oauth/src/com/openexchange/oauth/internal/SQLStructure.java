@@ -54,7 +54,9 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.sql.grammar.Column;
 import com.openexchange.sql.grammar.EQUALS;
 import com.openexchange.sql.grammar.INSERT;
@@ -66,6 +68,7 @@ import com.openexchange.sql.grammar.UPDATE;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class SQLStructure {
 
@@ -84,10 +87,10 @@ public class SQLStructure {
         DISPLAY_NAME("displayName"),
         ACCESS_TOKEN("accessToken"),
         ACCESS_SECRET("accessSecret"),
-        SERVICE_ID("serviceId");
+        SERVICE_ID("serviceId"),
+        SCOPE("scope");
 
-        public static Set<OAUTH_COLUMN> updateableColumns = EnumSet.complementOf(EnumSet.of(CID, USER, ID, SERVICE_ID));
-
+        public static Set<OAUTH_COLUMN> updateableColumns = EnumSet.complementOf(EnumSet.of(CID, USER, ID, SERVICE_ID, SCOPE));
 
         private final Column column;
 
@@ -114,20 +117,25 @@ public class SQLStructure {
          */
         public Object get(final OAuthAccount account, final int cid, final int userId) {
             switch (this) {
-            case CID:
-                return Integer.valueOf(cid);
-            case USER:
-                return Integer.valueOf(userId);
-            case ID:
-                return Integer.valueOf(account.getId());
-            case DISPLAY_NAME:
-                return account.getDisplayName();
-            case ACCESS_TOKEN:
-                return account.getToken();
-            case ACCESS_SECRET:
-                return account.getSecret();
-            case SERVICE_ID:
-                return account.getMetaData().getId();
+                case CID:
+                    return Integer.valueOf(cid);
+                case USER:
+                    return Integer.valueOf(userId);
+                case ID:
+                    return Integer.valueOf(account.getId());
+                case DISPLAY_NAME:
+                    return account.getDisplayName();
+                case ACCESS_TOKEN:
+                    return account.getToken();
+                case ACCESS_SECRET:
+                    return account.getSecret();
+                case SERVICE_ID:
+                    return account.getMetaData().getId();
+                case SCOPE:
+                    Set<OAuthScope> enabledScopes = account.getEnabledScopes();
+                    return Strings.concat(",", enabledScopes.toArray(new Object[enabledScopes.size()]));
+                default:
+                    break;
             }
             return null;
         }
@@ -157,11 +165,13 @@ public class SQLStructure {
     }
 
     /**
-     * @param account
-     * @param contextId
-     * @param user
-     * @param values
-     * @return
+     * Performs an UPDATE for the specified account.
+     * 
+     * @param account The account
+     * @param contextId The context identifier
+     * @param user The user identifier
+     * @param values The added values in insertion order
+     * @return The UPDATE command
      */
     public static UPDATE updateAccount(final OAuthAccount account, int contextId, int user, ArrayList<Object> values) {
         final UPDATE update = new UPDATE(OAUTH_ACCOUNTS);
@@ -175,5 +185,4 @@ public class SQLStructure {
         update.WHERE(new EQUALS(OAUTH_COLUMN.CID.getColumn(), contextId).AND(new EQUALS(OAUTH_COLUMN.ID.getColumn(), account.getId())));
         return update;
     }
-
 }

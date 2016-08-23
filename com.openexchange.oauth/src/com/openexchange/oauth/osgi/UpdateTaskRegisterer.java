@@ -58,6 +58,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.oauth.internal.groupware.OAuthAddScopeColumnTask;
 import com.openexchange.oauth.internal.groupware.OAuthCreateTableTask;
 import com.openexchange.oauth.internal.groupware.OAuthCreateTableTask2;
 
@@ -84,7 +85,7 @@ public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer<Data
 
             @Override
             public Collection<UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList(((UpdateTaskV2) new OAuthCreateTableTask(dbService)), new OAuthCreateTableTask2(dbService));
+                return Arrays.asList(((UpdateTaskV2) new OAuthCreateTableTask(dbService)), new OAuthCreateTableTask2(dbService), new OAuthAddScopeColumnTask(dbService));
             }
         }, null);
         return dbService;

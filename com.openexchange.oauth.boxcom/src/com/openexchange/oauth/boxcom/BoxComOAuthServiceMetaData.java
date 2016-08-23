@@ -71,7 +71,7 @@ public final class BoxComOAuthServiceMetaData extends AbstractExtendedScribeAwar
      * @param services the service lookup instance
      */
     public BoxComOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, API.BOX_COM);
+        super(services, API.BOX_COM, BoxComOAuthScope.values());
     }
 
     @Override

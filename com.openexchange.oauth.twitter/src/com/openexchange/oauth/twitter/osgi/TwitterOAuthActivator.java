@@ -60,13 +60,14 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.oauth.twitter.OAuthServiceMetaDataTwitterImpl;
+import com.openexchange.oauth.twitter.TwitterOAuthScope;
 import com.openexchange.oauth.twitter.TwitterOAuthServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-
 
 /**
  * {@link TwitterOAuthActivator}
@@ -84,7 +85,7 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, CapabilityService.class, ConfigViewFactory.class, DeferringURLService.class, DispatcherPrefixService.class };
+        return new Class<?>[] { ConfigurationService.class, CapabilityService.class, ConfigViewFactory.class, DeferringURLService.class, DispatcherPrefixService.class, OAuthScopeRegistry.class };
     }
 
     @Override
@@ -104,6 +105,7 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
             final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
             properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "twitter");
             registerService(CapabilityChecker.class, new CapabilityChecker() {
+
                 @Override
                 public boolean isEnabled(String capability, Session ses) throws OXException {
                     if ("twitter".equals(capability)) {
@@ -120,6 +122,10 @@ public final class TwitterOAuthActivator extends HousekeepingActivator {
             }, properties);
 
             getService(CapabilityService.class).declareCapability("twitter");
+
+            // Register the scope
+            OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
+            scopeRegistry.registerScopes(service.getAPI(), TwitterOAuthScope.values());
         } catch (final Exception e) {
             org.slf4j.LoggerFactory.getLogger(TwitterOAuthActivator.class).error("", e);
             throw e;
