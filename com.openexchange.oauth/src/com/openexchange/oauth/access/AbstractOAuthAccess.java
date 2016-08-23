@@ -53,9 +53,9 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.access.OAuthAccess;
-import com.openexchange.oauth.access.OAuthClient;
+import com.openexchange.oauth.OAuthExceptionCodes;
 
 /**
  * {@link AbstractOAuthAccess}
@@ -92,6 +92,24 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
     @Override
     public OAuthAccount getOAuthAccount() {
         return oauthAccount;
+    }
+
+    /**
+     * Verifies the specified {@link OAuthAccount} over validity:
+     * <ul>
+     * <li>accessToken exists?</li>
+     * </ul>
+     * 
+     * @param account The {@link OAuthAccount} to check for validity
+     * @throws OXException if the account is not valid
+     */
+    protected void verifyAccount(OAuthAccount account) throws OXException {
+        // Verify that the account has an access token 
+        if (Strings.isEmpty(account.getToken())) {
+            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(account.getId());
+        }
+
+        // Other checks?
     }
 
     @Override

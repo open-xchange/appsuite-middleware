@@ -115,6 +115,7 @@ public class DropboxOAuthAccess extends AbstractOAuthAccess {
                 int oauthAccountId = getAccountId();
                 OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
                 OAuthAccount dropboxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+                verifyAccount(dropboxOAuthAccount);
                 setOAuthAccount(dropboxOAuthAccount);
 
                 /*-
