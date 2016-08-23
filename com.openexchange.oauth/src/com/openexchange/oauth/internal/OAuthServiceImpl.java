@@ -1003,7 +1003,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
             @Override
             public int set(int pos, PreparedStatement stmt) throws SQLException {
-                String scope = Strings.concat(",", scopes.toArray());
+                String scope = Strings.concat(" ", scopes.toArray());
                 stmt.setString(pos, scope);
                 return ++pos;
             }
