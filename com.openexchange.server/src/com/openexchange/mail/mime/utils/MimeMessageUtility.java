@@ -2531,7 +2531,7 @@ public final class MimeMessageUtility {
      * @return The new {@link MimeMessage} instance
      * @throws OXException If a new {@link MimeMessage} instance cannot be returned
      */
-    public static MimeMessage cloneMessage(MimeMessage original, final Date optReceivedDate) throws OXException {
+    public static MimeMessage cloneMessage(Message original, final Date optReceivedDate) throws OXException {
         ThresholdFileHolder sink = new ThresholdFileHolder();
         boolean closeSink = true;
         try {

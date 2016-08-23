@@ -55,25 +55,26 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONValue;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.Client;
 import com.openexchange.exception.OXException;
+import com.openexchange.pns.JsonMessage;
 import com.openexchange.pns.KnownTopic;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushNotification;
-import com.openexchange.pns.TextMessage;
 
 
 /**
- * {@link AppSuiteMessageGenerator} - The message generator for App Suite UI.
+ * {@link AppSuiteWebSocketMessageGenerator} - The message generator for App Suite UI.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class AppSuiteMessageGenerator implements PushMessageGenerator {
+public class AppSuiteWebSocketMessageGenerator implements PushMessageGenerator {
 
     private static final String TRANSPORT_ID_WEB_SOCKET = KnownTransport.WEB_SOCKET.getTransportId();
 
@@ -97,9 +98,9 @@ public class AppSuiteMessageGenerator implements PushMessageGenerator {
     private final Map<String, ArgsGenerator> generators;
 
     /**
-     * Initializes a new {@link AppSuiteMessageGenerator}.
+     * Initializes a new {@link AppSuiteWebSocketMessageGenerator}.
      */
-    public AppSuiteMessageGenerator() {
+    public AppSuiteWebSocketMessageGenerator() {
         super();
 
         Map<String, ArgsGenerator> generators = new HashMap<>(16);
@@ -122,10 +123,13 @@ public class AppSuiteMessageGenerator implements PushMessageGenerator {
     }
 
     @Override
-    public Message<String> generateMessageFor(String transportId, PushNotification notification) throws OXException {
+    public Message<JSONValue> generateMessageFor(String transportId, PushNotification notification) throws OXException {
         if (!TRANSPORT_ID_WEB_SOCKET.equals(transportId)) {
             throw PushExceptionCodes.UNSUPPORTED_TRANSPORT.create(null == transportId ? "null" : transportId);
         }
+
+        // From here on it known that we are supposed to compile a Socket.IO JSON message since
+        // com.openexchange.pns.appsuite.AppSuiteWebSocketToClientResolver only accepts "/socket.io/*"
 
         String topic = notification.getTopic();
         ArgsGenerator argsGenerator = generators.get(topic);
@@ -134,7 +138,7 @@ public class AppSuiteMessageGenerator implements PushMessageGenerator {
         }
 
         try {
-            return new TextMessage(new JSONObject(3).put("name", topic).put("args", new JSONArray(argsGenerator.generateArgsFrom(notification))).put("namespace", DEFAULT_NAMESPACE).toString());
+            return new JsonMessage(new JSONObject(3).put("name", topic).put("args", new JSONArray(argsGenerator.generateArgsFrom(notification))).put("namespace", DEFAULT_NAMESPACE));
         } catch (JSONException e) {
             throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

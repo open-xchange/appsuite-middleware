@@ -47,38 +47,31 @@
  *
  */
 
-package com.openexchange.pns.appsuite.osgi;
+package com.openexchange.pns;
 
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.pns.PushMessageGenerator;
-import com.openexchange.pns.appsuite.AppSuiteWebSocketMessageGenerator;
-import com.openexchange.pns.appsuite.AppSuiteWebSocketToClientResolver;
-import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
+import org.json.JSONValue;
 
 /**
- * {@link AppSuitePushStuffActivator}
+ * {@link JsonMessage} - A message containing a JSON payload.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class AppSuitePushStuffActivator extends HousekeepingActivator {
+public class JsonMessage implements Message<JSONValue> {
+
+    private final JSONValue jsonValue;
 
     /**
-     * Initializes a new {@link AppSuitePushStuffActivator}.
+     * Initializes a new {@link JsonMessage}.
      */
-    public AppSuitePushStuffActivator() {
+    public JsonMessage(JSONValue jsonValue) {
         super();
+        this.jsonValue = jsonValue;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {};
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(PushMessageGenerator.class, new AppSuiteWebSocketMessageGenerator());
-        registerService(WebSocketToClientResolver.class, new AppSuiteWebSocketToClientResolver());
+    public JSONValue getMessage() {
+        return jsonValue;
     }
 
 }
