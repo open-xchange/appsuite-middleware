@@ -47,66 +47,48 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.transport.wns;
 
 
 /**
- * {@link KnownTransport} - The enumeration for known transports for the push notification service.
+ * {@link WnsOptionsPerClient} - A pair of client identifier and associated WNS options.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public enum KnownTransport {
+public class WnsOptionsPerClient {
+
+    private final String client;
+    private final WnsOptions options;
 
     /**
-     * The transport by a Web Socket connection.
+     * Initializes a new {@link WnsOptionsPerClient}.
+     *
+     * @param client The client
+     * @param options The associated GCM options
      */
-    WEB_SOCKET("websocket"),
-    /**
-     * The transport by Apple Push Notification Service (APNS).
-     */
-    APNS("apn"),
-    /**
-     * The transport by Google Cloud Messaging service (GCM).
-     */
-    GCM("gcm"),
-    /**
-     * The transport by Windows Push Notification Services (WNS).
-     */
-    WNS("wns"),
-
-    ;
-
-    private final String transportId;
-
-    private KnownTransport(String transportId) {
-        this.transportId = transportId;
+    public WnsOptionsPerClient(String client, WnsOptions options) {
+        super();
+        this.client = client;
+        this.options = options;
     }
 
     /**
-     * Gets the transport identifier.
+     * Gets the client
      *
-     * @return The transport identifier
+     * @return The client
      */
-    public String getTransportId() {
-        return transportId;
+    public String getClient() {
+        return client;
     }
 
     /**
-     * Gets the known transport for specified identifier.
+     * Gets the options
      *
-     * @param transportId The transport identifier
-     * @return The associated known transport or <code>null</code>
+     * @return The options
      */
-    public static KnownTransport knownTransportFor(String transportId) {
-        if (null != transportId) {
-            for (KnownTransport knownTransport : values()) {
-                if (transportId.equals(knownTransport.transportId)) {
-                    return knownTransport;
-                }
-            }
-        }
-        return null;
+    public WnsOptions getOptions() {
+        return options;
     }
 
 }

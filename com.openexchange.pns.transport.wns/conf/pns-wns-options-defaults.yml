@@ -1,0 +1,27 @@
+# The YAML configuration file for the WNS transport of the Push Notification Service
+#
+# Notation/meaning is:
+# <unique-client-identifier>:
+#     enabled: <true|false>
+#       Boolean. If set to "false" the client configuration will not be available.
+#                Default is "true".
+#
+#     sid: <sid>
+#       String. Specifies the SID (Package security identifier).
+#
+#     secret: <secret>
+#       String. Specifies the client secret.
+#
+
+# Only an example
+mywindowsclient:
+    # Disabled...
+    enabled: false
+    sid: AIzaSy2535345TbVL2r4yaZ4ZVQvJdcE1vth24546
+    secret: 14e435y2535345TbVL2r4yaZ4ZVQvJdcE1vth24546
+
+anotherwindowsclient:
+    # Disabled...
+    enabled: false
+    sid: 234345345TbVL2r4yaZ4ZVQvJdcE1vth24546
+    secret: 34dfge4545TbVL2r4yaZ4ZVQvJdcE1vth24546
