@@ -112,7 +112,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
     /**
      * Verifies whether the OAuth token and the associated {@link OAuthClient} are expired.
      *
-     * @return <code>true</code> if expired; false otherwise
+     * @return <code>true</code> if expired; <code>false</code> otherwise
      */
     protected boolean isExpired() {
         long now = System.nanoTime();
@@ -141,39 +141,38 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
     /**
      * Sets the {@link OAuthAccount}
      *
-     * @param oauthAccount the {@link OAuthAccount} to set
+     * @param oauthAccount The {@link OAuthAccount} to set
      */
     protected void setOAuthAccount(OAuthAccount oauthAccount) {
         this.oauthAccount = oauthAccount;
     }
 
     /**
-     * Returns the OAuth account identifier from messaging account's configuration
+     * Returns the OAuth account identifier from associated account's configuration
      *
      * @param configuration The configuration
      * @return The account identifier
-     * @throws IllegalArgumentException if the configuration is <code>null</code>, or if the account identifier is not present, or is present but cannot be parsed as an integer
+     * @throws IllegalArgumentException If the configuration is <code>null</code>, or if the account identifier is not present, or is present but cannot be parsed as an integer
      */
     protected int getAccountId(Map<String, Object> configuration) {
-        final int oauthAccountId;
-        {
-            if (null == configuration) {
-                throw new IllegalArgumentException("The configuration cannot be 'null'");
-            }
-            final Object accountId = configuration.get("account");
-            if (null == accountId) {
-                throw new IllegalArgumentException("The account identifier is missing from the configuration");
-            }
-            if (accountId instanceof Integer) {
-                oauthAccountId = ((Integer) accountId).intValue();
-            } else {
-                try {
-                    oauthAccountId = Integer.parseInt(accountId.toString());
-                } catch (final NumberFormatException e) {
-                    throw new IllegalArgumentException("The account identifier '" + accountId.toString() + "' cannot be parsed as an integer.");
-                }
-            }
+        if (null == configuration) {
+            throw new IllegalArgumentException("The configuration cannot be 'null'");
         }
-        return oauthAccountId;
+
+        Object accountId = configuration.get("account");
+        if (null == accountId) {
+            throw new IllegalArgumentException("The account identifier is missing from the configuration");
+        }
+
+        if (accountId instanceof Integer) {
+            return ((Integer) accountId).intValue();
+        }
+
+        try {
+            return Integer.parseInt(accountId.toString());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("The account identifier '" + accountId.toString() + "' cannot be parsed as an integer.", e);
+        }
     }
+
 }
