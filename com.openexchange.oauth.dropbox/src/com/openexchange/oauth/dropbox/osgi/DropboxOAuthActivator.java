@@ -78,7 +78,7 @@ public final class DropboxOAuthActivator extends HousekeepingActivator {
         DropboxOAuthServiceMetaData service = new DropboxOAuthServiceMetaData(this);
         registerService(OAuthServiceMetaData.class, service);
         registerService(Reloadable.class, service);
-        //track(DatabaseService.class, new DatabaseUpdateTaskServiceTracker(context));
+        track(DatabaseService.class, new DatabaseUpdateTaskServiceTracker(context));
         openTrackers();
     }
 }
