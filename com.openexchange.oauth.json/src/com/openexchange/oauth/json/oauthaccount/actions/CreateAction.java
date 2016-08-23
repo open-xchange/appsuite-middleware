@@ -90,7 +90,8 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "oauth_token", description = "The request token from preceeding OAuth interaction."),
     @Parameter(name = "uuid", description = "The UUID of the preceeding OAuth interaction."),
     @Parameter(name = "oauth_verfifier", description = "The verifier string which confirms that user granted access."),
-    @Parameter(name = "displayName", description = "The display name for the new account.")
+    @Parameter(name = "displayName", description = "The display name for the new account."),
+    @Parameter(name = "scopes", description = "A space separated list with scopes")
 }, responseDescription = "A JSON object describing the newly created OAuth account as specified in OAuth account data.")
 @DispatcherNotes(noSecretCallback = true)
 public final class CreateAction extends AbstractOAuthTokenAction {
@@ -110,7 +111,7 @@ public final class CreateAction extends AbstractOAuthTokenAction {
             if (serviceId == null) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(AccountField.SERVICE_ID.getName());
             }
-            final String scope = request.getParameter(AccountField.SCOPE.getName());
+            final String scope = request.getParameter("scopes");
             if (isEmpty(scope)) {
                 throw OAuthExceptionCodes.MISSING_SCOPE.create();
             }

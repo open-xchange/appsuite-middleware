@@ -49,11 +49,14 @@
 
 package com.openexchange.oauth.json.oauthaccount;
 
+import java.util.Set;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteraction;
+import com.openexchange.oauth.scope.OAuthScope;
 
 /**
  * The OAuth account writer
@@ -81,7 +84,8 @@ public class AccountWriter {
         jAccount.put(AccountField.ID.getName(), account.getId());
         jAccount.put(AccountField.DISPLAY_NAME.getName(), account.getDisplayName());
         jAccount.put(AccountField.SERVICE_ID.getName(), account.getMetaData().getId());
-        jAccount.put(AccountField.SCOPE.getName(), account.getEnabledScopes());
+        jAccount.put(AccountField.ENABLED_SCOPES.getName(), write(account.getEnabledScopes()));
+        jAccount.put(AccountField.AVAILABLE_SCOPES.getName(), write(account.getMetaData().getAvailableScopes()));
         return jAccount;
     }
 
@@ -102,4 +106,17 @@ public class AccountWriter {
         return jInteraction;
     }
 
+    /**
+     * Writes the specified {@link Set} with {@link OAuthScope}s as a {@link JSONArray}
+     * 
+     * @param scopes The {@link Set} with {@link OAuthScope}s to write
+     * @return The {@link JSONArray} with the {@link OAuthScope}s
+     */
+    private static JSONArray write(Set<OAuthScope> scopes) {
+        JSONArray scopeArray = new JSONArray();
+        for (OAuthScope scope : scopes) {
+            scopeArray.put(scope.getModule());
+        }
+        return scopeArray;
+    }
 }

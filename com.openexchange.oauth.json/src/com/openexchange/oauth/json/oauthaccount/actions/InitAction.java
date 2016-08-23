@@ -151,10 +151,11 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
             if (isEmpty(displayName)) {
                 throw OAuthExceptionCodes.MISSING_DISPLAY_NAME.create();
             }
-            final String scope = request.getParameter(AccountField.SCOPE.getName());
+            final String scope = request.getParameter("scopes");
             if (isEmpty(scope)) {
                 throw OAuthExceptionCodes.MISSING_SCOPE.create();
             }
+            
             /*
              * Generate UUID
              */
@@ -176,7 +177,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
                 callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
                 callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
                 callbackUrlBuilder.append('&').append(Session.PARAM_TOKEN).append('=').append(oauthSessionToken);
-                callbackUrlBuilder.append('&').append(AccountField.SCOPE.getName()).append('=').append(scope);
+                callbackUrlBuilder.append('&').append("scopes").append('=').append(scope);
                 final String cb = request.getParameter("cb");
                 if (!isEmpty(cb)) {
                     callbackUrlBuilder.append("&callback=").append(cb);
@@ -254,10 +255,11 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
     }
 
     private AJAXRequestResult reauthorizeCallbackAction(final String accountId, final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
-        final String scope = request.getParameter(AccountField.SCOPE.getName());
+        final String scope = request.getParameter("scopes");
         if (isEmpty(scope)) {
             throw OAuthExceptionCodes.MISSING_SCOPE.create();
         }
+        
         final OAuthService oAuthService = getOAuthService();
         /*
          * Get account by identifier
@@ -289,7 +291,7 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
         callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
         callbackUrlBuilder.append('&').append(Session.PARAM_TOKEN).append('=').append(oauthSessionToken);
-        callbackUrlBuilder.append('&').append(AccountField.SCOPE.getName()).append('=').append(scope);
+        callbackUrlBuilder.append('&').append("scopes").append('=').append(scope);
         final String cb = request.getParameter("cb");
         if (!isEmpty(cb)) {
             callbackUrlBuilder.append("&callback=").append(cb);

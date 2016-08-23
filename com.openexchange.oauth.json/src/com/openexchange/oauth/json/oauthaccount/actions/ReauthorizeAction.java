@@ -96,7 +96,7 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create( AccountField.SERVICE_ID.getName());
         }
 
-        final String scope = request.getParameter(AccountField.SCOPE.getName());
+        final String scope = request.getParameter("scopes");
         if (isEmpty(scope)) {
             throw OAuthExceptionCodes.MISSING_SCOPE.create();
         }
