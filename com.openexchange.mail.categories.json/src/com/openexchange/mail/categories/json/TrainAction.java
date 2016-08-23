@@ -127,6 +127,9 @@ public class TrainAction extends AbstractCategoriesAction {
                 addresses.add((String) obj);
             }
         }
+        if (addresses.size() == 0) {
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+        }
 
         boolean createRule = AJAXRequestDataTools.parseBoolParameter(CREATE_RULE_PARAMETER, requestData, true);
 

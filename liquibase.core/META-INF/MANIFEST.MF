@@ -5,8 +5,7 @@ Bundle-SymbolicName: liquibase.core
 Bundle-Version: 3.0.7
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Bundle-ClassPath: lib/snakeyaml-1.11.jar,
- .
+Bundle-ClassPath: .
 Import-Package: javax.servlet,
  javax.servlet.http,
  javax.xml.parsers,
@@ -15,7 +14,23 @@ Import-Package: javax.servlet,
  org.osgi.util.tracker,
  org.xml.sax,
  org.xml.sax.ext,
- org.xml.sax.helpers
+ org.xml.sax.helpers,
+ org.yaml.snakeyaml;version="1.17.0",
+ org.yaml.snakeyaml.composer;version="1.17.0",
+ org.yaml.snakeyaml.constructor;version="1.17.0",
+ org.yaml.snakeyaml.emitter;version="1.17.0",
+ org.yaml.snakeyaml.error;version="1.17.0",
+ org.yaml.snakeyaml.events;version="1.17.0",
+ org.yaml.snakeyaml.introspector;version="1.17.0",
+ org.yaml.snakeyaml.nodes;version="1.17.0",
+ org.yaml.snakeyaml.parser;version="1.17.0",
+ org.yaml.snakeyaml.reader;version="1.17.0",
+ org.yaml.snakeyaml.representer;version="1.17.0",
+ org.yaml.snakeyaml.resolver;version="1.17.0",
+ org.yaml.snakeyaml.scanner;version="1.17.0",
+ org.yaml.snakeyaml.serializer;version="1.17.0",
+ org.yaml.snakeyaml.tokens;version="1.17.0",
+ org.yaml.snakeyaml.util;version="1.17.0"
 Bundle-Activator: liquibase.LiquibaseCoreActivator
 Export-Package: liquibase,
  liquibase.change,

@@ -49,10 +49,14 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.json.JSONObject;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
@@ -66,8 +70,7 @@ import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
  */
 public class EMClientURLTest extends AbstractConfigAwareAjaxSession {
 
-    public EMClientURLTest(String name) {
-        super(name);
+    public EMClientURLTest() {
     }
 
     private static Map<String, String> confs;
@@ -82,6 +85,13 @@ public class EMClientURLTest extends AbstractConfigAwareAjaxSession {
         return confs;
     }
 
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        setUpConfiguration(client, false);
+    }
+
+    @Test
     public void testEMClientURL() throws Exception {
         ExecuteRequest req = new ExecuteRequest("windows.desktop/emclientinstall", "link", null, false);
         OnboardingTestResponse response = client.execute(req);

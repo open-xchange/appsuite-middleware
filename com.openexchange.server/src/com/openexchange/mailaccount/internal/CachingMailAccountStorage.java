@@ -339,6 +339,36 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public boolean existsMailAccount(int id, int userId, int contextId) throws OXException {
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        if (cacheService == null) {
+            return delegate.existsMailAccount(id, userId, contextId);
+        }
+
+        Cache cache = cacheService.getCache(REGION_NAME);
+        CacheKey key = newCacheKey(cacheService, id, userId, contextId);
+        Object object = cache.get(key);
+        if (object instanceof MailAccount) {
+            return true;
+        }
+
+        // Check in listing of account IDs
+        key = accountsCacheKey(cacheService, userId, contextId);
+        object = cache.get(key);
+        if (object instanceof int[]) {
+            // Rely on listing of account IDs...
+            int[] ids = (int[]) object;
+            boolean exists = false;
+            for (int i = ids.length; !exists && i-- > 0;) {
+                exists = (ids[i] == id);
+            }
+            return exists;
+        }
+
+        return delegate.existsMailAccount(id, userId, contextId);
+    }
+
+    @Override
     public MailAccount getMailAccount(int id, int userId, int contextId) throws OXException {
         CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
@@ -392,6 +422,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     @Override
     public int getTransportByPrimaryAddress(String primaryAddress, int userId, int contextId) throws OXException {
         return delegate.getTransportByPrimaryAddress(primaryAddress, userId, contextId);
+    }
+
+    @Override
+    public TransportAccount getTransportByReference(String reference, int userId, int contextId) throws OXException {
+        return delegate.getTransportByReference(reference, userId, contextId);
     }
 
     @Override

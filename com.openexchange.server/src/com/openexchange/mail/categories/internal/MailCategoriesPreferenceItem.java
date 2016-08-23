@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.IValueHandlerExtended;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
@@ -67,6 +68,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
@@ -78,7 +80,8 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 public class MailCategoriesPreferenceItem implements PreferencesItemService {
 
-    private final ServiceLookup lookupService;
+    /** The service listing */
+    final ServiceLookup lookupService;
 
     /**
      * Initializes a new {@link MailCategoriesPreferenceItem}.
@@ -101,6 +104,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
     private static final String FIELD_FEATURE_INITIALIZED = "initialized";
     private static final String FIELD_ID = "id";
     private static final String FIELD_NAME = "name";
+    private static final String FIELD_DESCRIPTION = "description";
     private static final String FIELD_ACTIVE = "active";
     private static final String FIELD_PERMISSIONS = "permissions";
 
@@ -110,11 +114,21 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
 
     @Override
     public IValueHandler getSharedValue() {
-        return new IValueHandler() {
+        return new IValueHandlerExtended() {
 
             @Override
             public boolean isAvailable(UserConfiguration userConfig) {
                 return userConfig.hasWebMail() && userConfig.getExtendedPermissions().contains(MAIL_CATEGORIES_CAPABILTY);
+            }
+
+            @Override
+            public boolean isAvailable(Session session, UserConfiguration userConfig) throws OXException {
+                if (false == userConfig.hasWebMail()) {
+                    return false;
+                }
+
+                CapabilityService service = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
+                return service.getCapabilities(session).contains(MAIL_CATEGORIES_CAPABILTY);
             }
 
             @Override
@@ -138,6 +152,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                             JSONObject categoryJSON = new JSONObject(3);
                             categoryJSON.put(FIELD_ID, config.getCategory());
                             categoryJSON.put(FIELD_NAME, config.getName());
+                            categoryJSON.put(FIELD_DESCRIPTION, config.getDescription());
                             categoryJSON.put(FIELD_ACTIVE, config.isActive());
 
                             List<String> mailCategoryPermissions = new ArrayList<>();
@@ -183,12 +198,12 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                     if (service == null) {
                         return;
                     }
-                    
+
                     boolean featureEnabled = config.getBoolean(FIELD_FEATURE_ENABLED);
                     if (!service.isForced(session)) {
                         service.enable(session, featureEnabled);
                     }
-                    
+
                     JSONArray mailCategories = getType(config.get(FIELD_LIST), JSONArray.class, setting.getSingleValue(), setting.getName());
                     List<MailCategoryConfig> newConfigs = new ArrayList<>();
                     for (Object o : mailCategories.asList()) {
@@ -197,7 +212,8 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                         String catID = getType(newConfJSON.remove(FIELD_ID), String.class, setting.getSingleValue(), setting.getName());
                         String name = getType(newConfJSON.remove(FIELD_NAME), String.class, setting.getSingleValue(), setting.getName());
                         Boolean enable = getType(newConfJSON.remove(FIELD_ACTIVE), Boolean.class, setting.getSingleValue(), setting.getName());
-                        newConfJSON.remove("permissions");
+                        newConfJSON.remove(FIELD_PERMISSIONS);
+                        newConfJSON.remove(FIELD_DESCRIPTION);
                         if (!newConfJSON.isEmpty()) {
                             throw SettingExceptionCodes.INVALID_VALUE.create(setting.getSingleValue(), setting.getName());
                         }
@@ -215,7 +231,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                 } catch (JSONException e) {
                     throw SettingExceptionCodes.INVALID_VALUE.create(setting.getSingleValue(), setting.getName());
                 }
-                
+
             }
 
             private <T> T getType(Object o, Class<T> clazz, Object exceptionObject, String name) throws OXException {

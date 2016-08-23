@@ -61,7 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.boxcom.access.BoxAccess;
+import com.openexchange.file.storage.boxcom.access.BoxOAuthAccess;
 import com.openexchange.session.Session;
 
 /**
@@ -75,7 +75,7 @@ public abstract class AbstractBoxResourceAccess {
 
     private static final String TYPE_FOLDER = BoxConstants.TYPE_FOLDER;
 
-    protected final BoxAccess boxAccess;
+    protected final BoxOAuthAccess boxAccess;
     protected final Session session;
     protected final FileStorageAccount account;
     protected final String rootFolderId;
@@ -83,7 +83,7 @@ public abstract class AbstractBoxResourceAccess {
     /**
      * Initializes a new {@link AbstractBoxResourceAccess}.
      */
-    protected AbstractBoxResourceAccess(BoxAccess boxAccess, FileStorageAccount account, Session session) throws OXException {
+    protected AbstractBoxResourceAccess(BoxOAuthAccess boxAccess, FileStorageAccount account, Session session) throws OXException {
         super();
         this.boxAccess = boxAccess;
         this.account = account;
@@ -205,9 +205,9 @@ public abstract class AbstractBoxResourceAccess {
      * @return The re-initialized Box.com access
      * @throws OXException If authentication error could not be handled
      */
-    protected BoxAccess handleAuthError(BoxSDKException e, Session session) throws OXException {
+    protected BoxOAuthAccess handleAuthError(BoxSDKException e, Session session) throws OXException {
         try {
-            boxAccess.reinit(session);
+            boxAccess.initialize();
             return boxAccess;
         } catch (OXException oxe) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractBoxResourceAccess.class);

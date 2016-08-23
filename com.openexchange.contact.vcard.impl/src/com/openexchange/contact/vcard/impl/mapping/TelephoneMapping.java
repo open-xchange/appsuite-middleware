@@ -51,9 +51,9 @@ package com.openexchange.contact.vcard.impl.mapping;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import ezvcard.VCard;
@@ -74,6 +74,18 @@ public class TelephoneMapping extends AbstractMapping {
     static final String TYPE_RADIO = "x-radio";
     static final String TYPE_PRIMARY = "x-primary";
     static final String TYPE_2ND = "x-2nd";
+
+    /**
+     * Initializes a new {@link TelephoneMapping}.
+     */
+    public TelephoneMapping() {
+        super("TEL", ContactField.TELEPHONE_PAGER, ContactField.TELEPHONE_TTYTDD, ContactField.TELEPHONE_ISDN, ContactField.TELEPHONE_CAR,
+            ContactField.CELLULAR_TELEPHONE1, ContactField.CELLULAR_TELEPHONE2, ContactField.TELEPHONE_CALLBACK,
+            ContactField.TELEPHONE_COMPANY, ContactField.TELEPHONE_ASSISTANT, ContactField.TELEPHONE_IP, ContactField.TELEPHONE_RADIO,
+            ContactField.TELEPHONE_PRIMARY, ContactField.FAX_BUSINESS, ContactField.FAX_BUSINESS, ContactField.FAX_OTHER,
+            ContactField.TELEPHONE_BUSINESS1, ContactField.TELEPHONE_BUSINESS2, ContactField.TELEPHONE_HOME1,
+            ContactField.TELEPHONE_HOME2, ContactField.TELEPHONE_OTHER);
+    }
 
     @Override
     public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
@@ -162,7 +174,7 @@ public class TelephoneMapping extends AbstractMapping {
             if (null == telephone) {
                 telephone = new Telephone((String) contact.get(field));
                 if (voice) {
-                    telephone.addType(TelephoneType.VOICE);
+                    telephone.getTypes().add(TelephoneType.VOICE);
                 }
                 for (String type : types) {
                     telephone.getParameters().addType(type);
@@ -244,7 +256,7 @@ public class TelephoneMapping extends AbstractMapping {
         /*
          * assume "voice" if specified explicitly, or if no other distinguishing type is present
          */
-        Set<TelephoneType> telephoneTypes = telephone.getTypes();
+        List<TelephoneType> telephoneTypes = telephone.getTypes();
         if (null != telephoneTypes && false == telephoneTypes.contains(TelephoneType.VOICE) && (
             telephoneTypes.contains(TelephoneType.TEXT) || telephoneTypes.contains(TelephoneType.FAX) ||
             telephoneTypes.contains(TelephoneType.CELL) || telephoneTypes.contains(TelephoneType.VIDEO) ||

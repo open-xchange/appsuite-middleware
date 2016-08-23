@@ -71,6 +71,7 @@ import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavFactory;
+import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
@@ -285,7 +286,9 @@ public abstract class DAVAction extends AbstractAction {
             for (Element requestedProps : requestBody.getRootElement().getChildren("prop", DAVProtocol.DAV_NS)){
                 for (Element requestedProperty : requestedProps.getChildren()) {
                     loadingHints.addProperty(requestedProperty.getNamespaceURI(), requestedProperty.getName());
-                    responseMarshaller.addProperty(requestedProperty.getNamespaceURI(), requestedProperty.getName());
+                    WebdavProperty property = new WebdavProperty(requestedProperty.getNamespaceURI(), requestedProperty.getName());
+                    property.setChildren(requestedProperty.getChildren());
+                    responseMarshaller.addProperty(property);
                 }
             }
             marshaller = responseMarshaller;

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.framework;
 
+import static org.junit.Assert.assertNotNull;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,45 +59,53 @@ import com.openexchange.ajax.framework.config.util.ChangePropertiesResponse;
 import com.openexchange.ajax.writer.ResponseWriter;
 
 /**
- * {@link AbstractConfigAwareAjaxSession} extends the AbstractAjaxSession to preconfigure reloadable configurations before executing the tests.
+ * {@link AbstractConfigAwareAjaxSession} extends the AbstractAjaxSession with methods to preconfigure reloadable configurations before executing the tests.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public abstract class AbstractConfigAwareAjaxSession extends AbstractAJAXSession {
+public abstract class AbstractConfigAwareAjaxSession extends AbstractJUnit4AjaxSession {
 
     /**
      * Initializes a new {@link AbstractConfigAwareAjaxSession}.
-     * 
+     *
      * @param name
      */
-    protected AbstractConfigAwareAjaxSession(String name) {
-        super(name);
+    protected AbstractConfigAwareAjaxSession() {
     }
 
     JSONObject oldData;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    /**
+     * Changes the configurations given by {@link #getNeededConfigurations()}.
+     *
+     * @param client The client to use.
+     * @param logout Indicating whether the used client should be logged out afterwards.
+     * @throws Exception if changing the configuration fails
+     */
+    protected void setUpConfiguration(AJAXClient client, boolean logout) throws Exception {
 
+        assertNotNull("The client must not be null!", client);
         Map<String, String> map = getNeededConfigurations();
         if (!map.isEmpty()) {
             // change configuration to new values
-            ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<ChangePropertiesResponse>(map, getScope());
+            ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(map, getScope(), getReloadables());
             ChangePropertiesResponse response = client.execute(req);
             oldData = ResponseWriter.getJSON(response.getResponse()).getJSONObject("data");
+        }
+        if (logout) {
+            client.logout();
         }
     }
 
     @Override
-    protected void tearDown() throws Exception {
+    public void tearDown() throws Exception {
         super.setUp();
 
         if (oldData != null) {
             // change back to old value if present
             Map<String, Object> map = oldData.asMap();
-            Map<String, String> newMap = new HashMap<String, String>();
+            Map<String, String> newMap = new HashMap<>();
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 try {
                     newMap.put(entry.getKey(), (String) entry.getValue());
@@ -106,7 +115,7 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractAJAXSession
                 }
             }
             if (!map.isEmpty()) {
-                ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<ChangePropertiesResponse>(newMap, "server");
+                ChangePropertiesRequest<ChangePropertiesResponse> req = new ChangePropertiesRequest<>(newMap, "server", getReloadables());
                 ChangePropertiesResponse response = client.execute(req);
                 oldData = ResponseWriter.getJSON(response.getResponse());
             }
@@ -114,11 +123,11 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractAJAXSession
     }
 
     /**
-     * 
+     *
      * Retrieves all needed configurations.
-     * 
+     *
      * Should be overwritten by child implementations to define necessary configurations.
-     * 
+     *
      * @return Needed configurations.
      */
     protected Map<String, String> getNeededConfigurations() {
@@ -127,13 +136,23 @@ public abstract class AbstractConfigAwareAjaxSession extends AbstractAJAXSession
 
     /**
      * Retrieves the scope to use for the configurations.
-     * 
+     *
      * Can be overwritten by child implementations to change the scope of the configurations. Defaults to "server".
-     * 
+     *
      * @return The scope for the configuration.
      */
     protected String getScope() {
         return "server";
     }
 
+    /**
+     * Retrieves the the names of the reloadable classes which should be reloaded.
+     *
+     * Can be overwritten by child implementations. Defaults to null.
+     *
+     * @return A comma separated list of reloadable class names or null.
+     */
+    protected String getReloadables() {
+        return null;
+    }
 }

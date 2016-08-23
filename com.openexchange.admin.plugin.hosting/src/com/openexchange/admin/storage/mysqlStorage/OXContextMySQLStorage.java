@@ -49,14 +49,8 @@
 
 package com.openexchange.admin.storage.mysqlStorage;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.i;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
-import java.io.File;
-import java.io.IOException;
+import static com.openexchange.java.Autoboxing.*;
+import static com.openexchange.tools.sql.DBUtils.*;
 import java.io.Serializable;
 import java.net.URI;
 import java.sql.Connection;
@@ -82,8 +76,6 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.mail.internet.idn.IDNA;
-import org.apache.commons.io.FileUtils;
-import org.osgi.framework.ServiceException;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -124,11 +116,9 @@ import com.openexchange.admin.tools.database.TableRowObject;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.FileStorage2EntitiesResolver;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
@@ -211,66 +201,22 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     @Override
     public void delete(final Context ctx) throws StorageException {
-        LOG.debug("Fetching connection and scheme for context {}", ctx.getId());
 
-        // Groupware context must be loaded before entry from "user_setting_admin" table is removed.
-        com.openexchange.groupware.contexts.Context gwCtx = null;
-        try {
-            ContextService service = AdminServiceRegistry.getInstance().getService(ContextService.class, true);
-            gwCtx = service.getContext(ctx.getId().intValue());
-        } catch (final OXException e) {
-            LOG.error("", e);
-        } catch (final ServiceException e) {
-            LOG.error("", e);
-        }
+        // Delete filestores of the context
+        LOG.debug("Starting filestore deletion for context {}...", ctx.getId());
+        Utils.removeFileStorages(ctx, true);
+        LOG.debug("Filestore deletion for context {} from finished!", ctx.getId());
 
         AdminCacheExtended adminCache = cache;
-        boolean simpleDelete = null == gwCtx;
-
         Connection conForConfigDB = null;
         boolean rollbackConfigDB = false;
         try {
-            // Delete filestore directories of the context
-            LOG.debug("Starting filestore delete(cid={}) from disc!", ctx.getId());
-            if (!simpleDelete) {
-                // Fetch filestores for associated context
-                List<com.openexchange.filestore.QuotaFileStorage> storages;
-                {
-                    FileStorage2EntitiesResolver resolver = FileStorages.getFileStorage2EntitiesResolver();
-                    List<com.openexchange.filestore.FileStorage> fileStorages = resolver.getFileStoragesUsedBy(ctx.getId().intValue(), true);
-
-                    storages = new ArrayList<com.openexchange.filestore.QuotaFileStorage>(fileStorages.size());
-                    for (com.openexchange.filestore.FileStorage fileStorage : fileStorages) {
-                        storages.add(((com.openexchange.filestore.QuotaFileStorage) fileStorage));
-                    }
-                }
-
-                for (Iterator<com.openexchange.filestore.QuotaFileStorage> iter = storages.iterator(); iter.hasNext();) {
-                    com.openexchange.filestore.QuotaFileStorage quotaFileStorage = iter.next();
-                    try {
-                        quotaFileStorage.remove();
-                        iter.remove();
-                    } catch (OXException e) {
-                        simpleDelete = true;
-                        LOG.error("File storage implementation failed to remove the file storage '{}'. Trying to hard-delete the file storage contents.", quotaFileStorage.getUri(), e);
-                    }
-                }
-            }
-            if (simpleDelete) {
-                List<URI> uris = OXUtilStorageInterface.getInstance().getUrisforFilestoresUsedBy(ctx.getId().intValue());
-                for (URI uri : uris) {
-                    if (!"file".equalsIgnoreCase(uri.getScheme())) {
-                        throw new StorageException("Can't hard-delete non-local file store at \"" + uri + "\"");
-                    }
-                    FileUtils.deleteDirectory(new File(uri));
-                }
-            }
-            LOG.debug("Filestore delete(cid={}) from disc finished!", ctx.getId());
 
             // Get connection for ConfigDB
             conForConfigDB = adminCache.getWriteConnectionForConfigDB();
 
             // Get connection and scheme for given context
+            LOG.debug("Fetching connection and scheme for context {}", ctx.getId());
             int poolId;
             Connection conForContext;
             try {
@@ -329,12 +275,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             rollbackConfigDB = false;
 
             LOG.info("Context {} deleted.", ctx.getId());
-        } catch (OXException e) {
-            LOG.error("", e);
-            throw new StorageException(e);
-        } catch (IOException e) {
-            LOG.error("", e);
-            throw new StorageException(e);
         } catch (SQLException e) {
             LOG.error("", e);
             throw new StorageException(e);
@@ -1152,8 +1092,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             storeId = OXUtilStorageInterface.getInstance().findFilestoreForContext().getId();
             ctx.setFilestoreId(storeId);
         } else {
-            if (!OXToolStorageInterface.getInstance().existsStore(i(storeId))) {
-                throw new StorageException("Filestore with identifier " + storeId + " does not exist.");
+            OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
+            Filestore fs = oxu.getFilestoreBasic(i(storeId));
+            if (fs.getMaxContexts().intValue() <= 0) {
+                // Must not be used for a context association
+                throw new StorageException("Filestore " + storeId + " must not be used.");
             }
         }
 
@@ -1183,6 +1126,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     db = getNextDBHandleByWeight(configCon);
                 } else {
                     db = OXToolStorageInterface.getInstance().loadDatabaseById(i(dbId));
+                    if (db.getMaxUnits().intValue() <= 0) {
+                        // Must not be used for a context association
+                        throw new StorageException("Database " + dbId + " must not be used.");
+                    }
                 }
             } catch (SQLException e) {
                 throw new StorageException(e.getMessage(), e);

@@ -61,6 +61,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.lang.ArrayUtils;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
@@ -75,14 +76,21 @@ import gnu.trove.list.array.TIntArrayList;
 
 public class Tools {
 
+    public static List<Integer> getContextInSameSchema(int contextId) throws OXException {
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        int[] contextsInSameSchema = dbService.getContextsInSameSchema(contextId);
+        return java.util.Arrays.asList(ArrayUtils.toObject(contextsInSameSchema));
+    }
+
     public static List<Integer> getAllContextIds() throws OXException {
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
 
         final List<Integer> retval = new ArrayList<Integer>();
-        final Connection readConnection = dbService.getReadOnly();
         PreparedStatement stmt = null;
         ResultSet result = null;
+        Connection readConnection = null;
         try {
+            readConnection = dbService.getReadOnly();
             stmt = readConnection.prepareStatement("SELECT cid FROM context");
             result = stmt.executeQuery();
             while (result.next()) {
@@ -99,10 +107,11 @@ public class Tools {
 
     public static User[] getUser(int contextId) throws OXException {
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
-        Connection readOnly = dbService.getReadOnly(contextId);
+        Connection readOnly = null;
 
         final List<User> users = new ArrayList<User>();
         try {
+            readOnly = dbService.getReadOnly(contextId);
             int[] userIds = listAllUser(contextId, readOnly);
 
             final int length = userIds.length;
@@ -142,6 +151,89 @@ public class Tools {
             dbService.backReadOnly(contextId, readOnly);
         }
         return users.toArray(new User[users.size()]);
+    }
+
+    public static int getNumberOfUsers(List<Integer> contextIds) throws OXException {
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        Connection readOnly = null;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+
+        try {
+            readOnly = dbService.getReadOnly(contextIds.get(0).intValue());
+
+            stmt = readOnly.prepareStatement(getIN("SELECT COUNT(id) AS total FROM user WHERE user.guestCreatedBy = 0 AND user.cid IN (", contextIds.size()));
+            int pos = 1;
+            for (final int contextId : contextIds) {
+                stmt.setInt(pos++, contextId);
+            }
+            result = stmt.executeQuery();
+            if (result.next()) {
+                return result.getInt("total");
+            }
+        } catch (final SQLException e) {
+            throw UserExceptionCode.LOAD_FAILED.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+            dbService.backReadOnly(contextIds.get(0).intValue(), readOnly);
+        }
+        return 0;
+    }
+
+    public static int getNumberOfGuests(List<Integer> contextIds) throws OXException {
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        Connection readOnly = null;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+
+        try {
+            readOnly = dbService.getReadOnly(contextIds.get(0).intValue());
+
+            stmt = readOnly.prepareStatement(getIN("SELECT COUNT(id) AS total FROM user WHERE user.guestCreatedBy > 0 AND user.mail <> '' AND user.cid IN (", contextIds.size()));
+            int pos = 1;
+            for (final int contextId : contextIds) {
+                stmt.setInt(pos++, contextId);
+            }
+            result = stmt.executeQuery();
+
+            if (result.next()) {
+                return result.getInt("total");
+            }
+        } catch (final SQLException e) {
+            throw UserExceptionCode.LOAD_FAILED.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+            dbService.backReadOnly(contextIds.get(0).intValue(), readOnly);
+        }
+        return 0;
+    }
+
+    public static int getNumberOfLinks(List<Integer> contextIds) throws OXException {
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        Connection readOnly = null;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+
+        try {
+            readOnly = dbService.getReadOnly(contextIds.get(0).intValue());
+
+            stmt = readOnly.prepareStatement(getIN("SELECT COUNT(id) AS total FROM user WHERE user.guestCreatedBy > 0 AND user.mail = '' AND user.cid IN (", contextIds.size()));
+            int pos = 1;
+            for (final int contextId : contextIds) {
+                stmt.setInt(pos++, contextId);
+            }
+            result = stmt.executeQuery();
+
+            if (result.next()) {
+                return result.getInt("total");
+            }
+        } catch (final SQLException e) {
+            throw UserExceptionCode.LOAD_FAILED.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+            dbService.backReadOnly(contextIds.get(0).intValue(), readOnly);
+        }
+        return 0;
     }
 
     private static int[] listAllUser(int contextID, Connection con) throws OXException {

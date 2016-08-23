@@ -607,6 +607,27 @@ public class MimeMailException extends OXException {
     }
 
     /**
+     * Checks for possible exists error.
+     */
+    public static boolean isExistsException(final MessagingException e) {
+        if (null == e) {
+            return false;
+        }
+        return isExistsException(e.getMessage());
+    }
+
+    /**
+     * Checks for possible exists error.
+     */
+    public static boolean isExistsException(final String msg) {
+        if (null == msg) {
+            return false;
+        }
+        final String m = com.openexchange.java.Strings.toLowerCase(msg);
+        return (m.indexOf("exists") >= 0);
+    }
+
+    /**
      * Checks for possible already-exists error.
      */
     public static boolean isAlreadyExistsException(final MessagingException e) {

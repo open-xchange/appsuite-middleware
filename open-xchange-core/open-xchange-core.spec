@@ -17,7 +17,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -479,7 +479,7 @@ if [ $permval -lt 256 ]; then
     nopts=$(echo $nopts | sed "s;\(^.*MaxPermSize=\)[0-9]*\(.*$\);\1256\2;")
 fi
 # -----------------------------------------------------------------------
-for opt in "-XX:+DisableExplicitGC" "-server" "-Djava.awt.headless=true" \
+for opt in "-server" "-Djava.awt.headless=true" \
     "-XX:+UseConcMarkSweepGC" "-XX:+UseParNewGC" "-XX:CMSInitiatingOccupancyFraction=" \
     "-XX:+UseCMSInitiatingOccupancyOnly" "-XX:NewRatio=" "-XX:+UseTLAB" \
     "-XX:-OmitStackTraceInFastThrow"; do
@@ -1331,6 +1331,85 @@ if [ "" = "$VALUE" ]; then
 fi
 ox_add_property com.openexchange.mail.account.whitelist.ports "143,993, 25,465,587, 110,995" /opt/open-xchange/etc/mail.properties
 
+# SoftwareChange_Request-3225
+ox_add_property com.openexchange.tools.images.transformations.preferThumbnailThreshold 0.8 /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-3246
+ox_add_property com.openexchange.mail.mailStartTls false /opt/open-xchange/etc/mail.properties
+ox_add_property com.openexchange.mail.transportStartTls false /opt/open-xchange/etc/mail.properties
+
+# SoftwareChange_Request-3350
+sed -i '/^JAVA_XTRAOPTS=/s/ -XX:+DisableExplicitGC//' /opt/open-xchange/etc/ox-scriptconf.sh
+
+# SoftwareChange_Request-3355,3417
+oldlink=$(ox_read_property object_link /opt/open-xchange/etc/notification.properties)
+if [[ ${oldlink} == *"[uiwebpath]#m=[module]&i=[object]&f=[folder]" ]]
+then
+  newlink=$(echo ${oldlink} | sed -e 's;^\(.*\)/\[uiwebpath\].*$;\1/[uiwebpath]#!!\&app=io.ox/[module]\&id=[object]\&folder=[folder];')
+  ox_set_property object_link ${newlink} /opt/open-xchange/etc/notification.properties
+fi
+
+# SoftwareChange_Request-3356
+ox_add_property com.openexchange.ajax.login.checkPunyCodeLoginString false /opt/open-xchange/etc/login.properties
+
+# SoftwareChange_Request-3405
+ox_add_property com.openexchange.ical.updateTimezones true /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-3406
+TMPFILE=$(mktemp)
+rm -f $TMPFILE
+cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/appender[@name=\'FILE\']/encoder/pattern -r -
+<configuration>
+    <appender name="FILE">
+        <encoder>
+            <pattern>%date{"yyyy-MM-dd'T'HH:mm:ss,SSSZ"} %-5level [%thread] %class.%method\(%class{0}.java:%line\)%n%sanitisedMessage%n%lmdc%exception{full}</pattern>
+        </encoder>
+    </appender>
+</configuration>
+EOF
+if [ -e $TMPFILE ]; then
+    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+    rm -f $TMPFILE
+fi
+cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/appender[@name=\'FILE_COMPAT\']/encoder/pattern -r -
+<configuration>
+    <appender name="FILE_COMPAT">
+        <encoder>
+            <pattern>%d{"MMM dd, yyyy H:mm:ss a"} %class.%method\(%class{0}.java:%line\)%n%level: %sanitisedMessage%n%lmdc%exception{full}</pattern>
+        </encoder>
+    </appender>
+</configuration>
+EOF
+if [ -e $TMPFILE ]; then
+    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+    rm -f $TMPFILE
+fi
+cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/appender[@name=\'SYSLOG\']/suffixPattern -r -
+<configuration>
+    <appender name="SYSLOG">
+        <suffixPattern>%date open-xchange %-5level [%logger][%thread]: %class.%method\(%class{0}.java:%line\)%n%lmdc %n %sanitisedMessage%n</suffixPattern>
+    </appender>
+</configuration>
+EOF
+if [ -e $TMPFILE ]; then
+    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+    rm -f $TMPFILE
+fi
+
+# SoftwareChange_Request-3421
+ox_remove_property com.openexchange.mail.transport.enablePublishOnExceededQuota /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.publishPrimaryAccountOnly /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.sendAttachmentToExternalRecipients /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.provideLinksInAttachment /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.publishedDocumentTimeToLive /opt/open-xchange/etc/transport.properties
+ox_remove_property com.openexchange.mail.transport.externalRecipientsLocale /opt/open-xchange/etc/transport.properties
+
+# SoftwareChange_Request-3482
+ox_add_property com.openexchange.secret.recovery.fast.enabled true /opt/open-xchange/etc/secret.properties
+
+# SoftwareChange_Request-3528
+ox_add_property html.tag.code '""' /opt/open-xchange/etc/whitelist.properties
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
@@ -1370,6 +1449,14 @@ exit 0
 %doc com.openexchange.server/doc/examples
 
 %changelog
+* Tue Jul 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.2 release
+* Wed Jul 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.8.2 release
+* Wed Jun 29 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.2 release
+* Thu Jun 16 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.8.2 release
 * Wed Apr 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.8.2 release
 * Wed Mar 30 2016 Marcus Klein <marcus.klein@open-xchange.com>

@@ -270,14 +270,18 @@ public class TransformImageAction implements IFileResponseRendererAction {
         // Validate...
         {
             InputStream stream = file.getStream();
-            if (null == stream) {
-                LOG.warn("(Possible) Image file misses stream data");
-                return file;
-            }
+            try {
+                if (null == stream) {
+                    LOG.warn("(Possible) Image file misses stream data");
+                    return file;
+                }
 
-            // Check for an animated .gif or svg image
-            if ("svg".equals(sourceFormatName) || "gif".equals(sourceFormatName) && ImageUtils.isAnimatedGif(stream)) {
-                return fileHolder;
+                // Check for an animated .gif or svg image
+                if ("svg".equals(sourceFormatName) || "gif".equals(sourceFormatName) && ImageUtils.isAnimatedGif(stream)) {
+                    return file;
+                }
+            } finally {
+                Streams.close(stream);
             }
         }
 

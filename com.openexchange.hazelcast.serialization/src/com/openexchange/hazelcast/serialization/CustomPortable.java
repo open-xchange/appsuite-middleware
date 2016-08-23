@@ -105,62 +105,56 @@ public interface CustomPortable extends Portable {
 
     /**
      * Gets the class ID of this portable implementation.
-     * <p/>
+     * <p>
      * Choose a not yet used arbitrary identifier <code>> 0</code> for your portable class here and ensure to return the same class ID in
      * the corresponding {@link CustomPortableFactory#getClassId()} method.
-     * <p/>
+     * <p>
      * The following list gives an overview about the <b>already used</b> class IDs (add your IDs here):
-     * <ul>
-     * <li><code> 1</code>: com.openexchange.sessionstorage.hazelcast.serialization.PortableSession</li>
-     * <li><code> 2</code>: com.openexchange.drive.events.ms.PortableDriveEvent</li>
-     * <li><code> 3</code>: com.openexchange.ms.internal.portable.PortableMessage</li>
-     * <li><code> 4</code>: com.openexchange.caching.events.ms.internal.PortableCacheEvent</li>
-     * <li><code> 5</code>: com.openexchange.realtime.hazelcast.serialization.PortableID</li>
-     * <li><code> 6</code>: com.openexchange.realtime.hazelcast.serialization.PortableSelectorChoice</li>
-     * <li><code> 7</code>: com.openexchange.realtime.hazelcast.serialization.PortableNotInternalPredicate</li>
-     * <li><code> 8</code>: com.openexchange.realtime.hazelcast.serialization.PortableMemberPredicate</li>
-     * <li><code> 9</code>: com.openexchange.report.appsuite.internal.PortableReport, used via
-     * {@link com.openexchange.hazelcast.serialization.CustomPortable.PORTABLEREPORT_CLASS_ID}</li>
-     * <li><code> 10</code>: com.openexchange.realtime.hazelcast.serialization.PortableHazelcastResource</li>
-     * <li><code> 11</code>: com.openexchange.realtime.hazelcast.serialization.PortablePresence</li>
-     * <li><code> 12</code>: com.openexchange.realtime.hazelcast.serialization.PortableRoutingInfo</li>
-     * <li><code> 13</code>: com.openexchange.realtime.hazelcast.serialization.PortableContextPredicate</li>
-     * <li><code> 14</code>: com.openexchange.realtime.hazelcast.serialization.channel.PortableStanzaDispatcher</li>
-     * <li><code> 15</code>: com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupDispatcher</li>
-     * <li><code> 16</code>: com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupStatus</li>
-     * <li><code> 17</code>: com.openexchange.caching.events.ms.internal.PortableCacheKey</li>
-     * <li><code> 18</code>: com.openexchange.sessiond.portable.PortableTokenSessionControl</li>
-     * <li><code> 19</code>: com.openexchange.sessiond.serialization.PortableContextSessionsCleaner</li>
-     * <li><code> 20</code>: com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfo</li>
-     * <li><code> 21</code>: com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMapEntry</li>
-     * <li><code> 22</code>: com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMap</li>
-     * <li><code> 23</code>: com.openexchange.session.reservation.impl.portable.PortableReservation</li>
-     * <li><code> 24</code>: com.openexchange.sessiond.serialization.PortableUserSessionsCleaner, used via
-     * {@link com.openexchange.hazelcast.serialization.CustomPortable.PORTABLE_USER_SESSIONS_CLEANER_CLASS_ID}</li>
-     * <li><code> 25</code>: com.openexchange.sessiond.serialization.PortableSessionFilterApplier</li>
-     *
-     * <li><code> 101</code>: com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentials</li>
-     * <li><code> 102</code>: com.openexchange.push.impl.portable.PortablePushUser</li>
-     * <li><code> 103</code>: com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableCheckForExtendedServiceCallable</li>
-     * <li><code> 104</code>: com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableDropPermanentListenerCallable</li>
-     * <li><code> 105</code>: com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortablePlanRescheduleCallable</li>
-     * <li><code> 106</code>: com.openexchange.push.impl.balancing.registrypolicy.portable.PortableOwner</li>
-     * <li><code> 109</code>: com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableDropAllPermanentListenerCallable</li>
-     * <li><code> 110</code>: com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableStartPermanentListenerCallable</li>
-     * <li><code> 107</code>: com.openexchange.mail.attachment.impl.portable.PortableCheckForAttachmentToken</li>
-     * <li><code> 108</code>: com.openexchange.mail.attachment.impl.portable.PortableAttachmentToken</li>
-     *
-     * <li><code> 200</code>: com.openexchange.office.hazelcast.serialization.PortableID</li>
-     * <li><code> 201</code>: com.openexchange.office.hazelcast.serialization.PortableDocumentState</li>
-     *
-     * <li><code> 300</code>: com.openexchange.saml.impl.hz.PortableAuthnRequestInfo</li>
-     * <li><code> 301</code>: com.openexchange.saml.impl.hz.PortableLogoutRequestInfo</li>
-     *
-     * <li><code> 400</code>: com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck</li>>
-     * <li><code> 401</code>: com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp</li>>
-     * 
-     * <li><code> 500</code>: com.openexchange.sms.tools.internal.SMSBucket</li>>
-     * </ul>
+     * <pre>
+     *   &bull; 1 ----> com.openexchange.sessionstorage.hazelcast.serialization.PortableSession
+     *   &bull; 2 ----> com.openexchange.drive.events.ms.PortableDriveEvent
+     *   &bull; 3 ----> com.openexchange.ms.internal.portable.PortableMessage
+     *   &bull; 4 ----> com.openexchange.caching.events.ms.internal.PortableCacheEvent
+     *   &bull; 5 ----> com.openexchange.realtime.hazelcast.serialization.PortableID
+     *   &bull; 6 ----> com.openexchange.realtime.hazelcast.serialization.PortableSelectorChoice
+     *   &bull; 7 ----> com.openexchange.realtime.hazelcast.serialization.PortableNotInternalPredicate
+     *   &bull; 8 ----> com.openexchange.realtime.hazelcast.serialization.PortableMemberPredicate
+     *   &bull; 9 ----> com.openexchange.report.appsuite.internal.PortableReport
+     *   &bull; 10 ---> com.openexchange.realtime.hazelcast.serialization.PortableHazelcastResource
+     *   &bull; 11 ---> com.openexchange.realtime.hazelcast.serialization.PortablePresence
+     *   &bull; 12 ---> com.openexchange.realtime.hazelcast.serialization.PortableRoutingInfo
+     *   &bull; 13 ---> com.openexchange.realtime.hazelcast.serialization.PortableContextPredicate
+     *   &bull; 14 ---> com.openexchange.realtime.hazelcast.serialization.channel.PortableStanzaDispatcher
+     *   &bull; 15 ---> com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupDispatcher
+     *   &bull; 16 ---> com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupStatus
+     *   &bull; 17 ---> com.openexchange.caching.events.ms.internal.PortableCacheKey
+     *   &bull; 18 ---> com.openexchange.sessiond.portable.PortableTokenSessionControl
+     *   &bull; 19 ---> com.openexchange.sessiond.serialization.PortableContextSessionsCleaner
+     *   &bull; 20 ---> com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfo
+     *   &bull; 21 ---> com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMapEntry
+     *   &bull; 22 ---> com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMap
+     *   &bull; 23 ---> com.openexchange.session.reservation.impl.portable.PortableReservation
+     *   &bull; 24 ---> com.openexchange.sessiond.serialization.PortableUserSessionsCleaner
+     *   &bull; 25 ---> com.openexchange.sessiond.serialization.PortableSessionFilterApplier
+     *   &bull; 101 --> com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentials
+     *   &bull; 102 --> com.openexchange.push.impl.portable.PortablePushUser
+     *   &bull; 103 --> com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableCheckForExtendedServiceCallable
+     *   &bull; 104 --> com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableDropPermanentListenerCallable
+     *   &bull; 105 --> com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortablePlanRescheduleCallable
+     *   &bull; 106 --> com.openexchange.push.impl.balancing.registrypolicy.portable.PortableOwner
+     *   &bull; 109 --> com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableDropAllPermanentListenerCallable
+     *   &bull; 110 --> com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableStartPermanentListenerCallable
+     *   &bull; 107 --> com.openexchange.mail.attachment.impl.portable.PortableCheckForAttachmentToken
+     *   &bull; 108 --> com.openexchange.mail.attachment.impl.portable.PortableAttachmentToken
+     *   &bull; 200 --> com.openexchange.office.hazelcast.serialization.PortableID
+     *   &bull; 201 --> com.openexchange.office.hazelcast.serialization.PortableDocumentState
+     *   &bull; 300 --> com.openexchange.saml.impl.hz.PortableAuthnRequestInfo
+     *   &bull; 301 --> com.openexchange.saml.impl.hz.PortableLogoutRequestInfo
+     *   &bull; 400 --> com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck
+     *   &bull; 401 --> com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionRemoteLookUp
+     *   &bull; 500 --> com.openexchange.sms.tools.internal.SMSBucket
+     *   &bull; 600 --> com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributor
+     * </pre>
      *
      * @return The class ID
      */

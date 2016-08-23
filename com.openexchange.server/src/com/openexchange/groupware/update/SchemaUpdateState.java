@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.update;
 
+import java.util.Date;
+
 /**
  * {@link SchemaUpdateState}
  *
@@ -63,5 +65,9 @@ public interface SchemaUpdateState extends Schema {
     String[] getExecutedList();
 
     boolean backgroundUpdatesRunning();
+
+    Date backgroundUpdatesRunningSince();
+
+    Date blockingUpdatesRunningSince();
 
 }

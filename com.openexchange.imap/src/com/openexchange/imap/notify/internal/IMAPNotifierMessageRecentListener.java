@@ -51,13 +51,14 @@ package com.openexchange.imap.notify.internal;
 
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.mail.event.MessageRecentEvent;
 import javax.mail.event.MessageRecentListener;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPProperties;
 import com.openexchange.imap.config.IMAPReloadable;
@@ -173,8 +174,8 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.imap.notifyFullNames");
             }
         });
     }

@@ -56,6 +56,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -83,7 +85,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -273,33 +274,26 @@ public class ReportingMBean implements DynamicMBean {
         final TabularDataSupport total = new TabularDataSupport(totalType);
 
         try {
-            int nrctx = 0;
-            int nruser = 0;
-            int nrguests = 0;
-            int nrlinks = 0;
-
             int userCount = 0;
             int guestCount = 0;
             int linkCount = 0;
 
             List<Integer> allContextIds = Tools.getAllContextIds();
-            for (Integer contextId : allContextIds) {
-                User[] users = Tools.getUser(contextId);
 
-                for (User user : users) {
-                    if (!user.isGuest()) {
-                        userCount++;
-                    } else if (user.getMail().isEmpty()) {
-                        linkCount++;
-                    } else {
-                        guestCount++;
-                    }
-                }
+            List<Integer> contextsToProcess = Collections.synchronizedList(new ArrayList<>(allContextIds));
+            while (!contextsToProcess.isEmpty()) {
+                Integer firstRemainingContext = contextsToProcess.get(0);
+                List<Integer> contextInSameSchema = Tools.getContextInSameSchema(firstRemainingContext.intValue());
+                userCount = userCount + Tools.getNumberOfUsers(contextInSameSchema);
+                guestCount = guestCount + Tools.getNumberOfGuests(contextInSameSchema);
+                linkCount = linkCount + Tools.getNumberOfLinks(contextInSameSchema);
+
+                contextsToProcess.removeAll(contextInSameSchema);
             }
-            nrctx = allContextIds.size();
-            nruser = userCount;
-            nrguests = guestCount;
-            nrlinks = linkCount;
+            int nrctx = allContextIds.size();
+            int nruser = userCount;
+            int nrguests = guestCount;
+            int nrlinks = linkCount;
 
             final CompositeDataSupport value = new CompositeDataSupport(totalRow, totalNames, new Object[] { I(nrctx), I(nruser), I(nrguests), I(nrlinks) });
             total.put(value);

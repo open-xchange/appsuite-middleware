@@ -69,6 +69,8 @@ import com.openexchange.oauth.OAuthAccountInvalidationListener;
 import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
+import com.openexchange.oauth.access.impl.OAuthAccessRegistryServiceImpl;
 import com.openexchange.oauth.httpclient.impl.scribe.ScribeHTTPClientFactoryImpl;
 import com.openexchange.oauth.internal.CallbackRegistryImpl;
 import com.openexchange.oauth.internal.DeleteListenerRegistry;
@@ -96,6 +98,7 @@ public final class OAuthActivator extends HousekeepingActivator {
 
     private volatile OSGiDelegateServiceMap delegateServices;
     private volatile ScheduledTimerTask timerTask;
+    private volatile OAuthAccessRegistryServiceImpl accessRegistryService;
 
     /**
      * Initializes a new {@link OAuthActivator}.
@@ -128,6 +131,12 @@ public final class OAuthActivator extends HousekeepingActivator {
             final OSGiMetaDataRegistry registry = OSGiMetaDataRegistry.getInstance();
             final BundleContext context = this.context;
             registry.start(context);
+
+            OAuthAccessRegistryServiceImpl accessRegistryService = new OAuthAccessRegistryServiceImpl();
+            this.accessRegistryService = accessRegistryService;
+            registerService(OAuthAccessRegistryService.class, accessRegistryService);
+            trackService(OAuthAccessRegistryService.class);
+
             /*
              * Start other trackers
              */
@@ -232,6 +241,12 @@ public final class OAuthActivator extends HousekeepingActivator {
                     this.timerTask = null;
                     timerTask.cancel();
                 }
+            }
+
+            OAuthAccessRegistryServiceImpl accessRegistryService = this.accessRegistryService;
+            if (null != accessRegistryService) {
+                this.accessRegistryService = null;
+                accessRegistryService.clear();
             }
 
             DeleteListenerRegistry.releaseInstance();

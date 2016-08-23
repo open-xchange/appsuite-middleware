@@ -61,7 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.json.writer.MailAccountWriter;
+import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -84,27 +84,24 @@ public final class ListAction extends AbstractMailAccountAction {
 
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
-        final String colString = requestData.getParameter(AJAXServlet.PARAMETER_COLUMNS);
+        MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        List<Attribute> attributes = getColumns(requestData.getParameter(AJAXServlet.PARAMETER_COLUMNS));
 
-        final List<Attribute> attributes = getColumns(colString);
-        final MailAccountStorageService storageService =
-            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        JSONArray jIds = jData.toArray();
+        int len = jIds.length();
 
-        final JSONArray ids = jData.toArray();
-        final int len = ids.length();
-        final boolean multipleEnabled = session.getUserPermissionBits().isMultipleMailAccounts();
-        final List<MailAccount> accounts = new ArrayList<MailAccount>(len);
-
-        for (int i = 0, size = len; i < size; i++) {
-            final int id = ids.getInt(i);
-            final MailAccount account = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+        boolean multipleEnabled = session.getUserPermissionBits().isMultipleMailAccounts();
+        List<MailAccount> accounts = new ArrayList<MailAccount>(len);
+        for (int i = 0, k = len; k-- > 0; i++) {
+            int id = jIds.getInt(i);
+            MailAccount account = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
             if (!isUnifiedINBOXAccount(account) && (multipleEnabled || isDefaultMailAccount(account))) {
                 accounts.add(account);
-                // accounts.add(checkFullNames(account, storageService, session));
             }
         }
 
-        return new AJAXRequestResult(MailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes, session));
+        JSONArray jAccounts = DefaultMailAccountWriter.writeArray(accounts.toArray(new MailAccount[accounts.size()]), attributes, session);
+        return new AJAXRequestResult(jAccounts);
     }
 
 }

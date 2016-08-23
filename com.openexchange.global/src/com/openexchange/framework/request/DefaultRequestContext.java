@@ -61,6 +61,7 @@ import com.openexchange.groupware.notify.hostname.HostData;
 public class DefaultRequestContext implements RequestContext {
 
     private HostData hostData;
+    private String userAgent;
 
     @Override
     public HostData getHostData() {
@@ -74,6 +75,20 @@ public class DefaultRequestContext implements RequestContext {
      */
     public void setHostData(HostData hostData) {
         this.hostData = hostData;
+    }
+
+    @Override
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    /**
+     * Sets the user agent.
+     *
+     * @param userAgent The user agent to set
+     */
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
     }
 
 }

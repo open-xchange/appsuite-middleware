@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.exception,
  com.openexchange.i18n,
  com.openexchange.oauth,
+ com.openexchange.oauth.access,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,

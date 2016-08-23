@@ -56,6 +56,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.pns.PushNotificationService;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.dovecot.DefaultRegistrationPerformer;
 import com.openexchange.push.dovecot.DovecotPushConfiguration;
@@ -96,6 +97,8 @@ public class DovecotPushActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
+
+        trackService(PushNotificationService.class);
 
         DovecotPushListener.setIfHigherRanked(new DefaultRegistrationPerformer(this));
 

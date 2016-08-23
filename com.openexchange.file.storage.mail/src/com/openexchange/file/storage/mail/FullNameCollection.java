@@ -87,15 +87,7 @@ public class FullNameCollection implements Iterable<FullName> {
 
     @Override
     public Iterator<FullName> iterator() {
-        List<FullName> fullNames = new ArrayList<FullName>(3);
-        fullNames.add(new FullName(fullNameAll, Type.ALL));
-        if (null != fullNameReceived) {
-            fullNames.add(new FullName(fullNameReceived, Type.RECEIVED));
-        }
-        if (null != fullNameSent) {
-            fullNames.add(new FullName(fullNameSent, Type.SENT));
-        }
-        return fullNames.iterator();
+        return asList().iterator();
     }
 
     /**
@@ -116,8 +108,6 @@ public class FullNameCollection implements Iterable<FullName> {
                 return null == fullNameReceived ? null : new FullName(fullNameReceived, Type.RECEIVED);
             case SENT:
                 return null == fullNameSent ? null : new FullName(fullNameSent, Type.SENT);
-            case DEFAULT:
-                return new FullName("", Type.DEFAULT);
             default:
                 return null;
         }
@@ -130,7 +120,9 @@ public class FullNameCollection implements Iterable<FullName> {
      */
     public List<FullName> asList() {
         List<FullName> fullNames = new ArrayList<FullName>(3);
-        fullNames.add(new FullName(fullNameAll, Type.ALL));
+        if (null != fullNameAll) {
+            fullNames.add(new FullName(fullNameAll, Type.ALL));
+        }
         if (null != fullNameReceived) {
             fullNames.add(new FullName(fullNameReceived, Type.RECEIVED));
         }

@@ -588,14 +588,17 @@ public class DriveConfig implements Initialization {
         previewImageSize = parseDimensions(configService.getProperty("com.openexchange.drive.previewImageSize", "1600x1600"));
         thumbnailImageSize = parseDimensions(configService.getProperty("com.openexchange.drive.thumbnailImageSize", "200x150"));
         imageLinkImageFile = configService.getProperty("com.openexchange.drive.imageLinkImageFile",
-            "[protocol]://[hostname]/[dispatcherPrefix]/files?action=document&folder=[folder]&id=[object]&version=[version]&" +
+            "[protocol]://[hostname]/[dispatcherPrefix]/files?action=document&" +
+            "folder=[folder]&id=[object]&version=[version]&context=[contextid]&user=[userid]&" +
             "delivery=download&scaleType=contain&width=[width]&height=[height]&shrinkOnly=true&rotate=true");
         imageLinkAudioFile = configService.getProperty("com.openexchange.drive.imageLinkAudioFile",
-            "[protocol]://[hostname]/[dispatcherPrefix]/image/file/mp3Cover?folder=[folder]&id=[object]&version=[version]&" +
+            "[protocol]://[hostname]/[dispatcherPrefix]/image/file/mp3Cover?" +
+            "folder=[folder]&id=[object]&version=[version]&context=[contextid]&user=[userid]&" +
             "delivery=download&scaleType=contain&width=[width]&height=[height]");
         imageLinkDocumentFile = configService.getProperty("com.openexchange.drive.imageLinkDocumentFile",
-            "[protocol]://[hostname]/[dispatcherPrefix]/files?action=document&format=preview_image&folder=[folder]&id=[object]&" +
-            "version=[version]&delivery=download&scaleType=contain&width=[width]&height=[height]");
+            "[protocol]://[hostname]/[dispatcherPrefix]/files?action=document&format=preview_image&" +
+            "folder=[folder]&id=[object]&version=[version]&context=[contextid]&user=[userid]&" +
+            "delivery=download&scaleType=contain&width=[width]&height=[height]");
         directLinkFragmentsDirectory = configService.getProperty("com.openexchange.drive.directLinkFragmentsDirectory",
             "m=infostore&f=[folder]");
         directLinkDirectory = configService.getProperty("com.openexchange.drive.directLinkDirectory",
@@ -626,10 +629,10 @@ public class DriveConfig implements Initialization {
         /*
          * optimistic save thresholds
          */
-        String optimisticSaveThresholdDesktopValue = configService.getProperty("com.openexchange.drive.optimisticSaveThresholdDesktop", "1MB");
+        String optimisticSaveThresholdDesktopValue = configService.getProperty("com.openexchange.drive.optimisticSaveThresholdDesktop", "64kB");
         optimisticSaveThresholdDesktop = Strings.isEmpty(optimisticSaveThresholdDesktopValue) || "-1".equals(optimisticSaveThresholdDesktopValue) ? -1 :
             parseBytes(optimisticSaveThresholdDesktopValue);
-        String optimisticSaveThresholdMobileValue = configService.getProperty("com.openexchange.drive.optimisticSaveThresholdMobile", "100kB");
+        String optimisticSaveThresholdMobileValue = configService.getProperty("com.openexchange.drive.optimisticSaveThresholdMobile", "64kB");
         optimisticSaveThresholdMobile = Strings.isEmpty(optimisticSaveThresholdMobileValue) || "-1".equals(optimisticSaveThresholdMobileValue) ? -1 :
             parseBytes(optimisticSaveThresholdMobileValue);
     }

@@ -72,4 +72,11 @@ public interface RequestContext {
      */
     HostData getHostData();
 
+    /**
+     * Gets the value of the request's user agent header.
+     *
+     * @return The user agent
+     */
+    String getUserAgent();
+
 }

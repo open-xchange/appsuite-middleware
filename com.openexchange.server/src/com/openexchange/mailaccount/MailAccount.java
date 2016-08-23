@@ -112,13 +112,6 @@ public interface MailAccount extends Account {
     public TransportAuth getTransportAuth();
 
     /**
-     * Checks if a secure connection to transport server shall be established.
-     *
-     * @return <code>true</code> if a secure connection to transport server shall be established; otherwise <code>false</code>
-     */
-    public boolean isTransportSecure();
-
-    /**
      * Gets the optional transport login.
      * <p>
      * <b>NOTE</b>:&nbsp;{@link #getLogin()} is returned if no separate transport login is available.
@@ -137,21 +130,6 @@ public interface MailAccount extends Account {
      */
     @Override
     public String getTransportPassword();
-
-    /**
-     * Gets the personal part of primary email address; e.g.<br>
-     * <code>Jane Doe &lt;jane.doe@somewhere.com&gt;</code>
-     *
-     * @return The personal
-     */
-    public String getPersonal();
-
-    /**
-     * Gets the reply-to address.
-     *
-     * @return The reply-to address
-     */
-    public String getReplyTo();
 
     /**
      * Gets the spam handler name for this mail account.
@@ -311,9 +289,16 @@ public interface MailAccount extends Account {
 
     /**
      * Checks if STARTTLS should be used to connect to mail server
-     * 
-     * @return
+     *
+     * @return <code>true</code> if STARTTLS should be used; otherwise <code>false</code>
      */
     public boolean isMailStartTls();
+
+    /**
+     * Gets the identifier of the account's root folder.
+     *
+     * @return The root folder identifier
+     */
+    public String getRootFolder();
 
 }

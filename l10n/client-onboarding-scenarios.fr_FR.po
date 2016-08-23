@@ -1,18 +1,18 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-#
 # Nicolas Ternisien <nicolas@bureau-cornavin.com>, 2016.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-06-22 12:14+0000\n"
 "PO-Revision-Date: 2016-02-23 22:20+0100\n"
 "Last-Translator: Nicolas Ternisien <nicolas@bureau-cornavin.com>\n"
 "Language-Team: French <kde-i18n-doc@kde.org>\n"
+"Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: fr\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Generator: Lokalize 1.5\n"
 
@@ -33,9 +33,9 @@ msgid ""
 "To synchronize your Mail, Calendar, Tasks and Address Book data, download "
 "and install our desktop application."
 msgstr ""
-"Pour synchroniser les données de vos courriels, de vos agendas, de vos tâches "
-"et de votre carnet d'adresses, téléchargez et installez notre application "
-"bureautique."
+"Pour synchroniser les données de vos courriels, de vos agendas, de vos "
+"tâches et de votre carnet d'adresses, téléchargez et installez notre "
+"application bureautique."
 
 # Drive App
 msgid "Drive App"
@@ -91,10 +91,10 @@ msgid ""
 "updates. You can download the updates from within the Updater."
 msgstr ""
 "Lors de l'exécution du fichier téléchargé, un assistant d'installation sera "
-"lancé. Veuillez suivre les instructions et installer le gestionnaire de mises "
-"à jour. Il installera les dernières versions du logiciel client Windows. Le "
-"gestionnaire vous informe automatiquement des dernières mises à jour. Vous "
-"pouvez télécharger celles-ci directement depuis le gestionnaire."
+"lancé. Veuillez suivre les instructions et installer le gestionnaire de "
+"mises à jour. Il installera les dernières versions du logiciel client "
+"Windows. Le gestionnaire vous informe automatiquement des dernières mises à "
+"jour. Vous pouvez télécharger celles-ci directement depuis le gestionnaire."
 
 # Connector for Microsoft Outlook®
 msgid "Connector for Microsoft Outlook®"
@@ -109,7 +109,8 @@ msgstr ""
 "dossiers publics, partagés et système des clients Microsoft Outlook®."
 
 # Synchronize your Mail, Calendar and Address Book data with your device.
-msgid "Synchronize your Mail, Calendar and Address Book data with your device."
+msgid ""
+"Synchronize your Mail, Calendar and Address Book data with your device."
 msgstr ""
 "Synchroniser les données de vos courriels, vos agendas et de votre carnet "
 "d'adresses avec votre périphérique."
@@ -136,4 +137,3 @@ msgid ""
 msgstr ""
 "Pour configurer manuellement votre compte Courriel, veuillez utiliser les "
 "informations suivantes"
-

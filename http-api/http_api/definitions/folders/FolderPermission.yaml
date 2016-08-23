@@ -2,7 +2,7 @@ type: object
 properties:
   bits:
     type: integer
-    description: For non-mail folders, a number as described in [Permission flags](#permission-flags).
+    description: For non-mail folders, a number as described in [Permission flags](https://documentation.open-xchange.com/latest/middleware/http_api/3_flags_bitmasks.html#permission-flags).
   rights:
     type: string
     description: For mail folders, the rights string as defined in http://tools.ietf.org/html/rfc2086.

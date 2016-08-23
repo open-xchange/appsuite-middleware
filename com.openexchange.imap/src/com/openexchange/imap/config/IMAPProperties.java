@@ -135,6 +135,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private boolean enableTls;
 
+    private boolean auditLogEnabled;
+
     private Set<String> propagateHostNames;
 
     private boolean allowFolderCaches;
@@ -154,6 +156,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         super();
         sContainerType = "boundary-aware";
         enableTls = true;
+        auditLogEnabled = false;
         maxNumConnection = -1;
         newACLExtMap = new NonBlockingHashMap<String, Boolean>();
         mailProperties = MailProperties.getInstance();
@@ -210,7 +213,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         }
 
         {
-            final String imapSearchStr = configuration.getProperty("com.openexchange.imap.imapSearch", "imap").trim();
+            final String imapSearchStr = configuration.getProperty("com.openexchange.imap.imapSearch", "force-imap").trim();
             forceImapSearch = "force-imap".equalsIgnoreCase(imapSearchStr);
             imapSearch = forceImapSearch || "imap".equalsIgnoreCase(imapSearchStr);
             logBuilder.append("\tIMAP-Search: ").append(imapSearch).append(forceImapSearch ? " (forced)\n" : "\n");
@@ -232,6 +235,12 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             final String tmp = configuration.getProperty("com.openexchange.imap.enableTls", STR_TRUE).trim();
             enableTls = Boolean.parseBoolean(tmp);
             logBuilder.append("\tEnable TLS: ").append(enableTls).append('\n');
+        }
+
+        {
+            String tmp = configuration.getProperty("com.openexchange.imap.auditLog.enabled", STR_FALSE).trim();
+            auditLogEnabled = Boolean.parseBoolean(tmp);
+            logBuilder.append("\tAudit Log Enabled: ").append(auditLogEnabled).append('\n');
         }
 
         {
@@ -435,6 +444,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         fastFetch = true;
         propagateClientIPAddress = false;
         enableTls = true;
+        auditLogEnabled = false;
         propagateHostNames = Collections.emptySet();
         supportsACLs = null;
         imapTimeout = 0;
@@ -482,6 +492,11 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public boolean isEnableTls() {
         return enableTls;
+    }
+
+    @Override
+    public boolean isAuditLogEnabled() {
+        return auditLogEnabled;
     }
 
     @Override

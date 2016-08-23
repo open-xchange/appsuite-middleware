@@ -37,6 +37,6 @@
         description: |
           A JSON object containing the object ID and the folder ID of an updated and/or moved mail or only
           the folder ID if several mails are updated. In case of errors the responsible fields in the
-          response are filled (see [Error handling](#error-handling)).
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/MailDestinationResponse"

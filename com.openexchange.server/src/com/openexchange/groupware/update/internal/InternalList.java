@@ -63,6 +63,7 @@ import com.openexchange.groupware.update.tasks.AddUUIDForDListTables;
 import com.openexchange.groupware.update.tasks.AddUUIDForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.AddUUIDForUserAttributeTable;
+import com.openexchange.groupware.update.tasks.AllowNullValuesForStandardFolderNamesUpdateTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicContextAttributesTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAttributesTask;
 import com.openexchange.groupware.update.tasks.CorrectAttachmentCountInAppointments;
@@ -166,7 +167,7 @@ public final class InternalList {
     private static UpdateTaskV2[] TASKS = null;
 
     private static UpdateTaskV2[] genTaskList() {
-        List<UpdateTaskV2> list = new ArrayList<UpdateTaskV2>();
+        List<UpdateTaskV2> list = new ArrayList<>();
 
         // Renames "Unified INBOX" to "Unified Mail"
         list.add(new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask());
@@ -616,7 +617,11 @@ public final class InternalList {
         // Applies MEDIUM TEXT to "user_setting" table.
         list.add(new com.openexchange.groupware.update.tasks.UserSettingMediumTextTask());
 
-        // Adds "oauth" column to "user_transport_account" table
+        // +++++++++++++++++++++++++++++++++ Version 7.8.3 starts here. +++++++++++++++++++++++++++++++++
+
+        list.add(new AllowNullValuesForStandardFolderNamesUpdateTask());
+
+        //Adds "oauth" column to account tables
         list.add(new AddOAuthColumnToMailAccountTableTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);

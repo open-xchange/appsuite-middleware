@@ -162,6 +162,20 @@ public interface File {
     void setMeta(Map<String, Object> properties);
 
     /**
+     * Checks whether {@link #getFileSize()} returns the exact size w/o any encodings (e.g. base64) applied.
+     *
+     * @return <code>true</code> for exact size; otherwise <code>false</code>
+     */
+    boolean isAccurateSize();
+
+    /**
+     * Sets whether the {@link #getFileSize()} returns the exact size w/o any encodings (e.g. base64) applied
+     *
+     * @param accurateSize <code>true</code> for exact size; otherwise <code>false</code>
+     */
+    void setAccurateSize(boolean accurateSize);
+
+    /**
      * Gets the object permissions in case they are defined.
      *
      * @return A list holding additional object permissions, or <code>null</code> if not defined or not supported by the storage
@@ -176,21 +190,21 @@ public interface File {
     void setObjectPermissions(List<FileStorageObjectPermission> objectPermissions);
 
     /**
-     * Gets a value indicating whether the item can be shared to others based on underlying storage's capabilities and the permissions of 
+     * Gets a value indicating whether the item can be shared to others based on underlying storage's capabilities and the permissions of
      * the requesting user.
-     * 
+     *
      * @return <code>true</code> if the file is shareable, <code>false</code>, otherwise
      */
     boolean isShareable();
-    
+
     /**
-     * Sets the flag indicating that the item can be shared to others based on underlying storage's capabilities and the permissions of 
+     * Sets the flag indicating that the item can be shared to others based on underlying storage's capabilities and the permissions of
      * the requesting user.
-     * 
+     *
      * @param shareable <code>true</code> if the file is shareable, <code>false</code>, otherwise
      */
     void setShareable(boolean shareable);
-    
+
     File dup();
 
     void copyInto(File other);

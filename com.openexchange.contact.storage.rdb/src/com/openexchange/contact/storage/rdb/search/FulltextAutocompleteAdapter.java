@@ -57,7 +57,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -68,6 +67,7 @@ import java.util.concurrent.TimeUnit;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
@@ -280,8 +280,8 @@ public class FulltextAutocompleteAdapter extends DefaultSearchAdapter {
         }
 
         @Override
-        public Map<String, String[]> getConfigFileNames() {
-            return null;
+        public com.openexchange.config.Interests getInterests() {
+            return DefaultInterests.builder().propertiesOfInterest("com.openexchange.contact.fulltextAutocomplete", "com.openexchange.contact.fulltextIndexFields").build();
         }
     };
 

@@ -55,11 +55,11 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.rss.osgi.Services;
 import com.openexchange.tools.stream.CountingInputStream;
 import com.sun.syndication.feed.synd.SyndFeed;
@@ -207,7 +207,7 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
 
     /**
      * Retrieves and caches a {@link SyndFeed}
-     * 
+     *
      * @param feedUrl The feed {@link URL}
      * @param syndFeedInfo The {@link SyndFeedInfo} to retrieve and cache
      * @param connection The {@link HttpURLConnection}
@@ -231,7 +231,7 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
 
     /**
      * Resets the specified {@link SyndFeedInfo}
-     * 
+     *
      * @param orignalUrl The original URL
      * @param syndFeedInfo The {@link SyndFeedInfo} to reset
      * @param connection The {@link HttpURLConnection}
@@ -317,7 +317,7 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
 
     /**
      * Reads the SyndFeed from the specified input stream and fires an event {@link FetcherEvent#EVENT_TYPE_FEED_RETRIEVED}
-     * 
+     *
      * @param inputStream The {@link InputStream}
      * @param connection The {@link URLConnection}
      * @return The {@link SyndFeed}
@@ -333,7 +333,7 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
 
     /**
      * Reads the SyndFeed from the specified input stream
-     * 
+     *
      * @param inputStream The {@link InputStream}
      * @param connection The {@link URLConnection}
      * @return The {@link SyndFeed}
@@ -364,26 +364,14 @@ public class TimoutHttpURLFeedFetcher extends AbstractFeedFetcher implements Rel
         return syndFeedInput.build(reader);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
-     */
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         maximumAllowedSize = configService.getIntProperty(MAX_FEED_SIZE_PROPERTY_NAME, 4194304);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.Reloadable#getConfigFileNames()
-     */
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> filenames = new HashMap<String, String[]>(1);
-        filenames.put("rssmessaging.propertes", new String[] { MAX_FEED_SIZE_PROPERTY_NAME });
-        return filenames;
+    public Interests getInterests() {
+        return Reloadables.interestsForProperties(MAX_FEED_SIZE_PROPERTY_NAME);
     }
 
     /**

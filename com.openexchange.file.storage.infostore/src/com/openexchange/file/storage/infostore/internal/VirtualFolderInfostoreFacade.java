@@ -79,6 +79,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
+    public long getTotalSize(long folderId, ServerSession session) throws OXException {
+        return 0;
+    }
+
+    @Override
     public boolean exists(final int id, final int version, ServerSession session) {
         return false;
     }
@@ -229,6 +234,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
 
     @Override
     public IDTuple saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final ServerSession session) throws OXException {
+        throw virtualFolder();
+    }
+
+    @Override
+    public IDTuple saveDocumentTryAddVersion(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final Metadata[] modifiedColumns, final ServerSession session) throws OXException {
         throw virtualFolder();
     }
 

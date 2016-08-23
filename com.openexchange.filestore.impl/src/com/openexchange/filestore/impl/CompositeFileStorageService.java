@@ -52,6 +52,7 @@ package com.openexchange.filestore.impl;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.osgi.framework.BundleContext;
@@ -117,12 +118,7 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
         try {
             LocalFileStorage standardFS = new LocalFileStorage(uri);
             HashingFileStorage hashedFS = new HashingFileStorage(new File(new File(uri), "hashed"));
-
-            CompositingFileStorage cStorage = new CompositingFileStorage();
-            cStorage.addStore(standardFS);
-            cStorage.addStore("hashed", hashedFS);
-            cStorage.setSavePrefix("hashed");
-            return cStorage;
+            return new CompositingFileStorage(standardFS, "hashed", Collections.<String, FileStorage> singletonMap("hashed", hashedFS));
         } catch (IllegalArgumentException e) {
             throw OXException.general("Cannot create file storage for URI: \"" + uri + "\". That URI does not hold the preconditions to be absolute, hierarchical with a scheme equal to \"file\", a non-empty path component, and undefined authority, query, and fragment components.", e);
         }

@@ -49,8 +49,6 @@
 
 package com.openexchange.mail;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumMap;
@@ -58,6 +56,8 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.mail.search.SearchTerm;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link MailField} - An enumeration of mail fields to define which fields to prefill.
@@ -185,6 +185,12 @@ public enum MailField {
      * @since v7.8.0
      */
     ORIGINAL_FOLDER_ID(MailListField.ORIGINAL_FOLDER_ID),
+
+    /**
+     * The attachment name.
+     * @since v7.8.2
+     */
+    ATTACHMENT_NAME(null)
 
     ;
 

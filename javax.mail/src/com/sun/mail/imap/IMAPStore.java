@@ -954,7 +954,7 @@ public class IMAPStore extends Store
 		p.capability();
 	    } else if (requireStartTLS) {
 		logger.fine("STARTTLS required but not supported by server");
-		throw new ProtocolException(
+		throw new com.sun.mail.iap.StarttlsRequiredException(
 		    "STARTTLS required but not supported by server");
 	    }
 	}
@@ -966,10 +966,42 @@ public class IMAPStore extends Store
 
 	// issue special ID command to Yahoo! Mail IMAP server
 	// http://en.wikipedia.org/wiki/Yahoo%21_Mail#Free_IMAP_and_SMTPs_access
-    if (guid != null) {
-        Map<String, String> clientParams = new LinkedHashMap<String, String>(2);
-        clientParams.put("GUID", guid);
-        p.id(clientParams);
+	// Advertise client parameters (if any)
+    if (guid != null || p.getCapabilities().containsKey("ID")) {
+        Map<String, String> clientParams = null;
+        {
+            ExternalIdGenerator generator = this.externalIdGenerator;
+            if (null == generator) {
+                if (null != this.clientParameters) {
+                    clientParams = new LinkedHashMap<String, String>(this.clientParameters);
+                }
+            } else {
+                // Generate external identifier & add to client parameters
+                String generatedExternalId = generator.generateExternalId();
+                if (null == this.clientParameters) {
+                    clientParams = new LinkedHashMap<String, String>(2);
+                } else {
+                    // Overwrite "x-session-ext-id" client parameter with the generated one
+                    clientParams = new LinkedHashMap<String, String>(this.clientParameters);
+                }
+                clientParams.put("x-session-ext-id", generatedExternalId);
+            }
+        }
+        
+        if (null == clientParams && guid != null) {
+            clientParams = new LinkedHashMap<String, String>(2);
+            clientParams.put("GUID", guid);
+        }
+        
+        if (null != clientParams) {
+            try {
+                p.id(clientParams);
+            } catch (CommandFailedException cex) {
+                // Swallow "NO" responses
+            } catch (BadCommandException e) {
+                // Swallow "BAD" responses
+            }
+        }
     }
 
 	/*
@@ -1003,41 +1035,6 @@ public class IMAPStore extends Store
 
 	if (proxyAuthUser != null)
 	    p.proxyauth(proxyAuthUser);
-
-	/*
-	 * Advertise client parameters (if any)
-	 */
-    if (p.getCapabilities().containsKey("ID")) {
-        Map<String, String> clientParams = null;
-        {
-            ExternalIdGenerator generator = this.externalIdGenerator;
-            if (null == generator) {
-                if (null != this.clientParameters) {
-                    clientParams = new LinkedHashMap<String, String>(this.clientParameters);
-                }
-            } else {
-                // Generate external identifier & add to client parameters
-                String generatedExternalId = generator.generateExternalId();
-                if (null == this.clientParameters) {
-                    clientParams = new LinkedHashMap<String, String>(2);
-                } else {
-                    // Overwrite "x-session-ext-id" client parameter with the generated one
-                    clientParams = new LinkedHashMap<String, String>(this.clientParameters);
-                }
-                clientParams.put("x-session-ext-id", generatedExternalId);
-            }
-        }
-        
-        if (null != clientParams) {
-            try {
-                p.id(clientParams);
-            } catch (CommandFailedException cex) {
-                // Swallow "NO" responses
-            } catch (BadCommandException e) {
-                // Swallow "BAD" responses
-            }
-        }
-    }
 
 	/*
      * Propagate client IP address if non-null

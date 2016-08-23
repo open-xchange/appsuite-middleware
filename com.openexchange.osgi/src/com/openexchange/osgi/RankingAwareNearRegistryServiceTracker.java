@@ -52,6 +52,7 @@ package com.openexchange.osgi;
 import static com.openexchange.osgi.util.RankedService.getRanking;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -96,11 +97,30 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
     }
 
     /**
+     * Called when a service appeared, but is not yet added.
+     *
+     * @param service The appeared service
+     * @return <code>true</code> to proceed; otherwise <code>false</code> to discard the appeared service
+     */
+    protected boolean onServiceAppeared(S service) {
+        return true;
+    }
+
+    /**
      * Called when a service gets added.
      *
      * @param service The added service
      */
     protected void onServiceAdded(S service) {
+        // Nothing
+    }
+
+    /**
+     * Called when a service disappeared, but is not yet removed.
+     *
+     * @param service The disappeared service
+     */
+    protected void onServiceDisappeared(S service) {
         // Nothing
     }
 
@@ -138,22 +158,37 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
      */
     @Override
     public List<S> getServiceList() {
-        if (empty) {
-            return Collections.emptyList();
-        }
+        return empty ? Collections.<S>emptyList() : asList();
+    }
 
-        List<S> ret = new ArrayList<S>(services.size());
-        for (RankedService<S> rs : services) {
+    @Override
+    public Iterator<S> iterator() {
+        return empty ? Collections.<S> emptyIterator() : asList().iterator();
+    }
+
+    /**
+     * Gets the list view for tracked services.
+     *
+     * @return The list view
+     */
+    private List<S> asList() {
+        List<RankedService<S>> snapshot = services.getSnapshot();
+        List<S> ret = new ArrayList<S>(snapshot.size());
+        for (RankedService<S> rs : snapshot) {
             ret.add(rs.service);
         }
         return ret;
     }
 
     @Override
-    public S addingService(final ServiceReference<S> reference) {
+    public synchronized S addingService(final ServiceReference<S> reference) {
         final S service = context.getService(reference);
-        final int ranking = getRanking(reference, defaultRanking);
-        final RankedService<S> rankedService = new RankedService<S>(service, ranking);
+        if (false == onServiceAppeared(service)) {
+            context.ungetService(reference);
+            return null;
+        }
+
+        final RankedService<S> rankedService = new RankedService<S>(service, getRanking(reference, defaultRanking));
         if (services.addAndSort(rankedService)) { // Append
             empty = false;
             onServiceAdded(service);
@@ -164,7 +199,8 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
     }
 
     @Override
-    public void removedService(final ServiceReference<S> reference, final S service) {
+    public synchronized void removedService(final ServiceReference<S> reference, final S service) {
+        onServiceDisappeared(service);
         if (services.remove(new RankedService<S>(service, getRanking(reference, defaultRanking)))) {
             empty = services.isEmpty();
             onServiceRemoved(service);

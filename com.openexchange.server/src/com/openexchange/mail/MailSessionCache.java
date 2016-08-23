@@ -55,6 +55,10 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.openexchange.caching.CacheService;
+import com.openexchange.caching.events.CacheEvent;
+import com.openexchange.caching.events.CacheEventService;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 
@@ -64,6 +68,13 @@ import com.openexchange.sessiond.SessiondService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailSessionCache {
+
+    /**
+     * The region name.
+     */
+    public static final String REGION = "MailSessionCache";
+
+    private static final Object SENDER = new Object() { @Override public String toString() { return REGION; } };
 
     /**
      * Gets the session-bound mail cache.
@@ -166,6 +177,85 @@ public final class MailSessionCache {
     }
 
     /**
+     * Drops the session-bound mail cache.
+     *
+     * @param session The session whose mail cache shall be dropped
+     * @return <code>true</code> if session-associated instance was cleared; otherwise <code>false</code>
+     */
+    public static void clearInstance(final Session session) {
+        final String key = MailSessionParameterNames.getParamMainCache();
+        MailSessionCache mailCache = null;
+        try {
+            mailCache = (MailSessionCache) session.getParameter(key);
+        } catch (final ClassCastException e) {
+            /*
+             * Class version does not match
+             */
+            mailCache = null;
+            session.setParameter(key, null);
+            return;
+        }
+
+        if (null == mailCache) {
+            return;
+        }
+
+        mailCache.clear();
+    }
+
+    /**
+     * Clears cache for given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public static void clearFor(int userId, int contextId) {
+        clearFor(userId, contextId, true);
+    }
+
+    /**
+     * Clears cache for given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param notify Whether to notify
+     */
+    public static void clearFor(int userId, int contextId, boolean notify) {
+        SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+        if (null != sessiondService) {
+            boolean somethingCleared = false;
+
+            Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
+            for (Session session : sessions) {
+                MailSessionCache mailSessionCache = MailSessionCache.optInstance(session);
+                if (null != mailSessionCache) {
+                    mailSessionCache.clear();
+                    somethingCleared = true;
+                }
+            }
+
+            if (somethingCleared && notify) {
+                fireInvalidateCacheEvent(userId, contextId);
+            }
+        }
+    }
+
+    private static void fireInvalidateCacheEvent(int userId, int contextId) {
+        CacheEventService cacheEventService = ServerServiceRegistry.getInstance().getService(CacheEventService.class);
+        if (null != cacheEventService && cacheEventService.getConfiguration().remoteInvalidationForPersonalFolders()) {
+            CacheEvent event = newCacheEventFor(userId, contextId);
+            if (null != event) {
+                cacheEventService.notify(SENDER, event, false);
+            }
+        }
+    }
+
+    private static CacheEvent newCacheEventFor(int userId, int contextId) {
+        CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
+        return null == service ? null : CacheEvent.INVALIDATE(REGION, Integer.toString(contextId), service.newCacheKey(contextId, userId));
+    }
+
+    /**
      * Removes cached standard folder information from user-associated caches.
      *
      * @param accountId The account identifier
@@ -199,21 +289,6 @@ public final class MailSessionCache {
         super();
         map = new TIntObjectHashMap<ConcurrentMap<String, Object>>();
     }
-
-    /*-
-     * Gets the parameter associated with given account ID and parameter name.
-     *
-     * @param accountId The account ID
-     * @param parameterName The parameter name
-     * @return The parameter or <code>null</code>
-    public Object getParameter(final int accountId, final String parameterName) {
-        final ConcurrentMap<String, Object> accountMap = map.get(Integer.valueOf(accountId));
-        if (null == accountMap) {
-            return null;
-        }
-        return accountMap.get(parameterName);
-    }
-     */
 
     /**
      * Gets the parameter associated with given account ID and parameter name.

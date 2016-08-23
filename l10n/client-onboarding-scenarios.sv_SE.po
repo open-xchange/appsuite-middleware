@@ -1,18 +1,18 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-#
 # Arve Eriksson, 2016.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-06-22 13:46+0000\n"
 "PO-Revision-Date: 2016-02-18 17:39+0100\n"
 "Last-Translator: Arve Eriksson\n"
 "Language-Team: sv <ox@bureau-cornavin.com>\n"
+"Language: sv_SE\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: sv\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.5\n"
 
@@ -34,8 +34,7 @@ msgid ""
 "and install our desktop application."
 msgstr ""
 "För att synkronisera din e-post, kalender, dina uppgifter och din adressbok, "
-"ladda ner och "
-"installera vårt skrivbordsprogram."
+"ladda ner och installera vårt skrivbordsprogram."
 
 # Drive App
 msgid "Drive App"
@@ -107,7 +106,8 @@ msgstr ""
 "publika, delade och systemmappar till Microsoft Outlook®-klienter."
 
 # Synchronize your Mail, Calendar and Address Book data with your device.
-msgid "Synchronize your Mail, Calendar and Address Book data with your device."
+msgid ""
+"Synchronize your Mail, Calendar and Address Book data with your device."
 msgstr "Synkronisera din e-post-, kalender- och adressboksdata med din enhet."
 
 # To manually setup your Mail, Calendar and Address Book accounts, please use the following information.
@@ -115,8 +115,8 @@ msgid ""
 "To manually setup your Mail, Calendar and Address Book accounts, please use "
 "the following information."
 msgstr ""
-"För att manuellt anpassa dina e-post-, kalender- och adressbokskonton, använd "
-"följande information."
+"För att manuellt anpassa dina e-post-, kalender- och adressbokskonton, "
+"använd följande information."
 
 # Mail
 msgid "Mail"
@@ -130,4 +130,3 @@ msgstr "Synkronisera din e-post med Apple Mail-programmet."
 msgid ""
 "To manually setup your Mail account, please use the following information"
 msgstr "För att manuellt anpassa ditt E-postkonto, använd följande information"
-

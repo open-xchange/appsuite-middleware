@@ -51,7 +51,6 @@ package com.openexchange.imap;
 
 import static com.openexchange.java.Strings.toUpperCase;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.Flags;
@@ -59,7 +58,9 @@ import javax.mail.Folder;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -142,8 +143,8 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.imap.failFastTimeout");
             }
         });
     }
@@ -457,7 +458,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                 // Check for equal folder
                 boolean isEqualFolder = isDefaultFolder ? ( 0 == imapFolderFullname.length()) : fullName.equals(imapFolderFullname);
 
-                IMAPCommandsCollection.forceNoopCommand(imapFolder);
+                // IMAPCommandsCollection.forceNoopCommand(imapFolder);
                 clearCache(imapFolder);
 
                 int mode = getMode(imapFolder);

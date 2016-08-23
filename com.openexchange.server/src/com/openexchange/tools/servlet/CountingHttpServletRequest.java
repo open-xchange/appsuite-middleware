@@ -64,7 +64,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.server.reloadable.GenericReloadable;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -109,8 +111,8 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.servlet.maxBodySize");
             }
         });
     }

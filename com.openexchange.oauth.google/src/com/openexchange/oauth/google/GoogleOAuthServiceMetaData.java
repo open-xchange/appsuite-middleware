@@ -71,7 +71,7 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
      * @param services the service lookup instance
      */
     public GoogleOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, "com.openexchange.oauth.google", "Google");
+        super(services, API.GOOGLE);
     }
 
     @Override
@@ -94,11 +94,6 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
         // https://www.googleapis.com/auth/userinfo.email -> View your email address
         // https://www.googleapis.com/auth/userinfo.profile -> View basic information about your account"
         return "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/drive https://mail.google.com/";
-    }
-
-    @Override
-    public API getAPI() {
-        return API.GOOGLE;
     }
 
     @Override

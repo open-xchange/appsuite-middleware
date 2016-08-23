@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,24 +49,19 @@
 
 package com.openexchange.mailfilter.json.ajax.servlet;
 
-import java.util.HashMap;
-import java.util.Map;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 
 /**
  * {@link MailFilterReloadable}
- * 
+ *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
 public class MailFilterReloadable implements Reloadable {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailFilterReloadable.class);
-
-    private static final String CONFIGFILE = "mailfilter.properties";
-
-    private static final String[] PROPERTIES = new String[] { "all properties in file" };
 
     /**
      * Initializes a new {@link MailFilterReloadable}.
@@ -75,10 +70,6 @@ public class MailFilterReloadable implements Reloadable {
         super();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
-     */
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         if (MailFilterServletInit.getInstance().isStarted()) {
@@ -86,20 +77,15 @@ public class MailFilterReloadable implements Reloadable {
             try {
                 MailFilterServletInit.getInstance().start();
             } catch (Exception e) {
-                LOG.error("Error reloading configuration for bundle com.openexchange.mail.filter: {}", e);
+                Logger logger = org.slf4j.LoggerFactory.getLogger(MailFilterReloadable.class);
+                logger.error("Error reloading configuration for bundle com.openexchange.mail.filter: {}", e);
             }
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.config.Reloadable#getConfigfileNames()
-     */
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
+    public Interests getInterests() {
+        return Reloadables.interestsForFiles("mailfilter.properties");
     }
 
 }

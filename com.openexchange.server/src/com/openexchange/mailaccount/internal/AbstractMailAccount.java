@@ -117,16 +117,17 @@ public abstract class AbstractMailAccount implements MailAccount {
     protected Map<String, String> transportProperties;
     protected boolean mailStartTls;
     protected boolean transportStartTls;
-    private Long oauth;
+    protected Long oauth;
+    protected String rootFolder;
 
     /**
      * Initializes a new {@link AbstractMailAccount}.
      */
     protected AbstractMailAccount() {
         super();
-        properties = new HashMap<String, String>(4);
+        properties = new HashMap<>(4);
         transportAuth = TransportAuth.MAIL;
-        transportProperties = new HashMap<String, String>(4);
+        transportProperties = new HashMap<>(4);
         transportPort = 25;
         mailPort = 143;
         final String transportProvider = TransportProperties.getInstance().getDefaultTransportProvider();
@@ -221,6 +222,11 @@ public abstract class AbstractMailAccount implements MailAccount {
     @Override
     public int getUserId() {
         return userId;
+    }
+
+    @Override
+    public String getRootFolder() {
+        return rootFolder;
     }
 
     /**
@@ -499,6 +505,15 @@ public abstract class AbstractMailAccount implements MailAccount {
     public void setTransportSecure(final boolean transportSecure) {
         transportServerUrl = null;
         this.transportSecure = transportSecure;
+    }
+
+    /**
+     * Sets the identifier for the root folder
+     *
+     * @param rootFolder The root folder identifier to set
+     */
+    public void setRootFolder(String rootFolder) {
+        this.rootFolder = rootFolder;
     }
 
     @Override
@@ -796,7 +811,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         if (properties.isEmpty()) {
             return Collections.emptyMap();
         }
-        final Map<String, String> clone = new HashMap<String, String>(properties.size());
+        final Map<String, String> clone = new HashMap<>(properties.size());
         clone.putAll(properties);
         if (null != replyTo) {
             clone.put("replyto", replyTo);
@@ -811,9 +826,9 @@ public abstract class AbstractMailAccount implements MailAccount {
      */
     public void setProperties(final Map<String, String> properties) {
         if (null == properties) {
-            this.properties = new HashMap<String, String>(4);
+            this.properties = new HashMap<>(4);
         } else if (properties.isEmpty()) {
-            this.properties = new HashMap<String, String>(4);
+            this.properties = new HashMap<>(4);
         } else {
             for (final Map.Entry<String, String> e : properties.entrySet()) {
                 if ("replyto".equals(e.getKey())) {
@@ -821,7 +836,7 @@ public abstract class AbstractMailAccount implements MailAccount {
                     break;
                 }
             }
-            this.properties = new HashMap<String, String>(properties.size());
+            this.properties = new HashMap<>(properties.size());
             this.properties.putAll(properties);
         }
     }
@@ -829,7 +844,7 @@ public abstract class AbstractMailAccount implements MailAccount {
     @Override
     public void addProperty(final String name, final String value) {
         if (properties.isEmpty()) {
-            properties = new HashMap<String, String>(4);
+            properties = new HashMap<>(4);
         }
         if ("replyto".equals(name)) {
             replyTo = value;
@@ -842,7 +857,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         if (transportProperties.isEmpty()) {
             return Collections.emptyMap();
         }
-        return new HashMap<String, String>(transportProperties);
+        return new HashMap<>(transportProperties);
     }
 
     /**
@@ -852,18 +867,18 @@ public abstract class AbstractMailAccount implements MailAccount {
      */
     public void setTransportProperties(final Map<String, String> transportProperties) {
         if (null == transportProperties) {
-            this.transportProperties = new HashMap<String, String>(4);
+            this.transportProperties = new HashMap<>(4);
         } else if (transportProperties.isEmpty()) {
-            this.transportProperties = new HashMap<String, String>(4);
+            this.transportProperties = new HashMap<>(4);
         } else {
-            this.transportProperties = new HashMap<String, String>(transportProperties);
+            this.transportProperties = new HashMap<>(transportProperties);
         }
     }
 
     @Override
     public void addTransportProperty(final String name, final String value) {
         if (transportProperties.isEmpty()) {
-            transportProperties = new HashMap<String, String>(4);
+            transportProperties = new HashMap<>(4);
         }
         transportProperties.put(name, value);
     }

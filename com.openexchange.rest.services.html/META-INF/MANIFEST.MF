@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.exception,
  com.openexchange.html,
  com.openexchange.osgi,
+ com.openexchange.rest.services.annotation,
  com.openexchange.tools.servlet,
  javax.ws.rs;version="[2.0.0,3.0.0)",
  javax.ws.rs.core;version="[2.0.0,3.0.0)",

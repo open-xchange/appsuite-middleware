@@ -68,6 +68,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXResultDecorator;
+import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
@@ -102,7 +103,6 @@ import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
 import com.openexchange.mail.json.compose.internal.ComposeHandlerRegistryImpl;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
-import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.transport.config.TransportReloadable;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
@@ -114,7 +114,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link MailJSONActivator} - The activator for mail module.
@@ -152,6 +151,8 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         final ServiceLookup serviceLookup = new ExceptionOnAbsenceServiceLookup(this);
         SERVICES.set(serviceLookup);
 
+        trackService(Dispatcher.class);
+
         final BundleContext context = this.context;
 
         // Tracker for CapabilityService that declares "publish_mail_attachments" capability
@@ -172,11 +173,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
                     @Override
                     public boolean isEnabled(final String capability, final Session ses) throws OXException {
                         if (sCapability.equals(capability)) {
-                            final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                            if (session.isAnonymous() || !session.getUserPermissionBits().hasWebMail()) {
-                                return false;
-                            }
-                            return TransportProperties.getInstance().isPublishOnExceededQuota();
+                            return false;
                         }
 
                         return true;

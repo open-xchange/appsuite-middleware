@@ -66,6 +66,7 @@ import com.openexchange.version.Version;
  * OX versioning information.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  */
 public class JMXReport {
     private final String uuid;
@@ -80,7 +81,6 @@ public class JMXReport {
      * Creates a JMX friendly version of the given report
      */
     public JMXReport(Report report) throws Exception {
-
         this.uuid = report.getUUID();
         this.pendingTasks = report.getNumberOfPendingTasks();
         this.tasks = report.getNumberOfTasks();
@@ -98,6 +98,7 @@ public class JMXReport {
                 configs = new HashMap<String, Object>();
             }
             configs.put("com.openexchange.mail.adminMailLoginEnabled", Boolean.toString(adminMailLoginEnabled));
+            lData.put("configs", configs);
             
             JSONObject jsonData = (JSONObject) JSONCoercion.coerceToJSON(lData);
             jsonData.put("uuid", uuid);

@@ -132,7 +132,7 @@ public final class MailConfigTest extends TestCase {
 
             SimSession session = new SimSession(1, 1);
 
-            final CustomMailAccount account = new CustomMailAccount();
+            final CustomMailAccount account = new CustomMailAccount(0);
             account.setLogin("login");
             account.setPassword("password");
 

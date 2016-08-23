@@ -61,6 +61,7 @@ import com.openexchange.ajax.framework.Params;
 public class GetInfostoreRequest extends AbstractInfostoreRequest<GetInfostoreResponse> {
 
     private String id;
+    private String[] columns;
 
     public void setId(String id) {
         this.id = id;
@@ -79,6 +80,12 @@ public class GetInfostoreRequest extends AbstractInfostoreRequest<GetInfostoreRe
         setId(id);
     }
 
+    public GetInfostoreRequest(String id, String... columns) {
+        this();
+        setId(id);
+        this.columns = columns;
+    }
+
     @Override
     public Object getBody() throws JSONException {
         return null;
@@ -91,11 +98,16 @@ public class GetInfostoreRequest extends AbstractInfostoreRequest<GetInfostoreRe
 
     @Override
     public Parameter[] getParameters() {
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION,
-            AJAXServlet.ACTION_GET,
-            AJAXServlet.PARAMETER_ID,
-            String.valueOf(getId())).toArray();
+        if (null == columns || columns.length == 0) {
+            return new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET, AJAXServlet.PARAMETER_ID, String.valueOf(getId())).toArray();
+        } else {
+            StringBuilder sb = new StringBuilder();
+            for (String col : columns) {
+                sb.append(col).append(",");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+            return new Params(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_GET, AJAXServlet.PARAMETER_ID, String.valueOf(getId()), AJAXServlet.PARAMETER_COLUMNS, sb.toString()).toArray();
+        }
     }
 
     @Override

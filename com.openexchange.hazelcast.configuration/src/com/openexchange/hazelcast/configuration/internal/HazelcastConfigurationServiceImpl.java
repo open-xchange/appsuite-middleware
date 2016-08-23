@@ -70,7 +70,7 @@ import com.hazelcast.config.QueueConfig;
 import com.hazelcast.config.SemaphoreConfig;
 import com.hazelcast.config.SymmetricEncryptionConfig;
 import com.hazelcast.config.TopicConfig;
-import com.hazelcast.instance.GroupProperties;
+import com.hazelcast.instance.GroupProperty;
 import com.hazelcast.nio.serialization.ClassDefinition;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.WildcardNamePropertyFilter;
@@ -106,9 +106,6 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
 
     /** The Hazelcast configuration instance */
     private volatile Config config;
-
-    /** The <i>shutdown-on-out-of-memory</i> flag */
-    private boolean shutdownOnOutOfMemory;
 
     /**
      * Initializes a new {@link HazelcastConfigurationServiceImpl}.
@@ -266,10 +263,10 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("com.openexchange.hazelcast.network.join");
         }
         String mergeFirstRunDelay = configService.getProperty("com.openexchange.hazelcast.merge.firstRunDelay", "120s");
-        config.setProperty(GroupProperties.PROP_MERGE_FIRST_RUN_DELAY_SECONDS,
+        config.setProperty(GroupProperty.MERGE_FIRST_RUN_DELAY_SECONDS,
             String.valueOf(TimeSpanParser.parseTimespan(mergeFirstRunDelay).longValue() / 1000));
         String mergeRunDelay = configService.getProperty("com.openexchange.hazelcast.merge.runDelay", "120s");
-        config.setProperty(GroupProperties.PROP_MERGE_NEXT_RUN_DELAY_SECONDS,
+        config.setProperty(GroupProperty.MERGE_NEXT_RUN_DELAY_SECONDS,
             String.valueOf(TimeSpanParser.parseTimespan(mergeRunDelay).longValue() / 1000));
         /*
          * Network Config
@@ -295,9 +292,9 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             }
         }
         if (configService.getBoolProperty("com.openexchange.hazelcast.network.enableIPv6Support", false)) {
-            config.setProperty(GroupProperties.PROP_PREFER_IPv4_STACK, "false");
+            config.setProperty(GroupProperty.PREFER_IPv4_STACK, "false");
         }
-        config.setProperty(GroupProperties.PROP_SOCKET_BIND_ANY, String.valueOf(
+        config.setProperty(GroupProperty.SOCKET_BIND_ANY, String.valueOf(
             configService.getBoolProperty("com.openexchange.hazelcast.socket.bindAny", false)));
         /*
          * Encryption
@@ -314,20 +311,15 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
          * Miscellaneous
          */
         String loggingType = configService.getBoolProperty("com.openexchange.hazelcast.logging.enabled", true) ? "slf4j" : "none";
-        System.setProperty(GroupProperties.PROP_LOGGING_TYPE, loggingType);
-        config.setProperty(GroupProperties.PROP_LOGGING_TYPE, loggingType);
-        config.setProperty(GroupProperties.PROP_VERSION_CHECK_ENABLED, "false");
-        config.setProperty(GroupProperties.PROP_HEALTH_MONITORING_LEVEL,
-            configService.getProperty("com.openexchange.hazelcast.healthMonitorLevel", "silent").toUpperCase());
-        config.setProperty(GroupProperties.PROP_OPERATION_CALL_TIMEOUT_MILLIS,
-            configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "30000"));
-        config.setProperty(GroupProperties.PROP_ENABLE_JMX, configService.getProperty("com.openexchange.hazelcast.jmx", "true"));
-        config.setProperty(GroupProperties.PROP_ENABLE_JMX_DETAILED,
-            configService.getProperty("com.openexchange.hazelcast.jmxDetailed", "true"));
-        config.setProperty(GroupProperties.PROP_MEMCACHE_ENABLED,
-            configService.getProperty("com.openexchange.hazelcast.memcache.enabled", "false"));
-        config.setProperty(GroupProperties.PROP_REST_ENABLED,
-            configService.getProperty("com.openexchange.hazelcast.rest.enabled", "false"));
+        System.setProperty(GroupProperty.LOGGING_TYPE.getName(), loggingType);
+        config.setProperty(GroupProperty.LOGGING_TYPE, loggingType);
+        config.setProperty(GroupProperty.VERSION_CHECK_ENABLED, "false");
+        config.setProperty(GroupProperty.HEALTH_MONITORING_LEVEL, configService.getProperty("com.openexchange.hazelcast.healthMonitorLevel", "silent").toUpperCase());
+        config.setProperty(GroupProperty.OPERATION_CALL_TIMEOUT_MILLIS, configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "30000"));
+        config.setProperty(GroupProperty.ENABLE_JMX, configService.getProperty("com.openexchange.hazelcast.jmx", "true"));
+        config.setProperty(GroupProperty.ENABLE_JMX_DETAILED, configService.getProperty("com.openexchange.hazelcast.jmxDetailed", "true"));
+        config.setProperty(GroupProperty.MEMCACHE_ENABLED, configService.getProperty("com.openexchange.hazelcast.memcache.enabled", "false"));
+        config.setProperty(GroupProperty.REST_ENABLED, configService.getProperty("com.openexchange.hazelcast.rest.enabled", "false"));
         /*
          * Arbitrary Hazelcast properties
          */
@@ -348,14 +340,10 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
          * Register serialization factory
          */
         DynamicPortableFactory dynamicPortableFactory = Services.requireService(DynamicPortableFactory.class);
-
-        config.getSerializationConfig().addPortableFactory(DynamicPortableFactory.FACTORY_ID,
-            dynamicPortableFactory);
-
-        for(ClassDefinition classDefinition : dynamicPortableFactory.getClassDefinitions()) {
+        config.getSerializationConfig().addPortableFactory(DynamicPortableFactory.FACTORY_ID, dynamicPortableFactory);
+        for (ClassDefinition classDefinition : dynamicPortableFactory.getClassDefinitions()) {
             config.getSerializationConfig().addClassDefinition(classDefinition);
         }
-
         /*
          * Config ready
          */

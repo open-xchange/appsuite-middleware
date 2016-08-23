@@ -97,7 +97,7 @@ public class MultiMailFixtureFactory implements FixtureFactory<CustomMailAccount
 
             defaults(values);
 
-            final CustomMailAccount customMailAccount = new CustomMailAccount();
+            final CustomMailAccount customMailAccount = new CustomMailAccount(0);
 
             apply(customMailAccount, values);
 

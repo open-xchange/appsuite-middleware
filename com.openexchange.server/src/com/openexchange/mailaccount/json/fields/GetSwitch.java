@@ -89,7 +89,7 @@ public class GetSwitch implements AttributeSwitch {
 
     @Override
     public Object id() {
-        return Integer.valueOf(desc.getId());
+        return desc.getId();
     }
 
     @Override
@@ -284,11 +284,17 @@ public class GetSwitch implements AttributeSwitch {
 
     @Override
     public Object mailStartTls() {
-        return desc.isMailStartTls();
+        return Boolean.valueOf(desc.isMailStartTls());
     }
 
     @Override
     public Object transportStartTls() {
-        return desc.isTransportStartTls();
+        return Boolean.valueOf(desc.isTransportStartTls());
     }
+
+    @Override
+    public Object rootFolder() {
+        return null;
+    }
+
 }

@@ -63,6 +63,7 @@ import com.openexchange.filestore.impl.groupware.AddFilestoreColumnsToUserTable;
 import com.openexchange.filestore.impl.groupware.AddFilestoreOwnerColumnToUserTable;
 import com.openexchange.filestore.impl.groupware.AddInitialUserFilestoreUsage;
 import com.openexchange.filestore.impl.groupware.AddUserColumnToFilestoreUsageTable;
+import com.openexchange.filestore.impl.groupware.MakeQuotaMaxConsistentInUserTable;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -165,7 +166,7 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
         }
 
         // Update tasks
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilestoreColumnsToUserTable(), new AddFilestoreOwnerColumnToUserTable(), new AddUserColumnToFilestoreUsageTable(), new AddInitialUserFilestoreUsage()));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AddFilestoreColumnsToUserTable(), new AddFilestoreOwnerColumnToUserTable(), new AddUserColumnToFilestoreUsageTable(), new AddInitialUserFilestoreUsage(), new MakeQuotaMaxConsistentInUserTable()));
 
         logger.info("Bundle successfully started: {}", context.getBundle().getSymbolicName());
     }

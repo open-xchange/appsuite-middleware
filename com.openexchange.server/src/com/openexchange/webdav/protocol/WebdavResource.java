@@ -81,7 +81,15 @@ public interface WebdavResource {
 
 	WebdavPath getUrl();
 
-	WebdavProperty getProperty(String namespace, String name) throws WebdavProtocolException;
+    WebdavProperty getProperty(String namespace, String name) throws WebdavProtocolException;
+
+    /**
+     * Gets a property from the resource.
+     *
+     * @param property The requested property
+     * @return The property
+     */
+    WebdavProperty getProperty(WebdavProperty property) throws WebdavProtocolException;
 
 	Date getCreationDate() throws WebdavProtocolException;
 

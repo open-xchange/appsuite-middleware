@@ -95,6 +95,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.server.impl.DBPool;
@@ -1742,8 +1743,8 @@ public class CalendarSql implements AppointmentSQLInterface {
     public int countObjectsInFolder(int folderId) throws OXException {
         OXFolderAccess oxfa = new OXFolderAccess(Tools.getContext(session));
         int folderType = oxfa.getFolderType(folderId, session.getUserId());
-        UserConfiguration userConfiguration = Tools.getUserConfiguration(Tools.getContext(session), session.getUserId());
-        EffectivePermission folderPermission = oxfa.getFolderPermission(folderId, session.getUserId(), userConfiguration);
+        UserPermissionBits permissionBits = Tools.getUserPermissionBits(Tools.getContext(session), session.getUserId());
+        EffectivePermission folderPermission = oxfa.getFolderPermission(folderId, session.getUserId(), permissionBits);
 
         if (!folderPermission.isFolderVisible()) {
             throw OXCalendarExceptionCodes.NO_PERMISSIONS_TO_READ.create();

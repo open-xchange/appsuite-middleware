@@ -1,0 +1,27 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: object
+    properties:
+        shareToken:
+          type: string
+          description: The associated share token.
+        contextId:
+          type: integer
+          description: The originator's context identifier.
+        userId:
+          type: integer
+          description: The originator's user identifier.
+        files:
+          type: array
+          description: The file meta data.
+          items:
+            $ref: ../infostore/InfoItemData.yaml
+        password:
+          type: string
+          description: The optional password that protects the share link.
+        expiration:
+          type: integer
+          format: int64
+          description: The optional expiration date of the share link.

@@ -50,7 +50,6 @@
 package com.openexchange.mail.parser.handlers;
 
 import java.io.FileInputStream;
-import junit.framework.TestCase;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.groupware.contexts.SimContext;
@@ -58,6 +57,7 @@ import com.openexchange.groupware.ldap.SimUser;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.SimHtmlService;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MimeSmilFixer;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.parser.MailMessageParser;
@@ -66,7 +66,7 @@ import com.openexchange.mail.utils.DisplayMode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SimServerSession;
-
+import junit.framework.TestCase;
 
 /**
  * {@link JsonMessageHandlerTest}
@@ -427,6 +427,7 @@ public class JsonMessageHandlerTest extends TestCase {
         }
 
     }
+
     /**
      * Ensure that proper TNEF parsing
      */
@@ -583,4 +584,84 @@ public class JsonMessageHandlerTest extends TestCase {
         }
     }
 
+    public void testCorrectNestedMessageIdsTillLevel2() {
+        try {
+            final MailMessage mail = MimeMessageConverter.convertMessage(new FileInputStream("./test/com/openexchange/mail/parser/handlers/test_mail_46443.eml"));
+            String folder = "default0/INBOX";
+            // Preperations
+            ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
+
+            UserSettingMail usm = new UserSettingMail(1, 1);
+            usm.parseBits(627479);
+
+            ServerSession session = new SimServerSession(new SimContext(1), new SimUser(1), null);
+            JsonMessageHandler handler = new JsonMessageHandler(0, folder, DisplayMode.DISPLAY, true, session, usm, false, 0);
+
+            MailMessageParser parser = new MailMessageParser();
+            parser.parseMailMessage(mail, handler);
+
+            JSONObject jMail = handler.getJSONObject();
+            assertNotNull("Mail was not parsed.", jMail);
+
+            JSONArray nestedMessages = jMail.getJSONArray("nested_msgs");
+            assertNotNull("No nested messages were parsed", nestedMessages);
+            assertEquals("Unexpected number of nested messages", 2, nestedMessages.length());
+            
+            // First and second level nested message-id calculation correct?
+            final JSONObject nestedMessage2 = nestedMessages.getJSONObject(1);
+            assertNotNull(nestedMessage2);
+            assertEquals("False calculation of first nested message-id", "3", nestedMessage2.getString("id"));
+            assertEquals("False calculation of the second nested message-id ", "3.2", nestedMessage2.getJSONArray("nested_msgs").getJSONObject(0).get("id"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+    
+    public void testCorrectNestedMessageIdsOnLevel3To4() {
+        try {
+            final MailMessage mail = MimeMessageConverter.convertMessage(new FileInputStream("./test/com/openexchange/mail/parser/handlers/test_mail_46443.eml"));
+            String folder = "default0/INBOX";
+            // Preperations
+            ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
+
+            UserSettingMail usm = new UserSettingMail(1, 1);
+            usm.parseBits(627479);
+
+            ServerSession session = new SimServerSession(new SimContext(1), new SimUser(1), null);
+            JsonMessageHandler handler = new JsonMessageHandler(0, folder, DisplayMode.DISPLAY, true, session, usm, false, 0);
+            handler.setInitialiserSequenceId("2.2");
+            MailMessageParser parser = new MailMessageParser();
+            
+            parser.parseMailMessage(mail, handler);
+
+            JSONObject jMail = handler.getJSONObject();
+            assertNotNull("Mail was not parsed.", jMail);
+
+            JSONArray nestedMessages = jMail.getJSONArray("nested_msgs");
+            JSONArray attachments = jMail.getJSONArray("attachments");
+            
+            assertNotNull("No nested messages were parsed", nestedMessages);
+            assertEquals("Unexpected number of nested messages", 2, nestedMessages.length());
+            
+            assertNotNull("No attachments were parsed", attachments);
+            assertEquals("Unexpected number of attachments", 1, attachments.length());
+            
+            // third and fourth level nested message-id calculation correct?
+            final JSONObject nestedMessage2 = nestedMessages.getJSONObject(1);
+            assertNotNull(nestedMessage2);
+            assertEquals("False calculation of first nested message-id", "2.2.3", nestedMessage2.getString("id"));
+            assertEquals("False calculation of the second nested message-id ", "2.2.3.2", nestedMessage2.getJSONArray("nested_msgs").getJSONObject(0).get("id"));
+            // third and fourth level attachment-id calculation correct?
+            final JSONObject attachment1 = attachments.getJSONObject(0);
+            assertNotNull(attachment1);
+            assertEquals("False calculation of first attachment-id", "2.2.1", attachment1.getString("id"));
+            final JSONObject attachment2 = nestedMessage2.getJSONArray("attachments").getJSONObject(0);
+            assertNotNull(attachment2);
+            assertEquals("False calculation of second and nested attachment-id", "2.2.3.1", attachment2.getString("id"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
 }

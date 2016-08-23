@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -63,7 +63,8 @@ import org.json.JSONValue;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.Rule;
-import com.openexchange.jsieve.commands.TestCommand;
+import com.openexchange.jsieve.commands.test.ITestCommand;
+import com.openexchange.jsieve.registry.TestCommandRegistry;
 import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.mailfilter.MailFilterService.FilterType;
@@ -302,8 +303,9 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
     }
 
     private JSONArray getTestArray(final Set<String> capabilities) throws JSONException {
+        TestCommandRegistry testCommandRegistry = Services.getService(TestCommandRegistry.class);
         final JSONArray testarray = new JSONArray();
-        for (final TestCommand.Commands command : TestCommand.Commands.values()) {
+        for (final ITestCommand command : testCommandRegistry.getCommands()) {
             final JSONObject object = new JSONObject();
             if (null == command.getRequired() || capabilities.contains(command.getRequired())) {
                 final JSONArray comparison = new JSONArray();

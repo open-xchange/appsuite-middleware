@@ -63,6 +63,7 @@ import com.openexchange.java.Strings;
  */
 public class Subscription {
 
+    private String uuid;
     private String serviceID;
     private String token;
     private int contextID;
@@ -74,8 +75,9 @@ public class Subscription {
         super();
     }
 
-    public Subscription(int contextID, int userID, String serviceID, String token, String rootFolderID, long timestamp) {
+    public Subscription(String uuid, int contextID, int userID, String serviceID, String token, String rootFolderID, long timestamp) {
         super();
+        this.uuid = uuid;
         this.serviceID = serviceID;
         this.token = token;
         this.contextID = contextID;
@@ -193,6 +195,24 @@ public class Subscription {
     }
 
     /**
+     * Gets the uuid
+     *
+     * @return The uuid
+     */
+    public String getUuid() {
+        return uuid;
+    }
+
+    /**
+     * Sets the uuid
+     *
+     * @param uuid The uuid to set
+     */
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    /**
      * Gets a value indicating whether this subscription's push registration token matches the supplied token value, trying to match
      * either the token itself or the md5 checksum of the token.
      *
@@ -219,7 +239,7 @@ public class Subscription {
 
     @Override
     public String toString() {
-        return "Subscription [serviceID=" + serviceID + ", token=" + token + ", contextID=" + contextID + ", userID=" + userID + ", rootFolderID=" + rootFolderID + ", timestamp=" + timestamp + "]";
+        return "Subscription [uuid=" + uuid + ", serviceID=" + serviceID + ", token=" + token + ", contextID=" + contextID + ", userID=" + userID + ", rootFolderID=" + rootFolderID + ", timestamp=" + timestamp + "]";
     }
 
 }

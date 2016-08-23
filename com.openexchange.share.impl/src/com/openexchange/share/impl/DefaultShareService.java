@@ -229,7 +229,7 @@ public class DefaultShareService implements ShareService {
     @Override
     public CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException {
         ShareTool.validateTarget(target);
-        LOG.info("Adding share target {} for recipients {} in context {}...", target, recipients, I(session.getContextId()));
+        LOG.info("Configuring accounts for {} at {} in context {}...", recipients, target, I(session.getContextId()));
         Map<ShareRecipient, ShareInfo> sharesByRecipient = new HashMap<ShareRecipient, ShareInfo>(recipients.size());
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
@@ -256,7 +256,7 @@ public class DefaultShareService implements ShareService {
              */
             checkQuota(session, connectionHelper, sharesInfos);
             connectionHelper.commit();
-            LOG.info("Share target {} for recipients {} in context {} added successfully.", target, recipients, I(session.getContextId()));
+            LOG.info("Accounts at {} in context {} configured: {}", target, I(session.getContextId()), sharesByRecipient.values());
             return new CreatedSharesImpl(sharesByRecipient);
         } finally {
             connectionHelper.finish();
@@ -1083,7 +1083,7 @@ public class DefaultShareService implements ShareService {
              * create new anonymous recipient for this target
              */
             AnonymousRecipient recipient = new AnonymousRecipient(LINK_PERMISSION_BITS, null, null);
-            LOG.info("Adding new share link to target {} for recipient {} in context {}...", target, recipient, I(session.getContextId()));
+            LOG.info("Adding new share link to {} for {} in context {}...", target, recipient, I(session.getContextId()));
             ShareInfo shareInfo = prepareShare(connectionHelper, session, recipient, target);
             checkQuota(session, connectionHelper, Collections.singletonList(shareInfo));
             /*
@@ -1096,7 +1096,7 @@ public class DefaultShareService implements ShareService {
              */
             targetUpdate.run();
             connectionHelper.commit();
-            LOG.info("Share link to target {} for recipient {} in context {} added successfully.", target, recipient, I(session.getContextId()));
+            LOG.info("Share link to {} for {} in context {} added successfully.", target, recipient, I(session.getContextId()));
             Date timestamp = moduleSupport.load(target, session).getTimestamp();
             return new DefaultShareLink(shareInfo, timestamp, true);
         } finally {

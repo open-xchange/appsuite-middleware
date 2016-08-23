@@ -212,7 +212,7 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
             };
 
             if (doPerformAsynchronously(arguments)) {
-                // Execute asynchronously; as a new connection is supposed to be fetched and no error should be signalled; thus "fire & forget"
+                // Execute asynchronously; as a new connection is supposed to be fetched and no error should be signaled; thus "fire & forget"
                 ThreadPools.submitElseExecute(task);
             } else {
                 task.call();

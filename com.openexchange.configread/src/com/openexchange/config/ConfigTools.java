@@ -49,6 +49,7 @@
 
 package com.openexchange.config;
 
+import java.util.Arrays;
 import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
@@ -145,6 +146,41 @@ public class ConfigTools {
         } catch (final NumberFormatException e) {
             return defaultValue;
         }
+    }
+
+    /**
+     * Parses a byte value including an optional unit, where the unit can be one of <code>B</code>, <code>kB</code>,
+     * <code>MB</code>, <code>GB</code>, or <code>TB</code>, ignoring case.
+     *
+     * @param value The value to parse, e.g. <code>10 MB</code> or <code>17.5kB</code>
+     * @return The parsed number in bytes
+     * @throws NumberFormatException If the supplied string is not parsable or greater then <code>Long.MAX_VALUE</code>
+     */
+    public static long parseBytes(String value) throws NumberFormatException {
+        StringBuilder numberBuilder = new StringBuilder(8);
+        StringBuilder unitbuilder = new StringBuilder(4);
+        for (int i = 0; i < value.length(); i++) {
+            char c = value.charAt(i);
+            if (Character.isDigit(c) || '.' == c || '-' == c) {
+                numberBuilder.append(c);
+            } else if (false == Character.isWhitespace(c)) {
+                unitbuilder.append(c);
+            }
+        }
+        double number = Double.parseDouble(numberBuilder.toString());
+        if (0 < unitbuilder.length()) {
+            String unit = unitbuilder.toString().toUpperCase();
+            int exp = Arrays.asList("B", "KB", "MB", "GB", "TB").indexOf(unit);
+            if (0 <= exp) {
+                number *= Math.pow(1024, exp);
+            } else {
+                throw new NumberFormatException(value);
+            }
+        }
+        if (Long.MAX_VALUE >= number) {
+            return (long) number;
+        }
+        throw new NumberFormatException(value);
     }
 
 }

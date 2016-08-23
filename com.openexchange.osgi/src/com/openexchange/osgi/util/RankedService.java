@@ -60,6 +60,37 @@ import org.osgi.framework.ServiceReference;
 public final class RankedService<S> implements Comparable<RankedService<S>> {
 
     /**
+     * Creates a new <code>RankedService</code> instance wrapping specified service using default ranking of <code>0</code> (zero).
+     * <p>
+     * Specified <code>ServiceReference</code> is used to determine <code>"service.ranking"</code> property.<br>
+     * See {@link Constants#SERVICE_RANKING}.
+     *
+     * @param reference The service reference to determine service ranking
+     * @param service The service instance
+     * @return The newly created ranked service
+     */
+    public static <S> RankedService<S> newRankedService(ServiceReference<S> reference, S service) {
+        return newRankedService(reference, service, 0);
+    }
+
+    /**
+     * Creates a new <code>RankedService</code> instance wrapping specified service using given default ranking.
+     * <p>
+     * Specified <code>ServiceReference</code> is used to determine <code>"service.ranking"</code> property.<br>
+     * See {@link Constants#SERVICE_RANKING}.
+     *
+     * @param reference The service reference to determine service ranking
+     * @param service The service instance
+     * @param defaultRanking The default ranking to use
+     * @return The newly created ranked service
+     */
+    public static <S> RankedService<S> newRankedService(ServiceReference<S> reference, S service, int defaultRanking) {
+        return new RankedService<S>(service, getRanking(reference, defaultRanking));
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
+    /**
      * The service.
      */
     public final S service;

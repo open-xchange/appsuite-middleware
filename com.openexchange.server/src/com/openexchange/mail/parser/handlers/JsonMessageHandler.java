@@ -151,7 +151,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String VIRTUAL = "___VIRTUAL___";
     private static final String MULTIPART_ID = "___MP-ID___";
 
-    private static final int DEFAULT_MAX_NESTED_MESSAGES_LEVELS = 10;
+//    private static final int DEFAULT_MAX_NESTED_MESSAGES_LEVELS = 10;
 
     private static final class PlainTextContent {
 
@@ -231,7 +231,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private String altId;
     private boolean textAppended;
     private boolean textWasEmpty;
-    private boolean html;
     private final boolean[] modified;
     private PlainTextContent plainText;
     private String tokenFolder;
@@ -245,6 +244,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private final int maxContentSize;
     private int currentNestingLevel = 0;
     private final int maxNestedMessageLevels;
+    private String initialiserSequenceId;
 
     /**
      * Initializes a new {@link JsonMessageHandler}
@@ -355,6 +355,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 jsonObject.put(SIZE, mail.getSize());
                 jsonObject.put(ACCOUNT_NAME, mail.getAccountName());
                 jsonObject.put(ACCOUNT_ID, mail.getAccountId());
+                this.initialiserSequenceId = mail.getSequenceId();
+
 
                 String originalId = null;
                 if (mail.containsOriginalId()) {
@@ -411,6 +413,14 @@ public final class JsonMessageHandler implements MailMessageHandler {
     public JsonMessageHandler setIncludePlainText(final boolean includePlainText) {
         this.includePlainText = includePlainText;
         return this;
+    }
+
+    public String getInitialiserSequenceId() {
+        return initialiserSequenceId;
+    }
+
+    public void setInitialiserSequenceId(String initialiserSequenceId) {
+        this.initialiserSequenceId = initialiserSequenceId;
     }
 
     private AttachmentListing getAttachmentListing() {
@@ -929,7 +939,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
-            html = true;
             textAppended = true;
         }
         return true;
@@ -1014,7 +1023,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     }
                     getAttachmentListing().add(jsonObject);
                 }
-                html = false;
                 textAppended = true;
                 return true;
             }
@@ -1094,7 +1102,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     textObject.put("plain_text", plainTextContentArg);
                 }
                 textAppended = true;
-                html = false;
                 textWasEmpty = (null == sanitizeResult.getContent() || 0 == sanitizeResult.getContent().length());
             }
             return true;
@@ -1205,6 +1212,9 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 int len = jAttachments.length();
                 for (int i = 0; i < len; i++) {
                     JSONObject jAttachment = jAttachments.getJSONObject(i);
+                    if (this.initialiserSequenceId != null) {
+                        jAttachment.put(ID, this.initialiserSequenceId + "." + jAttachment.getString(ID));
+                    }
                     jAttachment.remove(MULTIPART_ID);
                     if (jAttachment.hasAndNotNull(dispKey) && Part.ATTACHMENT.equalsIgnoreCase(jAttachment.getString(dispKey))) {
                         if (jAttachment.hasAndNotNull(VIRTUAL) && jAttachment.getBoolean(VIRTUAL)) {
@@ -1268,6 +1278,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     @Override
     public boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException {
+
+        String nestedMessageFullId = "";
         try {
             JSONObject nestedObject;
             if (currentNestingLevel < maxNestedMessageLevels) {
@@ -1288,16 +1300,28 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 msgHandler.exactLength = exactLength;
                 // msgHandler.originalMailPath = originalMailPath;
                 msgHandler.currentNestingLevel = currentNestingLevel + 1;
+                if (this.initialiserSequenceId != null) {
+                    nestedMessageFullId = this.initialiserSequenceId + "." + id;
+                    msgHandler.setInitialiserSequenceId(initialiserSequenceId);
+                }
                 new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
                 nestedObject = msgHandler.getJSONObject();
+                if (nestedMessageFullId.length() != 0) {
+                    nestedObject.put(ID, nestedMessageFullId);
+                }
             } else {
                 // Only basic information
                 nestedObject = new JSONObject(3);
+
             }
             /*
              * Sequence ID
              */
-            nestedObject.put(ID, mailPart.containsSequenceId() ? mailPart.getSequenceId() : id);
+            if (!nestedObject.has(ID) && this.initialiserSequenceId == null) {
+                nestedObject.put(ID, mailPart.containsSequenceId() ? mailPart.getSequenceId() : id);
+            } else if (this.initialiserSequenceId != null && this.initialiserSequenceId.length() != 0) {
+                nestedObject.put(ID, this.initialiserSequenceId + "." + id);
+            }
             /*
              * Filename (if present)
              */

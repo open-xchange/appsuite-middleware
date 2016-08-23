@@ -49,10 +49,7 @@
 
 package com.openexchange.dav;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -63,8 +60,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HeaderElement;
+import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpMethodBase;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -143,9 +142,27 @@ public abstract class WebDAVTest {
     public String authMethod;
 
     protected static Iterable<Object[]> availableAuthMethods() {
-        List<Object[]> authMethods = new ArrayList<>(2);
-        authMethods.add(new Object[] { AUTH_METHOD_BASIC });
-        authMethods.add(new Object[] { AUTH_METHOD_OAUTH });
+        List<Object[]> authMethods = new ArrayList<Object[]>(2);
+        PropFindMethod propFind = null;
+        try {
+            AJAXConfig.init();
+            DavPropertyNameSet props = new DavPropertyNameSet();
+            props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
+            propFind = new PropFindMethod(Config.getBaseUri() + '/', DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
+            if (HttpServletResponse.SC_UNAUTHORIZED == new HttpClient().executeMethod(propFind)) {
+                for (Header header : propFind.getResponseHeaders("WWW-Authenticate")) {
+                    if (header.getValue().startsWith("Bearer")) {
+                        authMethods.add(new Object[] { AUTH_METHOD_OAUTH });
+                    } else if (header.getValue().startsWith("Basic")) {
+                        authMethods.add(new Object[] { AUTH_METHOD_BASIC });
+                    }
+                }
+            }
+        } catch (OXException | IOException e) {
+            fail(e.getMessage());
+        } finally {
+            release(propFind);
+        }
         return authMethods;
     }
 
@@ -172,7 +189,7 @@ public abstract class WebDAVTest {
     }
 
     protected boolean testOAuth() {
-        return "OAuth".equals(authMethod);
+        return AUTH_METHOD_OAUTH.equals(authMethod);
     }
 
     @AfterClass

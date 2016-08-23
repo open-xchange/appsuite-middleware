@@ -62,13 +62,11 @@ public class FullName {
     /** A full name's type */
     public static enum Type {
         /** The virtual attachment folder containing all attachments */
-        ALL("all"),
+        ALL(FileStorageFolder.ROOT_FULLNAME),
         /** The virtual attachment folder containing received attachments */
         RECEIVED("received"),
         /** The virtual attachment folder containing sent attachments */
-        SENT("sent"),
-        /** The default folder */
-        DEFAULT(FileStorageFolder.ROOT_FULLNAME);
+        SENT("sent");
 
         private final String folderId;
 
@@ -128,7 +126,7 @@ public class FullName {
      * @return <code>true</code> if full name denotes the default folder; otherwise <code>false</code>
      */
     public boolean isDefaultFolder() {
-        return 0 == fullName.length();
+        return Type.ALL.equals(type);
     }
 
     /**

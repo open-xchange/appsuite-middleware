@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -83,7 +84,8 @@ public interface ResponseRenderer {
      * @param result The result
      * @param httpReq The HTTP request
      * @param httpResp The HTTP response
+     * @throws IOException If an I/O error occurs
      */
-    public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest httpReq, HttpServletResponse httpResp);
+    public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest httpReq, HttpServletResponse httpResp) throws IOException;
 
 }

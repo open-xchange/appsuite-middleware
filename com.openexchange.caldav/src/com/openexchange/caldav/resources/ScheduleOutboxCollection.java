@@ -83,6 +83,7 @@ import com.openexchange.folderstorage.DefaultPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.freebusy.FreeBusyData;
+import com.openexchange.freebusy.service.FreeBusyService;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.webdav.protocol.Protocol;
@@ -170,7 +171,7 @@ public class ScheduleOutboxCollection extends DAVCollection {
                 String[] resolvedAttendees = resolveCalendarUsers(requestedAttendees);
                 Map<String, FreeBusyData> freeBusy = null;
                 try {
-                    freeBusy = factory.getFreeBusyService().getMergedFreeBusy(factory.getSession(),
+                    freeBusy = factory.requireService(FreeBusyService.class).getMergedFreeBusy(factory.getSession(),
                         Arrays.asList(resolvedAttendees), freeBusyInformation.getStartDate(), freeBusyInformation.getEndDate());
                 } catch (OXException e) {
                     LOG.error("error getting free/busy information", e);

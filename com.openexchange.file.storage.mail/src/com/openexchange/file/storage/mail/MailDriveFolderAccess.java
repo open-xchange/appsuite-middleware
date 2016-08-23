@@ -74,8 +74,9 @@ public final class MailDriveFolderAccess extends AbstractMailDriveResourceAccess
      *
      * @param fullNameCollection The collection of valid full names
      * @param session The associated session
+     * @throws OXException If initialization fails
      */
-    public MailDriveFolderAccess(FullNameCollection fullNameCollection, Session session) {
+    public MailDriveFolderAccess(FullNameCollection fullNameCollection, Session session) throws OXException {
         super(fullNameCollection, session);
         userId = session.getUserId();
     }
@@ -126,14 +127,16 @@ public final class MailDriveFolderAccess extends AbstractMailDriveResourceAccess
 
         List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>(4);
         for (FullName fn : fullNameCollection) {
-            folders.add(parsedFolder(fn));
+            if (!FullName.Type.ALL.equals(fn.getType())) {
+                folders.add(parsedFolder(fn));
+            }
         }
         return folders.toArray(new FileStorageFolder[folders.size()]);
     }
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        return parsedFolder(fullNameCollection.getFullNameFor(FullName.Type.DEFAULT));
+        return parsedFolder(fullNameCollection.getFullNameFor(FullName.Type.ALL));
     }
 
     @Override
@@ -200,7 +203,7 @@ public final class MailDriveFolderAccess extends AbstractMailDriveResourceAccess
 
         List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>(3);
         folders.add(parsedFolder(fullName));
-        folders.add(parsedFolder(fullNameCollection.getFullNameFor(FullName.Type.DEFAULT)));
+        folders.add(parsedFolder(fullNameCollection.getFullNameFor(FullName.Type.ALL)));
         return folders.toArray(new FileStorageFolder[folders.size()]);
     }
 

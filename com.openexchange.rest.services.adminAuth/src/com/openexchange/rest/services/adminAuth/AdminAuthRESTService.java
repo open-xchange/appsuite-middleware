@@ -59,6 +59,8 @@ import org.json.JSONObject;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.auth.Credentials;
 import com.openexchange.exception.OXException;
+import com.openexchange.rest.services.annotation.Role;
+import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -69,14 +71,15 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  * @since 7.8.0
  */
-@Path("/adminproc/v1")
+@Path("/preliminary/adminproc/v1")
+@RoleAllowed(Role.BASIC_AUTHENTICATED)
 public class AdminAuthRESTService {
 
-    private ServiceLookup services;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link AdminAuthRESTService}.
-     * 
+     *
      * @param services
      */
     public AdminAuthRESTService(ServiceLookup services) {
@@ -124,7 +127,7 @@ public class AdminAuthRESTService {
             return new JSONObject(2).putSafe("result", Boolean.FALSE);
         }
     }
-    
+
     Credentials createCredentials(String login, String password) {
         return new Credentials(login, password);
     }

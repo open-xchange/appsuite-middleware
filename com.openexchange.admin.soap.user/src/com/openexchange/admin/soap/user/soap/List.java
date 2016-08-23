@@ -23,6 +23,8 @@ import com.openexchange.admin.soap.user.dataobjects.Credentials;
  *         &lt;element name="ctx" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Context" minOccurs="0"/>
  *         &lt;element name="search_pattern" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="auth" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}Credentials" minOccurs="0"/>
+ *         &lt;element name="include_guests" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
+ *         &lt;element name="exclude_users" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -35,7 +37,9 @@ import com.openexchange.admin.soap.user.dataobjects.Credentials;
 @XmlType(name = "", propOrder = {
     "ctx",
     "searchPattern",
-    "auth"
+    "auth",
+    "includeGuests",
+    "excludeUsers"
 })
 @XmlRootElement(name = "list")
 public class List {
@@ -46,6 +50,11 @@ public class List {
     protected String searchPattern;
     @XmlElement(nillable = true)
     protected Credentials auth;
+    @XmlElement(name = "include_guests", nillable = true)
+    protected Boolean includeGuests;
+    @XmlElement(name = "exclude_users", nillable = true)
+    protected Boolean excludeUsers;
+    
 
     /**
      * Ruft den Wert der ctx-Eigenschaft ab.
@@ -117,6 +126,26 @@ public class List {
      */
     public void setAuth(Credentials value) {
         this.auth = value;
+    }
+
+    
+    public Boolean getIncludeGuests() {
+        return includeGuests;
+    }
+
+    
+    public void setIncludeGuests(Boolean includeGuests) {
+        this.includeGuests = includeGuests;
+    }
+
+    
+    public Boolean getExcludeUsers() {
+        return excludeUsers;
+    }
+
+    
+    public void setExcludeUsers(Boolean excludeUsers) {
+        this.excludeUsers = excludeUsers;
     }
 
 }

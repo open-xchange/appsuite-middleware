@@ -104,5 +104,6 @@ public interface AttributeSwitch {
     public Object transportAuth();
     public Object mailStartTls();
     public Object transportStartTls();
+    public Object rootFolder();
 
 }

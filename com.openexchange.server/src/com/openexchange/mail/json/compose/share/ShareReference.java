@@ -49,12 +49,14 @@
 
 package com.openexchange.mail.json.compose.share;
 
+import static com.openexchange.mail.json.compose.share.ShareComposeConstants.HEADER_SHARE_REFERENCE;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -66,6 +68,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.utils.MailPasswordUtil;
 
 /**
  * {@link ShareReference} - References shared folder/items.
@@ -74,6 +78,9 @@ import com.openexchange.java.Strings;
  * @since v7.8.2
  */
 public class ShareReference {
+
+    /** The key. */
+    private static final Key KEY = MailPasswordUtil.generateSecretKey(Charsets.toAsciiBytes("jsonkeyp"));
 
     /**
      * Parses a <code>ShareReference</code> from specified reference string.
@@ -88,7 +95,7 @@ public class ShareReference {
         }
 
         try {
-            JSONObject jReference = new JSONObject(decompress(referenceString));
+            JSONObject jReference = new JSONObject(MailPasswordUtil.decrypt(referenceString, KEY));
             List<Item> items;
             {
                 JSONArray jItems = jReference.getJSONArray("items");
@@ -102,8 +109,8 @@ public class ShareReference {
             if (jReference.hasAndNotNull("expiration")) {
                 expiration = new Date(jReference.getLong("expiration"));
             }
-            return new ShareReference(jReference.getString("shareUrl"), items, parseItemFrom(jReference.getJSONObject("folder")), expiration, jReference.getInt("userId"), jReference.getInt("contextId"));
-        } catch (java.util.zip.ZipException e) {
+            return new ShareReference(jReference.getString("shareToken"), items, parseItemFrom(jReference.getJSONObject("folder")), expiration, jReference.optString("password", null), jReference.getInt("userId"), jReference.getInt("contextId"));
+        } catch (java.security.GeneralSecurityException e) {
             // A GZIP format error has occurred or the compression method used is unsupported
             throw new IllegalArgumentException("Invalid reference string", e);
         } catch (RuntimeException e) {
@@ -112,6 +119,39 @@ public class ShareReference {
             // Cannot occur
             throw new IllegalStateException(e);
         }
+    }
+
+    /**
+     * Generates a string from specified share reference suitable to be set as header value for a MIME message.
+     *
+     * @param shareReference The share reference
+     * @return The pure folded header value
+     */
+    public static String generateStringForMime(ShareReference shareReference) {
+        if (null == shareReference) {
+            return null;
+        }
+
+        String str = shareReference.generateReferenceString();
+        String splitted = split4Mime(str);
+        String folded = MimeMessageUtility.fold(USED, splitted);
+        return folded;
+    }
+
+    /**
+     * Parses the share reference taken as header value from a MIME message.
+     *
+     * @param fromMime The pure folded header value
+     * @return The parsed share reference
+     */
+    public static ShareReference parseFromMime(String fromMime) {
+        if (null == fromMime) {
+            return null;
+        }
+
+        String unfolded = MimeMessageUtility.unfold(fromMime);
+        String unsplitted = unsplit(unfolded);
+        return ShareReference.parseFromReferenceString(unsplitted);
     }
 
     private static Item parseItemFrom(JSONObject jItem) throws JSONException {
@@ -132,8 +172,9 @@ public class ShareReference {
         private final int userId;
         private Item folder;
         private List<Item> items;
-        private String shareUrl;
+        private String shareToken;
         private Date expiration;
+        private String password;
 
         /**
          * Initializes a new {@link Builder}.
@@ -170,13 +211,13 @@ public class ShareReference {
         }
 
         /**
-         * Sets the share URL
+         * Sets the share token
          *
-         * @param shareUrl The share URL
+         * @param shareToken The share token
          * @return This builder instance
          */
-        public Builder shareUrl(String shareUrl) {
-            this.shareUrl = shareUrl;
+        public Builder shareToken(String shareToken) {
+            this.shareToken = shareToken;
             return this;
         }
 
@@ -192,12 +233,23 @@ public class ShareReference {
         }
 
         /**
+         * Sets the password
+         *
+         * @param password The password
+         * @return This builder instance
+         */
+        public Builder password(String password) {
+            this.password = password;
+            return this;
+        }
+
+        /**
          * Creates the appropriate {@code ShareReference} instance according to this builder's arguments.
          *
          * @return The {@code ShareReference} instance
          */
         public ShareReference build() {
-            return new ShareReference(shareUrl, items, folder, expiration, userId, contextId);
+            return new ShareReference(shareToken, items, folder, expiration, password, userId, contextId);
         }
     }
 
@@ -207,24 +259,28 @@ public class ShareReference {
     private final int userId;
     private final Item folder;
     private final List<Item> items;
-    private final String shareUrl;
+    private final String shareToken;
     private final Date expiration;
+    private final String password;
 
     /**
      * Initializes a new {@link ShareReference}.
      *
-     * @param shareUrl The associated share URL
+     * @param shareToken The associated share token
      * @param items The shared files
      * @param folder The folder containing the files
+     * @param expiration The optional expiration date
+     * @param password The optional password
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    private ShareReference(String shareUrl, List<Item> items, Item folder, Date expiration, int userId, int contextId) {
+    ShareReference(String shareToken, List<Item> items, Item folder, Date expiration, String password, int userId, int contextId) {
         super();
-        this.shareUrl = shareUrl;
+        this.shareToken = shareToken;
         this.items = items;
         this.folder = folder;
         this.expiration = expiration;
+        this.password = password;
         this.userId = userId;
         this.contextId = contextId;
     }
@@ -266,12 +322,12 @@ public class ShareReference {
     }
 
     /**
-     * Gets the share URL
+     * Gets the share token
      *
-     * @return The share URL
+     * @return The share token
      */
-    public String getShareUrl() {
-        return shareUrl;
+    public String getShareToken() {
+        return shareToken;
     }
 
     /**
@@ -284,6 +340,15 @@ public class ShareReference {
     }
 
     /**
+     * Gets the optional password
+     *
+     * @return The password or <code>null</code>
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
      * Generates the reference string.
      *
      * @return The reference string
@@ -291,7 +356,7 @@ public class ShareReference {
     public String generateReferenceString() {
         try {
             JSONObject jReference = new JSONObject(8);
-            jReference.put("shareUrl", shareUrl);
+            jReference.put("shareToken", shareToken);
             jReference.put("contextId", contextId);
             jReference.put("userId", userId);
             jReference.put("folder", new JSONObject(2).put("id", folder.getId()).put("name", folder.getName()));
@@ -302,7 +367,13 @@ public class ShareReference {
                 }
                 jReference.put("items", jItems);
             }
-            return compress(jReference.toString());
+            if (null != expiration) {
+                jReference.put("expiration", expiration.getTime());
+            }
+            if (null != password) {
+                jReference.put("password", password);
+            }
+            return MailPasswordUtil.encrypt(jReference.toString(), KEY);
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
@@ -314,20 +385,23 @@ public class ShareReference {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(64);
-        sb.append("[contextId=").append(contextId).append(", userId=").append(userId).append(", ");
+        sb.append("[contextId=").append(contextId).append(", userId=").append(userId);
         if (folder != null) {
-            sb.append("folder=").append(folder).append(", ");
+            sb.append(", folder=").append(folder);
         }
         if (items != null) {
-            sb.append("items=").append(items).append(", ");
+            sb.append(", items=").append(items);
         }
-        if (shareUrl != null) {
-            sb.append("shareUrl=").append(shareUrl).append(", ");
+        if (shareToken != null) {
+            sb.append(", shareToken=").append(shareToken);
         }
         if (expiration != null) {
-            sb.append("expiration=").append(expiration);
+            sb.append(", expiration=").append(expiration);
         }
-        sb.append("]");
+        if (password != null) {
+            sb.append(", password=").append(password);
+        }
+        sb.append(']');
         return sb.toString();
     }
 
@@ -351,6 +425,44 @@ public class ShareReference {
             outStr.append(cbuf, 0, read);
         }
         return outStr.toString();
+    }
+
+    private static String unsplit(String s) {
+        int length = s.length();
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0, k = length; k-- > 0; i++) {
+            char c = s.charAt(i);
+            if (' ' != c) {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+
+    private static final int USED = HEADER_SHARE_REFERENCE.length() + 2;
+
+    private static String split4Mime(String s) {
+        int chunkSize = 76;
+        int length = s.length();
+        if (length <= chunkSize) {
+            return s;
+        }
+
+        StringBuilder sb = new StringBuilder(length + 16);
+        boolean first = true;
+        for (int i = 0; i < length;) {
+            if (first) {
+                first = false;
+                int cs = chunkSize - USED;
+                sb.append(s.substring(i, Math.min(length, i + cs)));
+                i += cs;
+            } else {
+                sb.append(' ');
+                sb.append(s.substring(i, Math.min(length, i + chunkSize)));
+                i += chunkSize;
+            }
+        }
+        return sb.toString();
     }
 
 }

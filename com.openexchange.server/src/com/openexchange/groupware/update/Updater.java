@@ -61,19 +61,22 @@ import com.openexchange.groupware.update.internal.UpdaterImpl;
 public abstract class Updater {
 
     /**
-     * Default constructor.
-     */
-    protected Updater() {
-        super();
-    }
-
-    /**
      * Factory method to get an updater.
+     *
      * @return the updater.
      * @throws OXException if instantiating the implementation fails.
      */
     public static Updater getInstance() {
-        return new UpdaterImpl();
+        return UpdaterImpl.getInstance();
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Default constructor.
+     */
+    protected Updater() {
+        super();
     }
 
     public final UpdateStatus getStatus(final Context ctx) throws OXException {
@@ -83,6 +86,16 @@ public abstract class Updater {
     public abstract UpdateStatus getStatus(int contextId) throws OXException;
 
     public abstract UpdateStatus getStatus(String schema, int writePoolId) throws OXException;
+
+    /**
+     * Unblocks specified schema (if updating for too long)
+     *
+     * @param schemaName The schema name
+     * @param poolId The pool identifier
+     * @param contextId The context identifier
+     * @throws OXException If unblocking fails
+     */
+    public abstract void unblock(String schemaName, int poolId, int contextId) throws OXException;
 
     /**
      * Starts the update process on a schema.

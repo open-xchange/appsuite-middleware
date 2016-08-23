@@ -93,6 +93,7 @@ import org.apache.james.mime4j.storage.ThresholdStorageProvider;
 import org.apache.james.mime4j.stream.RawFieldParser;
 import org.apache.james.mime4j.util.ByteArrayBuffer;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
@@ -177,7 +178,7 @@ public final class MimeMessageDataSource implements DataSource, CleanUp {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
+            public Interests getInterests() {
                 return null;
             }
         });

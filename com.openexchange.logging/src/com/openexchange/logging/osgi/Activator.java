@@ -51,9 +51,7 @@ package com.openexchange.logging.osgi;
 
 import java.net.URL;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -63,8 +61,12 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
+import com.openexchange.logging.LogLevelService;
 import com.openexchange.logging.filter.RankingAwareTurboFilterList;
+import com.openexchange.logging.internal.LogLevelServiceImpl;
 import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
 import com.openexchange.management.ManagementService;
 import ch.qos.logback.classic.Level;
@@ -86,13 +88,11 @@ import ch.qos.logback.core.status.StatusManager;
  */
 public class Activator implements BundleActivator, Reloadable {
 
-    protected static final String LOGIN_PERFORMER = "com.openexchange.login.internal.LoginPerformer";
-    protected static final String SESSION_HANDLER = "com.openexchange.sessiond.impl.SessionHandler";
-    private static final String CONFIGFILE = "logback.xml";
-    private static final String[] PROPERTIES = new String[] { "all properties in file" };
-
     /** The logger */
     protected static Logger LOGGER = LoggerFactory.getLogger(Activator.class);
+
+    protected static final String LOGIN_PERFORMER = "com.openexchange.login.internal.LoginPerformer";
+    protected static final String SESSION_HANDLER = "com.openexchange.sessiond.impl.SessionHandler";
 
     // ----------------------------------------------------------------------------------- //
 
@@ -101,6 +101,7 @@ public class Activator implements BundleActivator, Reloadable {
     private volatile RankingAwareTurboFilterList rankingAwareTurboFilterList;
     private volatile ServiceRegistration<IncludeStackTraceService> includeStackTraceServiceRegistration;
     private ServiceRegistration<Reloadable> reloadable;
+    private ServiceRegistration<LogLevelService> logLevelService;
 
     /*
      * Do not implement HousekeepingActivator, track services if you need them!
@@ -130,7 +131,7 @@ public class Activator implements BundleActivator, Reloadable {
             }
         }
 
-        // Initialisation stuff for JUL/JCL bridges
+        // Initialization stuff for JUL/JCL bridges
         configureJavaUtilLogging();
         overrideLoggerLevels(loggerContext);
         installJulLevelChangePropagator(loggerContext);
@@ -144,6 +145,8 @@ public class Activator implements BundleActivator, Reloadable {
         registerExceptionCategoryFilter(context, rankingAwareTurboFilterList, serviceImpl);
         registerIncludeStackTraceService(serviceImpl, context);
         reloadable = context.registerService(Reloadable.class, this, null);
+
+        logLevelService = context.registerService(LogLevelService.class, new LogLevelServiceImpl(), null);
     }
 
     @Override
@@ -180,6 +183,11 @@ public class Activator implements BundleActivator, Reloadable {
         if (null != reloadable) {
             reloadable.unregister();
             reloadable = null;
+        }
+
+        if (logLevelService != null) {
+            logLevelService.unregister();
+            logLevelService = null;
         }
     }
 
@@ -245,7 +253,7 @@ public class Activator implements BundleActivator, Reloadable {
 
     /**
      * Initialise the {@link RankingAwareTurboFilterList} and register itself acting as a turbo filter
-     * 
+     *
      * @param loggerContext The {@link LoggerContext}
      */
     private void initialiseRankingAwareTurboFilterList(LoggerContext loggerContext) {
@@ -272,7 +280,7 @@ public class Activator implements BundleActivator, Reloadable {
 
     /**
      * Register the exception category filter
-     * 
+     *
      * @param context The bundle context
      * @param turboFilterList The ranking aware turbo filter list
      * @param serviceImpl The include stack trace service
@@ -286,7 +294,7 @@ public class Activator implements BundleActivator, Reloadable {
 
     /**
      * Register the include stacktrace service
-     * 
+     *
      * @param serviceImpl The implementation
      * @param context The bundle context
      */
@@ -294,11 +302,8 @@ public class Activator implements BundleActivator, Reloadable {
         includeStackTraceServiceRegistration = context.registerService(IncludeStackTraceService.class, serviceImpl, null);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
-     */
+    // ------------------------------------------------- Reloadable stuff ------------------------------------------------------------
+
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -323,16 +328,9 @@ public class Activator implements BundleActivator, Reloadable {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.config.Reloadable#getConfigfileNames()
-     */
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
+    public Interests getInterests() {
+        return Reloadables.interestsForFiles("logback.xml");
     }
 
 }

@@ -466,8 +466,10 @@ public class DispatcherServlet extends SessionServlet {
             }
         } catch (UploadException e) {
             exc = e;
-            if (UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e)) {
+            boolean forceJSON = AJAXRequestDataTools.parseBoolParameter(httpRequest.getParameter("force_json_response"));
+            if (!forceJSON && (UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e))) {
                 // An upload failed
+
                 if (null == session || !Client.OX6_UI.getClientId().equals(session.getClient())) {
                     httpResp.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getDisplayMessage(getLocaleFrom(session, Locale.US)));
                     logException(e, LogLevel.DEBUG, HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
@@ -720,8 +722,9 @@ public class DispatcherServlet extends SessionServlet {
      * @param result The AJAX request result
      * @param httpRequest The associated HTTP Servlet request
      * @param httpResponse The associated HTTP Servlet response
+     * @throws IOException If an I/O error occurs
      */
-    protected static void sendResponse(AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+    protected static void sendResponse(AJAXRequestData requestData, AJAXRequestResult result, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         List<ResponseRenderer> responseRenderers = RESPONSE_RENDERERS.get();
         Iterator<ResponseRenderer> iter = responseRenderers.iterator();
         for (int i = responseRenderers.size(); i-- > 0;) {

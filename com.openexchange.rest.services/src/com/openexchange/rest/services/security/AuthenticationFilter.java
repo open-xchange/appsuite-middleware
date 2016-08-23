@@ -50,8 +50,13 @@
 package com.openexchange.rest.services.security;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.security.Principal;
+import java.util.Arrays;
 import javax.annotation.Priority;
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
@@ -65,6 +70,8 @@ import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.java.Strings;
+import com.openexchange.rest.services.annotation.Role;
+import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
 
 
@@ -88,11 +95,9 @@ public class AuthenticationFilter implements ContainerRequestFilter {
     @Context
     private ResourceInfo resourceInfo;
 
-    private boolean doFail;
-
-    private String authLogin;
-
-    private String authPassword;
+    private final boolean doFail;
+    private final String authLogin;
+    private final String authPassword;
 
     public AuthenticationFilter(String authLogin, String authPassword) {
         super();
@@ -107,26 +112,115 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         }
     }
 
+    private <A extends Annotation> A getAnnotation(Class<A> annotationClass) {
+        A annotation = resourceInfo.getResourceMethod().getAnnotation(annotationClass);
+        if (null != annotation) {
+            return annotation;
+        }
+        annotation = resourceInfo.getResourceClass().getAnnotation(annotationClass);
+        if (null != annotation) {
+            return annotation;
+        }
+        return null;
+    }
+
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
+        // Check if all is permitted
+        {
+            PermitAll permitAll = getAnnotation(PermitAll.class);
+            if (null != permitAll) {
+                grant(requestContext);
+                return;
+            }
+        }
+
+        // Check for a certain role
+        {
+            RoleAllowed roleAllowed = getAnnotation(RoleAllowed.class);
+            if (null != roleAllowed) {
+                Role role = roleAllowed.value();
+                if (Role.BASIC_AUTHENTICATED == role) {
+                    basicAuth(requestContext);
+                    return;
+                }
+
+                // Role unknown...
+                LOG.warn("Encountered unknown role '{}' in class {}", role.getId(), resourceInfo.getResourceClass().getName());
+                deny(requestContext);
+                return;
+            }
+        }
+
+        // ... again using generic 'javax.annotation.security.RolesAllowed' annotation class
+        {
+            RolesAllowed rolesAllowed = getAnnotation(RolesAllowed.class);
+            if (null != rolesAllowed) {
+                String[] roles = rolesAllowed.value();
+                if (hasRole(Role.BASIC_AUTHENTICATED.getId(), roles)) {
+                    basicAuth(requestContext);
+                    return;
+                }
+
+                // Other roles unknown...
+                LOG.warn("Encountered unknown roles '{}' in class {}", Arrays.toString(roles), resourceInfo.getResourceClass().getName());
+                deny(requestContext);
+                return;
+            }
+        }
+
+        // Check if all is denied
+        {
+            DenyAll denyAll = getAnnotation(DenyAll.class);
+            if (null != denyAll) {
+                deny(requestContext);
+                return;
+            }
+        }
+
+        // No suitable annotation found. Fall-back to "Basic-Authenticated" (as it was before)
+        LOG.warn("Found no security annotation for class {}. Assuming \"Basic-Authenticated\"...", resourceInfo.getResourceClass().getName());
+        basicAuth(requestContext);
+    }
+
+    private void basicAuth(ContainerRequestContext requestContext) {
         if (doFail) {
             LOG.error(
                 "Denied incoming HTTP request to REST interface due to unset Basic-Auth configuration. " +
                 "Please set properties 'com.openexchange.rest.services.basic-auth.login' and " +
                 "'com.openexchange.rest.services.basic-auth.password' appropriately.",
                 new Throwable("Denied request to REST interface"));
-            requestContext.abortWith(Response.status(Status.FORBIDDEN).build());
+            deny(requestContext);
         } else {
             if (authenticated(requestContext.getHeaders().getFirst(HttpHeaders.AUTHORIZATION))) {
-                boolean secure = requestContext.getUriInfo().getRequestUri().getScheme().equals("https");
-                Principal principal = new TrustedAppPrincipal(requestContext.getUriInfo().getBaseUri().getHost());
-                requestContext.setSecurityContext(new SecurityContextImpl(principal, SecurityContext.BASIC_AUTH, secure));
+                grant(requestContext);
             } else {
                 requestContext.abortWith(Response.status(Status.UNAUTHORIZED)
                     .header(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"OX REST\", encoding=\"UTF-8\"")
                     .build());
             }
         }
+    }
+
+    private void deny(ContainerRequestContext requestContext) {
+        requestContext.abortWith(Response.status(Status.FORBIDDEN).build());
+    }
+
+    private boolean hasRole(String roleToCheck, String[] roles) {
+        if (null != roles) {
+            for (String role : roles) {
+                if (roleToCheck.equalsIgnoreCase(role)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void grant(ContainerRequestContext requestContext) {
+        boolean secure = requestContext.getUriInfo().getRequestUri().getScheme().equals("https");
+        Principal principal = new TrustedAppPrincipal(requestContext.getUriInfo().getBaseUri().getHost());
+        requestContext.setSecurityContext(new SecurityContextImpl(principal, SecurityContext.BASIC_AUTH, secure));
     }
 
     private boolean authenticated(String authHeader) {

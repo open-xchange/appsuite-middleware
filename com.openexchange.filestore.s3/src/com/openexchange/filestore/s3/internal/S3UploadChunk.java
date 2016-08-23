@@ -61,12 +61,6 @@ import com.openexchange.tools.encoding.Base64;
  */
 public class S3UploadChunk extends UploadChunk {
 
-    /**
-     * The minimum allowed chunk size for AWS multipart uploads, which is 5MB according to
-     * http://docs.aws.amazon.com/AmazonS3/latest/API/mpUploadComplete.html
-     */
-    static final int MIN_CHUNK_SIZE = 5 * 1024 * 1024;
-
     private final String md5digest;
 
     /**
@@ -87,6 +81,11 @@ public class S3UploadChunk extends UploadChunk {
      */
     public String getMD5Digest() {
         return md5digest;
+    }
+
+    @Override
+    public String toString() {
+        return "S3UploadChunk [md5=" + md5digest + ", size=" + getSize() + "]";
     }
 
 }

@@ -105,7 +105,9 @@ public interface OXResellerUserServicePortType {
         @WebParam(name = "search_pattern", targetNamespace = "http://soap.reseller.admin.openexchange.com")
         java.lang.String searchPattern,
         @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
-        com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth
+        com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth,
+        @WebParam(name = "include_guests", targetNamespace = "http://soap.reseller.admin.openexchange.com") Boolean includeGuests,
+        @WebParam(name = "exclude_users", targetNamespace = "http://soap.reseller.admin.openexchange.com") Boolean excludeUsers
     ) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
 
     @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
@@ -169,7 +171,9 @@ public interface OXResellerUserServicePortType {
         @WebParam(name = "ctx", targetNamespace = "http://soap.reseller.admin.openexchange.com")
         com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,
         @WebParam(name = "auth", targetNamespace = "http://soap.reseller.admin.openexchange.com")
-        com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth
+        com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth,
+        @WebParam(name = "include_guests", targetNamespace = "http://soap.reseller.admin.openexchange.com") Boolean includeGuests,
+        @WebParam(name = "exclude_users", targetNamespace = "http://soap.reseller.admin.openexchange.com") Boolean excludeUsers
     ) throws DatabaseUpdateException_Exception, InvalidCredentialsException_Exception, DuplicateExtensionException_Exception, NoSuchContextException_Exception, StorageException_Exception, RemoteException_Exception, InvalidDataException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.reseller.admin.openexchange.com")

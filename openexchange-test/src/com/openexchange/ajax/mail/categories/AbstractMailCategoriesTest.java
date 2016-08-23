@@ -50,22 +50,25 @@
 package com.openexchange.ajax.mail.categories;
 
 import java.io.IOException;
-import java.rmi.Naming;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+import org.json.JSONArray;
 import org.json.JSONException;
-import com.openexchange.admin.rmi.OXUserInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
+import org.json.JSONObject;
+import org.junit.Assume;
+import org.xml.sax.SAXException;
+import com.openexchange.ajax.capabilities.actions.AllRequest;
+import com.openexchange.ajax.capabilities.actions.AllResponse;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.mail.actions.GetRequest;
+import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
+import com.openexchange.ajax.framework.CommonAllResponse;
+import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.framework.UserValues;
-import com.openexchange.ajax.mail.AbstractMailTest;
-import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.categories.MailCategoriesConstants;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * {@link AbstractMailCategoriesTest}
@@ -73,9 +76,8 @@ import edu.emory.mathcs.backport.java.util.Collections;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public abstract class AbstractMailCategoriesTest extends AbstractMailTest {
+public abstract class AbstractMailCategoriesTest extends AbstractConfigAwareAjaxSession {
 
-    private static final String RMI_HOSTNAME = "rmi://localhost:1099/";
 
     protected static final String CAT_GENERAL = "general";
     protected static final String CAT_1 = "social";
@@ -84,80 +86,73 @@ public abstract class AbstractMailCategoriesTest extends AbstractMailTest {
     protected static final String CAT_2_FLAG = "$promotion";
 
     protected UserValues values;
-    
+
     protected String EML;
-    
 
     /**
      * Initializes a new {@link AbstractMailCategoriesTest}.
-     * 
+     *
      * @param name
-     * @throws JSONException 
-     * @throws IOException 
-     * @throws OXException 
      */
-    public AbstractMailCategoriesTest(String name) throws OXException, IOException, JSONException {
-        super(name);
+    public AbstractMailCategoriesTest() {
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
+        AJAXClient configClient = new AJAXClient(User.User1);
+        setUpConfiguration(configClient, true);
         super.setUp();
+        AllResponse response = getClient().execute(new AllRequest());
+        Assume.assumeTrue("User does not have the mail_categories capability. Probably the mailserver does not support imap4flags.", response.getCapabilities().contains("mail_categories"));
         values = getClient().getValues();
         clearFolder(values.getInboxFolder()); // always start with an empty inbox
-        OXUserInterface oxUserRemote = (OXUserInterface) Naming.lookup(RMI_HOSTNAME + OXUserInterface.RMI_NAME);
-        String login = AJAXConfig.getProperty(User.OXAdmin.getLogin());
-        String password = AJAXConfig.getProperty(User.OXAdmin.getPassword());
-        Set<String> capsToAdd = new HashSet<String>();
-        capsToAdd.add("mail_categories");
-        oxUserRemote.changeCapabilities(new Context(values.getContextId()), new com.openexchange.admin.rmi.dataobjects.User(values.getUserId()), capsToAdd, Collections.emptySet(), Collections.emptySet(), new Credentials(login, password));
-        
-        EML = "Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" + 
+        EML = "Date: Mon, 19 Nov 2012 21:36:51 +0100 (CET)\n" +
             "From: " + getSendAddress() + "\n" +
             "To: " + getSendAddress() + "\n" +
-            "Message-ID: <1508703313.17483.1353357411049>\n" + 
-            "Subject: Test mail\n" + 
-            "MIME-Version: 1.0\n" + 
-            "Content-Type: multipart/alternative; \n" + 
-            "    boundary=\"----=_Part_17482_1388684087.1353357411002\"\n" + 
-            "\n" + 
-            "------=_Part_17482_1388684087.1353357411002\n" + 
-            "MIME-Version: 1.0\n" + 
-            "Content-Type: text/plain; charset=UTF-8\n" + 
-            "Content-Transfer-Encoding: 7bit\n" + 
-            "\n" + 
-            "Test\n" + 
-            "------=_Part_17482_1388684087.1353357411002\n" + 
-            "MIME-Version: 1.0\n" + 
-            "Content-Type: text/html; charset=UTF-8\n" + 
-            "Content-Transfer-Encoding: 7bit\n" + 
-            "\n" + 
+            "Message-ID: <1508703313.17483.1353357411049>\n" +
+            "Subject: Test mail\n" +
+            "MIME-Version: 1.0\n" +
+            "Content-Type: multipart/alternative; \n" +
+            "    boundary=\"----=_Part_17482_1388684087.1353357411002\"\n" +
+            "\n" +
+            "------=_Part_17482_1388684087.1353357411002\n" +
+            "MIME-Version: 1.0\n" +
+            "Content-Type: text/plain; charset=UTF-8\n" +
+            "Content-Transfer-Encoding: 7bit\n" +
+            "\n" +
+            "Test\n" +
+            "------=_Part_17482_1388684087.1353357411002\n" +
+            "MIME-Version: 1.0\n" +
+            "Content-Type: text/html; charset=UTF-8\n" +
+            "Content-Transfer-Encoding: 7bit\n" +
+            "\n" +
             "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\">" +
-            " <head>\n" + 
-            "    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\"/>\n" + 
-            " </head><body style=\"font-family: verdana,geneva; font-size: 10pt; \">\n" + 
-            " \n" + 
-            "  <div>\n" + 
-            "   Test\n" + 
-            "  </div>\n" + 
-            " \n" + 
-            "</body></html>\n" + 
+            " <head>\n" +
+            "    <meta content=\"text/html; charset=UTF-8\" http-equiv=\"Content-Type\"/>\n" +
+            " </head><body style=\"font-family: verdana,geneva; font-size: 10pt; \">\n" +
+            " \n" +
+            "  <div>\n" +
+            "   Test\n" +
+            "  </div>\n" +
+            " \n" +
+            "</body></html>\n" +
             "------=_Part_17482_1388684087.1353357411002--\n";
     }
 
     @Override
-    protected void tearDown() throws Exception {
-        clearFolder(values.getSentFolder());
-        clearFolder(values.getInboxFolder());
-        clearFolder(values.getDraftsFolder());
+    public void tearDown() throws Exception {
+        if (values != null) {
+            clearFolder(values.getSentFolder());
+            clearFolder(values.getInboxFolder());
+            clearFolder(values.getDraftsFolder());
+        }
         super.tearDown();
     }
 
     @Override
     protected Map<String, String> getNeededConfigurations() {
         Map<String, String> configs = new HashMap<>();
-        configs.put("com.openexchange.capability.mail_categories", Boolean.TRUE.toString());
+        configs.put("com.openexchange.mail.categories", Boolean.TRUE.toString());
         configs.put(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, Boolean.TRUE.toString());
         configs.put("com.openexchange.mail.categories.general.name.fallback", "General");
         configs.put(MailCategoriesConstants.MAIL_CATEGORIES_IDENTIFIERS, "promotion, social");
@@ -179,5 +174,39 @@ public abstract class AbstractMailCategoriesTest extends AbstractMailTest {
     @Override
     protected String getScope() {
         return "user";
+    }
+
+    /**
+     * Performs a hard delete on specified folder
+     *
+     * @param folder
+     *            The folder
+     */
+    protected final void clearFolder(final String folder) throws OXException, IOException, SAXException, JSONException {
+        Executor.execute(getSession(), new com.openexchange.ajax.mail.actions.ClearRequest(folder).setHardDelete(true));
+    }
+
+    /**
+     * @return User's default send address
+     */
+    protected String getSendAddress() throws OXException, IOException, JSONException {
+        return getSendAddress(getClient());
+    }
+
+    protected static String getSendAddress(final AJAXClient client) throws OXException, IOException, JSONException {
+        return client.getValues().getSendAddress();
+    }
+
+    protected String getInboxFolder() throws OXException, IOException, SAXException, JSONException {
+        return getClient().getValues().getInboxFolder();
+    }
+
+    protected JSONObject getFirstMailInFolder(final String inboxFolder) throws OXException, IOException, SAXException, JSONException {
+        final CommonAllResponse response = getClient().execute(new com.openexchange.ajax.mail.actions.AllRequest(inboxFolder, new int[] { 600 }, -1, null, true));
+        final JSONArray arr = (JSONArray) response.getData();
+        final JSONArray mailFields = arr.getJSONArray(0);
+        final String id = mailFields.getString(0);
+        final AbstractAJAXResponse response2 = getClient().execute(new GetRequest(inboxFolder, id));
+        return (JSONObject) response2.getData();
     }
 }

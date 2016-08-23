@@ -61,16 +61,19 @@ import com.openexchange.login.LoginResult;
  */
 public class MailCategoriesLoginHandler implements LoginHandlerService {
 
+    private final MailCategoriesConfigServiceImpl mailCategoriesService;
+
     /**
      * Initializes a new {@link MailCategoriesLoginHandler}.
      */
-    public MailCategoriesLoginHandler() {
+    public MailCategoriesLoginHandler(MailCategoriesConfigServiceImpl mailCategoriesService) {
         super();
+        this.mailCategoriesService = mailCategoriesService;
     }
 
     @Override
     public void handleLogin(LoginResult login) throws OXException {
-        MailCategoriesConfigServiceImpl.getInstance().initMailCategories(login.getSession());
+        mailCategoriesService.initMailCategories(login.getSession());
     }
 
     @Override

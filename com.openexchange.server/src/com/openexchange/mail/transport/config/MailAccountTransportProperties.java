@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.transport.config;
 
+import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.mailaccount.MailAccount;
@@ -73,12 +74,20 @@ public class MailAccountTransportProperties implements ITransportProperties {
      * @param mailAccount The mail account providing the properties
      * @throws IllegalArgumentException If provided mail account is <code>null</code>
      */
-    public MailAccountTransportProperties(final MailAccount mailAccount) {
+    public MailAccountTransportProperties(MailAccount mailAccount) {
         super();
         if (null == mailAccount) {
             throw new IllegalArgumentException("mail account is null.");
         }
         properties = mailAccount.getProperties();
+    }
+
+    /**
+     * Initializes a new {@link MailAccountTransportProperties} with empty properties.
+     */
+    protected MailAccountTransportProperties() {
+        super();
+        properties = new HashMap<String, String>(0);
     }
 
     /**

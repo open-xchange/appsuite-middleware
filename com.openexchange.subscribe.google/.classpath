@@ -5,7 +5,5 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
-	<classpathentry kind="lib" path="/com.openexchange.common/lib/httpcore-4.2.1.jar" sourcepath="/com.openexchange.common/lib/source/httpcore-4.2.1-src.zip"/>
-	<classpathentry kind="lib" path="/com.openexchange.common/lib/httpclient-4.2.1.jar" sourcepath="/com.openexchange.common/lib/source/httpclient-4.2.1-src.zip"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

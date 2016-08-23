@@ -63,6 +63,7 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
+import com.openexchange.folderstorage.LockCleaningFolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
@@ -378,6 +379,18 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                             checkOpenedStorage(realStorage, openedStorages);
                             realStorage.updateFolder(folder, storageParameters);
                             storage.updateFolder(folder, storageParameters);
+
+                            if(comparedPermissions.hasRemovedUsers()){
+                                if (realStorage instanceof LockCleaningFolderStorage) {
+                                    List<Permission> removedPermissions = comparedPermissions.getRemovedUserPermissions();
+                                    int[] removedUserPermissions = new int[removedPermissions.size()];
+                                    int x=0;
+                                    for(Permission perm: removedPermissions){
+                                        removedUserPermissions[x++] = perm.getEntity();
+                                    }
+                                    ((LockCleaningFolderStorage)realStorage).cleanLocksFor(folder, removedUserPermissions, storageParameters);
+                                }
+                            }
                         }
                     }
                     /*

@@ -1,0 +1,3 @@
+opt/open-xchange/etc/pns-apns-options.yml
+opt/open-xchange/etc/pns-gcm-options.yml
+opt/open-xchange/etc/pns-wns-options.yml

@@ -13,7 +13,7 @@
       200:
         description: |
           A JSON object with the timestamp of the creation date and a token which can be used to create a new
-          session. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+          session. In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/AcquireTokenResponse"
           

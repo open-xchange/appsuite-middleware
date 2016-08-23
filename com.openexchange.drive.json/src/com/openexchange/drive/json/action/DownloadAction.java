@@ -83,9 +83,10 @@ public class DownloadAction extends AbstractDriveAction {
     public AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         try {
             /*
-             * no limits for download
+             * no limits & no transformations for download
              */
             enableUnlimitedBodySize(requestData);
+            preventTransformations(requestData);
             /*
              * get parameters
              */
@@ -133,9 +134,7 @@ public class DownloadAction extends AbstractDriveAction {
             /*
              * return file result
              */
-            AJAXRequestResult requestResult = new AJAXRequestResult(fileHolder, "file");
-//            requestResult.setType(ResultType.DIRECT);//TODO: this leads to 0 bytes?
-            return requestResult;
+            return new AJAXRequestResult(fileHolder, "file");
         } catch (OXException e) {
             /*
              * indicate error by setting HTTP status code

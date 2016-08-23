@@ -65,6 +65,7 @@ public class GrizzlyTestSuite {
         suite.addTestSuite(ProcessingTest.class);
         suite.addTestSuite(GetWithBodyTest.class);
         suite.addTestSuite(MaxHttpHeaderSizeTest.class);
+        suite.addTestSuite(OmitUserInputTest.class);
         return suite;
     }
 

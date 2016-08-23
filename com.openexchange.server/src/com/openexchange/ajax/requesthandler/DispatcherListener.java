@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax.requesthandler;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link DispatcherListener} - A listener which receives various call-backs during a {@link Dispatcher} processing.
  * <p>
@@ -110,8 +112,9 @@ public interface DispatcherListener {
      * Called when a request is about being performed.
      *
      * @param requestData The associated request data
+     * @throws OXException If this listener signals to abort further processing
      */
-    void onRequestInitialized(AJAXRequestData requestData);
+    void onRequestInitialized(AJAXRequestData requestData) throws OXException;
 
     /**
      * Called when a result was supposed to be created, but not yet returned to requesting client (by responsible {@link ResponseRenderer renderer}).
@@ -119,8 +122,9 @@ public interface DispatcherListener {
      * @param requestData The associated request data
      * @param requestResult The request result that has been created or <code>null</code> if creation failed (in that case an exception is passed)
      * @param e The exception that caused termination, or <code>null</code> if execution completed normally (and a viable <code>requestResult</code> is given)
+     * @throws OXException If this listener signals to abort further processing
      */
-    void onRequestPerformed(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e);
+    void onRequestPerformed(AJAXRequestData requestData, AJAXRequestResult requestResult, Exception e) throws OXException;
 
     /**
      * Called when a result has been successfully created and an attempt was made returning it to requesting client (by responsible {@link ResponseRenderer renderer}).

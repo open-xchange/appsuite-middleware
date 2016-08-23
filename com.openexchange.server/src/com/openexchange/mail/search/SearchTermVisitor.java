@@ -169,4 +169,11 @@ public interface SearchTermVisitor {
      */
     public void visit(UserFlagTerm term);
 
+    /**
+     * Calls this visitor with specified file name term.
+     *
+     * @param term The file name term
+     */
+    public void visit(FileNameTerm term);
+
 }

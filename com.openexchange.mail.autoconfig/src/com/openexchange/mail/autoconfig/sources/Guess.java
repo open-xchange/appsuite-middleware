@@ -132,12 +132,12 @@ public class Guess extends AbstractConfigSource {
     }
 
     private boolean fillProtocol(URIDefaults protocol, String emailLocalPart, String emailDomain, String password, Autoconfig config, Map<String, Object> properties, boolean forceSecure) {
-        Object[] guessedHost = guessHost(protocol, emailDomain, forceSecure);
+        Object[] guessedHost = guessHost(protocol, emailDomain);
         if (guessedHost != null) {
             String host = (String) guessedHost[0];
             boolean secure = (Boolean) guessedHost[1];
             Integer port = (Integer) guessedHost[2];
-            String login = guessLogin(protocol, host, port.intValue(), secure, emailLocalPart, emailDomain, password, properties);
+            String login = guessLogin(protocol, host, port.intValue(), secure, forceSecure, emailLocalPart, emailDomain, password, properties);
             if (login == null) {
                 return false;
             }
@@ -161,20 +161,20 @@ public class Guess extends AbstractConfigSource {
         return false;
     }
 
-    private String guessLogin(URIDefaults protocol, String host, int port, boolean secure, String emailLocalPart, String emailDomain, String password, Map<String, Object> properties) {
+    private String guessLogin(URIDefaults protocol, String host, int port, boolean secure, boolean requireTls, String emailLocalPart, String emailDomain, String password, Map<String, Object> properties) {
         List<String> logins = Arrays.asList(emailLocalPart, emailLocalPart+"@"+emailDomain);
 
         for (String login : logins) {
             if (protocol == URIDefaults.IMAP) {
-                if (MailValidator.validateImap(host, port, secure, login, password)) {
+                if (MailValidator.validateImap(host, port, secure, requireTls, login, password)) {
                     return login;
                 }
             } else if (protocol == URIDefaults.POP3) {
-                if (MailValidator.validatePop3(host, port, secure, login, password)) {
+                if (MailValidator.validatePop3(host, port, secure, requireTls, login, password)) {
                     return login;
                 }
             } else if (protocol == URIDefaults.SMTP) {
-                if (MailValidator.validateSmtp(host, port, secure, login, password, properties)) {
+                if (MailValidator.validateSmtp(host, port, secure, requireTls, login, password, properties)) {
                     return login;
                 }
             }
@@ -182,7 +182,7 @@ public class Guess extends AbstractConfigSource {
         return null;
     }
 
-    private Object[] guessHost(URIDefaults protocol, String emailDomain, boolean forceSecure) {
+    private Object[] guessHost(URIDefaults protocol, String emailDomain) {
         List<String> prefixes = null;
         int altPort = 0;
         if (protocol == URIDefaults.IMAP) {
@@ -202,9 +202,11 @@ public class Guess extends AbstractConfigSource {
             String host = prefix + emailDomain;
             if (checkSave(protocol, host, protocol.getSSLPort(), true)) {
                 return new Object[] { host, true, protocol.getSSLPort() };
-            } else if (!forceSecure && altPort > 0 && checkSave(protocol, host, altPort, false)) {
+            } else if (checkSave(protocol, host, protocol.getPort(), true)) {
+                return new Object[] { host, true, protocol.getPort() };
+            } else if (altPort > 0 && checkSave(protocol, host, altPort, false)) {
                 return new Object[] { host, false, altPort };
-            } else if (!forceSecure && checkSave(protocol, host, protocol.getPort(), false)) {
+            } else if (checkSave(protocol, host, protocol.getPort(), false)) {
                 return new Object[] { host, false, protocol.getPort() };
             }
         }

@@ -103,6 +103,15 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
     }
 
     /**
+     * (Optionally) Gets the singleton instance.
+     *
+     * @return The singleton instance or <code>null</code>
+     */
+    public static SingletonMailAccessCache optInstance() {
+        return singleton;
+    }
+
+    /**
      * Releases the singleton instance.
      */
     public static void releaseInstance() {
@@ -116,11 +125,9 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
         }
     }
 
-    /*
-     * Field members
-     */
-    private TimeoutConcurrentMap<Key, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> timeoutMap;
+    // --------------------------------------------------------------------------------------------------------------------------------
 
+    private TimeoutConcurrentMap<Key, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> timeoutMap;
     private int defaultIdleSeconds;
 
     /**

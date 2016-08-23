@@ -70,6 +70,9 @@ CREATE_THREAD_DUMP_VALUES="true false"
 CREATE_HEAP_DUMP=false
 CREATE_HEAP_DUMP_LONG=heap-dump
 CREATE_HEAP_DUMP_VALUES="true false"
+REPORT_CLIENT=false
+REPORT_CLIENT_LONG=report-client
+REPORT_CLIENT_VALUES="true false"
 SKIP_COMPRESSION=false
 SKIP_COMPRESSION_LONG=skip-compression
 SKIP_COMPRESSION_VALUES="true false"
@@ -101,22 +104,21 @@ PROCS='
     ps -eLf;
     ps faux;
     readerengine_cache_overview;
-    report -o -d;
     route -n;
     showruntimestats -a;
     showruntimestats -c;
     showruntimestats -f;
     showruntimestats -g;
-    showruntimestats -y;
+    showruntimestats --port 9998 -y;
     top -bHn 1;
     ulimit -a;
     uname -a'
 MUSTOPTS="TMP LOGDIR KEEP_TMP LOGARC"
-LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$SKIP_COMPRESSION_LONG:,$SKIP_RUN_COMMANDS_LONG:,$EXCLUDE_OLDER_LOGS_THAN_LONG:,$EXCLUDE_SECRETS_LONG:'
+LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_DUMP_LONG:,$CREATE_HEAP_DUMP_LONG:,$REPORT_CLIENT_LONG:,$SKIP_COMPRESSION_LONG:,$SKIP_RUN_COMMANDS_LONG:,$EXCLUDE_OLDER_LOGS_THAN_LONG:,$EXCLUDE_SECRETS_LONG:'
 EARLY_NEEDED_TOOLS="basename cat echo dirname java pwd tr date"
 NEEDED_TOOLS="awk bzip2 cat cp df du egrep find grep gzip head mkdir mktemp rm rmdir sed sleep tail tar xargs"
 OX_LOG_DIR=/var/log/open-xchange
-OX_CONFIG_DIRS="/opt/open-xchange/etc"
+OX_CONFIG_DIRS="/opt/open-xchange/etc /opt/open-xchange/documentconverter/etc"
 OTHER_CONFIGS="/etc/security/limits.conf"
 
 ###############################################################################
@@ -160,7 +162,9 @@ collect_command_output() {
    for i in ${PROCS}; do
        IFS=${OIFS}
        echo "  ${i}"
-       ${i} > "/${TMP}/${LOGDIR}/commands/${i}" 2>&1
+       # slashes are forbidden in file names
+       removed_path=$(echo ${i} | sed 's|/.*/||g')
+       ${i} > "/${TMP}/${LOGDIR}/commands/${removed_path}" 2>&1
        IFS=";"
    done
    IFS=${OIFS}
@@ -766,6 +770,13 @@ for argument in ${@}; do
             if [ 'false' == "$(is_ox_running)" ]; then
                 die "${0}: Error, open-xchange service is not running"
             fi
+        ;;
+        --${REPORT_CLIENT_LONG})
+            REPORT_CLIENT=$(check_argument ${1} ${2})
+            if [ 'true' == "${REPORT_CLIENT}" ]; then
+                PROCS=${PROCS}';report -o -d'
+            fi
+            shift 2
         ;;
         --${SKIP_COMPRESSION_LONG})
             SKIP_COMPRESSION=$(check_argument ${1} ${2})

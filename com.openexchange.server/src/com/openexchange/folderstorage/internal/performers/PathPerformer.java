@@ -72,6 +72,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public final class PathPerformer extends AbstractUserizedFolderPerformer {
 
+    private static final int MAX_PATH_DEPTH = 256;
+
     /**
      * Initializes a new {@link PathPerformer} from given session.
      *
@@ -203,17 +205,26 @@ public final class PathPerformer extends AbstractUserizedFolderPerformer {
             if (!ownPermission.isVisible()) {
                 throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(getFolderInfo4Error(folder), getUserInfo4Error(), getContextInfo4Error());
             }
+
             final List<UserizedFolder> path = new ArrayList<UserizedFolder>(8);
             UserizedFolder userizedFolder = getUserizedFolder(folder, ownPermission, treeId, all, true, storageParameters, openedStorages);
             path.add(userizedFolder);
-            while (!FolderStorage.ROOT_ID.equals(userizedFolder.getParentID()) && null != userizedFolder.getParentID()) {
-                final FolderStorage fs = getOpenedStorage(userizedFolder.getParentID(), treeId, storageParameters, openedStorages);
+            for (int max = MAX_PATH_DEPTH; max-- > 0 && !FolderStorage.ROOT_ID.equals(userizedFolder.getParentID()) && null != userizedFolder.getParentID();) {
+                if (max == 0) {
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Exceeded max. allowed path depth of " + MAX_PATH_DEPTH);
+                }
+
+                FolderStorage fs = getOpenedStorage(userizedFolder.getParentID(), treeId, storageParameters, openedStorages);
                 folder = fs.getFolder(treeId, userizedFolder.getParentID(), storageParameters);
                 ownPermission = permissionProvider.getOwnPermission(folder);
                 if (!ownPermission.isVisible()) {
                     throw FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.create(getFolderInfo4Error(folder), getUserInfo4Error(), getContextInfo4Error());
                 }
                 userizedFolder = getUserizedFolder(folder, ownPermission, treeId, all, true, storageParameters, openedStorages);
+                if (userizedFolder.getID().equals(userizedFolder.getParentID())) {
+                    // Folder references itself as parent
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Folder \"" + userizedFolder.getID() + "\" references itself as parent.");
+                }
                 path.add(userizedFolder);
             }
 

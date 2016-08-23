@@ -51,7 +51,6 @@ package com.openexchange.consistency;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -77,19 +76,25 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
      * Defines the actions of the CLT
      */
     private enum Action {
-        list_unassigned("listUnassignedFiles"),
-        list_missing("listMissingFiles"),
-        repair("repairFiles"),
-        repair_configdb("checkOrRepairConfigDB"),
-        check_configdb("checkOrRepairConfigDB");
+        list_unassigned("listUnassignedFiles", "Lists names of orphaned files held in file storage"),
+        list_missing("listMissingFiles", "Lists names of files that are still referenced, but do no more exist in actual file storage"),
+        repair("repairFiles", "Repairs either orphaned files or references to non-existing files according to specified \"--policy\" and associated \"--policy-action\""),
+        repair_configdb("checkOrRepairConfigDB", "Deletes artefacts of non-existing contexts from config database. Requires no further options."),
+        check_configdb("checkOrRepairConfigDB", "Checks for artefacts of non-existing contexts in config database. Requires no further options.");
 
         private final String methodName;
+        private final String description;
 
         /**
-         * Initialises a new {@link ConsistencyCheck.Action}.
+         * Initializes a new {@link ConsistencyCheck.Action}.
          */
-        private Action(String methodName) {
+        private Action(String methodName, String description) {
             this.methodName = methodName;
+            this.description = description;
+        }
+
+        String getDescription() {
+            return description;
         }
     }
 
@@ -114,6 +119,25 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
         delete, create_dummy, create_admin_infoitem;
     }
 
+    private static <E extends Enum<?>> String prettyPrintEnum(Class<E> clazz) {
+        E[] enumConstants = clazz.getEnumConstants();
+        int length = enumConstants.length;
+        if (length <= 0) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder(length << 4);
+        sb.append('"').append(enumConstants[0].name()).append('"');
+        for (int i = 1, k = length - 2; k-- > 0; i++) {
+            E e = enumConstants[i];
+            sb.append(", \"").append(e.name()).append('"');
+        }
+        sb.append(", and \"").append(enumConstants[length - 1].name()).append('"');
+        return sb.toString();
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
     private Action action;
     private Source source;
     private Policy policy;
@@ -122,7 +146,7 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
 
     /**
      * Entry point
-     * 
+     *
      * @param args
      */
     public static void main(String[] args) {
@@ -131,7 +155,7 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractMBeanCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.mbean.AuthenticatorMBean)
      */
     @Override
@@ -141,21 +165,21 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractMBeanCLI#addOptions(org.apache.commons.cli.Options)
      */
     @Override
     protected void addOptions(Options options) {
-        options.addOption("a", "action", true, "Defines the action\nAvailable actions are: " + Arrays.toString(Action.values()));
-        options.addOption("o", "source", true, "Defines the source that is going to be used\nAvailable sources are: " + Arrays.toString(Source.values()));
-        options.addOption("r", "policy", true, "Defines the 'repair' policy\nAvailable repair policies are: " + Arrays.toString(Policy.values()));
-        options.addOption("y", "policy-action", true, "Defines an action for the desired repair policy\nAvailable policy actions are: " + Arrays.toString(PolicyAction.values()));
-        options.addOption("i", "source-id", true, "Defines the source identifier. If source is set to 'all' then this option is simply ignored");
+        options.addOption("a", "action", true, "Defines the action\nAccepted values are: " + prettyPrintEnum(Action.class));
+        options.addOption("o", "source", true, "Defines the source that is going to be used\nOnly considered if \"--action\" option specifies either \""+Action.list_missing.name()+"\", \""+Action.list_unassigned.name()+"\" or \""+Action.repair.name()+"\"\nAccepted values are: " + prettyPrintEnum(Source.class));
+        options.addOption("r", "policy", true, "Defines the 'repair' policy\nOnly considered if \"--action\" option specifies \""+Action.repair.name()+"\"\nAvailable repair policies are: " + prettyPrintEnum(Policy.class));
+        options.addOption("y", "policy-action", true, "Defines an action for the desired repair policy\nOnly considered if \"--policy\" option is specified");
+        options.addOption("i", "source-id", true, "Defines the source identifier.\nOnly considered if \"--source\" option is specified\nIf \"--source\" is set to \"all\" then this option is simply ignored");
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractMBeanCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, javax.management.MBeanServerConnection)
      */
     @SuppressWarnings("unchecked")
@@ -214,9 +238,11 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
         System.out.println(builder.toString());
         Object resultObject = mbsc.invoke(MBeanNamer.getName(), operationName, params.toArray(new Object[params.size()]), getSignatureOf(ConsistencyMBean.class, operationName));
 
-        if (action.equals(Action.check_configdb)) {
+        if (action.equals(Action.check_configdb) || action.equals(Action.repair_configdb)) {
             printList((List<String>) resultObject);
-            System.out.println("Now run 'checkconsistency' tool again with the 'repair_configdb' option to remove these inconsistent contexts from the 'configdb'.");
+            if (action.equals(Action.check_configdb)) {
+                System.out.println("Now run 'checkconsistency' tool again with the 'repair_configdb' option to remove these inconsistent contexts from the 'configdb'.");
+            }
         } else {
             printResult(resultObject);
         }
@@ -225,7 +251,7 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
 
     /**
      * Get the operation name
-     * 
+     *
      * @return
      */
     private String getOperationName() {
@@ -234,7 +260,7 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
 
     /**
      * Get the policy string
-     * 
+     *
      * @return
      */
     private String getPolicyString() {
@@ -243,7 +269,7 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
 
     /**
      * Prints the result
-     * 
+     *
      * @param result
      */
     @SuppressWarnings("unchecked")
@@ -265,7 +291,7 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
      */
     @Override
@@ -287,7 +313,7 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#requiresAdministrativePermission()
      */
     @Override
@@ -297,17 +323,56 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#getFooter()
      */
     @Override
     protected String getFooter() {
-        return "The OX check consistency tool";
+        StringBuilder sb = new StringBuilder(1024);
+        sb.append("Choose options following:\n");
+        sb.append(".\n");
+        sb.append("1. -a,--action:\n");
+        sb.append("====================================\n");
+        for (Action action : Action.values()) {
+            sb.append("\n- \"-a ").append(action.name()).append("\"\n").append(action.getDescription());
+        }
+
+        sb.append("\n");
+        sb.append(".\n");
+        sb.append("2. -o,--source / -i,--source-id:\n");
+        sb.append("====================================\n");
+        sb.append("Only considered for actions \"").append(Action.list_missing.name()).append("\", \"").append(Action.list_unassigned.name()).append("\" or \"").append(Action.repair).append("\"");
+        sb.append("\n");
+        sb.append("Possible combinations:");
+        sb.append("\n- \"-o ").append(source.context.name()).append(" -i ").append("<context-id>").append("\"\nConsiders all files of a certain context");
+        sb.append("\n- \"-o ").append(source.filestore.name()).append(" -i ").append("<filestore-id>").append("\"\nConsiders all files of a certain file store");
+        sb.append("\n- \"-o ").append(source.database.name()).append(" -i ").append("<database-id>").append("\"\nConsiders all files of all contexts that belong to a certain database's schema");
+        sb.append("\n- \"-o ").append(source.all.name()).append("\"\nConsiders all files; no matter to what context and/or file store a file belongs (the \"--source-id\" option is ignored)");
+
+        sb.append("\n");
+        sb.append(".\n");
+        sb.append("3. -r,--policy / -y,--policy-action:\n");
+        sb.append("====================================\n");
+        sb.append("Only considered for action \"").append(Action.repair).append("\"");
+        sb.append("\n");
+        sb.append("Possible combinations:");
+        sb.append("\n- \"-r ").append(Policy.missing_entry_for_file.name()).append(" -y ").append(PolicyAction.create_admin_infoitem.name()).append("\"\nCreates a dummy Drive entry named \"Restoredfile\" and associates it with the file");
+        sb.append("\n- \"-r ").append(Policy.missing_entry_for_file.name()).append(" -y ").append(PolicyAction.delete.name()).append("\"\nSimply deletes the orphanded file from storage");
+        sb.append("\n- \"-r ").append(Policy.missing_file_for_infoitem.name()).append(" -y ").append(PolicyAction.create_dummy.name()).append("\"\nCreates a dummy file in storage and associates it with the Drive item");
+        sb.append("\n- \"-r ").append(Policy.missing_file_for_infoitem.name()).append(" -y ").append(PolicyAction.delete.name()).append("\"\nSimply deletes the Drive item pointing to a non-existing file");
+        sb.append("\n- \"-r ").append(Policy.missing_file_for_attachment.name()).append(" -y ").append(PolicyAction.create_dummy.name()).append("\"\nCreates a dummy file in storage and associates it with the attachment item");
+        sb.append("\n- \"-r ").append(Policy.missing_file_for_attachment.name()).append(" -y ").append(PolicyAction.delete.name()).append("\"\nSimply deletes the attachment item pointing to a non-existing file");
+        sb.append("\n- \"-r ").append(Policy.missing_file_for_snippet.name()).append(" -y ").append(PolicyAction.create_dummy.name()).append("\"\nCreates a dummy file in storage and associates it with the snippet item");
+        sb.append("\n- \"-r ").append(Policy.missing_file_for_snippet.name()).append(" -y ").append(PolicyAction.delete.name()).append("\"\nSimply deletes the snippet item pointing to a non-existing file");
+        sb.append("\n- \"-r ").append(Policy.missing_file_for_vcard.name()).append(" -y ").append(PolicyAction.create_dummy.name()).append("\"\nCreates a dummy file in storage and associates it with the vcard item");
+        sb.append("\n- \"-r ").append(Policy.missing_file_for_vcard.name()).append(" -y ").append(PolicyAction.delete.name()).append("\"\nSimply deletes the vcard item pointing to a non-existing file");
+
+        return sb.toString();
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.cli.AbstractCLI#getName()
      */
     @Override
@@ -319,7 +384,7 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
 
     /**
      * Check and set the specified option
-     * 
+     *
      * @param enumClass The enum class to check it with
      * @param e The enum variable to set
      * @param cmd The command line options
@@ -340,7 +405,7 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
 
     /**
      * Generic helper method for parsing an enum value
-     * 
+     *
      * @param enumClass The enum class to use
      * @param value The value to parse
      * @return The parsed Enum value
@@ -393,7 +458,7 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
 
     /**
      * Print the result
-     * 
+     *
      * @param result The result to print
      */
     private void printMap(final Map<MBeanEntity, List<String>> result) {
@@ -467,7 +532,7 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
 
     /**
      * Flattens the specified list
-     * 
+     *
      * @param values A Collection with List of strings
      * @return the flattened collection
      */
@@ -482,7 +547,7 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
 
     /**
      * Sort the results and fetch the length of the widest string
-     * 
+     *
      * @param results The strings to sort
      * @return The length of the widest string
      */

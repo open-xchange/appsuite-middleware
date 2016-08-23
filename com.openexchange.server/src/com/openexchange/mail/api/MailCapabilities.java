@@ -94,6 +94,11 @@ public abstract class MailCapabilities {
         @Override
         public String toString() {
             return "Empty mail capabilities";
+        }
+
+        @Override
+        public boolean hasFileNameSearch() {
+            return false;
         };
 
     };
@@ -198,6 +203,28 @@ public abstract class MailCapabilities {
      * @return <code>true</code> if mail system supports subscription; otherwise <code>false</code>
      */
     public abstract boolean hasSubscription();
+
+    /**
+     * Indicates if mail system supports search of attachment file names.
+     * <p>
+     * Defaults to <code>false</code>
+     *
+     * @return <code>true</code> if mail system supports search of attachment file names; otherwise <code>false</code>
+     */
+    public boolean hasFileNameSearch() {
+        return false;
+    }
+
+    /**
+     * Indicates if mail system supports retrieving folder validity information.
+     * <p>
+     * Defaults to <code>false</code>
+     *
+     * @return <code>true</code> if mail system supports retrieving folder validity information; otherwise <code>false</code>
+     */
+    public boolean hasFolderValidity() {
+        return false;
+    }
 
     /**
      * Returns the capabilities as a bit mask.

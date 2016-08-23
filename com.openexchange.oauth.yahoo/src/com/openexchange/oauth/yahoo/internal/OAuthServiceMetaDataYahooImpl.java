@@ -69,7 +69,7 @@ import com.openexchange.session.Session;
 public class OAuthServiceMetaDataYahooImpl extends AbstractScribeAwareOAuthServiceMetaData {
 
     public OAuthServiceMetaDataYahooImpl(ServiceLookup services) {
-        super(services, "com.openexchange.oauth.yahoo", "Yahoo");
+        super(services, API.YAHOO);
     }
 
     @Override
@@ -79,11 +79,6 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractScribeAwareOAuthServi
             return callbackUrl;
         }
         return deferrer.getDeferredURL(callbackUrl, session.getUserId(), session.getContextId());
-    }
-
-    @Override
-    public API getAPI() {
-        return API.YAHOO;
     }
 
     @Override

@@ -89,9 +89,9 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.TransportAuth;
-import com.openexchange.mailaccount.json.fields.MailAccountFields;
-import com.openexchange.mailaccount.json.parser.MailAccountParser;
-import com.openexchange.mailaccount.json.writer.MailAccountWriter;
+import com.openexchange.mailaccount.json.MailAccountFields;
+import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
+import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -105,8 +105,6 @@ import com.openexchange.tools.session.ServerSession;
 @Action(method = RequestMethod.PUT, name = "update", description = "Update a mail account", parameters = { @Parameter(name = "session", description = "A session ID previously obtained from the login module.") }, requestBody = "A JSON object identifiying (field ID is present) and describing the account to update. See mail account data.", responseDescription = "A JSON object representing the updated mail account. See mail account data.")
 public final class UpdateAction extends AbstractMailAccountAction implements MailAccountFields {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateAction.class);
-
     public static final String ACTION = AJAXServlet.ACTION_UPDATE;
 
     /**
@@ -118,13 +116,26 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
 
     private static final EnumSet<Attribute> DEFAULT = EnumSet.of(Attribute.ARCHIVE_FULLNAME_LITERAL, Attribute.ARCHIVE_LITERAL, Attribute.CONFIRMED_HAM_FULLNAME_LITERAL, Attribute.CONFIRMED_HAM_LITERAL, Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL, Attribute.CONFIRMED_SPAM_LITERAL, Attribute.DRAFTS_FULLNAME_LITERAL, Attribute.DRAFTS_LITERAL, Attribute.SENT_FULLNAME_LITERAL, Attribute.SENT_LITERAL, Attribute.SPAM_FULLNAME_LITERAL, Attribute.SPAM_LITERAL, Attribute.TRASH_FULLNAME_LITERAL, Attribute.TRASH_LITERAL);
 
-    private static final Set<Attribute> WEBMAIL_ALLOWED = EnumSet.of(Attribute.ID_LITERAL, Attribute.PERSONAL_LITERAL, Attribute.REPLY_TO_LITERAL, Attribute.UNIFIED_INBOX_ENABLED_LITERAL);
+    private static final Set<Attribute> WEBMAIL_ALLOWED = EnumSet.of(   Attribute.ID_LITERAL, 
+                                                                        Attribute.PERSONAL_LITERAL, 
+                                                                        Attribute.REPLY_TO_LITERAL, 
+                                                                        Attribute.UNIFIED_INBOX_ENABLED_LITERAL, 
+                                                                        Attribute.ARCHIVE_LITERAL, 
+                                                                        Attribute.ARCHIVE_FULLNAME_LITERAL, 
+                                                                        Attribute.SENT_LITERAL, 
+                                                                        Attribute.SENT_FULLNAME_LITERAL, 
+                                                                        Attribute.TRASH_LITERAL, 
+                                                                        Attribute.TRASH_FULLNAME_LITERAL, 
+                                                                        Attribute.SPAM_LITERAL, 
+                                                                        Attribute.SPAM_FULLNAME_LITERAL, 
+                                                                        Attribute.DRAFTS_LITERAL, 
+                                                                        Attribute.DRAFTS_FULLNAME_LITERAL);
 
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
         MailAccountDescription accountDescription = new MailAccountDescription();
-        List<OXException> warnings = new LinkedList<OXException>();
-        Set<Attribute> fieldsToUpdate = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
+        List<OXException> warnings = new LinkedList<>();
+        Set<Attribute> fieldsToUpdate = DefaultMailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
 
         if (fieldsToUpdate.contains(Attribute.TRANSPORT_AUTH_LITERAL)) {
             TransportAuth transportAuth = accountDescription.getTransportAuth();
@@ -206,12 +217,12 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
                 clearStamp |= (pop3 && !toUpdate.getTransportServer().equals(accountDescription.getTransportServer()));
             }
 
-            // Check standard folder names against full names
-            if (false == isPop3(toUpdate)) {
-                fillMailConfig(accountDescription, fieldsToUpdate, toUpdate, session);
-                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccess(accountDescription, session, warnings);
-                Tools.checkNames(accountDescription, fieldsToUpdate, Tools.getSeparator(mailAccess));
-            }
+        }
+        // Check standard folder names against full names
+        if (false == isPop3(toUpdate)) {
+            fillMailConfig(accountDescription, fieldsToUpdate, toUpdate, session);
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccess(accountDescription, session, warnings);
+            Tools.checkNames(accountDescription, fieldsToUpdate, Tools.getSeparator(mailAccess));
         }
 
         // Update
@@ -293,9 +304,9 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
         // Write to JSON structure
         final JSONObject jsonAccount;
         if (null == updatedAccount) {
-            jsonAccount = MailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), contextId));
+            jsonAccount = DefaultMailAccountWriter.write(storageService.getMailAccount(id, session.getUserId(), contextId));
         } else {
-            jsonAccount = MailAccountWriter.write(updatedAccount);
+            jsonAccount = DefaultMailAccountWriter.write(updatedAccount);
         }
 
         return new AJAXRequestResult(jsonAccount).addWarnings(warnings);
@@ -316,7 +327,11 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
         }
         if (!fieldsToUpdate.contains(Attribute.PASSWORD_LITERAL)) {
             String password = toUpdate.getPassword();
-            password = MailPasswordUtil.decrypt(password, session, toUpdate.getId(), toUpdate.getLogin(), toUpdate.getMailServer());
+            if (toUpdate.isDefaultAccount() || password == null) {
+                password = session.getPassword();
+            } else {
+                password = MailPasswordUtil.decrypt(password, session, toUpdate.getId(), toUpdate.getLogin(), toUpdate.getMailServer());
+            }
             accountDescription.setPassword(password);
         }
         if (!fieldsToUpdate.contains(Attribute.MAIL_PORT_LITERAL)) {

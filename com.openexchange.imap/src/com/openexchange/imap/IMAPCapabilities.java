@@ -119,6 +119,11 @@ public class IMAPCapabilities extends MailCapabilities {
      */
     public static final String CAP_SORT_DISPLAY = "SORT=DISPLAY";
 
+    /**
+     * SEARCH BY ATTACHMENT FILE NAME
+     */
+    public static final String CAP_SEARCH_FILENAME = "SEARCH=X-MIMEPART";
+
     /*-
      * IMAP bit constants
      */
@@ -156,6 +161,7 @@ public class IMAPCapabilities extends MailCapabilities {
     private boolean hasIdle;
     private boolean hasChildren;
     private boolean hasSortDisplay;
+    private boolean hasFileNameSearch;
 
     /**
      * Initializes a new {@link IMAPCapabilities}
@@ -299,7 +305,26 @@ public class IMAPCapabilities extends MailCapabilities {
             ", hasThreadReferences=").append(hasThreadReferences()).append(", hasChildren=").append(hasChildren()).append(", hasIMAP4=").append(
             hasIMAP4()).append(", hasIMAP4rev1=").append(hasIMAP4rev1()).append(", hasNamespace=").append(hasNamespace()).append(
             ", hasThreadOrderedSubject=").append(hasThreadOrderedSubject()).append(", hasUIDPlus=").append(hasUIDPlus()).append(
-            ", hasSortDisplay=").append(hasSortDisplay()).toString();
+            ", hasSortDisplay=").append(hasSortDisplay()).append(", hasFileNameSearch=").append(hasFileNameSearch()).toString();
+    }
+
+    /**
+     * Sets whether file name search is supported
+     *
+     * @param hasFileNameSearch <code>true</code> to indicate support for file name search; otherwise <code>false</code>
+     */
+    public void setFileNameSearch(boolean hasFileNameSearch) {
+        this.hasFileNameSearch = hasFileNameSearch;
+    }
+
+    @Override
+    public boolean hasFileNameSearch() {
+        return hasFileNameSearch;
+    }
+
+    @Override
+    public boolean hasFolderValidity() {
+        return true;
     }
 
 }

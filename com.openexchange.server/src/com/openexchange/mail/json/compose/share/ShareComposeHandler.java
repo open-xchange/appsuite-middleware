@@ -71,6 +71,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.dataobjects.compose.DelegatingComposedMailMessage;
 import com.openexchange.mail.json.compose.AbstractComposeHandler;
 import com.openexchange.mail.json.compose.ComposeDraftResult;
 import com.openexchange.mail.json.compose.ComposeRequest;
@@ -79,9 +80,11 @@ import com.openexchange.mail.json.compose.DefaultComposeDraftResult;
 import com.openexchange.mail.json.compose.DefaultComposeTransportResult;
 import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
+import com.openexchange.mail.json.compose.share.internal.EnabledCheckerRegistry;
 import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
 import com.openexchange.mail.json.compose.share.internal.ShareComposeLinkGenerator;
 import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
+import com.openexchange.mail.json.compose.share.spi.EnabledChecker;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -151,7 +154,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
      */
     private String getPassword(ComposeRequest request) {
         JSONObject jShareAttachmentOptions = optShareAttachmentOptions(request);
-        return null == jShareAttachmentOptions ? null : jShareAttachmentOptions.optString("password");
+        return null == jShareAttachmentOptions ? null : jShareAttachmentOptions.optString("password", null);
     }
 
     /**
@@ -193,7 +196,15 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
      * @throws OXException If check fails
      */
     public boolean isEnabled(Session session) throws OXException {
-        return Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.enabled", true, session) && Utilities.hasCapabilities(session, "drive", "share_links");
+        if (false == Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.enabled", true, session)) {
+            // Not enabled as per configuration
+            return false;
+        }
+
+        // Check capabilities, too
+        EnabledCheckerRegistry checkerRegistry = ServerServiceRegistry.getServize(EnabledCheckerRegistry.class);
+        EnabledChecker checker = checkerRegistry.getEnabledCheckerFor(session);
+        return checker.isEnabled(session);
     }
 
     @Override
@@ -233,6 +244,15 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
 
     @Override
     protected ComposeTransportResult doCreateTransportResult(ComposeRequest composeRequest, ShareTransportComposeContext context) throws OXException {
+        // Check if context collected any attachment at all
+        if (false == context.hasAnyPart()) {
+            // No attachments
+            ComposedMailMessage composeMessage = createRegularComposeMessage(context);
+            DelegatingComposedMailMessage transportMessage = new DelegatingComposedMailMessage(composeMessage);
+            transportMessage.setAppendToSentFolder(false);
+            return new DefaultComposeTransportResult(Collections.<ComposedMailMessage> singletonList(transportMessage), composeMessage);
+        }
+
         // Get the basic source message
         ServerSession session = composeRequest.getSession();
         ComposedMailMessage source = context.getSourceMessage();
@@ -302,12 +322,13 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             // Create share compose reference
             ShareReference shareReference;
             {
-                String basicShareUrl = folderLink.getShareURL(composeRequest.getRequest().getHostData());
+                String shareToken = folderLink.getGuest().getBaseToken();
                 shareReference = new ShareReference.Builder(session.getUserId(), session.getContextId())
                     .expiration(expirationDate)
+                    .password(password)
                     .folder(attachmentsControl.getFolder())
                     .items(attachmentsControl.getAttachments())
-                    .shareUrl(basicShareUrl)
+                    .shareToken(shareToken)
                     .build();
             }
 
@@ -343,10 +364,8 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 MessageGenerator messageGenerator = generatorRegistry.getMessageGeneratorFor(composeRequest);
                 for (Map.Entry<ShareComposeLink, Set<Recipient>> entry : links.entrySet()) {
                     ShareComposeMessageInfo messageInfo = new ShareComposeMessageInfo(entry.getKey(), new ArrayList<Recipient>(entry.getValue()), password, expirationDate, source, context, composeRequest);
-                    List<ComposedMailMessage> generatedTransportMessages = messageGenerator.generateTransportMessagesFor(messageInfo);
+                    List<ComposedMailMessage> generatedTransportMessages = messageGenerator.generateTransportMessagesFor(messageInfo, shareReference);
                     for (ComposedMailMessage generatedTransportMessage : generatedTransportMessages) {
-                        // TODO: Apply header to transport messages, too?
-                        // transportMessage.setHeader(HEADER_SHARE_MAIL, referenceString);
                         generatedTransportMessage.setAppendToSentFolder(false);
                         transportMessages.add(generatedTransportMessage);
                     }

@@ -17,7 +17,7 @@ tags:
   - name: login
     description: |
       The login module is used to obtain a session from the user's login credentials. To understand the details
-      of the different login methods, see the article titled "[Login variations](http://oxpedia.org/wiki/index.php?title=Login_variations)".
+      of the different login methods, see the article titled [Login variations](http://oxpedia.org/wiki/index.php?title=Login_variations).
       
       Because of security reasons each login variation will reject requests containing the parameter
       "password" within the URL query (starting with 7.8.0). 
@@ -37,6 +37,7 @@ tags:
       | ID | Type | Description |
       |----|------|-------------|
       | 6 | contacts | System Users |
+      
   - name: tasks
     description: The tasks module is used to access task information.
   - name: contacts

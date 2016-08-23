@@ -141,6 +141,15 @@ public enum FileStorageCapability {
      */
     MAIL_ATTACHMENTS,
 
+    /**
+     * Automatic add new file version if file already exists
+     */
+    AUTO_NEW_VERSION,
+
+    /**
+     * A folder's content can be downloaded as a ZIP archive
+     */
+    ZIPPABLE_FOLDER,
 
     ;
 }

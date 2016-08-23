@@ -2,7 +2,9 @@ package com.openexchange.webdav.action;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 public class OptionsTest extends ActionTestCase {
@@ -29,23 +31,9 @@ public class OptionsTest extends ActionTestCase {
 		}
 		assertTrue(expected.toString(), expected.isEmpty());
 
-		final String[] davs = res.getHeader("DAV").split("\\s*,\\s*");
-		assertEquals(15, davs.length);
-		assertEquals("1", davs[0]);
-		assertEquals("2", davs[1]);
-		assertEquals("3", davs[2]);
-		assertEquals("access-control", davs[3]);
-		assertEquals("calendar-access", davs[4]);
-		assertEquals("addressbook", davs[5]);
-		assertEquals("extended-mkcol", davs[6]);
-		assertEquals("calendar-auto-schedule", davs[7]);
-        assertEquals("calendar-schedule", davs[8]);
-        assertEquals("calendarserver-sharing", davs[9]);
-        assertEquals("calendarserver-principal-search", davs[10]);
-        assertEquals("calendarserver-principal-property-search", davs[11]);
-        assertEquals("calendarserver-private-comments", davs[12]);
-        assertEquals("extended-mkcol", davs[13]);
-        assertEquals("calendar-managed-attachments", davs[14]);
+		List<String> davHeaders = Strings.splitAndTrim(res.getHeader("DAV"), ",");
+		List<String> expectedDavHeaders = Strings.splitAndTrim(WebdavOptionsAction.DAV_OPTIONS, ",");
+		assertTrue(expectedDavHeaders.equals(davHeaders));
 
 		assertEquals("bytes", res.getHeader("Accept-Ranges"));
 	}

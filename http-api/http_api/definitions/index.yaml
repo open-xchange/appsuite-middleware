@@ -186,6 +186,12 @@ MailAckBody:
   $ref: ./mail/MailAckBody.yaml
 MailAckResponse:
   $ref: ./mail/MailAckResponse.yaml
+ResolveShareReferenceElement:
+  $ref: ./mail/ResolveShareReferenceElement.yaml
+ResolveShareReferenceResponse:
+  $ref: ./mail/ResolveShareReferenceResponse.yaml
+ExamineResponse:
+ $ref: ./mail/ExamineResponse.yaml
 # Module: groups
 GroupData:
   $ref: ./groups/GroupData.yaml

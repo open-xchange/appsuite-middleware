@@ -50,12 +50,11 @@
 package com.openexchange.file.storage.mail.osgi;
 
 import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.ajax.customizer.file.AdditionalFileField;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.context.ContextService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.mail.MailDriveFileStorageService;
+import com.openexchange.file.storage.mail.MailMetadataField;
 import com.openexchange.file.storage.mail.find.MailDriveDriver;
 import com.openexchange.file.storage.mail.settings.AbstractMailDriveSetting;
 import com.openexchange.file.storage.mail.settings.AllAttachmentsFolder;
@@ -65,8 +64,6 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
 
 /**
@@ -86,8 +83,7 @@ public final class MailDriveActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class,
-            MimeTypeMap.class, TimerService.class, ConfigViewFactory.class, ContextService.class, UserService.class };
+        return new Class<?>[] { MimeTypeMap.class, ConfigViewFactory.class, UserService.class };
     }
 
     @Override
@@ -113,6 +109,10 @@ public final class MailDriveActivator extends HousekeepingActivator {
             setting = new SentAttachmentsFolder(service);
             registerService(PreferencesItemService.class, setting, null);
             registerService(ConfigTreeEquivalent.class, setting, null);
+            /*
+             * register an additional file field providing additional mail metadata
+             */
+            registerService(AdditionalFileField.class, new MailMetadataField());
         } catch (Exception e) {
             logger.error("", e);
             throw e;

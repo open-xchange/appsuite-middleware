@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.console.common"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.console"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.diff"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.plugin.hosting"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.admin.rmi"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.admin"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.admin.console.common"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.admin.console"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.admin.diff"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.admin.plugin.hosting"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.2,com.openexchange.admin.rmi"/>
 </provider>
 </psf>

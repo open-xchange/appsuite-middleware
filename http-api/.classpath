@@ -7,12 +7,12 @@
 	<classpathentry kind="lib" path="lib/jersey-core-1.19.1.jar"/>
 	<classpathentry kind="lib" path="lib/jsr311-api-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-multipart-1.19.1.jar"/>
-	<classpathentry kind="lib" path="lib/jackson-annotations-2.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/jackson-core-2.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/jackson-databind-2.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/jackson-datatype-joda-2.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/jackson-jaxrs-json-provider-2.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/jackson-jaxrs-base-2.5.3.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-annotations-2.6.4.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-core-2.6.4.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-databind-2.6.4.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-datatype-joda-2.6.4.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-jaxrs-json-provider-2.6.4.jar"/>
+	<classpathentry kind="lib" path="lib/jackson-jaxrs-base-2.6.4.jar"/>
 	<classpathentry kind="lib" path="lib/migbase64-2.2.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

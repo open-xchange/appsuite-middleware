@@ -1322,11 +1322,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 final int maxNumberOfEntities;
                 final int numberOfEntities;
 
-                Candidate(final int id, final int maxNumberOfContexts, final int numberOfContexts) {
+                Candidate(final int id, final int maxNumberOfEntities, final int numberOfEntities) {
                     super();
                     this.id = id;
-                    this.maxNumberOfEntities = maxNumberOfContexts;
-                    this.numberOfEntities = numberOfContexts;
+                    this.maxNumberOfEntities = maxNumberOfEntities;
+                    this.numberOfEntities = numberOfEntities;
                 }
             }
 
@@ -1342,7 +1342,10 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 }
 
                 do {
-                    candidates.add(new Candidate(rs.getInt(1), rs.getInt(2), rs.getInt(3)));
+                    int maxNumberOfContexts = rs.getInt(2);
+                    if (maxNumberOfContexts > 0) {
+                        candidates.add(new Candidate(rs.getInt(1), maxNumberOfContexts, rs.getInt(3)));
+                    }
                 } while (rs.next());
 
                 // Close resources
@@ -1357,28 +1360,26 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             // Find a suitable one from ordered list of candidates
             boolean loadRealUsage = false;
             for (Candidate candidate : candidates) {
-                if (candidate.maxNumberOfEntities > 0) {
-                    int entityCount = candidate.numberOfEntities;
+                int entityCount = candidate.numberOfEntities;
 
-                    // Get user count information
-                    FilestoreCount count = filestoreUserCounts.get(candidate.id);
-                    if (null != count) {
-                        entityCount += count.getCount();
-                    }
+                // Get user count information
+                FilestoreCount count = filestoreUserCounts.get(candidate.id);
+                if (null != count) {
+                    entityCount += count.getCount();
+                }
 
-                    if (entityCount < candidate.maxNumberOfEntities) {
-                        FilestoreUsage userFilestoreUsage = new FilestoreUsage(null == count ? 0 : count.getCount(), 0L);
+                if (entityCount < candidate.maxNumberOfEntities) {
+                    FilestoreUsage userFilestoreUsage = new FilestoreUsage(null == count ? 0 : count.getCount(), 0L);
 
-                        // Get filestore
-                        Filestore filestore = getFilestore(candidate.id, loadRealUsage, null, userFilestoreUsage, con);
-                        if (forContext) {
-                            if (enoughSpaceForContext(filestore)) {
-                                return filestore;
-                            }
-                        } else {
-                            if (enoughSpaceForUser(filestore)) {
-                                return filestore;
-                            }
+                    // Get filestore
+                    Filestore filestore = getFilestore(candidate.id, loadRealUsage, null, userFilestoreUsage, con);
+                    if (forContext) {
+                        if (enoughSpaceForContext(filestore)) {
+                            return filestore;
+                        }
+                    } else {
+                        if (enoughSpaceForUser(filestore)) {
+                            return filestore;
                         }
                     }
                 }

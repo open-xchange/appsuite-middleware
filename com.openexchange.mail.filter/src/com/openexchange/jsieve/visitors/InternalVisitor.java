@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -72,6 +72,9 @@ import com.openexchange.jsieve.commands.IfOrElseIfCommand;
 import com.openexchange.jsieve.commands.RequireCommand;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.TestCommand;
+import com.openexchange.jsieve.commands.test.ITestCommand;
+import com.openexchange.jsieve.registry.TestCommandRegistry;
+import com.openexchange.mailfilter.services.Services;
 
 /**
  * This class is used to convert the JJTree Objects into the internal
@@ -211,48 +214,52 @@ public class InternalVisitor implements SieveParserVisitor {
 //            }
 //            commands.add(elseCommand);
         } else {
-            final ArrayList<Object> visitChildren = (ArrayList<Object>) visitChildren(node, data);
-            final ArrayList<Object> arguments = new ArrayList<Object>();
-            for (final Object obj : visitChildren) {
-                if (obj instanceof TagArgument) {
-                    final TagArgument tag = (TagArgument) obj;
-                    arguments.add(tag);
-                } else if (obj instanceof NumberArgument) {
-                    final NumberArgument numberarg = (NumberArgument) obj;
-                    arguments.add(numberarg);
-                } else if (obj instanceof ArrayList) {
-                    arguments.add(obj);
-                } else {
-                    final ArrayList<String> arrayList = new ArrayList<String>();
-                    arrayList.add(obj.toString());
-                    arguments.add(arrayList);
-                }
-            }
-            for (final ActionCommand.Commands command : ActionCommand.Commands.values()) {
-                if (command.getCommandName().equals(name)) {
-                    final ActionCommand actionCommand = new ActionCommand(command, arguments);
-                    // Here we have to decide if we are on the base level or
-                    // inside a control command. If we are inside
-                    // a control command the parent-parent node is a block, so
-                    // test this
-                    if (node.jjtGetParent().jjtGetParent() instanceof ASTblock) {
-                        ((ArrayList<ActionCommand>) data).add(actionCommand);
-                    } else if (node.jjtGetParent().jjtGetParent() instanceof ASTstart) {
-                        // As a workaround we surround the commands with an if (true)
-                        final ArrayList<ActionCommand> actionCommands = new ArrayList<ActionCommand>();
-                        actionCommands.add(actionCommand);
-                        final IfOrElseIfCommand ifCommand = new IfCommand();
-                        ifCommand.setTestcommand(new TestCommand(TestCommand.Commands.TRUE, new ArrayList<Object>(), new ArrayList<TestCommand>()));
-                        ifCommand.setActionCommands(actionCommands);
-                        final ArrayList<Command> commands = new ArrayList<Command>();
-                        commands.add(ifCommand);
-                        ((ArrayList<Rule>) data).add(new Rule(commands, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), commented));
-//                        ((ArrayList<Rule>) data).add(new Rule(commands, node.getCoordinate().getStartLineNumber(), commented));
-//                        throw new SieveException("Action commands are not allowed on base level, line " + node.getCoordinate().getStartLineNumber());
+            try {
+                final ArrayList<Object> visitChildren = (ArrayList<Object>) visitChildren(node, data);
+                final ArrayList<Object> arguments = new ArrayList<Object>();
+                for (final Object obj : visitChildren) {
+                    if (obj instanceof TagArgument) {
+                        final TagArgument tag = (TagArgument) obj;
+                        arguments.add(tag);
+                    } else if (obj instanceof NumberArgument) {
+                        final NumberArgument numberarg = (NumberArgument) obj;
+                        arguments.add(numberarg);
+                    } else if (obj instanceof ArrayList) {
+                        arguments.add(obj);
                     } else {
-                        // What the hell....
+                        final ArrayList<String> arrayList = new ArrayList<String>();
+                        arrayList.add(obj.toString());
+                        arguments.add(arrayList);
                     }
                 }
+                for (final ActionCommand.Commands command : ActionCommand.Commands.values()) {
+                    if (command.getCommandName().equals(name)) {
+                        final ActionCommand actionCommand = new ActionCommand(command, arguments);
+                        // Here we have to decide if we are on the base level or
+                        // inside a control command. If we are inside
+                        // a control command the parent-parent node is a block, so
+                        // test this
+                        if (node.jjtGetParent().jjtGetParent() instanceof ASTblock) {
+                            ((ArrayList<ActionCommand>) data).add(actionCommand);
+                        } else if (node.jjtGetParent().jjtGetParent() instanceof ASTstart) {
+                            // As a workaround we surround the commands with an if (true)
+                            final ArrayList<ActionCommand> actionCommands = new ArrayList<ActionCommand>();
+                            actionCommands.add(actionCommand);
+                            final IfOrElseIfCommand ifCommand = new IfCommand();
+                            ifCommand.setTestcommand(new TestCommand(TestCommand.Commands.TRUE, new ArrayList<Object>(), new ArrayList<TestCommand>()));
+                            ifCommand.setActionCommands(actionCommands);
+                            final ArrayList<Command> commands = new ArrayList<Command>();
+                            commands.add(ifCommand);
+                            ((ArrayList<Rule>) data).add(new Rule(commands, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), commented));
+//                            ((ArrayList<Rule>) data).add(new Rule(commands, node.getCoordinate().getStartLineNumber(), commented));
+//                            throw new SieveException("Action commands are not allowed on base level, line " + node.getCoordinate().getStartLineNumber());
+                        } else {
+                            // What the hell....
+                        }
+                    }
+                }
+            } catch (final SieveException e) {
+                ((ArrayList<Rule>) data).add(new Rule(commented, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), e.getMessage()));
             }
         }
         return data;
@@ -297,53 +304,65 @@ public class InternalVisitor implements SieveParserVisitor {
     @Override
     public Object visit(final ASTtest node, final Object data) throws SieveException {
         final String name = node.getName();
-        for (final TestCommand.Commands command : TestCommand.Commands.values()) {
-            if (command.getCommandName().equals(name)) {
-                final Object visitChildren = visitChildren(node, data);
-                if (visitChildren instanceof ArrayList) {
-                    final ArrayList<String> tagargs = new ArrayList<String>();
-                    final ArrayList<Object> arguments = new ArrayList<Object>();
-                    final ArrayList<TestCommand> testcommands = new ArrayList<TestCommand>();
-                    for (final Object obj : ((ArrayList<Object>) visitChildren)) {
-                        if (obj instanceof TagArgument) {
-                            final TagArgument tag = (TagArgument) obj;
-                            final String string = tag.toString();
-                            tagargs.add(string);
-                            arguments.add(tag);
-                        } else if (obj instanceof ArrayList) {
-                            // Here we have to determine which type is inside,
-                            // so we must check the size first and then get
-                            // first element
-                            final ArrayList<Object> array = (ArrayList<Object>) obj;
-                            if (!array.isEmpty()) {
-                                final Object object = array.get(0);
-                                if (object instanceof TestCommand) {
-                                    testcommands.addAll((ArrayList<TestCommand>) obj);
-                                } else if (object instanceof String) {
-                                    arguments.add(obj);
-                                }
-                            }
-                        } else if (obj instanceof TestCommand) {
-                            final TestCommand testcommand = (TestCommand) obj;
-                            testcommands.add(testcommand);
-                        } else if (obj instanceof NumberArgument) {
-                            final NumberArgument numberarg = (NumberArgument) obj;
-                            arguments.add(numberarg);
-                        } else {
-                            final ArrayList<String> array = new ArrayList<String>(1);
-                            array.add(obj.toString());
-                            arguments.add(array);
-                        }
-                    }
-                    return new TestCommand(command, arguments, testcommands);
-                } else if (visitChildren instanceof TestCommand) {
-                    final ArrayList<TestCommand> testcommands = new ArrayList<TestCommand>();
-                    testcommands.add((TestCommand) visitChildren);
-                    return new TestCommand(command, new ArrayList<Object>(), testcommands);
-                }
+        // now use registry:
+        TestCommandRegistry testCommandRegistry = Services.getService(TestCommandRegistry.class);
+        for (final ITestCommand command : testCommandRegistry.getCommands()) {
+            TestCommand testCommand = visit0(node, data, name, command);
+            if (null != testCommand) {
+                return testCommand;
             }
         }
+
         throw new SieveException("Found not known test name: " + name + " in line " + node.getCoordinate().getStartLineNumber());
+    }
+
+    private TestCommand visit0(final ASTtest node, final Object data, final String name, final ITestCommand command) throws SieveException {
+        TestCommand testCommand = null;
+        if (command.getCommandName().equals(name)) {
+            final Object visitChildren = visitChildren(node, data);
+            if (visitChildren instanceof ArrayList) {
+                final ArrayList<String> tagargs = new ArrayList<String>();
+                final ArrayList<Object> arguments = new ArrayList<Object>();
+                final ArrayList<TestCommand> testcommands = new ArrayList<TestCommand>();
+                for (final Object obj : ((ArrayList<Object>) visitChildren)) {
+                    if (obj instanceof TagArgument) {
+                        final TagArgument tag = (TagArgument) obj;
+                        final String string = tag.toString();
+                        tagargs.add(string);
+                        arguments.add(tag);
+                    } else if (obj instanceof ArrayList) {
+                        // Here we have to determine which type is inside,
+                        // so we must check the size first and then get
+                        // first element
+                        final ArrayList<Object> array = (ArrayList<Object>) obj;
+                        if (!array.isEmpty()) {
+                            final Object object = array.get(0);
+                            if (object instanceof TestCommand) {
+                                testcommands.addAll((ArrayList<TestCommand>) obj);
+                            } else if (object instanceof String) {
+                                arguments.add(obj);
+                            }
+                        }
+                    } else if (obj instanceof TestCommand) {
+                        final TestCommand testcommand = (TestCommand) obj;
+                        testcommands.add(testcommand);
+                    } else if (obj instanceof NumberArgument) {
+                        final NumberArgument numberarg = (NumberArgument) obj;
+                        arguments.add(numberarg);
+                    } else {
+                        final ArrayList<String> array = new ArrayList<String>(1);
+                        array.add(obj.toString());
+                        arguments.add(array);
+                    }
+                }
+                testCommand =  new TestCommand(command, arguments, testcommands);
+            } else if (visitChildren instanceof TestCommand) {
+                final ArrayList<TestCommand> testcommands = new ArrayList<TestCommand>();
+                testcommands.add((TestCommand) visitChildren);
+                testCommand =  new TestCommand(command, new ArrayList<Object>(), testcommands);
+            }
+        }
+        return testCommand;
     }
 
     @Override

@@ -149,6 +149,7 @@
             <sysproperty key="user.country" value="US"/>
             <sysproperty key="logback.configurationFile" value="${confDir}/logback.xml"/>
             <sysproperty key="java.awt.headless" value="true"/>
+            <sysproperty key="jaxp.debug" value="true"/>
         </junit>
     </target>
 

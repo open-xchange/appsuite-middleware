@@ -52,14 +52,15 @@ package com.openexchange.imap.storecache;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.mail.MessagingException;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.config.IMAPReloadable;
@@ -131,8 +132,8 @@ public final class IMAPStoreCache {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.imap.checkConnected", "com.openexchange.imap.storeContainerType", "com.openexchange.imap.maxNumConnections");
             }
         });
     }
@@ -298,7 +299,7 @@ public final class IMAPStoreCache {
         }
     }
 
-    private IMAPStoreContainer getContainer(final int accountId, final String server, final int port, final String login, final Session session, boolean propagateClientIp, boolean checkConnectivityIfPolled) throws OXException {
+    private IMAPStoreContainer getContainer(int accountId, String server, int port, String login, Session session, boolean propagateClientIp, boolean checkConnectivityIfPolled) throws OXException {
         /*
          * Check for a cached one
          */
@@ -308,7 +309,7 @@ public final class IMAPStoreCache {
          */
         IMAPStoreContainer container = map.get(key);
         if (null == container) {
-            final IMAPStoreContainer newContainer = newContainer(server, port, propagateClientIp, checkConnectivityIfPolled);
+            final IMAPStoreContainer newContainer = newContainer(server, port, accountId, session, propagateClientIp, checkConnectivityIfPolled);
             container = map.putIfAbsent(key, newContainer);
             if (null == container) {
                 container = newContainer;
@@ -328,16 +329,16 @@ public final class IMAPStoreCache {
         return container;
     }
 
-    private IMAPStoreContainer newContainer(final String server, final int port, boolean propagateClientIp, boolean checkConnectivityIfPolled) {
+    private IMAPStoreContainer newContainer(String server, int port, int accountId, Session session, boolean propagateClientIp, boolean checkConnectivityIfPolled) {
         switch (containerType) {
         case UNBOUNDED:
-            return new UnboundedIMAPStoreContainer(server, port, propagateClientIp, checkConnectivityIfPolled);
+            return new UnboundedIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
         case BOUNDARY_AWARE:
-            return new BoundaryAwareIMAPStoreContainer(server, port, propagateClientIp, checkConnectivityIfPolled);
+            return new BoundaryAwareIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
         case NON_CACHING:
-            return new NonCachingIMAPStoreContainer(server, port, propagateClientIp);
+            return new NonCachingIMAPStoreContainer(accountId, session, server, port, propagateClientIp);
         default:
-            return new BoundaryAwareIMAPStoreContainer(server, port, propagateClientIp, checkConnectivityIfPolled);
+            return new BoundaryAwareIMAPStoreContainer(accountId, session, server, port, propagateClientIp, checkConnectivityIfPolled);
         }
     }
 

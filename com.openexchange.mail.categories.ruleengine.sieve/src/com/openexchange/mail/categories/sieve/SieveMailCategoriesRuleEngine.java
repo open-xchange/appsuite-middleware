@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.security.auth.Subject;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
@@ -91,13 +92,29 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
 
     private final ServiceLookup services;
 
-
     /**
      * Initializes a new {@link SieveMailCategoriesRuleEngine}.
      */
     public SieveMailCategoriesRuleEngine(ServiceLookup services) {
         super();
         this.services = services;
+    }
+
+    @Override
+    public boolean isApplicable(Session session) throws OXException {
+        MailFilterService mailFilterService = services.getService(MailFilterService.class);
+        if (mailFilterService == null) {
+            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailFilterService.class);
+        }
+
+        Credentials creds = getCredentials(session);
+        Set<String> capabilities = mailFilterService.getStaticCapabilities(creds);
+        boolean applicable = capabilities.contains("imap4flags");
+        if (!applicable) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(SieveMailCategoriesRuleEngine.class);
+            logger.warn("SIEVE server is not suitable for mail categories as it misses required \"imap4flags\" capability");
+        }
+        return applicable;
     }
 
     @Override
@@ -111,9 +128,9 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
             throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailFilterService.class);
         }
 
+        Credentials creds = getCredentials(session);
         Rule oldRule = null;
         String rulename = rule.getFlag() == null ? MailCategoriesConstants.GENERAL_CATEGORY_ID : rule.getFlag();
-        Credentials creds = getCredentials(session);
         try {
 
             List<Rule> rules = mailFilterService.listRules(creds, type.getName());
@@ -127,6 +144,8 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
             Rule newRule = mailCategoryRule2SieveRule(rule, type);
 
             if (oldRule != null) {
+                newRule.setPosition(oldRule.getPosition());
+                newRule.getRuleComment().setUniqueid(oldRule.getUniqueId());
                 mailFilterService.updateFilterRule(creds, newRule, oldRule.getUniqueId());
             } else {
                 mailFilterService.createFilterRule(creds, newRule);
@@ -252,7 +271,6 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         }
 
         Credentials creds = getCredentials(session);
-
         List<Rule> rules = mailFilterService.listRules(creds, "category");
         String name = flag;
         if (flag == null) {
@@ -274,15 +292,15 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         //  assume command contains an ALLOF testcommand with a not hasflag test and another test
         if (command.getTestCommands() == null || command.getTestCommands().isEmpty()) {
             throw MailCategoriesRuleEngineExceptionCodes.UNABLE_TO_RETRIEVE_RULE.create();
+        }
+
+        List<TestCommand> twoCommands = command.getTestCommands();
+        if (twoCommands.size() != 2) {
+            throw MailCategoriesRuleEngineExceptionCodes.UNABLE_TO_RETRIEVE_RULE.create();
         } else {
-            List<TestCommand> twoCommands = command.getTestCommands();
-            if (twoCommands.size() != 2) {
-                throw MailCategoriesRuleEngineExceptionCodes.UNABLE_TO_RETRIEVE_RULE.create();
-            } else {
-                // assume command 0 is the not hasflag command
-                TestCommand realTest = twoCommands.get(1);
-                return parseRule(realTest, flag);
-            }
+            // assume command 0 is the not hasflag command
+            TestCommand realTest = twoCommands.get(1);
+            return parseRule(realTest, flag);
         }
     }
 
@@ -327,6 +345,7 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         if (mailFilterService == null) {
             throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailFilterService.class);
         }
+
         Credentials creds = getCredentials(session);
         List<Rule> rules = mailFilterService.listRules(creds, "category");
         List<Rule> rules2update = new ArrayList<>();
@@ -351,7 +370,6 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
                 if (testCom.getCommand() == TestCommand.Commands.ANYOF || testCom.getCommand() == TestCommand.Commands.ALLOF) {
                     if (testCom.getTestCommands().isEmpty()) {
                         mailFilterService.deleteFilterRule(creds, rule.getUniqueId());
-                        continue;
                     } else {
                         // test whether it contains only the hasflag check
                         if (testCom.getTestCommands().size() == 1 && testCom.getTestCommands().get(0).getCommand().equals(Commands.NOT)) {
@@ -426,9 +444,9 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         if (mailFilterService == null) {
             throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailFilterService.class);
         }
-        final Credentials creds = getCredentials(session);
 
         // Get old rules
+        Credentials creds = getCredentials(session);
         List<Rule> oldRules = mailFilterService.listRules(creds, RuleType.SYSTEM_CATEGORY.getName());
         final int[] uids = new int[oldRules.size()];
         int x = 0;
@@ -449,4 +467,34 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
             mailFilterService.reorderRules(creds, new int[] {});
         }
     }
+
+    @Override
+    public void cleanUp(List<String> flags, Session session) throws OXException {
+        MailFilterService mailFilterService = services.getService(MailFilterService.class);
+        if (mailFilterService == null) {
+            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailFilterService.class);
+        }
+
+        Credentials creds = getCredentials(session);
+        List<Integer> uidList = new ArrayList<>();
+        List<Rule> rules = mailFilterService.listRules(creds, RuleType.CATEGORY.getName());
+        for (Rule rule : rules) {
+            String name = rule.getRuleComment().getRulename();
+            if (!flags.contains(name) && !name.equals(MailCategoriesConstants.GENERAL_CATEGORY_ID)) {
+                uidList.add(rule.getRuleComment().getUniqueid());
+            }
+        }
+        if (uidList.isEmpty()) {
+            return;
+        }
+        int[] uids = new int[uidList.size()];
+        int x = 0;
+        for (Integer i : uidList) {
+            uids[x++] = i;
+        }
+
+        mailFilterService.deleteFilterRules(creds, uids);
+
+    }
+
 }

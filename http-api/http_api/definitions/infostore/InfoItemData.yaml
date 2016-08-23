@@ -27,7 +27,7 @@ properties:
     description: The size of the document in bytes.
   version:
     type: string
-    description: Version of the document. New documents start at 1. Every update increments the version by 1.
+    description: Version of the document. NULL can be used to denote the most recent version and will be set in responses if versions are not supported by the underlying storage.
   description:
     type: string
     description: A description if the item.
@@ -55,4 +55,6 @@ properties:
   com.openexchange.realtime.resourceID:
     type: string
     description: The resource identifier for the infoitem for usage within the realtime component (read-only). (available since 7.8.0)
-  
+  com.openexchange.file.storage.mail.mailMetadata:
+    type: object
+    description: Contains additional metadata for items in the "maildrive" file storage (read-only). (available since 7.8.2)

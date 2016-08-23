@@ -52,6 +52,7 @@ package com.openexchange.contact.vcard.impl.mapping;
 import java.util.Arrays;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import ezvcard.property.Categories;
@@ -64,7 +65,7 @@ import ezvcard.property.Categories;
 public class CategoriesMapping extends SimpleMapping<Categories> {
 
     public CategoriesMapping() {
-        super(Contact.CATEGORIES, Categories.class);
+        super(Contact.CATEGORIES, Categories.class, "CATEGORIES", ContactField.CATEGORIES);
     }
 
     @Override

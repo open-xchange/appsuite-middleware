@@ -176,7 +176,7 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
         return new StringBuilder("IDBasedAccess ")
             .append("[user=").append(session.getUserId()).append(", context=").append(session.getContextId())
             .append(", connectedAccounts=").append(connectedAccounts.get().keySet()).append(']')
-        .toString();
+            .toString();
     }
 
     /**

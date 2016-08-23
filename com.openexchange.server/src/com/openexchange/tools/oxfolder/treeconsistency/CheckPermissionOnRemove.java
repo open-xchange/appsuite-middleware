@@ -183,11 +183,21 @@ public final class CheckPermissionOnRemove extends CheckPermission {
         /*
          * Check if recursive call is needed that is current parent folder is no more visible to entity if system permission is removed
          */
-        if (!getFolderFromMaster(parent).isNonSystemVisible(entity)) {
+        FolderObject parentFolder;
+        try {
+            parentFolder = getFolderFromMaster(parent, false);
+        } catch (OXException e) {
+            if ("FLD-0008".equals(e.getErrorCode())) {
+                // parent no longer found, abort
+                return;
+            }
+            throw e;
+        }
+        if (false == parentFolder.isNonSystemVisible(entity)) {
             /*
              * Recursively check ancestor folders
              */
-            hasVisibleSibling(getFolderFromMaster(parent).getParentFolderID(), parent, origin, entity, isGroup, toRemove);
+            hasVisibleSibling(parentFolder.getParentFolderID(), parent, origin, entity, isGroup, toRemove);
         }
     }
 

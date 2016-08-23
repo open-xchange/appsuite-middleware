@@ -72,6 +72,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.api2.ReminderService;
@@ -1351,8 +1353,10 @@ public final class CalendarCollection implements CalendarCollectionService {
             throw OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_RECURRING_POSITION.create(clone.getRecurrencePosition());
         }
         final RecurringResultInterface rs = rss.getRecurringResult(0);
-        if (!cdao.containsStartDate() || !cdao.containsEndDate()) {
-            clone.setStartDate(new Date(rs.getStart()));
+        if (!cdao.containsStartDate()) {
+            clone.setStartDate(new Date(rs.getStart()));   
+        }
+        if (!cdao.containsEndDate()) {
             clone.setEndDate(new Date(rs.getEnd()));
         }
 
@@ -2000,6 +2004,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     public void simpleParticipantCheck(final CalendarDataObject cdao) throws OXException {
         // TODO: Maybe we have to enhance this simple check
         final Participant check[] = cdao.getParticipants();
+        List<Participant> target = new ArrayList<Participant>();
         if (check != null && check.length > 0) {
             for (int a = 0; a < check.length; a++) {
                 if (check[a].getType() == Participant.EXTERNAL_USER) {
@@ -2009,9 +2014,18 @@ public final class CalendarCollection implements CalendarCollectionService {
                     if (check[a].getEmailAddress() == null) {
                         throw OXCalendarExceptionCodes.EXTERNAL_PARTICIPANTS_MANDATORY_FIELD.create();
                     }
+                    try {
+                        new InternetAddress(check[a].getEmailAddress()).validate();
+                        target.add(check[a]);
+                    } catch (AddressException e) {
+                        LOG.warn("Invalid email address for external participant: {}.", check[a].getEmailAddress());
+                    }
+                } else {
+                    target.add(check[a]);
                 }
             }
         }
+        cdao.setParticipants(target);
     }
 
     @Override

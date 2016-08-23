@@ -71,7 +71,6 @@ import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.mail.Flags;
@@ -96,7 +95,9 @@ import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.james.mime4j.stream.MimeConfig;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Charsets;
@@ -493,7 +494,8 @@ public final class MimeMessageConverter {
             if (composedMail.getSession() == null) {
                 compositionParameters = new ContextCompositionParameters(composedMail.getContext());
             } else {
-                compositionParameters = new SessionCompositionParameters(composedMail.getSession(), composedMail.getContext(), UserSettingMailStorage.getInstance().getUserSettingMail(composedMail.getSession()));
+                UserSettingMail usm = null == composedMail.getMailSettings() ? UserSettingMailStorage.getInstance().getUserSettingMail(composedMail.getSession()) : composedMail.getMailSettings();
+                compositionParameters = new SessionCompositionParameters(composedMail.getSession(), composedMail.getContext(), usm);
             }
             final MimeMessageFiller filler = new MimeMessageFiller(compositionParameters);
             filler.setAccountId(composedMail.getAccountId());
@@ -2426,8 +2428,8 @@ public final class MimeMessageConverter {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.mail.mime.enableMime4j");
             }
         });
     }

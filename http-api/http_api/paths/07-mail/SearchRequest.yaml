@@ -23,8 +23,8 @@
       - in: body
         name: body
         description: |
-          A JSON object describing the search term as introducted in [Advanced search](#advanced-search). Example:
-          `{"filter":["and",["=", {"field":"to"},"test1@example.com"],["not",["=",{"field":"from"},"test2@example.com"]]]}`
+          A JSON object describing the search term as introducted in [Advanced search](https://documentation.open-xchange.com/latest/middleware/http_api/5_advanced_search.html). Example:
+          `{"filter":["and",["=", {"field":"to"},"test1@example.com"],["not",["=",{"attachment":"name"},"document.pdf"]]]}`
           which represents 'to = "test1@example.com" AND NOT from = "test2@example.com"'. Available field names are
           `from`, `to`, `cc`, `bcc`, `subject`, `received_date`, `sent_date`, `size`, `flags`, `content`, `content_type`, `disp`, and `priority`.
         required: true
@@ -35,6 +35,6 @@
         description: |
           'A JSON object containing an array with matching mails. Mails are represented by arrays. The elements of each array contain the
           information specified by the corresponding identifiers in the `columns` parameter. Not IMAP: with timestamp. In case of errors the responsible fields in the
-          response are filled (see [Error handling](#error-handling)).'
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).'
         schema:
           $ref: "#/definitions/MailsResponse"

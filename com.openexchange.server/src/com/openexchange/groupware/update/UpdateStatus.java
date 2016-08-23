@@ -49,6 +49,8 @@
 
 package com.openexchange.groupware.update;
 
+import java.util.Date;
+
 /**
  * {@link UpdateStatus}
  *
@@ -63,4 +65,8 @@ public interface UpdateStatus {
     boolean needsBlockingUpdates();
 
     boolean needsBackgroundUpdates();
+
+    Date blockingUpdatesRunningSince();
+
+    Date backgroundUpdatesRunningSince();
 }

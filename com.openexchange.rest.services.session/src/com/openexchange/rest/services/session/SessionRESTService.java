@@ -58,6 +58,8 @@ import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.rest.services.annotation.Role;
+import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -72,7 +74,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
  * @since v7.8.1
  */
-@Path("/session/v1/")
+@Path("/preliminary/session/v1/")
+@RoleAllowed(Role.BASIC_AUTHENTICATED)
 public class SessionRESTService {
 
     private final ServiceLookup services;

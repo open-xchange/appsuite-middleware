@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 public interface TransportAccount extends Account {
 
     /**
-     * Parses specified transport server URL.
+     * Parses specified transport server URL. If the given url is <code>null</code>, then the transportserver url will be set to <code>null</code> too.
      *
      * @param url The transport server URL to parse
      * @throws OXException if parsing the URL fails.

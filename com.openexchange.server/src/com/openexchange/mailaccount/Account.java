@@ -65,6 +65,11 @@ public interface Account extends Serializable {
     public static final int DEFAULT_ID = 0;
 
     /**
+     * The ID to identify a default mail account.
+     */
+    public static final String DEFAULT_ID_STR = Integer.toString(DEFAULT_ID);
+
+    /**
      * Generates the transport server URL; e.g. <code>&quot;smtp://smtp.somewhere.com:225&quot;</code>.
      *
      * @return The generated transport server URL
@@ -110,17 +115,38 @@ public interface Account extends Serializable {
     String getPrimaryAddress();
 
     /**
-     * @return
+     * Gets the personal part of primary email address; e.g.<br>
+     * <code>Jane Doe &lt;jane.doe@somewhere.com&gt;</code>
+     *
+     * @return The personal
+     */
+    public String getPersonal();
+
+    /**
+     * Gets the reply-to address.
+     *
+     * @return The reply-to address
+     */
+    public String getReplyTo();
+
+    /**
+     * Gets the transport-auth value.
+     *
+     * @return The transport-auth value
      */
     TransportAuth getTransportAuth();
 
     /**
-     * @return
+     * Gets the transport login
+     *
+     * @return The transport login
      */
     String getTransportLogin();
 
     /**
-     * @return
+     * Gets the transport password
+     *
+     * @return The transport password
      */
     String getTransportPassword();
 
@@ -149,6 +175,13 @@ public interface Account extends Serializable {
     String getTransportServer();
 
     /**
+     * Checks if a secure connection to transport server shall be established.
+     *
+     * @return <code>true</code> if a secure connection to transport server shall be established; otherwise <code>false</code>
+     */
+    public boolean isTransportSecure();
+
+    /**
      * Checks if this mail account is a default account.
      *
      * @return <code>true</code> if this mail account is a default account; otherwise <code>false</code>
@@ -157,7 +190,7 @@ public interface Account extends Serializable {
 
     /**
      * Checks if STARTTLS should be used to connect to transport server
-     * 
+     *
      * @return
      */
     boolean isTransportStartTls();

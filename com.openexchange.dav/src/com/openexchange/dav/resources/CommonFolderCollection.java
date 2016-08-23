@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.resources;
 
+import static com.openexchange.dav.DAVProtocol.protocolException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -58,6 +59,7 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.DAVUserAgent;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.internal.Tools;
 import com.openexchange.dav.mixins.ACL;
@@ -67,11 +69,10 @@ import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.dav.mixins.Invite;
 import com.openexchange.dav.mixins.Principal;
 import com.openexchange.dav.mixins.ShareAccess;
-import com.openexchange.dav.mixins.SharerResourceURI;
+import com.openexchange.dav.mixins.ShareResourceURI;
 import com.openexchange.dav.mixins.SupportedPrivilegeSet;
 import com.openexchange.dav.mixins.SyncToken;
 import com.openexchange.dav.reports.SyncStatus;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.ProblematicAttribute;
@@ -120,7 +121,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
         if (null != folder) {
             includeProperties(new CurrentUserPrivilegeSet(folder.getOwnPermission()), new CTag(this), new SyncToken(this));
             includeProperties(new ACL(folder.getPermissions()), new ACLRestrictions(), new SupportedPrivilegeSet());
-            includeProperties(new ShareAccess(this), new Invite(this), new SharerResourceURI(this), new Principal(getOwner()));
+            includeProperties(new ShareAccess(this), new Invite(this), new ShareResourceURI(this), new Principal(getOwner()));
         }
     }
 
@@ -197,7 +198,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
             LOG.debug("{}: added {} child resources.", this.getUrl(), children.size());
             return children;
         } catch (OXException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -222,7 +223,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
                 return createResource(null, constructPathForChildResource(name));
             }
         } catch (OXException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -247,7 +248,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
              */
             return getSyncStatus(new Date(since));
         } catch (OXException e) {
-            throw protocolException(e);
+            throw protocolException(getUrl(), e);
         }
     }
 
@@ -271,7 +272,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
     @Override
     public void setDisplayName(String displayName) throws WebdavProtocolException {
         if (folder.isDefault() || false == PrivateType.getInstance().equals(folder.getType())) {
-            throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+            throw protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
         getFolderToUpdate().setName(displayName);
     }
@@ -279,7 +280,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
     @Override
     public void save() throws WebdavProtocolException {
         if (false == exists() || null == folder) {
-            throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+            throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
         }
         if (null == folderToUpdate) {
             return; // no changes
@@ -304,10 +305,7 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
                         }
                     }
                 }
-                if (e.getCategory().equals(Category.CATEGORY_PERMISSION_DENIED)) {
-                    throw WebdavProtocolException.generalError(e, getUrl(), HttpServletResponse.SC_FORBIDDEN);
-                }
-                throw protocolException(e);
+                throw protocolException(getUrl(), e);
             }
         }
     }
@@ -320,16 +318,22 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
     @Override
     protected void internalDelete() throws WebdavProtocolException {
         if (null == folder) {
-            throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+            throw protocolException(getUrl(), HttpServletResponse.SC_NOT_FOUND);
+        }
+        if (null != folder.getOwnPermission() && false == folder.getOwnPermission().isAdmin() && DAVUserAgent.MAC_CALENDAR.equals(getUserAgent())) {
+            // Client will continue to show an exclamation mark if responding with 403 on an "unsubscribe" request,
+            // so pretend a successful deletion here
+            LOG.info("{}: Ignoring delete/unsubscribe request for folder {} due to missing admin permissions of user {}.", getUrl(), folder, factory.getUser().getId());
+            return;
         }
         if (folder.isDefault()) {
-            throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+            throw protocolException(getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
         String treeID = null != folder.getTreeID() ? folder.getTreeID() : FolderStorage.REAL_TREE_ID;
         try {
             factory.getService(FolderService.class).deleteFolder(treeID, folder.getID(), folder.getLastModifiedUTC(), factory.getSession(), null);
         } catch (OXException e) {
-            throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+            throw protocolException(getUrl(), e);
         }
     }
 

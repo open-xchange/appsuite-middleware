@@ -51,6 +51,10 @@ package com.openexchange.file.storage.dropbox.access;
 
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.file.storage.dropbox.DropboxServices;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
@@ -81,7 +85,9 @@ public final class DropboxEventHandler implements EventHandler {
                 if (null != contextId) {
                     Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
                     if (null != userId) {
-                        if (DropboxOAuthAccessRegistry.getInstance().removeAccessIfLast(contextId, userId)) {
+                        OAuthAccessRegistryService registryService = DropboxServices.getService(OAuthAccessRegistryService.class);
+                        OAuthAccessRegistry registry = registryService.get(API.DROPBOX.getFullName());
+                        if (registry.removeIfLast(contextId, userId)) {
                             LOG.debug("Dropbox session removed for user {} in context {}", userId, contextId);
                         }
                     }

@@ -49,8 +49,10 @@
 
 package com.openexchange.ajax.mail.categories;
 
+import static org.junit.Assert.*;
 import java.io.IOException;
 import org.json.JSONException;
+import org.junit.Test;
 import com.openexchange.ajax.mail.MailTestManager;
 import com.openexchange.ajax.mail.TestMail;
 import com.openexchange.ajax.mail.actions.NewMailRequest;
@@ -76,10 +78,10 @@ public class AllRequestCategoryParameterTest extends AbstractMailCategoriesTest 
      * @throws IOException
      * @throws OXException
      */
-    public AllRequestCategoryParameterTest(String name) throws OXException, IOException, JSONException {
-        super(name);
+    public AllRequestCategoryParameterTest() {
     }
 
+    @Test
     public void testAllRequest() throws Exception {
 
         MailTestManager manager = new MailTestManager(client, false);

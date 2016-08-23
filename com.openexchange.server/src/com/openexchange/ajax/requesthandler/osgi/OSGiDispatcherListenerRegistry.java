@@ -128,16 +128,7 @@ public class OSGiDispatcherListenerRegistry implements DispatcherListenerRegistr
         }
 
         List<DispatcherListener> listeners = new LinkedList<DispatcherListener>();
-
-        // Grab module
-        String module;
-        {
-            module = requestData.getModule();
-            int pos = module.indexOf('/');
-            if (pos > 0) {
-                module = module.substring(0, pos);
-            }
-        }
+        String module = requestData.getNormalizedModule();
 
         if (Strings.isNotEmpty(module)) {
             // Grab action
@@ -159,13 +150,13 @@ public class OSGiDispatcherListenerRegistry implements DispatcherListenerRegistr
         }
 
         // Add the ones signaling applicability
+        List<DispatcherListener> applicables = new LinkedList<DispatcherListener>();
         for (DispatcherListener listener : listeners) {
             if (listener.applicable(requestData)) {
-                listeners.add(listener);
+                applicables.add(listener);
             }
         }
-
-        return listeners;
+        return applicables;
     }
 
     private boolean add(DispatcherListener listener) {

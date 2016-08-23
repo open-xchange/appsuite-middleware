@@ -83,7 +83,7 @@ public class TransportAccountImpl implements TransportAccount {
     private String name;
     private String personal;
     private String replyTo;
-    private String sentAddress;
+    private String sendAddress;
     private TransportAuth transportAuth;
     private String transportLogin;
     private String transportPassword;
@@ -141,7 +141,7 @@ public class TransportAccountImpl implements TransportAccount {
 
     @Override
     public String getPrimaryAddress() {
-        return this.sentAddress;
+        return this.sendAddress;
     }
 
 
@@ -228,6 +228,11 @@ public class TransportAccountImpl implements TransportAccount {
         this.personal = personal;
     }
 
+    @Override
+    public String getPersonal() {
+        return personal;
+    }
+
     /**
      * Sets the reply-to address
      *
@@ -235,6 +240,11 @@ public class TransportAccountImpl implements TransportAccount {
      */
     public void setReplyTo(final String replyTo) {
         this.replyTo = replyTo;
+    }
+
+    @Override
+    public String getReplyTo() {
+        return replyTo;
     }
 
     /**
@@ -281,11 +291,9 @@ public class TransportAccountImpl implements TransportAccount {
      */
     public void setTransportProperties(final Map<String, String> transportProperties) {
         if (null == transportProperties) {
-            this.transportProperties = new HashMap<String, String>(4);
-        } else if (transportProperties.isEmpty()) {
-            this.transportProperties = new HashMap<String, String>(4);
+            this.transportProperties = new HashMap<>(4);
         } else {
-            this.transportProperties = new HashMap<String, String>(transportProperties);
+            this.transportProperties = transportProperties;
         }
     }
 
@@ -307,6 +315,11 @@ public class TransportAccountImpl implements TransportAccount {
     public void setTransportSecure(final boolean transportSecure) {
         transportServerUrl = null;
         this.transportSecure = transportSecure;
+    }
+
+    @Override
+    public boolean isTransportSecure() {
+        return transportSecure;
     }
 
     /**
@@ -344,7 +357,7 @@ public class TransportAccountImpl implements TransportAccount {
 
     /**
      * Sets the startTLS flag
-     * 
+     *
      * @param startTLS The startTLS flag
      */
     public void setTransportStartTls(boolean startTLS) {
@@ -363,6 +376,10 @@ public class TransportAccountImpl implements TransportAccount {
     @Override
     public boolean isOAuthAble() {
         return oAuth != null && oAuth >= 0;
+    }
+
+    public void setSendAddress(String sendAddress) {
+        this.sendAddress = sendAddress;
     }
 
 }

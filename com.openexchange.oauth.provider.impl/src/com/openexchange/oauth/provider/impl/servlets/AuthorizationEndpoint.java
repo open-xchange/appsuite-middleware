@@ -353,11 +353,10 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
      */
     private void terminateSession(HttpServletRequest request, HttpServletResponse response, AuthorizationRequest authRequest, Session session) {
         try {
+            SessionUtility.removeOXCookies(cookieHash(request, authRequest), request, response, session);
             LoginPerformer.getInstance().doLogout(session.getSessionID());
         } catch (OXException e) {
             LOG.warn("Error while terminating OAuth provider authorization session", e);
-        } finally {
-            SessionUtility.removeOXCookies(cookieHash(request, authRequest), request, response);
         }
     }
 

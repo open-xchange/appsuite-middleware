@@ -286,7 +286,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
             // Plan rescheduling
             if (remotePlan) {
-                rescheduleQueue.offerOrReplaceAndReset(ReschedulePlan.getInstance(true));
+                rescheduleQueue.offerOrReplace(ReschedulePlan.getInstance(true));
                 LOG.info("Planned rescheduling including remote plan");
             } else {
                 boolean added = rescheduleQueue.offerIfAbsentElseReset(ReschedulePlan.getInstance(false));
@@ -330,11 +330,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
      * @param remotePlan Whether to plan rescheduling on remote members or not
      */
     private void doReschedule(ReschedulePolicy policy, boolean remotePlan) {
-        HazelcastInstance hzInstance = hzInstancerRef.get();
-        if (null != hzInstance) {
-            Cluster cluster = hzInstance.getCluster();
-            reschedule(cluster.getMembers(), hzInstance, policy, remotePlan);
-        }
+        reschedule(hzInstancerRef.get(), policy, remotePlan);
     }
 
     /**
@@ -345,11 +341,14 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
      * @param policy The rescheduling policy to obey
      * @param remotePlan Whether to plan rescheduling on remote members or not
      */
-    private void reschedule(Set<Member> allMembers, HazelcastInstance hzInstance, ReschedulePolicy policy, boolean remotePlan) {
+    private void reschedule(HazelcastInstance hzInstance, ReschedulePolicy policy, boolean remotePlan) {
         if (null == hzInstance) {
             LOG.warn("Aborted rescheduling of permanent listeners as passed HazelcastInstance is null.");
             return;
         }
+
+        Cluster cluster = hzInstance.getCluster();
+        Set<Member> allMembers = cluster.getMembers();
 
         // Determine push users to distribute among cluster members
         List<PushUser> allPushUsers;

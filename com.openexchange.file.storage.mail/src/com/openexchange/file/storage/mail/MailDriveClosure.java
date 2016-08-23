@@ -55,6 +55,8 @@ import java.io.IOException;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.mail.accesscontrol.AccessControl;
+import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -97,7 +99,16 @@ public abstract class MailDriveClosure<R> {
      * @throws OXException If operation fails
      */
     public R perform(Session session) throws OXException {
-        return innerPerform(session);
+        AccessControl accessControl = AccessControl.getAccessControl(session);
+        try {
+            accessControl.acquireGrant();
+            return innerPerform(session);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw MailExceptionCode.INTERRUPT_ERROR.create(e, new Object[0]);
+        } finally {
+            accessControl.close();
+        }
     }
 
     private R innerPerform(Session session) throws OXException {

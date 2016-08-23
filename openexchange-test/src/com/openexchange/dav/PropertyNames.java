@@ -486,10 +486,15 @@ public final class PropertyNames {
 	 */
 	public static final DavPropertyName DIRECTORY_GATEWAY = DavPropertyName.create("directory-gateway", NS_CARDDAV);
 
-	/**
-	 * addressbook-multiget xmlns="urn:ietf:params:xml:ns:carddav"
-	 */
-	public static final DavPropertyName ADDRESSBOOK_MULTIGET = DavPropertyName.create("addressbook-multiget", NS_CARDDAV);
+    /**
+     * addressbook-multiget xmlns="urn:ietf:params:xml:ns:carddav"
+     */
+    public static final DavPropertyName ADDRESSBOOK_MULTIGET = DavPropertyName.create("addressbook-multiget", NS_CARDDAV);
+
+    /**
+     * addressbook-query xmlns="urn:ietf:params:xml:ns:carddav"
+     */
+    public static final DavPropertyName ADDRESSBOOK_QUERY = DavPropertyName.create("addressbook-query", NS_CARDDAV);
 
 	/**
 	 * address-data xmlns="urn:ietf:params:xml:ns:carddav"

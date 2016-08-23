@@ -58,6 +58,8 @@ import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
+import com.openexchange.ajax.share.actions.RedeemRequest;
+import com.openexchange.ajax.share.actions.RedeemResponse;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.ajax.share.actions.ShareLink;
 import com.openexchange.ajax.share.actions.UpdateLinkRequest;
@@ -66,6 +68,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**
  * {@link LoginScreenTest}
@@ -100,7 +103,7 @@ public class LoginScreenTest extends ShareTest {
         long now = System.currentTimeMillis();
         OCLGuestPermission perm = createNamedGuestPermission("testGuestPasswordInit" + now + "@example.org", "Test " + now);
         folder.getPermissions().add(perm);
-        folder = updateFolder(EnumAPI.OX_NEW, folder);
+        folder = updateFolder(EnumAPI.OX_NEW, folder, Transport.MAIL);
         OCLPermission matchingPermission = null;
         for (OCLPermission permission : folder.getPermissions()) {
             if (permission.getEntity() != client.getValues().getUserId()) {
@@ -131,9 +134,13 @@ public class LoginScreenTest extends ShareTest {
          */
         guestClient = resolveShare(shareURL, ShareTest.getUsername(perm.getRecipient()), newPW);
         ResolveShareResponse resolveResponse = guestClient.getShareResolveResponse();
-        assertEquals("guest_password", resolveResponse.getLoginType());
-        assertEquals("INFO", resolveResponse.getMessageType());
-        assertNotNull(resolveResponse.getMessage());
+        String token = resolveResponse.getToken();
+        assertNotNull(token);
+        RedeemRequest req = new RedeemRequest(token);
+        RedeemResponse resp = guestClient.execute(req);
+        assertEquals("guest_password", resp.getLoginType());
+        assertEquals("INFO", resp.getMessageType());
+        assertNotNull(resp.getMessage());
     }
 
     public void testLinkWithPassword() throws Exception {
@@ -153,9 +160,13 @@ public class LoginScreenTest extends ShareTest {
         GuestClient guestClient = resolveShare(shareLink.getShareURL(), null, newPW);
         guestClient.checkSessionAlive(false);
         ResolveShareResponse resolveResponse = guestClient.getShareResolveResponse();
-        assertEquals("anonymous_password", resolveResponse.getLoginType());
-        assertEquals("INFO", resolveResponse.getMessageType());
-        assertNotNull(resolveResponse.getMessage());
+        String token = resolveResponse.getToken();
+        assertNotNull(token);
+        RedeemRequest req = new RedeemRequest(token);
+        RedeemResponse resp = guestClient.execute(req);
+        assertEquals("anonymous_password", resp.getLoginType());
+        assertEquals("INFO", resp.getMessageType());
+        assertNotNull(resp.getMessage());
     }
 
 }

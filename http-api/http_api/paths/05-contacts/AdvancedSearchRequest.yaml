@@ -35,7 +35,7 @@
       - in: body
         name: body
         description: |
-          A JSON object describing the search term as introducted in [Advanced search](#advanced-search). Example:
+          A JSON object describing the search term as introducted in [Advanced search](https://documentation.open-xchange.com/latest/middleware/http_api/5_advanced_search.html). Example:
           `{"filter":["and",["=", {"field":"last_name"},"Mustermann"],["=",{"field":"first_name"},"Max"]]}`
           which represents 'last_name = "Mustermann" AND first_name = "Max"'. Valid fields are the ones specified in [Contact data](#/definitions/ContactData) model.
         required: true
@@ -46,6 +46,6 @@
         description: |
           A JSON object containing an array with matching contacts. Contacts are represented by arrays. The elements of each array contain the
           information specified by the corresponding identifiers in the `columns` parameter. In case of errors the
-          responsible fields in the response are filled (see [Error handling](#error-handling)).
+          responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/ContactsResponse"

@@ -49,8 +49,7 @@
 
 package com.openexchange.tools.webdav;
 
-import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
-import static com.openexchange.tools.servlet.http.Tools.sendEmptyErrorResponse;
+import static com.openexchange.tools.servlet.http.Tools.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -74,10 +73,7 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.framework.request.DefaultRequestContext;
-import com.openexchange.framework.request.RequestContext;
 import com.openexchange.framework.request.RequestContextHolder;
-import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.Interface;
@@ -298,7 +294,7 @@ public abstract class OXServlet extends WebDavServlet {
             return;
         }
         Session session = getSession(req);
-        RequestContextHolder.set(buildRequestContext(req, resp, session));
+        RequestContextHolder.set(new WebDAVRequestContext(req, session));
         try {
             if (session != null) {
                 LogProperties.putSessionProperties(session);
@@ -316,19 +312,6 @@ public abstract class OXServlet extends WebDavServlet {
         } finally {
             RequestContextHolder.reset();
         }
-    }
-
-    protected RequestContext buildRequestContext(HttpServletRequest req, HttpServletResponse resp, Session session) {
-        int contextId = -1;
-        int userId = -1;
-        if (session != null) {
-            contextId = session.getContextId();
-            userId = session.getUserId();
-        }
-        HostData hostData = Tools.createHostData(req, contextId, userId, false);
-        DefaultRequestContext context = new DefaultRequestContext();
-        context.setHostData(hostData);
-        return context;
     }
 
     protected LoginCustomizer getLoginCustomizer() {

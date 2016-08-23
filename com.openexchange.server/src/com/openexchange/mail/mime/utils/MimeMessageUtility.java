@@ -51,6 +51,7 @@ package com.openexchange.mail.mime.utils;
 
 import static com.openexchange.java.Strings.asciiLowerCase;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -65,16 +66,17 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -118,7 +120,9 @@ import org.apache.james.mime4j.util.CharsetUtil;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.ldap.User;
@@ -128,6 +132,7 @@ import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
@@ -196,6 +201,77 @@ public final class MimeMessageUtility {
      */
     private MimeMessageUtility() {
         super();
+    }
+
+    private static volatile Set<String> dummyDomains;
+
+    /**
+     * Gets the dummy domains artificially set by IMAP servers; such as <code>"@unspecified-domain"</code> or <code>"@missing-domain"</code>.
+     *
+     * @return The dummy domains
+     */
+    public static Set<String> getDummyDomains() {
+        Set<String> set = dummyDomains;
+        if (null == set) {
+            synchronized (MimeMessageUtility.class) {
+                set = dummyDomains;
+                if (null == set) {
+                    String def = "@unspecified-domain, @missing_domain, @syntax_error";
+                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return new LinkedHashSet<String>(Arrays.asList(Strings.splitByComma(def)));
+                    }
+
+                    String csv = Strings.asciiLowerCase(service.getProperty("com.openexchange.mail.dummyDomains", def).trim());
+                    set = Collections.unmodifiableSet(new LinkedHashSet<String>(Arrays.asList(Strings.splitByComma(csv))));
+                    dummyDomains = set;
+                }
+            }
+        }
+        return set;
+    }
+
+    /**
+     * Strips possibly dummy domain from specified address string.
+     *
+     * @param address The address string
+     * @return The address string with any dummy domain removed
+     */
+    public static String stripDummyDomain(String address) {
+        if (null == address) {
+            return null;
+        }
+
+        String toCheck = Strings.asciiLowerCase(address);
+        for (String dummyDomain : getDummyDomains()) {
+            int pos = toCheck.indexOf(dummyDomain);
+            if (pos >= 0) {
+                return address.substring(0, pos);
+            }
+        }
+
+        // Contains no dummy domain; return unchanged
+        return address;
+    }
+
+    /**
+     * Prepares given address string by checking for possible mail-safe encodings.
+     *
+     * @param address The address
+     * @return The prepared address
+     */
+    public static String prepareAddress(final String address) {
+        String decoded = toIDN(MimeMessageUtility.decodeMultiEncodedHeader(address));
+        // Check for slash character -- the delimiting character for MSISDN addresses
+        int pos = decoded.indexOf('@');
+        if (pos < 0) {
+            pos = decoded.indexOf('/');
+            if (pos > 0) {
+                decoded = decoded.substring(0, pos);
+            }
+        }
+        // Check for dummy domains
+        return MimeMessageUtility.stripDummyDomain(decoded);
     }
 
     /**
@@ -1282,6 +1358,9 @@ public final class MimeMessageUtility {
         final List<String> ret = new ArrayList<String>(sa.length);
         final StringBuilder tmp = new StringBuilder(24);
         for (final String string : sa) {
+            if (string.isEmpty()) {
+                continue;
+            }
             final String trim = string.trim();
             if (trim.charAt(0) == '"') {
                 tmp.setLength(0);
@@ -1401,8 +1480,8 @@ public final class MimeMessageUtility {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.mail.replaceWithComma");
             }
         });
     }
@@ -2452,7 +2531,7 @@ public final class MimeMessageUtility {
      * @return The new {@link MimeMessage} instance
      * @throws OXException If a new {@link MimeMessage} instance cannot be returned
      */
-    public static MimeMessage cloneMessage(MimeMessage original, final Date optReceivedDate) throws OXException {
+    public static MimeMessage cloneMessage(Message original, final Date optReceivedDate) throws OXException {
         ThresholdFileHolder sink = new ThresholdFileHolder();
         boolean closeSink = true;
         try {

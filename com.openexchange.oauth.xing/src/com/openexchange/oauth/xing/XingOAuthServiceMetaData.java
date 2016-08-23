@@ -75,12 +75,7 @@ public final class XingOAuthServiceMetaData extends AbstractExtendedScribeAwareO
      * @throws IllegalStateException If either API key or secret is missing
      */
     public XingOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, "com.openexchange.oauth.xing", "XING", true, true);
-    }
-
-    @Override
-    public API getAPI() {
-        return API.XING;
+        super(services, API.XING, true, true);
     }
 
     @Override

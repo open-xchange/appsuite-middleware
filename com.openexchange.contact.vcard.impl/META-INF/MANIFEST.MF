@@ -6,7 +6,7 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: .,
- lib/ez-vcard-0.9.6.jar
+ lib/ez-vcard-0.9.10.jar
 Import-Package: com.google.common.io,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
@@ -15,6 +15,7 @@ Import-Package: com.google.common.io,
  com.openexchange.contact.vcard,
  com.openexchange.exception,
  com.openexchange.groupware.attach,
+ com.openexchange.groupware.contact.helpers,
  com.openexchange.groupware.container,
  com.openexchange.i18n,
  com.openexchange.imagetransformation,

@@ -50,6 +50,7 @@
 package com.openexchange.contact.vcard;
 
 import java.awt.Dimension;
+import java.util.Set;
 import com.openexchange.session.Session;
 
 /**
@@ -275,6 +276,21 @@ public interface VCardParameters {
      * @return A self reference
      */
     VCardParameters setRemoveAttachmentsFromKeptVCard(boolean removeAttachmentsFromKeptVCard);
+
+    /**
+     * Gets the vCard property names to consider during import/export.
+     *
+     * @return The property names, or <code>null</code> if not set
+     */
+    Set<String> getPropertyNames();
+
+    /**
+     * Sets the vCard property names to consider during import/export.
+     *
+     * @param propertyNames The property names, or <code>null</code> if not set
+     * @return A self reference
+     */
+    VCardParameters setPropertyNames(Set<String> propertyNames);
 
     /**
      * Gets the value of an arbitrary extended parameter.

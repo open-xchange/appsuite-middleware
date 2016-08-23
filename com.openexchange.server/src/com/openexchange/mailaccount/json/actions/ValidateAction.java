@@ -82,7 +82,7 @@ import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.TransportAuth;
-import com.openexchange.mailaccount.json.parser.MailAccountParser;
+import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
 import com.openexchange.mailaccount.utils.MailAccountUtils;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.net.URIDefaults;
@@ -124,7 +124,7 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
 
         MailAccountDescription accountDescription = new MailAccountDescription();
         List<OXException> warnings = new LinkedList<OXException>();
-        Set<Attribute> availableAttributes = MailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
+        Set<Attribute> availableAttributes = DefaultMailAccountParser.getInstance().parse(accountDescription, jData.toObject(), warnings);
 
         if (accountDescription.getId() == MailAccount.DEFAULT_ID) {
             return new AJAXRequestResult(Boolean.TRUE);

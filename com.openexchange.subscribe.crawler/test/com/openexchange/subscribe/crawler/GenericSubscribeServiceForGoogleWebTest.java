@@ -52,7 +52,7 @@ package com.openexchange.subscribe.crawler;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import org.ho.yaml.Yaml;
+import org.yaml.snakeyaml.Yaml;
 import com.openexchange.subscribe.crawler.internal.PagePart;
 import com.openexchange.subscribe.crawler.internal.PagePartSequence;
 import com.openexchange.subscribe.crawler.internal.Step;
@@ -121,7 +121,7 @@ public class GenericSubscribeServiceForGoogleWebTest extends GenericSubscribeSer
             sequence));
 
         Workflow workflow = new Workflow(steps);
-        crawler.setWorkflowString(Yaml.dump(workflow));
+        crawler.setWorkflowString(new Yaml().dump(workflow));
 
         findOutIfThereAreContactsForThisConfiguration(username, password, crawler);
         //uncomment this if the if the crawler description was updated to get the new config-files

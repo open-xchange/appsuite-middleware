@@ -88,6 +88,8 @@ public class Activator extends HousekeepingActivator {
         CreatedBy.userResolver = userResolver;
 
         ConfigurationService configurationService = getService(ConfigurationService.class);
+        String updateTimezones = configurationService.getProperty("com.openexchange.ical.updateTimezones", "true");
+        System.setProperty("net.fortuna.ical4j.timezone.update.enabled", updateTimezones);
 
         final OXResourceResolver resourceResolver = new OXResourceResolver();
         track(ResourceService.class, new ResourceServiceTrackerCustomizer(context, resourceResolver));

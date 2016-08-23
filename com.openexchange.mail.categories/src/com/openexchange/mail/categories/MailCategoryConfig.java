@@ -49,11 +49,6 @@
 
 package com.openexchange.mail.categories;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-
 /**
  * {@link MailCategoryConfig}
  *
@@ -73,6 +68,7 @@ public class MailCategoryConfig {
         private boolean force;
         private boolean enabled;
         private String name;
+        private String description;
         private boolean isSystemCategory = false;
 
         /**
@@ -141,11 +137,22 @@ public class MailCategoryConfig {
         /**
          * Sets the name.
          *
-         * @param enabled The name
+         * @param name The name
          * @return This builder
          */
         public Builder name(String name) {
             this.name = name;
+            return this;
+        }
+
+        /**
+         * Sets the description.
+         *
+         * @param description The description
+         * @return This builder
+         */
+        public Builder description(String description) {
+            this.description = description;
             return this;
         }
 
@@ -155,7 +162,7 @@ public class MailCategoryConfig {
          * @return The new {@link MailCategoryConfig} instance
          */
         public MailCategoryConfig build() {
-            return new MailCategoryConfig(category, flag, force, enabled, name, isSystemCategory);
+            return new MailCategoryConfig(category, flag, force, enabled, name, isSystemCategory, description);
         }
 
     }// End of class Builder
@@ -172,7 +179,7 @@ public class MailCategoryConfig {
             return null;
         }
 
-        return new MailCategoryConfig(categoryConfig.category, categoryConfig.flag, categoryConfig.force, active, categoryConfig.name, categoryConfig.isSystemCategory);
+        return new MailCategoryConfig(categoryConfig.category, categoryConfig.flag, categoryConfig.force, active, categoryConfig.name, categoryConfig.isSystemCategory, categoryConfig.description);
     }
 
     /**
@@ -193,11 +200,12 @@ public class MailCategoryConfig {
     private final boolean enabled;
     private final String name;
     private final boolean isSystemCategory;
+    private final String description;
 
     /**
      * Initializes a new {@link MailCategoryConfig}.
      */
-    MailCategoryConfig(String category, String flag, boolean force, boolean enabled, String name, boolean isSystemCategory) {
+    MailCategoryConfig(String category, String flag, boolean force, boolean enabled, String name, boolean isSystemCategory, String description) {
         super();
         this.category = category;
         this.flag = flag;
@@ -205,6 +213,7 @@ public class MailCategoryConfig {
         this.enabled = enabled;
         this.isSystemCategory = isSystemCategory;
         this.name = name;
+        this.description = description;
 
     }
 
@@ -263,12 +272,21 @@ public class MailCategoryConfig {
     }
 
     /**
-     * Gets the en_US name.
+     * Gets the name.
      *
-     * @return The en_US name
+     * @return The name
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Gets the description.
+     *
+     * @return The description
+     */
+    public String getDescription() {
+        return description;
     }
 
     @Override

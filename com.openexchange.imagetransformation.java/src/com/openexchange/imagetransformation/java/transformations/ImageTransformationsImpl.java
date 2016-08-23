@@ -59,7 +59,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -70,7 +69,9 @@ import javax.imageio.stream.ImageOutputStream;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.imagetransformation.Constants;
@@ -197,8 +198,13 @@ public class ImageTransformationsImpl implements ImageTransformations {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties(
+                    "com.openexchange.tools.images.transformations.preferThumbnailThreshold",
+                    "com.openexchange.tools.images.transformations.maxResolution",
+                    "com.openexchange.tools.images.transformations.maxSize",
+                    "com.openexchange.tools.images.transformations.waitTimeoutSeconds"
+                    );
             }
         });
     }
@@ -251,7 +257,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
         }
 
         this.sourceImage = sourceImage;
-        this.transformations = new ArrayList<ImageTransformation>();
+        this.transformations = new ArrayList<>();
         this.transformationContext = new TransformationContext();
     }
 
@@ -611,15 +617,17 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * @return The buffered image
      */
     private BufferedImage readAndExtractMetadataFromFile(IFileHolder imageFile, String formatName, long maxSize, long maxResolution, ImageTransformationSignaler signaler) throws IOException {
-        ImageInputStream input = null;
+        ImageInputStream imageInputStream = null;
         ImageReader reader = null;
+        InputStream inputStream = null;
         try {
+            inputStream = imageFile.getStream();
             /*
              * create reader from image input stream
              */
-            input = getImageInputStream(imageFile);
-            reader = getImageReader(input, imageFile.getContentType(), imageFile.getName());
-            reader.setInput(input);
+            imageInputStream = getImageInputStream(inputStream);
+            reader = getImageReader(imageInputStream, imageFile.getContentType(), imageFile.getName());
+            reader.setInput(imageInputStream);
             /*
              * read original image dimensions & check against required dimensions for transformations
              */
@@ -632,32 +640,36 @@ public class ImageTransformationsImpl implements ImageTransformations {
              * prefer a suitable thumbnail in stream if possible when downscaling images
              */
             float preferThumbnailThreshold = preferThumbnailThreshold();
-            if (0 <= preferThumbnailThreshold && reader.hasThumbnails(imageIndex)) {
-                if (null != requiredResolution && (requiredResolution.width < width || requiredResolution.height < height)) {
-                    int requiredWidth = (int) (preferThumbnailThreshold * requiredResolution.width);
-                    int requiredHeight = (int) (preferThumbnailThreshold * requiredResolution.height);
-                    for (int i = 0; i < reader.getNumThumbnails(imageIndex); i++) {
-                        int thumbnailWidth = reader.getThumbnailWidth(imageIndex, i);
-                        int thumbnailHeight = reader.getThumbnailHeight(imageIndex, i);
-                        if (thumbnailWidth >= requiredWidth && thumbnailHeight >= requiredHeight) {
-                            LOG.trace("Using thumbnail of {}x{}px (requested: {}x{}px)",
-                                thumbnailWidth, thumbnailHeight, requiredResolution.width, requiredResolution.height);
-                            /*
-                             * use thumbnail & skip any additional scale transformations / compressions
-                             */
-                            compress = false;
-                            for (Iterator<ImageTransformation> iterator = transformations.iterator(); iterator.hasNext();) {
-                                ImageTransformation transformation = iterator.next();
-                                if (ScaleTransformation.class.isInstance(transformation)) {
-                                    iterator.remove();
+            try {
+                if (0 <= preferThumbnailThreshold && reader.hasThumbnails(imageIndex)) {
+                    if (null != requiredResolution && (requiredResolution.width < width || requiredResolution.height < height)) {
+                        int requiredWidth = (int) (preferThumbnailThreshold * requiredResolution.width);
+                        int requiredHeight = (int) (preferThumbnailThreshold * requiredResolution.height);
+                        for (int i = 0; i < reader.getNumThumbnails(imageIndex); i++) {
+                            int thumbnailWidth = reader.getThumbnailWidth(imageIndex, i);
+                            int thumbnailHeight = reader.getThumbnailHeight(imageIndex, i);
+                            if (thumbnailWidth >= requiredWidth && thumbnailHeight >= requiredHeight) {
+                                LOG.trace("Using thumbnail of {}x{}px (requested: {}x{}px)", thumbnailWidth, thumbnailHeight, requiredResolution.width, requiredResolution.height);
+                                /*
+                                 * use thumbnail & skip any additional scale transformations / compressions
+                                 */
+                                compress = false;
+                                for (Iterator<ImageTransformation> iterator = transformations.iterator(); iterator.hasNext();) {
+                                    ImageTransformation transformation = iterator.next();
+                                    if (ScaleTransformation.class.isInstance(transformation)) {
+                                        iterator.remove();
+                                    }
                                 }
+                                imageInformation = new ImageInformation(orientation, thumbnailWidth, thumbnailHeight);
+                                onImageRead(signaler);
+                                return reader.readThumbnail(imageIndex, i);
                             }
-                            imageInformation = new ImageInformation(orientation, thumbnailWidth, thumbnailHeight);
-                            onImageRead(signaler);
-                            return reader.readThumbnail(imageIndex, i);
                         }
                     }
                 }
+            } catch (IOException e) {
+                LOG.debug(e.getMessage(), e);
+                // fallback to image transformation
             }
             /*
              * check image size against limitations prior reading source image
@@ -677,11 +689,17 @@ public class ImageTransformationsImpl implements ImageTransformations {
         } catch (RuntimeException e) {
             LOG.debug("error reading image from stream for {}", formatName, e);
             return null;
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw (IOException) cause;
+            }
+            throw null == cause ? new IOException(e.getMessage(), e) : new IOException(cause.getMessage(), cause);
         } finally {
             if (null != reader) {
                 reader.dispose();
             }
-            Streams.close(input);
+            Streams.close(imageInputStream, inputStream);
         }
     }
 

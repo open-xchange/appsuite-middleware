@@ -96,6 +96,7 @@ import com.openexchange.admin.storage.interfaces.OXContextStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPoolExtension;
+import com.openexchange.admin.storage.utils.Filestore2UserUtil;
 import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.DatabaseDataMover;
@@ -103,6 +104,9 @@ import com.openexchange.admin.tools.filestore.FilestoreDataMover;
 import com.openexchange.admin.tools.filestore.PostProcessTask;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
+import com.openexchange.config.cascade.ConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -163,7 +167,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
 
         final String[] mods = sModule.split(" *, *");
-        final Set<String> modules = new LinkedHashSet<String>(mods.length);
+        final Set<String> modules = new LinkedHashSet<>(mods.length);
         for (final String mod : mods) {
             modules.add(mod);
         }
@@ -207,7 +211,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
 
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            oxcox.changeQuota(ctx, new ArrayList<String>(modules), quota, auth);
+            oxcox.changeQuota(ctx, new ArrayList<>(modules), quota, auth);
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -475,7 +479,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             try {
                 if (tool.checkAndUpdateSchemaIfRequired(ctx)) {
-                    throw new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
+                    throw tool.generateDatabaseUpdateException(ctx.getId().intValue());
                 }
             } catch (final StorageException e) {
                 // Context deletion should be a robust process. Therefore not failing if the schema is not up
@@ -499,6 +503,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
 
             oxcox.delete(ctx);
+            Filestore2UserUtil.removeFilestore2UserEntries(ctx.getId().intValue(), cache);
             basicAuthenticator.removeFromAuthCache(ctx);
         } catch (final StorageException e) {
             LOGGER.error("", e);
@@ -796,7 +801,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             new BasicAuthenticator(context).doAuthentication(auth);
 
-            final List<Context> retval = new ArrayList<Context>();
+            final List<Context> retval = new ArrayList<>();
             boolean filled = true;
             for (final Context ctx : ctxs) {
                 if (!ctx.isListrun()) {
@@ -871,8 +876,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             Filter<Context, Context> loader = null;
             Filter<Integer, Integer> filter = null;
-            final ArrayList<Filter<Context, Context>> loaderFilter = new ArrayList<Filter<Context, Context>>();
-            final ArrayList<Filter<Integer, Integer>> contextFilter = new ArrayList<Filter<Integer, Integer>>();
+            final ArrayList<Filter<Context, Context>> loaderFilter = new ArrayList<>();
+            final ArrayList<Filter<Integer, Integer>> contextFilter = new ArrayList<>();
 
             final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
             if (null != pluginInterfaces) {
@@ -935,7 +940,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
 
-            final List<Context> retval = new ArrayList<Context>();
+            final List<Context> retval = new ArrayList<>();
             final Context[] ret = oxcox.searchContextByDatabase(db);
             final List<Context> callGetDataPlugins = callGetDataPlugins(Arrays.asList(ret), auth, oxcox);
             if (null != callGetDataPlugins) {
@@ -969,7 +974,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchFilestoreException();
             }
             final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            final List<Context> retval = new ArrayList<Context>();
+            final List<Context> retval = new ArrayList<>();
             final Context[] ret = oxcox.searchContextByFilestore(filestore);
             final List<Context> callGetDataPlugins = callGetDataPlugins(Arrays.asList(ret), auth, oxcox);
             if (null != callGetDataPlugins) {
@@ -1029,7 +1034,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 throw new NoSuchContextException();
             }
             if (tool.checkAndUpdateSchemaIfRequired(ctx)) {
-                throw new DatabaseUpdateException("Database is locked or is now beeing updated, please try again later");
+                throw tool.generateDatabaseUpdateException(ctx.getId().intValue());
             }
             if (!tool.isContextEnabled(ctx)) {
                 throw new OXContextException(OXContextException.CONTEXT_DISABLED);
@@ -1194,8 +1199,23 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
 
         Context ret = oxcox.create(ctx, admin_user, createaccess, schemaSelectStrategy == null ? getDefaultSchemaSelectStrategy() : schemaSelectStrategy);
+        final ConfigViewFactory viewFactory = AdminServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (viewFactory != null) {
+            ConfigView view;
+            try {
+                view = viewFactory.getView(admin_user.getId(), ctx.getId());
+                Boolean check = view.get("com.openexchange.imap.initWithSpecialUse", Boolean.class);
+                if (check != null && check) {
+                    ConfigProperty<Boolean> prop = view.property("user", "com.openexchange.mail.specialuse.check", Boolean.class);
+                    prop.set(Boolean.TRUE);
+                }
+            } catch (OXException e) {
+                LOGGER.error("Unable to set special use check property!");
+            }
+        }
 
         if (isAnyPluginLoaded()) {
+            PluginException pe = null;
             PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
             if (null != pluginInterfaces) {
                 for (OXContextPluginInterface contextInterface : pluginInterfaces.getContextPlugins().getServiceList()) {
@@ -1203,17 +1223,21 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                         ret = contextInterface.postCreate(ret, admin_user, createaccess, auth);
                     } catch (PluginException e) {
                         LOGGER.error("", e);
-                        // callPluginMethod delete may fail here for what ever reason.
-                        // this must not prevent us from cleaning up the rest
-                        try {
-                            contextInterface.delete(ctx, auth);
-                        } catch (Exception e1) {
-                            LOGGER.error("", e);
-                        }
-                        oxcox.delete(ret);
-                        throw StorageException.wrapForRMI(e);
+                        pe = e;
                     }
                 }
+            }
+            if (null != pe) {
+                // cleanup
+                for (final OXContextPluginInterface oxContextPlugin : pluginInterfaces.getContextPlugins().getServiceList()) {
+                    try {
+                        oxContextPlugin.delete(ctx, auth);
+                    } catch (final PluginException e) {
+                        LOGGER.error("", e);
+                    }
+                }
+                oxcox.delete(ret);
+                throw StorageException.wrapForRMI(pe);
             }
         }
 

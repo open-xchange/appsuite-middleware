@@ -171,8 +171,8 @@ public abstract class AbstractDelegatingIDBasedFileAccess implements DelegatingI
     }
 
     @Override
-    public String saveFileMetadata(File document, long sequenceNumber, List<Field> modifiedColumns, boolean ignoreWarnings) throws OXException {
-        return fileAccess.saveFileMetadata(document, sequenceNumber, modifiedColumns, ignoreWarnings);
+    public String saveFileMetadata(File document, long sequenceNumber, List<Field> modifiedColumns, boolean ignoreWarnings, boolean tryAddVersion) throws OXException {
+        return fileAccess.saveFileMetadata(document, sequenceNumber, modifiedColumns, ignoreWarnings, tryAddVersion);
     }
 
     @Override
@@ -226,8 +226,8 @@ public abstract class AbstractDelegatingIDBasedFileAccess implements DelegatingI
     }
 
     @Override
-    public String saveDocument(File document, InputStream data, long sequenceNumber, List<Field> modifiedColumns, boolean ignoreVersion, boolean ignoreWarnings) throws OXException {
-        return fileAccess.saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion, ignoreWarnings);
+    public String saveDocument(File document, InputStream data, long sequenceNumber, List<Field> modifiedColumns, boolean ignoreVersion, boolean ignoreWarnings, boolean tryAddVersion) throws OXException {
+        return fileAccess.saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion, ignoreWarnings, tryAddVersion);
     }
 
     @Override

@@ -415,4 +415,9 @@ public class SimMailAccount implements MailAccount {
         return null;
     }
 
+    @Override
+    public String getRootFolder() {
+        return null;
+    }
+
 }

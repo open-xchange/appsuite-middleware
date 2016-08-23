@@ -51,6 +51,7 @@ package com.openexchange.contact.vcard.impl.mapping;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.property.Url;
 
@@ -62,7 +63,7 @@ import ezvcard.property.Url;
 public class URLMapping extends SimpleMapping<Url> {
 
     public URLMapping() {
-        super(Contact.URL, Url.class);
+        super(Contact.URL, Url.class, "URL", ContactField.URL);
     }
 
     @Override

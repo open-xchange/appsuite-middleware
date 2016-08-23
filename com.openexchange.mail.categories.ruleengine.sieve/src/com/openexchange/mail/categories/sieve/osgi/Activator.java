@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.categories.sieve.osgi;
 
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
@@ -73,13 +74,22 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        registerService(MailCategoriesRuleEngine.class, new SieveMailCategoriesRuleEngine(this));
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { MailFilterService.class, ConfigurationService.class, ConfigViewFactory.class };
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { MailFilterService.class, ConfigurationService.class, ConfigViewFactory.class };
+    protected void startBundle() throws Exception {
+        registerService(MailCategoriesRuleEngine.class, new SieveMailCategoriesRuleEngine(this));
+        Logger logger = org.slf4j.LoggerFactory.getLogger(Activator.class);
+        logger.info("Bundle successfully started: {}", context.getBundle().getSymbolicName());
+    }
+
+
+    @Override
+    protected void stopBundle() throws Exception {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(Activator.class);
+        logger.info("Bundle successfully stopped: {}", context.getBundle().getSymbolicName());
     }
 
 }

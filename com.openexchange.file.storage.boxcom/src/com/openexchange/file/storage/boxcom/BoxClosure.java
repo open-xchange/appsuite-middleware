@@ -55,7 +55,7 @@ import com.box.boxjavalibv2.exceptions.BoxServerException;
 import com.box.restclientv2.exceptions.BoxRestException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.boxcom.access.BoxAccess;
+import com.openexchange.file.storage.boxcom.access.BoxOAuthAccess;
 import com.openexchange.session.Session;
 
 /**
@@ -84,7 +84,7 @@ public abstract class BoxClosure<R> {
      * @throws AuthFatalFailureException If an authentication error occurred
      * @throws UnsupportedEncodingException If an encoding problem occurred
      */
-    protected abstract R doPerform(BoxAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException;
+    protected abstract R doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException;
 
     /**
      * Performs this closure's operation.
@@ -95,7 +95,7 @@ public abstract class BoxClosure<R> {
      * @return The return value
      * @throws OXException If operation fails
      */
-    public R perform(AbstractBoxResourceAccess resourceAccess, BoxAccess boxAccess, Session session) throws OXException {
+    public R perform(AbstractBoxResourceAccess resourceAccess, BoxOAuthAccess boxAccess, Session session) throws OXException {
         return null == resourceAccess ? innerPerform(false, null, boxAccess, session) : innerPerform(true, resourceAccess, boxAccess, session);
     }
 
@@ -105,14 +105,14 @@ public abstract class BoxClosure<R> {
     /** Status code (409) indicating that the request could not be completed due to a conflict with the current state of the resource. */
     protected static final int SC_CONFLICT = 409;
 
-    private R innerPerform(boolean handleAuthError, AbstractBoxResourceAccess resourceAccess, BoxAccess boxAccess, Session session) throws OXException {
+    private R innerPerform(boolean handleAuthError, AbstractBoxResourceAccess resourceAccess, BoxOAuthAccess boxAccess, Session session) throws OXException {
         try {
             return doPerform(boxAccess);
         } catch (BoxRestException e) {
             throw AbstractBoxResourceAccess.handleRestError(e);
         } catch (BoxServerException e) {
             if (handleAuthError && SC_UNAUTHORIZED == e.getStatusCode()) {
-                BoxAccess newBoxAccess = resourceAccess.handleAuthError(e, session);
+                BoxOAuthAccess newBoxAccess = resourceAccess.handleAuthError(e, session);
                 return innerPerform(false, resourceAccess, newBoxAccess, session);
             }
             throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getMessage());
@@ -120,7 +120,7 @@ public abstract class BoxClosure<R> {
             if (!handleAuthError) {
                 throw FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, resourceAccess.account.getId(), BoxConstants.ID, e.getMessage());
             }
-            BoxAccess newBoxAccess = resourceAccess.handleAuthError(e, session);
+            BoxOAuthAccess newBoxAccess = resourceAccess.handleAuthError(e, session);
             return innerPerform(false, resourceAccess, newBoxAccess, session);
         } catch (final UnsupportedEncodingException | RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

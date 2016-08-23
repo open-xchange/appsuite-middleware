@@ -89,10 +89,11 @@ public class S3ChunkedUpload extends com.openexchange.filestore.utils.ChunkedUpl
      *
      * @param data The underlying input stream
      * @param encrypted Whether encryption is enabled
+     * @param minChunkSize The minimum chunk size to fill in bytes
      * @throws OXException If initialization fails
      */
-    public S3ChunkedUpload(InputStream data, boolean encrypted) throws OXException {
-        super(digestStreamFor(data, encrypted), S3UploadChunk.MIN_CHUNK_SIZE);
+    public S3ChunkedUpload(InputStream data, boolean encrypted, long minChunkSize) throws OXException {
+        super(digestStreamFor(data, encrypted), minChunkSize);
         this.encrypted = encrypted;
     }
 

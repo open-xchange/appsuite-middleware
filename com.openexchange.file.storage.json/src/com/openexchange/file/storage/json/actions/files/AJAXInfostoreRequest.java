@@ -58,6 +58,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -71,6 +72,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.customizer.file.AdditionalFileField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
+import com.openexchange.ajax.requesthandler.crypto.CryptographicServiceAuthenticationFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
@@ -80,6 +82,8 @@ import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
+import com.openexchange.file.storage.composition.crypto.CryptographicAwareIDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.crypto.CryptographyMode;
 import com.openexchange.file.storage.json.FileMetadataParser;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
 import com.openexchange.file.storage.json.osgi.FileFieldCollector;
@@ -90,6 +94,7 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.java.FileKnowingInputStream;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -230,10 +235,37 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     @Override
-    public IDBasedFileAccess getFileAccess() {
+    public IDBasedFileAccess getFileAccess() throws OXException {
         if (fileAccess != null) {
             return fileAccess;
         }
+
+        String cryptoAction = data != null ? data.getParameter("cryptoAction") : null;
+        if(cryptoAction != null && !cryptoAction.isEmpty()) {
+
+            //Parsing authentication from the request. Might be null since not all crypto-actions require authentication.
+            String authentication = null;
+            CryptographicServiceAuthenticationFactory encryptionAuthenticationFactory = Services.getCryptographicServiceAuthenticationFactory();
+            if(encryptionAuthenticationFactory != null) {
+                if(data.optHttpServletRequest() != null) {
+                    authentication = encryptionAuthenticationFactory.createAuthenticationFrom(data.optHttpServletRequest());
+                }
+            }
+
+            //Creating file access with crypto functionalities
+            CryptographicAwareIDBasedFileAccessFactory encryptionAwareFileAccessFactory = Services.getCryptographicFileAccessFactory();
+            if (encryptionAwareFileAccessFactory != null) {
+                EnumSet<CryptographyMode> cryptMode = CryptographyMode.createSet(cryptoAction);
+                if (cryptMode.size() > 0) {
+                    return fileAccess = encryptionAwareFileAccessFactory.createAccess(Services.getFileAccessFactory().createAccess(session), cryptMode, session, authentication);
+                } else {
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("cryptoAction",cryptoAction);
+                }
+            } else {
+                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(CryptographicAwareIDBasedFileAccessFactory.class.getSimpleName());
+            }
+        }
+
         return fileAccess = Services.getFileAccessFactory().createAccess(session);
     }
 

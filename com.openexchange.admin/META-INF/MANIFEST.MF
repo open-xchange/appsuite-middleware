@@ -95,6 +95,7 @@ Export-Package: com.openexchange.admin.daemons,
  com.openexchange.admin.storage.interfaces,
  com.openexchange.admin.storage.mysqlStorage,
  com.openexchange.admin.storage.sqlStorage,
+ com.openexchange.admin.storage.utils,
  com.openexchange.admin.taskmanagement,
  com.openexchange.admin.tools,
  com.openexchange.admin.tools.filestore

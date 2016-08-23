@@ -130,7 +130,7 @@ public class MoveAction extends AbstractWriteAction {
 
         // Save file metadata without binary payload
         boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
-        String newId = fileAccess.saveFileMetadata(file, request.getTimestamp(), fields, ignoreWarnings);
+        String newId = fileAccess.saveFileMetadata(file, request.getTimestamp(), fields, ignoreWarnings, false);
 
         // Construct detailed response as requested including any warnings, treat as error if not forcibly ignored by client
         AJAXRequestResult result;
@@ -230,7 +230,7 @@ public class MoveAction extends AbstractWriteAction {
         file.setFolderId(newFolderId);
 
         // Save file metadata without binary payload
-        return fileAccess.saveFileMetadata(file, FileStorageFileAccess.DISTANT_FUTURE, fields, true);
+        return fileAccess.saveFileMetadata(file, FileStorageFileAccess.DISTANT_FUTURE, fields, true, false);
     }
 
     private static String getFilenameSave(FileID id, IDBasedFileAccess fileAccess) {

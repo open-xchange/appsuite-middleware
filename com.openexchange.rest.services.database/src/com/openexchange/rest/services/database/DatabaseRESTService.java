@@ -63,6 +63,8 @@ import javax.ws.rs.core.UriInfo;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.rest.services.annotation.Role;
+import com.openexchange.rest.services.annotation.RoleAllowed;
 import com.openexchange.rest.services.database.internal.AbstractDatabaseRESTService;
 import com.openexchange.rest.services.database.internal.DatabaseEnvironment;
 import com.openexchange.rest.services.database.internal.RESTRequest;
@@ -73,12 +75,13 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-@Path("/database/v1")
+@Path("/preliminary/database/v1")
+@RoleAllowed(Role.BASIC_AUTHENTICATED)
 public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Initializes a new {@link DatabaseRESTService}.
-     * 
+     *
      * @param services
      */
     public DatabaseRESTService(ServiceLookup services, DatabaseEnvironment environment) {
@@ -87,11 +90,12 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Performs a query to the 'configdb'.
-     * 
+     *
      * @return A Response with the result set
      * @throws OXException If an error occurs
      * @deprecated Use {@link #queryConfigDB(HttpHeaders, UriInfo, JSONObject)} instead.
      */
+    @Deprecated
     @PUT
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
@@ -102,7 +106,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Performs a query to the 'configdb'.
-     * 
+     *
      * @return A Response with the result set
      * @throws OXException If an error occurs
      */
@@ -116,11 +120,12 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Performs an update to the 'configdb'.
-     * 
+     *
      * @return
      * @throws OXException
      * @deprecated Use {@link #updateConfigDB(HttpHeaders, UriInfo, JSONObject)} instead.
      */
+    @Deprecated
     @PUT
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
@@ -139,12 +144,13 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Performs a query to an OX database with the specified context identifier.
-     * 
+     *
      * @param ctxId The context identifier
      * @return A Response with the result set
      * @throws OXException If an error occurs
      * @deprecated Use {@link #queryOXDB(int, HttpHeaders, UriInfo, JSONObject)} instead.
      */
+    @Deprecated
     @PUT
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
@@ -155,7 +161,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Performs a query to an OX database with the specified context identifier.
-     * 
+     *
      * @param ctxId The context identifier
      * @return A Response with the result set
      * @throws OXException If an error occurs
@@ -173,17 +179,18 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
      * sent in a request to a writable database, they are considered to be part of one transaction. A transaction
      * is automatically committed after all requests have been sent. If an error occurs, the transaction is rolled
      * back and all changes are undone.
-     * 
+     *
      * The transaction can be kept open at the end of an request to get a transaction that spans multiple requests.
      * This is useful, if, for example, a value is to be retrieved, do a computation on it, and then write it back.
      * A transaction will be kept open, if the URL parameter "keepOpen" with the parameter to "true" is set in the
      * request.
-     * 
+     *
      * @param ctxId The context identifier
      * @return A Response with the outcome of the result (updated=1 or update=0)
      * @throws OXException If an error occurs
      * @deprecated Use {@link #updateOXDB(int, HttpHeaders, UriInfo, JSONObject)} instead.
      */
+    @Deprecated
     @PUT
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
@@ -197,12 +204,12 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
      * sent in a request to a writable database, they are considered to be part of one transaction. A transaction
      * is automatically committed after all requests have been sent. If an error occurs, the transaction is rolled
      * back and all changes are undone.
-     * 
+     *
      * The transaction can be kept open at the end of an request to get a transaction that spans multiple requests.
      * This is useful, if, for example, a value is to be retrieved, do a computation on it, and then write it back.
      * A transaction will be kept open, if the URL parameter "keepOpen" with the parameter to "true" is set in the
      * request.
-     * 
+     *
      * @param ctxId The context identifier
      * @return A Response with the outcome of the result (updated=1 or update=0)
      * @throws OXException If an error occurs
@@ -217,7 +224,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Uses the open transaction to execute further queries or updates.
-     * 
+     *
      * @param txId The transaction identifier
      * @return
      * @throws OXException If an error occurs
@@ -232,7 +239,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Uses the open transaction to execute further queries or updates.
-     * 
+     *
      * @param txId The transaction identifier
      * @return
      * @throws OXException If an error occurs
@@ -250,7 +257,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
      * when done. If a transaction can not be found (on all requests in the /transaction/ namespace), a 404
      * is returned. Transactions are automatically closed and rolled back, if they weren't contacted in a 2 minute
      * interval.
-     * 
+     *
      * @param txId The transaction identifier
      * @throws OXException If an error occurs
      */
@@ -267,7 +274,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
      * when done. If a transaction can not be found (on all requests in the /transaction/ namespace), a 404
      * is returned. Transactions are automatically closed and rolled back, if they weren't contacted in a 2 minute
      * interval.
-     * 
+     *
      * @param txId The transaction identifier
      * @throws OXException If an error occurs
      */
@@ -279,7 +286,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Query a monitored connection
-     * 
+     *
      * @param readId The read pool identifier
      * @param writeId The write pool identifier
      * @param schema The schema name
@@ -296,7 +303,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Query a monitored connection
-     * 
+     *
      * @param readId The read pool identifier
      * @param writeId The write pool identifier
      * @param schema The schema name
@@ -312,7 +319,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Query a monitored connection
-     * 
+     *
      * @param readId The read pool identifier
      * @param writeId The write pool identifier
      * @param schema The schema name
@@ -328,7 +335,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Update a monitored connection
-     * 
+     *
      * @param readId The read pool identifier
      * @param writeId The write pool identifier
      * @param schema The schema name
@@ -345,7 +352,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Update a monitored connection
-     * 
+     *
      * @param readId The read pool identifier
      * @param writeId The write pool identifier
      * @param schema The schema name
@@ -361,7 +368,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Update a monitored connection
-     * 
+     *
      * @param readId The read pool identifier
      * @param writeId The write pool identifier
      * @param schema The schema name
@@ -377,7 +384,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Initialize a new database schema with the specified name and the specified write pool identifier.
-     * 
+     *
      * @param writePoolId The write pool identifier
      * @param schema The schema name
      * @throws OXException If the initialization of the new schema fails
@@ -390,7 +397,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Inserts the partition identifiers to the replication monitor table
-     * 
+     *
      * @param writeId The write identifier referencing the master db server
      * @param schema The name of the schema
      * @throws OXException If the operation fails
@@ -405,7 +412,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Unlocks a schema/module combination.
-     * 
+     *
      * @param ctxId The context identifier
      * @param module The module
      * @throws OXException If the operation fails
@@ -418,7 +425,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Unlocks a schema/module combination for the specified context identifier.
-     * 
+     *
      * @param readPoolId The read pool identifier
      * @param writePoolId The write pool identifier
      * @param schema The schema name
@@ -434,7 +441,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Unlocks a schema/module combination for the specified context identifier.
-     * 
+     *
      * @param readPoolId The read pool identifier
      * @param writePoolId The write pool identifier
      * @param schema The schema name
@@ -447,10 +454,10 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
     public Response unlockMonitored(@PathParam("readId") int readId, @PathParam("writeId") int writeId, @PathParam("schema") String schema, @PathParam("module") String module, @Context HttpHeaders headers, @Context UriInfo uriInfo) throws OXException {
         return performUnlockMonitored(new RESTRequest(headers, uriInfo.getQueryParameters()), readId, writeId, schema, 0, module);
     }
-    
+
     /**
      * Migrate from the specified version to the specified version
-     * 
+     *
      * @param ctxId The context identifier
      * @param fromVersion Version updating from
      * @param toVersion Version updating to
@@ -458,6 +465,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
      * @throws OXException If the operation fails
      * @deprecated Use {@link #migrate(int, String, String, String, HttpHeaders, UriInfo, JSONObject)} instead.
      */
+    @Deprecated
     @PUT
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
@@ -468,7 +476,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Migrate from the specified version to the specified version
-     * 
+     *
      * @param ctxId The context identifier
      * @param fromVersion Version updating from
      * @param toVersion Version updating to
@@ -485,7 +493,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Perform an initial migration to the specified version
-     * 
+     *
      * @param ctxId The context identifier
      * @param toVersion Version updating to
      * @param module The module name
@@ -498,10 +506,10 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
     public Response initialiMigration(@PathParam("ctxId") int ctxId, @PathParam("toVersion") String toVersion, @PathParam("module") String module, @Context HttpHeaders headers, @Context UriInfo uriInfo, JSONObject body) throws OXException {
         return performMigrate(new RESTRequest(headers, uriInfo.getQueryParameters(), body), ctxId, "", toVersion, module);
     }
-    
+
     /**
      * Migrate from the specified version to the specified version by using a monitored connection
-     * 
+     *
      * @param readId The read identifier
      * @param writeId The write identifier
      * @param schema The name of the schema
@@ -512,6 +520,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
      * @throws OXException If the operation fails
      * @deprecated Use {@link #migrateMonitored(int, int, String, int, String, String, String, HttpHeaders, UriInfo, JSONObject)} instead.
      */
+    @Deprecated
     @PUT
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
@@ -522,7 +531,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Migrate from the specified version to the specified version by using a monitored connection
-     * 
+     *
      * @param readId The read identifier
      * @param writeId The write identifier
      * @param schema The name of the schema
@@ -542,7 +551,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Migrate from the specified version to the specified version by using a monitored connection
-     * 
+     *
      * @param readId The read identifier
      * @param writeId The write identifier
      * @param schema The name of the schema
@@ -560,7 +569,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Migrate from the specified version to the specified version by using a monitored connection
-     * 
+     *
      * @param readId The read identifier
      * @param writeId The write identifier
      * @param schema The name of the schema
@@ -579,7 +588,7 @@ public class DatabaseRESTService extends AbstractDatabaseRESTService {
 
     /**
      * Migrate from the specified version to the specified version by using a monitored connection
-     * 
+     *
      * @param readId The read identifier
      * @param writeId The write identifier
      * @param schema The name of the schema

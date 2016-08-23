@@ -85,6 +85,7 @@ import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.auth.rmi.impl.RemoteAuthenticatorImpl;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
+import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.charset.CustomCharsetProvider;
 import com.openexchange.config.ConfigurationService;
@@ -168,6 +169,7 @@ import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.lock.LockService;
 import com.openexchange.lock.impl.LockServiceImpl;
 import com.openexchange.log.Slf4jLogger;
+import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.internal.LoginNameRecorder;
@@ -185,6 +187,7 @@ import com.openexchange.mail.conversion.VCardAttachMailDataHandler;
 import com.openexchange.mail.conversion.VCardMailPartDataSource;
 import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
 import com.openexchange.mail.json.compose.share.internal.AttachmentStorageRegistry;
+import com.openexchange.mail.json.compose.share.internal.EnabledCheckerRegistry;
 import com.openexchange.mail.json.compose.share.internal.MessageGeneratorRegistry;
 import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegistry;
 import com.openexchange.mail.loginhandler.MailLoginHandler;
@@ -192,6 +195,7 @@ import com.openexchange.mail.loginhandler.TransportLoginHandler;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.osgi.MailCapabilityServiceTracker;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
+import com.openexchange.mail.osgi.MailSessionCacheInvalidator;
 import com.openexchange.mail.osgi.MailcapServiceTracker;
 import com.openexchange.mail.osgi.TransportProviderServiceTracker;
 import com.openexchange.mail.service.MailService;
@@ -204,13 +208,13 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.CreateMailAccountTables;
 import com.openexchange.mailaccount.internal.DeleteListenerServiceTracker;
-import com.openexchange.mailaccount.json.actions.MailAccountActionProvider;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.Managements;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
+import com.openexchange.notification.service.FullNameBuilderService;
 import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.objectusecount.service.ObjectUseCountServiceTracker;
@@ -229,9 +233,9 @@ import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.server.impl.Starter;
 import com.openexchange.server.reloadable.GenericReloadable;
-import com.openexchange.server.services.ActionLimiterServices;
 import com.openexchange.server.services.ServerRequestHandlerRegistry;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.spamhandler.SpamHandler;
@@ -240,7 +244,6 @@ import com.openexchange.systemname.SystemNameService;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.servlet.limit.ActionLimiter;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.uadetector.UserAgentParser;
@@ -416,10 +419,18 @@ public final class ServerActivator extends HousekeepingActivator {
         // I18n service load
         track(I18nService.class, new I18nServiceListener(context));
 
+        // Audit logger
+        track(AuditLogService.class, new RegistryCustomizer<AuditLogService>(context, AuditLogService.class));
+
+        // Full-name builder
+        track(ServerConfigService.class, new RegistryCustomizer<ServerConfigService>(context, ServerConfigService.class));
+        track(FullNameBuilderService.class, new RegistryCustomizer<FullNameBuilderService>(context, FullNameBuilderService.class));
+
         // Mail account delete listener
         track(MailAccountDeleteListener.class, new DeleteListenerServiceTracker(context));
 
         // Mail provider service tracker
+        track(CacheEventService.class, new MailSessionCacheInvalidator(context));
         track(MailProvider.class, new MailProviderServiceTracker(context));
         track(MailcapCommandMap.class, new MailcapServiceTracker(context));
         track(CapabilityService.class, new MailCapabilityServiceTracker(context));
@@ -429,6 +440,7 @@ public final class ServerActivator extends HousekeepingActivator {
         track(ShareLinkGeneratorRegistry.class, new RegistryCustomizer<ShareLinkGeneratorRegistry>(context, ShareLinkGeneratorRegistry.class));
         track(MessageGeneratorRegistry.class, new RegistryCustomizer<MessageGeneratorRegistry>(context, MessageGeneratorRegistry.class));
         track(AttachmentStorageRegistry.class, new RegistryCustomizer<AttachmentStorageRegistry>(context, AttachmentStorageRegistry.class));
+        track(EnabledCheckerRegistry.class, new RegistryCustomizer<EnabledCheckerRegistry>(context, EnabledCheckerRegistry.class));
 
         // Image transformation service
         track(ImageTransformationService.class, new RegistryCustomizer<ImageTransformationService>(context, ImageTransformationService.class));
@@ -438,6 +450,9 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Spam handler provider service tracker
         track(SpamHandler.class, new SpamHandlerServiceTracker(context));
+
+        // CacheEventService
+        track(CacheEventService.class, new RegistryCustomizer<CacheEventService>(context, CacheEventService.class));
 
         // AJAX request handler
         track(AJAXRequestHandler.class, new AJAXRequestHandlerCustomizer(context));
@@ -618,20 +633,6 @@ public final class ServerActivator extends HousekeepingActivator {
         ServerServiceRegistry.getInstance().addService(UserService.class, userService);
 
         track(ObjectUseCountService.class, new ObjectUseCountServiceTracker(context));
-
-        track(ActionLimiter.class, new SimpleRegistryListener<ActionLimiter>() {
-
-            @Override
-            public void added(ServiceReference<ActionLimiter> ref, ActionLimiter service) {
-                ActionLimiterServices.add(service);
-            }
-
-            @Override
-            public void removed(ServiceReference<ActionLimiter> ref, ActionLimiter service) {
-                ActionLimiterServices.remove(service);
-            }
-
-        });
 
         // Start up server the usual way
         starter.start();

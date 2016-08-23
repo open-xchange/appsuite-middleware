@@ -129,6 +129,17 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     // Delegate config database service methods.
 
+    /**
+     * Gets the assignment for specified context identifier
+     *
+     * @param contextId The context identifier
+     * @return The associated assignment
+     * @throws OXException If such an assignment cannot be returned
+     */
+    public AssignmentImpl getAssignment(int contextId) throws OXException {
+        return configDatabaseService.getAssignment(contextId);
+    }
+
     @Override
     public Connection getReadOnly() throws OXException {
         return configDatabaseService.getReadOnly();

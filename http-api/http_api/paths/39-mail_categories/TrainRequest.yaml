@@ -1,6 +1,6 @@
 /mail/categories?action=train:
   put:
-    operationId: moveMails
+    operationId: train
     tags: 
       - mail_categories
     summary: Add a new rule 
@@ -35,6 +35,6 @@
       200:
         description: |
           'An empty response if everything went well. In case of errors the responsible fields in the
-          response are filled (see [Error handling](#error-handling)).'
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).'
         schema:
           $ref: "#/definitions/CommonResponse"

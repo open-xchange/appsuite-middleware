@@ -49,10 +49,11 @@
 
 package com.openexchange.file.storage.mail;
 
+import java.util.Locale;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.mail.osgi.Services;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPMessageStorage;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -63,6 +64,8 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
@@ -74,22 +77,31 @@ import com.sun.mail.imap.IMAPStore;
  */
 public abstract class AbstractMailDriveResourceAccess {
 
-    /** The constant for full name of an account's root folder. */
-    private static final String ROOT_FULLNAME = FileStorageFolder.ROOT_FULLNAME;
-
     /** The associated session */
     protected final Session session;
+
+    /** The locale of session-associated user */
+    protected final Locale locale;
 
     /** The full names of the virtual attachment folders */
     protected final FullNameCollection fullNameCollection;
 
     /**
      * Initializes a new {@link AbstractMailDriveResourceAccess}.
+     *
+     * @throws OXException If initialization fails
      */
-    protected AbstractMailDriveResourceAccess(FullNameCollection fullNameCollection, Session session) {
+    protected AbstractMailDriveResourceAccess(FullNameCollection fullNameCollection, Session session) throws OXException {
         super();
         this.fullNameCollection = fullNameCollection;
         this.session = session;
+
+        if (session instanceof ServerSession) {
+            locale = ((ServerSession) session).getUser().getLocale();
+        } else {
+            UserService userService = Services.getOptionalService(UserService.class);
+            locale = null == userService ? Locale.US : userService.getUser(session.getUserId(), session.getContextId()).getLocale();
+        }
     }
 
     /**

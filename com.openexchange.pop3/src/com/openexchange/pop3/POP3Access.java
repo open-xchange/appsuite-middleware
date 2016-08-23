@@ -423,7 +423,7 @@ public final class POP3Access extends MailAccess<POP3FolderStorage, POP3MessageS
              * Try to authenticate
              */
             boolean forceSecure = config.isStartTls() || config.isRequireTls() || config.getMailProperties().isEnforceSecureConnection();
-            pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false, session, false, forceSecure).getPop3Store();
+            pop3Store = POP3StoreConnector.getPOP3Store(config, getMailProperties(), false, -1, session, false, forceSecure).getPop3Store();
             /*
              * Add warning if non-secure
              */

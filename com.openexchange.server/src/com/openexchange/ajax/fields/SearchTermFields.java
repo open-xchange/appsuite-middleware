@@ -57,6 +57,8 @@ package com.openexchange.ajax.fields;
 public final class SearchTermFields {
 
     public static final String FIELD = "field";
+    public static final String ATTACHMENT = "attachment";
+    public static final String HEADER = "header";
 
     /**
      * Initializes a new {@link SearchTermFields}.

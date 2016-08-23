@@ -79,6 +79,7 @@ import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CryptoConfiguration;
 import com.amazonaws.services.s3.model.EncryptionMaterials;
 import com.amazonaws.services.s3.model.Region;
+import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -152,7 +153,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
             AmazonS3Client client = clientInfo.client;
             String bucketName = initBucket(client, filestoreID);
             LOG.debug("Using \"{}\" as bucket name.", bucketName);
-            S3FileStorage newStorage = new S3FileStorage(client, clientInfo.encrypted, bucketName, extractFilestorePrefix(uri));
+            S3FileStorage newStorage = new S3FileStorage(client, clientInfo.encrypted, bucketName, extractFilestorePrefix(uri), clientInfo.chunkSize);
             storage = storages.putIfAbsent(uri, newStorage);
             if (null == storage) {
                 storage = newStorage;
@@ -235,9 +236,14 @@ public class S3FileStorageFactory implements FileStorageProvider {
         if (configService.getBoolProperty("com.openexchange.filestore.s3." + filestoreID + ".pathStyleAccess", true)) {
             client.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true));
         }
-
-
-        return new AmazonS3ClientInfo(client, encrypted);
+        long chunkSize;
+        String chunkSizeValue = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".chunkSize", "5MB");
+        try {
+            chunkSize = ConfigTools.parseBytes(chunkSizeValue);
+        } catch (NumberFormatException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, chunkSizeValue);
+        }
+        return new AmazonS3ClientInfo(client, encrypted, chunkSize);
     }
 
     private ClientConfiguration getClientConfiguration(String filestoreID) {
@@ -411,10 +417,14 @@ public class S3FileStorageFactory implements FileStorageProvider {
         /** Whether associated Amazon S3 client reference has encryption enabled */
         final boolean encrypted;
 
-        AmazonS3ClientInfo(AmazonS3Client client, boolean encrypted) {
+        /** The chunk size to use for multipart uploads */
+        final long chunkSize;
+
+        AmazonS3ClientInfo(AmazonS3Client client, boolean encrypted, long chunkSize) {
             super();
             this.client = client;
             this.encrypted = encrypted;
+            this.chunkSize = chunkSize;
         }
     }
 

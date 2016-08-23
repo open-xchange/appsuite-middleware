@@ -49,6 +49,9 @@
 
 package com.openexchange.mailaccount.internal;
 
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.utils.MailFolderUtility;
+
 /**
  * {@link DefaultMailAccount} - Represents a default mail account.
  *
@@ -63,6 +66,8 @@ public final class DefaultMailAccount extends AbstractMailAccount {
      */
     public DefaultMailAccount() {
         super();
+        id = DEFAULT_ID;
+        rootFolder = MailFolderUtility.prepareFullname(DEFAULT_ID, MailFolder.DEFAULT_FOLDER_ID);
     }
 
     @Override

@@ -121,7 +121,7 @@ public class GetUserCapabilities extends UserAbstraction {
                 final String lf = System.getProperty("line.separator");
 
                 final StringBuilder sb = new StringBuilder(2048);
-                sb.append("Capabilities for user ").append(usr.getId()).append(" in context ").append(ctx.getId()).append(":").append(lf);
+                sb.append("Capabilities for user ").append(usr.getId() != null ? usr.getId() : usr.getName()).append(" in context ").append(ctx.getId()).append(":").append(lf);
 
                 for (final String cap : new TreeSet<String>(caps)) {
                     sb.append(cap).append(lf);

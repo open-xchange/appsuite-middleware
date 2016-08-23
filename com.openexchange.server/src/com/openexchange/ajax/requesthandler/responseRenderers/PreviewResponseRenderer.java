@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
+import java.io.IOException;
 import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -83,7 +84,7 @@ public class PreviewResponseRenderer implements ResponseRenderer {
     }
 
     @Override
-    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest httpReq, final HttpServletResponse httpResp) {
+    public void write(final AJAXRequestData request, final AJAXRequestResult result, final HttpServletRequest httpReq, final HttpServletResponse httpResp) throws IOException {
         //httpResp.setContentType(AJAXServlet.CONTENTTYPE_HTML);
         try {
             final PreviewDocument previewDocument = (PreviewDocument) result.getResultObject();

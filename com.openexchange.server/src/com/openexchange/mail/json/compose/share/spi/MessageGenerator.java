@@ -68,10 +68,11 @@ public interface MessageGenerator extends Applicable {
      * Generates the transport messages for given attributes.
      *
      * @param info The message info providing the link and target recipients
+     * @param shareReference The share reference
      * @return The generated messages
      * @throws OXException If messages cannot be generated
      */
-    List<ComposedMailMessage> generateTransportMessagesFor(ShareComposeMessageInfo info) throws OXException;
+    List<ComposedMailMessage> generateTransportMessagesFor(ShareComposeMessageInfo info, ShareReference shareReference) throws OXException;
 
     /**
      * Generates the messages, that is supposed to be added to standard sent folder.

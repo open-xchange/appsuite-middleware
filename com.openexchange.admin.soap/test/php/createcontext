@@ -21,6 +21,10 @@ try {
 	$ctx = new Context();
 	$ctx->id = $random_id;
 	$ctx->maxQuota = 10;
+	$ctx->name = "example.com";
+	
+	// If more than one domain mappings is needed
+	//$ctx->loginMappings = array( "mapping1", "mapping2", "mapping3");
 
 	$result = getContextClient($SOAPHOST)->create($ctx, $user, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
 

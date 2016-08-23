@@ -50,6 +50,7 @@
 package com.openexchange.osgi;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -66,19 +67,26 @@ public final class ServiceListings {
         super();
     }
 
-    private static final ServiceListing EMPTY_SERVICE_LISTING = new ServiceListing() {
+    private static class EmptyServiceListing<E> implements ServiceListing<E> {
+
+        static final EmptyServiceListing<Object> EMPTY_SERVICE_LISTING = new EmptyServiceListing<>();
 
         @Override
-        public List getServiceList() {
-            return Collections.EMPTY_LIST;
+        public List<E> getServiceList() {
+            return Collections.emptyList();
         }
-    };
+
+        @Override
+        public Iterator<E> iterator() {
+            return Collections.emptyIterator();
+        }
+    }
 
     /**
      * Returns the empty service listing (immutable).
      */
     public static final <T> ServiceListing<T> emptyList() {
-        return EMPTY_SERVICE_LISTING;
+        return (ServiceListing<T>) EmptyServiceListing.EMPTY_SERVICE_LISTING;
     }
 
 }

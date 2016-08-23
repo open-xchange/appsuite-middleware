@@ -361,4 +361,10 @@ public class SetSwitch implements AttributeSwitch {
         desc.setTransportStartTls(Boolean.parseBoolean(value.toString()));
         return null;
     }
+
+    @Override
+    public Object rootFolder() {
+        return null;
+    }
+
 }

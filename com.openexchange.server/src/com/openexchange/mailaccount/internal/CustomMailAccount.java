@@ -49,6 +49,9 @@
 
 package com.openexchange.mailaccount.internal;
 
+import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.utils.MailFolderUtility;
+
 /**
  * {@link CustomMailAccount} - Represents a custom mail account.
  *
@@ -60,9 +63,13 @@ public final class CustomMailAccount extends AbstractMailAccount {
 
     /**
      * Initializes a new {@link CustomMailAccount}.
+     *
+     * @param id The account identifier
      */
-    public CustomMailAccount() {
+    public CustomMailAccount(int id) {
         super();
+        this.id = id;
+        rootFolder = MailFolderUtility.prepareFullname(id, MailFolder.DEFAULT_FOLDER_ID);
     }
 
     @Override

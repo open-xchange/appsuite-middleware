@@ -111,7 +111,11 @@ public class ExternalMailAccountRootFolder extends AbstractFolder {
         parent = FolderStorage.PRIVATE_ID;
         final MailPermissionImpl mp = new MailPermissionImpl();
         mp.setEntity(userId);
-        mp.setAllPermissions(Permission.CREATE_SUB_FOLDERS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
+        if (UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailAccount.getMailProtocol())) {
+            mp.setAllPermissions(Permission.CREATE_OBJECTS_IN_FOLDER, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
+        } else {
+            mp.setAllPermissions(Permission.CREATE_SUB_FOLDERS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS);
+        }
         mp.setAdmin(false);
         permissions = new Permission[] { mp };
         type = SystemType.getInstance();

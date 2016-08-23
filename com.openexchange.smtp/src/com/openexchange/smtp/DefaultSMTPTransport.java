@@ -49,7 +49,6 @@
 
 package com.openexchange.smtp;
 
-import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.parseAddressList;
 import static com.openexchange.mail.text.TextProcessing.performLineFolding;
 import java.text.DateFormat;
@@ -59,7 +58,6 @@ import javax.mail.Address;
 import javax.mail.Message.RecipientType;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
-import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
@@ -79,7 +77,6 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.config.ITransportProperties;
@@ -302,18 +299,7 @@ public final class DefaultSMTPTransport extends AbstractSMTPTransport {
             /*
              * Transport message
              */
-            final long start = System.currentTimeMillis();
-            final Transport transport = getSMTPSession().getTransport(SMTP);
-            try {
-                connectTransport(transport, smtpConfig);
-                saveChangesSafe(smtpMessage, true);
-                transport(smtpMessage, smtpMessage.getAllRecipients(), transport, smtpConfig);
-                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-            } catch (final javax.mail.AuthenticationFailedException e) {
-                throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
-            } finally {
-                transport.close();
-            }
+            transport(smtpMessage, smtpMessage.getAllRecipients(), getSMTPSession(smtpConfig), smtpConfig);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, smtpConfig, session);
         }
@@ -321,12 +307,15 @@ public final class DefaultSMTPTransport extends AbstractSMTPTransport {
 
     @Override
     protected ITransportProperties createNewMailProperties() throws OXException {
-        try {
-            final MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
-            return new MailAccountSMTPProperties(storageService.getMailAccount(accountId, session.getUserId(), session.getContextId()));
-        } catch (final OXException e) {
-            throw e;
+        MailAccountStorageService storageService = Services.getService(MailAccountStorageService.class);
+        int contextId = session.getContextId();
+        int userId = session.getUserId();
+        if (storageService.existsMailAccount(accountId, userId, contextId)) {
+            return new MailAccountSMTPProperties(storageService.getMailAccount(accountId, userId, contextId));
         }
+
+        // Fall-back...
+        return new MailAccountSMTPProperties(accountId);
     }
 
     private static String quoteReplacement(final String str) {

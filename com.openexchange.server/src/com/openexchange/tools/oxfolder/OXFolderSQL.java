@@ -3083,6 +3083,31 @@ public final class OXFolderSQL {
         }
     }
 
+    private static final String SQL_CLEAN_LOCKS =   "DELETE FROM infostore_lock WHERE cid=? AND userid=? AND " + 
+                                                    "entity IN (SELECT id FROM infostore WHERE cid=? AND folder_id=?) AND " + 
+                                                    "entity NOT IN (SELECT object_id FROM object_permission where cid=? AND folder_id=?);";
+
+    static void cleanLocksForFolder(int folder, int[] userIds, Connection con, Context ctx) throws SQLException {
+
+        PreparedStatement stmt = null;
+        try {
+            for (int userId : userIds) {
+                stmt = con.prepareStatement(SQL_CLEAN_LOCKS);
+                stmt.setInt(1, ctx.getContextId());
+                stmt.setInt(2, userId);
+                stmt.setInt(3, ctx.getContextId());
+                stmt.setInt(4, folder);
+                stmt.setInt(5, ctx.getContextId());
+                stmt.setInt(6, folder);
+                stmt.execute();
+                closeSQLStuff(stmt);
+            }
+        } finally {
+            closeResources(null, stmt, null, true, ctx);
+        }
+
+    }
+
     /**
      * @return <code>true</code> if folder type is set to private, <code>false</code> otherwise
      */

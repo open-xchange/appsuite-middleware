@@ -175,7 +175,16 @@ public interface ConfigurationService {
      *
      * @param fileName The file name of the properties file.
      * @return the properties from that file or an empty properties if that file was not read.
+     *
+     * @deprecated <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     *             Due to "lean configuration" initiative this method might return a {@code Properties} instance that does not contain
+     *             all of the properties that are expected to be contained, as the specified file might miss those properties whose
+     *             value does not differ from associated default value. If the denoted file is known to exist and does contain expected
+     *             content, this methods may be safely called or by invoking
+     *             <code>ConfigurationServices.loadPropertiesFrom(configService.getFileByName("existing.properties"))</code>.
+     *             </div>
      */
+    @Deprecated
     public Properties getFile(String fileName);
 
     /**
@@ -188,6 +197,13 @@ public interface ConfigurationService {
 
     /**
      * Gets the file denoted by given file name.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * Due to "lean configuration" initiative this method the referenced file might be absent or return an incomplete content
+     * in case a <code>.properties</code> file is supposed to be fetched, as the specified file might miss those properties whose
+     * value does not differ from associated default value.
+     * If the denoted file is known to exist and does contain expected content, this methods may be safely called.
+     * </div>
      *
      * @param fileName The file name
      * @return The file or <code>null</code>
@@ -196,6 +212,13 @@ public interface ConfigurationService {
 
     /**
      * If no property format is used for configuration data, the text content of a file can be retrieved with this call.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">
+     * Due to "lean configuration" initiative this method the referenced file might be absent or return an incomplete content
+     * in case a <code>.properties</code> file is supposed to be fetched, as the specified file might miss those properties whose
+     * value does not differ from associated default value.
+     * If the denoted file is known to exist and does contain expected content, this methods may be safely called.
+     * </div>
      *
      * @param fileName The logical file name of the file to be retrieved.
      * @return The text content of the configuration

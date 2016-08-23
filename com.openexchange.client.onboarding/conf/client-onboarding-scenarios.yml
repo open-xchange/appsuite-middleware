@@ -55,7 +55,7 @@
 #   - At last, ensure the capabilities as required by the associated provider(s) are available
 #      app                -> No capabilites required; always available
 #      drivewindowsclient -> Requires "drive" capability
-#      emclient           -> Requires "emclient" capability
+#      emclient           -> Requires "emclient_basic" or "emclient_premium" capability
 #      mailapp            -> Requires "mobile_mail_app" and "webmail" capabilities
 #      driveapp           -> Requires "drive" capability
 #      caldav             -> Requires "caldav" capability

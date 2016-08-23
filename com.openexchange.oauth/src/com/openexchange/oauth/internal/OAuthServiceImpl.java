@@ -106,6 +106,9 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.OAuthToken;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.services.Services;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
@@ -609,7 +612,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
 
     private static Session getUserSession(final int userId, final int contextId) {
-     // Firstly let's see if the currently active session matches the one we need here and prefer that one.
+        // Firstly let's see if the currently active session matches the one we need here and prefer that one.
         final SessionHolder sessionHolder = Services.getService(SessionHolder.class);
         if (sessionHolder != null) {
             final Session session = sessionHolder.getSessionObject();
@@ -654,10 +657,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             stmt.setInt(pos, accountId);
             final int rows = stmt.executeUpdate();
             if (rows <= 0) {
-                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(
-                    Integer.valueOf(accountId),
-                    Integer.valueOf(user),
-                    Integer.valueOf(contextId));
+                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(accountId), Integer.valueOf(user), Integer.valueOf(contextId));
             }
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -681,10 +681,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             stmt.setInt(3, accountId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
-                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(
-                    Integer.valueOf(accountId),
-                    Integer.valueOf(user),
-                    Integer.valueOf(contextId));
+                throw OAuthExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(accountId), Integer.valueOf(user), Integer.valueOf(contextId));
             }
             final DefaultOAuthAccount account = new DefaultOAuthAccount();
             account.setId(accountId);
@@ -764,6 +761,19 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             executeUpdate(contextId, update, values);
             /*
+             * Re-authorise
+             */
+            OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
+            OAuthAccessRegistry oAuthAccessRegistry = registryService.get(serviceMetaData);
+            OAuthAccess access = oAuthAccessRegistry.get(contextId, user);
+            // No need to re-authorise if access not present
+            if (access != null) {
+                // First revoke the old token
+                access.revoke();
+                // Then initialise the access with the new one
+                access.initialize();
+            }
+            /*
              * Return the account
              */
             return account;
@@ -776,14 +786,14 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
     protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OXException {
         switch (type) {
-        case OUT_OF_BAND:
-            obtainTokenByOutOfBand(arguments, account);
-            break;
-        case CALLBACK:
-            obtainTokenByCallback(arguments, account);
-            break;
-        default:
-            break;
+            case OUT_OF_BAND:
+                obtainTokenByOutOfBand(arguments, account);
+                break;
+            case CALLBACK:
+                obtainTokenByCallback(arguments, account);
+                break;
+            default:
+                break;
         }
     }
 

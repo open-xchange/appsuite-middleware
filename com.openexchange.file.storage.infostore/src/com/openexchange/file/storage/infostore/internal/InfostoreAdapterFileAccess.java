@@ -78,6 +78,7 @@ import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageRangeFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
+import com.openexchange.file.storage.FileStorageZippableFolderFileAccess;
 import com.openexchange.file.storage.ObjectPermissionAware;
 import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.infostore.FileMetadata;
@@ -103,7 +104,7 @@ import gnu.trove.list.array.TIntArrayList;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileStorageRandomFileAccess, FileStorageSequenceNumberProvider, FileStorageAdvancedSearchFileAccess, FileStoragePersistentIDs, FileStorageVersionedFileAccess, FileStorageLockedFileAccess, FileStorageEfficientRetrieval, ObjectPermissionAware, FileStorageRangeFileAccess, FileStorageExtendedMetadata, FileStorageMultiMove {
+public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileStorageRandomFileAccess, FileStorageSequenceNumberProvider, FileStorageAdvancedSearchFileAccess, FileStoragePersistentIDs, FileStorageVersionedFileAccess, FileStorageLockedFileAccess, FileStorageEfficientRetrieval, ObjectPermissionAware, FileStorageRangeFileAccess, FileStorageExtendedMetadata, FileStorageMultiMove, FileStorageZippableFolderFileAccess {
 
     private final InfostoreSearchEngine search;
     private final Context ctx;
@@ -383,7 +384,15 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     }
 
     @Override
-    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields, final boolean ignoreVersion) throws OXException {
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields, long offset) throws OXException {
+        if (modifiedFields.contains(Field.URL)) {
+            checkUrl(file);
+        }
+        return getInfostore(file.getFolderId()).saveDocument(new FileMetadata(file), data, sequenceNumber, FieldMapping.getMatching(modifiedFields), offset, session);
+    }
+
+    @Override
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields, boolean ignoreVersion) throws OXException {
         if (modifiedFields.contains(Field.URL)) {
             checkUrl(file);
         }
@@ -391,11 +400,11 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     }
 
     @Override
-    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields, long offset) throws OXException {
+    public IDTuple saveDocumentTryAddVersion(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         if (modifiedFields.contains(Field.URL)) {
             checkUrl(file);
         }
-        return getInfostore(file.getFolderId()).saveDocument(new FileMetadata(file), data, sequenceNumber, FieldMapping.getMatching(modifiedFields), offset, session);
+        return getInfostore(file.getFolderId()).saveDocumentTryAddVersion(new FileMetadata(file), data, sequenceNumber, FieldMapping.getMatching(modifiedFields), session);
     }
 
     @Override

@@ -573,7 +573,7 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     EXPIRATION_DATE_MISSING("User %1$s in context %2$s did not specify an expiration date for a share compose message, but is required to do so", MailExceptionStrings.EXPIRATION_DATE_MISSING_MSG, CATEGORY_USER_INPUT, 107),
     ;
 
-    private static String PREFIX = "MSG";
+    private static final String PREFIX = "MSG";
 
     /**
      * Gets the <code>"MSG"</code> prefix for mail-related exceptions
@@ -597,13 +597,10 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
         return PREFIX.equals(e.getPrefix());
     }
 
-    private String message;
-
-    private String displayMessage;
-
-    private int number;
-
-    private Category category;
+    private final String message;
+    private final String displayMessage;
+    private final int number;
+    private final Category category;
 
     private MailExceptionCode(String message, Category category, int detailNumber) {
         this(message, null, category, detailNumber);
@@ -620,6 +617,7 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
         message = source.message;
         number = source.number;
         category = source.category;
+        displayMessage = source.displayMessage;
     }
 
     @Override

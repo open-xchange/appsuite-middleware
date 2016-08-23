@@ -90,6 +90,11 @@ public class SimInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
+    public long getTotalSize(long folderId, ServerSession session) throws OXException {
+        return 0;
+    }
+
+    @Override
     public boolean exists(int id, int version, ServerSession session) throws OXException {
         // Nothing to do
         return false;
@@ -213,6 +218,12 @@ public class SimInfostoreFacade implements InfostoreFacade {
 
     @Override
     public IDTuple saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
+        // Nothing to do
+        return null;
+    }
+
+    @Override
+    public IDTuple saveDocumentTryAddVersion(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, ServerSession session) throws OXException {
         // Nothing to do
         return null;
     }

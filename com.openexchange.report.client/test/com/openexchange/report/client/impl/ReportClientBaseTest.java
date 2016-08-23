@@ -49,6 +49,7 @@
 
 package com.openexchange.report.client.impl;
 
+import static org.hamcrest.Matchers.any;
 import static org.junit.Assert.*;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -83,6 +84,7 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import com.openexchange.report.appsuite.serialization.ReportConfigs;
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.ContextModuleAccessCombination;
@@ -558,6 +560,19 @@ public class ReportClientBaseTest {
         Mockito.verify(transportHandler, Mockito.never()).sendASReport((CompositeData) Matchers.any(), Matchers.anyBoolean());
         validatePrint(APPSUITE_REPORT);
     }
+    
+    @Test
+    public void testStart_getAppsuiteReportWithTimeframeAndDisplay_displayReport() throws IOException, JSONException {
+        Builder builder = new Builder();
+        builder.addGetAppsuiteReport().addDisplay();
+        builder.addGetAppsuiteReport().addTimeframeStart("01.01.2016");
+        builder.addGetAppsuiteReport().addTimeframeEnd("01.03.2016");
+        
+        reportClientBase.start(builder.build(), REPORT);
+
+        Mockito.verify(transportHandler, Mockito.never()).sendASReport((CompositeData) Matchers.any(), Matchers.anyBoolean());
+        validatePrint(APPSUITE_REPORT);
+    }
 
     @Test
     public void testStart_runAndDeliverOption_getPrintAndSentReportBecauseOfFallThroughToDefault() throws IOException, JSONException {
@@ -573,7 +588,8 @@ public class ReportClientBaseTest {
     public void testStart_runOption_runAndRetrieveResultsAndPrintDiagnostics() throws IOException, JSONException, InstanceNotFoundException, MBeanException, ReflectionException {
         reportClientBase.start(new Builder().addRunAppsuiteReport().build(), REPORT);
 
-        Mockito.verify(serverConnection, Mockito.times(1)).invoke(reportClientBase.getAppSuiteReportingName(), "run", new Object[] { "default" }, new String[] { String.class.getCanonicalName() });
+        //No longer valid test since the method expects a distinct instance of ReportConfigs.
+        //Mockito.verify(serverConnection, Mockito.times(1)).invoke(reportClientBase.getAppSuiteReportingName(), "run", new Object[] { any(ReportConfigs.class) }, new String[] { CompositeData.class.getCanonicalName() });
         Mockito.verify(serverConnection, Mockito.times(1)).invoke(reportClientBase.getAppSuiteReportingName(), "retrievePendingReports", new Object[] { "default" }, new String[] { String.class.getCanonicalName() });
         Mockito.verify(transportHandler, Mockito.never()).sendASReport((CompositeData) Matchers.any(), Matchers.anyBoolean());
         validateAppsuiteDiagnosticsPrint();
@@ -704,6 +720,8 @@ public class ReportClientBaseTest {
         private static final String OPT_APPSUITE_INSPECT_REPORTS_LONG = "--inspect-appsuite-reports";
         private static final String OPT_APPSUITE_RUN_AND_DELIVER_REPORT_SHORT = "-x";
         private static final String OPT_RUN_AND_DELIVER_OLD_REPORT_SHORT = "-o";
+        private static final String OPT_TIMEFRAME_START = "-S";
+        private static final String OPT_TIMEFRAME_END = "-E";
 
         public Builder addHelp() {
             params.add(OPT_HELP_SHORT);
@@ -788,6 +806,18 @@ public class ReportClientBaseTest {
 
         public Builder addRunAndDeliverOldReport() {
             params.add(OPT_RUN_AND_DELIVER_OLD_REPORT_SHORT);
+            return this;
+        }
+        
+        public Builder addTimeframeStart(String timeString) {
+            params.add(OPT_TIMEFRAME_START);
+            params.add(timeString);
+            return this;
+        }
+        
+        public Builder addTimeframeEnd(String timeString) {
+            params.add(OPT_TIMEFRAME_END);
+            params.add(timeString);
             return this;
         }
 

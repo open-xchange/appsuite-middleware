@@ -120,9 +120,7 @@ import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MultipleMailPartHandler;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -217,12 +215,7 @@ public final class MessageParser {
             composedMail.setAccountId(accountId);
 
             // Select appropriate handler
-            IAttachmentHandler attachmentHandler;
-            if (prepare4Transport && TransportProperties.getInstance().isPublishOnExceededQuota() && (!TransportProperties.getInstance().isPublishPrimaryAccountOnly() || (MailAccount.DEFAULT_ID == accountId))) {
-                attachmentHandler = new PublishAttachmentHandler(session, provider, protocol, hostName);
-            } else {
-                attachmentHandler = new AbortAttachmentHandler(session);
-            }
+            IAttachmentHandler attachmentHandler = new AbortAttachmentHandler(session);
 
             // Parse transport message plus its text body
             parse(composedMail, jMail, session, accountId, provider, attachmentHandler, ctx, prepare4Transport);
@@ -945,7 +938,7 @@ public final class MessageParser {
             if (length == 0) {
                 return EMPTY_ADDRS;
             }
-            return parseAdressArray(jAddresses, length, false);
+            return parseAdressArray(jAddresses, length, ParseMode.AS_IS);
         } catch (JSONException e) {
             LOG.error("", e);
             /*
@@ -962,31 +955,96 @@ public final class MessageParser {
      * [&quot;&lt;personal&gt;&quot;, &quot;&lt;email-address&gt;&quot;]
      * </pre>
      *
-     * @param jsonArray The JSON array
+     * @param jAddresses The JSON array of addresses
+     * @param length The length of the passed JSON array
      * @param strict boolean flag to enable/disable strict RFC822 parsing
      * @return Parsed address list combined in a {@link String} object
      * @throws JSONException If a JSON error occurs
      * @throws AddressException If constructing an address fails
      */
-    public static InternetAddress[] parseAdressArray(JSONArray jsonArray, int length, boolean strict) throws JSONException, AddressException {
+    public static InternetAddress[] parseAdressArray(JSONArray jAddresses, int length, boolean strict) throws JSONException, AddressException {
+        return parseAdressArray(jAddresses, length, strict ? ParseMode.STRICT : ParseMode.LENIENT);
+    }
+
+    /** The parse mode */
+    public static enum ParseMode {
+        /**
+         * Enforces strict RFC822 syntax during parsing
+         */
+        STRICT,
+        /**
+         * Enforces no strict RFC822 syntax during parsing, but does fail for completely syntactically wrong addresses; e.g. containing illegal characters
+         */
+        LENIENT,
+        /**
+         * Simply passes address string as-is.
+         */
+        AS_IS;
+    }
+
+    /**
+     * Expects the specified JSON array to be an array of arrays. Each inner array conforms to pattern:
+     *
+     * <pre>
+     * [&quot;&lt;personal&gt;&quot;, &quot;&lt;email-address&gt;&quot;]
+     * </pre>
+     *
+     * @param jAddresses The JSON array of addresses
+     * @param length The length of the passed JSON array
+     * @param parseMode The parse mode to apply
+     * @return Parsed address list combined in a {@link String} object
+     * @throws JSONException If a JSON error occurs
+     * @throws AddressException If constructing an address fails
+     */
+    public static InternetAddress[] parseAdressArray(JSONArray jAddresses, int length, ParseMode parseMode) throws JSONException, AddressException {
+        boolean strictOrLenient = (ParseMode.STRICT == parseMode) || (ParseMode.LENIENT == parseMode);
         List<InternetAddress> addresses = new ArrayList<InternetAddress>(length);
-        for (int i = 0; i < length; i++) {
-            JSONArray persAndAddr = jsonArray.getJSONArray(i);
+        for (int i = 0, k = length; k-- > 0; i++) {
+            JSONArray persAndAddr = jAddresses.getJSONArray(i);
             int pLen = persAndAddr.length();
             if (pLen != 0) {
                 if (1 == pLen) {
-                    addresses.add(new QuotedInternetAddress(persAndAddr.getString(0), strict));
-                } else {
-                    String personal = persAndAddr.getString(0);
-                    boolean hasPersonal = (personal != null && !"null".equals(personal));
-                    if (hasPersonal) {
+                    if (strictOrLenient) {
+                        addresses.add(new QuotedInternetAddress(persAndAddr.getString(0), ParseMode.STRICT == parseMode));
+                    } else {
+                        // Use 'QuotedInternetAddress(String, String, String)' constructor for no parsing, but accepting literals as-is
                         try {
-                            addresses.add(new QuotedInternetAddress(persAndAddr.getString(1), personal, "UTF-8"));
+                            addresses.add(new QuotedInternetAddress(persAndAddr.getString(0), null, "UTF-8"));
                         } catch (UnsupportedEncodingException x) {
                             // Cannot occur
                         }
+                    }
+                } else {
+                    String personal = persAndAddr.optString(0, null);
+                    boolean hasPersonal = (personal != null && !"null".equals(personal));
+                    if (hasPersonal) {
+                        if (strictOrLenient) {
+                            QuotedInternetAddress addr = new QuotedInternetAddress(persAndAddr.getString(1), ParseMode.STRICT == parseMode);
+                            try {
+                                addr.setPersonal(personal, "UTF-8");
+                            } catch (UnsupportedEncodingException x) {
+                                // Cannot occur
+                            }
+                            addresses.add(addr);
+                        } else {
+                            // Use 'QuotedInternetAddress(String, String, String)' constructor for no parsing, but accepting literals as-is
+                            try {
+                                addresses.add(new QuotedInternetAddress(persAndAddr.getString(1), personal, "UTF-8"));
+                            } catch (UnsupportedEncodingException x) {
+                                // Cannot occur
+                            }
+                        }
                     } else {
-                        addresses.add(new QuotedInternetAddress(persAndAddr.getString(1), strict));
+                        if (strictOrLenient) {
+                            addresses.add(new QuotedInternetAddress(persAndAddr.getString(1), ParseMode.STRICT == parseMode));
+                        } else {
+                            // Use 'QuotedInternetAddress(String, String, String)' constructor for no parsing, but accepting literals as-is
+                            try {
+                                addresses.add(new QuotedInternetAddress(persAndAddr.getString(1), null, "UTF-8"));
+                            } catch (UnsupportedEncodingException x) {
+                                // Cannot occur
+                            }
+                        }
                     }
                 }
             }

@@ -52,10 +52,13 @@ package com.openexchange.notification.osgi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.mime.MimeTypeMap;
+import com.openexchange.notification.FullNameBuilder;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.notification.mail.impl.NotificationMailFactoryImpl;
+import com.openexchange.notification.service.FullNameBuilderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link NotificationActivator}
@@ -75,6 +78,7 @@ public class NotificationActivator extends HousekeepingActivator {
         Services.set(this);
 
         trackService(MimeTypeMap.class);
+        trackService(UserService.class);
         openTrackers();
 
         NotificationMailFactoryImpl notificationMailFactory = new NotificationMailFactoryImpl(
@@ -82,6 +86,7 @@ public class NotificationActivator extends HousekeepingActivator {
             getService(TemplateService.class),
             getService(HtmlService.class));
         registerService(NotificationMailFactory.class, notificationMailFactory);
+        registerService(FullNameBuilderService.class, FullNameBuilder.getInstance());
     }
 
     @Override

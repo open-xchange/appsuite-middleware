@@ -1,3 +1,27 @@
+open-xchange-sso (7.8.2-4) stable; urgency=medium
+
+  * Second candidate for 7.8.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 12 Jul 2016 09:21:15 +0200
+
+open-xchange-sso (7.8.2-3) stable; urgency=medium
+
+  * First candidate for 7.8.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 06 Jul 2016 15:33:09 +0200
+
+open-xchange-sso (7.8.2-2) stable; urgency=medium
+
+  * Second candidate for 7.8.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 29 Jun 2016 16:28:54 +0200
+
+open-xchange-sso (7.8.2-1) stable; urgency=medium
+
+  * First candidate for 7.8.2 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 16 Jun 2016 12:34:55 +0200
+
 open-xchange-sso (7.8.2-0) unstable; urgency=medium
 
   * prepare for 7.8.2 release

@@ -1,0 +1,22 @@
+# The YAML configuration file for the GCM transport of the Push Notification Service
+#
+# Notation/meaning is:
+# <unique-client-identifier>:
+#     enabled: <true|false>
+#       Boolean. If set to "false" the client configuration will not be available.
+#                Default is "true".
+#
+#     key: <key>
+#       String. Specifies the API key of the server application.
+#
+
+# Only an example
+mygoogleclient:
+    # Disabled...
+    enabled: false
+    key: AIzaSy2535345TbVL2r4yaZ4ZVQvJdcE1vth24546
+
+anothergoogleclient:
+    # Disabled...
+    enabled: false
+    key: 34556786SyCqjcTbVL2r4yaZ4ZVQvJdcE1vth354Y

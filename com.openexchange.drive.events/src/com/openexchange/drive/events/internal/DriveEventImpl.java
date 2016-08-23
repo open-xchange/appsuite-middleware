@@ -63,13 +63,6 @@ import com.openexchange.drive.events.DriveEvent;
  */
 public class DriveEventImpl implements DriveEvent {
 
-    /** The only resulting action from events for now */
-    private static final List<DriveAction<? extends DriveVersion>> SYNC_DIRECTORIES_ACTION;
-    static {
-        SYNC_DIRECTORIES_ACTION = new ArrayList<DriveAction<? extends DriveVersion>>(1);
-        SYNC_DIRECTORIES_ACTION.add(new SyncDirectoriesAction());
-    }
-
     private final int contextID;
     private final Set<String> folderIDs;
     private final boolean remote;
@@ -103,8 +96,14 @@ public class DriveEventImpl implements DriveEvent {
     }
 
     @Override
-    public List<DriveAction<? extends DriveVersion>> getActions() {
-        return SYNC_DIRECTORIES_ACTION;
+    public List<DriveAction<? extends DriveVersion>> getActions(List<String> rootFolderIDs) {
+        List<DriveAction<? extends DriveVersion>> actions = new ArrayList<DriveAction<? extends DriveVersion>>(rootFolderIDs.size());
+        for (String rootFolderID : rootFolderIDs) {
+            if (folderIDs.contains(rootFolderID)) {
+                actions.add(new SyncDirectoriesAction(rootFolderID));
+            }
+        }
+        return actions;
     }
 
     @Override

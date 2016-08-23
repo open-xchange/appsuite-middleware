@@ -67,8 +67,6 @@ test -f $OXFUNCTIONS || {
 
 test -f $OXCONFIG && . $OXCONFIG
 
-ox_kill_readerengine_instances
-
 ox_set_JAVA_BIN
 
 ox_update_config_init @configini@ @configini@.template @bundle.d@
@@ -106,4 +104,4 @@ else
     umask 066
 fi
 
-exec $JAVA_BIN $JAVA_OPTS $CLASSPATH -jar /opt/open-xchange/bundles/org.eclipse.osgi_3.10.1.v20140909-1633.jar -configuration file:$OSGIPATH >> $CONSOLELOG 2>&1
+exec $JAVA_BIN $JAVA_OPTS $CLASSPATH -jar /opt/open-xchange/bundles/org.eclipse.osgi_3.11.0.v20160603-1336.jar -configuration file:$OSGIPATH >> $CONSOLELOG 2>&1

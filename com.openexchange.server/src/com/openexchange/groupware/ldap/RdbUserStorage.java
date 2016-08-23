@@ -253,7 +253,7 @@ public class RdbUserStorage extends UserStorage {
                         setStringOrNull(i++, stmt, null); // filestore_password
                     }
                 }
-                stmt.setLong(i++, user.getFileStorageQuota() <= 0 ? 0 : user.getFileStorageQuota()); // quota_max
+                stmt.setLong(i++, user.getFileStorageQuota() < 0 ? -1 : user.getFileStorageQuota()); // quota_max
             } else {
                 stmt.setInt(i++, 0); // filestore_id
                 stmt.setInt(i++, 0); // filestore_owner
@@ -562,7 +562,13 @@ public class RdbUserStorage extends UserStorage {
                             String passwd = result.getString(pos++);
                             user.setFilestoreAuth(new String[] { login, passwd });
                         }
-                        user.setFileStorageQuota(result.getLong(pos++));
+                        {
+                            long quotaMax = result.getLong(pos++);
+                            if (result.wasNull()) {
+                                quotaMax = -1L;
+                            }
+                            user.setFileStorageQuota(quotaMax);
+                        }
 
                         users.put(user.getId(), user);
                         if (false == user.isGuest()) {

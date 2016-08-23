@@ -144,9 +144,17 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                     fileHolder.write(document.getData());
                     result = new AJAXRequestResult(fileHolder, "file");
                 } else {
-                    FileHolder fileHolder = new FileHolder(getDocumentStream(document), document.getSize(), document.getMimeType(), document.getName());
+                    long size = document.getSize();
+                    if (false == document.getFile().isAccurateSize()) {
+                        size = -1;
+                    }
+
+                    FileHolder fileHolder = document.isRepetitive() ?
+                        new FileHolder(getDocumentStream(document), size, document.getMimeType(), document.getName()) :
+                        new FileHolder(bufferedInputStreamFor(document.getData()), size, document.getMimeType(), document.getName());
+
                     if (fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.RANDOM_FILE_ACCESS)) {
-                        fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), document.getSize(), request.getSession()));
+                        fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), size, request.getSession()));
                     }
                     result = new AJAXRequestResult(fileHolder, "file");
                 }
@@ -171,9 +179,13 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
             result = new AJAXRequestResult(fileHolder, "file");
         } else {
             InputStreamClosure isClosure = getDocumentStream(request.getSession(), request.getId(), request.getVersion());
-            FileHolder fileHolder = new FileHolder(isClosure, metadata.getFileSize(), metadata.getFileMIMEType(), metadata.getFileName());
+            long size = metadata.getFileSize();
+            if (false == metadata.isAccurateSize()) {
+                size = -1;
+            }
+            FileHolder fileHolder = new FileHolder(isClosure, size, metadata.getFileMIMEType(), metadata.getFileName());
             if (fileAccess.supports(fileID.getService(), fileID.getAccountId(), FileStorageCapability.RANDOM_FILE_ACCESS)) {
-                fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), metadata.getFileSize(), request.getSession()));
+                fileHolder.setRandomAccessClosure(new IDBasedFileAccessRandomAccessClosure(request.getId(), request.getVersion(), size, request.getSession()));
             }
             result = new AJAXRequestResult(fileHolder, "file");
         }

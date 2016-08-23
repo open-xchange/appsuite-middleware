@@ -58,6 +58,7 @@ import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
 import com.openexchange.admin.rmi.dataobjects.Server;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.NoSuchDatabaseException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
@@ -379,6 +380,42 @@ public interface OXUtilInterface extends Remote {
      *             General RMI Exception
      */
     public Database[] listAllDatabase(final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+
+    /**
+     * Checks databases by schema consistency.
+     *
+     * @return Such databases either needing update, currently updating or outdated updating
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @throws com.openexchange.admin.rmi.exceptions.StorageException
+     *             When an error in the subsystems occurred.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
+     *             When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
+     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException
+     *             General RMI Exception
+     */
+    public Database[][] checkDatabase(Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
+
+    /**
+     * Unblocks specified database schema (in case marked as being updated for too long).
+     *
+     * @return The list of unblocked database schemas
+     * @param database The database schema to unblock
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @throws com.openexchange.admin.rmi.exceptions.StorageException
+     *             When an error in the subsystems occurred.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidCredentialsException
+     *             When the supplied credentials were not correct or invalid.
+     * @throws com.openexchange.admin.rmi.exceptions.InvalidDataException
+     *             If the data sent within the method contained invalid data.
+     * @throws RemoteException
+     *             General RMI Exception
+     * @throws NoSuchDatabaseException If no such database/schema exists
+     */
+    public Database[] unblockDatabase(Database database, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, NoSuchDatabaseException;
 
     /**
      * Search for server

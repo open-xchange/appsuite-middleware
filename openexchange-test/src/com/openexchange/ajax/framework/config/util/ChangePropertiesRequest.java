@@ -70,13 +70,15 @@ public class ChangePropertiesRequest<T extends AbstractAJAXResponse> implements 
     private Map<String, String> properties;
     private static final String CONFIG_URL = "/ajax/changeConfigForTest";
     private String scope;
+    private String reloadables;
     /**
      * Initializes a new {@link ChangePropertiesRequest}.
      */
-    public ChangePropertiesRequest(Map<String, String> properties, String scope) {
+    public ChangePropertiesRequest(Map<String, String> properties, String scope, String reloadables) {
         super();
         this.properties = properties;
         this.scope = scope;
+        this.reloadables = reloadables;
     }
 
     @Override
@@ -91,7 +93,11 @@ public class ChangePropertiesRequest<T extends AbstractAJAXResponse> implements 
 
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] { new Parameter("scope", scope) };
+        if (reloadables != null) {
+            return new Parameter[] { new Parameter("scope", scope), new Parameter("reload", reloadables) };
+        } else {
+            return new Parameter[] { new Parameter("scope", scope) };
+        }
     }
 
     @Override

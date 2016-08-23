@@ -49,15 +49,22 @@
 
 package com.openexchange.html.internal.jericho;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HtmlServices;
+import com.openexchange.html.internal.jericho.control.JerichoParseControl;
+import com.openexchange.html.internal.jericho.control.JerichoParseControlTask;
+import com.openexchange.html.internal.jericho.control.JerichoParseTask;
 import com.openexchange.html.internal.parser.HtmlHandler;
+import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.java.InterruptibleCharSequence;
+import com.openexchange.java.InterruptibleCharSequence.InterruptedRuntimeException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import net.htmlparser.jericho.CharacterReference;
@@ -77,6 +84,8 @@ import net.htmlparser.jericho.TagType;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class JerichoParser {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(JerichoParser.class);
 
     /**
      * {@link ParsingDeniedException} - Thrown if HTML content cannot be parsed by {@link JerichoParser#parse(String, JerichoHandler)}
@@ -132,13 +141,45 @@ public final class JerichoParser {
         return INSTANCE;
     }
 
+    /**
+     * Shuts-down the parser.
+     */
+    public static void shutDown() {
+        INSTANCE.stop();
+    }
+
     // -------------------------------------------------------------------------------------------------------------- //
+
+    private final int htmlParseTimeoutSec;
+    private final Thread controlRunner;
 
     /**
      * Initializes a new {@link JerichoParser}.
      */
     private JerichoParser() {
         super();
+        ConfigurationService service = ServiceRegistry.getInstance().getService(ConfigurationService.class);
+        int defaultValue = 10;
+        htmlParseTimeoutSec = null == service ? defaultValue : service.getIntProperty("com.openexchange.html.parse.timeout", defaultValue);
+        if (htmlParseTimeoutSec > 0) {
+            controlRunner = new Thread(new JerichoParseControlTask(), "JerichoControl");
+            controlRunner.start();
+        } else {
+            controlRunner = null;
+        }
+    }
+
+    /**
+     * Stops this parser.
+     */
+    private void stop() {
+        if (htmlParseTimeoutSec > 0) {
+            JerichoParseControl.getInstance().add(JerichoParseTask.POISON);
+        }
+        Thread controlRunner = this.controlRunner;
+        if (null != controlRunner) {
+            controlRunner.interrupt();
+        }
     }
 
     /**
@@ -161,7 +202,7 @@ public final class JerichoParser {
         return (html.indexOf("<body") >= 0) || (html.indexOf("<BODY") >= 0);
     }
 
-    private static final Pattern FIX_START_TAG = Pattern.compile("\\s*(<[^?][^>]+)(>?)\\s*");
+    private static final Pattern FIX_START_TAG = Pattern.compile("\\s*(<[a-zA-Z][^>]+)(>?)\\s*");
 
     /**
      * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
@@ -175,14 +216,37 @@ public final class JerichoParser {
     }
 
     /**
-     * Parses specified real-life HTML document and delegates events to given instance of {@link HtmlHandler}
+     * Parses specified real-life HTML document and delegates events to given instance of {@link JerichoHandler}.
      *
      * @param html The real-life HTML document
      * @param handler The HTML handler
      * @param checkSize Whether this call is supposed to check the size of given HTML content against <i>"com.openexchange.html.maxLength"</i> property
      * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
      */
-    public void parse(String html, JerichoHandler handler, boolean checkSize) {
+    public void parse(final String html, final JerichoHandler handler, final boolean checkSize) {
+        int timeout = htmlParseTimeoutSec;
+        if (timeout <= 0) {
+            doParse(html, handler, checkSize);
+            return;
+        }
+
+        // Run as a separate task monitored by Jericho control
+        new JerichoParseTask(html, handler, checkSize, timeout, this).call();
+    }
+
+    /**
+     * Parses specified real-life HTML document and delegates events to given instance of {@link JerichoHandler}.
+     * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; background-color:#FFDDDD;">Never call this method directly!</div>
+     * <p>
+     *
+     * @param html The real-life HTML document
+     * @param handler The HTML handler
+     * @param checkSize Whether this call is supposed to check the size of given HTML content against <i>"com.openexchange.html.maxLength"</i> property
+     * @throws ParsingDeniedException If specified HTML content cannot be parsed without wasting too many JVM resources
+     */
+    public void doParse(String html, JerichoHandler handler, boolean checkSize) {
+        Thread thread = Thread.currentThread();
         StreamedSource streamedSource = null;
         try {
             if (false == checkBody(html, checkSize)) {
@@ -191,9 +255,8 @@ public final class JerichoParser {
             }
 
             // Start regular parsing
-            streamedSource = new StreamedSource(html);
+            streamedSource = new StreamedSource(InterruptibleCharSequence.valueOf(html));
             streamedSource.setLogger(null);
-            Thread thread = Thread.currentThread();
             int lastSegmentEnd = 0;
             for (Iterator<Segment> iter = streamedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
                 Segment segment = iter.next();
@@ -206,6 +269,8 @@ public final class JerichoParser {
                 // Handle current segment
                 handleSegment(handler, segment, true);
             }
+        } catch (InterruptedRuntimeException e) {
+            throw new ParsingDeniedException("Parser timeout.", e);
         } catch (StackOverflowError parserOverflow) {
             throw new ParsingDeniedException("Parser overflow detected.", parserOverflow);
         } finally {
@@ -273,7 +338,7 @@ public final class JerichoParser {
     }
 
     private static void safeParse(JerichoHandler handler, Segment segment, boolean fixStartTags) {
-        if (fixStartTags && contains('<', segment)) {
+        if (fixStartTags && containsStartTag(segment)) {
             Matcher m = FIX_START_TAG.matcher(segment);
             if (m.find()) {
                 // Re-parse start tag
@@ -288,30 +353,29 @@ public final class JerichoParser {
                 if (start > 0) {
                     handler.handleSegment(segment.subSequence(0, start));
                 }
-                String remainder = null;
+                int[] remainder = null;
 
                 int end = m.end();
                 if (end < segment.length()) {
-                    remainder = segment.subSequence(end, segment.length()).toString();
-                    int pos = remainder.indexOf('>');
+                    int pos = indexOf('>', end, segment);
                     if (pos >= 0) {
-                        startTag = startTag + remainder.substring(0, pos + 1);
-                        remainder = remainder.substring(pos + 1);
+                        startTag = startTag + segment.subSequence(end, pos + 1);
+                        remainder = new int[] { pos + 1, segment.length() };
+                    } else {
+                        remainder = new int[] { end, segment.length() };
                     }
                 }
 
-                try (StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(startTag))) {
-                    Thread thread = Thread.currentThread();
-                    for (Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
-                        Segment nestedSegment = iter.next();
-                        handleSegment(handler, nestedSegment, false);
-                    }
-                    if (null != remainder) {
-                        safeParse(handler, new Segment(new Source(remainder), 0, remainder.length()), fixStartTags);
-                        // handler.handleSegment(remainder);
-                    }
-                } catch (IOException e) {
-                    // may only happen within StreamedSource.close()
+                @SuppressWarnings("resource")
+                StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(startTag)); // No need to close since String-backed (all in memory)!
+                Thread thread = Thread.currentThread();
+                for (Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
+                    Segment nestedSegment = iter.next();
+                    handleSegment(handler, nestedSegment, false);
+                }
+                if (null != remainder) {
+                    safeParse(handler, new Segment(new Source(segment), remainder[0], remainder[1]), fixStartTags);
+                    // handler.handleSegment(remainder);
                 }
             } else {
                 handler.handleSegment(segment);
@@ -321,7 +385,7 @@ public final class JerichoParser {
         }
     }
 
-    private static boolean contains(char c, CharSequence toCheck) {
+    private static boolean containsStartTag(CharSequence toCheck) {
         if (null == toCheck) {
             return false;
         }
@@ -329,12 +393,30 @@ public final class JerichoParser {
         if (len <= 0) {
             return false;
         }
-        for (int k = len, index = 0; k-- > 0; index++) {
-            if (c == toCheck.charAt(index)) {
+        for (int k = len - 1, index = 0; k-- > 0; index++) {
+            if ('<' == toCheck.charAt(index) && isAsciLetter(toCheck.charAt(index + 1))) {
                 return true;
             }
         }
         return false;
+    }
+
+    private static boolean isAsciLetter(char ch) {
+        return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
+    }
+
+    private static int indexOf(int ch, int fromIndex, CharSequence cs) {
+        int max = cs.length();
+        if (fromIndex >= max) {
+            return -1;
+        }
+
+        for (int i = fromIndex; i < max; i++) {
+            if (cs.charAt(i) == ch) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private static Pattern PATTERN_ATTRIBUTE = Pattern.compile("([a-zA-Z_0-9-]+)=((?:\".*?\")|(?:'.*?')|(?:[a-zA-Z_0-9-]+))");

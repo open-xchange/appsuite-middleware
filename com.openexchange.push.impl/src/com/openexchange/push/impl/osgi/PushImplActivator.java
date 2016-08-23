@@ -175,8 +175,6 @@ public final class PushImplActivator extends HousekeepingActivator  {
                 track(ManagementService.class, customizer);
             }
 
-            openTrackers();
-
             // Get initialized registry instance
             PushManagerRegistry pushManagerRegistry = PushManagerRegistry.getInstance();
 
@@ -224,6 +222,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
             log.error("Failed start-up of bundle com.openexchange.push.impl", e);
             throw e;
         }
+        openTrackers();
     }
 
     @Override

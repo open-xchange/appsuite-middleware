@@ -8,6 +8,7 @@
     <!-- Customizable values -->
     <!-- This values must be changed for defining other installation places -->
     <property name="logInstallDir" value="/var/log/open-xchange"/>
+    <property name="templatesDir" value="templates"/>
 
     <import file="build-project.xml"/>
 
@@ -45,6 +46,13 @@
 
     <target name="postClean" description="Removes artifacts created by this build script.">
         <delete dir="${tmpDir}"/>
+    </target>
+
+    <target name="postInstall">
+        <mkdir dir="${destDir}/${prefix}/${templatesDir}"/>
+        <copy todir="${destDir}/${prefix}/${templatesDir}">
+            <fileset dir="${templatesDir}"/>
+        </copy>
     </target>
 
 </project>

@@ -91,4 +91,9 @@ public final class POP3Capabilities extends MailCapabilities {
         return false;
     }
 
+    @Override
+    public boolean hasFileNameSearch() {
+        return false;
+    }
+
 }

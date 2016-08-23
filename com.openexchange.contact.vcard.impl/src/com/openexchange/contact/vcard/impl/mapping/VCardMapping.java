@@ -52,6 +52,7 @@ package com.openexchange.contact.vcard.impl.mapping;
 import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 
@@ -81,5 +82,19 @@ public interface VCardMapping {
      * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
      */
     void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings);
+
+    /**
+     * Gets the property names affected by this mapping.
+     *
+     * @return The property names
+     */
+    String[] getPropertyNames();
+
+    /**
+     * Gets the contact fields corresponding to the vCard properties affected by this mapping.
+     *
+     * @return The contact fields
+     */
+    ContactField[] getContactFields();
 
 }

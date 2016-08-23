@@ -54,10 +54,12 @@ import java.util.Hashtable;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
+import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.SecretUsesPasswordChecker;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
@@ -84,7 +86,7 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { CryptoService.class, UserService.class, SecretService.class, SecretUsesPasswordChecker.class };
+        return new Class[] { CryptoService.class, UserService.class, SecretService.class, SecretUsesPasswordChecker.class, SecretEncryptionFactoryService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -102,14 +104,22 @@ public class SecretRecoveryActivator extends HousekeepingActivator {
              *
              * Initialize whiteboard services
              */
-            final WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector = this.whiteboardEncryptedItemDetector = new WhiteboardEncryptedItemDetector(context);
+            final WhiteboardEncryptedItemDetector whiteboardEncryptedItemDetector = new WhiteboardEncryptedItemDetector(context);
+            this.whiteboardEncryptedItemDetector = whiteboardEncryptedItemDetector;
+
             /*
              * Register SecretInconsistencyDetector
              */
-            final CryptoService cryptoService = getService(CryptoService.class);
-            final UserService userService = getService(UserService.class);
-            final SecretService secretService = checker.passwordUsingSecretService();
-            final FastSecretInconsistencyDetector detector = new FastSecretInconsistencyDetector(secretService, cryptoService, userService, whiteboardEncryptedItemDetector);
+            FastSecretInconsistencyDetector detector;
+            {
+                CryptoService cryptoService = getService(CryptoService.class);
+                UserService userService = getService(UserService.class);
+                // final SecretService secretService = checker.passwordUsingSecretService();
+                SecretEncryptionFactoryService secretEncryptionFactory = getService(SecretEncryptionFactoryService.class);
+                ConfigViewFactory configViewFactory = getService(ConfigViewFactory.class);
+                detector = new FastSecretInconsistencyDetector(secretEncryptionFactory, cryptoService, userService, whiteboardEncryptedItemDetector, configViewFactory);
+            }
+
             registerService(SecretInconsistencyDetector.class, detector);
             registerService(EncryptedItemCleanUpService.class, detector);
 

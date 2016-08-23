@@ -61,10 +61,7 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * Service tracker for transport providers
@@ -128,12 +125,7 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
                     @Override
                     public boolean isEnabled(String capability, Session ses) throws OXException {
                         if (sCapability.equals(capability)) {
-                            final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                            if (session.isAnonymous() || !session.getUserPermissionBits().hasWebMail()) {
-                                return false;
-                            }
-
-                            return (TransportProperties.getInstance().isPublishOnExceededQuota() && session.getUserPermissionBits().hasInfostore());
+                            return false;
                         }
 
                         return true;

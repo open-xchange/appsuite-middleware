@@ -55,7 +55,7 @@ package com.openexchange.groupware.update;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
  */
-public final class TaskInfo {
+public final class TaskInfo implements Comparable<TaskInfo> {
 
     private final String taskName;
     private final String schema;
@@ -85,6 +85,12 @@ public final class TaskInfo {
      */
     public String getSchema() {
         return schema;
+    }
+
+    @Override
+    public int compareTo(TaskInfo o) {
+        int res = schema.compareTo(o.schema);
+        return 0 == res ? taskName.compareTo(o.taskName) : res;
     }
 
 }

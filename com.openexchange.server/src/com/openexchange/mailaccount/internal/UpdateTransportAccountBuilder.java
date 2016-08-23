@@ -374,4 +374,9 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         return null;
     }
 
+    @Override
+    public Object rootFolder() {
+        return null;
+    }
+
 }

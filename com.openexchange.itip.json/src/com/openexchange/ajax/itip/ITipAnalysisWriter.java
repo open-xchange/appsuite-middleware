@@ -52,9 +52,11 @@ package com.openexchange.ajax.itip;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.TimeZone;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
@@ -300,4 +302,5 @@ public class ITipAnalysisWriter {
             annotationObject.put("appointment", appointmentObject);
         }
     }
+
 }

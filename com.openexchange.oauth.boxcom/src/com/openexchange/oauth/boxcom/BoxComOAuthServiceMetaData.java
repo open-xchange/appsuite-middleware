@@ -71,7 +71,7 @@ public final class BoxComOAuthServiceMetaData extends AbstractExtendedScribeAwar
      * @param services the service lookup instance
      */
     public BoxComOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, "com.openexchange.oauth.boxcom", "Box.com");
+        super(services, API.BOX_COM);
     }
 
     @Override
@@ -82,11 +82,6 @@ public final class BoxComOAuthServiceMetaData extends AbstractExtendedScribeAwar
     @Override
     protected Collection<OAuthPropertyID> getExtraPropertyNames() {
         return Collections.singletonList(OAuthPropertyID.redirectUrl);
-    }
-
-    @Override
-    public API getAPI() {
-        return API.BOX_COM;
     }
 
     @Override

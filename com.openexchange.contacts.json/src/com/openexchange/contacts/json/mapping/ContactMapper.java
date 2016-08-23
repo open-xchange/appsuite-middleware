@@ -49,7 +49,6 @@
 
 package com.openexchange.contacts.json.mapping;
 
-import static com.openexchange.mail.mime.QuotedInternetAddress.toIDN;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -3224,10 +3223,10 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
             final StringBuilder sb = new StringBuilder(32);
             final String personal = addr.getPersonal();
             if (null == personal) {
-                sb.append(prepareAddress(sAddress.substring(0, pos)));
+                sb.append(MimeMessageUtility.prepareAddress(sAddress.substring(0, pos)));
             } else {
                 sb.append(preparePersonal(personal));
-                sb.append(" <").append(prepareAddress(sAddress.substring(0, pos))).append('>');
+                sb.append(" <").append(MimeMessageUtility.prepareAddress(sAddress.substring(0, pos))).append('>');
             }
             return sb.toString();
         } catch (final Exception e) {
@@ -3243,23 +3242,6 @@ public class ContactMapper extends DefaultJsonMapper<Contact, ContactField> {
      */
     static String preparePersonal(final String personal) {
         return MimeMessageUtility.quotePhrase(personal, false);
-    }
-
-    private static final String DUMMY_DOMAIN = "@unspecified-domain";
-
-    /**
-     * Prepares given address string by checking for possible mail-safe encodings.
-     *
-     * @param address The address
-     * @return The prepared address
-     */
-    static String prepareAddress(final String address) {
-        final String decoded = toIDN(MimeMessageUtility.decodeMultiEncodedHeader(address));
-        final int pos = decoded.indexOf(DUMMY_DOMAIN);
-        if (pos >= 0) {
-            return decoded.substring(0, pos);
-        }
-        return decoded;
     }
 
 }

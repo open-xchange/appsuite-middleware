@@ -92,7 +92,9 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -951,7 +953,7 @@ public class MimeMessageFiller {
                              *
                              * Well-formed HTML
                              */
-                            if (HTMLDetector.containsHTMLTags(content, true)) {
+                            if (HTMLDetector.containsHTMLTags(content, "<br", "<p>", "<div")) {
                                 isHtml = true;
                                 if (BODY_START.matcher(content).find()) {
                                     final String wellFormedHTMLContent = htmlService.getConformHTML(content, charset);
@@ -1337,8 +1339,8 @@ public class MimeMessageFiller {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.mail.octetExtensions");
             }
         });
     }
@@ -1867,19 +1869,7 @@ public class MimeMessageFiller {
          * Determine filename
          */
         String fileName = imageProvider.getFileName();
-        if (null == fileName) {
-            /*
-             * Generate dummy file name
-             */
-            final List<String> exts = MimeType2ExtMap.getFileExtensions(imageProvider.getContentType().toLowerCase(Locale.ENGLISH));
-            final StringBuilder sb = new StringBuilder("image.");
-            if (exts == null) {
-                sb.append("dat");
-            } else {
-                sb.append(exts.get(0));
-            }
-            fileName = sb.toString();
-        } else {
+        if (null != fileName)  {
             /*
              * Encode image's file name for being mail-safe
              */

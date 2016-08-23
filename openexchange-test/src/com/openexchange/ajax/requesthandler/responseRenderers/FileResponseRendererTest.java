@@ -58,7 +58,6 @@ import java.io.InputStream;
 import javax.servlet.http.sim.SimHttpServletRequest;
 import javax.servlet.http.sim.SimHttpServletResponse;
 import javax.servlet.sim.ByteArrayServletOutputStream;
-import junit.framework.TestCase;
 import org.apache.commons.io.IOUtils;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.FileHolder;
@@ -72,6 +71,7 @@ import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRender
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTools.Disposition;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;
+import com.openexchange.configuration.MailConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.SimHtmlService;
@@ -89,6 +89,7 @@ import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.SimServerSession;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.StringParser;
+import junit.framework.TestCase;
 
 /**
  * {@link FileResponseRendererTest}
@@ -96,8 +97,6 @@ import com.openexchange.tools.strings.StringParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FileResponseRendererTest extends TestCase {
-
-    private final String TEST_DATA_DIR = "testconf/";
 
     /**
      * Initializes a new {@link FileResponseRendererTest}.
@@ -593,9 +592,10 @@ public class FileResponseRendererTest extends TestCase {
     }
 
     public void testContentLengthMailAttachments_Bug26926() {
+        String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
         try {
             InputStream is = null;
-            is = new FileInputStream(new File(TEST_DATA_DIR + "26926_27394.pdf"));
+            is = new FileInputStream(new File(testDataDir + "26926_27394.pdf"));
             FileHolder fileHolder = new FileHolder(is, -1, "image/jpeg", "28082.jpg");
             fileHolder.setDelivery("download");
             final AJAXRequestData requestData = new AJAXRequestData();

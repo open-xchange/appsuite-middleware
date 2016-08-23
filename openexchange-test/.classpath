@@ -21,8 +21,6 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.2.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.2-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.lang_2.6.0.v201205030909.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.lang.source_2.6.0.v201205030909.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.5.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/httpclient-4.2.1.jar" sourcepath="lib/source/httpcomponents-client-4.2.1-src.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/httpcore-4.2.1.jar" sourcepath="lib/source/httpcomponents-core-4.2.1-src.zip"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.calendar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.conversion"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.conversion.engine"/>
@@ -103,7 +101,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.xing"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.control.clt"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ctc.wstx"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.codehaus.stax2"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.config.cascade"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.google.api.client"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.google.guava"/>
@@ -120,9 +117,9 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.filestore"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.filestore.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.http.grizzly"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi_3.10.1.v20140909-1633.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.services_3.4.0.v20140312-2051.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.util_3.3.0.v20131023-1243.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi_3.11.0.v20160603-1336.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.services_3.5.100.v20160504-1419.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.eclipse.osgi.util_3.3.100.v20150423-1351.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sessionstorage"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.cluster.timer"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.2.0.v201405211200.jar"/>
@@ -144,5 +141,9 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.mail.autoconfig.json"/>
 	<classpathentry kind="src" path="/com.openexchange.mail.categories"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.templating.impl"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.reseller.rmi"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.apache.httpcomponents.httpclient"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.apache.httpcomponents.httpcore"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/stax2-api-3.1.4.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

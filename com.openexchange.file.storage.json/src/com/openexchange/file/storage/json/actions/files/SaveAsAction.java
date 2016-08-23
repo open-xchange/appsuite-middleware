@@ -156,7 +156,7 @@ public class SaveAsAction extends AbstractWriteAction {
             modifiedColumns.add(Field.FILE_MIMETYPE);
             modifiedColumns.add(Field.TITLE);
             modifiedColumns.add(Field.DESCRIPTION);
-            String newID = fileAccess.saveDocument(file, fileData, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, modifiedColumns, false, true);
+            String newID = fileAccess.saveDocument(file, fileData, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, modifiedColumns, false, true, false);
             AJAXRequestResult result = new AJAXRequestResult(newID, new Date(file.getSequenceNumber()));
             List<OXException> warnings = fileAccess.getAndFlushWarnings();
             if (null != warnings && 0 < warnings.size()) {

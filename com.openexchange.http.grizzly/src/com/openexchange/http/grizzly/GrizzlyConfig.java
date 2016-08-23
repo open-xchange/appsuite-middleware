@@ -52,12 +52,12 @@ package com.openexchange.http.grizzly;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.http.grizzly.osgi.Services;
@@ -76,8 +76,6 @@ public class GrizzlyConfig implements Initialization, Reloadable {
 
     private static final GrizzlyConfig instance = new GrizzlyConfig();
 
-    private static final String CONFIGFILE = "server.properties";
-    private static final String[] PROPERTIES = new String[] {"com.openexchange.server.knownProxies"};
     private final PropertyChangeSupport changes = new PropertyChangeSupport(this);
 
     public static GrizzlyConfig getInstance() {
@@ -581,10 +579,8 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
-        Map<String, String[]> map = new HashMap<String, String[]>(1);
-        map.put(CONFIGFILE, PROPERTIES);
-        return map;
+    public Interests getInterests() {
+        return DefaultInterests.builder().propertiesOfInterest("com.openexchange.server.knownProxies").build();
     }
 
     public void addPropertyListener(PropertyChangeListener listener) {

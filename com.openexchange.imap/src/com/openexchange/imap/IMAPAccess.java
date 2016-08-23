@@ -49,10 +49,10 @@
 
 package com.openexchange.imap;
 
-import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -62,6 +62,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.Lock;
 import javax.mail.AuthenticationFailedException;
 import javax.mail.MessagingException;
 import javax.mail.Provider;
@@ -71,7 +72,9 @@ import javax.mail.internet.idn.IDNA;
 import javax.security.auth.Subject;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionInit;
@@ -96,6 +99,9 @@ import com.openexchange.imap.storecache.IMAPStoreContainer;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
+import com.openexchange.log.audit.AuditLogService;
+import com.openexchange.log.audit.DefaultAttribute;
+import com.openexchange.log.audit.DefaultAttribute.Name;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -113,10 +119,12 @@ import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.session.Session;
+import com.openexchange.session.Sessions;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.iap.ConnectQuotaExceededException;
+import com.sun.mail.iap.StarttlsRequiredException;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.JavaIMAPStore;
@@ -191,6 +199,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
         return b.booleanValue();
     }
+
 
     /*-
      * Member section
@@ -288,8 +297,8 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return Reloadables.interestsForProperties("com.openexchange.imap.maxNumConnections");
             }
         });
     }
@@ -443,7 +452,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     final IMAPStoreCache imapStoreCache = IMAPStoreCache.getInstance();
                     if (null == imapStoreCache) {
                         closeSafely(imapStore);
-                    } else if (imapStore.isConnected()) {
+                    } else if (imapStore.isConnectedUnsafe()) {
                         imapStoreCache.returnIMAPStore(imapStore, accountId, server, port, login, session);
                     } else {
                         // Not null AND not connected...?
@@ -629,6 +638,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     OXException oxe = MimeMailException.handleMessagingException(e, config, session);
                     warnings.add(oxe);
                     throw oxe;
+                } else if (StarttlsRequiredException.class.isInstance(cause)) {
+                    OXException oxe = MailExceptionCode.NON_SECURE_DENIED.create(config.getServer());
+                    warnings.add(oxe);
+                    throw oxe;
                 }
                 warnings.add(MailExceptionCode.PING_FAILED.create(e, config.getServer(), config.getLogin(), e.getMessage()));
                 throw MimeMailException.handleMessagingException(e, config, session);
@@ -775,6 +788,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                         }
                     }
                 }
+                {
+                    Exception next = e.getNextException();
+                    if (StarttlsRequiredException.class.isInstance(next)) {
+                        throw MailExceptionCode.NON_SECURE_DENIED.create(server);
+                    }
+                }
                 throw e;
             }
             this.connected = true;
@@ -799,21 +818,31 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              * Special check for ACLs
              */
             if (config.isSupportsACLs()) {
-                final String key = new StringBuilder(server).append('@').append(port).toString();
+                String key = new StringBuilder(server).append('@').append(port).toString();
+                ConcurrentMap<String, Boolean> aclCapableServers = IMAPAccess.aclCapableServers;
                 Boolean b = aclCapableServers.get(key);
                 if (null == b) {
-                    Boolean nb;
-                    final IMAPFolder dummy = (IMAPFolder) imapStore.getFolder("INBOX");
+                    Lock lock = Sessions.optLock(session);
+                    lock.lock();
                     try {
-                        dummy.myRights();
-                        nb = Boolean.TRUE;
-                    } catch (MessagingException e) {
-                        // MessagingException - If the server doesn't support the ACL extension
-                        nb = Boolean.FALSE;
-                    }
-                    b = aclCapableServers.putIfAbsent(key, nb);
-                    if (null == b) {
-                        b = nb;
+                        b = aclCapableServers.get(key);
+                        if (null == b) {
+                            Boolean nb;
+                            IMAPFolder dummy = (IMAPFolder) imapStore.getFolder("INBOX");
+                            try {
+                                dummy.myRights();
+                                nb = Boolean.TRUE;
+                            } catch (MessagingException e) {
+                                // MessagingException - If the server doesn't support the ACL extension
+                                nb = Boolean.FALSE;
+                            }
+                            b = aclCapableServers.putIfAbsent(key, nb);
+                            if (null == b) {
+                                b = nb;
+                            }
+                        }
+                    } finally {
+                        lock.unlock();
                     }
                 }
                 if (!b.booleanValue()) {
@@ -971,14 +1000,14 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     // Ignore
                 }
             }
-            doIMAPConnect(imapSession, imapStore, server, port, login, pw);
+            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session);
         } catch (final AuthenticationFailedException e) {
             /*
              * Retry connect with AUTH=PLAIN disabled
              */
             imapSession.getProperties().put("mail.imap.auth.login.disable", "true");
             imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
-            doIMAPConnect(imapSession, imapStore, server, port, login, pw);
+            doIMAPConnect(imapSession, imapStore, server, port, login, pw, accountId, session);
         }
 
         String sessionInformation = imapStore.getClientParameter(IMAPClientParameters.SESSION_ID.getParamName());
@@ -995,15 +1024,18 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * the IMAP session, this Kerberos subject object is used to only allow a single IMAP login per Kerberos subject. The service ticket for
      * the IMAP server is stored in the Kerberos subject once the IMAP login was successful. If multiple threads can execute this in
      * parallel, multiple IMAP service tickets are requested, which is discouraged for performance reasons.
+     *
      * @param imapSession The IMAP session
      * @param imapStore The IMAP store
      * @param server The host name
      * @param port The port
      * @param login The login
      * @param pw The password
+     * @param accountId The account identifier
+     * @param session The associated Groupware session
      * @throws MessagingException If operation fails
      */
-    public static void doIMAPConnect(javax.mail.Session imapSession, IMAPStore imapStore, String server, int port, String login, String pw) throws MessagingException {
+    public static void doIMAPConnect(javax.mail.Session imapSession, IMAPStore imapStore, String server, int port, String login, String pw, int accountId, Session session) throws MessagingException {
         Object kerberosSubject = imapSession.getProperties().get("mail.imap.sasl.kerberosSubject");
         if (null == kerberosSubject) {
             imapStore.connect(server, port, login, pw);
@@ -1011,6 +1043,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             synchronized (kerberosSubject) {
                 imapStore.connect(server, port, login, pw);
             }
+        }
+
+        AuditLogService auditLogService = Services.optService(AuditLogService.class);
+        if (null != auditLogService) {
+            String eventId = MailAccount.DEFAULT_ID == accountId ? "imap.primary.login" : "imap.external.login";
+            auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("imap.login", login), DefaultAttribute.arbitraryFor("imap.server", server), DefaultAttribute.arbitraryFor("imap.port", Integer.toString(port)));
         }
     }
 
@@ -1284,6 +1322,20 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             imapProps.put("mail.imap.connectiontimeout", String.valueOf(connectionTimeout));
         }
         /*
+         * Specify CLOSE behavior
+         */
+        imapProps.put("mail.imap.explicitCloseForReusedProtocol", "false");
+        /*
+         * Specify NOOP behavior
+         */
+        imapProps.put("mail.imap.issueNoopToKeepConnectionAlive", "false");
+        /*
+         * Enable/disable audit log
+         */
+        if (config.getIMAPProperties().isAuditLogEnabled()) {
+            imapProps.put("mail.imap.auditLog.enabled", "true");
+        }
+        /*
          * Check if a secure IMAP connection should be established
          */
         final String sPort = String.valueOf(config.getPort());
@@ -1318,31 +1370,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected connection.
              */
-            if (forceSecure || config.getIMAPProperties().isEnableTls()) {
-                try {
-                    final String serverUrl = new StringBuilder(36).append(IDNA.toASCII(config.getServer())).append(':').append(config.getPort()).toString();
-                    final Map<String, String> capabilities = IMAPCapabilityAndGreetingCache.getCapabilities(serverUrl, false, config.getIMAPProperties());
-                    if (null != capabilities) {
-                        if (capabilities.containsKey("STARTTLS")) {
-                            imapProps.put("mail.imap.starttls.enable", "true");
-                        } else if (forceSecure) {
-                            // No SSL demanded and IMAP server seems not to support TLS
-                            throw MailExceptionCode.NON_SECURE_DENIED.create(config.getServer());
-                        }
-                    } else {
-                        if (forceSecure) {
-                            // No SSL demanded and IMAP server seems not to support TLS
-                            throw MailExceptionCode.NON_SECURE_DENIED.create(config.getServer());
-                        }
-                        imapProps.put("mail.imap.starttls.enable", "true");
-                    }
-                } catch (final IOException e) {
-                    if (forceSecure) {
-                        // No SSL demanded and IMAP server seems not to support TLS
-                        throw MailExceptionCode.NON_SECURE_DENIED.create(e, config.getServer());
-                    }
-                    imapProps.put("mail.imap.starttls.enable", "true");
-                }
+            if (forceSecure) {
+                imapProps.put("mail.imap.starttls.required", "true");
+            } else if (config.getIMAPProperties().isEnableTls()) {
+                imapProps.put("mail.imap.starttls.enable", "true");
             }
             /*
              * Specify the javax.net.ssl.SSLSocketFactory class, this class will be used to create IMAP SSL sockets if TLS handshake says

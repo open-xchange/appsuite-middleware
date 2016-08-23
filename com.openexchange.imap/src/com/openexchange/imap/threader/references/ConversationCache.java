@@ -128,11 +128,10 @@ public class ConversationCache {
 
     /**
      * Gets the calculated hash string for specified arguments.
-     * @param usedFields
      *
      * @return The calculated hash string
      */
-    public static String getArgsHash(MailSortField sortField, OrderDirection order, int lookAhead, boolean mergeWithSent, MailFields usedFields, int total, long uidnext, int sentTotal, long sentUidNext) {
+    public static String getArgsHash(MailSortField sortField, OrderDirection order, int lookAhead, boolean mergeWithSent, MailFields usedFields, String[] headerNames, int total, long uidnext, int sentTotal, long sentUidNext) {
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
             md.update(sortField.getKey().getBytes(Charsets.UTF_8));
@@ -140,6 +139,11 @@ public class ConversationCache {
             md.update(intToByteArray(lookAhead));
             md.update(mergeWithSent ? (byte) 1 : 0);
             md.update(usedFields.toByteArray());
+            if (null != headerNames && headerNames.length > 0) {
+                for (String headerName : headerNames) {
+                    md.update(Charsets.getBytes(headerName, Charsets.UTF_8));
+                }
+            }
             md.update(intToByteArray(total));
             md.update(longToByteArray(uidnext));
             if (mergeWithSent) {

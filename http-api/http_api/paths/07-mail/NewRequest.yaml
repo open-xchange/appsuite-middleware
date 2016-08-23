@@ -43,7 +43,7 @@
     responses:
       200:
         description: |
-          A HTML page containing the object ID of the newly created mail or in case of errors an error object (see [File uploads](#file-uploads) as an example).
+          A HTML page containing the object ID of the newly created mail or in case of errors an error object (see [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) as an example).
         schema:
           type: string
   put:
@@ -75,6 +75,6 @@
       200:
         description: |
           A JSON object containing the folder ID and the object ID of the mail. In case of errors the
-          responsible fields in the response are filled (see [Error handling](#error-handling)).
+          responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/MailDestinationResponse"

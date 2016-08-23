@@ -51,11 +51,12 @@ package com.openexchange.file.storage;
 
 import java.net.MalformedURLException;
 import java.util.Date;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.Deflater;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.internal.FileStorageConfigReloadable;
@@ -143,6 +144,32 @@ public final class FileStorageUtility {
         } catch (final MalformedURLException e) {
             throw FileStorageExceptionCodes.INVALID_URL.create(e, sUrl, e.getMessage());
         }
+    }
+
+    /**
+     * Tries to cast a concrete {@link File} implementation to the class or interface represented by the supplied {@link Class}
+     * object recursively, also considering possible underlying delegates.
+     *
+     * @param file The file implementation to launder
+     * @param clazz The target interface or class
+     * @return The target class implementation, or <code>null</code> if no suitable type found
+     */
+    public static <T extends File> T launderDelegate(File file, Class<T> clazz) {
+        if (null == file) {
+            return null;
+        }
+        if (clazz.isInstance(file)) {
+            return clazz.cast(file);
+        }
+        if (DelegatingFile.class.isInstance(file)) {
+            DelegatingFile delegatingFile = (DelegatingFile) file;
+            File fileDelegate = delegatingFile.getDelegate();
+            if (null != fileDelegate && clazz.isInstance(fileDelegate)) {
+                return clazz.cast(fileDelegate);
+            }
+            return launderDelegate(fileDelegate, clazz);
+        }
+        return null;
     }
 
     /**
@@ -279,8 +306,12 @@ public final class FileStorageUtility {
             }
 
             @Override
-            public Map<String, String[]> getConfigFileNames() {
-                return null;
+            public Interests getInterests() {
+                return DefaultInterests.builder().propertiesOfInterest(
+                    "com.openexchange.file.storage.numberOfPregeneratedPreviews",
+                    "com.openexchange.file.storage.zipFolderThreshold",
+                    "com.openexchange.infostore.zipDocumentsCompressionLevel"
+                    ).build();
             }
         });
     }

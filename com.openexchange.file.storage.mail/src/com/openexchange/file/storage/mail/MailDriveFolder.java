@@ -60,6 +60,7 @@ import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.mail.FullName.Type;
 import com.openexchange.file.storage.mail.osgi.Services;
+import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -126,12 +127,12 @@ public final class MailDriveFolder extends DefaultFileStorageFolder implements T
 
             if (rootFolder) {
                 setParentId(null);
-                setName(StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.ACCOUNT_DISPLAY_NAME));
+                setName(StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.NAME_ATTACHMENTS_ALL));
                 setSubfolders(true);
                 setSubscribedSubfolders(true);
                 permission.setReadPermission(FileStoragePermission.NO_PERMISSIONS);
             } else {
-                setParentId(Type.DEFAULT.getFolderId());
+                setParentId(Type.ALL.getFolderId());
                 setName(getLocalizedNameFor(fullName, session));
                 setSubfolders(false);
                 setSubscribedSubfolders(false);
@@ -148,17 +149,30 @@ public final class MailDriveFolder extends DefaultFileStorageFolder implements T
             case ALL:
                 return StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.NAME_ATTACHMENTS_ALL);
             case RECEIVED:
-                return StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.NAME_ATTACHMENTS_RECEIVED);
+                {
+                    StringHelper stringHelper = StringHelper.valueOf(getSessionUserLocale(session));
+                    String translated = stringHelper.getString(MailDriveStrings.NAME_ATTACHMENTS_DEDICATED);
+                    return String.format(translated, stringHelper.getString(MailStrings.INBOX));
+                }
             case SENT:
-                return StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.NAME_ATTACHMENTS_SENT);
-            case DEFAULT:
-                return StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.ACCOUNT_DISPLAY_NAME);
+                {
+                    StringHelper stringHelper = StringHelper.valueOf(getSessionUserLocale(session));
+                    String translated = stringHelper.getString(MailDriveStrings.NAME_ATTACHMENTS_DEDICATED);
+                    return String.format(translated, stringHelper.getString(MailStrings.SENT));
+                }
             default:
                 return null;
         }
     }
 
-    private static Locale getSessionUserLocale(Session session) throws OXException {
+    /**
+     * Extracts the locale from specified session
+     *
+     * @param session The session
+     * @return The locale
+     * @throws OXException If extracting the locale fails
+     */
+    public static Locale getSessionUserLocale(Session session) throws OXException {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser().getLocale();
         }

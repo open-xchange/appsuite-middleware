@@ -60,6 +60,7 @@ import com.openexchange.exception.OXExceptions;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.IValueHandlerExtended;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -379,7 +380,7 @@ public class RdbSettingStorage extends SettingStorage {
     private void readSharedValue(final Setting setting) throws OXException {
         final IValueHandler reader = getSharedValue(setting);
         if (null != reader) {
-            if (reader.isAvailable(userConfig)) {
+            if (reader instanceof IValueHandlerExtended ? ((IValueHandlerExtended) reader).isAvailable(session, userConfig) : reader.isAvailable(userConfig)) {
                 try {
                     reader.getValue(session, ctx, user, userConfig, setting);
                     if (setting.getSingleValue() != null && setting.getSingleValue().equals(IValueHandler.UNDEFINED)) {

@@ -176,7 +176,7 @@ gblQueryParamFolderColumns:
   name: columns
   in: query
   type: string
-  description: A comma-separated list of columns to return, like "1,300". Each column is specified by a numeric column identifier, see [Common folder data](#common-folder-data) and [Detailed folder data](#detailed-folder-data).
+  description: A comma-separated list of columns to return, like "1,300". Each column is specified by a numeric column identifier, see [Common folder data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#common-folder-data) and [Detailed folder data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-folder-data).
   required: true
 gblQueryParamAllowedModules:
   name: allowed_modules
@@ -194,7 +194,7 @@ gblQueryParamTaskColumns:
   name: columns
   in: query
   type: string
-  description: A comma-separated list of columns to return, like "1,200". Each column is specified by a numeric column identifier, see [Common object data](#common-object-data), [Detailed task and appointment data](#detailed-task-and-appointment-data) and [Detailed task data](#detailed-task-data).
+  description: A comma-separated list of columns to return, like "1,200". Each column is specified by a numeric column identifier, see [Common object data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#common-object-data), [Detailed task and appointment data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-task-and-appointment-data) and [Detailed task data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-task-data).
   required: true
 gblQueryParamContactFolder:
   name: folder
@@ -206,7 +206,7 @@ gblQueryParamContactColumns:
   name: columns
   in: query
   type: string
-  description: A comma-separated list of columns to return, like "1,500". Each column is specified by a numeric column identifier, see [Common object data](#common-object-data) and [Detailed contact data](#detailed-contact-data).
+  description: A comma-separated list of columns to return, like "1,500". Each column is specified by a numeric column identifier, see [Common object data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#common-object-data) and [Detailed contact data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-contact-data).
   required: true
 gblQueryParamCalendarFolder:
   name: folder
@@ -218,7 +218,7 @@ gblQueryParamCalendarColumns:
   name: columns
   in: query
   type: string
-  description: A comma-separated list of columns to return, like "1,500". Each column is specified by a numeric column identifier, see [Common object data](#common-object-data), [Detailed task and appointment data](#detailed-task-and-appointment-data) and [Detailed appointment data](#detailed-appointment-data).
+  description: A comma-separated list of columns to return, like "1,500". Each column is specified by a numeric column identifier, see [Common object data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#common-object-data), [Detailed task and appointment data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-task-and-appointment-data) and [Detailed appointment data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-appointment-data).
   required: true
 gblQueryParamRecurrenceMaster:
   name: recurrence_master
@@ -236,7 +236,7 @@ gblQueryParamMailColumns:
   name: columns
   in: query
   type: string
-  description: A comma-separated list of columns to return, like "600,601". Each column is specified by a numeric column identifier, see [Detailed mail data](#detailed-mail-data).
+  description: A comma-separated list of either columns or header names to return, like "600,601,X-Custom-Header". Each column is specified by a numeric column identifier, see [Detailed mail data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-mail-data).
   required: true
 gblQueryParamInfostoreFolder:
   name: folder
@@ -248,7 +248,7 @@ gblQueryParamInfostoreColumns:
   name: columns
   in: query
   type: string
-  description: A comma-separated list of columns to return, like "1,700". Each column is specified by a numeric column identifier, see [Common object data](#common-object-data) and [Detailed infoitem data](#detailed-infoitem-data).
+  description: A comma-separated list of columns to return, like "1,700". Each column is specified by a numeric column identifier, see [Common object data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#common-object-data) and [Detailed infoitem data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-infoitem-data).
   required: true
 gblQueryParamAttached:
   name: attached
@@ -272,17 +272,17 @@ gblQueryParamAttachmentsColumns:
   name: columns
   in: query
   type: string
-  description: A comma-separated list of columns to return, like "1,800". Each column is specified by a numeric column identifier, see [Common object data](#common-object-data) and [Attachment data](#attachment-data).
+  description: A comma-separated list of columns to return, like "1,800". Each column is specified by a numeric column identifier, see [Common object data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#common-object-data) and [Attachment data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#attachment-data).
   required: true
 gblQueryParamAccountColumns:
   name: columns
   in: query
   type: string
-  description: A comma-separated list of columns to return, like "1,800". Each column is specified by a numeric column identifier, see [Mail account data](#mail-account-data).
+  description: A comma-separated list of columns to return, like "1,800". Each column is specified by a numeric column identifier, see [Mail account data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#mail-account-data).
   required: true
 gblQueryParamUserColumns:
   name: columns
   in: query
   type: string
-  description: A comma-separated list of columns to return, like "1,501,610". Each column is specified by a numeric column identifier, see [Common object data](#common-object-data), [Detailed contact data](#detailed-contact-data) and [Detailed user data](#detailed-user-data).
+  description: A comma-separated list of columns to return, like "1,501,610". Each column is specified by a numeric column identifier, see [Common object data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#common-object-data), [Detailed contact data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-contact-data) and [Detailed user data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-user-data).
   required: true

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -64,7 +64,7 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface MailFilterService {
 
     public enum FilterType {
-        antispam("antispam"), autoforward("autoforward"), vacation("vacation"), all(""), custom("custom");
+        antispam("antispam"), autoforward("autoforward"), vacation("vacation"), all(""), custom("custom"), category("category"), syscategory("syscategory");
 
         private final String flag;
 
@@ -145,7 +145,7 @@ public interface MailFilterService {
      * @return a list with all mail filter rules
      * @throws OXException
      */
-    public List<Rule> listRules(final Credentials credentials, final FilterType flag) throws OXException;
+    public List<Rule> listRules(final Credentials credentials, final String flag) throws OXException;
 
     /**
      * Return a list with all mail filter rules
@@ -155,7 +155,7 @@ public interface MailFilterService {
      * @return a list with all mail filter rules
      * @throws OXException
      */
-    public List<Rule> listRules(final Credentials credentials, final String flag) throws OXException;
+    public List<Rule> listRules(final Credentials credentials, final FilterType flag) throws OXException;
 
     /**
      * Return a list with all mail filters except those specified in the exclusion list
@@ -193,5 +193,14 @@ public interface MailFilterService {
      * @throws OXException
      */
     public Set<String> getCapabilities(final Credentials credentials) throws OXException;
+
+    /**
+     * Get a set with static capabilities
+     *
+     * @param credentials the user's credentials (but only used to determine host and port)
+     * @return a Set with static capabilities
+     * @throws OXException
+     */
+    public Set<String> getStaticCapabilities(Credentials credentials) throws OXException;
 
 }

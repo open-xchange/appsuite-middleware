@@ -54,6 +54,7 @@ import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.impl.AbstractMailFuncs;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -96,6 +97,10 @@ public class UnifiedInboxEnablement implements PreferencesItemService {
 
             @Override
             protected Boolean isSet(final UserSettingMail settings) {
+                if (false == MailProviderRegistry.isUnifiedMailAvailable()) {
+                    return Boolean.FALSE;
+                }
+
                 final UnifiedInboxManagement management;
                 try {
                     management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class, true);
@@ -113,8 +118,14 @@ public class UnifiedInboxEnablement implements PreferencesItemService {
 
             @Override
             protected void setValue(final UserSettingMail settings, final String value) {
-                final boolean enable = Boolean.parseBoolean(value);
-                final UnifiedInboxManagement management;
+                boolean enable = Boolean.parseBoolean(value);
+
+                if (false == MailProviderRegistry.isUnifiedMailAvailable()) {
+                    LOG.warn("{} of Unified Mail for user {} in context {} aborted: {}", enable ? "Enabling" : "Disabling", settings.getUserId(), settings.getCid(), "Not available");
+                    return;
+                }
+
+                UnifiedInboxManagement management;
                 try {
                     management = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class, true);
                 } catch (final OXException e) {

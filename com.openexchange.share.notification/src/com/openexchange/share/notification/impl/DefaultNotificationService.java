@@ -83,6 +83,7 @@ import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.Entities;
+import com.openexchange.share.notification.NotificationStrings;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.share.notification.impl.mail.MailNotifications;

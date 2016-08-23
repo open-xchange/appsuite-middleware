@@ -1768,7 +1768,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         Quota amountQuota = CalendarQuotaProvider.getAmountQuota(session, connection, viewFactory, this);
         long limit = amountQuota.getLimit();
         long usage = amountQuota.getUsage();
-        if (limit > 0 && amountQuota.getUsage() >= limit) {
+        if (limit == 0 || (limit > 0 && amountQuota.getUsage() >= limit)) {
             throw QuotaExceptionCodes.QUOTA_EXCEEDED_CALENDAR.create(usage, limit);
         }
     }
@@ -3181,7 +3181,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             /*
              * Check if every possible occurrence is covered by a delete exception
              */
-            if (null != cdao.getDeleteException() && rresults.size() <= cdao.getDeleteException().length) {
+            if (rresults != null && cdao.getDeleteException() != null && rresults.size() <= cdao.getDeleteException().length) {
                 /*
                  * Commit current transaction
                  */

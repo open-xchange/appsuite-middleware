@@ -1,18 +1,18 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-#
 # Jacob Sparre Andersen <jacob@bureau-cornavin.com>, 2016.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-06-22 11:53+0000\n"
 "PO-Revision-Date: 2016-02-25 18:32+0100\n"
 "Last-Translator: Jacob Sparre Andersen <jacob@bureau-cornavin.com>\n"
 "Language-Team: Danish <jacob@jacob-sparre.dk>\n"
+"Language: da_DK\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: da\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.5\n"
 
@@ -105,7 +105,8 @@ msgstr ""
 "delte og systemmapper med Microsoft Outlook®-klienter."
 
 # Synchronize your Mail, Calendar and Address Book data with your device.
-msgid "Synchronize your Mail, Calendar and Address Book data with your device."
+msgid ""
+"Synchronize your Mail, Calendar and Address Book data with your device."
 msgstr "Synkronisér din e-mail, kalender og adressebog med din enhed."
 
 # To manually setup your Mail, Calendar and Address Book accounts, please use the following information.
@@ -129,4 +130,3 @@ msgid ""
 "To manually setup your Mail account, please use the following information"
 msgstr ""
 "Brug venligst de følgende oplysninger til selv at sætte din e-mail-konto op"
-
