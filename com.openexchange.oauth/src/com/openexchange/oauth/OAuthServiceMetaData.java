@@ -183,11 +183,11 @@ public interface OAuthServiceMetaData {
      * Gets the optional OAuth token.
      *
      * @param arguments The OAuth arguments
-     * @param session The associated session
+     * @param scopes A {@link Set} with the requested {@link OAuthScope}s
      * @return The OAuth token or <code>null</code>
      * @throws OXException If an error occurs returning the token
      */
-    OAuthToken getOAuthToken(Map<String, Object> arguments) throws OXException;
+    OAuthToken getOAuthToken(Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException;
 
     /**
      * Initiates contact and returns the initial OAuth interaction.

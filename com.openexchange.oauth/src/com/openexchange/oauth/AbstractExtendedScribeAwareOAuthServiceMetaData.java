@@ -52,6 +52,7 @@ package com.openexchange.oauth;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.model.Token;
@@ -151,7 +152,7 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
     }
 
     @Override
-    public OAuthToken getOAuthToken(Map<String, Object> arguments) throws OXException {
+    public OAuthToken getOAuthToken(Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
         Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
         final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(getScribeService());
         serviceBuilder.apiKey(getAPIKey(session)).apiSecret(getAPISecret(session));
@@ -173,9 +174,13 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
             }
         }
 
-        final String scope = getScope();
-        if (null != scope) {
-            serviceBuilder.scope(scope);
+        // Add requested scopes
+        if (!scopes.isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+            for (OAuthScope scope : scopes) {
+                builder.append(scope.getMapping()).append(" ");
+            }
+            serviceBuilder.scope(builder.toString());
         }
 
         OAuthService scribeOAuthService = serviceBuilder.build();

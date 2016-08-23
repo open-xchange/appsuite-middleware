@@ -245,7 +245,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OXException {
+    public OAuthToken getOAuthToken(final Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
         return null;
     }
 

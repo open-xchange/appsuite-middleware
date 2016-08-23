@@ -199,8 +199,10 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                         // IGNORE
                     }
                     String scopes = rs.getString(6);
-                    Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), Module.valuesOf(scopes));
-                    account.setEnabledScopes(enabledScopes);
+                    if (!Strings.isEmpty(scopes)) {
+                        Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), Module.valuesOf(scopes));
+                        account.setEnabledScopes(enabledScopes);
+                    }
 
                     accounts.add(account);
                 } catch (final OXException e) {
@@ -335,19 +337,19 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                     String prevCbUrl = cbUrl;
                     cbUrl = new StringBuilder(uri.getScheme()).append("://").append(uri.getHost()).append(path).toString();
 
-                    org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session);
+                    org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session, scopes);
                     scribeToken = service.getRequestToken();
                     authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
 
                     callbackRegistry.add(scribeToken.getToken(), prevCbUrl);
                     tokenRegistered = true;
                 } catch (URISyntaxException e) {
-                    org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session);
+                    org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session, scopes);
                     scribeToken = service.getRequestToken();
                     authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
                 }
             } else {
-                org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session);
+                org.scribe.oauth.OAuthService service = getScribeService(metaData, cbUrl, session, scopes);
                 scribeToken = metaData.needsRequestToken() ? service.getRequestToken() : null;
                 authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
             }
@@ -504,7 +506,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Obtain & apply the access token
              */
-            obtainToken(type, arguments, account);
+            obtainToken(type, arguments, account, scopes);
             /*
              * Encrypt token & secret
              */
@@ -770,7 +772,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Obtain & apply the access token
              */
-            obtainToken(type, arguments, account);
+            obtainToken(type, arguments, account, scopes);
             /*
              * Crypt tokens
              */
@@ -814,23 +816,23 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
     // OAuth
 
-    protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OXException {
+    protected void obtainToken(final OAuthInteractionType type, final Map<String, Object> arguments, final DefaultOAuthAccount account, Set<OAuthScope> scopes) throws OXException {
         switch (type) {
             case OUT_OF_BAND:
-                obtainTokenByOutOfBand(arguments, account);
+                obtainTokenByOutOfBand(arguments, account, scopes);
                 break;
             case CALLBACK:
-                obtainTokenByCallback(arguments, account);
+                obtainTokenByCallback(arguments, account, scopes);
                 break;
             default:
                 break;
         }
     }
 
-    protected void obtainTokenByOutOfBand(final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OXException {
+    protected void obtainTokenByOutOfBand(final Map<String, Object> arguments, final DefaultOAuthAccount account, Set<OAuthScope> scopes) throws OXException {
         try {
             final OAuthServiceMetaData metaData = account.getMetaData();
-            final OAuthToken oAuthToken = metaData.getOAuthToken(arguments);
+            final OAuthToken oAuthToken = metaData.getOAuthToken(arguments, scopes);
             if (null == oAuthToken) {
                 final String pin = (String) arguments.get(OAuthConstants.ARGUMENT_PIN);
                 if (null == pin) {
@@ -846,7 +848,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                  * With the request token and the verifier (which is a number) we need now to get the access token
                  */
                 final Verifier verifier = new Verifier(pin);
-                final org.scribe.oauth.OAuthService service = getScribeService(account.getMetaData(), null, session);
+                final org.scribe.oauth.OAuthService service = getScribeService(account.getMetaData(), null, session, scopes);
                 final Token accessToken = service.getAccessToken(new Token(requestToken.getToken(), requestToken.getSecret()), verifier);
                 /*
                  * Apply to account
@@ -866,13 +868,13 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         }
     }
 
-    protected void obtainTokenByCallback(final Map<String, Object> arguments, final DefaultOAuthAccount account) throws OXException {
-        obtainTokenByOutOfBand(arguments, account);
+    protected void obtainTokenByCallback(final Map<String, Object> arguments, final DefaultOAuthAccount account, Set<OAuthScope> scopes) throws OXException {
+        obtainTokenByOutOfBand(arguments, account, scopes);
     }
 
     // Helper Methods
 
-    private static org.scribe.oauth.OAuthService getScribeService(final OAuthServiceMetaData metaData, final String callbackUrl, Session session) throws OXException {
+    private static org.scribe.oauth.OAuthService getScribeService(final OAuthServiceMetaData metaData, final String callbackUrl, Session session, Set<OAuthScope> scopes) throws OXException {
         final Class<? extends Api> apiClass;
         if (metaData instanceof com.openexchange.oauth.ScribeAware) {
             apiClass = ((com.openexchange.oauth.ScribeAware) metaData).getScribeService();
@@ -907,10 +909,16 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         if (null != callbackUrl) {
             serviceBuilder.callback(callbackUrl);
         }
-        final String scope = metaData.getScope();
-        if (null != scope) {
-            serviceBuilder.scope(scope);
+
+        // Add requested scopes
+        if (!scopes.isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+            for (OAuthScope scope : scopes) {
+                builder.append(scope.getMapping()).append(" ");
+            }
+            serviceBuilder.scope(builder.toString());
         }
+
         return serviceBuilder.build();
     }
 

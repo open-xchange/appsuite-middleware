@@ -65,6 +65,7 @@ import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.oauthaccount.actions.AccountActionFactory;
 import com.openexchange.oauth.json.oauthmeta.actions.MetaDataActionFactory;
 import com.openexchange.oauth.json.proxy.OAuthProxyActionFactory;
+import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -82,7 +83,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class, OAuthService.class, OAuthHTTPClientFactory.class, CapabilityService.class };
+        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class, OAuthService.class, OAuthScopeRegistry.class, OAuthHTTPClientFactory.class, CapabilityService.class };
     }
 
     @Override

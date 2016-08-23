@@ -73,12 +73,12 @@ public enum Module {
      */
     public static final Module[] valuesOf(String string) {
         List<Module> list = new ArrayList<>();
-        String[] split = Strings.splitByComma(string);
+        String[] split = Strings.splitByWhitespaces(string);
         for (String s : split) {
             try {
                 list.add(valueOf(s));
             } catch (IllegalArgumentException e) {
-                LOG.warn("The specified string '{}' cannot be resolved to a valud module. It will be skipped from the scopes.", s);
+                LOG.warn("The specified string '{}' cannot be resolved to a valid module. It will be skipped from the scopes.", s);
             }
         }
 

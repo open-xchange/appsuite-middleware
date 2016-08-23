@@ -52,6 +52,7 @@ package com.openexchange.oauth.dropbox;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.DropBoxApi;
 import com.dropbox.client2.DropboxAPI;
@@ -74,6 +75,7 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthToken;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -208,7 +210,7 @@ public final class DropboxOAuthServiceMetaData extends AbstractScribeAwareOAuthS
     }
 
     @Override
-    public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OXException {
+    public OAuthToken getOAuthToken(final Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
         return (OAuthToken) arguments.get(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
     }
 
