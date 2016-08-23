@@ -47,82 +47,76 @@
  *
  */
 
-package com.openexchange.oauth.dropbox.internal.groupware;
+package com.openexchange.oauth.dropbox.osgi;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collection;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.internal.groupware.OAuthCreateTableTask2;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.oauth.dropbox.internal.groupware.OAuthDropboxDropTokensTask;
 
 /**
- * {@link OAuthDropboxDropTokensTask}
+ * {@link DatabaseUpdateTaskServiceTracker}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OAuthDropboxDropTokensTask extends UpdateTaskAdapter {
+public class DatabaseUpdateTaskServiceTracker implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {
 
-    private final DatabaseService databaseService;
+    private BundleContext bundleContext;
+
+    private ServiceRegistration<UpdateTaskProviderService> registration;
 
     /**
-     * Initialises a new {@link OAuthDropboxDropTokensTask}.
+     * Initialises a new {@link DatabaseUpdateTaskServiceTracker}.
      */
-    public OAuthDropboxDropTokensTask(DatabaseService databaseService) {
+    public DatabaseUpdateTaskServiceTracker(BundleContext bundleContext) {
         super();
-        this.databaseService = databaseService;
+        this.bundleContext = bundleContext;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
     @Override
-    public void perform(PerformParameters params) throws OXException {
-        int contextId = params.getContextId();
+    public DatabaseService addingService(ServiceReference<DatabaseService> reference) {
+        final DatabaseService databaseService = bundleContext.getService(reference);
+        registration = bundleContext.registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
-        // Get the writeable connection
-        Connection writeConnection = null;
-        try {
-            writeConnection = databaseService.getForUpdateTask(contextId);
-        } catch (OXException e) {
-            throw e;
-        }
+            @Override
+            public Collection<? extends UpdateTaskV2> getUpdateTasks() {
+                return Arrays.asList(new OAuthDropboxDropTokensTask(databaseService));
+            }
 
-        // Perform the task
-        PreparedStatement statement = null;
-        try {
-            String dropTokensSQL = "UPDATE oauthAccounts SET accessToken = ? AND accessSecret = ? WHERE cid = ? AND serviceId = ?";
-            statement = writeConnection.prepareStatement(dropTokensSQL);
-
-            int parameterIndex = 1;
-            statement.setString(parameterIndex++, "");
-            statement.setString(parameterIndex++, "");
-            statement.setInt(parameterIndex++, contextId);
-            statement.setString(parameterIndex++, API.DROPBOX.getFullName());
-
-            statement.execute();
-        } catch (SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(statement);
-            databaseService.backForUpdateTask(writeConnection);
-        }
+        }, null);
+        return databaseService;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
     @Override
-    public String[] getDependencies() {
-        return new String[] { OAuthCreateTableTask2.class.getName() };
+    public void modifiedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        // Nothing to do
+
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    @Override
+    public void removedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        registration.unregister();
+        bundleContext.ungetService(reference);
     }
 }

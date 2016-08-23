@@ -51,6 +51,7 @@ package com.openexchange.oauth.dropbox.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.dropbox.DropboxOAuthServiceMetaData;
@@ -77,6 +78,7 @@ public final class DropboxOAuthActivator extends HousekeepingActivator {
         DropboxOAuthServiceMetaData service = new DropboxOAuthServiceMetaData(this);
         registerService(OAuthServiceMetaData.class, service);
         registerService(Reloadable.class, service);
+        //track(DatabaseService.class, new DatabaseUpdateTaskServiceTracker(context));
+        openTrackers();
     }
-
 }
