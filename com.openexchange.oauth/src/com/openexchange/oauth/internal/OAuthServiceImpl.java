@@ -354,22 +354,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 authorizationURL = new StringBuilder(service.getAuthorizationUrl(scribeToken));
             }
             /*
-             * Add optional scope
-             */
-            {
-                StringBuilder builder = new StringBuilder();
-                for (OAuthScope scope : scopes) {
-                    builder.append(scope.getMapping()).append(" ");
-                }
-                if (builder.length() > 0) {
-                    builder.setLength(builder.length() - 1);
-                    final String scope = builder.toString();
-                    if (scope != null && authorizationURL.indexOf("&scope=") < 0) {
-                        authorizationURL.append("&scope=").append(urlEncode(scope));
-                    }
-                }
-            }
-            /*
              * Process authorization URL
              */
             final String authURL = metaData.processAuthorizationURLCallbackAware(metaData.processAuthorizationURL(authorizationURL.toString()), cbUrl);
