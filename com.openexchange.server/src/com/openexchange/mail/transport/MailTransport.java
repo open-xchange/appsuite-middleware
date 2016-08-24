@@ -56,6 +56,7 @@ import javax.mail.Address;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -122,7 +123,22 @@ public abstract class MailTransport {
         /*
          * Create a new mail transport through user's transport provider
          */
-        return TransportProviderRegistry.getTransportProviderBySession(session, accountId).createNewMailTransport(session, accountId);
+        MailTransport mailTransport = TransportProviderRegistry.getTransportProviderBySession(session, accountId).createNewMailTransport(session, accountId);
+        TransportConfig transportConfig = mailTransport.getTransportConfig();
+        if (false == mailTransport.supports(transportConfig.getAuthType())) {
+            throw MailExceptionCode.AUTH_TYPE_NOT_SUPPORTED.create(transportConfig.getAuthType().getName(), transportConfig.getServer());
+        }
+        return mailTransport;
+    }
+
+    /**
+     * Checks if specified authentication type is supported by this mail access.
+     *
+     * @param authType The authentication type to check
+     * @return <code>true</code> if authentication type is supported; otherwise <code>false</code>
+     */
+    protected boolean supports(AuthType authType) {
+        return AuthType.LOGIN == authType;
     }
 
     /**

@@ -754,7 +754,11 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
                 checkDefaultFolderOnConnect();
             }
         } else {
-            checkFieldsBeforeConnect(getMailConfig());
+            MailConfig mailConfig = getMailConfig();
+            checkFieldsBeforeConnect(mailConfig);
+            if (!supports(mailConfig.getAuthType())) {
+                throw MailExceptionCode.AUTH_TYPE_NOT_SUPPORTED.create(mailConfig.getAuthType().getName(), mailConfig.getServer());
+            }
             connectInternal();
             if (checkDefaultFolder) {
                 checkDefaultFolderOnConnect();
@@ -839,6 +843,17 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      * @throws OXException If connection could not be established
      */
     protected abstract void connectInternal() throws OXException;
+
+    /**
+     * Checks if specified authentication type is supported by this mail access.
+     *
+     * @param authType The authentication type to check
+     * @return <code>true</code> if authentication type is supported; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    protected boolean supports(AuthType authType) throws OXException {
+        return AuthType.LOGIN == authType;
+    }
 
     @Override
     public void close() {

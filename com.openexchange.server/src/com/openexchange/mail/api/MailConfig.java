@@ -84,6 +84,9 @@ import com.openexchange.mailaccount.Account;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
@@ -709,8 +712,15 @@ public abstract class MailConfig {
             int oAuthAccontId = assumeXOauth2For(account);
             if (oAuthAccontId >= 0) {
                 // Do the XOAUTH2 dance...
+                OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
+                if (null == oauthService) {
+                    throw ServiceExceptionCode.absentService(OAuthService.class);
+                }
 
-
+                OAuthAccount oAuthAccount = oauthService.getAccount(oAuthAccontId, session, session.getUserId(), session.getContextId());
+                mailConfig.login = oAuthAccount.getToken();
+                mailConfig.password = oAuthAccount.getSecret();
+                mailConfig.authType = AuthType.OAUTH;
             } else {
                 String mailAccountPassword = account.getPassword();
                 if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
@@ -729,7 +739,13 @@ public abstract class MailConfig {
         mailConfig.doCustomParsing(account, session);
     }
 
-    private static int assumeXOauth2For(Account account) {
+    /**
+     * Checks whether XOAUTH2 authentication is assumed for specified account.
+     *
+     * @param account The account to check
+     * @return The verified identifier of the associated OAuth account or <code>-1</code>
+     */
+    protected static int assumeXOauth2For(Account account) {
         if (account.isMailAccount()) {
             MailAccount mailAccount = (MailAccount) account;
             if (false == mailAccount.isMailOAuthAble()) {
@@ -754,7 +770,6 @@ public abstract class MailConfig {
     protected Map<String, Object> authProps;
     protected int accountId;
     protected Session session;
-    protected boolean xoauth;
     protected String login;
     protected String password;
     protected boolean requireTls;
@@ -767,7 +782,6 @@ public abstract class MailConfig {
      */
     protected MailConfig() {
         super();
-        xoauth = false;
         requireTls = false;
         authProps = null;
         authType = AuthType.LOGIN;

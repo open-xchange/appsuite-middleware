@@ -61,12 +61,26 @@ public enum AuthType {
     /**
      * The login authentication type.
      */
-    LOGIN,
+    LOGIN("login"),
     /**
      * The OAuth authentication type.
      */
-    OAUTH,
+    OAUTH("OAuth"),
     ;
 
+    private final String name;
+
+    private AuthType(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Gets the name
+     *
+     * @return The name
+     */
+    public String getName() {
+        return name;
+    }
 
 }
