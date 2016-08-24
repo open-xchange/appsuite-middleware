@@ -186,9 +186,12 @@ public abstract class SocketIOServlet extends SessionServlet {
         try {
             LOGGER.debug("Request from {}:{}, transport: {}, EIO protocol version:{}", request.getRemoteHost(), request.getRemotePort(), request.getParameter(EngineIOProtocol.TRANSPORT), request.getParameter(EngineIOProtocol.VERSION));
             transportProvider.getTransport(request).handle(request, response, socketIOManager);
-        } catch (UnsupportedTransportException | SocketIOProtocolException e) {
-            LOGGER.warn("Socket IO error", e);
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+        } catch (SocketIOProtocolException e) {
+            LOGGER.warn("{} parameter missing", EngineIOProtocol.TRANSPORT, e);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing " + EngineIOProtocol.TRANSPORT + " parameter");
+        } catch (UnsupportedTransportException e) {
+            LOGGER.warn("No such transport", e);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
         }
     }
 }
