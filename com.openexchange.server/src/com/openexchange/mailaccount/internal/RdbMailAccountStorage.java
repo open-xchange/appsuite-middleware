@@ -2279,7 +2279,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 transportAccount.setTransportStartTls(result.getBoolean(8));
                 transportAccount.setSendAddress(result.getString(9));
 
-                int oauthAccountId = result.getInt(26);
+                int oauthAccountId = result.getInt(10);
                 if (result.wasNull()) {
                     transportAccount.setTransportOAuthId(-1);
                 } else {
