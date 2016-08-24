@@ -1646,6 +1646,12 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                         } else if (Attribute.TRANSPORT_STARTTLS_LITERAL == attribute) {
                             boolean b = mailAccount.isTransportStartTls();
                             stmt.setBoolean(pos++, b);
+                        } else if (Attribute.MAIL_OAUTH_LITERAL == attribute) {
+                            int oauthId = mailAccount.getMailOAuthId();
+                            stmt.setInt(pos++, oauthId);
+                        } else if (Attribute.TRANSPORT_OAUTH_LITERAL == attribute) {
+                            int oauthId = mailAccount.getTransportOAuthId();
+                            stmt.setInt(pos++, oauthId);
                         } else if (DEFAULT.contains(attribute)) {
                             if (DEFAULT_FULL_NAMES.contains(attribute)) {
                                 String fullName = null == value ? "" : MailFolderUtility.prepareMailFolderParam((String) value).getFullname();
