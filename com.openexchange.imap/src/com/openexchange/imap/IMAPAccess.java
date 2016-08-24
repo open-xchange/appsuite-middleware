@@ -1168,7 +1168,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         RootSubfoldersEnabledCache.init();
         ACLExtensionInit.getInstance().start();
         Entity2ACLInit.getInstance().start();
-        maxCountCache = new NonBlockingHashMap<String, Integer>(16);
+        maxCountCache = new NonBlockingHashMap<>(16);
 
         final ConfigurationService confService = Services.getService(ConfigurationService.class);
         final boolean useIMAPStoreCache = null == confService ? true : confService.getBoolProperty("com.openexchange.imap.useIMAPStoreCache", true);
@@ -1184,10 +1184,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     private static synchronized void initMaps() {
         if (null == timedOutServers) {
-            timedOutServers = new NonBlockingHashMap<HostAndPort, Long>();
+            timedOutServers = new NonBlockingHashMap<>();
         }
         if (null == aclCapableServers) {
-            aclCapableServers = new NonBlockingHashMap<String, Boolean>();
+            aclCapableServers = new NonBlockingHashMap<>();
         }
         if (null == cleanUpTimerTask) {
             final TimerService timerService = Services.getService(TimerService.class);
@@ -1324,7 +1324,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         /*
          * Specify CLOSE behavior
          */
-        imapProps.put("mail.imap.explicitCloseForReusedProtocol", "false");
+        imapProps.put("mail.imap.explicitCloseForReusedProtocol", "true");
         /*
          * Specify NOOP behavior
          */
