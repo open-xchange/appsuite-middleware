@@ -916,7 +916,9 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             for (OAuthScope scope : scopes) {
                 builder.append(scope.getMapping()).append(" ");
             }
-            serviceBuilder.scope(builder.toString());
+            if (!Strings.isEmpty(builder.toString())) {
+                serviceBuilder.scope(builder.toString());
+            }
         }
 
         return serviceBuilder.build();
