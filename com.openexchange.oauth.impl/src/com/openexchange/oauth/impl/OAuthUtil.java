@@ -50,14 +50,19 @@
 package com.openexchange.oauth.impl;
 
 import static com.openexchange.java.Strings.isEmpty;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.Set;
 import org.scribe.builder.ServiceBuilder;
 import com.openexchange.framework.request.RequestContext;
 import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.session.Session;
 
 /**
  * {@link OAuthUtil}
@@ -120,9 +125,36 @@ public final class OAuthUtil {
      * 
      * @return the call-back URL for OAuth
      */
-    public static final String buildCallbackURL() {
+    public static final String buildCallbackURL(Session session, OAuthAccount account, String oauthSessionToken, String sessionToken, String displayName, Set<OAuthScope> scopes, String cb) {
+        RequestContext requestContext = RequestContextHolder.get();
+        HostData hostData = requestContext.getHostData();
+        boolean isSecure = hostData.isSecure();
+
         StringBuilder builder = new StringBuilder();
-        return null;
+        builder.append(isSecure ? "https://" : "http://");
+        builder.append(determineHost(hostData));
+        builder.append(hostData.getDispatcherPrefix());
+        builder.append("oauth/accounts;jsessionid=");
+        builder.append(hostData.getHTTPSession());
+
+        builder.append("?action=reauthorize");
+        builder.append("&id=").append(account.getId());
+        builder.append("&respondWithHTML=true&session=").append(session.getSessionID());
+        {
+            final String name = OAuthConstants.ARGUMENT_DISPLAY_NAME;
+            if (displayName != null) {
+                builder.append('&').append(name).append('=').append(urlEncode(displayName));
+            }
+        }
+        builder.append('&').append("serviceId").append('=').append(urlEncode(account.getMetaData().getAPI().getFullName()));
+        builder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(sessionToken);
+        builder.append('&').append(Session.PARAM_TOKEN).append('=').append(oauthSessionToken);
+        builder.append('&').append("scopes").append('=').append(urlEncode(OAuthUtil.scopeModulesToString(scopes)));
+        if (!isEmpty(cb)) {
+            builder.append("&callback=").append(cb);
+        }
+
+        return builder.toString();
     }
 
     /**
@@ -131,15 +163,9 @@ public final class OAuthUtil {
      * 
      * @return The hostname
      */
-    private static final String determineHost() {
-        RequestContext requestContext = RequestContextHolder.get();
-        String hostname = null;
-
-        // Try from the host data if available
-        HostData hostData = requestContext.getHostData();
-        if (hostData != null) {
-            hostname = hostData.getHost();
-        }
+    private static final String determineHost(HostData hostData) {
+        // Try from the host data
+        String hostname = hostData.getHost();
 
         // Get hostname from java
         if (isEmpty(hostname)) {
@@ -155,5 +181,19 @@ public final class OAuthUtil {
         }
 
         return hostname;
+    }
+
+    /**
+     * URL encodes the specified string using "ISO-8859-1"
+     * 
+     * @param s The string to encode
+     * @return The encoded string
+     */
+    private static String urlEncode(final String s) {
+        try {
+            return URLEncoder.encode(s, "ISO-8859-1");
+        } catch (final UnsupportedEncodingException e) {
+            return s;
+        }
     }
 }
