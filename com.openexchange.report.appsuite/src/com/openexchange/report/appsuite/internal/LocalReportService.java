@@ -318,7 +318,6 @@ public class LocalReportService extends AbstractReportService {
                 try {
                     if (finishedContexts.get() != 0) {
                         report.setTaskState(report.getNumberOfTasks(), report.getNumberOfPendingTasks() - finishedContexts.get());
-                        System.out.println(report.getNumberOfPendingTasks() + " : " + report.getNumberOfTasks());
                         if (report.getNumberOfPendingTasks() <= 0) {
                             finishUpReport(reportType, reportCache.asMap().get(PENDING_REPORTS_PRE_KEY + reportType), report);
                         }
