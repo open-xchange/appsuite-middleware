@@ -61,7 +61,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum Module {
-    mail, calendar, contacts, drive;
+    mail, calendar, contacts, drive, generic;
 
     private static final Logger LOG = LoggerFactory.getLogger(Module.class);
 

@@ -58,7 +58,7 @@ import com.openexchange.oauth.scope.OAuthScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum XingOAuthScope implements OAuthScope {
-    none("", null); //FIXME: Don't set a 'null' Module, instead introduce a 'none' module to indicate that no scopes are required
+    contacts("", Module.contacts);
 
     private String mapping;
     private Module module;
