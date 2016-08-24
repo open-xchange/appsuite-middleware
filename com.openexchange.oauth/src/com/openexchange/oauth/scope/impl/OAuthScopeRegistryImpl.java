@@ -54,11 +54,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.scope.Module;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
+import com.openexchange.oauth.scope.OAuthScopeRegistryExceptionCodes;
 
 /**
  * {@link OAuthScopeRegistryImpl}
@@ -67,7 +70,8 @@ import com.openexchange.oauth.scope.OAuthScopeRegistry;
  */
 public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
 
-    // TODO: Consider whether the map and the sets need to be concurrent
+    private static final Logger LOG = LoggerFactory.getLogger(OAuthScopeRegistryImpl.class);
+
     private final Map<API, Set<OAuthScope>> registry;
 
     /**
@@ -122,8 +126,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
 
             scopes.remove(scope);
         } catch (OXException e) {
-            // TODO: Handle the exception properly
-            e.printStackTrace();
+            LOG.debug("{}", e.getMessage(), e);
         }
     }
 
@@ -156,8 +159,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
     public Set<OAuthScope> getAvailableScopes(API api) throws OXException {
         Set<OAuthScope> scopes = registry.get(api);
         if (scopes == null) {
-            //TODO: Introduce proper exception code
-            throw new OXException(0, "No scopes found for the '%1$s' OAuth service.", api.getFullName());
+            throw OAuthScopeRegistryExceptionCodes.NO_SCOPES.create(api.getFullName());
         }
         return Collections.unmodifiableSet(scopes);
     }
@@ -174,8 +176,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
             try {
                 availableScopes.add(getScope(api, module));
             } catch (OXException e) {
-                // TODO: Handle the exception properly 
-                e.printStackTrace();
+                LOG.debug("{}", e.getMessage(), e);
             }
         }
         return Collections.unmodifiableSet(availableScopes);
@@ -194,7 +195,6 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
                 return scope;
             }
         }
-        //TODO: Introduce proper exception code
-        throw new OXException(0, "No scope found for module '%1$s' in the '%2$s' OAuth service", module, api.getFullName());
+        throw OAuthScopeRegistryExceptionCodes.NO_SCOPE_FOR_MODULE.create(module, api.getFullName());
     }
 }
