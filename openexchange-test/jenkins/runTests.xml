@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="setup openstack environment" default="run-tests-with-params" basedir=".">
+
+    <property name="test.repository" value="backend/openexchange-test"/>
+    <property name="test.basepath" location="${test.repository}"/>
+
+    <target name="rewrite-system-properties">
+        <replace dir="${basedir}/etc">
+            <include name="*.properties"/>
+            <replacefilter token="/opt/open-xchange" value="${basedir}"/>
+        </replace>
+        <replace dir="${basedir}/etc">
+            <include name="configdb.properties"/>
+            <replacefilter token="readUrl=jdbc:mysql://localhost/configdb" value="readUrl=jdbc:mysql://${db-slave}/configdb"/>
+            <replacefilter token="writeUrl=jdbc:mysql://localhost/configdb" value="readUrl=jdbc:mysql://${db-master}/configdb"/>
+            <replacefilter token="password=secret" value="password=netline"/>
+        </replace>
+        <replace dir="${basedir}/etc">
+            <include name="system.properties"/>
+            <include name="AdminDaemon.properties"/>
+            <replacefilter token="SERVER_NAME=local" value="SERVER_NAME=${server-name}"/>
+        </replace>
+        <replace dir="${basedir}/etc">
+            <include name="server.properties"/>
+            <replacefilter token="UPLOAD_DIRECTORY=/var/spool/open-xchange/uploads" value="UPLOAD_DIRECTORY=/tmp"/>
+        </replace>
+    </target>
+
+    <target name="clean">
+        <delete dir="${basedir}/test-results"/>
+    </target>
+
+    <target name="run-tests-with-params" depends="rewrite-singlenode-properties,rewrite-system-properties">
+        <ant dir="${test.basepath}" antfile="${test.basepath}/build.xml" target="run-${tests}-tests">
+            <property name="org.apache.commons.logging.Log" value="org.apache.commons.logging.impl.Jdk14Logger"/>
+            <property name="confDir" value="${test.basepath}/conf"/>
+            <property name="testXmlDir" value="${basedir}/test-results"/>
+        </ant>
+    </target>
+
+    <target name="rewrite-singlenode-properties">
+        <concat destfile="${test.basepath}/conf/test.properties" append="false">
+openexchange.propdir=${basedir}/etc/
+ajaxPropertiesFile=${test.basepath}/conf/ajax.properties
+webdavPropertiesFile=${test.basepath}/conf/webdav.properties
+sessiondPropertiesFile=${test.basepath}/conf/sessiond.properties
+reminderPropertiesFile=${test.basepath}/conf/reminder.properties
+mailPropertiesFile=${test.basepath}/conf/mail.properties
+templatePath=${test.basepath}/templates
+testServletConfigs=${test.basepath}/testData/servletConf
+        </concat>
+        <concat destfile="${test.basepath}/conf/ajax.properties" append="false">
+hostname=${http-host}
+rmihost=${ox1-host}
+protocol=http
+contextName=context1.oxoe.int
+login=anton
+seconduser=berta
+thirdlogin=caesar
+fourthlogin=dora
+password=secret
+oxadmin=oxadmin
+oxadminmaster=oxadminmaster
+oxadminmaster_password=secret
+appointment_url=/ajax/appointment
+user_participant1=caser
+user_participant2=dora
+user_participant3=emil
+group_participant=users
+resource_participant=*
+resource_participant1=test-resource-1
+resource_participant2=test-resource-2
+resource_participant3=test-resource-3
+contact_url=/ajax/contacts
+reminder_url=/ajax/reminder
+participant_url=/ajax/participant
+isSP3=false
+sleep=0
+        </concat>
+        <concat destfile="${test.basepath}/conf/webdav.properties" append="false">
+hostname=${http-host}
+contextName=context1.oxoe.int
+login=caesar
+password=secret
+secondlogin=anton
+appointment_url=/servlet/webdav.calendar/foo.xml
+user_participant1=caesar
+user_participant2=emil
+user_participant3=anton
+group_participant=users
+resource_participant=*
+contact_url=/servlet/webdav.contacts/foo.xml
+task_url=/servlet/webdav.tasks/foo.xml
+folder_url=/servlet/webdav.folders/foo.xml
+infostore_subpath=userstore/caesar
+        </concat>
+        <concat destfile="${test.basepath}/conf/sessiond.properties" append="false">
+com.openexchange.session.testUser1:test_1
+com.openexchange.session.testUser2:test_2
+com.openexchange.session.testUser3:test_3
+        </concat>
+        <concat destfile="${test.basepath}/conf/mail.properties" append="false">
+server=${imap-host}
+port=143
+login=anton@context1.oxoe.int
+login2=berta@context1.oxoe.int
+login3=caesar@context1.oxoe.int
+seconduser=4
+password=secret
+user=3
+cid=1
+testMailDir=${test.basepath}/testData/
+        </concat>
+    </target>
+
+</project>
