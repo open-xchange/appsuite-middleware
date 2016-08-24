@@ -108,14 +108,15 @@ public interface OAuthScopeRegistry {
 
     /**
      * Returns an unmodifiable {@link Set} with all available {@link OAuthScope}s that are associated with the specified
-     * OAuth {@link API} and {@link Module}. Any {@link Module}s that cannot be associated to any {@link OAuthScope}
-     * will be ignored.
+     * OAuth {@link API} and {@link Module}. If there is no {@link OAuthScope} associated with one of the specified
+     * OAuth {@link API} and {@link Module}s, an {@link OXException} will be thrown
      * 
      * @param api The OAuth {@link API}
      * @param modules The {@link Module}s
      * @return An unmodifiable {@link Set} with all available {@link OAuthScope}s
+     * @throws OXException if there is no {@link OAuthScope} associated with the specified OAuth {@link API} and {@link Module}
      */
-    Set<OAuthScope> getAvailableScopes(API api, Module... modules);
+    Set<OAuthScope> getAvailableScopes(API api, Module... modules) throws OXException;
 
     /**
      * Returns the {@link OAuthScope} associated with the specified {@link API} and {@link Module}

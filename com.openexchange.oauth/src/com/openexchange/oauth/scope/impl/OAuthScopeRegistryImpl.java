@@ -61,7 +61,7 @@ import com.openexchange.oauth.API;
 import com.openexchange.oauth.scope.Module;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
-import com.openexchange.oauth.scope.OAuthScopeRegistryExceptionCodes;
+import com.openexchange.oauth.scope.OAuthScopeExceptionCodes;
 
 /**
  * {@link OAuthScopeRegistryImpl}
@@ -126,7 +126,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
 
             scopes.remove(scope);
         } catch (OXException e) {
-            LOG.debug("{}", e.getMessage(), e);
+            LOG.warn("{}", e.getMessage(), e);
         }
     }
 
@@ -159,7 +159,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
     public Set<OAuthScope> getAvailableScopes(API api) throws OXException {
         Set<OAuthScope> scopes = registry.get(api);
         if (scopes == null) {
-            throw OAuthScopeRegistryExceptionCodes.NO_SCOPES.create(api.getFullName());
+            throw OAuthScopeExceptionCodes.NO_SCOPES.create(api.getFullName());
         }
         return Collections.unmodifiableSet(scopes);
     }
@@ -170,14 +170,10 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
      * @see com.openexchange.oauth.scope.OAuthScopeRegistry#getAvailableScopes(com.openexchange.oauth.API, com.openexchange.oauth.scope.Module[])
      */
     @Override
-    public Set<OAuthScope> getAvailableScopes(API api, Module... modules) {
+    public Set<OAuthScope> getAvailableScopes(API api, Module... modules) throws OXException {
         Set<OAuthScope> availableScopes = new HashSet<>(modules.length);
         for (Module module : modules) {
-            try {
-                availableScopes.add(getScope(api, module));
-            } catch (OXException e) {
-                LOG.debug("{}", e.getMessage(), e);
-            }
+            availableScopes.add(getScope(api, module));
         }
         return Collections.unmodifiableSet(availableScopes);
     }
@@ -195,6 +191,6 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
                 return scope;
             }
         }
-        throw OAuthScopeRegistryExceptionCodes.NO_SCOPE_FOR_MODULE.create(module, api.getFullName());
+        throw OAuthScopeExceptionCodes.NO_SCOPE_FOR_MODULE.create(module, api.getFullName());
     }
 }

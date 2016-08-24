@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
 /**
@@ -70,15 +71,16 @@ public enum Module {
      * 
      * @param string A comma separated String containing the {@link Module} strings
      * @return An array with the resolved {@link Module} values
+     * @throws OXException if the specified string cannot be resolved to a valid {@link Module}
      */
-    public static final Module[] valuesOf(String string) {
+    public static final Module[] valuesOf(String string) throws OXException {
         List<Module> list = new ArrayList<>();
         String[] split = Strings.splitByWhitespaces(string);
         for (String s : split) {
             try {
                 list.add(valueOf(s));
             } catch (IllegalArgumentException e) {
-                LOG.warn("The specified string '{}' cannot be resolved to a valid module. It will be skipped from the scopes.", s);
+                throw OAuthScopeExceptionCodes.CANNOT_RESOLVE_MODULE.create(s, Module.values());
             }
         }
 

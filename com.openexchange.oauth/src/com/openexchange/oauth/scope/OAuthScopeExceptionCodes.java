@@ -55,11 +55,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link OAuthScopeRegistryExceptionCodes}
+ * {@link OAuthScopeExceptionCodes}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum OAuthScopeRegistryExceptionCodes implements DisplayableOXExceptionCode {
+public enum OAuthScopeExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * No scopes found for the '%1$s' OAuth service.
      */
@@ -69,6 +69,10 @@ public enum OAuthScopeRegistryExceptionCodes implements DisplayableOXExceptionCo
      */
     NO_SCOPE_FOR_MODULE("No scope found for module '%1$s' in the '%2$s' OAuth service", Category.CATEGORY_ERROR, 2),
 
+    /**
+     * The specified string '%1$s' cannot be resolved to a valid module. Valid modules are: '%2$s'
+     */
+    CANNOT_RESOLVE_MODULE("The specified string '%1$s' cannot be resolved to a valid module. Valid modules are: '%2$s'", CATEGORY_ERROR, 3),
     ;
 
     private final Category category;
@@ -78,9 +82,9 @@ public enum OAuthScopeRegistryExceptionCodes implements DisplayableOXExceptionCo
     private static final String PREFIX = "OAUTH_SCOPE_REGISTRY";
 
     /**
-     * Initialises a new {@link OAuthScopeRegistryExceptionCodes}.
+     * Initialises a new {@link OAuthScopeExceptionCodes}.
      */
-    private OAuthScopeRegistryExceptionCodes(String message, Category category, int detailNumber) {
+    private OAuthScopeExceptionCodes(String message, Category category, int detailNumber) {
         this.message = message;
         this.category = category;
         number = detailNumber;
