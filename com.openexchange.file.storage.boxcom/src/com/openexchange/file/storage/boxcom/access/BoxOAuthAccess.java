@@ -118,6 +118,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
             int oauthAccountId = getAccountId();
             OAuthService oAuthService = Services.getService(OAuthService.class);
             OAuthAccount boxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+            verifyAccount(boxOAuthAccount);
             setOAuthAccount(boxOAuthAccount);
 
             OAuthAccount newAccount = recreateTokenIfExpired(true);

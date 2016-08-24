@@ -122,6 +122,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             {
                 OAuthService oAuthService = Services.getService(OAuthService.class);
                 liveconnectOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+                verifyAccount(liveconnectOAuthAccount);
             }
             setOAuthAccount(liveconnectOAuthAccount);
 

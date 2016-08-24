@@ -91,6 +91,7 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
             // Grab Google OAuth account
             int oauthAccountId = getAccountId();
             OAuthAccount oauthAccount = GoogleApiClients.getGoogleAccount(oauthAccountId, session, false);
+            verifyAccount(oauthAccount);
             setOAuthAccount(oauthAccount);
 
             {

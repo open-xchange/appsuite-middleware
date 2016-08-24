@@ -94,6 +94,7 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
     public XingOAuthAccessImpl(final Session session, final OAuthAccount oauthAccount) throws OXException {
         super();
         this.session = session;
+        verifyAccount(oauthAccount);
         setOAuthAccount(oauthAccount);
     }
 
