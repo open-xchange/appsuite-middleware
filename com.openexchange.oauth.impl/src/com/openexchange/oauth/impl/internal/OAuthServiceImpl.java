@@ -107,9 +107,10 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.OAuthToken;
-import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
+import com.openexchange.oauth.impl.OAuthUtil;
 import com.openexchange.oauth.impl.services.Services;
 import com.openexchange.oauth.scope.Module;
 import com.openexchange.oauth.scope.OAuthScope;
@@ -894,18 +895,8 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             serviceBuilder.callback(callbackUrl);
         }
 
-        // TODO: move the following snippet to a Utility class
         // Add requested scopes
-        if (!scopes.isEmpty()) {
-            StringBuilder builder = new StringBuilder();
-            for (OAuthScope scope : scopes) {
-                builder.append(scope.getMapping()).append(" ");
-            }
-            if (!Strings.isEmpty(builder.toString())) {
-                builder.setLength(builder.length() - 1);
-                serviceBuilder.scope(builder.toString());
-            }
-        }
+        OAuthUtil.addScopes(serviceBuilder, scopes);
 
         return serviceBuilder.build();
     }
