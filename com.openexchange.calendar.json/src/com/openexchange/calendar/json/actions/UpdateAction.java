@@ -180,7 +180,7 @@ public final class UpdateAction extends ChronosAction {
 
         UserizedEvent event = getEventConverter().getEvent(calendarSession, appointment, eventID);
         UpdateResult result = calendarService.updateEvent(calendarSession, eventID, event);
-        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, result.getUpdatedEvent().getId()), result.getUpdatedEvent().getLastModified(), "json");
+        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, result.getUpdate().getId()), result.getTimestamp(), "json");
     }
 
 }

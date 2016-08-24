@@ -156,7 +156,7 @@ public abstract class ChronosAction extends AppointmentAction {
                 legacy = false;
                 break;
             case "delete":
-                legacy = false;
+                legacy = true;
                 break;
             case "copy":
                 legacy = false;

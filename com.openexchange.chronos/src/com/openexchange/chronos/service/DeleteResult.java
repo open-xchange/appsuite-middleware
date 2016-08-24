@@ -49,7 +49,9 @@
 
 package com.openexchange.chronos.service;
 
+import java.util.Date;
 import com.openexchange.chronos.Event;
+import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link DeleteResult}
@@ -67,7 +69,22 @@ public interface DeleteResult {
     CalendarSession getSession();
 
     /**
-     * Gets the created event.
+     * Gets the the actual target calendar user based on the folder view the deletion is performed in. This is either the current session's
+     * user when operating in <i>private</i> or <i>public</i> folders, or the folder owner for <i>shared</i> calendar folders.
+     *
+     * @return The actual calendar user
+     */
+    User getCalendarUser();
+
+    /**
+     * The new server timestamp of the deleted event as used to return to clients.
+     *
+     * @return The updated server timestamp
+     */
+    Date getTimestamp();
+
+    /**
+     * Gets the deleted event.
      *
      * @return The event
      */

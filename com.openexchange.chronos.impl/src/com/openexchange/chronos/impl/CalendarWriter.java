@@ -75,6 +75,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
@@ -167,7 +168,7 @@ public class CalendarWriter extends CalendarReader {
             storage.getAlarmStorage().deleteAlarms(objectID);
             storage.getEventStorage().deleteEvent(objectID);
             storage.getAttendeeStorage().deleteAttendees(objectID);
-            return new DeleteResultImpl(session, i(folder), originalEvent, null);
+            return new DeleteResultImpl(session, calendarUser, i(folder), originalEvent, now);
         } else if (contains(userAttendees, calendarUser.getId())) {
             /*
              * deletion as one of the user attendees
@@ -183,7 +184,7 @@ public class CalendarWriter extends CalendarReader {
             Consistency.setModified(now, eventUpdate, calendarUser.getId());
             storage.getEventStorage().updateEvent(eventUpdate);
             Event updatedEvent = readAdditionalEventData(storage.getEventStorage().loadEvent(objectID, null), null);
-            return new DeleteResultImpl(session, i(folder), originalEvent, updatedEvent);
+            return new DeleteResultImpl(session, calendarUser, i(folder), originalEvent, updatedEvent);
         } else {
             /*
              * deletion as ?
@@ -229,7 +230,7 @@ public class CalendarWriter extends CalendarReader {
         if (userizedEvent.containsAlarms() && null != userizedEvent.getAlarms() && 0 < userizedEvent.getAlarms().size()) {
             storage.getAlarmStorage().insertAlarms(objectID, calendarUser.getId(), userizedEvent.getAlarms());
         }
-        return new CreateResultImpl(session, i(folder), readAdditionalEventData(storage.getEventStorage().loadEvent(objectID, null), null));
+        return new CreateResultImpl(session, calendarUser, i(folder), readAdditionalEventData(storage.getEventStorage().loadEvent(objectID, null), null));
     }
 
     private UpdateResultImpl updateEvent(UserizedFolder folder, int objectID, UserizedEvent userizedEvent, long clientTimestamp) throws OXException {
@@ -326,27 +327,27 @@ public class CalendarWriter extends CalendarReader {
         Consistency.setModified(now, eventUpdate, calendarUser.getId());
         eventUpdate.setSequence(originalEvent.getSequence() + 1);
         storage.getEventStorage().updateEvent(eventUpdate);
-
-        UserizedEvent reloadedEvent = readEvent(folder, objectID);
         /*
-         * update alarms for calendar user
+         * update alarms for calendar user as needed
          */
+        AbstractCollectionUpdate<Alarm, AlarmField> alarmUpdates = null;
         if (userizedEvent.containsAlarms()) {
-            List<Alarm> originalAlarms = reloadedEvent.getAlarms();
-            List<Alarm> updatedAlarms = userizedEvent.getAlarms();
-
-            if (null == userizedEvent.getAlarms() && null != reloadedEvent.getAlarms()) {
+            List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(objectID, calendarUser.getId());
+            alarmUpdates = AlarmMapper.getInstance().getAlarmUpdate(originalAlarms, userizedEvent.getAlarms());
+            if (false == alarmUpdates.isEmpty()) {
+                // TODO distinct alarm update
                 storage.getAlarmStorage().deleteAlarms(objectID, calendarUser.getId());
-            } else {
-                if (null == reloadedEvent.getAlarms()) {
+                if (null != userizedEvent.getAlarms()) {
                     storage.getAlarmStorage().insertAlarms(objectID, calendarUser.getId(), userizedEvent.getAlarms());
-                } else {
-                    storage.getAlarmStorage().updateAlarms(objectID, calendarUser.getId(), userizedEvent.getAlarms());
                 }
+                List<Alarm> newAlarms = storage.getAlarmStorage().loadAlarms(objectID, calendarUser.getId());
+                alarmUpdates = AlarmMapper.getInstance().getAlarmUpdate(originalAlarms, newAlarms);
             }
         }
         Event updatedEvent = readAdditionalEventData(storage.getEventStorage().loadEvent(objectID, null), null);
-        return new UpdateResultImpl(session, originalFolderID, originalEvent, updatedFolderID, updatedEvent);
+        UpdateResultImpl result = new UpdateResultImpl(session, calendarUser, originalFolderID, originalEvent, updatedFolderID, updatedEvent);
+        result.setAlarmUpdates(alarmUpdates);
+        return result;
     }
 
     private void moveEvent(Event event, UserizedFolder folder, UserizedFolder targetFolder) throws OXException {
@@ -541,7 +542,7 @@ public class CalendarWriter extends CalendarReader {
         AttendeeField[] updatedFields = AttendeeMapper.getInstance().getAssignedFields(attendeeUpdate);
         if (0 == updatedFields.length) {
             // TODO or throw?
-            return new UpdateResultImpl(session, i(folder), originalEvent, i(folder), originalEvent);
+            return new UpdateResultImpl(session, calendarUser, i(folder), originalEvent, i(folder), originalEvent);
         }
         for (AttendeeField field : AttendeeMapper.getInstance().getAssignedFields(attendeeUpdate)) {
             switch (field) {
@@ -593,7 +594,7 @@ public class CalendarWriter extends CalendarReader {
         Consistency.setModified(now, eventUpdate, session.getUser().getId());
         storage.getEventStorage().updateEvent(eventUpdate);
         Event updatedEvent = readAdditionalEventData(storage.getEventStorage().loadEvent(objectID, null), null);
-        return new UpdateResultImpl(session, i(folder), originalEvent, i(folder), updatedEvent);
+        return new UpdateResultImpl(session, calendarUser, i(folder), originalEvent, i(folder), updatedEvent);
     }
 
 }

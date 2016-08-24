@@ -49,10 +49,12 @@
 
 package com.openexchange.chronos.impl;
 
+import java.util.Date;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link DeleteResultImpl}
@@ -62,16 +64,34 @@ import com.openexchange.exception.OXException;
  */
 public class DeleteResultImpl extends UpdateResultImpl implements DeleteResult {
 
+    private final Date timestamp;
+
+    /**
+     * Initializes a new {@link DeleteResultImpl} for a delete operation that resulted in an event update.
+     *
+     * @param session The calendar session
+     * @param calendarUser The actual calendar user
+     * @param originalFolderID The original folder identifier
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
+     */
+    public DeleteResultImpl(CalendarSession session, User calendarUser, int originalFolderID, Event originalEvent, Event updatedEvent) throws OXException {
+        super(session, calendarUser, originalFolderID, originalEvent, originalFolderID, updatedEvent);
+        this.timestamp = null;
+    }
+
     /**
      * Initializes a new {@link DeleteResultImpl}.
      *
      * @param session The calendar session
+     * @param calendarUser The actual calendar user
      * @param originalFolderID The original folder identifier
      * @param originalEvent The original event
-     * @param updatedEvent The updated event, in case the delete operation lead to an update instead, or <code>null</code>, if the event was deleted
+     * @param timestamp The updated timestamp of the deleted event
      */
-    public DeleteResultImpl(CalendarSession session, int originalFolderID, Event originalEvent, Event updatedEvent) throws OXException {
-        super(session, originalFolderID, originalEvent, originalFolderID, updatedEvent);
+    public DeleteResultImpl(CalendarSession session, User calendarUser, int originalFolderID, Event originalEvent, Date timestamp) throws OXException {
+        super(session, calendarUser, originalFolderID, originalEvent, originalFolderID, null);
+        this.timestamp = timestamp;
     }
 
     /**
@@ -80,12 +100,17 @@ public class DeleteResultImpl extends UpdateResultImpl implements DeleteResult {
      * @return <code>true</code> if the result represents an update, <code>false</code>, otherwise
      */
     public boolean wasUpdate() {
-        return null != getUpdatedEvent();
+        return null != getUpdate();
+    }
+
+    @Override
+    public Date getTimestamp() {
+        return null != timestamp ? timestamp : super.getTimestamp();
     }
 
     @Override
     public Event getDeletedEvent() {
-        return getOriginalEvent();
+        return getOriginal();
     }
 
     @Override

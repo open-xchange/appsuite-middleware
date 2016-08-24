@@ -59,6 +59,7 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ParticipantRole;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
 import com.openexchange.groupware.tools.mappings.DefaultMapping;
@@ -94,6 +95,16 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
      */
     private AttendeeMapper() {
         super();
+    }
+
+    public AbstractCollectionUpdate<Attendee, AttendeeField> getAttendeeUpdate(List<Attendee> originalAttendees, List<Attendee> newAttendees) throws OXException {
+        return new AbstractCollectionUpdate<Attendee, AttendeeField>(this, originalAttendees, newAttendees) {
+
+            @Override
+            protected boolean matches(Attendee item1, Attendee item2) {
+                return CalendarUtils.matches(item1, item2);
+            }
+        };
     }
 
     /**

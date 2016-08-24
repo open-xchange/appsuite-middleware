@@ -47,55 +47,58 @@
  *
  */
 
-package com.openexchange.chronos.service;
+package com.openexchange.chronos.trigger.osgi;
 
-import java.util.Date;
-import com.openexchange.chronos.Event;
-import com.openexchange.groupware.ldap.User;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.service.CalendarHandler;
+import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.chronos.storage.CalendarStorageFactory;
+import com.openexchange.chronos.trigger.AlarmTriggerHandler;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.user.UserService;
 
 /**
- * {@link CreateResult}
+ * {@link ChronosTriggerActivator}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CreateResult {
+public class ChronosTriggerActivator extends HousekeepingActivator {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ChronosTriggerActivator.class);
 
     /**
-     * Gets the underlying calendar session.
-     *
-     * @return The calendar session
+     * Initializes a new {@link ChronosTriggerActivator}.
      */
-    CalendarSession getSession();
+    public ChronosTriggerActivator() {
+        super();
+    }
 
-    /**
-     * Gets the the actual target calendar user based on the folder view the creation is performed in. This is either the current session's
-     * user when operating in <i>private</i> or <i>public</i> folders, or the folder owner for <i>shared</i> calendar folders.
-     *
-     * @return The actual calendar user
-     */
-    User getCalendarUser();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { CalendarStorageFactory.class, UserService.class, RecurrenceService.class, DatabaseService.class };
+    }
 
-    /**
-     * The new server timestamp of the created event as used to return to clients.
-     *
-     * @return The new server timestamp
-     */
-    Date getTimestamp();
+    @Override
+    protected void startBundle() throws Exception {
+        try {
+            LOG.info("starting bundle: \"com.openexchange.chronos.trigger\"");
+            /*
+             * register alarm trigger handler
+             */
+            registerService(CalendarHandler.class, new AlarmTriggerHandler(this));
+        } catch (Exception e) {
+            LOG.error("error starting \"com.openexchange.chronos.trigger\"", e);
+            throw e;
+        }
+    }
 
-    /**
-     * Gets the created event.
-     *
-     * @return The event
-     */
-    Event getCreatedEvent();
-
-    /**
-     * Gets the identifier of the folder the event has been created in, representing the view of the calendar user.
-     *
-     * @return The folder identifier
-     */
-    int getFolderID();
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle: \"com.openexchange.chronos.trigger\"");
+        super.stopBundle();
+    }
 
 }
-

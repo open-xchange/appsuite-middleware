@@ -66,8 +66,8 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.impl.osgi.Services;
-import com.openexchange.chronos.service.AttendeeUpdate;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -171,12 +171,12 @@ public class AttendeeHelper {
     }
 
     private void processUpdatedEvent(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
-        AttendeeDiffImpl attendeeDiff = new AttendeeDiffImpl(originalAttendees, updatedAttendees);
+        AbstractCollectionUpdate<Attendee, AttendeeField> attendeeDiff = AttendeeMapper.getInstance().getAttendeeUpdate(originalAttendees, updatedAttendees);
         List<Attendee> attendeeList = new ArrayList<Attendee>(originalAttendees);
         /*
          * delete removed attendees
          */
-        for (Attendee removedAttendee : attendeeDiff.getRemovedAttendees()) {
+        for (Attendee removedAttendee : attendeeDiff.getRemovedItems()) {
             if (false == PublicType.getInstance().equals(folder.getType()) && removedAttendee.getEntity() == folder.getCreatedBy()) {
                 // preserve calendar user in personal folders
                 LOG.info("Implicitly preserving default calendar user {} in personal folder {}.", I(removedAttendee.getEntity()), folder);
@@ -188,16 +188,16 @@ public class AttendeeHelper {
         /*
          * apply updated attendee data
          */
-        for (AttendeeUpdate attendeeUpdate : attendeeDiff.getUpdatedAttendees()) {
+        for (ItemUpdate<Attendee, AttendeeField> attendeeUpdate : attendeeDiff.getUpdatedItems()) {
             Attendee attendee = new Attendee();
-            AttendeeMapper.getInstance().copy(attendeeUpdate.getOriginalAttendee(), attendee, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
-            AttendeeMapper.getInstance().copy(attendeeUpdate.getUpdatedAttendee(), attendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
+            AttendeeMapper.getInstance().copy(attendeeUpdate.getOriginal(), attendee, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
+            AttendeeMapper.getInstance().copy(attendeeUpdate.getUpdate(), attendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
             attendeesToUpdate.add(attendee);
         }
         /*
          * prepare & add all new attendees
          */
-        attendeesToInsert.addAll(prepareNewAttendees(attendeeList, attendeeDiff.getAddedAttendees()));
+        attendeesToInsert.addAll(prepareNewAttendees(attendeeList, attendeeDiff.getAddedItems()));
     }
 
     private void processDeletedEvent(List<Attendee> originalAttendees) {

@@ -49,9 +49,11 @@
 
 package com.openexchange.chronos.impl;
 
+import java.util.Date;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
+import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link CreateResultImpl}
@@ -62,6 +64,7 @@ import com.openexchange.chronos.service.CreateResult;
 public class CreateResultImpl implements CreateResult {
 
     private final CalendarSession session;
+    private final User calendarUser;
     private final int folderID;
     private final Event createdEvent;
 
@@ -69,12 +72,14 @@ public class CreateResultImpl implements CreateResult {
      * Initializes a new {@link CreateResultImpl}.
      *
      * @param session The calendar session
+     * @param calendarUser The actual calendar user
      * @param folderID The identifier of the folder the event has been created in.
      * @param createdEvent The created event
      */
-    public CreateResultImpl(CalendarSession session, int folderID, Event createdEvent) {
+    public CreateResultImpl(CalendarSession session, User calendarUser, int folderID, Event createdEvent) {
         super();
         this.session = session;
+        this.calendarUser = calendarUser;
         this.folderID = folderID;
         this.createdEvent = createdEvent;
     }
@@ -82,6 +87,16 @@ public class CreateResultImpl implements CreateResult {
     @Override
     public CalendarSession getSession() {
         return session;
+    }
+
+    @Override
+    public User getCalendarUser() {
+        return calendarUser;
+    }
+
+    @Override
+    public Date getTimestamp() {
+        return createdEvent.getLastModified();
     }
 
     @Override

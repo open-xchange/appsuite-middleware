@@ -47,55 +47,19 @@
  *
  */
 
-package com.openexchange.chronos.service;
-
-import java.util.Date;
-import com.openexchange.chronos.Event;
-import com.openexchange.groupware.ldap.User;
+package com.openexchange.chronos;
 
 /**
- * {@link CreateResult}
+ * {@link AlarmField}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CreateResult {
+public enum AlarmField {
 
     /**
-     * Gets the underlying calendar session.
-     *
-     * @return The calendar session
+     * Specifies when an alarm will trigger.
      */
-    CalendarSession getSession();
-
-    /**
-     * Gets the the actual target calendar user based on the folder view the creation is performed in. This is either the current session's
-     * user when operating in <i>private</i> or <i>public</i> folders, or the folder owner for <i>shared</i> calendar folders.
-     *
-     * @return The actual calendar user
-     */
-    User getCalendarUser();
-
-    /**
-     * The new server timestamp of the created event as used to return to clients.
-     *
-     * @return The new server timestamp
-     */
-    Date getTimestamp();
-
-    /**
-     * Gets the created event.
-     *
-     * @return The event
-     */
-    Event getCreatedEvent();
-
-    /**
-     * Gets the identifier of the folder the event has been created in, representing the view of the calendar user.
-     *
-     * @return The folder identifier
-     */
-    int getFolderID();
+    TRIGGER,
 
 }
-

@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The chronos alarm trigger handler bundle
+Bundle-SymbolicName: com.openexchange.chronos.trigger
+Bundle-Version: 7.10.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.chronos,
+ com.openexchange.chronos.common,
+ com.openexchange.chronos.service,
+ com.openexchange.chronos.storage,
+ com.openexchange.database,
+ com.openexchange.exception,
+ com.openexchange.groupware,
+ com.openexchange.groupware.contexts,
+ com.openexchange.groupware.ldap,
+ com.openexchange.groupware.reminder,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.osgi.util,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.arrays,
+ com.openexchange.tools.session,
+ com.openexchange.user,
+ org.osgi.framework,
+ org.slf4j
+Bundle-Activator: com.openexchange.chronos.trigger.osgi.ChronosTriggerActivator

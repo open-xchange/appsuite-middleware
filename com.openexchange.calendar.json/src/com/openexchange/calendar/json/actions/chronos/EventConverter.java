@@ -57,7 +57,6 @@ import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
@@ -65,6 +64,7 @@ import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UserizedEvent;
@@ -553,6 +553,9 @@ public class EventConverter {
                 Attendee existingAttendee = find(attendees, user.getIdentifier());
                 if (null != existingAttendee) {
                     copyProperties(getAttendee(user), existingAttendee);
+                } else {
+                    //TODO: add from users array or not?
+                    attendees.add(getAttendee(user));
                 }
             }
         }

@@ -49,53 +49,43 @@
 
 package com.openexchange.chronos.service;
 
-import java.util.Date;
-import com.openexchange.chronos.Event;
-import com.openexchange.groupware.ldap.User;
+import java.util.Set;
 
 /**
- * {@link CreateResult}
+ * {@link ItemUpdate}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CreateResult {
+public interface ItemUpdate<O, E extends Enum<E>> {
 
     /**
-     * Gets the underlying calendar session.
+     * Gets the original item.
      *
-     * @return The calendar session
+     * @return The original item
      */
-    CalendarSession getSession();
+    O getOriginal();
 
     /**
-     * Gets the the actual target calendar user based on the folder view the creation is performed in. This is either the current session's
-     * user when operating in <i>private</i> or <i>public</i> folders, or the folder owner for <i>shared</i> calendar folders.
+     * Gets the updated item.
      *
-     * @return The actual calendar user
+     * @return The updated item
      */
-    User getCalendarUser();
+    O getUpdate();
 
     /**
-     * The new server timestamp of the created event as used to return to clients.
+     * Gets the fields that were modified through the update.
      *
-     * @return The new server timestamp
+     * @return The updated fields
      */
-    Date getTimestamp();
+    Set<E> getUpdatedFields();
 
     /**
-     * Gets the created event.
+     * Gets a value indicating whether at least one of the specified fields has been modified through the update operation.
      *
-     * @return The event
+     * @param fields The event fields to check
+     * @return <code>true</code> if at least one field was updated, <code>false</code>, otherwise
      */
-    Event getCreatedEvent();
-
-    /**
-     * Gets the identifier of the folder the event has been created in, representing the view of the calendar user.
-     *
-     * @return The folder identifier
-     */
-    int getFolderID();
+    boolean containsAnyChangeOf(E[] fields);
 
 }
-

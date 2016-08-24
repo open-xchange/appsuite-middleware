@@ -49,9 +49,14 @@
 
 package com.openexchange.chronos.service;
 
-import java.util.Set;
+import java.util.Date;
+import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.AlarmField;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link UpdateResult}
@@ -59,7 +64,7 @@ import com.openexchange.chronos.EventField;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface UpdateResult {
+public interface UpdateResult extends ItemUpdate<Event, EventField> {
 
     /**
      * Gets the underlying calendar session.
@@ -69,18 +74,19 @@ public interface UpdateResult {
     CalendarSession getSession();
 
     /**
-     * Gets the original event.
+     * Gets the the actual target calendar user based on the folder view the update is performed in. This is either the current session's
+     * user when operating in <i>private</i> or <i>public</i> folders, or the folder owner for <i>shared</i> calendar folders.
      *
-     * @return The original event
+     * @return The actual calendar user
      */
-    Event getOriginalEvent();
+    User getCalendarUser();
 
     /**
-     * Gets the updated event.
+     * The new server timestamp of the updated event as used to return to clients.
      *
-     * @return The updated event
+     * @return The updated server timestamp
      */
-    Event getUpdatedEvent();
+    Date getTimestamp();
 
     /**
      * Gets the identifier of the folder the event has been updated in.
@@ -97,25 +103,17 @@ public interface UpdateResult {
     int getUpdatedFolderID();
 
     /**
-     * Gets a set of fields that were modified through the update operation.
-     *
-     * @return The updated fields
-     */
-    Set<EventField> getUpdatedFields();
-
-    /**
      * Gets the attendee-related modifications performed through the update operation.
      *
-     * @return The attendee updates, or an empty attendee diff if there were no attendee-related changes
+     * @return The attendee updates, or an empty collection update if there were no attendee-related changes
      */
-    AttendeeDiff getAttendeeUpdates();
+    CollectionUpdate<Attendee, AttendeeField> getAttendeeUpdates();
 
     /**
-     * Gets a value indicating whether at least one of the specified fields has been modified through the update operation.
+     * Gets the alarm-related modifications performed through the update operation. Only alarms of the actual calendar user are considered.
      *
-     * @param fields The event fields to check
-     * @return <code>true</code> if at least one field was updated, <code>false</code>, otherwise
+     * @return The alarm updates, or an empty collection update if there were no alarm-related changes
      */
-    boolean containsAnyChangeOf(EventField... fields);
+    CollectionUpdate<Alarm, AlarmField> getAlarmUpdates();
 
 }

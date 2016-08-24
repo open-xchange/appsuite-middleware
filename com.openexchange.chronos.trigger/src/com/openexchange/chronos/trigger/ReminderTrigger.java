@@ -47,55 +47,39 @@
  *
  */
 
-package com.openexchange.chronos.service;
+package com.openexchange.chronos.trigger;
 
 import java.util.Date;
-import com.openexchange.chronos.Event;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.Types;
+import com.openexchange.groupware.reminder.ReminderObject;
 
 /**
- * {@link CreateResult}
+ * {@link ReminderTrigger}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CreateResult {
+public class ReminderTrigger extends ReminderObject {
+
+    private static final int MODULE = Types.APPOINTMENT;
 
     /**
-     * Gets the underlying calendar session.
+     * Initializes a new {@link ReminderTrigger}.
      *
-     * @return The calendar session
+     * @param folderID The folder identifier representing the user's view on the targeted event
+     * @param objectID The identifier of the targeted event
+     * @param userID The identifier of the user
+     * @param trigger The trigger date
+     * @param forSeries <code>true</code> if the trigger is for an occurrence of an event series, <code>false</code>, otherwise
      */
-    CalendarSession getSession();
-
-    /**
-     * Gets the the actual target calendar user based on the folder view the creation is performed in. This is either the current session's
-     * user when operating in <i>private</i> or <i>public</i> folders, or the folder owner for <i>shared</i> calendar folders.
-     *
-     * @return The actual calendar user
-     */
-    User getCalendarUser();
-
-    /**
-     * The new server timestamp of the created event as used to return to clients.
-     *
-     * @return The new server timestamp
-     */
-    Date getTimestamp();
-
-    /**
-     * Gets the created event.
-     *
-     * @return The event
-     */
-    Event getCreatedEvent();
-
-    /**
-     * Gets the identifier of the folder the event has been created in, representing the view of the calendar user.
-     *
-     * @return The folder identifier
-     */
-    int getFolderID();
+    public ReminderTrigger(int folderID, int objectID, int userID, Date trigger, boolean forSeries) {
+        super();
+        setModule(MODULE);
+        setFolder(folderID);
+        setTargetId(objectID);
+        setUser(userID);
+        setDate(trigger);
+        setRecurrenceAppointment(forSeries);
+    }
 
 }
-

@@ -206,7 +206,7 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
             stmt.setInt(parameterIndex++, contextID);
             stmt.setInt(parameterIndex++, objectID);
             try (ResultSet resultSet = logExecuteQuery(stmt)) {
-                if (resultSet.next()) {
+                while (resultSet.next()) {
                     int reminder = resultSet.getInt("reminder");
                     if (false == resultSet.wasNull()) {
                         alarmsById.put(I(resultSet.getInt("member_uid")), Collections.singletonList(Appointment2Event.getAlarm(reminder)));

@@ -49,76 +49,43 @@
 
 package com.openexchange.chronos.service;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.AttendeeField;
+import java.util.List;
 
 /**
- * {@link AttendeeUpdate}
+ * {@link CollectionUpdate}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class AttendeeUpdate {
-
-    private final Attendee originalAttendee;
-    private final Attendee updatedAttendee;
-    private final Set<AttendeeField> updatedFields;
+public interface CollectionUpdate<O, E extends Enum<E>> {
 
     /**
-     * Initializes a new {@link AttendeeUpdate}.
+     * Gets the list of newly added items.
      *
-     * @param originalAttendee The attendee in the original event, or <code>null</code> for a newly added attendee
-     * @param updatedAttendee The attendee in the updated event, or <code>null</code> for a removed attendee
-     * @param updatedFields The attendee fields that were modified through the update
+     * @return The added items, or an empty list if there are none
      */
-    public AttendeeUpdate(Attendee originalAttendee, Attendee updatedAttendee, AttendeeField[] updatedFields) {
-        this(originalAttendee, updatedAttendee, Collections.unmodifiableSet(new HashSet<AttendeeField>(Arrays.asList(updatedFields))));
-    }
+    List<O> getAddedItems();
 
     /**
-     * Initializes a new {@link AttendeeUpdate}.
+     * Gets the list of removed items.
      *
-     * @param originalAttendee The attendee in the original event, or <code>null</code> for a newly added attendee
-     * @param updatedAttendee The attendee in the updated event, or <code>null</code> for a removed attendee
-     * @param updatedFields The attendee fields that were modified through the update
+     * @return The removed items, or an empty list if there are none
      */
-    public AttendeeUpdate(Attendee originalAttendee, Attendee updatedAttendee, Set<AttendeeField> updatedFields) {
-        super();
-        this.originalAttendee = originalAttendee;
-        this.updatedAttendee = updatedAttendee;
-        this.updatedFields = updatedFields;
-    }
+    List<O> getRemovedItems();
 
     /**
-     * Gets the attendee in the original event.
+     * Gets the list of updated items.
      *
-     * @return The attendee in the original event, or <code>null</code> for a newly added attendee
+     * @return The updated items, or an empty list if there are none
      */
-    public Attendee getOriginalAttendee() {
-        return originalAttendee;
-    }
+    List<ItemUpdate<O, E>> getUpdatedItems();
 
     /**
-     * Gets the attendee in the updated event.
+     * Gets a value indicating whether the collection update is empty, i.e. if there were any kind of changes or not.
      *
-     * @return The attendee in the updated event, or <code>null</code> for a removed attendee
+     * @return <code>true</code> if there were no changes at all, <code>false</code>, otherwise
      */
-    public Attendee getUpdatedAttendee() {
-        return updatedAttendee;
-    }
-
-    /**
-     * Gets the attendee fields that were modified through the update
-     *
-     * @return The updated fields
-     */
-    public Set<AttendeeField> getUpdatedFields() {
-        return updatedFields;
-    }
+    boolean isEmpty();
 
 }
 
