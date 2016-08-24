@@ -63,6 +63,9 @@ import com.openexchange.session.Session;
  */
 public interface MailCategoriesConfigService {
 
+    public static final String TOPIC_REORGANIZE = "TOPIC_MAIL_REORGANIZE";
+    public static final String PROP_USER_ID = "userId";
+    public static final String PROP_CONTEXT_ID = "ctxId";
     /**
      * Retrieves all category configurations for the given user
      *
