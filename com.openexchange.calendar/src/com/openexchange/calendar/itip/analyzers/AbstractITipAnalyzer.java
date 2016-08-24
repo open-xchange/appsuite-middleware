@@ -556,26 +556,28 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
             participantList.add(up);
             appointment.setParticipants(participantList);
         }
-
-        if (appointment.getUsers() != null) {
-            found = false;
-            final UserParticipant[] users = appointment.getUsers();
-            if (users != null) {
-                for (final UserParticipant userParticipant : users) {
-                    if (userParticipant.getIdentifier() == owner) {
-                        found = true;
-                    }
-                }
-            }
-    
-            if (!found) {
-                final UserParticipant up = new UserParticipant(owner);
-                up.setConfirm(confirm);
-                final UserParticipant[] tmp = appointment.getUsers();
-                final List<UserParticipant> participantList = (tmp == null) ? new ArrayList<UserParticipant>(1) : new ArrayList<UserParticipant>(Arrays.asList(tmp));
-                participantList.add(up);
-                appointment.setUsers(participantList);
+        
+        List<UserParticipant> users = appointment.getUsers() == null ? new ArrayList<UserParticipant>() : new ArrayList<UserParticipant>(Arrays.asList(appointment.getUsers()));
+        for (Participant p : appointment.getParticipants()) {
+            if (p.getType() == Participant.USER) {
+                users.add((UserParticipant) p);
             }
         }
+
+        found = false;
+        if (users != null) {
+            for (UserParticipant userParticipant : users) {
+                if (userParticipant.getIdentifier() == owner) {
+                    found = true;
+                }
+            }
+        }
+
+        if (!found) {
+            UserParticipant up = new UserParticipant(owner);
+            up.setConfirm(confirm);
+            users.add(up);
+        }
+        appointment.setUsers(users);
     }
 }
