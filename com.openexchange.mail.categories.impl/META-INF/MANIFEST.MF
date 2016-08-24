@@ -28,6 +28,7 @@ Import-Package: com.openexchange.capabilities,
  com.openexchange.tools.session,
  org.apache.commons.lang,
  org.osgi.framework,
+ org.osgi.service.event,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.mail.categories.impl.osgi.Activator

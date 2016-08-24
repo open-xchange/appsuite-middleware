@@ -47,32 +47,32 @@
  *
  */
 
-package com.openexchange.ajax.mail.categories;
+package com.openexchange.ajax.mail.actions;
 
-import junit.framework.JUnit4TestAdapter;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 /**
- * {@link MailCategoriesTestSuite}
+ * {@link ConversationParser}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.2
+ * @since v7.8.3
  */
-public class MailCategoriesTestSuite extends TestSuite {
+public class ConversationParser extends AbstractAJAXParser<ConversationResponse> {
 
-    private MailCategoriesTestSuite() {
-        super();
+    /**
+     * Initializes a new {@link ConversationParser}.
+     * 
+     * @param failOnError
+     */
+    protected ConversationParser(boolean failOnError) {
+        super(failOnError);
     }
-    
-    public static Test suite() {
-        final TestSuite mailSuite = new TestSuite("com.openexchange.ajax.mail.categories.MailCategoriesTestSuite");
-        mailSuite.addTest(new JUnit4TestAdapter(AllRequestCategoryParameterTest.class));
-        mailSuite.addTest(new JUnit4TestAdapter(TrainTest.class));
-        mailSuite.addTest(new JUnit4TestAdapter(MoveTest.class));
-        mailSuite.addTest(new JUnit4TestAdapter(UnreadTest.class));
-        mailSuite.addTest(new JUnit4TestAdapter(ThreadedMailCategoriesTest.class));
-        return mailSuite;
+
+    @Override
+    protected ConversationResponse createResponse(Response response) throws JSONException {
+        return new ConversationResponse(response);
     }
 
 }

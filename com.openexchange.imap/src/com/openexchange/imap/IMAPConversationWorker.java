@@ -245,6 +245,16 @@ public final class IMAPConversationWorker {
     private List<List<MailMessage>> doReferenceOnlyThreadSort(final String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, final String sentFullName, int lookAhead, final boolean mergeWithSent, MailField[] mailFields, final String[] headerNames, SearchTerm<?> searchTerm) throws MessagingException, OXException {
         boolean useSearchTerm = searchTerm != null;
         final MailFields usedFields = new MailFields(mailFields);
+        // add necessary fields for searchTerm
+        if (searchTerm != null) {
+            List<MailField> searchFields = new ArrayList<>();
+            searchTerm.addMailField(searchFields);
+            for (MailField field : searchFields) {
+                if (!usedFields.contains(field)) {
+                    usedFields.add(field);
+                }
+            }
+        }
         usedFields.add(MailField.THREAD_LEVEL);
         usedFields.add(MailField.RECEIVED_DATE);
         usedFields.add(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
