@@ -51,8 +51,6 @@ package com.openexchange.oauth.scope;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
@@ -64,8 +62,8 @@ import com.openexchange.java.Strings;
 public enum Module {
     mail, calendar, contacts, drive, generic;
 
-    private static final Logger LOG = LoggerFactory.getLogger(Module.class);
-
+    private static final String modules = Strings.concat(", ", (Object[])Module.values());
+    
     /**
      * Resolves the specified comma separated string of {@link Module}s to an array of {@link Module} values
      * 
@@ -80,7 +78,7 @@ public enum Module {
             try {
                 list.add(valueOf(s));
             } catch (IllegalArgumentException e) {
-                throw OAuthScopeExceptionCodes.CANNOT_RESOLVE_MODULE.create(s, Module.values());
+                throw OAuthScopeExceptionCodes.CANNOT_RESOLVE_MODULE.create(s, modules);
             }
         }
 
