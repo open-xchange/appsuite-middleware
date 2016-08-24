@@ -132,8 +132,14 @@ public abstract class SocketIOServlet extends SessionServlet {
         }
 
         if (path.startsWith("socket.io.js")) {
-            resp.setContentType("text/javascript");
             InputStream is = this.getClass().getClassLoader().getResourceAsStream("socket.io.js");
+            if (null == is) {
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "\"socket.io.js\" not found");
+                return;
+            }
+
+            // Transfer bytes to output stream
+            resp.setContentType("text/javascript");
             OutputStream os = resp.getOutputStream();
             ByteStreams.copy(is, os);
             return;
@@ -170,13 +176,13 @@ public abstract class SocketIOServlet extends SessionServlet {
 
         TransportProvider transportProvider = socketIOManager.getTransportProvider();
         if (null == transportProvider) {
+            LOGGER.warn("Transport provider not available. {} not (yet) initialized.", getClass().getSimpleName());
             response.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;
         }
 
         try {
             LOGGER.debug("Request from {}:{}, transport: {}, EIO protocol version:{}", request.getRemoteHost(), request.getRemotePort(), request.getParameter(EngineIOProtocol.TRANSPORT), request.getParameter(EngineIOProtocol.VERSION));
-
             transportProvider.getTransport(request).handle(request, response, socketIOManager);
         } catch (UnsupportedTransportException | SocketIOProtocolException e) {
             LOGGER.warn("Socket IO error", e);
