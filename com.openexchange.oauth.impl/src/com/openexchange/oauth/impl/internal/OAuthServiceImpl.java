@@ -894,6 +894,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             serviceBuilder.callback(callbackUrl);
         }
 
+        // TODO: move the following snippet to a Utility class
         // Add requested scopes
         if (!scopes.isEmpty()) {
             StringBuilder builder = new StringBuilder();
@@ -901,6 +902,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 builder.append(scope.getMapping()).append(" ");
             }
             if (!Strings.isEmpty(builder.toString())) {
+                builder.setLength(builder.length() - 1);
                 serviceBuilder.scope(builder.toString());
             }
         }
