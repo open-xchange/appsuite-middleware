@@ -127,22 +127,24 @@ public abstract class SocketIOServlet extends SessionServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String path = req.getPathInfo();
-        if (path.startsWith("/")) {
-            path = path.substring(1);
-        }
-
-        if (path.startsWith("socket.io.js")) {
-            InputStream is = this.getClass().getClassLoader().getResourceAsStream("socket.io.js");
-            if (null == is) {
-                resp.sendError(HttpServletResponse.SC_NOT_FOUND, "\"socket.io.js\" not found");
-                return;
+        if (null != path) {
+            if (path.startsWith("/")) {
+                path = path.substring(1);
             }
 
-            // Transfer bytes to output stream
-            resp.setContentType("text/javascript");
-            OutputStream os = resp.getOutputStream();
-            ByteStreams.copy(is, os);
-            return;
+            if (path.startsWith("socket.io.js")) {
+                InputStream is = this.getClass().getClassLoader().getResourceAsStream("socket.io.js");
+                if (null == is) {
+                    resp.sendError(HttpServletResponse.SC_NOT_FOUND, "\"socket.io.js\" not found");
+                    return;
+                }
+
+                // Transfer bytes to output stream
+                resp.setContentType("text/javascript");
+                OutputStream os = resp.getOutputStream();
+                ByteStreams.copy(is, os);
+                return;
+            }
         }
 
         serve(req, resp);
