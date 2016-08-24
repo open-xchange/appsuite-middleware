@@ -81,11 +81,6 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractScribeAwareOAuthSe
     }
 
     @Override
-    public String getId() {
-        return LinkedInService.SERVICE_ID;
-    }
-
-    @Override
     protected String getEnabledProperty() {
         return "com.openexchange.oauth.linkedin";
     }
