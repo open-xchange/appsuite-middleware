@@ -99,6 +99,15 @@ public interface Mapper<O, E extends Enum<E>> extends Factory<O>, ArrayFactory<E
 	 */
 	O getDifferences(final O original, final O update) throws OXException;
 
+    /**
+     * Determines the differences between one object and another one. Only <i>set</i> properties in the second object are considered.
+     *
+     * @param original The original object
+     * @param update The updated object
+     * @return The different fields, or an empty array if there are no differences
+     */
+    E[] getDifferentFields(O original, O update) throws OXException;
+
 	/**
 	 * Gets an array of all mapped fields that are set in the supplied object.
 	 *
@@ -109,7 +118,7 @@ public interface Mapper<O, E extends Enum<E>> extends Factory<O>, ArrayFactory<E
 
     /**
      * Copies data from on object to another. Only <i>set</i> fields are transferred.
-     * 
+     *
      * @param from The source object
      * @param to The destination object
      * @param fields The fields to copy

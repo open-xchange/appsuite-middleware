@@ -96,22 +96,40 @@ public abstract class DefaultMapper<O, E extends Enum<E>> implements Mapper<O, E
 		}
 	}
 
-	@Override
-	public O getDifferences(final O original, final O update) throws OXException {
-		if (null == original) {
-			throw new IllegalArgumentException("original");
-		}
-		if (null == update) {
-			throw new IllegalArgumentException("update");
-		}
-		final O delta = newInstance();
-		for (final Mapping<? extends Object, O> mapping : getMappings().values()) {
-			if (mapping.isSet(update) && (false == mapping.isSet(original) || false == mapping.equals(original, update))) {
-				mapping.copy(update, delta);
-			}
-		}
-		return delta;
-	}
+    @Override
+    public O getDifferences(final O original, final O update) throws OXException {
+        if (null == original) {
+            throw new IllegalArgumentException("original");
+        }
+        if (null == update) {
+            throw new IllegalArgumentException("update");
+        }
+        final O delta = newInstance();
+        for (final Mapping<? extends Object, O> mapping : getMappings().values()) {
+            if (mapping.isSet(update) && (false == mapping.isSet(original) || false == mapping.equals(original, update))) {
+                mapping.copy(update, delta);
+            }
+        }
+        return delta;
+    }
+
+    @Override
+    public E[] getDifferentFields(O original, O update) throws OXException {
+        if (null == original) {
+            throw new IllegalArgumentException("original");
+        }
+        if (null == update) {
+            throw new IllegalArgumentException("update");
+        }
+        Set<E> differentFields = new HashSet<E>();
+        for (Entry<E, ? extends Mapping<? extends Object, O>> entry : getMappings().entrySet()) {
+            Mapping<? extends Object, O> mapping = entry.getValue();
+            if (mapping.isSet(update) && (false == mapping.isSet(original) || false == mapping.equals(original, update))) {
+                differentFields.add(entry.getKey());
+            }
+        }
+        return differentFields.toArray(newArray(differentFields.size()));
+    }
 
 	@Override
 	public E[] getAssignedFields(final O object) {
