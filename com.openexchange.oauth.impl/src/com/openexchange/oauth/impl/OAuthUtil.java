@@ -49,9 +49,14 @@
 
 package com.openexchange.oauth.impl;
 
+import static com.openexchange.java.Strings.isEmpty;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Set;
 import org.scribe.builder.ServiceBuilder;
-import com.openexchange.java.Strings;
+import com.openexchange.framework.request.RequestContext;
+import com.openexchange.framework.request.RequestContextHolder;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.oauth.scope.OAuthScope;
 
 /**
@@ -71,14 +76,84 @@ public final class OAuthUtil {
         if (scopes.isEmpty()) {
             return;
         }
+        serviceBuilder.scope(scopesToString(scopes));
+    }
 
+    /**
+     * Parses the specified {@link OAuthScope}s and returns the mappings ({@link OAuthScope#getMapping()}) as a space separated string
+     * 
+     * @param scopes The {@link OAuthScope}s
+     * @return a space separated string with all {@link OAuthScope}s in the specified {@link Set}
+     */
+    private static final String scopesToString(Set<OAuthScope> scopes) {
+        if (scopes.isEmpty()) {
+            return "";
+        }
         StringBuilder builder = new StringBuilder();
         for (OAuthScope scope : scopes) {
             builder.append(scope.getMapping()).append(" ");
         }
-        if (!Strings.isEmpty(builder.toString())) {
-            builder.setLength(builder.length() - 1);
-            serviceBuilder.scope(builder.toString());
+        builder.setLength(builder.length() - 1);
+        return builder.toString();
+    }
+
+    /**
+     * Parses the specified {@link OAuthScope}s and returns the mappings ({@link OAuthScope#getModule()}) as a space separated string
+     * 
+     * @param scopes The {@link OAuthScope}s
+     * @return a space separated string with all {@link OAuthScope}s in the specified {@link Set}
+     */
+    public static final String scopeModulesToString(Set<OAuthScope> scopes) {
+        if (scopes.isEmpty()) {
+            return "";
         }
+        StringBuilder builder = new StringBuilder();
+        for (OAuthScope scope : scopes) {
+            builder.append(scope.getModule()).append(" ");
+        }
+        builder.setLength(builder.length() - 1);
+        return builder.toString();
+    }
+
+    /**
+     * Builds the call-back URL for OAuth
+     * 
+     * @return the call-back URL for OAuth
+     */
+    public static final String buildCallbackURL() {
+        StringBuilder builder = new StringBuilder();
+        return null;
+    }
+
+    /**
+     * Tries to determine the hostname by first looking in to the {@link RequestContext},
+     * then through Java and if still not available, falls back to 'localhost' as last resort.
+     * 
+     * @return The hostname
+     */
+    private static final String determineHost() {
+        RequestContext requestContext = RequestContextHolder.get();
+        String hostname = null;
+
+        // Try from the host data if available
+        HostData hostData = requestContext.getHostData();
+        if (hostData != null) {
+            hostname = hostData.getHost();
+        }
+
+        // Get hostname from java
+        if (isEmpty(hostname)) {
+            try {
+                hostname = InetAddress.getLocalHost().getCanonicalHostName();
+            } catch (UnknownHostException e) {
+                // ignore
+            }
+        }
+        // Fall back to localhost as last resort
+        if (isEmpty(hostname)) {
+            hostname = "localhost";
+        }
+
+        return hostname;
     }
 }

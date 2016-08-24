@@ -56,6 +56,7 @@ import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -83,6 +84,7 @@ import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.Parameterizable;
+import com.openexchange.oauth.impl.OAuthUtil;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.Tools;
@@ -274,6 +276,13 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
          * OAuth token for session
          */
         final String oauthSessionToken = UUID.randomUUID().toString();
+        // Get the scopes
+        OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
+        Set<OAuthScope> scopesToEnable = scopeRegistry.getAvailableScopes(API.resolveFromServiceId(serviceId), Module.valuesOf(scope));
+        // Merge scopes
+        Set<OAuthScope> scopes = new HashSet<>();
+        scopes.addAll(account.getEnabledScopes());
+        scopes.addAll(scopesToEnable);
         /*
          * Compose call-back URL
          */
@@ -291,14 +300,12 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         callbackUrlBuilder.append('&').append(AccountField.SERVICE_ID.getName()).append('=').append(urlEncode(serviceId));
         callbackUrlBuilder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(uuid);
         callbackUrlBuilder.append('&').append(Session.PARAM_TOKEN).append('=').append(oauthSessionToken);
-        callbackUrlBuilder.append('&').append("scopes").append('=').append(scope);
+        callbackUrlBuilder.append('&').append("scopes").append('=').append(OAuthUtil.scopeModulesToString(scopes));
         final String cb = request.getParameter("cb");
         if (!isEmpty(cb)) {
             callbackUrlBuilder.append("&callback=").append(cb);
         }
-        // Get the scopes
-        OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
-        Set<OAuthScope> scopes = scopeRegistry.getAvailableScopes(API.resolveFromServiceId(serviceId), Module.valuesOf(scope));
+        
         /*
          * Invoke
          */
