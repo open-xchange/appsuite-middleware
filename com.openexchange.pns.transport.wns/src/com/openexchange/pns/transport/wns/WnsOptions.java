@@ -47,66 +47,50 @@
  *
  */
 
-package com.openexchange.pns;
-
+package com.openexchange.pns.transport.wns;
 
 /**
- * {@link KnownTransport} - The enumeration for known transports for the push notification service.
+ * {@link WnsOptions} - The options to communicate with Windows Push Notification service (WNS).
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public enum KnownTransport {
+public class WnsOptions {
+
+    /** The SID (Package security identifier) */
+    private final String sid;
+
+    /** The client secret */
+    private final String secret;
 
     /**
-     * The transport by a Web Socket connection.
+     * Initializes a new {@link WnsOptions}.
+     *
+     * @param sid The SID (Package security identifier)
+     * @param secret The client secret
      */
-    WEB_SOCKET("websocket"),
-    /**
-     * The transport by Apple Push Notification Service (APNS).
-     */
-    APNS("apn"),
-    /**
-     * The transport by Google Cloud Messaging service (GCM).
-     */
-    GCM("gcm"),
-    /**
-     * The transport by Windows Push Notification Services (WNS).
-     */
-    WNS("wns"),
-
-    ;
-
-    private final String transportId;
-
-    private KnownTransport(String transportId) {
-        this.transportId = transportId;
+    public WnsOptions(String sid, String secret) {
+        super();
+        this.sid = sid;
+        this.secret = secret;
     }
 
     /**
-     * Gets the transport identifier.
+     * Gets the SID (Package security identifier)
      *
-     * @return The transport identifier
+     * @return The SID (Package security identifier)
      */
-    public String getTransportId() {
-        return transportId;
+    public String getSid() {
+        return sid;
     }
 
     /**
-     * Gets the known transport for specified identifier.
+     * Gets the client secret
      *
-     * @param transportId The transport identifier
-     * @return The associated known transport or <code>null</code>
+     * @return The client secret
      */
-    public static KnownTransport knownTransportFor(String transportId) {
-        if (null != transportId) {
-            for (KnownTransport knownTransport : values()) {
-                if (transportId.equals(knownTransport.transportId)) {
-                    return knownTransport;
-                }
-            }
-        }
-        return null;
+    public String getSecret() {
+        return secret;
     }
 
 }

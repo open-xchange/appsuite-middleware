@@ -49,64 +49,29 @@
 
 package com.openexchange.pns;
 
+import java.util.Map;
 
 /**
- * {@link KnownTransport} - The enumeration for known transports for the push notification service.
+ * {@link PropertiesMessage} - A message containing properties.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public enum KnownTransport {
+public class PropertiesMessage implements Message<Map<String, Object>> {
+
+    private final Map<String, Object> properties;
 
     /**
-     * The transport by a Web Socket connection.
+     * Initializes a new {@link PropertiesMessage}.
      */
-    WEB_SOCKET("websocket"),
-    /**
-     * The transport by Apple Push Notification Service (APNS).
-     */
-    APNS("apn"),
-    /**
-     * The transport by Google Cloud Messaging service (GCM).
-     */
-    GCM("gcm"),
-    /**
-     * The transport by Windows Push Notification Services (WNS).
-     */
-    WNS("wns"),
-
-    ;
-
-    private final String transportId;
-
-    private KnownTransport(String transportId) {
-        this.transportId = transportId;
+    public PropertiesMessage(Map<String, Object> properties) {
+        super();
+        this.properties = properties;
     }
 
-    /**
-     * Gets the transport identifier.
-     *
-     * @return The transport identifier
-     */
-    public String getTransportId() {
-        return transportId;
-    }
-
-    /**
-     * Gets the known transport for specified identifier.
-     *
-     * @param transportId The transport identifier
-     * @return The associated known transport or <code>null</code>
-     */
-    public static KnownTransport knownTransportFor(String transportId) {
-        if (null != transportId) {
-            for (KnownTransport knownTransport : values()) {
-                if (transportId.equals(knownTransport.transportId)) {
-                    return knownTransport;
-                }
-            }
-        }
-        return null;
+    @Override
+    public Map<String, Object> getMessage() {
+        return properties;
     }
 
 }

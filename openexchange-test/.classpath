@@ -101,7 +101,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.xing"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.control.clt"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.ctc.wstx"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.codehaus.stax2"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.config.cascade"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.google.api.client"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.google.guava"/>
@@ -143,7 +142,8 @@
 	<classpathentry kind="src" path="/com.openexchange.mail.categories"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.templating.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.reseller.rmi"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.apache.httpcomponents.httpclient"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.apache.httpcomponents.httpcore"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/stax2-api-3.1.4.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.2.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.5.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

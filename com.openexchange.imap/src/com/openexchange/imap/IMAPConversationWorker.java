@@ -241,19 +241,9 @@ public final class IMAPConversationWorker {
     }
 
     private static final MailFields FIELDS_FLAGS = new MailFields(MailField.FLAGS, MailField.COLOR_LABEL);
-    private static final String SEARCH_TERM_THREADING_PROPERTY = "com.openexchange.imap.threading.search.variant";
 
     private List<List<MailMessage>> doReferenceOnlyThreadSort(final String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, final String sentFullName, int lookAhead, final boolean mergeWithSent, MailField[] mailFields, final String[] headerNames, SearchTerm<?> searchTerm) throws MessagingException, OXException {
         boolean useSearchTerm = searchTerm != null;
-        String variant = null;
-        if (useSearchTerm) {
-            ConfigurationService configurationService = Services.getService(ConfigurationService.class);
-            variant = configurationService.getProperty(SEARCH_TERM_THREADING_PROPERTY);
-            if (variant == null) {
-                variant = "ALL";
-            }
-        }
-
         final MailFields usedFields = new MailFields(mailFields);
         usedFields.add(MailField.THREAD_LEVEL);
         usedFields.add(MailField.RECEIVED_DATE);
@@ -289,7 +279,7 @@ public final class IMAPConversationWorker {
 
                     // Filter for searchterm
                     if (useSearchTerm) {
-                        List<List<MailMessage>> result = filterThreads(variant, list, searchTerm);
+                        List<List<MailMessage>> result = filterThreads(list, searchTerm);
                         // Slice & fill with recent flags
                         if (usedFields.containsAny(FIELDS_FLAGS)) {
                             return sliceAndFill(result, fullName, indexRange, sentFullName, mergeWithSent, FIELDS_FLAGS, null, body, isRev1);
@@ -396,7 +386,7 @@ public final class IMAPConversationWorker {
             // Filter for searchterm
             if (useSearchTerm) {
                 fillMessages(list, fullName, sentFullName, mergeWithSent, usedFields, headerNames, body, isRev1);
-                return filterThreads(variant, list, searchTerm);
+                return filterThreads(list, searchTerm);
             }
             return sliceAndFill(list, fullName, indexRange, sentFullName, mergeWithSent, usedFields, headerNames, body, isRev1);
         }
@@ -411,7 +401,7 @@ public final class IMAPConversationWorker {
 
             // Filter for searchterm
             if (useSearchTerm) {
-                return filterThreads(variant, list, searchTerm);
+                return filterThreads(list, searchTerm);
             }
 
             // All
@@ -488,27 +478,16 @@ public final class IMAPConversationWorker {
         return slice;
     }
 
-    private List<List<MailMessage>> filterThreads(String variant, List<List<MailMessage>> list, SearchTerm<?> searchTerm) throws OXException {
+    private List<List<MailMessage>> filterThreads(List<List<MailMessage>> list, SearchTerm<?> searchTerm) throws OXException {
         List<List<MailMessage>> result = new ArrayList<>();
         for (List<MailMessage> messages : list) {
             boolean containsFlag = false;
-            if (variant.equals("ALL")) {
-                for (MailMessage message : messages) {
-                    if (searchTerm.matches(message)) {
-                        containsFlag = true;
-                        break;
-                    }
-                }
-            } else if (variant.equals("FIRST")) {
-                if (searchTerm.matches(messages.get(0))) {
+            for (MailMessage message : messages) {
+                if (searchTerm.matches(message)) {
                     containsFlag = true;
-                }
-            } else if (variant.equals("LAST")) {
-                if (searchTerm.matches(messages.get(messages.size() - 1))) {
-                    containsFlag = true;
+                    break;
                 }
             }
-
             if (containsFlag) {
                 result.add(messages);
             }

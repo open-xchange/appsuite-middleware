@@ -10,7 +10,7 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.2.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.2-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.share"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.share.impl"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.apache.httpcomponents.httpclient"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/org.apache.httpcomponents.httpcore"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.2.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.5.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

@@ -47,66 +47,31 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.transport.wns;
 
+import java.util.Collection;
 
 /**
- * {@link KnownTransport} - The enumeration for known transports for the push notification service.
+ * {@link WnsOptionsProvider} - Provides the options to communicate with Windows Push Notification service (WNS).
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public enum KnownTransport {
+public interface WnsOptionsProvider {
 
     /**
-     * The transport by a Web Socket connection.
-     */
-    WEB_SOCKET("websocket"),
-    /**
-     * The transport by Apple Push Notification Service (APNS).
-     */
-    APNS("apn"),
-    /**
-     * The transport by Google Cloud Messaging service (GCM).
-     */
-    GCM("gcm"),
-    /**
-     * The transport by Windows Push Notification Services (WNS).
-     */
-    WNS("wns"),
-
-    ;
-
-    private final String transportId;
-
-    private KnownTransport(String transportId) {
-        this.transportId = transportId;
-    }
-
-    /**
-     * Gets the transport identifier.
+     * Gets the options to communicate with Google Cloud Messaging (GCM) for given client.
      *
-     * @return The transport identifier
+     * @param client The client identifier
+     * @return The options
      */
-    public String getTransportId() {
-        return transportId;
-    }
+    WnsOptions getOptions(String client);
 
     /**
-     * Gets the known transport for specified identifier.
+     * Gets available options from this provider
      *
-     * @param transportId The transport identifier
-     * @return The associated known transport or <code>null</code>
+     * @return The available options
      */
-    public static KnownTransport knownTransportFor(String transportId) {
-        if (null != transportId) {
-            for (KnownTransport knownTransport : values()) {
-                if (transportId.equals(knownTransport.transportId)) {
-                    return knownTransport;
-                }
-            }
-        }
-        return null;
-    }
+    Collection<WnsOptionsPerClient> getAvailableOptions();
 
 }

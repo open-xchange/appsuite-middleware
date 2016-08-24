@@ -47,66 +47,46 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.transport.wns.internal;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import com.openexchange.pns.transport.wns.WnsOptions;
+import com.openexchange.pns.transport.wns.WnsOptionsPerClient;
+import com.openexchange.pns.transport.wns.WnsOptionsProvider;
 
 
 /**
- * {@link KnownTransport} - The enumeration for known transports for the push notification service.
+ * {@link DefaultWnsOptionsProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public enum KnownTransport {
+public class DefaultWnsOptionsProvider implements WnsOptionsProvider {
+
+    private final Map<String, WnsOptions> options;
 
     /**
-     * The transport by a Web Socket connection.
+     * Initializes a new {@link DefaultWnsOptionsProvider}.
      */
-    WEB_SOCKET("websocket"),
-    /**
-     * The transport by Apple Push Notification Service (APNS).
-     */
-    APNS("apn"),
-    /**
-     * The transport by Google Cloud Messaging service (GCM).
-     */
-    GCM("gcm"),
-    /**
-     * The transport by Windows Push Notification Services (WNS).
-     */
-    WNS("wns"),
-
-    ;
-
-    private final String transportId;
-
-    private KnownTransport(String transportId) {
-        this.transportId = transportId;
+    public DefaultWnsOptionsProvider(Map<String, WnsOptions> options) {
+        super();
+        this.options = options;
     }
 
-    /**
-     * Gets the transport identifier.
-     *
-     * @return The transport identifier
-     */
-    public String getTransportId() {
-        return transportId;
+    @Override
+    public WnsOptions getOptions(String client) {
+        return options.get(client);
     }
 
-    /**
-     * Gets the known transport for specified identifier.
-     *
-     * @param transportId The transport identifier
-     * @return The associated known transport or <code>null</code>
-     */
-    public static KnownTransport knownTransportFor(String transportId) {
-        if (null != transportId) {
-            for (KnownTransport knownTransport : values()) {
-                if (transportId.equals(knownTransport.transportId)) {
-                    return knownTransport;
-                }
-            }
+    @Override
+    public Collection<WnsOptionsPerClient> getAvailableOptions() {
+        Collection<WnsOptionsPerClient> col = new ArrayList<>(options.size());
+        for (Map.Entry<String, WnsOptions> entry : options.entrySet()) {
+            col.add(new WnsOptionsPerClient(entry.getKey(), entry.getValue()));
         }
-        return null;
+        return col;
     }
 
 }
