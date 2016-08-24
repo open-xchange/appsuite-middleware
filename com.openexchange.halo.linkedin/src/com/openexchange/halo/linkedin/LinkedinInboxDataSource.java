@@ -55,8 +55,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.halo.HaloContactQuery;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -81,7 +81,7 @@ public class LinkedinInboxDataSource extends AbstractLinkedinDataSource {
         final int uid = session.getUserId();
         final int cid = session.getContextId();
 
-        final List<OAuthAccount> accounts = getOauthService().getAccounts(LinkedInService.SERVICE_ID, session, uid, cid);
+        final List<OAuthAccount> accounts = getOauthService().getAccounts(API.LINKEDIN.getFullName(), session, uid, cid);
         if (accounts.isEmpty()) {
             throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
         }
