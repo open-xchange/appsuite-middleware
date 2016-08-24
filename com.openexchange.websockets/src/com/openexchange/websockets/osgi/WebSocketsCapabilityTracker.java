@@ -50,12 +50,12 @@
 package com.openexchange.websockets.osgi;
 
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.osgi.Tools;
 import com.openexchange.websockets.WebSocketService;
 
 
@@ -93,7 +93,15 @@ public class WebSocketsCapabilityTracker implements ServiceTrackerCustomizer<Obj
      * @throws InvalidSyntaxException If the syntax of the generated filter is not correct.
      */
     public Filter getFilter() throws InvalidSyntaxException {
-        return Tools.generateServiceFilter(context, neededServices);
+        StringBuilder sb = new StringBuilder(16 << neededServices.length).append("(|(");
+        for (final Class<?> clazz : neededServices) {
+            sb.append(Constants.OBJECTCLASS);
+            sb.append('=');
+            sb.append(clazz.getName());
+            sb.append(")(");
+        }
+        sb.setCharAt(sb.length() - 1, ')');
+        return context.createFilter(sb.toString());
     }
 
     @Override
