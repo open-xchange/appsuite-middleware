@@ -1609,62 +1609,75 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             continue;
                         }
                         Object value = attribute.doSwitch(getter);
-                        if (Attribute.PASSWORD_LITERAL == attribute) {
-                            encryptedPassword = encrypt(mailAccount.getPassword(), session);
-                            setOptionalString(stmt, pos++, encryptedPassword);
-                        } else if (Attribute.PERSONAL_LITERAL == attribute) {
-                            String personal = mailAccount.getPersonal();
-                            if (isEmpty(personal)) {
-                                stmt.setNull(pos++, TYPE_VARCHAR);
-                            } else {
-                                stmt.setString(pos++, personal);
-                            }
-                        } else if (Attribute.REPLY_TO_LITERAL == attribute) {
-                            String replyTo = mailAccount.getReplyTo();
-                            if (isEmpty(replyTo)) {
-                                stmt.setNull(pos++, TYPE_VARCHAR);
-                            } else {
-                                stmt.setString(pos++, replyTo);
-                            }
-                        } else if (Attribute.ARCHIVE_LITERAL == attribute) {
-                            String s = mailAccount.getArchive();
-                            if (isEmpty(s)) {
-                                stmt.setString(pos++, "");
-                            } else {
-                                stmt.setString(pos++, s);
-                            }
-                        } else if (Attribute.ARCHIVE_FULLNAME_LITERAL == attribute) {
-                            String s = mailAccount.getArchiveFullname();
-                            if (isEmpty(s)) {
-                                stmt.setString(pos++, "");
-                            } else {
-                                stmt.setString(pos++, MailFolderUtility.prepareMailFolderParam(s).getFullname());
-                            }
-                        } else if (Attribute.MAIL_STARTTLS_LITERAL == attribute) {
-                            boolean b = mailAccount.isMailStartTls();
-                            stmt.setBoolean(pos++, b);
-                        } else if (Attribute.TRANSPORT_STARTTLS_LITERAL == attribute) {
-                            boolean b = mailAccount.isTransportStartTls();
-                            stmt.setBoolean(pos++, b);
-                        } else if (Attribute.MAIL_OAUTH_LITERAL == attribute) {
-                            int oauthId = mailAccount.getMailOAuthId();
-                            stmt.setInt(pos++, oauthId);
-                        } else if (Attribute.TRANSPORT_OAUTH_LITERAL == attribute) {
-                            int oauthId = mailAccount.getTransportOAuthId();
-                            stmt.setInt(pos++, oauthId);
-                        } else if (DEFAULT.contains(attribute)) {
-                            if (DEFAULT_FULL_NAMES.contains(attribute)) {
-                                String fullName = null == value ? "" : MailFolderUtility.prepareMailFolderParam((String) value).getFullname();
-                                stmt.setString(pos++, fullName);
-                            } else {
-                                if (null == value) {
-                                    stmt.setObject(pos++, "");
+                        switch (attribute) {
+                            case PASSWORD_LITERAL:
+                                encryptedPassword = encrypt(mailAccount.getPassword(), session);
+                                setOptionalString(stmt, pos++, encryptedPassword);
+                                break;
+                            case PERSONAL_LITERAL:
+                                String personal = mailAccount.getPersonal();
+                                if (isEmpty(personal)) {
+                                    stmt.setNull(pos++, TYPE_VARCHAR);
+                                } else {
+                                    stmt.setString(pos++, personal);
+                                }
+                                break;
+                            case REPLY_TO_LITERAL:
+                                String replyTo = mailAccount.getReplyTo();
+                                if (isEmpty(replyTo)) {
+                                    stmt.setNull(pos++, TYPE_VARCHAR);
+                                } else {
+                                    stmt.setString(pos++, replyTo);
+                                }
+                                break;
+                            case ARCHIVE_LITERAL:
+                                String a = mailAccount.getArchive();
+                                if (isEmpty(a)) {
+                                    stmt.setString(pos++, "");
+                                } else {
+                                    stmt.setString(pos++, a);
+                                }
+                                break;
+                            case ARCHIVE_FULLNAME_LITERAL:
+                                String af = mailAccount.getArchiveFullname();
+                                if (isEmpty(af)) {
+                                    stmt.setString(pos++, "");
+                                } else {
+                                    stmt.setString(pos++, MailFolderUtility.prepareMailFolderParam(af).getFullname());
+                                }
+                                break;
+                            case MAIL_STARTTLS_LITERAL:
+                                boolean mtls = mailAccount.isMailStartTls();
+                                stmt.setBoolean(pos++, mtls);
+                                break;
+                            case TRANSPORT_STARTTLS_LITERAL:
+                                boolean ttls = mailAccount.isTransportStartTls();
+                                stmt.setBoolean(pos++, ttls);
+                                break;
+                            case MAIL_OAUTH_LITERAL:
+                                int mOAuthId = mailAccount.getMailOAuthId();
+                                stmt.setInt(pos++, mOAuthId);
+                                break;
+                            case TRANSPORT_OAUTH_LITERAL:
+                                int tOAuthId = mailAccount.getTransportOAuthId();
+                                stmt.setInt(pos++, tOAuthId);
+                                break;
+                            default:
+                                if (DEFAULT.contains(attribute)) {
+                                    if (DEFAULT_FULL_NAMES.contains(attribute)) {
+                                        String fullName = null == value ? "" : MailFolderUtility.prepareMailFolderParam((String) value).getFullname();
+                                        stmt.setString(pos++, fullName);
+                                    } else {
+                                        if (null == value) {
+                                            stmt.setObject(pos++, "");
+                                        } else {
+                                            stmt.setObject(pos++, value);
+                                        }
+                                    }
                                 } else {
                                     stmt.setObject(pos++, value);
                                 }
-                            }
-                        } else {
-                            stmt.setObject(pos++, value);
+                                break;
                         }
                     }
                     stmt.setLong(pos++, contextId);
@@ -1726,31 +1739,46 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                                 continue;
                             }
                             Object value = attribute.doSwitch(getter);
-                            if (Attribute.TRANSPORT_PASSWORD_LITERAL == attribute) {
-                                if (encryptedPassword == null) {
-                                    encryptedPassword = encrypt(mailAccount.getTransportPassword(), session);
-                                }
-                                setOptionalString(stmt, pos++, encryptedPassword);
-                            } else if (Attribute.TRANSPORT_LOGIN_LITERAL == attribute) {
-                                setOptionalString(stmt, pos++, (String) value);
-                            } else if (Attribute.TRANSPORT_URL_LITERAL == attribute) {
-                                setOptionalString(stmt, pos++, (String) value);
-                            } else if (Attribute.PERSONAL_LITERAL == attribute) {
-                                final String personal = mailAccount.getPersonal();
-                                if (isEmpty(personal)) {
-                                    stmt.setNull(pos++, TYPE_VARCHAR);
-                                } else {
-                                    stmt.setString(pos++, personal);
-                                }
-                            } else if (Attribute.REPLY_TO_LITERAL == attribute) {
-                                final String replyTo = mailAccount.getReplyTo();
-                                if (isEmpty(replyTo)) {
-                                    stmt.setNull(pos++, TYPE_VARCHAR);
-                                } else {
-                                    stmt.setString(pos++, replyTo);
-                                }
-                            } else {
-                                stmt.setObject(pos++, value);
+                            switch (attribute) {
+                                case TRANSPORT_PASSWORD_LITERAL:
+                                    if (encryptedPassword == null) {
+                                        encryptedPassword = encrypt(mailAccount.getTransportPassword(), session);
+                                    }
+                                    setOptionalString(stmt, pos++, encryptedPassword);
+                                    break;
+                                case TRANSPORT_LOGIN_LITERAL:
+                                    setOptionalString(stmt, pos++, (String) value);
+                                    break;
+                                case TRANSPORT_URL_LITERAL:
+                                    setOptionalString(stmt, pos++, (String) value);
+                                    break;
+                                case PERSONAL_LITERAL:
+                                    final String personal = mailAccount.getPersonal();
+                                    if (isEmpty(personal)) {
+                                        stmt.setNull(pos++, TYPE_VARCHAR);
+                                    } else {
+                                        stmt.setString(pos++, personal);
+                                    }
+                                    break;
+                                case REPLY_TO_LITERAL:
+                                    final String replyTo = mailAccount.getReplyTo();
+                                    if (isEmpty(replyTo)) {
+                                        stmt.setNull(pos++, TYPE_VARCHAR);
+                                    } else {
+                                        stmt.setString(pos++, replyTo);
+                                    }
+                                    break;
+                                case TRANSPORT_STARTTLS_LITERAL:
+                                    boolean ttls = mailAccount.isTransportStartTls();
+                                    stmt.setBoolean(pos++, ttls);
+                                    break;
+                                case TRANSPORT_OAUTH_LITERAL:
+                                    int tOAuthId = mailAccount.getTransportOAuthId();
+                                    stmt.setInt(pos++, tOAuthId);
+                                    break;
+                                default:
+                                    stmt.setObject(pos++, value);
+                                    break;
                             }
                         }
 
@@ -1780,7 +1808,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                             encryptedTransportPassword = encrypt(mailAccount.getTransportPassword(), session);
                         }
                         // cid, id, user, name, url, login, password, send_addr, default_flag
-                        stmt = con.prepareStatement("INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal, replyTo) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+                        stmt = con.prepareStatement("INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal, replyTo, starttls, oauth) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
                         pos = 1;
                         stmt.setLong(pos++, contextId);
                         stmt.setLong(pos++, mailAccount.getId());
@@ -1807,10 +1835,18 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                         } else {
                             stmt.setString(pos++, replyTo);
                         }
+                        stmt.setInt(pos++, mailAccount.isTransportStartTls() ? 1 : 0);
+
+                        int oAuth = mailAccount.getTransportOAuthId();
+                        if (oAuth < 0) {
+                            stmt.setNull(pos++, Types.INTEGER);
+                        } else {
+                            stmt.setInt(pos++, oAuth);
+                        }
 
                         if (LOG.isDebugEnabled()) {
                             String query = stmt.toString();
-                            LOG.debug("Trying to perform SQL insert query for attributes {} :\n{}", orderedAttributes, query.substring(query.indexOf(':') + 1));
+                            LOG.debug("Trying to perform SQL insert query:\n{}", query.substring(query.indexOf(':') + 1));
                         }
 
                         stmt.executeUpdate();
