@@ -81,9 +81,6 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
     /** The XING user's full name */
     private String xingUserName;
 
-    /** The associated Groupware session */
-    private final Session session;
-
     /**
      * Initializes a new {@link XingOAuthAccessImpl}.
      *
@@ -92,8 +89,7 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
      * @throws OXException If connect attempt fails
      */
     public XingOAuthAccessImpl(final Session session, final OAuthAccount oauthAccount) throws OXException {
-        super();
-        this.session = session;
+        super(session);
         verifyAccount(oauthAccount);
         setOAuthAccount(oauthAccount);
     }
@@ -109,8 +105,7 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
     // FIXME: This constructor is only being used for tests. Clean-up and introduce a new way of testing the XING
     //        functionality.
     public XingOAuthAccessImpl(final Session session, final String token, final String secret) throws OXException {
-        super();
-        this.session = session;
+        super(session);
         init(token, secret);
     }
 
@@ -187,7 +182,7 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
     private void init(String token, String secret) throws OXException {
         try {
             final OAuthServiceMetaData xingOAuthServiceMetaData = Services.getService(OAuthServiceMetaData.class);
-            final AppKeyPair appKeys = new AppKeyPair(xingOAuthServiceMetaData.getAPIKey(session), xingOAuthServiceMetaData.getAPISecret(session));
+            final AppKeyPair appKeys = new AppKeyPair(xingOAuthServiceMetaData.getAPIKey(getSession()), xingOAuthServiceMetaData.getAPISecret(getSession()));
             WebAuthSession webAuthSession = new WebAuthSession(appKeys, new AccessTokenPair(token, secret));
             XingAPI<WebAuthSession> xingApi = new XingAPI<WebAuthSession>(webAuthSession);
             setOAuthClient(new OAuthClient<XingAPI<WebAuthSession>>(xingApi, token));

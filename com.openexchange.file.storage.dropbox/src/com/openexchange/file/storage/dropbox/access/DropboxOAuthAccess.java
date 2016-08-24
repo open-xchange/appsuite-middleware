@@ -79,15 +79,13 @@ import com.openexchange.session.Session;
 public class DropboxOAuthAccess extends AbstractOAuthAccess {
 
     private final FileStorageAccount fsAccount;
-    private final Session session;
 
     /**
      * Initializes a new {@link DropboxOAuthAccess}.
      */
     public DropboxOAuthAccess(FileStorageAccount fsAccount, Session session) {
-        super();
+        super(session);
         this.fsAccount = fsAccount;
-        this.session = session;
     }
 
     @Override
@@ -114,7 +112,7 @@ public class DropboxOAuthAccess extends AbstractOAuthAccess {
             try {
                 int oauthAccountId = getAccountId();
                 OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
-                OAuthAccount dropboxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+                OAuthAccount dropboxOAuthAccount = oAuthService.getAccount(oauthAccountId, getSession(), getSession().getUserId(), getSession().getContextId());
                 verifyAccount(dropboxOAuthAccount);
                 setOAuthAccount(dropboxOAuthAccount);
 

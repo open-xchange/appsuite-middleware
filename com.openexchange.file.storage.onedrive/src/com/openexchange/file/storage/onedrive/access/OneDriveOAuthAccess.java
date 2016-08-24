@@ -94,15 +94,13 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OneDriveOAuthAccess.class);
 
     private final FileStorageAccount fsAccount;
-    private final Session session;
 
     /**
      * Initializes a new {@link OneDriveOAuthAccess}.
      */
     public OneDriveOAuthAccess(FileStorageAccount fsAccount, Session session) {
-        super();
+        super(session);
         this.fsAccount = fsAccount;
-        this.session = session;
     }
 
     @Override
@@ -121,12 +119,12 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             OAuthAccount liveconnectOAuthAccount;
             {
                 OAuthService oAuthService = Services.getService(OAuthService.class);
-                liveconnectOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+                liveconnectOAuthAccount = oAuthService.getAccount(oauthAccountId, getSession(), getSession().getUserId(), getSession().getContextId());
                 verifyAccount(liveconnectOAuthAccount);
             }
             setOAuthAccount(liveconnectOAuthAccount);
 
-            OAuthAccount newAccount = recreateTokenIfExpired(true, liveconnectOAuthAccount, session);
+            OAuthAccount newAccount = recreateTokenIfExpired(true, liveconnectOAuthAccount, getSession());
             if (newAccount != null) {
                 setOAuthAccount(newAccount);
             }
@@ -164,7 +162,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
                 }
             }
         };
-        return closure.perform(null, this.<DefaultHttpClient> getClient().client, session).booleanValue();
+        return closure.perform(null, this.<DefaultHttpClient> getClient().client, getSession()).booleanValue();
     }
 
     @Override

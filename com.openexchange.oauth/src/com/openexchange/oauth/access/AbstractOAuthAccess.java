@@ -56,6 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.session.Session;
 
 /**
  * {@link AbstractOAuthAccess}
@@ -76,11 +77,15 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
     /** The last-accessed time stamp */
     private volatile long lastAccessed;
 
+    /** The associated Groupware {@link Session} */
+    private final Session session;
+
     /**
      * Initializes a new {@link AbstractOAuthAccess}.
      */
-    protected AbstractOAuthAccess() {
+    protected AbstractOAuthAccess(Session session) {
         super();
+        this.session = session;
         oauthClientRef = new AtomicReference<OAuthClient<?>>();
     }
 
@@ -194,4 +199,12 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
         }
     }
 
+    /**
+     * Gets the session
+     *
+     * @return The session
+     */
+    public Session getSession() {
+        return session;
+    }
 }

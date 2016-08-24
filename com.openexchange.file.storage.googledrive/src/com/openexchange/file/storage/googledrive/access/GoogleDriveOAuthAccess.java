@@ -74,15 +74,12 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
 
     private final FileStorageAccount fsAccount;
 
-    private final Session session;
-
     /**
      * Initialises a new {@link GoogleDriveOAuthAccess}.
      */
     public GoogleDriveOAuthAccess(FileStorageAccount fsAccount, Session session) throws OXException {
-        super();
+        super(session);
         this.fsAccount = fsAccount;
-        this.session = session;
     }
 
     @Override
@@ -90,12 +87,12 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
         synchronized (this) {
             // Grab Google OAuth account
             int oauthAccountId = getAccountId();
-            OAuthAccount oauthAccount = GoogleApiClients.getGoogleAccount(oauthAccountId, session, false);
+            OAuthAccount oauthAccount = GoogleApiClients.getGoogleAccount(oauthAccountId, getSession(), false);
             verifyAccount(oauthAccount);
             setOAuthAccount(oauthAccount);
 
             {
-                OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(oauthAccount, session);
+                OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(oauthAccount, getSession());
                 if (null != newAccount) {
                     oauthAccount = newAccount;
                     setOAuthAccount(newAccount);
@@ -103,7 +100,7 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
             }
 
             // Generate appropriate credentials for it
-            GoogleCredential credentials = GoogleApiClients.getCredentials(oauthAccount, session);
+            GoogleCredential credentials = GoogleApiClients.getCredentials(oauthAccount, getSession());
 
             // Establish Drive instance
             setOAuthClient(new OAuthClient<Drive>(new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build(), getOAuthAccount().getToken()));
