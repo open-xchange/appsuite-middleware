@@ -680,7 +680,7 @@ public abstract class MailConfig {
      * @param account The mail account
      * @throws OXException If a configuration error occurs
      */
-    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final String userLoginInfo, final Account account) throws OXException {
+    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final String userLoginInfo, final MailAccount account) throws OXException {
         final String proxyDelimiter = account.isDefaultAccount() ? MailProperties.getInstance().getAuthProxyDelimiter() : null;
         // Assign login
         final String slogin = session.getLoginName();
@@ -706,20 +706,34 @@ public abstract class MailConfig {
                 mailConfig.password = sessionPassword;
             }
         } else {
-            final String mailAccountPassword = account.getPassword();
-            if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
-                // Set to empty string
-                mailConfig.password = "";
+            int oAuthAccontId = assumeXOauth2For(account);
+            if (oAuthAccontId >= 0) {
+                // Do the XOAUTH2 dance...
+                s
+
             } else {
-                // Mail account's password
-                if (account instanceof MailAccount) {
-                    mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), ((MailAccount)account).getMailServer());
+                String mailAccountPassword = account.getPassword();
+                if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
+                    // Set to empty string
+                    mailConfig.password = "";
                 } else {
-                    mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), account.getTransportServer());
+                    // Mail account's password
+                    if (account instanceof MailAccount) {
+                        mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), account.getMailServer());
+                    } else {
+                        mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), account.getTransportServer());
+                    }
                 }
             }
         }
         mailConfig.doCustomParsing(account, session);
+    }
+
+    private static int assumeXOauth2For(MailAccount account) {
+        if (false == account.isMailOAuthAble()) {
+            return -1;
+        }
+        return (account.getMailOAuthId() >= 0 ? account.getMailOAuthId() : -1);
     }
 
     private static final int LENGTH = 6;
@@ -732,6 +746,7 @@ public abstract class MailConfig {
     protected Map<String, Object> authProps;
     protected int accountId;
     protected Session session;
+    protected boolean xoauth;
     protected String login;
     protected String password;
     protected boolean requireTls;
@@ -744,6 +759,7 @@ public abstract class MailConfig {
      */
     protected MailConfig() {
         super();
+        xoauth = false;
         requireTls = false;
         authProps = null;
         authType = AuthType.LOGIN;

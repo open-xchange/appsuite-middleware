@@ -54,7 +54,7 @@ import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.LinkedInApi;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.impl.AbstractScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 
 /**

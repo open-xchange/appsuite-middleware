@@ -57,8 +57,8 @@ import org.scribe.builder.api.Api;
 import org.scribe.builder.api.TwitterApi;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.oauth.OAuthToken;
+import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 

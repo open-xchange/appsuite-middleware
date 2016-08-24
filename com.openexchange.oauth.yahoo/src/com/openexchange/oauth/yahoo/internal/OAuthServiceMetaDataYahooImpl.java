@@ -55,7 +55,7 @@ import org.scribe.builder.api.Api;
 import org.scribe.builder.api.YahooApi;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.impl.AbstractScribeAwareOAuthServiceMetaData;
 import com.openexchange.oauth.yahoo.YahooOAuthScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
