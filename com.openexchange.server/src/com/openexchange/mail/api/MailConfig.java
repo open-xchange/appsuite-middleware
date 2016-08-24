@@ -680,7 +680,7 @@ public abstract class MailConfig {
      * @param account The mail account
      * @throws OXException If a configuration error occurs
      */
-    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final String userLoginInfo, final MailAccount account) throws OXException {
+    protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final String userLoginInfo, final Account account) throws OXException {
         final String proxyDelimiter = account.isDefaultAccount() ? MailProperties.getInstance().getAuthProxyDelimiter() : null;
         // Assign login
         final String slogin = session.getLoginName();
@@ -709,7 +709,7 @@ public abstract class MailConfig {
             int oAuthAccontId = assumeXOauth2For(account);
             if (oAuthAccontId >= 0) {
                 // Do the XOAUTH2 dance...
-                s
+
 
             } else {
                 String mailAccountPassword = account.getPassword();
@@ -718,8 +718,8 @@ public abstract class MailConfig {
                     mailConfig.password = "";
                 } else {
                     // Mail account's password
-                    if (account instanceof MailAccount) {
-                        mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), account.getMailServer());
+                    if (account.isMailAccount()) {
+                        mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), ((MailAccount) account).getMailServer());
                     } else {
                         mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), account.getTransportServer());
                     }
@@ -729,11 +729,19 @@ public abstract class MailConfig {
         mailConfig.doCustomParsing(account, session);
     }
 
-    private static int assumeXOauth2For(MailAccount account) {
-        if (false == account.isMailOAuthAble()) {
+    private static int assumeXOauth2For(Account account) {
+        if (account.isMailAccount()) {
+            MailAccount mailAccount = (MailAccount) account;
+            if (false == mailAccount.isMailOAuthAble()) {
+                return -1;
+            }
+            return (mailAccount.getMailOAuthId() >= 0 ? mailAccount.getMailOAuthId() : -1);
+        }
+
+        if (false == account.isTransportOAuthAble()) {
             return -1;
         }
-        return (account.getMailOAuthId() >= 0 ? account.getMailOAuthId() : -1);
+        return (account.getTransportOAuthId() >= 0 ? account.getTransportOAuthId() : -1);
     }
 
     private static final int LENGTH = 6;

@@ -84,6 +84,13 @@ public interface Account extends Serializable {
     int getId();
 
     /**
+     * Checks if this account is a mail account.
+     *
+     * @return <code>true</code> for mail account; otherwise <code>false</code> for transport-only
+     */
+    boolean isMailAccount();
+
+    /**
      * Gets the login.
      *
      * @return The login

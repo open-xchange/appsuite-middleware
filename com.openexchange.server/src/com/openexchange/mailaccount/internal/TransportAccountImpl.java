@@ -138,6 +138,11 @@ public class TransportAccountImpl implements TransportAccount {
     }
 
     @Override
+    public boolean isMailAccount() {
+        return false;
+    }
+
+    @Override
     public String getLogin() {
         return this.getTransportLogin();
     }

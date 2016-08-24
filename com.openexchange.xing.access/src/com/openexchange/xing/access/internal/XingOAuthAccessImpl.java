@@ -50,9 +50,9 @@
 package com.openexchange.xing.access.internal;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.session.Session;

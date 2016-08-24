@@ -139,6 +139,11 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             }
 
             @Override
+            public boolean isMailAccount() {
+                return true;
+            }
+
+            @Override
             public String getLogin() {
                 return acc.getLogin();
             }

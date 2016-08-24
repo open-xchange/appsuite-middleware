@@ -226,6 +226,11 @@ public class SimMailAccount implements MailAccount {
     }
 
     @Override
+    public boolean isMailAccount() {
+        return true;
+    }
+
+    @Override
     public String getLogin() {
         return login;
     }

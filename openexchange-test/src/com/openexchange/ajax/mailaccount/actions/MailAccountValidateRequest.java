@@ -148,6 +148,11 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             }
 
             @Override
+            public boolean isMailAccount() {
+                return true;
+            }
+
+            @Override
             public String getLogin() {
                 return acc.getLogin();
             }

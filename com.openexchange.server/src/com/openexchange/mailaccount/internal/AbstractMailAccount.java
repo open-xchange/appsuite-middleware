@@ -145,6 +145,11 @@ public abstract class AbstractMailAccount implements MailAccount {
     }
 
     @Override
+    public boolean isMailAccount() {
+        return true;
+    }
+
+    @Override
     public String getLogin() {
         return login;
     }
