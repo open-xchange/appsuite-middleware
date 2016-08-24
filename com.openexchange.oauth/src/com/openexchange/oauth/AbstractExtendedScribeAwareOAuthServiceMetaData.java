@@ -180,7 +180,10 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
             for (OAuthScope scope : scopes) {
                 builder.append(scope.getMapping()).append(" ");
             }
-            serviceBuilder.scope(builder.toString());
+            String s = builder.toString();
+            if (!Strings.isEmpty(s)) {
+                serviceBuilder.scope(s);
+            }
         }
 
         OAuthService scribeOAuthService = serviceBuilder.build();
