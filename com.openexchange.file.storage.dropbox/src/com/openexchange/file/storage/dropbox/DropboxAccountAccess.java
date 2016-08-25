@@ -62,6 +62,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
 import com.openexchange.oauth.API;
+import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
@@ -109,7 +110,7 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
         OAuthAccessRegistry registry = service.get(API.DROPBOX.getFullName());
         OAuthAccess dropboxOAuthAccess = registry.get(session.getContextId(), session.getUserId());
         if (dropboxOAuthAccess == null) {
-            DropboxOAuthAccess newInstance = new DropboxOAuthAccess(account, session);
+            AbstractOAuthAccess newInstance = new DropboxOAuthAccess(account, session);
             dropboxOAuthAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), newInstance);
             if (null == dropboxOAuthAccess) {
                 newInstance.initialize();
@@ -150,7 +151,7 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
         if (null == dropboxOAuthAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        return new DropboxFileAccess((DropboxOAuthAccess) dropboxOAuthAccess, account, session, this);
+        return new DropboxFileAccess((AbstractOAuthAccess) dropboxOAuthAccess, account, session, this);
     }
 
     @Override
@@ -159,7 +160,7 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
         if (null == dropboxOAuthAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
-        return new DropboxFolderAccess((DropboxOAuthAccess) dropboxOAuthAccess, account, session);
+        return new DropboxFolderAccess((AbstractOAuthAccess) dropboxOAuthAccess, account, session);
     }
 
     @Override

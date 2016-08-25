@@ -116,7 +116,7 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
      */
     @Override
     public XingAPI<WebAuthSession> getXingAPI() throws OXException {
-        return this.<XingAPI<WebAuthSession>>getClient().client;
+        return this.<XingAPI<WebAuthSession>> getClient().client;
     }
 
     /**

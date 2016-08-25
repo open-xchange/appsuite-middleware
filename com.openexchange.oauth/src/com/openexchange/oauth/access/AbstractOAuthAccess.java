@@ -50,7 +50,6 @@
 package com.openexchange.oauth.access;
 
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
@@ -84,6 +83,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
 
     /**
      * Initializes a new {@link AbstractOAuthAccess}.
+     * @param session TODO
      */
     protected AbstractOAuthAccess(Session session) {
         super();
