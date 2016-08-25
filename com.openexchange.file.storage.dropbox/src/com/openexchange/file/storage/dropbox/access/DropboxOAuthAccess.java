@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.dropbox.access;
 
-import org.scribe.oauth.OAuthService;
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.exception.DropboxServerException;
@@ -66,6 +65,7 @@ import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.file.storage.dropbox.Utils;
 import com.openexchange.file.storage.dropbox.auth.TrustAllWebAuthSession;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
