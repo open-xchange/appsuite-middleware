@@ -147,8 +147,8 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
     protected Void invoke(Options option, CommandLine cmd, String optRmiHostName) throws Exception {
         OXUserInterface oxUserInterface = getUserInterface();
 
-        final Context ctx = new Context(parseInt('c', 0, cmd, option));
-        final User user = new User(parseInt('u', 0, cmd, option));
+        final Context ctx = new Context(parseInt(OPT_CONTEXT_SHORT, 0, cmd, option));
+        final User user = new User(parseInt(OPT_USER_SHORT, 0, cmd, option));
         Credentials credentials = new Credentials(cmd.getOptionValue('A'), cmd.getOptionValue('P'));
 
         if (cmd.hasOption(OPT_CONFIGURATION_SHORT)) {
@@ -206,7 +206,7 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
             System.out.println();
             return;
         }
-        List<CapabilitySource> capabilitySources = new ArrayList<CapabilitySource>();
+        List<CapabilitySource> capabilitySources = new ArrayList<>();
         capabilitySources.add(new CapabilitySource(CapabilitySourceEnum.PROVISIONING, userCapabilitiesSource.get(CapabilitySourceEnum.PROVISIONING.getName()).get(CapabilitySource.GRANTED_KEY), userCapabilitiesSource.get(CapabilitySourceEnum.PROVISIONING.getName()).get(CapabilitySource.DENIED_KEY)));
         capabilitySources.add(new CapabilitySource(CapabilitySourceEnum.CONFIGURATION, userCapabilitiesSource.get(CapabilitySourceEnum.CONFIGURATION.getName()).get(CapabilitySource.GRANTED_KEY), userCapabilitiesSource.get(CapabilitySourceEnum.CONFIGURATION.getName()).get(CapabilitySource.DENIED_KEY)));
         capabilitySources.add(new CapabilitySource(CapabilitySourceEnum.PROGRAMMATIC, userCapabilitiesSource.get(CapabilitySourceEnum.PROGRAMMATIC.getName()).get(CapabilitySource.GRANTED_KEY), userCapabilitiesSource.get(CapabilitySourceEnum.PROGRAMMATIC.getName()).get(CapabilitySource.DENIED_KEY)));
