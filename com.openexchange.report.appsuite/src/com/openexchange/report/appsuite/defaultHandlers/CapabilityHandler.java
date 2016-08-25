@@ -110,64 +110,58 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     }
 
     @Override
-    public void runUserReport(UserReport userReport) {
-        try {
+    public void runUserReport(UserReport userReport) throws OXException {
+        // First look up the capabilities for this user
+        CapabilitySet capabilities = new CapabilitySet(0);
+        if (userReport.getUser().isGuest()) {
+            capabilities = Services.getService(CapabilityService.class).getCapabilities(userReport.getUser().getCreatedBy(), userReport.getContext().getContextId());
+        } else {
+            capabilities = Services.getService(CapabilityService.class).getCapabilities(userReport.getUser().getId(), userReport.getContext().getContextId());
+        }
 
-            // First look up the capabilities for this user
-            CapabilitySet capabilities = new CapabilitySet(0);
-            if (userReport.getUser().isGuest()) {
-                capabilities = Services.getService(CapabilityService.class).getCapabilities(userReport.getUser().getCreatedBy(), userReport.getContext().getContextId());
+        // Next, turn them into a list of strings
+        ArrayList<String> c = new ArrayList<String>(capabilities.size());
+
+        for (Capability capability : capabilities) {
+            c.add(capability.getId().toLowerCase());
+        }
+
+        // Sort them alphabetically so we can more easily find the same list of capabilities again
+        Collections.sort(c);
+
+        StringBuilder cString = new StringBuilder();
+        for (String cap : c) {
+            cString.append(cap).append(",");
+        }
+
+        cString.setLength(cString.length() - 1);
+
+        // Remember both the list and the identifying comma-separated String in the userReport
+        userReport.set(Report.MACDETAIL, Report.CAPABILITIES, cString.toString());
+        userReport.set(Report.MACDETAIL, Report.CAPABILITY_LIST, c);
+
+        if (!userReport.getUser().isGuest()) {
+            // Determine if the user is disabled
+            if (!userReport.getUser().isMailEnabled()) {
+                userReport.set(Report.MACDETAIL, Report.DISABLED, Boolean.TRUE);
             } else {
-                capabilities = Services.getService(CapabilityService.class).getCapabilities(userReport.getUser().getId(), userReport.getContext().getContextId());
+                userReport.set(Report.MACDETAIL, Report.DISABLED, Boolean.FALSE);
             }
 
-            // Next, turn them into a list of strings
-            ArrayList<String> c = new ArrayList<String>(capabilities.size());
-
-            for (Capability capability : capabilities) {
-                c.add(capability.getId().toLowerCase());
+            // Determine if the user is the admin user
+            if (userReport.getContext().getMailadmin() == userReport.getUser().getId()) {
+                userReport.set(Report.MACDETAIL, Report.MAILADMIN, Boolean.TRUE);
+            } else {
+                userReport.set(Report.MACDETAIL, Report.MAILADMIN, Boolean.FALSE);
             }
-
-            // Sort them alphabetically so we can more easily find the same list of capabilities again
-            Collections.sort(c);
-
-            StringBuilder cString = new StringBuilder();
-            for (String cap : c) {
-                cString.append(cap).append(",");
-            }
-
-            cString.setLength(cString.length() - 1);
-
-            // Remember both the list and the identifying comma-separated String in the userReport
-            userReport.set(Report.MACDETAIL, Report.CAPABILITIES, cString.toString());
-            userReport.set(Report.MACDETAIL, Report.CAPABILITY_LIST, c);
-
-            if (!userReport.getUser().isGuest()) {
-                // Determine if the user is disabled
-                if (!userReport.getUser().isMailEnabled()) {
-                    userReport.set(Report.MACDETAIL, Report.DISABLED, Boolean.TRUE);
-                } else {
-                    userReport.set(Report.MACDETAIL, Report.DISABLED, Boolean.FALSE);
-                }
-
-                // Determine if the user is the admin user
-                if (userReport.getContext().getMailadmin() == userReport.getUser().getId()) {
-                    userReport.set(Report.MACDETAIL, Report.MAILADMIN, Boolean.TRUE);
-                } else {
-                    userReport.set(Report.MACDETAIL, Report.MAILADMIN, Boolean.FALSE);
-                }
-                // Get all relevant logins for this user and add them to the report
-                Calendar cal = Calendar.getInstance();
-                Date endDate = cal.getTime();
-                cal.add(Calendar.YEAR, -1);
-                Date startDate = cal.getTime();
-                LoginCounterService loginCounterService = Services.getService(LoginCounterService.class);
-                HashMap<String, Long> userLogins = loginCounterService.getLastClientLogIns(userReport.getUser().getId(), userReport.getContext().getContextId(), startDate, endDate);
-                userReport.set(Report.MACDETAIL, Report.USER_LOGINS, userLogins);
-            }
-        } catch (OXException e) {
-            LOG.error("", e);
-            Services.getService(ReportService.class).abortContextReport(userReport.getUUID(), userReport.getType());
+            // Get all relevant logins for this user and add them to the report
+            Calendar cal = Calendar.getInstance();
+            Date endDate = cal.getTime();
+            cal.add(Calendar.YEAR, -1);
+            Date startDate = cal.getTime();
+            LoginCounterService loginCounterService = Services.getService(LoginCounterService.class);
+            HashMap<String, Long> userLogins = loginCounterService.getLastClientLogIns(userReport.getUser().getId(), userReport.getContext().getContextId(), startDate, endDate);
+            userReport.set(Report.MACDETAIL, Report.USER_LOGINS, userLogins);
         }
     }
 
@@ -181,8 +175,8 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             handleInternalUser(userReport, contextReport);
         }
     }
-    
- // The system report contains an overall count of unique capability and quota combinations
+
+    // The system report contains an overall count of unique capability and quota combinations
     // So the numbers from the context report have to be added to the numbers already in the report
     @Override
     public void merge(ContextReport contextReport, Report report) {
@@ -298,7 +292,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
 
         // Get the users client logins and save them also to this context/capability-set
-        HashMap<String,Long> userLogins = userReport.get(Report.MACDETAIL, Report.USER_LOGINS, HashMap.class);
+        HashMap<String, Long> userLogins = userReport.get(Report.MACDETAIL, Report.USER_LOGINS, HashMap.class);
         for (Entry<String, Long> clientName : userLogins.entrySet()) {
             incCount(counts, (String) clientName.getKey());
         }
@@ -354,10 +348,6 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
         elementMap.put(keyInMap, value + 1);
     }
-
-    
-
-    
     /**
      * Calculate drive specific average-metrics and clean up the given map form unneeded parameters.
      * 

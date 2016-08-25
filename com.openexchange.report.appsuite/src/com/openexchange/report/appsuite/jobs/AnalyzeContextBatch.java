@@ -101,23 +101,23 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
         this.reportType = reportType;
         this.contextIds = chunk;
     }
-    
+
     /**
-    *
-    * Initializes a new {@link AnalyzeContextBatch} with a report instead of just a report-type.
-    * This means, additional options are selected and stored in the report object.
-    *
-    * @param uuid The uuid of the report we're running
-    * @param reportType The type of report that is being run
-    * @param chunk a list of context IDs to analyze
-    */
-   public AnalyzeContextBatch(String uuid, Report report, List<Integer> chunk) {
-       super();
-       this.uuid = uuid;
-       this.report = report;
-       this.reportType = report.getType();
-       this.contextIds = chunk;
-   }
+     *
+     * Initializes a new {@link AnalyzeContextBatch} with a report instead of just a report-type.
+     * This means, additional options are selected and stored in the report object.
+     *
+     * @param uuid The uuid of the report we're running
+     * @param reportType The type of report that is being run
+     * @param chunk a list of context IDs to analyze
+     */
+    public AnalyzeContextBatch(String uuid, Report report, List<Integer> chunk) {
+        super();
+        this.uuid = uuid;
+        this.report = report;
+        this.reportType = report.getType();
+        this.contextIds = chunk;
+    }
 
     @Override
     public Void call() throws Exception {
@@ -148,7 +148,7 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
                         break;
                     }
                     if (oxException.similarTo(ReportExceptionCodes.REPORT_GENERATION_CANCELED)) {
-                        LOG.info("Stop execution of report generation due to an user intruction!");
+                        LOG.info("Stop execution of report generation due to an user instruction!");
                         contextIds = Collections.emptyList();
                         reportService.abortGeneration(uuid, reportType, "Cancelled report generation based on user interaction.");
                         break;
@@ -192,7 +192,9 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
     private void handleUsersGuestsLinks(Context ctx, ContextReport contextReport) throws OXException {
         // Next, let's look at all the users in this context
         User[] loadUsers = loadUsers(ctx);
+        
         for (User user : loadUsers) {
+            boolean skip = false;
             UserReport userReport = new UserReport(uuid, reportType, ctx, user, contextReport);
             // Are extended options available?
             if (this.report != null) {
@@ -213,8 +215,20 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
             // Run User Analyzers
             for (ReportUserHandler userHandler : Services.getUserHandlers()) {
                 if (userHandler.appliesTo(reportType)) {
-                    userHandler.runUserReport(userReport);
+                    try {
+                        userHandler.runUserReport(userReport);
+                    } catch (OXException e) {
+                        LOG.error("", e);
+                        contextReport.getUserList().remove((Integer) user.getId());
+                        skip = true;
+                        if (this.report != null) {
+                            this.report.addError(e);
+                        }
+                    }
                 }
+            }
+            if (skip) {
+                continue;
             }
             // Compact User Analysis and add to context report
             for (UserReportCumulator cumulator : Services.getUserReportCumulators()) {
@@ -223,6 +237,7 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
                 }
             }
         }
+
     }
 
     protected User[] loadUsers(Context ctx) throws OXException {

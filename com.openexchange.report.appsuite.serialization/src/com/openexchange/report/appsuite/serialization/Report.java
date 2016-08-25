@@ -56,6 +56,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.report.appsuite.serialization.osgi.StringParserServiceRegistry;
 import com.openexchange.tools.strings.StringParser;
 
@@ -128,6 +129,10 @@ public class Report implements Serializable {
     public static final String TIMEFRAME_START = "start";
 
     public static final String TIMEFRAME_END = "end";
+    
+    public static final String ERRORS = "errors";
+    
+    public static final String IGNORED = "ignored";
 
     //--------------------Report attributes--------------------
 
@@ -271,6 +276,12 @@ public class Report implements Serializable {
     }
 
     private static Class[] allowedTypes = new Class[] { Integer.class, Long.class, Float.class, Short.class, Double.class, Byte.class, Boolean.class, String.class };
+    
+    public void addError(OXException exception) {
+        HashMap<String, String> errors = get(Report.ERRORS, Report.IGNORED, new HashMap<String, String>(), HashMap.class);
+        errors.put(exception.getExceptionId(), exception.getLogMessage());
+        set(Report.ERRORS, Report.IGNORED, errors);
+    }
 
     private void checkValue(Object value) {
 
