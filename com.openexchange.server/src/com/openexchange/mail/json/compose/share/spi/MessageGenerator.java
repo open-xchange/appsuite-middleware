@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.compose.share.spi;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.json.compose.Applicable;
@@ -72,7 +73,7 @@ public interface MessageGenerator extends Applicable {
      * @return The generated messages
      * @throws OXException If messages cannot be generated
      */
-    List<ComposedMailMessage> generateTransportMessagesFor(ShareComposeMessageInfo info, ShareReference shareReference) throws OXException;
+    List<ComposedMailMessage> generateTransportMessagesFor(ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> cidMapping) throws OXException;
 
     /**
      * Generates the messages, that is supposed to be added to standard sent folder.
@@ -82,6 +83,6 @@ public interface MessageGenerator extends Applicable {
      * @return The generated message
      * @throws OXException If message cannot be generated
      */
-    ComposedMailMessage generateSentMessageFor(ShareComposeMessageInfo info, ShareReference shareReference) throws OXException;
+    ComposedMailMessage generateSentMessageFor(ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> cidMapping) throws OXException;
 
 }
