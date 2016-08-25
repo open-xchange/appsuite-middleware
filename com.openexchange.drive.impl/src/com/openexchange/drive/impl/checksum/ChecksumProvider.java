@@ -56,12 +56,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import jonelo.jacksum.algorithm.MD;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
@@ -75,6 +75,7 @@ import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import jonelo.jacksum.algorithm.MD;
 
 /**
  * {@link ChecksumProvider}
@@ -195,7 +196,7 @@ public class ChecksumProvider {
             List<FolderID> folderIDsSupportingSequenceNumbers = DriveUtils.getFolderIDs(foldersSupportingSequenceNumbers);
             int userID = session.getServerSession().getUserId();
             checksums = new ArrayList<DirectoryChecksum>(folderIDs.size());
-            List<DirectoryChecksum> storedChecksums = session.getChecksumStore().getDirectoryChecksums(userID, folderIDsSupportingSequenceNumbers, view);
+            HashMap<Integer, DirectoryChecksum> storedChecksums = getChecksumHelperMap(session.getChecksumStore().getDirectoryChecksums(userID, folderIDsSupportingSequenceNumbers, view));
             List<DirectoryChecksum> updatedChecksums = new ArrayList<DirectoryChecksum>();
             List<DirectoryChecksum> newChecksums = new ArrayList<DirectoryChecksum>();
             Map<String, Long> sequenceNumbers = session.getStorage().getSequenceNumbers(foldersSupportingSequenceNumbers);
@@ -432,14 +433,41 @@ public class ChecksumProvider {
      * @param view The view to match
      * @return The checksum, or <code>null</code> if not found
      */
-    private static DirectoryChecksum find(Collection<? extends DirectoryChecksum> checksums, FolderID folderID, int view) {
-        for (DirectoryChecksum checksum : checksums) {
-            if (checksum.getFolderID().equals(folderID) && checksum.getView() == view) {
-                return checksum;
-            }
-        }
-        return null;
+    private static DirectoryChecksum find(HashMap<Integer, DirectoryChecksum> map, FolderID folderID, int view) {
+        return map.get(getChecksumHelperKey(folderID, view));
     }
+
+    /**
+     * Prepares a HashMap to lookup DirectoryChecksum by Key.
+     * The Key is constructed by using the FolderID and View
+     *
+     * @param checksums The checksums to search in
+     * @return A map to get an easier lookup for DirectoryChecksum
+     */
+    private static HashMap<Integer, DirectoryChecksum> getChecksumHelperMap(Collection<? extends DirectoryChecksum> checksums) {
+        HashMap<Integer, DirectoryChecksum> returnMap = new HashMap<Integer, DirectoryChecksum>();
+        for (DirectoryChecksum checksum : checksums) {
+            returnMap.put(getChecksumHelperKey(checksum.getFolderID(), checksum.getView()), checksum);
+        }
+        return returnMap;
+    }
+
+    /**
+     * Prepares the Key for the DirectoryChecksum lookup
+     * @param folderID of the Key
+     * @param view of the Key
+     * @return Hash to be used for a HashMap
+     */
+    private static int getChecksumHelperKey(FolderID folderID, int view) {
+        final int prime = 31;
+        int hashCode = folderID.hashCode();
+        int result = 1;
+        result = prime * result + hashCode;
+        result = prime * result + view;
+        return result;
+    }
+
+
 
     private static final Comparator<File> FILENAME_COMPARATOR = new Comparator<File>() {
 
