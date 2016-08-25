@@ -433,8 +433,8 @@ public class ChecksumProvider {
      * @param view The view to match
      * @return The checksum, or <code>null</code> if not found
      */
-    private static DirectoryChecksum find(HashMap<Integer, DirectoryChecksum> map, FolderID folderID, int view) {
-        return map.get(getChecksumHelperKey(folderID, view));
+    private static DirectoryChecksum find(HashMap<Integer, DirectoryChecksum> checksums, FolderID folderID, int view) {
+        return checksums.get(getChecksumHelperKey(folderID, view));
     }
 
     /**
