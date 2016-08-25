@@ -83,7 +83,7 @@ public class Bug47921Test extends CardDAVTest {
 		 */
         SyncToken syncToken = new SyncToken(fetchSyncToken());
 		/*
-		 * try to create contact group using bulk-import
+		 * try to create contact using bulk-import
 		 */
     	String uid = randomUID();
     	String vCard =
@@ -123,8 +123,8 @@ public class Bug47921Test extends CardDAVTest {
     	 */
     	Contact contact = getContact(uid);
         assertNotNull(contact);
-        assertEquals("Herbert", contact.getGivenName());
-        assertEquals("Tester", contact.getSurName());
+        assertEquals("Tester", contact.getGivenName());
+        assertEquals("Herbert", contact.getSurName());
         /*
          * verify contact on client
          */
@@ -132,8 +132,8 @@ public class Bug47921Test extends CardDAVTest {
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<VCardResource> addressData = addressbookMultiget(eTags.keySet());
         VCardResource contactCard = assertContains(uid, addressData);
-        assertEquals("Herbert", contactCard.getGivenName());
-        assertEquals("Tester", contactCard.getFamilyName());
+        assertEquals("Tester", contactCard.getGivenName());
+        assertEquals("Herbert", contactCard.getFamilyName());
 	}
 
 }
