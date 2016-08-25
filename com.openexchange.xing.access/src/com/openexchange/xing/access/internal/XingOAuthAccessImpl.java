@@ -81,9 +81,6 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
     /** The XING user's full name */
     private String xingUserName;
 
-    /** The associated Groupware session */
-    private final Session session;
-
     /**
      * Initializes a new {@link XingOAuthAccessImpl}.
      *
@@ -92,8 +89,7 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
      * @throws OXException If connect attempt fails
      */
     public XingOAuthAccessImpl(final Session session, final OAuthAccount oauthAccount) throws OXException {
-        super();
-        this.session = session;
+        super(session);
         setOAuthAccount(oauthAccount);
     }
 
@@ -108,8 +104,7 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
     // FIXME: This constructor is only being used for tests. Clean-up and introduce a new way of testing the XING
     //        functionality.
     public XingOAuthAccessImpl(final Session session, final String token, final String secret) throws OXException {
-        super();
-        this.session = session;
+        super(session);
         init(token, secret);
     }
 

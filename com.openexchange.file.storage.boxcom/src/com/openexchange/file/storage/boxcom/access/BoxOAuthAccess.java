@@ -100,13 +100,11 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(BoxOAuthAccess.class);
 
     private final FileStorageAccount fsAccount;
-    private final Session session;
-
     /**
      * Initializes a new {@link BoxOAuthAccess}.
      */
     public BoxOAuthAccess(FileStorageAccount fsAccount, Session session) {
-        super();
+        super(session);
         this.fsAccount = fsAccount;
         this.session = session;
     }

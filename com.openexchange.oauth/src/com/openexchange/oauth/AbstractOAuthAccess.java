@@ -55,6 +55,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
+import com.openexchange.session.Session;
 
 /**
  * {@link AbstractOAuthAccess}
@@ -75,11 +76,15 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
     /** The last-accessed time stamp */
     private volatile long lastAccessed;
 
+    protected final Session session;
+
     /**
      * Initializes a new {@link AbstractOAuthAccess}.
+     * @param session TODO
      */
-    protected AbstractOAuthAccess() {
+    protected AbstractOAuthAccess(Session session) {
         super();
+        this.session = session;
         oauthClientRef = new AtomicReference<OAuthClient<?>>();
     }
 
