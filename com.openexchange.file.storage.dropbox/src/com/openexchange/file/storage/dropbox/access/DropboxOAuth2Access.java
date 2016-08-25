@@ -60,7 +60,6 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.file.storage.dropbox.DropboxServices;
-import com.openexchange.java.Strings;
 import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
@@ -78,15 +77,13 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
     private static final Logger LOG = LoggerFactory.getLogger(DropboxOAuth2Access.class);
 
     private final FileStorageAccount fsAccount;
-    private final Session session;
 
     /**
      * Initialises a new {@link DropboxOAuth2Access}.
      */
     public DropboxOAuth2Access(FileStorageAccount fsAccount, Session session) throws OXException {
-        super();
+        super(session);
         this.fsAccount = fsAccount;
-        this.session = session;
     }
 
     /*
@@ -100,7 +97,7 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
         try {
             final OAuthAccount oauthAccount = oAuthService.getAccount(getAccountId(), session, session.getUserId(), session.getContextId());
             verifyAccount(oauthAccount);
-            
+
             DbxRequestConfig config = new DbxRequestConfig(DropboxConfiguration.getInstance().getProductName());
             String accessToken = oauthAccount.getToken();
             DbxClientV2 dbxClient = new DbxClientV2(config, accessToken);

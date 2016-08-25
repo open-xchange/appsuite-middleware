@@ -65,6 +65,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
+import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.session.Session;
 
 /**
@@ -75,7 +76,7 @@ import com.openexchange.session.Session;
  */
 abstract class AbstractDropboxAccess {
 
-    protected final DropboxOAuth2Access dropboxOAuthAccess;
+    protected final AbstractOAuthAccess dropboxOAuthAccess;
     protected final Session session;
     protected final FileStorageAccount account;
     protected final DbxClientV2 client;
@@ -85,7 +86,7 @@ abstract class AbstractDropboxAccess {
      * 
      * @throws OXException
      */
-    AbstractDropboxAccess(DropboxOAuth2Access dropboxOAuthAccess, FileStorageAccount account, Session session) throws OXException {
+    AbstractDropboxAccess(AbstractOAuthAccess dropboxOAuthAccess, FileStorageAccount account, Session session) throws OXException {
         super();
         this.dropboxOAuthAccess = dropboxOAuthAccess;
         this.session = session;
