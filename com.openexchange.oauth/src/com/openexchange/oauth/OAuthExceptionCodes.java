@@ -251,9 +251,9 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     OAUTH_PROBLEM_ACCESS_DENIED("The OAuth provider refused to permit this Consumer to access the protected resources.", CATEGORY_PERMISSION_DENIED, 39, null),
     
     /**
-     * The OAuth access token for OAuth account '%1$s' is invalid.  Re-authorisation is required
+     * The OAuth access token for OAuth account '%1$s' is invalid.  Re-authorisation is required. URL: %2$s
      */
-    OAUTH_ACCESS_TOKEN_INVALID("The OAuth access token for OAuth account '%1$s' is invalid. Re-authorisation is required", CATEGORY_ERROR, 40, OAuthExceptionMessages.OAUTH_TOKEN_INVALID),
+    OAUTH_ACCESS_TOKEN_INVALID("The OAuth access token for OAuth account '%1$s' is invalid. Re-authorisation is required. URL: %2$s", CATEGORY_ERROR, 40, OAuthExceptionMessages.OAUTH_TOKEN_INVALID),
 
     ;
 

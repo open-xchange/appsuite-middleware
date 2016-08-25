@@ -113,7 +113,8 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
     protected void verifyAccount(OAuthAccount account) throws OXException {
         // Verify that the account has an access token 
         if (Strings.isEmpty(account.getToken())) {
-            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(account.getId());
+            String cburl = OAuthUtil.buildCallbackURL(session, account);
+            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(account.getId(), cburl);
         }
 
         // Other checks?
