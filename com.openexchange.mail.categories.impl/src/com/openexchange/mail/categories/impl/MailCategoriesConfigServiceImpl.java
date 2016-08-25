@@ -52,8 +52,12 @@ package com.openexchange.mail.categories.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ConfigProperty;
@@ -502,6 +506,15 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                     warnings.add(MailCategoriesOrganizeExceptionCodes.UNABLE_TO_ORGANIZE.create());
                 }
             }
+            EventAdmin eventAdmin = Services.optService(EventAdmin.class);
+            if (eventAdmin != null) {
+                Dictionary<String, Object> dic = new Hashtable<>(2);
+                dic.put(PROP_USER_ID, session.getUserId());
+                dic.put(PROP_CONTEXT_ID, session.getContextId());
+                Event event = new Event(TOPIC_REORGANIZE, dic);
+                eventAdmin.postEvent(event);
+            }
+
         }
 
     }

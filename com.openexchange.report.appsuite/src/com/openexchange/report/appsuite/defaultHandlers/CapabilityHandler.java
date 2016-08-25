@@ -261,7 +261,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     public void finish(Report report) {
         Map<String, Object> macdetail = report.getNamespace(Report.MACDETAIL);
 
-        ArrayList values = new ArrayList(macdetail.values());
+        ArrayList<Object> values = new ArrayList(macdetail.values());
         this.sumClientsInSingleMap(values);
 
         if (report.getType().equals("extended")) {
@@ -277,7 +277,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
 
         report.clearNamespace(Report.MACDETAIL);
 
-        report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, values);
+        report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, values == null ? new ArrayList<Object>() : values);
     }
 
     /**

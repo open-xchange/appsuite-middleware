@@ -209,6 +209,10 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
                 } else {
                     writerChain.go(originalVCard.asOutputStream());
                 }
+            } catch (IllegalArgumentException e) {
+                Streams.close(originalVCard);
+                originalVCard = null;
+                warnings.add(VCardExceptionCodes.ORIGINAL_VCARD_NOT_STORED.create(e, e.getMessage()));
             } catch (IOException e) {
                 Streams.close(originalVCard);
                 throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());

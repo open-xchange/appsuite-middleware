@@ -116,7 +116,9 @@ public final class HtmlServices {
         return isNonJavaScriptURL(val, new String[0]);
     }
 
-    private static final String[] UNSAFE_TOKENS = {"javascript:", "vbscript:", "data:text/html", "<script"};
+    private static final String[] UNSAFE_TOKENS = { "javascript:", "vbscript:", "<script" };
+    private static final String DATA_TOKEN = "data:";
+    private static final String BASE64_URL = ";base64,";
 
     /**
      * Checks if specified URL String is safe or not.
@@ -131,6 +133,9 @@ public final class HtmlServices {
         }
 
         String lc = asciiLowerCase(fullUrlDecode(val.trim()));
+        if (lc.indexOf(DATA_TOKEN) >= 0 && lc.indexOf(BASE64_URL) > 0) {
+            return false;
+        }
         for (String unsafeToken : UNSAFE_TOKENS) {
             if (lc.indexOf(unsafeToken) >= 0) {
                 return false;
