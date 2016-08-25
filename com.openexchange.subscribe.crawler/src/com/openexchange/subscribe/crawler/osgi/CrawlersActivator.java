@@ -62,11 +62,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-<<<<<<< 2ebb8c06d2c08e2a25e5bb75ea67423674255973
-import javax.net.ssl.HttpsURLConnection;
-=======
 import org.ho.yaml.Yaml;
->>>>>>> Remove references in activator (and in addition duplicate settings) to ensure a proper bundle startup
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -75,11 +71,7 @@ import org.yaml.snakeyaml.Yaml;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.data.conversion.ical.ICalParser;
-<<<<<<< 2ebb8c06d2c08e2a25e5bb75ea67423674255973
 import com.openexchange.java.Streams;
-import com.openexchange.ssl.SSLSocketFactoryProvider;
-=======
->>>>>>> Remove references in activator (and in addition duplicate settings) to ensure a proper bundle startup
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerBlacklister;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
