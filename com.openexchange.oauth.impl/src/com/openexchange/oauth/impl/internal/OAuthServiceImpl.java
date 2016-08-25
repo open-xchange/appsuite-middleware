@@ -897,7 +897,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
         // Add requested scopes
         String mappings = OAuthUtil.scopeMappingsToString(scopes);
-        if (Strings.isEmpty(mappings)) {
+        if (!Strings.isEmpty(mappings)) {
             serviceBuilder.scope(mappings);
         }
 
