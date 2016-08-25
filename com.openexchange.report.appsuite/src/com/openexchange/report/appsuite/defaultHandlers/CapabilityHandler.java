@@ -271,7 +271,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
 
         report.clearNamespace(Report.MACDETAIL);
 
-        report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, values == null ? new ArrayList<Object>() : values);
+        report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, values);
     }
 
     /**
