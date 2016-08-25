@@ -51,7 +51,9 @@ package com.openexchange.oauth.access.impl;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 
@@ -61,39 +63,50 @@ import com.openexchange.oauth.access.OAuthAccessRegistryService;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class OAuthAccessRegistryServiceImpl implements OAuthAccessRegistryService {
-    
-    private final ConcurrentMap<String, OAuthAccessRegistry> map;
+
+    private final AtomicReference<ConcurrentMap<String, OAuthAccessRegistryImpl>> mapRef;
 
     /**
-     * Initialises a new {@link OAuthAccessRegistryServiceImpl}.
+     * Initializes a new {@link OAuthAccessRegistryServiceImpl}.
      */
     public OAuthAccessRegistryServiceImpl() {
         super();
-        map = new ConcurrentHashMap<>();
+        mapRef = new AtomicReference<ConcurrentMap<String,OAuthAccessRegistryImpl>>(new ConcurrentHashMap<String, OAuthAccessRegistryImpl>());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccessRegistryService#get(java.lang.String)
-     */
     @Override
     public OAuthAccessRegistry get(String serviceId) throws OXException {
-        OAuthAccessRegistry oAuthAccessRegistry = map.get(serviceId);
-        if (oAuthAccessRegistry == null) {
-            // TODO: Define exception codes
-            throw new OXException(1337, "An OAuthRegistry with identifier '%s' does not exist.", serviceId);
+        ConcurrentMap<String, OAuthAccessRegistryImpl> map = mapRef.get();
+        if (null == map) {
+            throw new OXException(new IllegalStateException("Shut-down initiated"));
         }
-        return oAuthAccessRegistry;
+
+        OAuthAccessRegistry registry = map.get(serviceId);
+        if (registry == null) {
+            OAuthAccessRegistryImpl newRegistry = new OAuthAccessRegistryImpl(serviceId);
+            registry = map.putIfAbsent(serviceId, newRegistry);
+            if (null == registry) {
+                registry = newRegistry;
+            }
+        }
+        return registry;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccessRegistryService#add(java.lang.String, com.openexchange.oauth.access.OAuthAccessRegistry)
+    /**
+     * Clears this registry
      */
-    @Override
-    public void add(String serviceId, OAuthAccessRegistry accessRegistry) throws OXException {
-        map.putIfAbsent(serviceId, accessRegistry);
+    public void clear() {
+        ConcurrentMap<String, OAuthAccessRegistryImpl> map = mapRef.getAndSet(null);
+        if (null != map) {
+            for (OAuthAccessRegistryImpl registry : map.values()) {
+                for (OAuthAccess oAuthAccess : registry) {
+                    if (null != oAuthAccess) {
+                        oAuthAccess.dispose();
+                    }
+                }
+            }
+            map.clear();
+        }
     }
+
 }

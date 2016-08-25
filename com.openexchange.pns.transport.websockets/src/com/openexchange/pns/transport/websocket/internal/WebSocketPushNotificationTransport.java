@@ -517,8 +517,9 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         }
 
         Message<?> message = generator.generateMessageFor(ID, notification);
-        String textMessage = (String) message.getMessage();
 
+        // Get & send message's textual representation
+        String textMessage = message.getMessage().toString();
         webSocketService.sendMessage(textMessage, clientAndPathFilter.getPathFilter(), uac.getUserId(), uac.getContextId());
     }
 

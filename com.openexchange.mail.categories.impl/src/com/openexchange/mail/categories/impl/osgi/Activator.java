@@ -51,6 +51,7 @@ package com.openexchange.mail.categories.impl.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.service.event.EventAdmin;
 import org.slf4j.Logger;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
@@ -80,7 +81,7 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { ConfigViewFactory.class, ConfigurationService.class, MailCategoriesRuleEngine.class, ThreadPoolService.class,
-            CapabilityService.class };
+            CapabilityService.class, EventAdmin.class };
     }
 
     @Override
@@ -92,7 +93,7 @@ public class Activator extends HousekeepingActivator {
         openTrackers();
 
         final String sCapability = "mail_categories";
-        Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+        Dictionary<String, Object> properties = new Hashtable<>(2);
         properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
         registerService(CapabilityChecker.class, new FailureAwareCapabilityChecker() {
             @Override

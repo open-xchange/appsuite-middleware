@@ -2737,7 +2737,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         } else if (paramtype.equalsIgnoreCase("java.lang.Long")) {
                             long longValue = rs.getLong(fieldname);
                             if ("MaxQuota".equals(methodnamewithoutset)) {
-                                if (longValue != -1) {
+                                if (rs.wasNull()) {
+                                    longValue = -1;
+                                } else if (longValue != -1) {
                                     longValue = longValue >> 20;
                                 }
                             }

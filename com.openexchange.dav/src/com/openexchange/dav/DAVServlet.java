@@ -68,6 +68,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.AllowAsteriskAsSeparatorCustomizer;
 import com.openexchange.tools.webdav.LoginCustomizer;
 import com.openexchange.tools.webdav.OXServlet;
+import com.openexchange.tools.webdav.WebDAVRequestContext;
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.protocol.WebdavMethod;
 
@@ -144,7 +145,7 @@ public class DAVServlet extends OXServlet {
         }
         Session session = getSession(request);
         incrementRequests();
-        RequestContextHolder.set(buildRequestContext(request, response, session));
+        RequestContextHolder.set(new WebDAVRequestContext(request, session));
         LogProperties.putSessionProperties(session);
         try {
             /*

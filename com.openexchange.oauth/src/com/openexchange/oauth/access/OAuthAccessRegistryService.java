@@ -55,24 +55,17 @@ import com.openexchange.exception.OXException;
  * {@link OAuthAccessRegistryService}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface OAuthAccessRegistryService {
 
     /**
      * Retrieves the {@link OAuthAccessRegistry} with the specified service identifier from this registry service
-     * 
+     *
      * @param serviceId The service identifier of the {@link OAuthAccessRegistry} to retrieve
      * @return The {@link OAuthAccessRegistry}
-     * @throws OXException if the specified {@link OAuthAccessRegistry} does not exist
+     * @throws OXException If the specified {@link OAuthAccessRegistry} cannot be returned
      */
     OAuthAccessRegistry get(String serviceId) throws OXException;
 
-    /**
-     * Adds to this registry service the specified {@link OAuthAccessRegistry} with the specified service identifier
-     * 
-     * @param serviceId The service identifier of the {@link OAuthAccessRegistry}
-     * @param accessRegistry The {@link OAuthAccessRegistry}
-     * @throws OXException if an error is occurred
-     */
-    void add(String serviceId, OAuthAccessRegistry accessRegistry) throws OXException;
 }

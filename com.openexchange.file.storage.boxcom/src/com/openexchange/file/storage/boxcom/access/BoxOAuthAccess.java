@@ -99,75 +99,58 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(BoxOAuthAccess.class);
 
-    private FileStorageAccount fsAccount;
-    private Session session;
-
+    private final FileStorageAccount fsAccount;
     /**
-     * Initialises a new {@link BoxOAuthAccess}.
+     * Initializes a new {@link BoxOAuthAccess}.
      */
-    public BoxOAuthAccess(FileStorageAccount fsAccount, Session session) throws OXException {
-        super();
+    public BoxOAuthAccess(FileStorageAccount fsAccount, Session session) {
+        super(session);
         this.fsAccount = fsAccount;
         this.session = session;
-
-        int oauthAccountId = getAccountId();
-        // Grab Box.com OAuth account
-        OAuthService oAuthService = Services.getService(OAuthService.class);
-        OAuthAccount boxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
-        setOAuthAccount(boxOAuthAccount);
-
-        createOAuthClient();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#initialise()
-     */
     @Override
-    public void initialise() throws OXException {
+    public void initialize() throws OXException {
         synchronized (this) {
+            // Grab Box.com OAuth account
+            int oauthAccountId = getAccountId();
+            OAuthService oAuthService = Services.getService(OAuthService.class);
+            OAuthAccount boxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+            setOAuthAccount(boxOAuthAccount);
+
             OAuthAccount newAccount = recreateTokenIfExpired(true);
             if (newAccount != null) {
-                createOAuthClient();
+                setOAuthAccount(newAccount);
             }
+            createOAuthClient(newAccount);
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#revoke()
-     */
     @Override
     public void revoke() throws OXException {
-        // No Java API call
-        // More information here: https://docs.box.com/reference#revoke
-        try {
-            DefaultHttpClient httpClient = HttpClients.getHttpClient("Open-Xchange box.com Client");
-            // TODO: include the client id as a property in the boxcomoauth.properties
-            HttpGet request = new HttpGet("https://api.box.com/oauth2/revoke?client_id=" + getOAuthAccount().getMetaData().getId() + "&client_secret" + getOAuthAccount().getMetaData().getAPISecret(session) + "&token=" + getOAuthAccount().getToken());
+        synchronized (this) {
+            // No Java API call
+            // More information here: https://docs.box.com/reference#revoke
+            try {
+                DefaultHttpClient httpClient = HttpClients.getHttpClient("Open-Xchange box.com Client");
+                // TODO: include the client id as a property in the boxcomoauth.properties
+                HttpGet request = new HttpGet("https://api.box.com/oauth2/revoke?client_id=" + getOAuthAccount().getMetaData().getId() + "&client_secret" + getOAuthAccount().getMetaData().getAPISecret(session) + "&token=" + getOAuthAccount().getToken());
 
-            HttpResponse httpResponse = httpClient.execute(request);
-            int statusCode = httpResponse.getStatusLine().getStatusCode();
-            if (statusCode == 200) {
-                return;
-            } else {
+                HttpResponse httpResponse = httpClient.execute(request);
+                int statusCode = httpResponse.getStatusLine().getStatusCode();
+                if (statusCode == 200) {
+                    return;
+                }
+
                 LOG.warn("The box.com OAuth token couldn't not be revoked for user '{}' in context '{}'. Status Code: {}, {}", session.getUserId(), session.getContextId(), statusCode, httpResponse.getStatusLine().getReasonPhrase());
+            } catch (ClientProtocolException e) {
+                throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
+            } catch (IOException e) {
+                throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
             }
-        } catch (ClientProtocolException e) {
-            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
-        } catch (IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
-
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#ping()
-     */
     @Override
     public boolean ping() throws OXException {
         BoxClosure<Boolean> closure = new BoxClosure<Boolean>() {
@@ -175,7 +158,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
             @Override
             protected Boolean doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException {
                 try {
-                    BoxClient client = (BoxClient) boxAccess.getClient().client;
+                    BoxClient client = boxAccess.<BoxClient> getClient().client;
                     client.getUsersManager().getCurrentUser(new BoxDefaultRequestObject());
                     return Boolean.TRUE;
                 } catch (final BoxRestException e) {
@@ -210,32 +193,25 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         return new OAuthClient<ExtendedNonRefreshingBoxClient>(boxClient, getOAuthAccount().getToken());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#getAccountId()
-     */
     @Override
     public int getAccountId() throws OXException {
         try {
             return getAccountId(fsAccount.getConfiguration());
         } catch (IllegalArgumentException e) {
-            throw FileStorageExceptionCodes.MISSING_CONFIG.create(BoxConstants.ID, fsAccount.getId());
+            throw FileStorageExceptionCodes.MISSING_CONFIG.create(e, BoxConstants.ID, fsAccount.getId());
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
-     */
     @Override
     public OAuthAccess ensureNotExpired() throws OXException {
         if (isExpired()) {
             synchronized (this) {
-                OAuthAccount newAccount = recreateTokenIfExpired(false);
-                if (newAccount != null) {
-                    createOAuthClient();
+                if (isExpired()) {
+                    OAuthAccount newAccount = recreateTokenIfExpired(false);
+                    if (newAccount != null) {
+                        setOAuthAccount(newAccount);
+                        createOAuthClient(newAccount);
+                    }
                 }
             }
         }
@@ -261,7 +237,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
 
     /**
      * Re-creates the OAuth token if it is expired
-     * 
+     *
      * @param considerExpired flag to consider the token as expired
      * @return the {@link OAuthAccount} with the updated token
      * @throws OXException if the token cannot be recreated
@@ -302,8 +278,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         return null;
     }
 
-    private void createOAuthClient() throws OXException {
-        OAuthAccount account = getOAuthAccount();
+    private void createOAuthClient(OAuthAccount account) throws OXException {
         BoxClient boxClient = new NonRefreshingBoxClient(account.getMetaData().getAPIKey(session), account.getMetaData().getAPISecret(session), new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
         applyOAuthToken(boxClient);
         OAuthClient<BoxClient> oAuthClient = new OAuthClient<BoxClient>(boxClient, getOAuthAccount().getToken());

@@ -72,7 +72,7 @@ import com.openexchange.server.impl.OCLPermission;
 
 /**
  * {@link PrivateTests}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class PrivateTests extends AbstractAJAXSession {
@@ -143,7 +143,7 @@ public class PrivateTests extends AbstractAJAXSession {
         app.setEndDate(D("01.07.2013 09:00"));
         app.setLocation("Hier und da");
         app.setPrivateFlag(true);
-        app.setParentFolderID(client1.getValues().getPrivateAppointmentFolder());
+        app.setParentFolderID(folder.getObjectID());
 
         InsertRequest insertRequest = new InsertRequest(app, client1.getValues().getTimeZone());
         AppointmentInsertResponse insertResponse = client1.execute(insertRequest);

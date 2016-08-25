@@ -1,4 +1,4 @@
-# The YAML configuration file for the APNS transport of the Push Notification Service
+# The YAML configuration file for the GCM transport of the Push Notification Service
 #
 # Notation/meaning is:
 # <unique-client-identifier>:
@@ -11,7 +11,7 @@
 #
 
 # Only an example
-mygooglesclient:
+mygoogleclient:
     # Disabled...
     enabled: false
     key: AIzaSy2535345TbVL2r4yaZ4ZVQvJdcE1vth24546

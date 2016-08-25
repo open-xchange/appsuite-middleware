@@ -99,7 +99,7 @@ public abstract class AbstractGoogleDriveAccess {
             rootFolderId = (String) session.getParameter(key);
             if (null == rootFolderId) {
                 try {
-                    Drive drive = (Drive) googleDriveAccess.getClient().client;
+                    Drive drive = googleDriveAccess.<Drive>getClient().client;
                     rootFolderId = drive.files().get("root").execute().getId();
                     session.setParameter(key, rootFolderId);
                 } catch (HttpResponseException e) {

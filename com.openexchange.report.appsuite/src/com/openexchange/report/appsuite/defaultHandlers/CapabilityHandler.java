@@ -75,8 +75,10 @@ import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.report.InfostoreInformationService;
 import com.openexchange.report.LoginCounterService;
 import com.openexchange.report.appsuite.ContextReport;
@@ -90,7 +92,7 @@ import com.openexchange.report.appsuite.UserReportCumulator;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.report.appsuite.serialization.Report.JsonObjectType;
-import com.openexchange.tools.file.QuotaFileStorage;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * The {@link CapabilityHandler} analyzes a users capabilities and filestore quota. It sums up unique combinations of capabilities and quota and gives counts for
@@ -115,7 +117,12 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         // Grab the file store quota from the context and save them in the report
         Context ctx = contextReport.getContext();
         try {
-            long quota = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx).getQuota();
+            QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
+            if (null == storageService) {
+                throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
+            }
+            QuotaFileStorage userStorage = storageService.getQuotaFileStorage(ctx.getContextId());
+            long quota = userStorage.getQuota();
             contextReport.set(Report.MACDETAIL_QUOTA, Report.QUOTA, quota);
         } catch (OXException e) {
             LOG.error("", e);
@@ -124,64 +131,58 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     }
 
     @Override
-    public void runUserReport(UserReport userReport) {
-        try {
+    public void runUserReport(UserReport userReport) throws OXException {
+        // First look up the capabilities for this user
+        CapabilitySet capabilities = new CapabilitySet(0);
+        if (userReport.getUser().isGuest()) {
+            capabilities = Services.getService(CapabilityService.class).getCapabilities(userReport.getUser().getCreatedBy(), userReport.getContext().getContextId());
+        } else {
+            capabilities = Services.getService(CapabilityService.class).getCapabilities(userReport.getUser().getId(), userReport.getContext().getContextId());
+        }
 
-            // First look up the capabilities for this user
-            CapabilitySet capabilities = new CapabilitySet(0);
-            if (userReport.getUser().isGuest()) {
-                capabilities = Services.getService(CapabilityService.class).getCapabilities(userReport.getUser().getCreatedBy(), userReport.getContext().getContextId());
+        // Next, turn them into a list of strings
+        ArrayList<String> c = new ArrayList<String>(capabilities.size());
+
+        for (Capability capability : capabilities) {
+            c.add(capability.getId().toLowerCase());
+        }
+
+        // Sort them alphabetically so we can more easily find the same list of capabilities again
+        Collections.sort(c);
+
+        StringBuilder cString = new StringBuilder();
+        for (String cap : c) {
+            cString.append(cap).append(",");
+        }
+
+        cString.setLength(cString.length() - 1);
+
+        // Remember both the list and the identifying comma-separated String in the userReport
+        userReport.set(Report.MACDETAIL, Report.CAPABILITIES, cString.toString());
+        userReport.set(Report.MACDETAIL, Report.CAPABILITY_LIST, c);
+
+        if (!userReport.getUser().isGuest()) {
+            // Determine if the user is disabled
+            if (!userReport.getUser().isMailEnabled()) {
+                userReport.set(Report.MACDETAIL, Report.DISABLED, Boolean.TRUE);
             } else {
-                capabilities = Services.getService(CapabilityService.class).getCapabilities(userReport.getUser().getId(), userReport.getContext().getContextId());
+                userReport.set(Report.MACDETAIL, Report.DISABLED, Boolean.FALSE);
             }
 
-            // Next, turn them into a list of strings
-            ArrayList<String> c = new ArrayList<String>(capabilities.size());
-
-            for (Capability capability : capabilities) {
-                c.add(capability.getId().toLowerCase());
+            // Determine if the user is the admin user
+            if (userReport.getContext().getMailadmin() == userReport.getUser().getId()) {
+                userReport.set(Report.MACDETAIL, Report.MAILADMIN, Boolean.TRUE);
+            } else {
+                userReport.set(Report.MACDETAIL, Report.MAILADMIN, Boolean.FALSE);
             }
-
-            // Sort them alphabetically so we can more easily find the same list of capabilities again
-            Collections.sort(c);
-
-            StringBuilder cString = new StringBuilder();
-            for (String cap : c) {
-                cString.append(cap).append(",");
-            }
-
-            cString.setLength(cString.length() - 1);
-
-            // Remember both the list and the identifying comma-separated String in the userReport
-            userReport.set(Report.MACDETAIL, Report.CAPABILITIES, cString.toString());
-            userReport.set(Report.MACDETAIL, Report.CAPABILITY_LIST, c);
-
-            if (!userReport.getUser().isGuest()) {
-                // Determine if the user is disabled
-                if (!userReport.getUser().isMailEnabled()) {
-                    userReport.set(Report.MACDETAIL, Report.DISABLED, Boolean.TRUE);
-                } else {
-                    userReport.set(Report.MACDETAIL, Report.DISABLED, Boolean.FALSE);
-                }
-
-                // Determine if the user is the admin user
-                if (userReport.getContext().getMailadmin() == userReport.getUser().getId()) {
-                    userReport.set(Report.MACDETAIL, Report.MAILADMIN, Boolean.TRUE);
-                } else {
-                    userReport.set(Report.MACDETAIL, Report.MAILADMIN, Boolean.FALSE);
-                }
-                // Get all relevant logins for this user and add them to the report
-                Calendar cal = Calendar.getInstance();
-                Date endDate = cal.getTime();
-                cal.add(Calendar.YEAR, -1);
-                Date startDate = cal.getTime();
-                LoginCounterService loginCounterService = Services.getService(LoginCounterService.class);
-                HashMap<String, Long> userLogins = loginCounterService.getLastClientLogIns(userReport.getUser().getId(), userReport.getContext().getContextId(), startDate, endDate);
-                userReport.set(Report.MACDETAIL, Report.USER_LOGINS, userLogins);
-            }
-        } catch (OXException e) {
-            LOG.error("", e);
-            Services.getService(ReportService.class).abortContextReport(userReport.getUUID(), userReport.getType());
+            // Get all relevant logins for this user and add them to the report
+            Calendar cal = Calendar.getInstance();
+            Date endDate = cal.getTime();
+            cal.add(Calendar.YEAR, -1);
+            Date startDate = cal.getTime();
+            LoginCounterService loginCounterService = Services.getService(LoginCounterService.class);
+            HashMap<String, Long> userLogins = loginCounterService.getLastClientLogIns(userReport.getUser().getId(), userReport.getContext().getContextId(), startDate, endDate);
+            userReport.set(Report.MACDETAIL, Report.USER_LOGINS, userLogins);
         }
     }
 
@@ -279,7 +280,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     public void finish(Report report) {
         Map<String, Object> macdetail = report.getNamespace(Report.MACDETAIL);
 
-        ArrayList values = new ArrayList(macdetail.values());
+        ArrayList<Object> values = new ArrayList(macdetail.values());
         // TODO QS-VS: warum auskommentiert?
         //        this.sumClientsInSingleMap(values);
 
@@ -403,7 +404,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     /**
      * Set the user specific data for the given {@link ContextReport}. The capability-set specific values
      * like total, admin... are incremented depending on the given {@link UserReport}.
-     * 
+     *
      * @param userReport
      * @param contextReport
      */
@@ -427,7 +428,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         // Get the users client logins and save them also to this context/capability-set
         HashMap<String, Long> userLogins = userReport.get(Report.MACDETAIL, Report.USER_LOGINS, HashMap.class);
         for (Entry<String, Long> clientName : userLogins.entrySet()) {
-            incCount(counts, (String) clientName.getKey());
+            incCount(counts, clientName.getKey());
         }
 
         incCount(counts, Report.TOTAL);
@@ -449,7 +450,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     /**
      * Distinguish the guest type (link or guest) and increment the predestined parameter in the
      * given context report
-     * 
+     *
      * @param userReport
      * @param contextReport
      */
@@ -470,12 +471,12 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
 
     /**
      * Increments the value of an element in the given map, identified by the given key
-     * 
+     *
      * @param elementMap
      * @param keyInMap
      */
     private void incCount(HashMap<String, Long> elementMap, String keyInMap) {
-        Long value = (Long) elementMap.get(keyInMap);
+        Long value = elementMap.get(keyInMap);
         if (value == null) {
             value = Long.valueOf(0);
         }
@@ -484,7 +485,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
 
     /**
      * Calculate drive specific average-metrics and clean up the given map form unneeded parameters.
-     * 
+     *
      * @param driveTotalMap, the map with all relevant drive metrics.
      */
     private void calculateCorrectDriveAvg(LinkedHashMap<String, Long> driveTotalMap) {
@@ -510,15 +511,16 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             driveTotalMap.remove("quota-usage-percent-sum");
         }
 
-        if (driveTotalMap.get("external-storages-users") != null && driveTotalMap.get("external-storages-users") != 0)
+        if (driveTotalMap.get("external-storages-users") != null && driveTotalMap.get("external-storages-users") != 0) {
             driveTotalMap.put("external-storages-avg", driveTotalMap.get("external-storages-total") / driveTotalMap.get("external-storages-users"));
+        }
     }
 
     /**
      * Get all drive metrics from db for the given usersInContext map. The result is saved into the given
      * capSMap. All new total values on report level are then recalculated and saved into the given
      * report.
-     * 
+     *
      * @param capSMap, the capability-set key/value pairs
      * @param usersInContext, all relevant contexts and users for this capability-set
      * @param consideredTimeframeStart, beginning of potential timeframe for calculating file count
@@ -562,7 +564,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         } finally {
             informationService.closeAllDBConnections();
         }
-        driveUserMetrics.put("users", driveUserMetrics.get("file-count-overall-users"));
+        driveUserMetrics.put("users", driveUserMetrics.get("file-count-overall-users") == null ? 0 : driveUserMetrics.get("file-count-overall-users"));
         driveUserMetrics.remove("file-count-overall-users");
         capSMap.put(Report.DRIVE_USER, driveUserMetrics);
         capSMap.put(Report.DRIVE_OVERALL, driveMetrics);
@@ -573,15 +575,17 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
         for (Entry<String, Integer> entry : driveUserMetrics.entrySet()) {
             Long value = totalDrive.get(entry.getKey());
+            Long newValue = entry.getValue() == null ? 0l : entry.getValue().longValue();
             if (value == null) {
-                totalDrive.put(entry.getKey(), entry.getValue().longValue());
+                totalDrive.put(entry.getKey(), newValue);
             } else {
-                if (entry.getKey().contains("min") && entry.getValue() < value) {
-                    totalDrive.put(entry.getKey(), entry.getValue().longValue());
-                } else if (entry.getKey().contains("max") && entry.getValue() > value) {
-                    totalDrive.put(entry.getKey(), entry.getValue().longValue());
-                } else if (entry.getKey().contains("total") || entry.getKey().contains("sum") || entry.getKey().contains("users"))
-                    totalDrive.put(entry.getKey(), totalDrive.get(entry.getKey()) + entry.getValue());
+                if (entry.getKey().contains("min") && newValue < value) {
+                    totalDrive.put(entry.getKey(), newValue);
+                } else if (entry.getKey().contains("max") && newValue > value) {
+                    totalDrive.put(entry.getKey(), newValue);
+                } else if (entry.getKey().contains("total") || entry.getKey().contains("sum") || entry.getKey().contains("users")) {
+                    totalDrive.put(entry.getKey(), totalDrive.get(entry.getKey()) + newValue);
+                }
             }
 
         }
@@ -609,7 +613,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     /**
      * Add all values from counts to saveCounts. Also calculate Context-users-min/max/avg in savedCounts, depending
      * on the new values.
-     * 
+     *
      * @param savedCounts
      * @param counts
      */
@@ -690,7 +694,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
      * Sum all clients of the given attribute list in one single Map and remove them from from the given {@link ArrayList} afterwards.
      * A client is identified by the preceding string "client:". In the new Map, this preceding string is removed and the rest
      * represents the key. The value is the amount. The result is added to the given ArrayList.
-     * 
+     *
      * @param capSValueMap - A list of {@link HashMap}<String, Object>s with the counted values of a capability-set
      */
     private void sumClientsInSingleMap(ArrayList capSValueMap) {

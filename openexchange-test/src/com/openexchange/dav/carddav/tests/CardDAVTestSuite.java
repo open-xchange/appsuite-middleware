@@ -77,6 +77,7 @@ import org.junit.runners.Suite.SuiteClasses;
     AddressbookQueryTest.class,
     AddressbookQueryPartialRetrievalTest.class,
     AddressbookMultigetPartialRetrievalTest.class,
+    ImageURITest.class
 })
 public final class CardDAVTestSuite {
 

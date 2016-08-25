@@ -61,13 +61,13 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.boxcom.access.BoxOAuthAccess;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.session.Session;
 
 /**
- * {@link BoxAccountAccess}
+ * {@link BoxAccountAccess} - Initialized per call to <code>BoxFileStorageService.getAccountAccess()</code>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -76,7 +76,7 @@ public final class BoxAccountAccess implements CapabilityAware {
     private final FileStorageAccount account;
     private final Session session;
     private final FileStorageService service;
-    private OAuthAccess boxAccess;
+    private volatile OAuthAccess boxAccess;
 
     /**
      * Initializes a new {@link BoxAccountAccess}.
@@ -106,15 +106,17 @@ public final class BoxAccountAccess implements CapabilityAware {
     public void connect() throws OXException {
         OAuthAccessRegistryService service = Services.getService(OAuthAccessRegistryService.class);
         OAuthAccessRegistry registry = service.get(API.BOX_COM.getFullName());
-        boxAccess = registry.get(session.getContextId(), session.getUserId());
+        OAuthAccess boxAccess = registry.get(session.getContextId(), session.getUserId());
         if (boxAccess == null) {
             BoxOAuthAccess access = new BoxOAuthAccess(account, session);
-            registry.add(session.getContextId(), session.getUserId(), access);
-            if (boxAccess == null) {
+            boxAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), access);
+            if (null == boxAccess) {
+                access.initialize();
                 boxAccess = access;
             }
+            this.boxAccess = boxAccess;
         } else {
-            boxAccess = boxAccess.ensureNotExpired();
+            this.boxAccess = boxAccess.ensureNotExpired();
         }
     }
 
@@ -145,6 +147,7 @@ public final class BoxAccountAccess implements CapabilityAware {
 
     @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
+        OAuthAccess boxAccess = this.boxAccess;
         if (null == boxAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }
@@ -153,6 +156,7 @@ public final class BoxAccountAccess implements CapabilityAware {
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
+        OAuthAccess boxAccess = this.boxAccess;
         if (null == boxAccess) {
             throw FileStorageExceptionCodes.NOT_CONNECTED.create();
         }

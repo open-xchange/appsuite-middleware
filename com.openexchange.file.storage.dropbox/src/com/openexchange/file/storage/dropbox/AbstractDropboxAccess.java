@@ -58,7 +58,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
+import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.session.Session;
 
 /**
@@ -71,24 +71,24 @@ public abstract class AbstractDropboxAccess {
     /** Status code (409) indicating that the request could not be completed due to a conflict with the current state of the resource. */
     protected static final int SC_CONFLICT = 409;
 
-    protected final DropboxOAuthAccess dropboxOAuthAccess;
+    protected final AbstractOAuthAccess dropboxOAuthAccess;
     protected final Session session;
     protected final FileStorageAccount account;
     protected final DropboxAPI<WebAuthSession> dropboxAPI;
 
     /**
      * Initialises a new {@link AbstractDropboxAccess}.
-     * 
+     *
      * @throws OXException
      */
     @SuppressWarnings("unchecked")
-    protected AbstractDropboxAccess(final DropboxOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session) throws OXException {
+    protected AbstractDropboxAccess(final AbstractOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session) throws OXException {
         super();
         this.dropboxOAuthAccess = dropboxOAuthAccess;
         this.account = account;
         this.session = session;
         // Other fields
-        this.dropboxAPI = (DropboxAPI<WebAuthSession>) dropboxOAuthAccess.getClient().client;
+        this.dropboxAPI = dropboxOAuthAccess.<DropboxAPI<WebAuthSession>> getClient().client;
     }
 
     /**

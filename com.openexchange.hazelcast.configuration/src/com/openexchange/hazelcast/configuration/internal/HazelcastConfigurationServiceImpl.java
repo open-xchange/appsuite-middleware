@@ -313,7 +313,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         String loggingType = configService.getBoolProperty("com.openexchange.hazelcast.logging.enabled", true) ? "slf4j" : "none";
         System.setProperty(GroupProperty.LOGGING_TYPE.getName(), loggingType);
         config.setProperty(GroupProperty.LOGGING_TYPE, loggingType);
-        config.setProperty(GroupProperty.VERSION_CHECK_ENABLED, "false");
+        config.setProperty(GroupProperty.PHONE_HOME_ENABLED, "false");
         config.setProperty(GroupProperty.HEALTH_MONITORING_LEVEL, configService.getProperty("com.openexchange.hazelcast.healthMonitorLevel", "silent").toUpperCase());
         config.setProperty(GroupProperty.OPERATION_CALL_TIMEOUT_MILLIS, configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "30000"));
         config.setProperty(GroupProperty.ENABLE_JMX, configService.getProperty("com.openexchange.hazelcast.jmx", "true"));

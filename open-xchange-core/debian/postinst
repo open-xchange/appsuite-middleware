@@ -1250,6 +1250,9 @@ ox_add_property com.openexchange.secret.recovery.fast.enabled true /opt/open-xch
 # Bug 47925
 dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/contextSets/index.yml 7.8.3~ -- "$@"
 
+# SoftwareChange_Request-3528
+ox_add_property html.tag.code '""' /opt/open-xchange/etc/whitelist.properties
+
 setConfigFilePermissions() {
     PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
     for FILE in "${PROTECT[@]}"

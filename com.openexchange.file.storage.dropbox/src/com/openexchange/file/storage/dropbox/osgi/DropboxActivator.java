@@ -60,10 +60,8 @@ import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.file.storage.dropbox.access.DropboxEventHandler;
 import com.openexchange.mime.MimeTypeMap;
-import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -109,11 +107,6 @@ public final class DropboxActivator extends HousekeepingActivator {
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
             registerService(EventHandler.class, new DropboxEventHandler(), serviceProperties);
-            /*
-             * Register the access registry
-             */
-            OAuthAccessRegistryService oAuthAccessRegistryService = DropboxServices.getService(OAuthAccessRegistryService.class);
-            oAuthAccessRegistryService.add(API.DROPBOX.getFullName(), new OAuthAccessRegistry(API.DROPBOX.getFullName()));
         } catch (final Exception e) {
             org.slf4j.LoggerFactory.getLogger(DropboxActivator.class).error("", e);
             throw e;

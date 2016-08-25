@@ -106,8 +106,8 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.OAuthToken;
-import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.services.Services;
 import com.openexchange.secret.SecretEncryptionFactoryService;
@@ -771,7 +771,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 // First revoke the old token
                 access.revoke();
                 // Then initialise the access with the new one
-                access.initialise();
+                access.initialize();
             }
             /*
              * Return the account

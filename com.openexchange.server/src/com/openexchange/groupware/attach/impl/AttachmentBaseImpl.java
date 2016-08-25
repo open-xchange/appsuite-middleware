@@ -168,7 +168,7 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 Quota amountQuota = quotaProvider.getAmountQuota(session);
                 long limit = amountQuota.getLimit();
                 long usage = amountQuota.getUsage();
-                if (limit > 0 && amountQuota.getUsage() >= limit) {
+                if (limit == 0 || (limit > 0 && amountQuota.getUsage() >= limit)) {
                     throw QuotaExceptionCodes.QUOTA_EXCEEDED_ATTACHMENTS.create(usage, limit);
                 }
             }

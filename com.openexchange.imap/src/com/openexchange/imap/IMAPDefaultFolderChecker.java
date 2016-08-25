@@ -731,7 +731,7 @@ public class IMAPDefaultFolderChecker {
                 } else {
                     // Full name specified
                     if (fullName.indexOf(sep) > 0 || !fullName.equals(names[i])) {
-                        // E.g. name=Sent, but fullName=INBOX/Sent or fullName=Zent
+                        // E.g. name=Sent, but fullName=INBOX/Sent or fullName=Sent
 
                         String expectedFullName = null;
                         if (null != checkedIndexes) {

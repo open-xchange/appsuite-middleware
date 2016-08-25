@@ -55,6 +55,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
+import com.openexchange.session.Session;
 
 /**
  * {@link AbstractOAuthAccess}
@@ -70,57 +71,53 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
     private volatile OAuthAccount oauthAccount;
 
     /** The associated OAuth client */
-    private AtomicReference<OAuthClient<?>> oauthClientRef;
+    private final AtomicReference<OAuthClient<?>> oauthClientRef;
 
     /** The last-accessed time stamp */
     private volatile long lastAccessed;
 
+    protected final Session session;
+
     /**
-     * Initialises a new {@link AbstractOAuthAccess}.
+     * Initializes a new {@link AbstractOAuthAccess}.
+     * @param session TODO
      */
-    public AbstractOAuthAccess() {
+    protected AbstractOAuthAccess(Session session) {
         super();
+        this.session = session;
         oauthClientRef = new AtomicReference<OAuthClient<?>>();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#dispose()
-     */
     @Override
     public void dispose() {
-        // So far nothing known that needs to be disposed        
+        // Empty by default
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#getOAuthAccount()
-     */
     @Override
     public OAuthAccount getOAuthAccount() {
         return oauthAccount;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#getClient()
-     */
     @Override
-    public OAuthClient<?> getClient() throws OXException {
+    public <T> OAuthClient<T> getClient() throws OXException {
         OAuthClient<?> client = oauthClientRef.get();
         if (client == null) {
-            initialise();
+            // Exclusive initialization for OAuth client
+            synchronized (this) {
+                client = oauthClientRef.get();
+                if (client == null) {
+                    initialize();
+                    client = oauthClientRef.get();
+                }
+            }
         }
-        return client;
+        return (OAuthClient<T>) client;
     }
 
     /**
      * Verifies whether the OAuth token and the associated {@link OAuthClient} are expired.
-     * 
-     * @return <code>true</code> if expired; false otherwise
+     *
+     * @return <code>true</code> if expired; <code>false</code> otherwise
      */
     protected boolean isExpired() {
         long now = System.nanoTime();
@@ -128,51 +125,59 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
     }
 
     /**
-     * Sets the {@link OAuthClient}. Updates the last accessed timestamp
-     * 
+     * Sets the {@link OAuthClient}. Updates the last accessed time stamp
+     *
      * @param client The {@link OAuthClient} to set
      */
-    protected void setOAuthClient(OAuthClient<?> client) {
+    protected <T> void setOAuthClient(OAuthClient<T> client) {
         lastAccessed = System.nanoTime();
         oauthClientRef.set(client);
     }
 
     /**
+     * Gets the {@link OAuthClient} reference w/o any initializations before-hand.
+     *
+     * @return The {@link OAuthClient} instance or <code>null</code>
+     */
+    protected <T> OAuthClient<T> getOAuthClient() {
+        return (OAuthClient<T>) oauthClientRef.get();
+    }
+
+    /**
      * Sets the {@link OAuthAccount}
-     * 
-     * @param oauthAccount the {@link OAuthAccount} to set
+     *
+     * @param oauthAccount The {@link OAuthAccount} to set
      */
     protected void setOAuthAccount(OAuthAccount oauthAccount) {
         this.oauthAccount = oauthAccount;
     }
 
     /**
-     * Returns the OAuth account identifier from messaging account's configuration
-     * 
+     * Returns the OAuth account identifier from associated account's configuration
+     *
      * @param configuration The configuration
      * @return The account identifier
-     * @throws IllegalArgumentException if the configuration is <code>null</code>, or if the account identifier is not present, or is present but cannot be parsed as an integer
+     * @throws IllegalArgumentException If the configuration is <code>null</code>, or if the account identifier is not present, or is present but cannot be parsed as an integer
      */
     protected int getAccountId(Map<String, Object> configuration) {
-        final int oauthAccountId;
-        {
-            if (null == configuration) {
-                throw new IllegalArgumentException("The configuration cannot be 'null'");
-            }
-            final Object accountId = configuration.get("account");
-            if (null == accountId) {
-                throw new IllegalArgumentException("The account identifier is missing from the configuration");
-            }
-            if (accountId instanceof Integer) {
-                oauthAccountId = ((Integer) accountId).intValue();
-            } else {
-                try {
-                    oauthAccountId = Integer.parseInt(accountId.toString());
-                } catch (final NumberFormatException e) {
-                    throw new IllegalArgumentException("The account identifier '" + accountId.toString() + "' cannot be parsed as an integer.");
-                }
-            }
+        if (null == configuration) {
+            throw new IllegalArgumentException("The configuration cannot be 'null'");
         }
-        return oauthAccountId;
+
+        Object accountId = configuration.get("account");
+        if (null == accountId) {
+            throw new IllegalArgumentException("The account identifier is missing from the configuration");
+        }
+
+        if (accountId instanceof Integer) {
+            return ((Integer) accountId).intValue();
+        }
+
+        try {
+            return Integer.parseInt(accountId.toString());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("The account identifier '" + accountId.toString() + "' cannot be parsed as an integer.", e);
+        }
     }
+
 }

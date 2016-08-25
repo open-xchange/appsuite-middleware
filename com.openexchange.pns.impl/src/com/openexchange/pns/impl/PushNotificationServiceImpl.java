@@ -246,7 +246,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                 } while (null != notification);
             }
 
-            // Drop timer task is queue is empty
+            // Drop timer task if queue is empty
             if (scheduledNotifcations.isEmpty()) {
                 cancelTimerTask();
             }
