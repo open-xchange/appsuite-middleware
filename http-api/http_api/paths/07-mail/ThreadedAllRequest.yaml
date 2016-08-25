@@ -38,6 +38,11 @@
         type: integer
         description: 'A positive integer number to specify how many items shall be returned according to given sorting; overrides `left_hand_limit`/`right_hand_limit` parameters and is equal to `left_hand_limit=0` and `right_hand_limit=<limit>`. Note: Applies only to root-level messages.'
         required: false
+      - in: query
+        name: categoryid
+        type: string
+        description: The category id to filter for. Retrieves all conversations with at least one mail in the category.
+        required: false
     responses:
       200:
         description: |
