@@ -53,6 +53,7 @@ import java.util.Date;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.DeleteResult;
+import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 
@@ -94,15 +95,6 @@ public class DeleteResultImpl extends UpdateResultImpl implements DeleteResult {
         this.timestamp = timestamp;
     }
 
-    /**
-     * Gets a value indicating whether the delete operation resulted in an event update instead of a deletion.
-     *
-     * @return <code>true</code> if the result represents an update, <code>false</code>, otherwise
-     */
-    public boolean wasUpdate() {
-        return null != getUpdate();
-    }
-
     @Override
     public Date getTimestamp() {
         return null != timestamp ? timestamp : super.getTimestamp();
@@ -114,8 +106,13 @@ public class DeleteResultImpl extends UpdateResultImpl implements DeleteResult {
     }
 
     @Override
-    public int getFolderID() {
-        return getOriginalFolderID();
+    public boolean wasUpdate() {
+        return null != getUpdate();
+    }
+
+    @Override
+    public UpdateResult asUpdate() {
+        return wasUpdate() ? this : null;
     }
 
 }

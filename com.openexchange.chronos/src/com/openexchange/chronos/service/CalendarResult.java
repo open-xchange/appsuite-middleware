@@ -47,89 +47,48 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.service;
 
 import java.util.Date;
+import com.openexchange.groupware.ldap.User;
 
 /**
- * {@link Trigger}
+ * {@link CalendarResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
- * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.6.3">RFC 5545, section 3.8.6.3</a>
  */
-public class Trigger {
+public interface CalendarResult {
 
-	public enum Related {
-		START,
-		END
-	}
+    /**
+     * Gets the underlying calendar session.
+     *
+     * @return The calendar session
+     */
+    CalendarSession getSession();
 
-	private String duration;
-	private Related related;
-	private Date dateTime;
+    /**
+     * Gets the the actual target calendar user based on the folder view the action has been performed in. This is either the current
+     * session's user when operating in <i>private</i> or <i>public</i> folders, or the folder owner for <i>shared</i> calendar folders.
+     *
+     * @return The actual calendar user
+     */
+    User getCalendarUser();
 
-	public String getDuration() {
-		return duration;
-	}
+    /**
+     * The updated server timestamp as used as new/updated last-modification date of the modified data in storage, which is usually also
+     * returned to clients.
+     *
+     * @return The server timestamp
+     */
+    Date getTimestamp();
 
-	public void setDuration(String duration) {
-		this.duration = duration;
-	}
-
-	public Related getRelated() {
-		return related;
-	}
-
-	public void setRelated(Related related) {
-		this.related = related;
-	}
-
-	public Date getDateTime() {
-		return dateTime;
-	}
-
-	public void setDateTime(Date dateTime) {
-		this.dateTime = dateTime;
-	}
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((dateTime == null) ? 0 : dateTime.hashCode());
-        result = prime * result + ((duration == null) ? 0 : duration.hashCode());
-        result = prime * result + ((related == null) ? 0 : related.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Trigger other = (Trigger) obj;
-        if (dateTime == null) {
-            if (other.dateTime != null)
-                return false;
-        } else if (!dateTime.equals(other.dateTime))
-            return false;
-        if (duration == null) {
-            if (other.duration != null)
-                return false;
-        } else if (!duration.equals(other.duration))
-            return false;
-        if (related != other.related)
-            return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "Trigger [duration=" + duration + ", related=" + related + ", dateTime=" + dateTime + "]";
-    }
+    /**
+     * Gets the identifier of the folder the action has been performed in, representing the view of the calendar user.
+     *
+     * @return The folder identifier
+     */
+    int getFolderID();
 
 }
+

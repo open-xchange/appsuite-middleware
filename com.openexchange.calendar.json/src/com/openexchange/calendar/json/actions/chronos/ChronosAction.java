@@ -189,9 +189,12 @@ public abstract class ChronosAction extends AppointmentAction {
         return new AJAXRequestResult(appointments, timestamp, "appointment");
     }
 
-    private static Date getLatestModified(Date lastModified, UserizedEvent event) {
-        Date eventLastModified = event.getEvent().getLastModified();
-        return null != eventLastModified && eventLastModified.after(lastModified) ? eventLastModified : lastModified;
+    protected static Date getLatestModified(Date lastModified, UserizedEvent event) {
+        return getLatestModified(lastModified, event.getEvent().getLastModified());
+    }
+
+    protected static Date getLatestModified(Date lastModified1, Date lastModified2) {
+        return null != lastModified2 && lastModified2.after(lastModified1) ? lastModified2 : lastModified1;
     }
 
     protected static AJAXRequestResult getAppointmentDeltaResultWithTimestamp(List<UserizedEvent> newAndModifiedEvents, List<UserizedEvent> deletedEvents) {

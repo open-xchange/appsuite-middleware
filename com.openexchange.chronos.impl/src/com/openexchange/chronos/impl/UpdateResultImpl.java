@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
@@ -59,6 +60,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
+import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
@@ -69,12 +71,10 @@ import com.openexchange.groupware.ldap.User;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class UpdateResultImpl extends DefaultItemUpdate<Event, EventField> implements UpdateResult {
+public class UpdateResultImpl extends AbstractCalendarResult implements UpdateResult {
 
-    private final CalendarSession session;
-    private final User calendarUser;
-    private final int originalFolderID;
     private final int updatedFolderID;
+    private final ItemUpdate<Event, EventField> itemUpdate;
 
     private CollectionUpdate<Alarm, AlarmField> alarmUpdates;
     private CollectionUpdate<Attendee, AttendeeField> attendeeUpdates;
@@ -90,10 +90,8 @@ public class UpdateResultImpl extends DefaultItemUpdate<Event, EventField> imple
      * @param updatedEvent The updated event
      */
     public UpdateResultImpl(CalendarSession session, User calendarUser, int originalFolderID, Event originalEvent, int updatedFolderID, Event updatedEvent) throws OXException {
-        super(EventMapper.getInstance(), originalEvent, updatedEvent);
-        this.session = session;
-        this.calendarUser = calendarUser;
-        this.originalFolderID = originalFolderID;
+        super(session, calendarUser, originalFolderID);
+        this.itemUpdate = new DefaultItemUpdate<Event, EventField>(EventMapper.getInstance(), originalEvent, updatedEvent);
         this.updatedFolderID = updatedFolderID;
         setAttendeeUpdates(null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null);
     }
@@ -113,23 +111,8 @@ public class UpdateResultImpl extends DefaultItemUpdate<Event, EventField> imple
     }
 
     @Override
-    public CalendarSession getSession() {
-        return session;
-    }
-
-    @Override
-    public User getCalendarUser() {
-        return calendarUser;
-    }
-
-    @Override
     public Date getTimestamp() {
-        return updatedItem.getLastModified();
-    }
-
-    @Override
-    public int getOriginalFolderID() {
-        return originalFolderID;
+        return getUpdate().getLastModified();
     }
 
     @Override
@@ -145,6 +128,26 @@ public class UpdateResultImpl extends DefaultItemUpdate<Event, EventField> imple
     @Override
     public CollectionUpdate<Alarm, AlarmField> getAlarmUpdates() {
         return null != alarmUpdates ? alarmUpdates : AbstractCollectionUpdate.<Alarm, AlarmField> emptyUpdate();
+    }
+
+    @Override
+    public Event getOriginal() {
+        return itemUpdate.getOriginal();
+    }
+
+    @Override
+    public Event getUpdate() {
+        return itemUpdate.getUpdate();
+    }
+
+    @Override
+    public Set<EventField> getUpdatedFields() {
+        return itemUpdate.getUpdatedFields();
+    }
+
+    @Override
+    public boolean containsAnyChangeOf(EventField[] fields) {
+        return itemUpdate.containsAnyChangeOf(fields);
     }
 
 }

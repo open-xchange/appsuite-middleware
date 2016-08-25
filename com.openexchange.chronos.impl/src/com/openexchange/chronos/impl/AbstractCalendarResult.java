@@ -47,89 +47,51 @@
  *
  */
 
-package com.openexchange.chronos;
+package com.openexchange.chronos.impl;
 
-import java.util.Date;
+import com.openexchange.chronos.service.CalendarResult;
+import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.groupware.ldap.User;
 
 /**
- * {@link Trigger}
+ * {@link AbstractCalendarResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
- * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.6.3">RFC 5545, section 3.8.6.3</a>
  */
-public class Trigger {
+public abstract class AbstractCalendarResult implements CalendarResult {
 
-	public enum Related {
-		START,
-		END
-	}
+    protected final CalendarSession session;
+    protected final User calendarUser;
+    protected final int folderID;
 
-	private String duration;
-	private Related related;
-	private Date dateTime;
-
-	public String getDuration() {
-		return duration;
-	}
-
-	public void setDuration(String duration) {
-		this.duration = duration;
-	}
-
-	public Related getRelated() {
-		return related;
-	}
-
-	public void setRelated(Related related) {
-		this.related = related;
-	}
-
-	public Date getDateTime() {
-		return dateTime;
-	}
-
-	public void setDateTime(Date dateTime) {
-		this.dateTime = dateTime;
-	}
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((dateTime == null) ? 0 : dateTime.hashCode());
-        result = prime * result + ((duration == null) ? 0 : duration.hashCode());
-        result = prime * result + ((related == null) ? 0 : related.hashCode());
-        return result;
+    /**
+     * Initializes a new {@link AbstractCalendarResult}.
+     *
+     * @param session The calendar session
+     * @param calendarUser The actual calendar user
+     * @param folderID The identifier of the folder the event has been created in.
+     */
+    protected AbstractCalendarResult(CalendarSession session, User calendarUser, int folderID) {
+        super();
+        this.session = session;
+        this.calendarUser = calendarUser;
+        this.folderID = folderID;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Trigger other = (Trigger) obj;
-        if (dateTime == null) {
-            if (other.dateTime != null)
-                return false;
-        } else if (!dateTime.equals(other.dateTime))
-            return false;
-        if (duration == null) {
-            if (other.duration != null)
-                return false;
-        } else if (!duration.equals(other.duration))
-            return false;
-        if (related != other.related)
-            return false;
-        return true;
+    public CalendarSession getSession() {
+        return session;
     }
 
     @Override
-    public String toString() {
-        return "Trigger [duration=" + duration + ", related=" + related + ", dateTime=" + dateTime + "]";
+    public User getCalendarUser() {
+        return calendarUser;
+    }
+
+    @Override
+    public int getFolderID() {
+        return folderID;
     }
 
 }

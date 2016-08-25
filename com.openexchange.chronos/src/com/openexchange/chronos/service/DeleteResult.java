@@ -49,9 +49,7 @@
 
 package com.openexchange.chronos.service;
 
-import java.util.Date;
 import com.openexchange.chronos.Event;
-import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link DeleteResult}
@@ -59,29 +57,7 @@ import com.openexchange.groupware.ldap.User;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface DeleteResult {
-
-    /**
-     * Gets the underlying calendar session.
-     *
-     * @return The calendar session
-     */
-    CalendarSession getSession();
-
-    /**
-     * Gets the the actual target calendar user based on the folder view the deletion is performed in. This is either the current session's
-     * user when operating in <i>private</i> or <i>public</i> folders, or the folder owner for <i>shared</i> calendar folders.
-     *
-     * @return The actual calendar user
-     */
-    User getCalendarUser();
-
-    /**
-     * The new server timestamp of the deleted event as used to return to clients.
-     *
-     * @return The updated server timestamp
-     */
-    Date getTimestamp();
+public interface DeleteResult extends CalendarResult {
 
     /**
      * Gets the deleted event.
@@ -91,11 +67,18 @@ public interface DeleteResult {
     Event getDeletedEvent();
 
     /**
-     * Gets the identifier of the folder the event has been deleted in, representing the view of the calendar user.
+     * Gets a value indicating whether the delete operation resulted in an event update instead of a deletion.
      *
-     * @return The folder identifier
+     * @return <code>true</code> if the result represents an update, <code>false</code>, otherwise
      */
-    int getFolderID();
+    boolean wasUpdate();
+
+    /**
+     * Returns the update result view in case the delete operation resulted in an event update instead of a deletion, i.e.
+     * {@link #wasUpdate()} is <code>true</code>.
+     *
+     * @return The corresponding update result, or <code>null</code> if not available
+     */
+    UpdateResult asUpdate();
 
 }
-

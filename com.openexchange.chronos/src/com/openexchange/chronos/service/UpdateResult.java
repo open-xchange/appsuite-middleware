@@ -49,14 +49,12 @@
 
 package com.openexchange.chronos.service;
 
-import java.util.Date;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link UpdateResult}
@@ -64,36 +62,7 @@ import com.openexchange.groupware.ldap.User;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface UpdateResult extends ItemUpdate<Event, EventField> {
-
-    /**
-     * Gets the underlying calendar session.
-     *
-     * @return The calendar session
-     */
-    CalendarSession getSession();
-
-    /**
-     * Gets the the actual target calendar user based on the folder view the update is performed in. This is either the current session's
-     * user when operating in <i>private</i> or <i>public</i> folders, or the folder owner for <i>shared</i> calendar folders.
-     *
-     * @return The actual calendar user
-     */
-    User getCalendarUser();
-
-    /**
-     * The new server timestamp of the updated event as used to return to clients.
-     *
-     * @return The updated server timestamp
-     */
-    Date getTimestamp();
-
-    /**
-     * Gets the identifier of the folder the event has been updated in.
-     *
-     * @return The original folder identifier
-     */
-    int getOriginalFolderID();
+public interface UpdateResult extends CalendarResult, ItemUpdate<Event, EventField> {
 
     /**
      * Gets the identifier of the folder the event has been moved into.
@@ -113,6 +82,7 @@ public interface UpdateResult extends ItemUpdate<Event, EventField> {
      * Gets the alarm-related modifications performed through the update operation. Only alarms of the actual calendar user are considered.
      *
      * @return The alarm updates, or an empty collection update if there were no alarm-related changes
+     * @see #getCalendarUser()
      */
     CollectionUpdate<Alarm, AlarmField> getAlarmUpdates();
 

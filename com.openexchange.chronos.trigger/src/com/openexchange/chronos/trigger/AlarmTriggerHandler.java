@@ -334,6 +334,9 @@ public class AlarmTriggerHandler implements CalendarHandler {
              */
             TimeZone timeZone = null != event.getStartTimezone() ? TimeZone.getTimeZone(event.getStartTimezone()) : getTimeZone(context, event.getCreatedBy());
             Event occurrence = getNextOccurrence(event, timeZone);
+            if (null == occurrence) {
+                return triggersPerUser;
+            }
             for (Attendee attendee : userAttendees) {
                 List<Alarm> alarms = alarmsByUser.get(I(attendee.getEntity()));
                 if (null != alarms && 0 < alarms.size()) {
@@ -349,7 +352,9 @@ public class AlarmTriggerHandler implements CalendarHandler {
                 if (null != alarms && 0 < alarms.size()) {
                     TimeZone timeZone = getTimeZone(context, attendee.getEntity());
                     Event occurrence = getNextOccurrence(event, timeZone);
-                    put(triggersPerUser, I(attendee.getEntity()), prepareTriggers(occurrence, attendee, timeZone, alarms, forSeries));
+                    if (null != occurrence) {
+                        put(triggersPerUser, I(attendee.getEntity()), prepareTriggers(occurrence, attendee, timeZone, alarms, forSeries));
+                    }
                 }
             }
         }

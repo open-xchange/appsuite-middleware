@@ -61,11 +61,8 @@ import com.openexchange.groupware.ldap.User;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CreateResultImpl implements CreateResult {
+public class CreateResultImpl extends AbstractCalendarResult implements CreateResult {
 
-    private final CalendarSession session;
-    private final User calendarUser;
-    private final int folderID;
     private final Event createdEvent;
 
     /**
@@ -77,21 +74,8 @@ public class CreateResultImpl implements CreateResult {
      * @param createdEvent The created event
      */
     public CreateResultImpl(CalendarSession session, User calendarUser, int folderID, Event createdEvent) {
-        super();
-        this.session = session;
-        this.calendarUser = calendarUser;
-        this.folderID = folderID;
+        super(session, calendarUser, folderID);
         this.createdEvent = createdEvent;
-    }
-
-    @Override
-    public CalendarSession getSession() {
-        return session;
-    }
-
-    @Override
-    public User getCalendarUser() {
-        return calendarUser;
     }
 
     @Override
@@ -102,11 +86,6 @@ public class CreateResultImpl implements CreateResult {
     @Override
     public Event getCreatedEvent() {
         return createdEvent;
-    }
-
-    @Override
-    public int getFolderID() {
-        return folderID;
     }
 
 }

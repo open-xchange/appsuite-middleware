@@ -70,12 +70,29 @@ public interface AlarmStorage {
 
     Map<Integer, List<Alarm>> loadAlarms(int[] objectIDs, int userID) throws OXException;
 
-    void deleteAlarms(int objectID, int userID) throws OXException;
-
-    void deleteAlarms(int objectID, int[] userIDs) throws OXException;
-
     void updateAlarms(int objectID, int userID, List<Alarm> alarms) throws OXException;
 
+    /**
+     * Deletes all alarms stored for a specific event.
+     *
+     * @param objectID The identifier of the event to remove the alarms for
+     */
     void deleteAlarms(int objectID) throws OXException;
+
+    /**
+     * Deletes all alarms of a user stored for a specific event.
+     *
+     * @param objectID The identifier of the event to remove the alarms for
+     * @param userID The identifier of the user to remove the alarms for
+     */
+    void deleteAlarms(int objectID, int userID) throws OXException;
+
+    /**
+     * Deletes all alarms of multiple users stored for a specific event.
+     *
+     * @param objectID The identifier of the event to remove the alarms for
+     * @param userIDs The identifiers of the users to remove the alarms for
+     */
+    void deleteAlarms(int objectID, int[] userIDs) throws OXException;
 
 }

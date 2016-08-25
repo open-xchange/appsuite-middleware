@@ -234,7 +234,9 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     private static int insertOrReplaceEvent(Connection connection, String tableName, boolean replace, int contextID, Event event) throws SQLException, OXException {
         EventField[] mappedFields = EventMapper.getInstance().getMappedFields();
         String sql = new StringBuilder()
-            .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName).append(' ').append("(cid,").append(EventMapper.getInstance().getColumns(mappedFields)).append(") ").append("VALUES (?,").append(EventMapper.getInstance().getParameters(mappedFields)).append(");")
+            .append(replace ? "REPLACE" : "INSERT").append(" INTO ").append(tableName).append(' ')
+            .append("(cid,").append(EventMapper.getInstance().getColumns(mappedFields)).append(") ")
+            .append("VALUES (?,").append(EventMapper.getInstance().getParameters(mappedFields)).append(");")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;

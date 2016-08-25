@@ -51,6 +51,7 @@ package com.openexchange.chronos.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.exception.OXException;
 
@@ -84,11 +85,9 @@ public interface CalendarService {
 
     UpdateResult updateEvent(CalendarSession session, EventID eventID, UserizedEvent event) throws OXException;
 
-    //    UserizedEvent moveEvent(CalendarSession session, EventID eventID, int targetFolderID) throws OXException;
-
     UpdateResult updateAttendee(CalendarSession session, int folderID, int objectID, Attendee attendee) throws OXException;
 
-    void deleteEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
+    Map<EventID, DeleteResult> deleteEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
 
     List<UserizedEvent> getUpdatedEventsInFolder(CalendarSession session, int folderID, Date updatedSince) throws OXException;
 

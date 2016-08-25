@@ -82,6 +82,7 @@ import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -330,24 +331,37 @@ public class CalendarWriter extends CalendarReader {
         /*
          * update alarms for calendar user as needed
          */
-        AbstractCollectionUpdate<Alarm, AlarmField> alarmUpdates = null;
+        CollectionUpdate<Alarm, AlarmField> alarmUpdates = null;
         if (userizedEvent.containsAlarms()) {
-            List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(objectID, calendarUser.getId());
-            alarmUpdates = AlarmMapper.getInstance().getAlarmUpdate(originalAlarms, userizedEvent.getAlarms());
-            if (false == alarmUpdates.isEmpty()) {
-                // TODO distinct alarm update
-                storage.getAlarmStorage().deleteAlarms(objectID, calendarUser.getId());
-                if (null != userizedEvent.getAlarms()) {
-                    storage.getAlarmStorage().insertAlarms(objectID, calendarUser.getId(), userizedEvent.getAlarms());
-                }
-                List<Alarm> newAlarms = storage.getAlarmStorage().loadAlarms(objectID, calendarUser.getId());
-                alarmUpdates = AlarmMapper.getInstance().getAlarmUpdate(originalAlarms, newAlarms);
-            }
+            alarmUpdates = updateAlarms(objectID, calendarUser, userizedEvent.getAlarms());
         }
         Event updatedEvent = readAdditionalEventData(storage.getEventStorage().loadEvent(objectID, null), null);
         UpdateResultImpl result = new UpdateResultImpl(session, calendarUser, originalFolderID, originalEvent, updatedFolderID, updatedEvent);
         result.setAlarmUpdates(alarmUpdates);
         return result;
+    }
+
+    /**
+     * Updates a calendar user's alarms for a specific event.
+     *
+     * @param objectID The identifier of the event to update the alarms in
+     * @param calendarUser The calendar user whose alarms are updated
+     * @param updatedAlarms The updated alarms
+     * @return A corresponding collection update
+     */
+    private CollectionUpdate<Alarm, AlarmField> updateAlarms(int objectID, User calendarUser, List<Alarm> updatedAlarms) throws OXException {
+        List<Alarm> originalAlarms = storage.getAlarmStorage().loadAlarms(objectID, calendarUser.getId());
+        CollectionUpdate<Alarm, AlarmField> alarmUpdates = AlarmMapper.getInstance().getAlarmUpdate(originalAlarms, updatedAlarms);
+        if (false == alarmUpdates.isEmpty()) {
+            // TODO distinct alarm update
+            storage.getAlarmStorage().deleteAlarms(objectID, calendarUser.getId());
+            if (null != updatedAlarms) {
+                storage.getAlarmStorage().insertAlarms(objectID, calendarUser.getId(), updatedAlarms);
+            }
+            List<Alarm> newAlarms = storage.getAlarmStorage().loadAlarms(objectID, calendarUser.getId());
+            return AlarmMapper.getInstance().getAlarmUpdate(originalAlarms, newAlarms);
+        }
+        return alarmUpdates;
     }
 
     private void moveEvent(Event event, UserizedFolder folder, UserizedFolder targetFolder) throws OXException {

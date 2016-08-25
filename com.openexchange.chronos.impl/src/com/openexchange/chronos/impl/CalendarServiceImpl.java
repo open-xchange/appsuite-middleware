@@ -49,15 +49,17 @@
 
 package com.openexchange.chronos.impl;
 
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CreateResult;
+import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.chronos.service.UserizedEvent;
@@ -275,16 +277,16 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public void deleteEvents(CalendarSession session, final List<EventID> eventIDs) throws OXException {
+    public Map<EventID, DeleteResult> deleteEvents(CalendarSession session, final List<EventID> eventIDs) throws OXException {
         Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
         final long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
-        List<DeleteResultImpl> results = new WriteOperation<List<DeleteResultImpl>>(session) {
+        Map<EventID, DeleteResult> results = new WriteOperation<Map<EventID, DeleteResult>>(session) {
 
             @Override
-            protected List<DeleteResultImpl> execute(CalendarWriter writer) throws OXException {
-                List<DeleteResultImpl> results = new ArrayList<DeleteResultImpl>(eventIDs.size());
+            protected Map<EventID, DeleteResult> execute(CalendarWriter writer) throws OXException {
+                Map<EventID, DeleteResult> results = new HashMap<EventID, DeleteResult>(eventIDs.size());
                 for (EventID eventID : eventIDs) {
-                    results.add(writer.deleteEvent(eventID.getFolderID(), eventID.getObjectID(), clientTimestamp));
+                    results.put(eventID, writer.deleteEvent(eventID.getFolderID(), eventID.getObjectID(), clientTimestamp));
                 }
                 return results;
             }
@@ -292,10 +294,10 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * notify handlers
          */
-        for (DeleteResultImpl result : results) {
+        for (DeleteResult result : results.values()) {
             if (result.wasUpdate()) {
                 for (CalendarHandler handler : calendarHandlers) {
-                    handler.eventUpdated(result);
+                    handler.eventUpdated(result.asUpdate());
                 }
             } else {
                 for (CalendarHandler handler : calendarHandlers) {
@@ -303,7 +305,7 @@ public class CalendarServiceImpl implements CalendarService {
                 }
             }
         }
-        //        return results;
+        return results;
     }
 
 }

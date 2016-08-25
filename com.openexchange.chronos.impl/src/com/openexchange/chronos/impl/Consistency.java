@@ -216,6 +216,12 @@ public class Consistency {
                      * ensure all necessary recurrence related data is present in passed event update
                      */
                     EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
+                    /*
+                     * assign recurrence id when transforming a single event to a series
+                     */
+                    if (0 >= originalEvent.getSeriesId()) {
+                        eventUpdate.setSeriesId(originalEvent.getId());
+                    }
                     break;
                 case START_DATE:
                     /*
