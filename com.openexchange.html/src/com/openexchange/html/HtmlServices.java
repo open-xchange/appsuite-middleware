@@ -54,6 +54,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import org.apache.commons.codec.net.URLCodec;
+import org.apache.tika.mime.MediaType;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.WhitelistedSchemes;
 import com.openexchange.html.osgi.Services;
@@ -116,7 +117,9 @@ public final class HtmlServices {
         return isNonJavaScriptURL(val, new String[0]);
     }
 
-    private static final String[] UNSAFE_TOKENS = {"javascript:", "vbscript:", "data:text/html", "<script"};
+    private static final String[] UNSAFE_TOKENS = { "javascript:", "vbscript:", "<script", "data:text/html" };
+    private static final String DATA_TOKEN = "data:";
+    private static final String BASE64_TOKEN = ";base64";
 
     /**
      * Checks if specified URL String is safe or not.
@@ -131,6 +134,24 @@ public final class HtmlServices {
         }
 
         String lc = asciiLowerCase(fullUrlDecode(val.trim()));
+
+        // do media type whitelisting for "data:" tokens
+        int dataPos = lc.indexOf(DATA_TOKEN);
+        if (dataPos >= 0) {
+            // retrieve media/type
+            String sub = lc.substring(lc.indexOf(DATA_TOKEN) + DATA_TOKEN.length(), lc.length() - 1);
+            sub = sub.substring(0, sub.indexOf(','));
+            int base64Pos = sub.indexOf(BASE64_TOKEN);
+            if (base64Pos >= 0) {
+                sub = sub.substring(0, base64Pos);
+            }
+            MediaType type = MediaType.parse(sub);
+            if (type == null) {
+                // unknown media type
+                return false;
+            }
+        }
+
         for (String unsafeToken : UNSAFE_TOKENS) {
             if (lc.indexOf(unsafeToken) >= 0) {
                 return false;
