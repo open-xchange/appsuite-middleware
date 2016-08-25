@@ -446,7 +446,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         } finally {
             informationService.closeAllDBConnections();
         }
-        driveUserMetrics.put("users", driveUserMetrics.get("file-count-overall-users"));
+        driveUserMetrics.put("users", driveUserMetrics.get("file-count-overall-users") == null ? 0 : driveUserMetrics.get("file-count-overall-users"));
         driveUserMetrics.remove("file-count-overall-users");
         capSMap.put(Report.DRIVE_USER, driveUserMetrics);
         capSMap.put(Report.DRIVE_OVERALL, driveMetrics);
