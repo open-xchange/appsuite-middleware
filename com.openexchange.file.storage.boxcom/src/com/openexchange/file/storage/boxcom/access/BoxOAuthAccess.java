@@ -134,7 +134,6 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
             // More information here: https://docs.box.com/reference#revoke
             try {
                 DefaultHttpClient httpClient = HttpClients.getHttpClient("Open-Xchange box.com Client");
-                // TODO: include the client id as a property in the boxcomoauth.properties
                 HttpGet request = new HttpGet("https://api.box.com/oauth2/revoke?client_id=" + getOAuthAccount().getMetaData().getId() + "&client_secret" + getOAuthAccount().getMetaData().getAPISecret(getSession()) + "&token=" + getOAuthAccount().getToken());
 
                 HttpResponse httpResponse = httpClient.execute(request);
