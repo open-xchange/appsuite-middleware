@@ -69,6 +69,7 @@ import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthToken;
+import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -180,7 +181,10 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
         }
 
         // Add requested scopes
-        OAuthUtil.addScopes(serviceBuilder, scopes);
+        String mappings = OAuthUtil.scopeMappingsToString(scopes);
+        if (Strings.isEmpty(mappings)) {
+            serviceBuilder.scope(mappings);
+        }
 
         OAuthService scribeOAuthService = serviceBuilder.build();
 

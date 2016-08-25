@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oauth.impl;
+package com.openexchange.oauth;
 
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.UnsupportedEncodingException;
@@ -55,12 +55,9 @@ import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.Set;
-import org.scribe.builder.ServiceBuilder;
 import com.openexchange.framework.request.RequestContext;
 import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
 
@@ -72,25 +69,12 @@ import com.openexchange.session.Session;
 public final class OAuthUtil {
 
     /**
-     * Adds the specified {@link OAuthScope}s to the specified {@link ServiceBuilder}
-     * 
-     * @param serviceBuilder The {@link ServiceBuilder} to add the {@link OAuthScope}s to
-     * @param scopes The {@link OAuthScope}s to add
-     */
-    public static final void addScopes(ServiceBuilder serviceBuilder, Set<OAuthScope> scopes) {
-        if (scopes.isEmpty()) {
-            return;
-        }
-        serviceBuilder.scope(scopesToString(scopes));
-    }
-
-    /**
      * Parses the specified {@link OAuthScope}s and returns the mappings ({@link OAuthScope#getMapping()}) as a space separated string
      * 
      * @param scopes The {@link OAuthScope}s
      * @return a space separated string with all {@link OAuthScope}s in the specified {@link Set}
      */
-    private static final String scopesToString(Set<OAuthScope> scopes) {
+    public static final String scopeMappingsToString(Set<OAuthScope> scopes) {
         if (scopes.isEmpty()) {
             return "";
         }
@@ -121,11 +105,11 @@ public final class OAuthUtil {
     }
 
     /**
-     * Builds the call-back URL for OAuth
+     * Builds the 'init' call-back URL for OAuth
      * 
-     * @return the call-back URL for OAuth
+     * @return the 'init' call-back URL for OAuth
      */
-    public static final String buildCallbackURL(Session session, OAuthAccount account, String oauthSessionToken, String sessionToken, String displayName, Set<OAuthScope> scopes, String cb) {
+    public static final String buildCallbackURL(Session session, OAuthAccount account) {
         RequestContext requestContext = RequestContextHolder.get();
         HostData hostData = requestContext.getHostData();
         boolean isSecure = hostData.isSecure();
@@ -134,25 +118,12 @@ public final class OAuthUtil {
         builder.append(isSecure ? "https://" : "http://");
         builder.append(determineHost(hostData));
         builder.append(hostData.getDispatcherPrefix());
-        builder.append("oauth/accounts;jsessionid=");
-        builder.append(hostData.getHTTPSession());
-
-        builder.append("?action=reauthorize");
+        builder.append("oauth/accounts?action=init");
+        builder.append("&serviceId=").append(account.getAPI().getFullName());
         builder.append("&id=").append(account.getId());
-        builder.append("&respondWithHTML=true&session=").append(session.getSessionID());
-        {
-            final String name = OAuthConstants.ARGUMENT_DISPLAY_NAME;
-            if (displayName != null) {
-                builder.append('&').append(name).append('=').append(urlEncode(displayName));
-            }
-        }
-        builder.append('&').append("serviceId").append('=').append(urlEncode(account.getMetaData().getAPI().getFullName()));
-        builder.append('&').append(OAuthConstants.SESSION_PARAM_UUID).append('=').append(sessionToken);
-        builder.append('&').append(Session.PARAM_TOKEN).append('=').append(oauthSessionToken);
-        builder.append('&').append("scopes").append('=').append(urlEncode(OAuthUtil.scopeModulesToString(scopes)));
-        if (!isEmpty(cb)) {
-            builder.append("&callback=").append(cb);
-        }
+        builder.append('&').append(OAuthConstants.ARGUMENT_DISPLAY_NAME).append('=').append(urlEncode(account.getDisplayName()));
+        builder.append("&scopes=").append(urlEncode(OAuthUtil.scopeModulesToString(account.getEnabledScopes())));
+        builder.append("&session=").append(session.getSessionID());
 
         return builder.toString();
     }
