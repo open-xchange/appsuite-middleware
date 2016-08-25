@@ -64,8 +64,10 @@ import java.util.Properties;
 import net.htmlparser.jericho.Config;
 import net.htmlparser.jericho.LoggerProvider;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.html.HtmlService;
+import com.openexchange.html.MediaTypeChecker;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.WhitelistedSchemes;
 import com.openexchange.html.internal.jericho.JerichoParser;
@@ -116,6 +118,12 @@ public class HTMLServiceActivator extends HousekeepingActivator {
              * Service trackers
              */
             track(ProxyRegistry.class, new ProxyRegistryCustomizer(context));
+
+            trackService(MediaTypeChecker.class);
+            MediaTypeChecker mediaTypeChecker = new MediaTypeChecker();
+            registerService(Reloadable.class, mediaTypeChecker);
+            registerService(MediaTypeChecker.class, mediaTypeChecker);
+            
             /*
              * Open trackers
              */
@@ -182,8 +190,8 @@ public class HTMLServiceActivator extends HousekeepingActivator {
     }
 
     public static Object[] getHTMLEntityMaps(final File htmlEntityFile) {
-        final Map<Character, String> htmlCharMap = new HashMap<Character, String>();
-        final Map<String, Character> htmlEntityMap = new HashMap<String, Character>();
+        final Map<Character, String> htmlCharMap = new HashMap<>();
+        final Map<String, Character> htmlEntityMap = new HashMap<>();
         final Properties htmlEntities = new Properties();
         InputStream in = null;
         try {
@@ -211,8 +219,8 @@ public class HTMLServiceActivator extends HousekeepingActivator {
     }
 
     public static Object[] getDefaultHTMLEntityMaps() {
-        final Map<Character, String> htmlCharMap = new HashMap<Character, String>();
-        final Map<String, Character> htmlEntityMap = new HashMap<String, Character>();
+        final Map<Character, String> htmlCharMap = new HashMap<>();
+        final Map<String, Character> htmlEntityMap = new HashMap<>();
         final Properties htmlEntities = new Properties();
         try {
             final StringBuilder entityMap = new StringBuilder(1024);

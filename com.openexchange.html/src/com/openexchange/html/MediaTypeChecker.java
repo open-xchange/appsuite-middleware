@@ -47,26 +47,66 @@
  *
  */
 
-package com.openexchange.report.appsuite;
+package com.openexchange.html;
 
-import com.openexchange.exception.OXException;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.config.Reloadables;
+import com.openexchange.html.osgi.Services;
+import com.openexchange.java.Strings;
 
 /**
- * A {@link ReportUserHandler} analyzes a given user and places data about him/her in a {@link UserReport}
+ * {@link MediaTypeChecker}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.3
  */
-public interface ReportUserHandler {
+public class MediaTypeChecker implements Reloadable {
 
-    /**
-     * Analyze the user ( To be retrieved via {@link UserReport#getUser()} and {@link UserReport#getContext()})
-     * @throws OXException 
-     */
-    void runUserReport(UserReport userReport) throws OXException;
+    private volatile String[] forbiddenMediaType = null;
+    private static final String HARMFUL_MEDIA_TYPES = "com.openexchange.mail.harmful.media.types";
 
-    /**
-     * Declare whether to run as part of this reportType
-     */
-    boolean appliesTo(String reportType);
+    public boolean isHarmFul(String mediaType, String value) {
+        for (String possibleHarmful : getForbiddenMediaTypes()) {
+            if (possibleHarmful.contentEquals(mediaType)) {
+                //TODO do some checking
+
+            }
+        }
+        return false;
+    }
+
+    private String[] getForbiddenMediaTypes() {
+        if (forbiddenMediaType == null) {
+            ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+            if (configurationService != null) {
+                String text = configurationService.getProperty(HARMFUL_MEDIA_TYPES);
+                if (Strings.isEmpty(text)) {
+                    forbiddenMediaType = new String[0];
+                } else {
+                    forbiddenMediaType = Strings.splitByComma(text);
+                }
+            } else {
+                return new String[0];
+            }
+        }
+        return forbiddenMediaType;
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        String text = configService.getProperty(HARMFUL_MEDIA_TYPES);
+        if (Strings.isEmpty(text)) {
+            forbiddenMediaType = new String[0];
+        } else {
+            forbiddenMediaType = Strings.splitByComma(text);
+        }
+    }
+
+    @Override
+    public Interests getInterests() {
+        return Reloadables.interestsForProperties(HARMFUL_MEDIA_TYPES);
+    }
 
 }

@@ -117,7 +117,7 @@ public final class HtmlServices {
         return isNonJavaScriptURL(val, new String[0]);
     }
 
-    private static final String[] UNSAFE_TOKENS = { "javascript:", "vbscript:", "<script", "data:text/html" };
+    private static final String[] UNSAFE_TOKENS = { "javascript:", "vbscript:", "<script" };
     private static final String DATA_TOKEN = "data:";
     private static final String BASE64_TOKEN = ";base64";
 
@@ -149,6 +149,14 @@ public final class HtmlServices {
             if (type == null) {
                 // unknown media type
                 return false;
+            }
+
+            // check for harmful media types
+            MediaTypeChecker service = Services.getService(MediaTypeChecker.class);
+            if (service != null) {
+                if (service.isHarmFul(sub, lc)) {
+                    return false;
+                }
             }
         }
 
