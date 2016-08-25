@@ -49,6 +49,7 @@
 
 package com.openexchange.report.appsuite;
 
+import com.openexchange.exception.OXException;
 
 /**
  * A {@link ReportUserHandler} analyzes a given user and places data about him/her in a {@link UserReport}
@@ -59,8 +60,9 @@ public interface ReportUserHandler {
 
     /**
      * Analyze the user ( To be retrieved via {@link UserReport#getUser()} and {@link UserReport#getContext()})
+     * @throws OXException 
      */
-    void runUserReport(UserReport userReport);
+    void runUserReport(UserReport userReport) throws OXException;
 
     /**
      * Declare whether to run as part of this reportType
