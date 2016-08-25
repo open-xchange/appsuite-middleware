@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.apache.http.annotation.ThreadSafe;
 
 /**
  * Utility class that can test if DNS names match the content of the Public Suffix List.
@@ -43,7 +42,6 @@ import org.apache.http.annotation.ThreadSafe;
  *
  * @since 4.4
  */
-@ThreadSafe
 public final class PublicSuffixMatcher {
 
     private final Map<String, String> rules;

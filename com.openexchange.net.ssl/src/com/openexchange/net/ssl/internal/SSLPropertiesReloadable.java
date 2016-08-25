@@ -49,8 +49,8 @@
 
 package com.openexchange.net.ssl.internal;
 
-import java.util.Map;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.net.ssl.config.SSLProperties;
 
@@ -68,7 +68,7 @@ public class SSLPropertiesReloadable implements Reloadable {
     }
 
     @Override
-    public Map<String, String[]> getConfigFileNames() {
+    public Interests getInterests() {
         // TODO Auto-generated method stub
         return null;
     }

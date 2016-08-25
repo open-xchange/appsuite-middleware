@@ -47,7 +47,6 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.security.auth.x500.X500Principal;
-import org.apache.http.annotation.Immutable;
 import org.apache.http.conn.util.InetAddressUtils;
 import com.openexchange.net.ssl.internal.DefaultTrustManager;
 
@@ -56,7 +55,6 @@ import com.openexchange.net.ssl.internal.DefaultTrustManager;
  *
  * @since 4.4
  */
-@Immutable
 public class DefaultHostnameVerifier implements HostnameVerifier {
 
     final static int DNS_NAME_TYPE = 2;
