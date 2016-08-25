@@ -207,6 +207,12 @@ public class Consistency {
                     break;
                 case RECURRENCE_RULE:
                     /*
+                     * deny update for change exceptions
+                     */
+                    if (CalendarUtils.isSeriesException(originalEvent)) {
+                        throw OXException.general("not allowed change");
+                    }
+                    /*
                      * ensure all necessary recurrence related data is present in passed event update
                      */
                     EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
