@@ -119,6 +119,7 @@ public class MSLiveApiClient {
             arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
             arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
             oauthService.updateAccount(account.getId(), arguments, session.getUserId(), session.getContextId(), account.getEnabledScopes());
+            token = accessToken.getToken();
         }
 
         return token;
