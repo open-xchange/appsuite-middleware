@@ -233,8 +233,10 @@ If everything is allright you only have to restart the server.
 
 With OX Middleware version 7.8.2 a feature called mail categories (aka tabbed inbox) is introduced.
 This features divides the inbox of the primary email account into categories. Each category acts like a container for emails.
-The emails will be categorized into this containers based on email flags. Whereby each mail can only be in one category at a time.
+The emails will be categorized into this containers based on email flags. Whereby each mail can only be in one category at a time with the exception of conversations.
 All mails which does not belong to any active category will be categorized in a 'general' category.
+In case of conversations the complete conversation will be shown in each category in which at least one email of the conversation belong. For example if a conversations contains mails from three different categories, the complete conversation will be shown in each of those three categories. 
+
 
 The mail categories feature currently allows the hoster/admin to:
 * Enable the feature for users via config cascade
