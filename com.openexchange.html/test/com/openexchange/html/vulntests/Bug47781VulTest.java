@@ -72,12 +72,5 @@ public class Bug47781VulTest extends AbstractSanitizing {
             "</head><body><p><a href=\"data:text/html;base64,PHNjcmlwdD5wcm9tcHQoZG9jdW1lbnQuY29va2llKTwvc2NyaXB0Pg==\">XSS</a><br></p></body></html>";
 
         AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "data:text/html");
-        
-        content = "<!DOCTYPE html>\n" +
-            "<html><head>\n" +
-            "    <meta charset=\"UTF-8\">\n" +
-            "</head><body><p><a href=\"data:someValue;base64,PHNjcmlwdD5wcm9tcHQoZG9jdW1lbnQuY29va2llKTwvc2NyaXB0Pg==\">XSS</a><br></p></body></html>";
-
-        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "data:someValue");
     }
 }
