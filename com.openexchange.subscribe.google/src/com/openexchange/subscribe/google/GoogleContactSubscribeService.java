@@ -318,7 +318,7 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
                         while (resultsFound == pageSize) {
                             List<Contact> contacts = new ArrayList<Contact>();
                             adjustQuery(contactQuery, page, pageSize);
-                            fetchResults(contactsService, contactQuery, contacts);
+                            resultsFound = fetchResults(contactsService, contactQuery, contacts);
                             folderUpdater.save(new SearchIteratorDelegator<Contact>(contacts), subscription);
 
                             // Next page...
