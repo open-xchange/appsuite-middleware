@@ -246,6 +246,12 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
     private OAuthAccount recreateTokenIfExpired(boolean considerExpired) throws OXException {
         // Create Scribe Box.com OAuth service
         OAuthAccount boxOAuthAccount = getOAuthAccount();
+        OAuthService oAuthService = Services.getService(OAuthService.class);
+        if (boxOAuthAccount == null) {
+            // Reload
+            boxOAuthAccount = oAuthService.getAccount(getAccountId(), getSession(), getSession().getUserId(), getSession().getContextId());
+        }
+
         final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(BoxApi.class);
         serviceBuilder.apiKey(boxOAuthAccount.getMetaData().getAPIKey(getSession())).apiSecret(boxOAuthAccount.getMetaData().getAPISecret(getSession()));
         BoxApi.BoxApiService scribeOAuthService = (BoxApi.BoxApiService) serviceBuilder.build();
@@ -266,7 +272,6 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
                 refreshToken = accessToken.getSecret();
             }
             // Update account
-            OAuthService oAuthService = Services.getService(OAuthService.class);
             int accountId = boxOAuthAccount.getId();
             Map<String, Object> arguments = new HashMap<String, Object>(3);
             arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
