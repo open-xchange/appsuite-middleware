@@ -127,13 +127,13 @@ import com.openexchange.mail.transport.listener.Reply;
 import com.openexchange.mail.transport.listener.Result;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.ISMTPProperties;
 import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
 import com.openexchange.smtp.filler.SMTPMessageFiller;
 import com.openexchange.smtp.services.Services;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.smtp.JavaSMTPTransport;
 import com.sun.mail.smtp.SMTPMessage;
 import com.sun.mail.smtp.SMTPSendFailedException;
@@ -462,7 +462,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                      * Check if a secure SMTP connection should be established
                      */
                     final String sPort = String.valueOf(smtpConfig.getPort());
-                    final String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+                    final String socketFactoryClass = SSLSocketFactoryProvider.getDefault().getClass().getName();
                     if (smtpConfig.isSecure()) {
                         /*
                          * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected

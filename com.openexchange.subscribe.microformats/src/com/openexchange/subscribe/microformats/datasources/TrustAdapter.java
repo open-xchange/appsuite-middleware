@@ -47,48 +47,69 @@
  *
  */
 
-package com.openexchange.management.internal;
+package com.openexchange.subscribe.microformats.datasources;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.InetAddress;
-import java.net.ServerSocket;
+import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.rmi.server.RMISocketFactory;
+import java.net.SocketAddress;
+import java.net.UnknownHostException;
+import javax.net.ssl.SSLSocketFactory;
+import org.apache.commons.httpclient.ConnectTimeoutException;
+import org.apache.commons.httpclient.params.HttpConnectionParams;
+import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+
 
 /**
- * {@link CustomRMIClientSocketFactory}
+ * {@link TrustAdapter}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public final class CustomRMISocketFactory extends RMISocketFactory implements Serializable {
+public class TrustAdapter implements ProtocolSocketFactory {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 4536982546713571286L;
+    private final SSLSocketFactory delegate = SSLSocketFactoryProvider.getDefault();
 
-    private final InetAddress bindAddress;
-
-    /**
-     * Initializes a new {@link CustomRMIClientSocketFactory}.
-     *
-     * @param bindAddr The bind address
-     * @throws IOException If initialization fails
-     */
-    public CustomRMISocketFactory(final String bindAddr) throws IOException {
-        super();
-        bindAddress = bindAddr.charAt(0) == '*' ? null : InetAddress.getByName(bindAddr);
+    @Override
+    public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
+        return delegate.createSocket(host, port);
     }
 
     @Override
-    public ServerSocket createServerSocket(final int port) throws IOException {
-        return new ServerSocket(port, 0, bindAddress);
+    public Socket createSocket(String host, int port, InetAddress localAddress, int localPort) throws IOException, UnknownHostException {
+        return delegate.createSocket(host, port, localAddress, localPort);
     }
 
     @Override
-    public Socket createSocket(final String host, final int port) throws IOException {
-        return new Socket(InetAddress.getByName(host), port);
+    public Socket createSocket(String host, int port, InetAddress localAddress, int localPort, HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
+        Socket socket;
+        int timeout = params.getConnectionTimeout();
+        if (timeout == 0) {
+            socket = createSocket(host, port, localAddress, localPort);
+        } else {
+            socket = delegate.createSocket();
+            SocketAddress localaddr = new InetSocketAddress(localAddress, localPort);
+            SocketAddress remoteaddr = new InetSocketAddress(host, port);
+            socket.bind(localaddr);
+            socket.connect(remoteaddr, timeout);
+            return socket;
+        }
+
+
+        int linger = params.getLinger();
+        if(linger == 0) {
+            socket.setSoLinger(false, 0);
+        } else if (linger > 0) {
+            socket.setSoLinger(true, linger);
+        }
+
+        socket.setSoTimeout(params.getSoTimeout());
+        socket.setTcpNoDelay(params.getTcpNoDelay());
+
+        return socket;
     }
+
 
 }

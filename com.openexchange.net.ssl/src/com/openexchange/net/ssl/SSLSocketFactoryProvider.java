@@ -55,17 +55,18 @@ import com.openexchange.net.ssl.config.TrustLevel;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
- * {@link SSLSocketFactoryProvider}
- * 
- * This implementation has to be placed within an exported package as it will be accessed per reflection.
+ * The provider of the {@link SSLSocketFactory} based on the configuration made by the administrator.
  *
+ * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
 public class SSLSocketFactoryProvider {
 
     /**
-     * Returns the configured {@link SSLSocketFactory}. This method is invoked by by reflection
+     * Returns the configured {@link SSLSocketFactory}. This method is invoked by by reflection.
+     * <p>
+     * Do not use the underlying {@link SSLSocketFactory} directly as this will bypass the server configuration.
      * 
      * @return {@link TrustedSSLSocketFactory} or {@link TrustAllSSLSocketFactory} based on the configuration
      */

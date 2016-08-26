@@ -79,6 +79,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.POP3Provider;
 import com.openexchange.pop3.config.IPOP3Properties;
@@ -87,7 +88,6 @@ import com.openexchange.pop3.config.POP3Properties;
 import com.openexchange.pop3.config.POP3SessionProperties;
 import com.openexchange.pop3.util.POP3CapabilityCache;
 import com.openexchange.session.Session;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Prober;
 import com.sun.mail.pop3.POP3Store;
@@ -310,18 +310,11 @@ public final class POP3StoreConnector {
              * then switching the connection into TLS mode using the STLS command.
              */
             final String sPort = String.valueOf(port);
-            final String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+            final String socketFactoryClass = SSLSocketFactoryProvider.getDefault().getClass().getName();
             if (pop3Config.isSecure()) {
                 pop3Props.put("mail.pop3.socketFactory.class", socketFactoryClass);
                 pop3Props.put("mail.pop3.socketFactory.port", sPort);
                 pop3Props.put("mail.pop3.socketFactory.fallback", "false");
-                /*
-                 * Needed for JavaMail >= 1.4
-                 */
-                // Security.setProperty("ssl.SocketFactory.provider", TrustAllSSLSocketFactory.class.getName());
-                /*
-                 * Specify SSL protocols
-                 */
                 pop3Props.put("mail.pop3.ssl.protocols", pop3Config.getPOP3Properties().getSSLProtocols());
                 /*
                  * Specify SSL cipher suites

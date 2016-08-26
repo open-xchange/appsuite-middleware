@@ -60,7 +60,7 @@ import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.scheme.SchemeLayeredSocketFactory;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 
 /**
  * {@link EasySSLSocketFactory}
@@ -148,7 +148,7 @@ public class EasySSLSocketFactory implements SchemeLayeredSocketFactory {
 
     @Override
     public Socket createLayeredSocket(Socket socket, String host, int port, HttpParams params) throws IOException, UnknownHostException {
-        SSLSocket sslSocket = (SSLSocket) TrustAllSSLSocketFactory.getDefault().createSocket(socket, host, port, true);
+        SSLSocket sslSocket = (SSLSocket) SSLSocketFactoryProvider.getDefault().createSocket(socket, host, port, true);
         if (!sslSocket.isConnected()) {
             int connTimeout = HttpConnectionParams.getConnectionTimeout(params);
             InetSocketAddress remoteAddress = new InetSocketAddress(host, port);
@@ -161,19 +161,19 @@ public class EasySSLSocketFactory implements SchemeLayeredSocketFactory {
         return sslSocket;
 
         /*
-        Socket sock = socket != null ? socket : createSocket(params);
-        if (sock instanceof SSLSocket) {
-            final SSLSocket sslsock = (SSLSocket) sock;
-            sslsock.connect(remoteAddress, connTimeout);
-            sslsock.setSoTimeout(soTimeout);
-            sock = sslsock;
-        } else {
-            if (!sock.isConnected()) {
-                sock.connect(remoteAddress, connTimeout);
-                sock.setSoTimeout(soTimeout);
-            }
-        }
-        */
+         * Socket sock = socket != null ? socket : createSocket(params);
+         * if (sock instanceof SSLSocket) {
+         * final SSLSocket sslsock = (SSLSocket) sock;
+         * sslsock.connect(remoteAddress, connTimeout);
+         * sslsock.setSoTimeout(soTimeout);
+         * sock = sslsock;
+         * } else {
+         * if (!sock.isConnected()) {
+         * sock.connect(remoteAddress, connTimeout);
+         * sock.setSoTimeout(soTimeout);
+         * }
+         * }
+         */
 
     }
 }

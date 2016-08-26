@@ -68,8 +68,8 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.session.Session;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * {@link URLMailAttachmentDataSource}
@@ -125,7 +125,7 @@ public final class URLMailAttachmentDataSource implements DataSource {
              */
             urlCon = url.openConnection();
             if ("https".equalsIgnoreCase(url.getProtocol())) {
-                ((HttpsURLConnection) urlCon).setSSLSocketFactory(TrustAllSSLSocketFactory.getDefault());
+                ((HttpsURLConnection) urlCon).setSSLSocketFactory(SSLSocketFactoryProvider.getDefault());
             }
             urlCon.setConnectTimeout(timeoutMillis);
             urlCon.setReadTimeout(timeoutMillis);

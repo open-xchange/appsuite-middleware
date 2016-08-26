@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.http.client.apache;
+package com.openexchange.file.storage.webdav;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -55,56 +55,70 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
-
+import javax.net.ssl.SSLSocketFactory;
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+/**
+ * {@link TrustAdapter} - A trust-all {@link ProtocolSocketFactory protocol socket factory}.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ */
+public class TrustAdapter implements SecureProtocolSocketFactory {
 
-public class TrustAllAdapter implements ProtocolSocketFactory {
-    
-    private TrustAllSSLSocketFactory delegate = (TrustAllSSLSocketFactory) TrustAllSSLSocketFactory.getDefault();
+    private final SSLSocketFactory delegate = SSLSocketFactoryProvider.getDefault();
+
+    /**
+     * Initializes a new {@link TrustAdapter}.
+     */
+    public TrustAdapter() {
+        super();
+    }
 
     @Override
-    public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
+    public Socket createSocket(final String host, final int port) throws IOException, UnknownHostException {
         return delegate.createSocket(host, port);
     }
 
     @Override
-    public Socket createSocket(String host, int port, InetAddress localAddress, int localPort) throws IOException, UnknownHostException {
+    public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort) throws IOException, UnknownHostException {
         return delegate.createSocket(host, port, localAddress, localPort);
     }
 
     @Override
-    public Socket createSocket(String host, int port, InetAddress localAddress, int localPort, HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
+    public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort, final HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
         Socket socket;
-        int timeout = params.getConnectionTimeout();
+        final int timeout = params.getConnectionTimeout();
         if (timeout == 0) {
             socket = createSocket(host, port, localAddress, localPort);
         } else {
             socket = delegate.createSocket();
-            SocketAddress localaddr = new InetSocketAddress(localAddress, localPort);
-            SocketAddress remoteaddr = new InetSocketAddress(host, port);
+            final SocketAddress localaddr = new InetSocketAddress(localAddress, localPort);
+            final SocketAddress remoteaddr = new InetSocketAddress(host, port);
             socket.bind(localaddr);
             socket.connect(remoteaddr, timeout);
             return socket;
         }
-        
-        
-        int linger = params.getLinger();
-        if(linger == 0) {
+
+        final int linger = params.getLinger();
+        if (linger == 0) {
             socket.setSoLinger(false, 0);
         } else if (linger > 0) {
             socket.setSoLinger(true, linger);
         }
-        
+
         socket.setSoTimeout(params.getSoTimeout());
         socket.setTcpNoDelay(params.getTcpNoDelay());
-        
+
         return socket;
     }
-    
- 
-}
 
+    @Override
+    public Socket createSocket(final Socket socket, final String host, final int port, final boolean autoClose) throws IOException, UnknownHostException {
+        return delegate.createSocket(socket, host, port, autoClose);
+    }
+
+}

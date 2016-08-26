@@ -140,7 +140,7 @@ public abstract class CommonApacheHTTPRequest<T extends HTTPGenericRequestBuilde
                     port = 443;
                 }
 
-                final Protocol https = new Protocol("https", new TrustAllAdapter(), 443);
+                final Protocol https = new Protocol("https", new TrustAdapter(), 443);
                 client.getHostConfiguration().setHost(javaURL.getHost(), port, https);
 
                 final HttpMethodBase m = createMethod(javaURL.getFile());

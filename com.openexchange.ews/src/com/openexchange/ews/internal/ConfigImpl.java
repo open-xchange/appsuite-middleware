@@ -55,7 +55,6 @@ import javax.xml.ws.BindingProvider;
 import com.microsoft.schemas.exchange.services._2006.types.ExchangeVersionType;
 import com.openexchange.ews.Config;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 
 /**
@@ -155,7 +154,7 @@ public class ConfigImpl implements Config {
     @Override
     public boolean isTrustAllCerts() {
         Object socketFactory = get(SSL_SOCKET_FACTORY);
-        return null != socketFactory && TrustAllSSLSocketFactory.getDefault().equals(socketFactory);
+        return null != socketFactory && SSLSocketFactoryProvider.getDefault().equals(socketFactory);
     }
 
     /* (non-Javadoc)

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.webdav;
+package com.openexchange.subscribe.helpers;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -55,56 +55,51 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import javax.net.ssl.SSLSocketFactory;
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
-import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+
 
 /**
- * {@link TrustAllAdapter} - A trust-all {@link ProtocolSocketFactory protocol socket factory}.
+ * {@link TrustAdapter}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ *
  */
-public class TrustAllAdapter implements SecureProtocolSocketFactory {
+public class TrustAdapter implements ProtocolSocketFactory {
 
-    private final TrustAllSSLSocketFactory delegate;
-
-    /**
-     * Initializes a new {@link TrustAllAdapter}.
-     */
-    public TrustAllAdapter() {
-        super();
-        delegate = (TrustAllSSLSocketFactory) TrustAllSSLSocketFactory.getDefault();
-    }
+    private final SSLSocketFactory delegate = SSLSocketFactoryProvider.getDefault();
 
     @Override
-    public Socket createSocket(final String host, final int port) throws IOException, UnknownHostException {
+    public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
         return delegate.createSocket(host, port);
     }
 
     @Override
-    public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort) throws IOException, UnknownHostException {
+    public Socket createSocket(String host, int port, InetAddress localAddress, int localPort) throws IOException, UnknownHostException {
         return delegate.createSocket(host, port, localAddress, localPort);
     }
 
     @Override
-    public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort, final HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
+    public Socket createSocket(String host, int port, InetAddress localAddress, int localPort, HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
         Socket socket;
-        final int timeout = params.getConnectionTimeout();
+        int timeout = params.getConnectionTimeout();
         if (timeout == 0) {
             socket = createSocket(host, port, localAddress, localPort);
         } else {
             socket = delegate.createSocket();
-            final SocketAddress localaddr = new InetSocketAddress(localAddress, localPort);
-            final SocketAddress remoteaddr = new InetSocketAddress(host, port);
+            SocketAddress localaddr = new InetSocketAddress(localAddress, localPort);
+            SocketAddress remoteaddr = new InetSocketAddress(host, port);
             socket.bind(localaddr);
             socket.connect(remoteaddr, timeout);
             return socket;
         }
 
-        final int linger = params.getLinger();
-        if (linger == 0) {
+
+        int linger = params.getLinger();
+        if(linger == 0) {
             socket.setSoLinger(false, 0);
         } else if (linger > 0) {
             socket.setSoLinger(true, linger);
@@ -116,9 +111,5 @@ public class TrustAllAdapter implements SecureProtocolSocketFactory {
         return socket;
     }
 
-    @Override
-    public Socket createSocket(final Socket socket, final String host, final int port, final boolean autoClose) throws IOException, UnknownHostException {
-        return delegate.createSocket(socket, host, port, autoClose);
-    }
 
 }

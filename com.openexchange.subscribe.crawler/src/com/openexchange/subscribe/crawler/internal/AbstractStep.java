@@ -55,15 +55,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.TypeVariable;
-import java.net.URLConnection;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.X509Certificate;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.openexchange.exception.OXException;
@@ -202,46 +193,4 @@ public abstract class AbstractStep<O,I> implements Step<O,I>{
         return this.getClass().getTypeParameters();
     }
     // Convenience Methods for Development / Debugging
-
-    /** A trust manager that does not validate certificate chains */
-    static final TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-
-        @Override
-        public void checkClientTrusted(final X509Certificate[] chain, final String authType) {
-            // Nothing
-        }
-
-        @Override
-        public void checkServerTrusted(final X509Certificate[] chain, final String authType) {
-            // Nothing
-        }
-
-        @Override
-        public X509Certificate[] getAcceptedIssuers() {
-            return null;
-        }
-    } };
-
-    /**
-     * Prepares given {@link URLConnection} instance if an all-trusting trust manager needs to be applied.
-     *
-     * @param urlCon The URL connection to check
-     * @throws NoSuchAlgorithmException If preparation fails
-     * @throws KeyManagementException If preparation fails
-     */
-    static void prepareURLConnection(final URLConnection urlCon) throws NoSuchAlgorithmException, KeyManagementException {
-        if (urlCon instanceof HttpsURLConnection) {
-            final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) urlCon;
-            SSLSocketFactory sslSocketFactory = httpsURLConnection.getSSLSocketFactory();
-            if ((null == sslSocketFactory) || !(sslSocketFactory instanceof com.openexchange.tools.ssl.TrustAllSSLSocketFactory)) {
-                // Install the all-trusting trust manager
-                final SSLContext sslContext = SSLContext.getInstance("SSL");
-                sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-                // Create an ssl socket factory with our all-trusting manager
-                sslSocketFactory = sslContext.getSocketFactory();
-                // Tell the url connection object to use our socket factory which bypasses security checks
-                httpsURLConnection.setSSLSocketFactory(sslSocketFactory);
-            }
-        }
-    }
 }

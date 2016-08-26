@@ -55,27 +55,27 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import javax.net.ssl.SSLSocketFactory;
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 
 /**
- * {@link TrustAllAdapter} - A trust-all {@link ProtocolSocketFactory protocol socket factory}.
+ * {@link TrustAdapter} - A trust-all {@link ProtocolSocketFactory protocol socket factory}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class TrustAllAdapter implements SecureProtocolSocketFactory {
+public class TrustAdapter implements SecureProtocolSocketFactory {
 
-    private final TrustAllSSLSocketFactory delegate;
+    private final SSLSocketFactory delegate = SSLSocketFactoryProvider.getDefault();
 
     /**
-     * Initializes a new {@link TrustAllAdapter}.
+     * Initializes a new {@link TrustAdapter}.
      */
-    public TrustAllAdapter() {
+    public TrustAdapter() {
         super();
-        delegate = (TrustAllSSLSocketFactory) TrustAllSSLSocketFactory.getDefault();
     }
 
     @Override

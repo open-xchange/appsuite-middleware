@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.subscribe.microformats.datasources;
+package com.openexchange.http.client.apache;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -55,21 +55,15 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import javax.net.ssl.SSLSocketFactory;
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 
-
-/**
- * {@link TrustAllAdapter}
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
- */
-public class TrustAllAdapter implements ProtocolSocketFactory {
-
-    private final TrustAllSSLSocketFactory delegate = (TrustAllSSLSocketFactory) TrustAllSSLSocketFactory.getDefault();
+public class TrustAdapter implements ProtocolSocketFactory {
+    
+    private final SSLSocketFactory delegate = SSLSocketFactoryProvider.getDefault();
 
     @Override
     public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
@@ -95,20 +89,21 @@ public class TrustAllAdapter implements ProtocolSocketFactory {
             socket.connect(remoteaddr, timeout);
             return socket;
         }
-
-
+        
+        
         int linger = params.getLinger();
         if(linger == 0) {
             socket.setSoLinger(false, 0);
         } else if (linger > 0) {
             socket.setSoLinger(true, linger);
         }
-
+        
         socket.setSoTimeout(params.getSoTimeout());
         socket.setTcpNoDelay(params.getTcpNoDelay());
-
+        
         return socket;
     }
-
-
+    
+ 
 }
+
