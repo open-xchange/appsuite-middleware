@@ -66,11 +66,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import javax.activation.DataHandler;
-import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.idn.IDNA;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -111,7 +109,6 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.datasource.FileHolderDataSource;
-import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
@@ -386,7 +383,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             // Generate preview images
             previewImages = generatePreviewImages(session, shareReference);
             Map<String, String> cidMapping = getCidMapping(previewImages);
-            MailPart mailPart = createPreviewPart(cidMapping, previewImages);
+            List<MailPart> imageParts = createPreviewPart(cidMapping, previewImages);
 
             // Generate messages from links
             List<ComposedMailMessage> transportMessages = new LinkedList<>();
@@ -402,7 +399,9 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                     List<ComposedMailMessage> generatedTransportMessages = messageGenerator.generateTransportMessagesFor(messageInfo, shareReference, cidMapping);
                     for (ComposedMailMessage generatedTransportMessage : generatedTransportMessages) {
                         generatedTransportMessage.setAppendToSentFolder(false);
-                        generatedTransportMessage.addEnclosedPart(mailPart);
+                        for (MailPart imagePart : imageParts) {
+                            generatedTransportMessage.addEnclosedPart(imagePart);
+                        }
                         transportMessages.add(generatedTransportMessage);
                     }
                 }
@@ -411,7 +410,9 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 User user = composeRequest.getUser();
                 Recipient userRecipient = Recipient.createInternalRecipient(user.getDisplayName(), sendAddr, user);
                 sentMessage = messageGenerator.generateSentMessageFor(new ShareComposeMessageInfo(personalLink, Collections.singletonList(userRecipient), password, expirationDate, source, context, composeRequest), shareReference, cidMapping);
-                sentMessage.addEnclosedPart(mailPart);
+                for (MailPart imagePart : imageParts) {
+                    sentMessage.addEnclosedPart(imagePart);
+                }
             }
 
             // Commit attachment storage
@@ -540,9 +541,9 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         return cidMapping;
     }
 
-    private MailPart createPreviewPart(Map<String, String> cidMapping, Map<String, ThresholdFileHolder> previews) throws OXException {
+    private List<MailPart> createPreviewPart(Map<String, String> cidMapping, Map<String, ThresholdFileHolder> previews) throws OXException {
         try {
-            MimeMultipart relatedMultipart = new MimeMultipart("related");
+            List<MailPart> parts = new ArrayList<>(cidMapping.size());
             for (String id : cidMapping.keySet()) {
                 String contentId = cidMapping.get(id);
                 MimeBodyPart imagePart = new MimeBodyPart();
@@ -551,11 +552,9 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 imagePart.setContentID("<" + contentId + ">");
                 imagePart.setHeader("X-Attachment-Id", contentId);
                 imagePart.setDataHandler(new DataHandler(new FileHolderDataSource(previews.get(id), "image/png")));
-                relatedMultipart.addBodyPart(imagePart);
+                parts.add(new MimeMailPart(imagePart));
             }
-            BodyPart bodyPart = new MimeBodyPart();
-            MessageUtility.setContent(relatedMultipart, bodyPart);
-            return new MimeMailPart(bodyPart);
+            return parts;
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
