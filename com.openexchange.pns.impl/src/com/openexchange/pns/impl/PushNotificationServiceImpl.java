@@ -383,7 +383,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                 while (notifications.hasNext()) {
                     PushNotification notification = notifications.next();
                     transport.transport(notification, hit.getMatches());
-                    LOG.debug("Transported notification \"{}\" via transport '{}' to client '{}'", notification.getTopic(), transportId, client);
+                    LOG.debug("Transported notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId));
                 }
             }
         }
