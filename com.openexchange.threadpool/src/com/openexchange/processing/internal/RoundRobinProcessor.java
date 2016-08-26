@@ -149,6 +149,15 @@ public class RoundRobinProcessor implements Processor {
     }
 
     /**
+     * Handles if a task could not be offered to processor
+     *
+     * @param task The task that could not be offered
+     */
+    protected void handleFailedTaskOffer(Runnable task) {
+        // Nothing
+    }
+
+    /**
      * Checks if a new <code>Selector</code> is supposed to be created
      *
      * @return <code>true</code> if a new <code>Selector</code> is supposed to be created; otherwise <code>false</code>
@@ -221,6 +230,7 @@ public class RoundRobinProcessor implements Processor {
         try {
             scheduleNewSelectorIfNeeded();
         } catch (RejectedExecutionException x) {
+            handleFailedTaskOffer(task);
             return false;
         }
 
@@ -232,24 +242,37 @@ public class RoundRobinProcessor implements Processor {
         synchronized (taskManagers) {
             // Stopped meanwhile...?
             if (stopped.get()) {
+                handleFailedTaskOffer(task);
                 return false;
             }
 
             // Add task to either new or existing TaskManager instance
             TaskManager existingManager = taskManagers.get(key);
-            if (existingManager == null) {
-                // None present, yet. Create a new executer.
-                newManager = new DefaultTaskManager(task, key);
-                taskManagers.put(key, newManager);
-            } else {
-                // Use existing one
-                existingManager.add(task);
+            try {
+                if (existingManager == null) {
+                    // None present, yet. Create a new executer.
+                    newManager = new DefaultTaskManager(task, key);
+                    taskManagers.put(key, newManager);
+                } else {
+                    // Use existing one
+                    existingManager.add(task);
+                }
+            } catch (RuntimeException e) {
+                // Adding to manager failed
+                handleFailedTaskOffer(task);
+                throw e;
             }
         }
 
         // Add to round-robin queue in case task manager was newly created
         if (null != newManager) {
-            roundRobinQueue.offerLast(newManager);
+            try {
+                roundRobinQueue.offerLast(newManager);
+            } catch (RuntimeException e) {
+                // Adding to manager failed
+                handleFailedTaskOffer(task);
+                throw e;
+            }
         }
 
         // Otherwise passed to an already existing executer
