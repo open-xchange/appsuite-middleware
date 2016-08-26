@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,64 +49,26 @@
 
 package com.openexchange.html;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
-import com.openexchange.html.osgi.Services;
-import com.openexchange.java.Strings;
 
 /**
- * {@link MediaTypeChecker}
+ * {@link Result} - Enumeration for possible results of checks/tests.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class MediaTypeChecker implements Reloadable {
+public enum Result {
 
-    private volatile String[] forbiddenMediaType = null;
-    private static final String HARMFUL_MEDIA_TYPES = "com.openexchange.mail.harmful.media.types";
-
-    public boolean isHarmFul(String mediaType, String value) {
-        for (String possibleHarmful : getForbiddenMediaTypes()) {
-            if (possibleHarmful.contentEquals(mediaType)) {
-                //TODO do some checking
-
-            }
-        }
-        return false;
-    }
-
-    private String[] getForbiddenMediaTypes() {
-        if (forbiddenMediaType == null) {
-            ConfigurationService configurationService = Services.getService(ConfigurationService.class);
-            if (configurationService != null) {
-                String text = configurationService.getProperty(HARMFUL_MEDIA_TYPES);
-                if (Strings.isEmpty(text)) {
-                    forbiddenMediaType = new String[0];
-                } else {
-                    forbiddenMediaType = Strings.splitByComma(text);
-                }
-            } else {
-                return new String[0];
-            }
-        }
-        return forbiddenMediaType;
-    }
-
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        String text = configService.getProperty(HARMFUL_MEDIA_TYPES);
-        if (Strings.isEmpty(text)) {
-            forbiddenMediaType = new String[0];
-        } else {
-            forbiddenMediaType = Strings.splitByComma(text);
-        }
-    }
-
-    @Override
-    public Interests getInterests() {
-        return Reloadables.interestsForProperties(HARMFUL_MEDIA_TYPES);
-    }
+    /**
+     * The check/test is passed positively.
+     */
+    ALLOW,
+    /**
+     * The check/test is should not be considered.
+     */
+    NEUTRAL,
+    /**
+     * The check/test is not passed.
+     */
+    DENY;
 
 }
