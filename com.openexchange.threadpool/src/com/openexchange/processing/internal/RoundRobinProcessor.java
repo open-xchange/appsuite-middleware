@@ -108,22 +108,24 @@ public class RoundRobinProcessor implements Processor {
         }
     }
 
-    @Override
-    public void stop() {
-        if (!stopped.compareAndSet(false, true)) {
-            // Already stopped
-            return;
+    /**
+     * Checks whether to consider task managers map as empty.
+     * <p>
+     * Must only be accessed synchronized.
+     *
+     * @return <code>true</code> if empty; otherwise <code>false</code>
+     */
+    protected boolean considerTaskManagersEmpty() {
+        if (taskManagers.isEmpty()) {
+            return true;
         }
 
-        for (int i = numThreads; i-- > 0;) {
-            roundRobinQueue.offerFirst(TaskManager.POISON);
+        for (TaskManager taskManager : taskManagers.values()) {
+            if (false == taskManager.isEmpty()) {
+                return false;
+            }
         }
-
-        try {
-            pool.shutdownNow();
-        } catch (final Exception x) {
-            // Ignore
-        }
+        return true;
     }
 
     /**
@@ -166,6 +168,44 @@ public class RoundRobinProcessor implements Processor {
         pool.execute(new Selector());
     }
 
+    private void haltThreadsAndShutDownPool() {
+        for (int i = numThreads; i-- > 0;) {
+            roundRobinQueue.offerFirst(TaskManager.POISON);
+        }
+
+        try {
+            pool.shutdownNow();
+        } catch (final Exception x) {
+            // Ignore
+        }
+    }
+
+    @Override
+    public void stop() {
+        if (!stopped.compareAndSet(false, true)) {
+            // Already stopped
+            return;
+        }
+
+        haltThreadsAndShutDownPool();
+    }
+
+    @Override
+    public void stopWhenEmpty() throws InterruptedException {
+        if (!stopped.compareAndSet(false, true)) {
+            // Already stopped
+            return;
+        }
+
+        synchronized (taskManagers) {
+            while (false == considerTaskManagersEmpty()) {
+                taskManagers.wait();
+            }
+        }
+
+        haltThreadsAndShutDownPool();
+    }
+
     @Override
     public boolean execute(Object optKey, Runnable task) {
         if (stopped.get()) {
@@ -187,9 +227,15 @@ public class RoundRobinProcessor implements Processor {
         // Determine the key to use
         Object key = null == optKey ? Thread.currentThread() : optKey;
 
-        // Add to task to either an existing or to a newly created task manager
+        // Schedule task
         TaskManager newManager = null;
         synchronized (taskManagers) {
+            // Stopped meanwhile...?
+            if (stopped.get()) {
+                return false;
+            }
+
+            // Add task to either new or existing TaskManager instance
             TaskManager existingManager = taskManagers.get(key);
             if (existingManager == null) {
                 // None present, yet. Create a new executer.
@@ -251,7 +297,7 @@ public class RoundRobinProcessor implements Processor {
 
             boolean decrementCount = true;
             try {
-                // Perform image processing until aborted
+                // Perform processing until aborted
                 boolean proceed = true;
                 while (proceed) {
                     try {
@@ -272,6 +318,7 @@ public class RoundRobinProcessor implements Processor {
                             if (null == task) {
                                 taskManagers.remove(manager.getExecuterKey());
                             }
+                            taskManagers.notify();
                         }
 
                         // Check task
@@ -279,7 +326,7 @@ public class RoundRobinProcessor implements Processor {
                             // Re-add slot to round-robin queue for next processing
                             roundRobinQueue.offerLast(manager);
 
-                            // Perform (image transformation) task
+                            // Perform task
                             task.run();
 
                             if (Thread.interrupted()) {
