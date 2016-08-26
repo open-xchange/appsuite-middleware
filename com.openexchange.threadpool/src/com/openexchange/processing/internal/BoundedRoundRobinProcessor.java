@@ -90,6 +90,11 @@ public class BoundedRoundRobinProcessor extends RoundRobinProcessor {
     }
 
     @Override
+    protected void handleFailedTaskOffer(Runnable task) {
+        numberOfPendingTasks.decrementAndGet();
+    }
+
+    @Override
     protected Runnable getNextTaskFrom(TaskManager manager) {
         Runnable task = super.getNextTaskFrom(manager);
         if (null != task) {

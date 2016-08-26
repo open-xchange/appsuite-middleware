@@ -173,6 +173,12 @@ public class PushNotificationServiceImplActivator extends HousekeepingActivator 
 
     @Override
     protected synchronized void stopBundle() throws Exception {
+        ServiceRegistration<PushNotificationService> serviceRegistration = this.serviceRegistration;
+        if (null != serviceRegistration) {
+            this.serviceRegistration = null;
+            serviceRegistration.unregister();
+        }
+
         PushNotificationServiceImpl serviceImpl = this.serviceImpl;
         if (null != serviceImpl) {
             this.serviceImpl = null;
