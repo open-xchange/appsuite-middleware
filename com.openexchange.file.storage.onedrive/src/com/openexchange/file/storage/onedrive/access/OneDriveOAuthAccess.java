@@ -94,15 +94,12 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OneDriveOAuthAccess.class);
 
     private final FileStorageAccount fsAccount;
-    private final Session session;
-
     /**
      * Initializes a new {@link OneDriveOAuthAccess}.
      */
     public OneDriveOAuthAccess(FileStorageAccount fsAccount, Session session) {
-        super();
+        super(session);
         this.fsAccount = fsAccount;
-        this.session = session;
     }
 
     @Override

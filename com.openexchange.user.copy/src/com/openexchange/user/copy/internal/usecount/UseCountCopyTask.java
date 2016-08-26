@@ -111,7 +111,7 @@ public class UseCountCopyTask implements CopyUserTaskService {
         Connection dstCon = copyTools.getDestinationConnection();
 
         ObjectMapping<Integer> contactMapping = copyTools.checkAndExtractGenericMapping(Contact.class.getName());
-        ObjectMapping<Integer> folderMapping = copyTools.checkAndExtractGenericMapping(FolderObject.class.getName());
+        ObjectMapping<FolderObject> folderMapping = copyTools.checkAndExtractGenericMapping(FolderObject.class.getName());
         correctObjectUseCountTable(srcCon, i(srcCtxId), srcUsr.getId(), dstCon, i(dstCtxId), i(dstUsrId), contactMapping, folderMapping);
         return null;
     }
@@ -120,7 +120,7 @@ public class UseCountCopyTask implements CopyUserTaskService {
     public void done(Map<String, ObjectMapping<?>> copied, boolean failed) {
     }
 
-    private void correctObjectUseCountTable(Connection srcCon, int srcCtxId, int srcUserId, Connection dstCon, int dstCtxId, int dstUserId, ObjectMapping<Integer> contactMapping, ObjectMapping<Integer> folderMapping) throws OXException {
+    private void correctObjectUseCountTable(Connection srcCon, int srcCtxId, int srcUserId, Connection dstCon, int dstCtxId, int dstUserId, ObjectMapping<Integer> contactMapping, ObjectMapping<FolderObject> folderMapping) throws OXException {
         String sql = "SELECT folder, object, value FROM object_use_count WHERE cid = ? AND user = ?";
         String dstSql = "INSERT INTO object_use_count (cid, user, folder, object, value) VALUES (?, ?, ?, ?, ?)";
         PreparedStatement srcStmt = null;
@@ -135,7 +135,13 @@ public class UseCountCopyTask implements CopyUserTaskService {
             while (rs.next()) {
                 dstStmt.setInt(1, dstCtxId);
                 dstStmt.setInt(2, dstUserId);
-                dstStmt.setInt(3, folderMapping.getDestination(I(rs.getInt(1))));
+                FolderObject folderObj = new FolderObject(I(rs.getInt(1)));
+                FolderObject destFolderObj = folderMapping.getDestination(folderObj);
+                if (destFolderObj == null) {
+                    // skip use counts without folder mapping (probably internal users)
+                    continue;
+                }
+                dstStmt.setInt(3, destFolderObj.getObjectID());
                 dstStmt.setInt(4, contactMapping.getDestination(I(rs.getInt(2))));
                 dstStmt.setInt(5, rs.getInt(3));
                 dstStmt.addBatch();

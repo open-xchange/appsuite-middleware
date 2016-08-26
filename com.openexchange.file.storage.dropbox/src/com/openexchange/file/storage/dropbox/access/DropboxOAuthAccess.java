@@ -79,15 +79,12 @@ import com.openexchange.session.Session;
 public class DropboxOAuthAccess extends AbstractOAuthAccess {
 
     private final FileStorageAccount fsAccount;
-    private final Session session;
-
     /**
      * Initializes a new {@link DropboxOAuthAccess}.
      */
     public DropboxOAuthAccess(FileStorageAccount fsAccount, Session session) {
-        super();
+        super(session);
         this.fsAccount = fsAccount;
-        this.session = session;
     }
 
     @Override

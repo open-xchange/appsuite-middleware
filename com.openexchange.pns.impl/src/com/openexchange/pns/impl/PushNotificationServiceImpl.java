@@ -50,6 +50,7 @@
 package com.openexchange.pns.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,6 +58,7 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
+import com.google.common.collect.Iterators;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.UnsychronizedBufferingQueue;
@@ -66,6 +68,9 @@ import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.processing.Processor;
+import com.openexchange.processing.ProcessorService;
+import com.openexchange.session.UserAndContext;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -77,7 +82,8 @@ import com.openexchange.timer.TimerService;
  */
 public class PushNotificationServiceImpl implements PushNotificationService {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PushNotificationServiceImpl.class);
+    /** The logger constant */
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PushNotificationServiceImpl.class);
 
     private static volatile Long delayDuration;
 
@@ -119,12 +125,54 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         return tmp.longValue();
     }
 
+    private static volatile Integer numProcessorThreads;
+
+    private static int numProcessorThreads(ConfigurationService configService) {
+        Integer tmp = numProcessorThreads;
+        if (null == tmp) {
+            synchronized (PushNotificationServiceImpl.class) {
+                tmp = numProcessorThreads;
+                if (null == tmp) {
+                    int defaultValue = 10; // 10 threads
+                    if (null == configService) {
+                        return defaultValue;
+                    }
+                    tmp = Integer.valueOf(configService.getIntProperty("com.openexchange.pns.numProcessorThreads", defaultValue));
+                    numProcessorThreads = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    private static volatile Integer maxProcessorTasks;
+
+    private static int maxProcessorTasks(ConfigurationService configService) {
+        Integer tmp = maxProcessorTasks;
+        if (null == tmp) {
+            synchronized (PushNotificationServiceImpl.class) {
+                tmp = maxProcessorTasks;
+                if (null == tmp) {
+                    int defaultValue = 65536; // 65536 tasks
+                    if (null == configService) {
+                        return defaultValue;
+                    }
+                    tmp = Integer.valueOf(configService.getIntProperty("com.openexchange.pns.maxProcessorTasks", defaultValue));
+                    maxProcessorTasks = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
     /**
      * Cleans statically initialized values.
      */
     public static void cleanseInits() {
         delayDuration = null;
         timerFrequency = null;
+        numProcessorThreads = null;
+        maxProcessorTasks = null;
     }
 
     // -----------------------------------------------------------------------------
@@ -135,16 +183,21 @@ public class PushNotificationServiceImpl implements PushNotificationService {
     private final PushSubscriptionRegistry subscriptionRegistry;
     private final PushNotificationTransportRegistry transportRegistry;
 
+    private final Processor processor;
+
     private final UnsychronizedBufferingQueue<PushNotification> scheduledNotifcations; // Accessed synchronized
     private ScheduledTimerTask scheduledTimerTask; // Accessed synchronized
     private boolean stopped; // Accessed synchronized
 
     /**
      * Initializes a new {@link PushNotificationServiceImpl}.
+     *
+     * @throws OXException If initialization fails
      */
-    public PushNotificationServiceImpl(PushSubscriptionRegistry subscriptionRegistry, ConfigurationService configService, TimerService timerService, PushNotificationTransportRegistry transportRegistry) {
+    public PushNotificationServiceImpl(PushSubscriptionRegistry subscriptionRegistry, ConfigurationService configService, TimerService timerService, ProcessorService processorService, PushNotificationTransportRegistry transportRegistry) throws OXException {
         super();
         lock = new ReentrantLock();
+        processor = processorService.newBoundedProcessor(getClass().getSimpleName(), numProcessorThreads(configService), maxProcessorTasks(configService));
         this.subscriptionRegistry = subscriptionRegistry;
         this.configService = configService;
         this.timerService = timerService;
@@ -154,13 +207,36 @@ public class PushNotificationServiceImpl implements PushNotificationService {
 
     /**
      * Stops this service
+     *
+     * @param handleRemaining <code>true</code> to handle remaining queued notifications; otherwise <code>false</code>
      */
-    public void stop() {
+    public void stop(boolean handleRemaining) {
         lock.lock();
         try {
             if (stopped) {
                 // Already stopped
                 return;
+            }
+
+            if (handleRemaining) {
+                for (PushNotification notification : scheduledNotifcations) {
+                    int userId = notification.getUserId();
+                    int contextId = notification.getContextId();
+                    try {
+                        doHandle(Iterators.singletonIterator(notification), notification.getTopic(), userId, contextId);
+                    } catch (Exception e) {
+                        LOG.error("Failed to handle notification with topic {} for user {} in context {}", notification.getTopic(), I(userId), I(contextId), e);
+                    }
+                }
+
+                try {
+                    processor.stopWhenEmpty();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            } else {
+                // Hard shut-down
+                processor.stop();
             }
 
             scheduledNotifcations.clear();
@@ -257,19 +333,27 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         // Distribute notifications (w/o holding lock)
         if (null == polledNotifications) {
             // There was only a single one available
-            try {
-                doHandleSingle(first);
-            } catch (OXException e) {
-                LOG.error("Failed to handle notification with topic {} for user {} in context {}", first.getTopic(), I(first.getUserId()), I(first.getContextId()), e);
+            int userId = first.getUserId();
+            int contextId = first.getContextId();
+            if (false == processor.execute(UserAndContext.newInstance(userId, contextId), new NotificationsHandler(Iterators.singletonIterator(first), first.getTopic(), userId, contextId))) {
+                try {
+                    doHandle(Iterators.singletonIterator(first), first.getTopic(), userId, contextId);
+                } catch (Exception e) {
+                    LOG.error("Failed to handle notification with topic {} for user {} in context {}", first.getTopic(), I(userId), I(contextId), e);
+                }
             }
         } else {
             // Handle them all
             for (Map.Entry<UserAndTopicKey, List<PushNotification>> entry : polledNotifications.entrySet()) {
                 UserAndTopicKey key = entry.getKey();
-                try {
-                    doHandle(entry.getValue(), key.topic, key.userId, key.contextId);
-                } catch (Exception e) {
-                    LOG.error("Failed to handle notification(s) with topic {} for user {} in context {}", key.topic, I(key.userId), I(key.contextId), e);
+                int userId = key.userId;
+                int contextId = key.contextId;
+                if (false == processor.execute(UserAndContext.newInstance(userId, contextId), new NotificationsHandler(entry.getValue().iterator(), key.topic, userId, contextId))) {
+                    try {
+                        doHandle(entry.getValue().iterator(), key.topic, userId, contextId);
+                    } catch (Exception e) {
+                        LOG.error("Failed to handle notification(s) with topic {} for user {} in context {}", key.topic, I(userId), I(contextId), e);
+                    }
                 }
             }
         }
@@ -294,7 +378,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
      * @param contextId The context identifier (for all notifications)
      * @throws OXException If handling fails
      */
-    private void doHandle(List<PushNotification> notifications, String topic, int userId, int contextId) throws OXException {
+    protected void doHandle(Iterator<PushNotification> notifications, String topic, int userId, int contextId) throws OXException {
         // Query appropriate subscriptions
         Hits hits = subscriptionRegistry.getInterestedSubscriptions(userId, contextId, topic);
         if (null == hits || hits.isEmpty()) {
@@ -309,38 +393,38 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             if (null == transport) {
                 LOG.warn("No such transport '{}' for client '{}' to publish notification from user {} in context {} for topic {}", transportId, client, I(userId), I(contextId), topic);
             } else {
-                for (PushNotification notification : notifications) {
-                    transport.transport(notification, hit.getMatches());
+                while (notifications.hasNext()) {
+                    transport.transport(notifications.next(), hit.getMatches());
                 }
             }
         }
     }
 
-    /**
-     * Handles given notification.
-     *
-     * @param notification The notification
-     * @throws OXException If handling fails
-     */
-    private void doHandleSingle(PushNotification notification) throws OXException {
-        // Query appropriate subscriptions
-        int contextId = notification.getContextId();
-        int userId = notification.getUserId();
-        String topic = notification.getTopic();
-        Hits hits = subscriptionRegistry.getInterestedSubscriptions(userId, contextId, topic);
-        if (null == hits || hits.isEmpty()) {
-            return;
+    private final class NotificationsHandler implements Runnable {
+
+        private final Iterator<PushNotification> notifications;
+        private final String topic;
+        private final int userId;
+        private final int contextId;
+
+        /**
+         * Initializes a new {@link PushNotificationServiceImpl.NotificationsHandler}.
+         */
+        NotificationsHandler(Iterator<PushNotification> notifications, String topic, int userId, int contextId) {
+            super();
+            this.notifications = notifications;
+            this.topic = topic;
+            this.userId = userId;
+            this.contextId = contextId;
+
         }
 
-        // Transport each subscription using associated transport
-        for (Hit hit : hits) {
-            String client = hit.getClient();
-            String transportId = hit.getTransportId();
-            PushNotificationTransport transport = transportRegistry.getTransportFor(client, transportId);
-            if (null == transport) {
-                LOG.warn("No such transport '{}' for client '{}' to publish notification from user {} in context {} for topic {}", transportId, client, I(userId), I(contextId), topic);
-            } else {
-                transport.transport(notification, hit.getMatches());
+        @Override
+        public void run() {
+            try {
+                doHandle(notifications, topic, userId, contextId);
+            } catch (Exception e) {
+                LOG.error("Failed to handle notification(s) with topic {} for user {} in context {}", topic, I(userId), I(contextId), e);
             }
         }
     }

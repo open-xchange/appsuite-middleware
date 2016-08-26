@@ -74,15 +74,12 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
 
     private final FileStorageAccount fsAccount;
 
-    private final Session session;
-
     /**
      * Initialises a new {@link GoogleDriveOAuthAccess}.
      */
     public GoogleDriveOAuthAccess(FileStorageAccount fsAccount, Session session) throws OXException {
-        super();
+        super(session);
         this.fsAccount = fsAccount;
-        this.session = session;
     }
 
     @Override
