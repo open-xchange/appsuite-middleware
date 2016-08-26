@@ -332,7 +332,6 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
     private Set<OAuthScope> getScopes(AJAXRequestData request, String serviceId) throws OXException {
         // Get the scope parameter
         String scope = request.getParameter("scopes");
-        scope = "drive";
         if (isEmpty(scope)) {
             throw OAuthExceptionCodes.MISSING_SCOPE.create();
         }
