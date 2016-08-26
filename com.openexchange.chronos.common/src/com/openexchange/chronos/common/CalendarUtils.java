@@ -60,6 +60,7 @@ import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -106,21 +107,21 @@ public class CalendarUtils {
     }
 
     /**
-     * Gets a value indicating whether one attendee matches another, by comparing the entity identifier for internal attendees,
-     * or trying to match the attendee's URI for external ones.
+     * Gets a value indicating whether one calendar user matches another, by comparing the entity identifier for internal calendar users,
+     * or trying to match the calendar user's URI for external ones.
      *
-     * @param attendee1 The first attendee to check
-     * @param attendee2 The second attendee to check
-     * @return <code>true</code> if the attendees match, i.e. are targeting the same calendar user, <code>false</code>, otherwise
+     * @param user1 The first calendar user to check
+     * @param user2 The second calendar user to check
+     * @return <code>true</code> if the objects <i>match</i>, i.e. are targeting the same calendar user, <code>false</code>, otherwise
      */
-    public static boolean matches(Attendee attendee1, Attendee attendee2) {
-        if (null == attendee1) {
-            return null == attendee2;
-        } else if (null != attendee2) {
-            if (0 < attendee1.getEntity() && attendee1.getEntity() == attendee2.getEntity()) {
+    public static boolean matches(CalendarUser user1, CalendarUser user2) {
+        if (null == user1) {
+            return null == user2;
+        } else if (null != user2) {
+            if (0 < user1.getEntity() && user1.getEntity() == user2.getEntity()) {
                 return true;
             }
-            if (null != attendee1.getUri() && attendee1.getUri().equals(attendee2.getUri())) {
+            if (null != user1.getUri() && user1.getUri().equals(user2.getUri())) {
                 return true;
             }
         }
@@ -166,6 +167,16 @@ public class CalendarUtils {
      */
     public static boolean isOrganizer(Event event, int userId) {
         return null != event.getOrganizer() && userId == event.getOrganizer().getEntity();
+    }
+
+    /**
+     * Gets a value indicating whether a specific event is organized externally, i.e. no internal organizer entity is responsible.
+     *
+     * @param event The event to check
+     * @return <code>true</code> if the event has an <i>external</i> organizer, <code>false</code>, otherwise
+     */
+    public static boolean hasExternalOrganizer(Event event) {
+        return null != event.getOrganizer() && 0 >= event.getOrganizer().getEntity();
     }
 
     /**
@@ -286,7 +297,7 @@ public class CalendarUtils {
     /**
      * Gets a value indicating whether the supplied event contains so-called <i>floating</i> dates, i.e. the event doesn't start- and end
      * at a fixed date and time, but is always rendered in the view of the user's current timezone.
-     * 
+     *
      * @param event The event to check
      * @return <code>true</code> if the event is <i>floating</i>, <code>false</code>, otherwise
      */

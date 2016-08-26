@@ -60,7 +60,6 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
-import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
@@ -128,11 +127,10 @@ public class ChangeExceptionsAction extends ChronosAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
-        CalendarSession calendarSession = initSession(request);
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         int folderID = request.checkInt(AJAXServlet.PARAMETER_FOLDERID);
         int objectID = request.checkInt(AJAXServlet.PARAMETER_ID);
-        List<UserizedEvent> events = calendarService.getChangeExceptions(calendarSession, folderID, objectID);
+        List<UserizedEvent> events = session.getCalendarService().getChangeExceptions(session, folderID, objectID);
         return getAppointmentResultWithTimestamp(events);
     }
 

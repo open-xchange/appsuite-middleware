@@ -49,10 +49,11 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.chronos.common.CalendarUtils.filter;
+import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.storage.rdb.SQL.logExecuteQuery;
 import static com.openexchange.groupware.tools.mappings.database.DefaultDbMapper.getParameters;
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.tools.arrays.Collections.put;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -62,27 +63,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
-import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.compat.Appointment2Event;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
-import com.openexchange.chronos.storage.rdb.osgi.Services;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.group.Group;
-import com.openexchange.group.GroupService;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.user.UserService;
 
 /**
  * {@link AttendeeLoader}
@@ -94,25 +84,21 @@ public class AttendeeLoader {
 
     public static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttendeeLoader.class);
 
+    private final EntityResolver entityResolver;
     private final Connection connection;
-    private final Context context;
-    private final Map<Integer, Group> knownGroups;
-    private final Map<Integer, User> knownUsers;
-    private final Map<Integer, Resource> knownResources;
+    private final int contextID;
 
     /**
      * Initializes a new {@link AttendeeLoader}.
      *
      * @param connection A (readable) database connection
-     * @param contextID The context identifier
+     * @param entityResolver The entity resolver to use
      */
-    public AttendeeLoader(Connection connection, int contextID) throws OXException {
+    public AttendeeLoader(Connection connection, EntityResolver entityResolver) throws OXException {
         super();
         this.connection = connection;
-        this.context = Services.getService(ContextService.class).getContext(contextID);
-        knownUsers = new HashMap<Integer, User>();
-        knownGroups = new HashMap<Integer, Group>();
-        knownResources = new HashMap<Integer, Resource>();
+        this.entityResolver = entityResolver;
+        this.contextID = entityResolver.getContextID();
     }
 
     /**
@@ -156,44 +142,14 @@ public class AttendeeLoader {
         return attendeesById;
     }
 
-    private Attendee addEntityData(Attendee attendee) throws OXException {
-        if (null != attendee && 0 < attendee.getEntity()) {
-            switch (attendee.getCuType()) {
-                case GROUP:
-                    Group group = getGroup(attendee.getEntity());
-                    attendee.setCn(group.getDisplayName());
-                    attendee.setPartStat(ParticipationStatus.ACCEPTED);
-                    attendee.setUri(ResourceId.forGroup(context.getContextId(), group.getIdentifier()));
-                    break;
-                case RESOURCE:
-                case ROOM:
-                    Resource resource = getResource(attendee.getEntity());
-                    attendee.setCn(resource.getDisplayName());
-                    attendee.setComment(resource.getDescription());
-                    attendee.setPartStat(ParticipationStatus.ACCEPTED);
-                    attendee.setUri(ResourceId.forResource(context.getContextId(), resource.getIdentifier()));
-                    attendee.setEmail(resource.getMail());
-                    break;
-                default:
-                    User user = getUser(attendee.getEntity());
-                    attendee.setCn(user.getDisplayName());
-                    attendee.setUri(Appointment2Event.getURI(user.getMail()));
-                    break;
+    private int findGroupID(List<Attendee> internalAttendees, int member) throws OXException {
+        for (Attendee internalAttendee : filter(internalAttendees, Boolean.TRUE, CalendarUserType.GROUP)) {
+            int[] members = entityResolver.getGroupMembers(internalAttendee.getEntity());
+            if (0 < Arrays.binarySearch(members, member)) {
+                return internalAttendee.getEntity();
             }
         }
-        return attendee;
-    }
-
-    private Group findGroup(List<Attendee> internalAttendees, int member) throws OXException {
-        for (Attendee internalAttendee : internalAttendees) {
-            if (CalendarUserType.GROUP.equals(internalAttendee.getCuType())) {
-                Group group = getGroup(internalAttendee.getEntity());
-                if (0 < Arrays.binarySearch(group.getMember(), member)) {
-                    return group;
-                }
-            }
-        }
-        return null;
+        return -1;
     }
 
     private List<Attendee> getAttendees(List<Attendee> internalAttendees, List<Attendee> userAttendees, List<Attendee> externalAttendees) throws OXException {
@@ -204,12 +160,12 @@ public class AttendeeLoader {
         if (null != userAttendees) {
             for (Attendee userAttendee : userAttendees) {
                 if (null != find(internalAttendees, userAttendee.getEntity())) {
-                    attendees.add(addEntityData(userAttendee));
+                    attendees.add(entityResolver.applyEntityData(userAttendee));
                 } else {
-                    Group group = findGroup(internalAttendees, userAttendee.getEntity());
-                    if (null != group) {
-                        userAttendee.setMember(ResourceId.forGroup(context.getContextId(), group.getIdentifier()));
-                        attendees.add(addEntityData(userAttendee));
+                    int groupID = findGroupID(internalAttendees, userAttendee.getEntity());
+                    if (0 < groupID) {
+                        userAttendee.setMember(ResourceId.forGroup(contextID, groupID));
+                        attendees.add(entityResolver.applyEntityData(userAttendee));
                     }
                 }
             }
@@ -220,7 +176,7 @@ public class AttendeeLoader {
         if (null != internalAttendees) {
             for (Attendee internalAttendee : internalAttendees) {
                 if (false == CalendarUserType.INDIVIDUAL.equals(internalAttendee.getCuType())) {
-                    attendees.add(addEntityData(internalAttendee));
+                    attendees.add(entityResolver.applyEntityData(internalAttendee));
                 }
             }
         }
@@ -228,36 +184,6 @@ public class AttendeeLoader {
             attendees.addAll(externalAttendees);
         }
         return attendees;
-    }
-
-    private Group getGroup(int entity) throws OXException {
-        int id = I(entity);
-        Group group = knownGroups.get(id);
-        if (null == group) {
-            group = Services.getService(GroupService.class).getGroup(context, entity);
-            knownGroups.put(id, group);
-        }
-        return group;
-    }
-
-    private User getUser(int entity) throws OXException {
-        int id = I(entity);
-        User user = knownUsers.get(id);
-        if (null == user) {
-            user = Services.getService(UserService.class).getUser(connection, entity, context);
-            knownUsers.put(id, user);
-        }
-        return user;
-    }
-
-    private Resource getResource(int entity) throws OXException {
-        int id = I(entity);
-        Resource resource = knownResources.get(id);
-        if (null == resource) {
-            resource = Services.getService(ResourceService.class).getResource(entity, context);
-            knownResources.put(id, resource);
-        }
-        return resource;
     }
 
     private void prefetchEntities(Collection<List<Attendee>> internalAttendees, Collection<List<Attendee>> userAttendees) throws OXException {
@@ -269,60 +195,19 @@ public class AttendeeLoader {
             for (List<Attendee> attendeeList : userAttendees) {
                 attendees.addAll(attendeeList);
             }
-            prefetchEntities(attendees);
-        }
-    }
-
-    private void prefetchEntities(List<Attendee> attendees) throws OXException {
-        Set<Integer> usersToLoad = new HashSet<Integer>();
-        Set<Integer> groupsToLoad = new HashSet<Integer>();
-        Set<Integer> resourcesToLoad = new HashSet<Integer>();
-        for (Attendee attendee : attendees) {
-            if (0 < attendee.getEntity()) {
-                switch (attendee.getCuType()) {
-                    case GROUP:
-                        groupsToLoad.add(I(attendee.getEntity()));
-                        break;
-                    case RESOURCE:
-                    case ROOM:
-                        resourcesToLoad.add(I(attendee.getEntity()));
-                        break;
-                    default:
-                        usersToLoad.add(I(attendee.getEntity()));
-                        break;
-                }
-            }
-        }
-        if (0 < resourcesToLoad.size()) {
-            ResourceService resourceService = Services.getService(ResourceService.class);
-            for (Integer resourceID : resourcesToLoad) {
-                knownResources.put(resourceID, resourceService.getResource(resourceID.intValue(), context));
-            }
-        }
-        if (0 < groupsToLoad.size()) {
-            GroupService groupService = Services.getService(GroupService.class);
-            for (Integer groupID : groupsToLoad) {
-                knownGroups.put(groupID, groupService.getGroup(context, groupID.intValue()));
-            }
-        }
-        if (0 < usersToLoad.size()) {
-            UserService userService = Services.getService(UserService.class);
-            User[] users = userService.getUser(context, I2i(usersToLoad));
-            for (User user : users) {
-                knownUsers.put(I(user.getId()), user);
-            }
+            entityResolver.prefetch(attendees);
         }
     }
 
     private Map<Integer, List<Attendee>> selectInternalAttendeeData(int objectIDs[]) throws SQLException, OXException {
         Map<Integer, List<Attendee>> attendeesByObjectId = new HashMap<Integer, List<Attendee>>(objectIDs.length);
-        String sql = 
+        String sql =
             new StringBuilder().append("SELECT object_id,id,type,ma,dn FROM prg_date_rights ")
             .append("WHERE cid=? AND object_id IN (").append(getParameters(objectIDs.length)).append(") AND type IN (1,2,3);")
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, contextID);
             for (int objectID : objectIDs) {
                 stmt.setInt(parameterIndex++, objectID);
             }
@@ -348,7 +233,7 @@ public class AttendeeLoader {
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, contextID);
             for (int objectID : objectIDs) {
                 stmt.setInt(parameterIndex++, objectID);
             }
@@ -375,7 +260,7 @@ public class AttendeeLoader {
         .toString();
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
-            stmt.setInt(parameterIndex++, context.getContextId());
+            stmt.setInt(parameterIndex++, contextID);
             for (int objectID : objectIDs) {
                 stmt.setInt(parameterIndex++, objectID);
             }
@@ -392,17 +277,6 @@ public class AttendeeLoader {
             }
         }
         return attendeesByObjectId;
-    }
-
-    private static Attendee find(List<Attendee> attendees, int entity) {
-        if (null != attendees && 0 < attendees.size()) {
-            for (Attendee attendee : attendees) {
-                if (attendee.getEntity() == entity) {
-                    return attendee;
-                }
-            }
-        }
-        return null;
     }
 
 }

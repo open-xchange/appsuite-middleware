@@ -57,7 +57,6 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
-import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -107,10 +106,9 @@ public final class ResolveUIDAction extends ChronosAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
-        CalendarSession calendarSession = initSession(request);
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         String uid = request.checkParameter(AJAXServlet.PARAMETER_UID);
-        int objectID = calendarService.resolveByUID(calendarSession, uid);
+        int objectID = session.getCalendarService().resolveByUID(session, uid);
         if (0 == objectID) {
             throw OXException.notFound("");
         }

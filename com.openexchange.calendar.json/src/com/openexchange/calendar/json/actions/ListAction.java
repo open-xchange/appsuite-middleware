@@ -64,7 +64,6 @@ import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UserizedEvent;
@@ -294,15 +293,11 @@ public final class ListAction extends ChronosAction {
         }
     }
 
-    private static final String[] REQUIRED_PARAMETERS = {
-        CalendarParameters.PARAMETER_FIELDS
-    };
-
     @Override
-    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
-        CalendarSession calendarSession = initSession(request, REQUIRED_PARAMETERS);
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
+        requireParameters(session, CalendarParameters.PARAMETER_FIELDS);
         List<EventID> requestedIDs = parseRequestedIDs(request);
-        List<UserizedEvent> events = calendarService.getEvents(calendarSession, requestedIDs);
+        List<UserizedEvent> events = session.getCalendarService().getEvents(session, requestedIDs);
         return getAppointmentResultWithTimestamp(events);
     }
 

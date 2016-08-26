@@ -118,19 +118,12 @@ import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
-import com.openexchange.group.Group;
-import com.openexchange.group.GroupService;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceService;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ColumnFieldOperand;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.user.UserService;
 
 /**
  * {@link CalendarService}
@@ -149,7 +142,7 @@ public class CalendarReader {
      * @param session The session
      */
     public CalendarReader(CalendarSession session) throws OXException {
-        this(session, Services.getService(CalendarStorageFactory.class).create(session.getContext()));
+        this(session, Services.getService(CalendarStorageFactory.class).create(session.getContext(), session.getEntityResolver()));
     }
 
     /**
@@ -581,24 +574,6 @@ public class CalendarReader {
             }
         }
         return visibleFolders;
-    }
-
-    protected User getUser(int userID) throws OXException {
-        UserService userService = Services.getService(UserService.class);
-        return userService.getUser(userID, session.getContext());
-    }
-
-    protected Group getGroup(int groupID) throws OXException {
-        return Services.getService(GroupService.class).getGroup(session.getContext(), groupID);
-    }
-
-    protected Resource getResource(int resourceID) throws OXException {
-        return Services.getService(ResourceService.class).getResource(resourceID, session.getContext());
-    }
-
-    protected int getDefaultFolderID(User user) throws OXException {
-        //TODO: via higher level service?
-        return new OXFolderAccess(session.getContext()).getDefaultFolderID(user.getId(), FolderObject.CALENDAR);
     }
 
 }

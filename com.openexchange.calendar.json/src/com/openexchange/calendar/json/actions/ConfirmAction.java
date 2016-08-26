@@ -63,7 +63,6 @@ import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.calendar.json.actions.chronos.EventConverter;
 import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.documentation.RequestMethod;
@@ -159,8 +158,7 @@ public final class ConfirmAction extends ChronosAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
-        CalendarSession calendarSession = initSession(request);
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         int objectID = request.checkInt(AJAXServlet.PARAMETER_ID);
         int folderID = request.checkInt(AJAXServlet.PARAMETER_FOLDERID);
         int recurrenceID = request.optInt(AJAXServlet.PARAMETER_OCCURRENCE);
@@ -168,9 +166,9 @@ public final class ConfirmAction extends ChronosAction {
         ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jsonObject);
         Attendee attendee = EventConverter.getAttendee(participant);
         if ((0 == participant.getType() || Participant.USER == participant.getType()) && 0 == participant.getIdentifier()) {
-            attendee.setEntity(jsonObject.has(AJAXServlet.PARAMETER_ID) ? jsonObject.getInt(AJAXServlet.PARAMETER_ID) : calendarSession.getUser().getId());
+            attendee.setEntity(jsonObject.has(AJAXServlet.PARAMETER_ID) ? jsonObject.getInt(AJAXServlet.PARAMETER_ID) : session.getUser().getId());
         }
-        UpdateResult result = calendarService.updateAttendee(calendarSession, folderID, objectID, attendee);
+        UpdateResult result = session.getCalendarService().updateAttendee(session, folderID, objectID, attendee);
         return new AJAXRequestResult(new JSONObject(0), result.getTimestamp(), "json");
     }
 

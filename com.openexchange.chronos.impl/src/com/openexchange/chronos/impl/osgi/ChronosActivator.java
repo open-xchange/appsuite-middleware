@@ -63,6 +63,7 @@ import com.openexchange.group.GroupService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
 import com.openexchange.resource.ResourceService;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 
 /**
@@ -85,7 +86,7 @@ public class ChronosActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, CalendarStorageFactory.class, FolderService.class, UserService.class,
-            GroupService.class, ResourceService.class, DatabaseService.class, RecurrenceService.class };
+            GroupService.class, ResourceService.class, DatabaseService.class, RecurrenceService.class, ThreadPoolService.class };
     }
 
     @Override

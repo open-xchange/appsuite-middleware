@@ -59,7 +59,6 @@ import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.calendar.json.actions.chronos.EventConverter;
-import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
@@ -125,11 +124,10 @@ public final class GetAction extends ChronosAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
-        CalendarSession calendarSession = initSession(request);
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         int objectID = request.checkInt(AJAXServlet.PARAMETER_ID);
         int folderID = request.checkInt(AJAXServlet.PARAMETER_FOLDERID);
-        UserizedEvent event = calendarService.getEvent(calendarSession, folderID, objectID);
+        UserizedEvent event = session.getCalendarService().getEvent(session, folderID, objectID);
         Appointment appointment = EventConverter.getAppointment(event);
         return new AJAXRequestResult(appointment, event.getEvent().getLastModified(), "appointment");
     }

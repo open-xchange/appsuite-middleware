@@ -148,7 +148,7 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
         OXUserInterface oxUserInterface = getUserInterface();
 
         final Context ctx = new Context(parseInt('c', 0, cmd, option));
-        final User user = new User(parseInt('u', 0, cmd, option));
+        final User user = new User(parseInt('i', 0, cmd, option));
         Credentials credentials = new Credentials(cmd.getOptionValue('A'), cmd.getOptionValue('P'));
 
         if (cmd.hasOption(OPT_CONFIGURATION_SHORT)) {

@@ -64,6 +64,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.compat.SeriesPattern;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -90,11 +91,12 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      * Initializes a new {@link RdbEventStorage}.
      *
      * @param context The context
+     * @param entityResolver The entity resolver to use
      * @param dbProvider The database provider to use
      * @param The transaction policy
      */
-    public RdbEventStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
-        super(context, dbProvider, txPolicy);
+    public RdbEventStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+        super(context, entityResolver, dbProvider, txPolicy);
     }
 
     @Override

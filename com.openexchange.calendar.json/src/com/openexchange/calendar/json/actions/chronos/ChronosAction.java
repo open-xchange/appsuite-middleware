@@ -171,13 +171,13 @@ public abstract class ChronosAction extends AppointmentAction {
         }
         //        legacy = true;
         try {
-            return legacy ? perform(request) : perform(getService(CalendarService.class), request);
+            return legacy ? perform(request) : perform(initSession(request), request);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    protected abstract AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException;
+    protected abstract AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException;
 
     protected static AJAXRequestResult getAppointmentResultWithTimestamp(List<UserizedEvent> events) {
         Date timestamp = new Date(0L);
@@ -247,8 +247,8 @@ public abstract class ChronosAction extends AppointmentAction {
      * @param requiredParameters The required parameters to check
      * @return The calendar session
      */
-    protected static CalendarSession initSession(AppointmentAJAXRequest request, String... requiredParameters) throws OXException {
-        CalendarSession session = new CalendarSession(request.getSession());
+    protected CalendarSession initSession(AppointmentAJAXRequest request, String... requiredParameters) throws OXException {
+        CalendarSession session = getService(CalendarService.class).init(request.getSession());
         String timestampParameter = request.getParameter(AJAXServlet.PARAMETER_TIMESTAMP);
         if (null != timestampParameter) {
             try {
@@ -312,7 +312,7 @@ public abstract class ChronosAction extends AppointmentAction {
         return EventConverter.getFields(columnIDs);
     }
 
-    private static CalendarSession requireParameters(CalendarSession session, String... requiredParameters) throws OXException {
+    protected static CalendarSession requireParameters(CalendarSession session, String... requiredParameters) throws OXException {
         if (null != requiredParameters) {
             for (String requiredParameter : requiredParameters) {
                 if (false == session.contains(requiredParameter)) {

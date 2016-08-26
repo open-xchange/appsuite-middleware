@@ -65,7 +65,6 @@ import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UpdateResult;
@@ -160,26 +159,22 @@ public final class UpdateAction extends ChronosAction {
         return new AJAXRequestResult(jsonResponseObj, timestamp, "json");
     }
 
-    private static final String[] REQUIRED_PARAMETERS = {
-        CalendarParameters.PARAMETER_TIMESTAMP
-    };
-
     @Override
-    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
+        requireParameters(session, CalendarParameters.PARAMETER_TIMESTAMP);
         EventID eventID = new EventID(request.checkInt(AJAXServlet.PARAMETER_INFOLDER), request.checkInt(AJAXServlet.PARAMETER_ID));
         JSONObject jsonObject = request.getData();
         CalendarDataObject appointment = new CalendarDataObject();
         appointment.setContext(request.getSession().getContext());
         new AppointmentParser(request.getTimeZone()).parse(appointment, jsonObject);
         convertExternalToInternalUsersIfPossible(appointment, request.getSession().getContext(), LOG);
-        CalendarSession calendarSession = initSession(request, REQUIRED_PARAMETERS);
         if (appointment.containsNotification()) {
-            calendarSession.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
+            session.set(CalendarParameters.PARAMETER_NOTIFICATION, Boolean.valueOf(appointment.getNotification()));
         }
-        calendarSession.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
+        session.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
 
-        UserizedEvent event = getEventConverter().getEvent(calendarSession, appointment, eventID);
-        UpdateResult result = calendarService.updateEvent(calendarSession, eventID, event);
+        UserizedEvent event = getEventConverter().getEvent(session, appointment, eventID);
+        UpdateResult result = session.getCalendarService().updateEvent(session, eventID, event);
         return new AJAXRequestResult(new JSONObject().put(DataFields.ID, result.getUpdate().getId()), result.getTimestamp(), "json");
     }
 

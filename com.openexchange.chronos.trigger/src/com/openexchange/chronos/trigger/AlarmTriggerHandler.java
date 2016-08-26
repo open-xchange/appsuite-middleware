@@ -77,6 +77,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.service.CalendarHandler;
+import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.DeleteResult;
@@ -89,9 +90,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.user.UserService;
 
 /**
  * {@link AlarmTriggerHandler}
@@ -126,7 +125,7 @@ public class AlarmTriggerHandler implements CalendarHandler {
     public void eventCreated(CreateResult result) {
         try {
             List<Attendee> userAttendees = filter(result.getCreatedEvent().getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL);
-            List<ReminderTrigger> triggers = prepareTriggers(result.getSession().getContext(), result.getCreatedEvent(), userAttendees);
+            List<ReminderTrigger> triggers = prepareTriggers(result.getSession(), result.getCreatedEvent(), userAttendees);
             if (0 < triggers.size()) {
                 insertTriggers(result.getSession().getContext(), triggers);
             }
@@ -143,7 +142,7 @@ public class AlarmTriggerHandler implements CalendarHandler {
                  * date/time-related property changed; re-create triggers of all actual attendees & remove triggers for deleted attendees
                  */
                 List<Attendee> newAttendees = filter(result.getUpdate().getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL);
-                Map<Integer, List<ReminderTrigger>> triggersPerUser = prepareTriggersPerUser(result.getSession().getContext(), result.getUpdate(), newAttendees);
+                Map<Integer, List<ReminderTrigger>> triggersPerUser = prepareTriggersPerUser(result.getSession(), result.getUpdate(), newAttendees);
                 for (Attendee originalAttendee : filter(result.getOriginal().getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
                     if (false == triggersPerUser.containsKey(I(originalAttendee.getEntity()))) {
                         triggersPerUser.put(I(originalAttendee.getEntity()), Collections.<ReminderTrigger> emptyList());
@@ -157,7 +156,7 @@ public class AlarmTriggerHandler implements CalendarHandler {
                     /*
                      * attendees changed; adjust triggers based on attendee updates
                      */
-                    adjustTriggers(result.getSession().getContext(), result.getUpdate(), result.getAttendeeUpdates());
+                    adjustTriggers(result.getSession(), result.getUpdate(), result.getAttendeeUpdates());
                 }
                 if (false == result.getAlarmUpdates().isEmpty()) {
                     /*
@@ -167,7 +166,7 @@ public class AlarmTriggerHandler implements CalendarHandler {
                     Map<Integer, List<ReminderTrigger>> triggersPerUser;
                     Attendee userAttendee = find(result.getUpdate().getAttendees(), result.getCalendarUser().getId());
                     if (null != userAttendee) {
-                        triggersPerUser = prepareTriggersPerUser(result.getSession().getContext(), result.getUpdate(), Collections.singletonList(userAttendee));
+                        triggersPerUser = prepareTriggersPerUser(result.getSession(), result.getUpdate(), Collections.singletonList(userAttendee));
                     } else {
                         triggersPerUser = new HashMap<Integer, List<ReminderTrigger>>();
                     }
@@ -262,23 +261,23 @@ public class AlarmTriggerHandler implements CalendarHandler {
         }
     }
 
-    private void adjustTriggers(Context context, Event updatedEvent, CollectionUpdate<Attendee, AttendeeField> attendeeUpdates) throws OXException {
+    private void adjustTriggers(CalendarSession session, Event updatedEvent, CollectionUpdate<Attendee, AttendeeField> attendeeUpdates) throws OXException {
         int updated = 0;
         DatabaseService dbService = services.getService(DatabaseService.class);
         Connection connection = null;
         try {
-            connection = dbService.getWritable(context);
+            connection = dbService.getWritable(session.getContext());
             connection.setAutoCommit(false);
-            TriggerStorage triggerStorage = new TriggerStorage(context, connection);
+            TriggerStorage triggerStorage = new TriggerStorage(session.getContext(), connection);
             for (Attendee removedAttendee : filter(attendeeUpdates.getRemovedItems(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
                 updated += triggerStorage.removeTriggers(updatedEvent.getId(), removedAttendee.getEntity());
             }
-            List<ReminderTrigger> newTriggers = prepareTriggers(context, updatedEvent, filter(attendeeUpdates.getAddedItems(), Boolean.TRUE, CalendarUserType.INDIVIDUAL));
+            List<ReminderTrigger> newTriggers = prepareTriggers(session, updatedEvent, filter(attendeeUpdates.getAddedItems(), Boolean.TRUE, CalendarUserType.INDIVIDUAL));
             if (0 < newTriggers.size()) {
                 updated += triggerStorage.insertTriggers(newTriggers);
             }
             List<Attendee> updatedAttendees = getAttendeesRequiringNewTrigger(attendeeUpdates.getUpdatedItems());
-            List<ReminderTrigger> updatedTriggers = prepareTriggers(context, updatedEvent, updatedAttendees);
+            List<ReminderTrigger> updatedTriggers = prepareTriggers(session, updatedEvent, updatedAttendees);
             if (0 < newTriggers.size()) {
                 updated += triggerStorage.replaceTriggers(updatedTriggers);
             }
@@ -289,16 +288,16 @@ public class AlarmTriggerHandler implements CalendarHandler {
             if (null != connection) {
                 Databases.autocommit(connection);
                 if (0 < updated) {
-                    dbService.backWritable(context, connection);
+                    dbService.backWritable(session.getContext(), connection);
                 } else {
-                    dbService.backWritableAfterReading(context, connection);
+                    dbService.backWritableAfterReading(session.getContext(), connection);
                 }
             }
         }
     }
 
-    private List<ReminderTrigger> prepareTriggers(Context context, Event event, List<Attendee> userAttendees) throws OXException {
-        Map<Integer, List<ReminderTrigger>> triggersPerUser = prepareTriggersPerUser(context, event, userAttendees);
+    private List<ReminderTrigger> prepareTriggers(CalendarSession session, Event event, List<Attendee> userAttendees) throws OXException {
+        Map<Integer, List<ReminderTrigger>> triggersPerUser = prepareTriggersPerUser(session, event, userAttendees);
         if (0 == triggersPerUser.size()) {
             return Collections.emptyList();
         }
@@ -317,12 +316,12 @@ public class AlarmTriggerHandler implements CalendarHandler {
      * @param userAttendees The user attendees to consider
      * @return The reminder triggers of each user, mapped to the user identifier
      */
-    private Map<Integer, List<ReminderTrigger>> prepareTriggersPerUser(Context context, Event event, List<Attendee> userAttendees) throws OXException {
+    private Map<Integer, List<ReminderTrigger>> prepareTriggersPerUser(CalendarSession session, Event event, List<Attendee> userAttendees) throws OXException {
         /*
          * load alarms per user
          */
         Map<Integer, List<ReminderTrigger>> triggersPerUser = new HashMap<Integer, List<ReminderTrigger>>(userAttendees.size());
-        CalendarStorage storage = services.getService(CalendarStorageFactory.class).create(context); //dbprovider?
+        CalendarStorage storage = services.getService(CalendarStorageFactory.class).create(session.getContext(), session.getEntityResolver()); //dbprovider?
         Map<Integer, List<Alarm>> alarmsByUser = storage.getAlarmStorage().loadAlarms(event.getId());
         if (null == alarmsByUser || 0 == alarmsByUser.size()) {
             return triggersPerUser;
@@ -332,7 +331,7 @@ public class AlarmTriggerHandler implements CalendarHandler {
             /*
              * collect triggers for next occurrence of event in common timezone
              */
-            TimeZone timeZone = null != event.getStartTimezone() ? TimeZone.getTimeZone(event.getStartTimezone()) : getTimeZone(context, event.getCreatedBy());
+            TimeZone timeZone = null != event.getStartTimezone() ? TimeZone.getTimeZone(event.getStartTimezone()) : session.getEntityResolver().getTimeZone(event.getCreatedBy());
             Event occurrence = getNextOccurrence(event, timeZone);
             if (null == occurrence) {
                 return triggersPerUser;
@@ -350,7 +349,7 @@ public class AlarmTriggerHandler implements CalendarHandler {
             for (Attendee attendee : userAttendees) {
                 List<Alarm> alarms = alarmsByUser.get(I(attendee.getEntity()));
                 if (null != alarms && 0 < alarms.size()) {
-                    TimeZone timeZone = getTimeZone(context, attendee.getEntity());
+                    TimeZone timeZone = session.getEntityResolver().getTimeZone(attendee.getEntity());
                     Event occurrence = getNextOccurrence(event, timeZone);
                     if (null != occurrence) {
                         put(triggersPerUser, I(attendee.getEntity()), prepareTriggers(occurrence, attendee, timeZone, alarms, forSeries));
@@ -416,11 +415,6 @@ public class AlarmTriggerHandler implements CalendarHandler {
             return null;
         }
         return occurrenceIterator.next();
-    }
-
-    private TimeZone getTimeZone(Context context, int userID) throws OXException {
-        User user = services.getService(UserService.class).getUser(userID, context);
-        return TimeZone.getTimeZone(user.getTimeZone());
     }
 
     private static List<Attendee> getAttendeesRequiringNewTrigger(List<ItemUpdate<Attendee, AttendeeField>> attendeeUpdates) {

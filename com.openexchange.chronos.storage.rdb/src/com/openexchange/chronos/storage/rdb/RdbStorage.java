@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.database.provider.DBProvider;
@@ -73,17 +74,20 @@ public abstract class RdbStorage {
     protected final Context context;
     protected final DBProvider dbProvider;
     protected final DBTransactionPolicy txPolicy;
+    protected final EntityResolver entityResolver;
 
     /**
      * Initializes a new {@link RdbStorage}.
      *
      * @param context The context
+     * @param entityResolver The entity resolver to use
      * @param dbProvider The database provider to use
      * @param The transaction policy
      */
-    protected RdbStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+    protected RdbStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
         super();
         this.context = context;
+        this.entityResolver = entityResolver;
         this.dbProvider = dbProvider;
         this.txPolicy = txPolicy;
     }

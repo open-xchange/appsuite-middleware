@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link CalendarService}
@@ -62,6 +63,14 @@ import com.openexchange.exception.OXException;
  * @since v7.10.0
  */
 public interface CalendarService {
+
+    /**
+     * Initializes a new calendar session.
+     *
+     * @param session The underlying server session
+     * @return A new calendar session
+     */
+    CalendarSession init(Session session) throws OXException;
 
     int resolveByUID(CalendarSession session, String uid) throws OXException;
 

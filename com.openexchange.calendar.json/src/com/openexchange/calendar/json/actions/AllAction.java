@@ -66,7 +66,6 @@ import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
@@ -346,19 +345,15 @@ public final class AllAction extends ChronosAction {
         }
     }
 
-    private static final String[] REQUIRED_PARAMETERS = {
-        CalendarParameters.PARAMETER_FIELDS, CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END
-    };
-
     @Override
-    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
-        CalendarSession calendarSession = initSession(request, REQUIRED_PARAMETERS);
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
+        requireParameters(session, CalendarParameters.PARAMETER_FIELDS, CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END);
         int folderID = request.getFolderId();
         List<UserizedEvent> events;
         if (0 < folderID) {
-            events = calendarService.getEventsInFolder(calendarSession, folderID);
+            events = session.getCalendarService().getEventsInFolder(session, folderID);
         } else {
-            events = calendarService.getEventsOfUser(calendarSession);
+            events = session.getCalendarService().getEventsOfUser(session);
         }
         return getAppointmentResultWithTimestamp(events);
     }

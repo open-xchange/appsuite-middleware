@@ -61,7 +61,6 @@ import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
@@ -282,7 +281,7 @@ public final class UpdatesAction extends ChronosAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         Date since = request.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
         String ignore = request.getParameter(AJAXServlet.PARAMETER_IGNORE);
         boolean ignoreUpdated = null != ignore && ignore.contains("changed");
@@ -291,26 +290,25 @@ public final class UpdatesAction extends ChronosAction {
         List<UserizedEvent> newAndModifiedEvents;
         List<UserizedEvent> deletedEvents;
         if (0 < folderID) {
-            CalendarSession calendarSession = initSession(request);
             if (false == ignoreUpdated) {
-                newAndModifiedEvents = calendarService.getUpdatedEventsInFolder(calendarSession, folderID, since);
+                newAndModifiedEvents = session.getCalendarService().getUpdatedEventsInFolder(session, folderID, since);
             } else {
                 newAndModifiedEvents = null;
             }
             if (false == ignoreDeleted) {
-                deletedEvents = calendarService.getDeletedEventsInFolder(calendarSession, folderID, since);
+                deletedEvents = session.getCalendarService().getDeletedEventsInFolder(session, folderID, since);
             } else {
                 deletedEvents = null;
             }
         } else {
-            CalendarSession calendarSession = initSession(request, CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END);
+            requireParameters(session, CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END);
             if (false == ignoreUpdated) {
-                newAndModifiedEvents = calendarService.getUpdatedEventsOfUser(calendarSession, since);
+                newAndModifiedEvents = session.getCalendarService().getUpdatedEventsOfUser(session, since);
             } else {
                 newAndModifiedEvents = null;
             }
             if (false == ignoreDeleted) {
-                deletedEvents = calendarService.getDeletedEventsOfUser(calendarSession, since);
+                deletedEvents = session.getCalendarService().getDeletedEventsOfUser(session, since);
             } else {
                 deletedEvents = null;
             }

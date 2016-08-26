@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.CalendarStorageFactory;
 import com.openexchange.chronos.storage.rdb.osgi.Services;
@@ -68,13 +69,13 @@ import com.openexchange.groupware.contexts.Context;
 public class RdbCalendarStorageFactory implements CalendarStorageFactory {
 
     @Override
-    public CalendarStorage create(Context context) throws OXException {
-        return create(context, new DatabaseServiceDBProvider(Services.getService(DatabaseService.class)), DBTransactionPolicy.NORMAL_TRANSACTIONS);
+    public CalendarStorage create(Context context, EntityResolver entityResolver) throws OXException {
+        return create(context, entityResolver, new DatabaseServiceDBProvider(Services.getService(DatabaseService.class)), DBTransactionPolicy.NORMAL_TRANSACTIONS);
     }
 
     @Override
-    public CalendarStorage create(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
-        return new RdbCalendarStorage(context, dbProvider, txPolicy);
+    public CalendarStorage create(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) throws OXException {
+        return new RdbCalendarStorage(context, entityResolver, dbProvider, txPolicy);
     }
 
 }

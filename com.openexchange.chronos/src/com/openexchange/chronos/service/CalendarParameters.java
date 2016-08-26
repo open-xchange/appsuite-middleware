@@ -50,8 +50,6 @@
 package com.openexchange.chronos.service;
 
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.TimeZone;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.EventField;
@@ -62,7 +60,7 @@ import com.openexchange.chronos.EventField;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CalendarParameters {
+public interface CalendarParameters {
 
     /**
      * {@link Boolean}
@@ -71,7 +69,7 @@ public class CalendarParameters {
      * {@link Classification#CONFIDENTIAL} should be included when fetching events from a shared folder or not. Such events are
      * anonymized by stripping away all information except start date, end date and recurrence information.
      */
-    public static final String PARAMETER_INCLUDE_PRIVATE = "showPrivate";
+    static final String PARAMETER_INCLUDE_PRIVATE = "showPrivate";
 
     /**
      * {@link Boolean}
@@ -79,94 +77,84 @@ public class CalendarParameters {
      * Configures if only the "master" event of a series should be returned, or if recurring events should be resolved into their
      * individual instances.
      */
-    public static final String PARAMETER_RECURRENCE_MASTER = "recurrence_master";
+    static final String PARAMETER_RECURRENCE_MASTER = "recurrence_master";
 
     /**
      * {@link Date}
      * <p/>
      * Specifies the lower inclusive limit of the queried range, i.e. only events which start on or after this date should be returned.
      */
-    public static final String PARAMETER_RANGE_START = "start";
+    static final String PARAMETER_RANGE_START = "start";
 
     /**
      * {@link Date}
      * <p/>
      * Specifies the upper exclusive limit of the queried range, i.e. only appointments which end before this date should be returned.
      */
-    public static final String PARAMETER_RANGE_END = "end";
+    static final String PARAMETER_RANGE_END = "end";
 
     /**
      * Array of {@link EventField}
      * <p/>
      * Allows to restrict the returned properties of retrieved event data.
      */
-    public static final String PARAMETER_FIELDS = "fields";
+    static final String PARAMETER_FIELDS = "fields";
 
     /**
      * {@link EventField}
      * <p/>
      * Specifies the field for sorting the results.
      */
-    public static final String PARAMETER_ORDER_BY = "sort";
+    static final String PARAMETER_ORDER_BY = "sort";
 
     /**
      * {@link String}
      * <p/>
      * The sort order to apply, either <code>ASC</code> for ascending, or <code>DESC</code> for descending.
      */
-    public static final String PARAMETER_ORDER = "order";
+    static final String PARAMETER_ORDER = "order";
 
     /**
      * {@link TimeZone}
      * <p/>
      * Provides a (possibly overridden) timezone used on a per-request basis.
      */
-    public static final String PARAMETER_TIMEZONE = "timezone";
+    static final String PARAMETER_TIMEZONE = "timezone";
 
     /**
      * {@link Boolean}
      * <p/>
      * Indicates whether (soft) conflicts of attendees should be ignored when saving a meeting.
      */
-    public static final String PARAMETER_IGNORE_CONFLICTS = "ignore_conflicts";
+    static final String PARAMETER_IGNORE_CONFLICTS = "ignore_conflicts";
 
     /**
      * {@link Boolean}
      * <p/>
      * Specifies that attendees should be notified about the changes when savong a meeting or not.
      */
-    public static final String PARAMETER_NOTIFICATION = "notification";
+    static final String PARAMETER_NOTIFICATION = "notification";
 
     /**
      * {@link Integer}
      * <p/>
      * A positive integer number to specify the "left-hand" limit of the range to return.
      */
-    public static final String PARAMETER_LEFT_HAND_LIMIT = "left_hand_limit";
+    static final String PARAMETER_LEFT_HAND_LIMIT = "left_hand_limit";
 
     /**
      * {@link Integer}
      * <p/>
      * A positive integer number to specify the "right-hand" limit of the range to return.
      */
-    public static final String PARAMETER_RIGHT_HAND_LIMIT = "right_hand_limit";
+    static final String PARAMETER_RIGHT_HAND_LIMIT = "right_hand_limit";
 
     /**
      * {@link Long}
      * <p/>
      * The client timestamp / sequence number to catch concurrent updates, i.e. the latest modification time known by the client.
      */
-    public static final String PARAMETER_TIMESTAMP = "timestamp";
-
-    private final Map<String, Object> parameters;
-
-    /**
-     * Initializes a new {@link CalendarParameters}.
-     */
-    public CalendarParameters() {
-        super();
-        this.parameters = new HashMap<String, Object>();
-    }
+    static final String PARAMETER_TIMESTAMP = "timestamp";
 
     /**
      * Sets a parameter.
@@ -175,10 +163,7 @@ public class CalendarParameters {
      * @param value The value to set
      * @return A self reference
      */
-    public <T> CalendarParameters set(String parameter, T value) {
-        parameters.put(parameter, value);
-        return this;
-    }
+    <T> CalendarParameters set(String parameter, T value);
 
     /**
      * Gets a parameter.
@@ -187,9 +172,7 @@ public class CalendarParameters {
      * @param clazz The value's target type
      * @return The parameter value, or <code>null</code> if not set
      */
-    public <T> T get(String parameter, Class<T> clazz) {
-        return get(parameter, clazz, null);
-    }
+    <T> T get(String parameter, Class<T> clazz);
 
     /**
      * Gets a parameter, falling back to a custom default value if not set.
@@ -199,10 +182,7 @@ public class CalendarParameters {
      * @param defaultValue The default value to use as fallback if the parameter is not set
      * @return The parameter value, or the passed default value if not set
      */
-    public <T> T get(String parameter, Class<T> clazz, T defaultValue) {
-        Object value = parameters.get(parameter);
-        return null == value ? defaultValue : clazz.cast(value);
-    }
+    <T> T get(String parameter, Class<T> clazz, T defaultValue);
 
     /**
      * Gets a value indicating whether a specific parameter is set.
@@ -210,8 +190,6 @@ public class CalendarParameters {
      * @param parameter The parameter name
      * @return <code>true</code> if the parameter is set, <code>false</code>, otherwise
      */
-    public boolean contains(String parameter) {
-        return parameters.containsKey(parameter);
-    }
+    boolean contains(String parameter);
 
 }

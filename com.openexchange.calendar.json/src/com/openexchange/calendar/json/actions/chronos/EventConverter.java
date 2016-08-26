@@ -64,7 +64,6 @@ import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UserizedEvent;
@@ -716,7 +715,7 @@ public class EventConverter {
         EventField[] oldFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
         try {
             session.set(CalendarParameters.PARAMETER_FIELDS, fields);
-            UserizedEvent event = services.getService(CalendarService.class).getEvent(session, eventID.getFolderID(), eventID.getObjectID());
+            UserizedEvent event = session.getCalendarService().getEvent(session, eventID.getFolderID(), eventID.getObjectID());
             return null != event ? event.getEvent() : null;
         } finally {
             session.set(CalendarParameters.PARAMETER_FIELDS, oldFields);

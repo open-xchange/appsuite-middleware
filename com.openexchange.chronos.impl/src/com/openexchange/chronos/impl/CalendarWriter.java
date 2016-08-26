@@ -53,10 +53,12 @@ import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.getUserIDs;
+import static com.openexchange.chronos.common.CalendarUtils.hasExternalOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isAttendee;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
+import static com.openexchange.chronos.common.CalendarUtils.matches;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
@@ -107,7 +109,7 @@ public class CalendarWriter extends CalendarReader {
      * @param session The session
      */
     public CalendarWriter(CalendarSession session) throws OXException {
-        this(session, Services.getService(CalendarStorageFactory.class).create(session.getContext()));
+        this(session, Services.getService(CalendarStorageFactory.class).create(session.getContext(), session.getEntityResolver()));
     }
 
     /**
@@ -140,14 +142,14 @@ public class CalendarWriter extends CalendarReader {
         /*
          * load original event data
          */
-        Event originalEvent = storage.getEventStorage().loadEvent(objectID, null);
+        Event originalEvent = readAdditionalEventData(storage.getEventStorage().loadEvent(objectID, null), null);
         if (null == originalEvent) {
             throw OXException.notFound(String.valueOf(objectID));//TODO
         }
-        readAdditionalEventData(originalEvent, null);
         /*
          * check current session user's permissions
          */
+        Check.eventIsInFolder(originalEvent, folder);
         if (session.getUser().getId() != originalEvent.getCreatedBy()) {
             requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
         } else {
@@ -245,6 +247,13 @@ public class CalendarWriter extends CalendarReader {
         /*
          * check current session user's permissions
          */
+        if (hasExternalOrganizer(originalEvent) && originalEvent.getUid().equals(userizedEvent.getEvent().getUid()) &&
+            matches(originalEvent.getOrganizer(), userizedEvent.getEvent().getOrganizer())) {
+            // don't check that the event already exists in the target folder to support later addition of internal users to externally
+            // organized events; see https://bugs.open-xchange.com/show_bug.cgi?id=29566#c12 for details
+        } else {
+            Check.eventIsInFolder(originalEvent, folder);
+        }
         if (session.getUser().getId() == originalEvent.getCreatedBy()) {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
         } else {
@@ -431,7 +440,7 @@ public class CalendarWriter extends CalendarReader {
                     if (targetCalendarUser.getId() == originalAttendee.getEntity()) {
                         attendeeUpdate.setFolderID(i(targetFolder));
                     } else {
-                        attendeeUpdate.setFolderID(AttendeeHelper.getDefaultFolderID(session.getContext(), getUser(originalAttendee.getEntity())));
+                        attendeeUpdate.setFolderID(session.getEntityResolver().getDefaultCalendarID(originalAttendee.getEntity()));
                     }
                     if (attendeeUpdate.getFolderID() != originalAttendee.getFolderID()) {
                         storage.getAttendeeStorage().insertTombstoneAttendee(objectID, AttendeeMapper.getInstance().getTombstone(originalAttendee));
@@ -470,7 +479,7 @@ public class CalendarWriter extends CalendarReader {
                 if (targetCalendarUser.getId() == originalAttendee.getEntity()) {
                     attendeeUpdate.setFolderID(i(targetFolder));
                 } else {
-                    attendeeUpdate.setFolderID(AttendeeHelper.getDefaultFolderID(session.getContext(), getUser(originalAttendee.getEntity())));
+                    attendeeUpdate.setFolderID(session.getEntityResolver().getDefaultCalendarID(originalAttendee.getEntity()));
                 }
                 storage.getAttendeeStorage().insertTombstoneAttendee(objectID, AttendeeMapper.getInstance().getTombstone(originalAttendee));
                 storage.getAttendeeStorage().updateAttendee(objectID, attendeeUpdate);
@@ -539,6 +548,7 @@ public class CalendarWriter extends CalendarReader {
         /*
          * check current session user's permissions
          */
+        Check.eventIsInFolder(originalEvent, folder);
         if (session.getUser().getId() == originalEvent.getCreatedBy()) {
             requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
         } else {

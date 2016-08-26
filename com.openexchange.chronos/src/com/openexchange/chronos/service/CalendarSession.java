@@ -59,50 +59,41 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class CalendarSession extends CalendarParameters {
-
-    private final ServerSession session;
-
-    /**
-     * Initializes a new {@link CalendarSession}.
-     *
-     * @param session The underlying server session
-     */
-    public CalendarSession(ServerSession session) {
-        super();
-        this.session = session;
-    }
+public interface CalendarSession extends CalendarParameters {
 
     /**
      * Gets the underlying server session.
      *
      * @return The underlying server session
      */
-    public ServerSession getSession() {
-        return session;
-    }
+    ServerSession getSession();
 
     /**
      * Gets the session's user.
      *
      * @return The user
      */
-    public User getUser() {
-        return session.getUser();
-    }
+    User getUser();
 
     /**
      * Gets the session's context.
      *
      * @return The context
      */
-    public Context getContext() {
-        return session.getContext();
-    }
+    Context getContext();
 
-    @Override
-    public String toString() {
-        return "CalendarSession [context=" + session.getContextId() + ", user=" + session.getUserId() + ", sessionId=" + session.getSessionID() + "]";
-    }
+    /**
+     * Gets the entity resolver.
+     *
+     * @return The entity resolver
+     */
+    EntityResolver getEntityResolver();
+
+    /**
+     * Gets a reference to the calendar service.
+     *
+     * @return The calendar service
+     */
+    CalendarService getCalendarService();
 
 }

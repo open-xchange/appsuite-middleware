@@ -136,22 +136,4 @@ public class CalendarUser {
         this.sentBy = sentBy;
     }
 
-    /**
-     * Gets the email
-     * 
-     * @return The email
-     */
-    public String getEmail() {
-        return email;
-    }
-
-    /**
-     * Sets the email
-     * 
-     * @param email The email to set
-     */
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
 }

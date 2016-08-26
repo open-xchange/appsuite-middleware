@@ -91,7 +91,7 @@ public abstract class ReadOperation<T> {
         try {
             readConnection = dbService.getReadOnly(session.getContext());
             SimpleDBProvider dbProvider = new SimpleDBProvider(readConnection, null);
-            CalendarStorage storage = storageFactory.create(session.getContext(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+            CalendarStorage storage = storageFactory.create(session.getContext(), session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
             return execute(new CalendarReader(session, storage));
         } finally {
             if (null != readConnection) {

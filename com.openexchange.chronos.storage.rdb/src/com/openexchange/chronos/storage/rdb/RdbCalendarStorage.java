@@ -51,6 +51,7 @@ package com.openexchange.chronos.storage.rdb;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.AttachmentStorage;
 import com.openexchange.chronos.storage.AttendeeStorage;
@@ -82,15 +83,16 @@ public class RdbCalendarStorage extends RdbStorage implements CalendarStorage {
      * Initializes a new {@link RdbCalendarStorage}.
      *
      * @param context The context
+     * @param entityResolver The entity resolver to use
      * @param dbProvider The database provider to use
      * @param The transaction policy
      */
-    public RdbCalendarStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
-        super(context, dbProvider, txPolicy);
-        eventStorage = new RdbEventStorage(context, dbProvider, txPolicy);
-        attendeeStorage = new RdbAttendeeStorage(context, dbProvider, txPolicy);
-        alarmStorage = new RdbAlarmStorage(context, dbProvider, txPolicy);
-        attachmentStorage = new RdbAttachmentStorage(context, dbProvider, txPolicy);
+    public RdbCalendarStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+        super(context, entityResolver, dbProvider, txPolicy);
+        eventStorage = new RdbEventStorage(context, entityResolver, dbProvider, txPolicy);
+        attendeeStorage = new RdbAttendeeStorage(context, entityResolver, dbProvider, txPolicy);
+        alarmStorage = new RdbAlarmStorage(context, entityResolver, dbProvider, txPolicy);
+        attachmentStorage = new RdbAttachmentStorage(context, entityResolver, dbProvider, txPolicy);
     }
 
     @Override

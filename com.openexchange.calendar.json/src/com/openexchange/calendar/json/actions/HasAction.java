@@ -61,7 +61,6 @@ import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.service.CalendarParameters;
-import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -120,16 +119,12 @@ public final class HasAction extends ChronosAction {
         return new AJAXRequestResult(jsonResponseArray, "json");
     }
 
-    private static final String[] REQUIRED_PARAMETERS = {
-        CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END
-    };
-
     @Override
-    protected AJAXRequestResult perform(CalendarService calendarService, AppointmentAJAXRequest request) throws OXException, JSONException {
-        CalendarSession calendarSession = initSession(request, REQUIRED_PARAMETERS);
-        Date from = calendarSession.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
-        Date until = calendarSession.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
-        boolean[] hasEventsArray = calendarService.hasEventsBetween(calendarSession, from, until);
+    protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
+        requireParameters(session, CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END);
+        Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
+        boolean[] hasEventsArray = session.getCalendarService().hasEventsBetween(session, from, until);
         JSONArray jsonArray = new JSONArray(hasEventsArray.length);
         for (int i = 0; i < hasEventsArray.length; i++) {
             jsonArray.put(hasEventsArray[i]);

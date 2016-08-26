@@ -62,6 +62,7 @@ import java.util.Map;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AlarmStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
@@ -82,11 +83,12 @@ public class RdbAlarmStorage extends RdbStorage implements AlarmStorage {
      * Initializes a new {@link RdbAlarmStorage}.
      *
      * @param context The context
+     * @param entityResolver The entity resolver to use
      * @param dbProvider The database provider to use
      * @param The transaction policy
      */
-    public RdbAlarmStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
-        super(context, dbProvider, txPolicy);
+    public RdbAlarmStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+        super(context, entityResolver, dbProvider, txPolicy);
     }
 
     @Override

@@ -52,7 +52,6 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.impl.Utils.applyProperties;
 import static com.openexchange.chronos.impl.Utils.getCalAddress;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.i;
@@ -65,23 +64,14 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.compat.Appointment2Event;
-import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
-import com.openexchange.group.Group;
-import com.openexchange.group.GroupService;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.preferences.ServerUserSetting;
-import com.openexchange.resource.Resource;
-import com.openexchange.resource.ResourceService;
-import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.user.UserService;
 
 /**
  * {@link AttendeeHelper}
@@ -154,6 +144,7 @@ public class AttendeeHelper {
     }
 
     private void processNewEvent(List<Attendee> requestedAttendees) throws OXException {
+        session.getEntityResolver().prefetch(requestedAttendees);
         /*
          * always add attendee for default calendar user in folder
          */
@@ -172,6 +163,7 @@ public class AttendeeHelper {
 
     private void processUpdatedEvent(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
         AbstractCollectionUpdate<Attendee, AttendeeField> attendeeDiff = AttendeeMapper.getInstance().getAttendeeUpdate(originalAttendees, updatedAttendees);
+        session.getEntityResolver().prefetch(attendeeDiff.getAddedItems());
         List<Attendee> attendeeList = new ArrayList<Attendee>(originalAttendees);
         /*
          * delete removed attendees
@@ -209,43 +201,49 @@ public class AttendeeHelper {
         /*
          * add internal user attendees
          */
-        for (Attendee attendee : filter(newAttendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
-            if (contains(existingAttendees, attendee) || contains(attendees, attendee)) {
-                LOG.debug("Skipping duplicate user attendee {}", attendee);
+        for (Attendee userAttendee : filter(newAttendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
+            if (contains(existingAttendees, userAttendee) || contains(attendees, userAttendee)) {
+                LOG.debug("Skipping duplicate user attendee {}", userAttendee);
                 continue;
             }
-            attendees.add(getAttendeeForInsert(getUser(attendee.getEntity()), attendee, folder.getType()));
+            userAttendee = session.getEntityResolver().applyEntityData(userAttendee, AttendeeField.ROLE, AttendeeField.RSVP);
+            userAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ?
+                ATTENDEE_PUBLIC_FOLDER_ID : session.getEntityResolver().getDefaultCalendarID(userAttendee.getEntity()));
+            userAttendee.setPartStat(getInitialPartStat(session.getContext().getContextId(), userAttendee.getEntity(), folder.getType()));
+            attendees.add(userAttendee);
         }
         /*
          * resolve & add any internal group attendees
          */
-        for (Attendee attendee : filter(newAttendees, Boolean.TRUE, CalendarUserType.GROUP)) {
-            if (contains(existingAttendees, attendee) || contains(attendees, attendee)) {
-                LOG.debug("Skipping duplicate group attendee {}", attendee);
+        for (Attendee groupAttendee : filter(newAttendees, Boolean.TRUE, CalendarUserType.GROUP)) {
+            if (contains(existingAttendees, groupAttendee) || contains(attendees, groupAttendee)) {
+                LOG.debug("Skipping duplicate group attendee {}", groupAttendee);
                 continue;
             }
-            Group group = getGroup(attendee.getEntity());
-            Attendee preparedAttendee = getAttendeeForInsert(group, attendee);
-            attendees.add(preparedAttendee);
-            for (int memberID : group.getMember()) {
+            groupAttendee = session.getEntityResolver().applyEntityData(groupAttendee);
+            attendees.add(groupAttendee);
+            for (int memberID : session.getEntityResolver().getGroupMembers(groupAttendee.getEntity())) {
                 if (contains(existingAttendees, memberID) || contains(attendees, memberID)) {
                     LOG.debug("Skipping explicitly added group member {}", I(memberID));
                     continue;
                 }
-                Attendee memberAttendee = getAttendeeForInsert(getUser(memberID), null, folder.getType());
-                memberAttendee.setMember(Utils.getCalAddress(session.getContext().getContextId(), group));
+                Attendee memberAttendee = session.getEntityResolver().prepareUserAttendee(memberID);
+                memberAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ?
+                    ATTENDEE_PUBLIC_FOLDER_ID : session.getEntityResolver().getDefaultCalendarID(memberID));
+                memberAttendee.setPartStat(getInitialPartStat(session.getContext().getContextId(), memberID, folder.getType()));
+                memberAttendee.setMember(groupAttendee.getUri());
                 attendees.add(memberAttendee);
             }
         }
         /*
          * resolve & add any internal resource attendees
          */
-        for (Attendee attendee : filter(newAttendees, Boolean.TRUE, CalendarUserType.RESOURCE)) {
-            if (contains(existingAttendees, attendee) || contains(attendees, attendee)) {
-                LOG.debug("Skipping duplicate resource attendee {}", attendee);
+        for (Attendee resourceAttendee : filter(newAttendees, Boolean.TRUE, CalendarUserType.RESOURCE)) {
+            if (contains(existingAttendees, resourceAttendee) || contains(attendees, resourceAttendee)) {
+                LOG.debug("Skipping duplicate resource attendee {}", resourceAttendee);
                 continue;
             }
-            attendees.add(getAttendeeForInsert(getResource(attendee.getEntity()), attendee));
+            attendees.add(session.getEntityResolver().applyEntityData(resourceAttendee, AttendeeField.ROLE));
         }
         /*
          * take over any external attendees
@@ -261,69 +259,12 @@ public class AttendeeHelper {
         return attendees;
     }
 
-    private Attendee getAttendeeForInsert(Group group, Attendee requestedAttendee) throws OXException {
-        /*
-         * prepare group attendee & apply default properties
-         */
-        Attendee groupAttendee = new Attendee();
-        groupAttendee.setEntity(group.getIdentifier());
-        groupAttendee.setCuType(CalendarUserType.GROUP);
-        groupAttendee.setPartStat(ParticipationStatus.ACCEPTED);
-        groupAttendee.setUri(getCalAddress(session.getContext().getContextId(), group));
-        groupAttendee.setCn(group.getDisplayName());
-        /*
-         * take over additional properties as requested
-         */
-        if (null != requestedAttendee) {
-            AttendeeMapper.getInstance().copy(requestedAttendee, groupAttendee, AttendeeField.ROLE);
-        }
-        return groupAttendee;
-    }
-
-    private Attendee getAttendeeForInsert(Resource resource, Attendee requestedAttendee) throws OXException {
-        /*
-         * prepare resource attendee & apply default properties
-         */
-        Attendee resourceAttendee = new Attendee();
-        resourceAttendee.setEntity(resource.getIdentifier());
-        resourceAttendee.setCuType(CalendarUserType.RESOURCE);
-        resourceAttendee.setPartStat(ParticipationStatus.ACCEPTED);
-        resourceAttendee.setUri(getCalAddress(session.getContext().getContextId(), resource));
-        resourceAttendee.setCn(resource.getDisplayName());
-        resourceAttendee.setComment(resource.getDescription());
-        /*
-         * take over additional properties as requested
-         */
-        if (null != requestedAttendee) {
-            AttendeeMapper.getInstance().copy(requestedAttendee, resourceAttendee, AttendeeField.ROLE);
-        }
-        return resourceAttendee;
-    }
-
-    private Attendee getAttendeeForInsert(User user, Attendee requestedAttendee, Type folderType) throws OXException {
-        /*
-         * prepare user attendee & apply default properties
-         */
-        Attendee userAttendee = applyProperties(new Attendee(), user);
-        userAttendee.setCuType(CalendarUserType.INDIVIDUAL);
-        userAttendee.setFolderID(PublicType.getInstance().equals(folderType) ? ATTENDEE_PUBLIC_FOLDER_ID : getDefaultFolderID(session.getContext(), user));
-        userAttendee.setPartStat(getInitialPartStat(session.getContext().getContextId(), user.getId(), folderType));
-        /*
-         * take over additional properties as requested
-         */
-        if (null != requestedAttendee) {
-            AttendeeMapper.getInstance().copy(requestedAttendee, userAttendee, AttendeeField.RSVP, AttendeeField.ROLE);
-        }
-        return userAttendee;
-    }
-
     private Attendee getDefaultAttendee(UserizedFolder folder, List<Attendee> requestedAttendees) throws OXException {
         /*
          * prepare attendee for default calendar user in folder
          */
         User calendarUser = getCalendarUser(folder);
-        Attendee defaultAttendee = applyProperties(new Attendee(), calendarUser);
-        defaultAttendee.setCuType(CalendarUserType.INDIVIDUAL);
+        Attendee defaultAttendee = session.getEntityResolver().prepareUserAttendee(calendarUser.getId());
         defaultAttendee.setPartStat(ParticipationStatus.ACCEPTED);
         if (session.getUser().getId() != defaultAttendee.getEntity()) {
             defaultAttendee.setSentBy(getCalAddress(calendarUser));
@@ -334,7 +275,8 @@ public class AttendeeHelper {
          */
         Attendee requestedAttendee = find(requestedAttendees, defaultAttendee);
         if (null != requestedAttendee) {
-            AttendeeMapper.getInstance().copy(requestedAttendee, defaultAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.PARTSTAT);
+            AttendeeMapper.getInstance().copy(requestedAttendee, defaultAttendee,
+                AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE, AttendeeField.PARTSTAT);
         }
         return defaultAttendee;
     }
@@ -355,24 +297,6 @@ public class AttendeeHelper {
             defaultStatus = ServerUserSetting.getInstance().getDefaultStatusPrivate(contextID, userID);
         }
         return null != defaultStatus ? Appointment2Event.getParticipationStatus(defaultStatus.intValue()) : ParticipationStatus.NEEDS_ACTION;
-    }
-
-    protected User getUser(int userID) throws OXException {
-        UserService userService = Services.getService(UserService.class);
-        return userService.getUser(userID, session.getContext());
-    }
-
-    protected Group getGroup(int groupID) throws OXException {
-        return Services.getService(GroupService.class).getGroup(session.getContext(), groupID);
-    }
-
-    protected Resource getResource(int resourceID) throws OXException {
-        return Services.getService(ResourceService.class).getResource(resourceID, session.getContext());
-    }
-
-    static int getDefaultFolderID(Context context, User user) throws OXException {
-        //TODO: via higher level service?
-        return new OXFolderAccess(context).getDefaultFolderID(user.getId(), FolderObject.CALENDAR);
     }
 
 }

@@ -62,6 +62,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.compat.Event2Appointment;
+import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.chronos.storage.AttendeeStorage;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
@@ -82,11 +83,12 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
      * Initializes a new {@link RdbAttendeeStorage}.
      *
      * @param context The context
+     * @param entityResolver The entity resolver to use
      * @param dbProvider The database provider to use
      * @param The transaction policy
      */
-    public RdbAttendeeStorage(Context context, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
-        super(context, dbProvider, txPolicy);
+    public RdbAttendeeStorage(Context context, EntityResolver entityResolver, DBProvider dbProvider, DBTransactionPolicy txPolicy) {
+        super(context, entityResolver, dbProvider, txPolicy);
     }
 
     @Override
@@ -152,8 +154,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            AttendeeLoader attendeeLoader = new AttendeeLoader(connection, context.getContextId());
-            return attendeeLoader.loadAttendees(objectID, AttendeeField.values());
+            return new AttendeeLoader(connection, entityResolver).loadAttendees(objectID, AttendeeField.values());
         } finally {
             dbProvider.releaseReadConnection(context, connection);
         }
@@ -164,8 +165,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         Connection connection = null;
         try {
             connection = dbProvider.getReadConnection(context);
-            AttendeeLoader attendeeLoader = new AttendeeLoader(connection, context.getContextId());
-            return attendeeLoader.loadAttendees(objectIDs, AttendeeField.values());
+            return new AttendeeLoader(connection, entityResolver).loadAttendees(objectIDs, AttendeeField.values());
         } finally {
             dbProvider.releaseReadConnection(context, connection);
         }

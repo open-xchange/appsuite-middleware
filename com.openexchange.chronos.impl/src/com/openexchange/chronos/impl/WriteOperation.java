@@ -96,7 +96,7 @@ public abstract class WriteOperation<T> {
             writeConnection = dbService.getWritable(session.getContext());
             writeConnection.setAutoCommit(false);
             SimpleDBProvider dbProvider = new SimpleDBProvider(writeConnection, writeConnection);
-            CalendarStorage storage = storageFactory.create(session.getContext(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
+            CalendarStorage storage = storageFactory.create(session.getContext(), session.getEntityResolver(), dbProvider, DBTransactionPolicy.NO_TRANSACTIONS);
             T result = execute(new CalendarWriter(session, storage));
             writeConnection.commit();
             committed = true;
@@ -108,10 +108,10 @@ public abstract class WriteOperation<T> {
                 if (false == committed) {
                     rollback(writeConnection);
                     autocommit(writeConnection);
-                    dbService.backWritable(session.getContext(), writeConnection);
+                    dbService.backWritableAfterReading(session.getContext(), writeConnection);
                 } else {
                     autocommit(writeConnection);
-                    dbService.backWritableAfterReading(session.getContext(), writeConnection);
+                    dbService.backWritable(session.getContext(), writeConnection);
                 }
             }
         }
