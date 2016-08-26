@@ -654,7 +654,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                  */
                 for (final Attribute attribute : attributes) {
                     final String val = attribute.getValue();
-                    if (isNonJavaScriptURL(val, "url=")) {
+                    if (isNonJavaScriptURL(val, tagName, "url=")) {
                         attrBuilder.append(' ').append(attribute.getName()).append("=\"").append(htmlService.encodeForHTMLAttribute(IMMUNE_HTMLATTR, val)).append('"');
                     } else {
                         attrBuilder.setLength(0);
@@ -721,7 +721,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             } else {
                 final String val = attribute.getValue();
                 if (null == allowedAttributes) { // No restrictions
-                    if (isSafe(val)) {
+                    if (isSafe(val, tagName)) {
                         if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
                             attrBuilder.append(' ').append(attr).append("=\"\"");
                             imageURLFound = true;
@@ -749,7 +749,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                         } else {
                             final Set<String> allowedValues = allowedAttributes.get(attr);
                             if (null == allowedValues || allowedValues.contains(toLowerCase(val))) {
-                                if (isSafe(val)) {
+                                if (isSafe(val, tagName)) {
                                     if (dropExternalImages && "background".equals(attr) && PATTERN_URL.matcher(val).matches()) {
                                         attrBuilder.append(' ').append(attr).append("=\"\"");
                                         imageURLFound = true;
