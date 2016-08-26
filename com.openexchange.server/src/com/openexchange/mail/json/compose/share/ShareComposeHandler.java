@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.compose.share;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -65,7 +66,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import javax.activation.DataHandler;
+import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.idn.IDNA;
 import org.json.JSONObject;
 import com.openexchange.conversion.DataProperties;
@@ -101,7 +106,9 @@ import com.openexchange.mail.json.compose.share.internal.ShareComposeLinkGenerat
 import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
 import com.openexchange.mail.json.compose.share.spi.EnabledChecker;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
-import com.openexchange.mail.mime.dataobjects.MIMEMultipartMailPart;
+import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.dataobjects.MimeMailPart;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.preview.PreviewDocument;
 import com.openexchange.preview.PreviewOutput;
 import com.openexchange.preview.PreviewService;
@@ -279,7 +286,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         // Collect recipients
         Set<Recipient> recipients;
         {
-            Set<InternetAddress> addresses = new HashSet<InternetAddress>();
+            Set<InternetAddress> addresses = new HashSet<>();
             addresses.addAll(Arrays.asList(source.getTo()));
             addresses.addAll(Arrays.asList(source.getCc()));
             addresses.addAll(Arrays.asList(source.getBcc()));
@@ -371,15 +378,15 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             {
                 personalLink = ShareComposeLinkGenerator.getInstance().createPersonalShareLink(folderTarget, null, composeRequest);
             }
-            
+
             // Generate preview images
             Map<String, byte[]> previewImages;
             Map<String, String> cidMapping;
-            List<MailPart> mailParts;
+            MailPart mailPart;
             {
                 previewImages = generatePreviewImages(session, shareReference);
                 cidMapping = getCidMapping(previewImages);
-                mailParts = createPreviewParts(cidMapping, previewImages);
+                mailPart = createPreviewPart(cidMapping, previewImages);
             }
 
             // Generate messages from links
@@ -392,13 +399,11 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 }
                 MessageGenerator messageGenerator = generatorRegistry.getMessageGeneratorFor(composeRequest);
                 for (Map.Entry<ShareComposeLink, Set<Recipient>> entry : links.entrySet()) {
-                    ShareComposeMessageInfo messageInfo = new ShareComposeMessageInfo(entry.getKey(), new ArrayList<Recipient>(entry.getValue()), password, expirationDate, source, context, composeRequest);
+                    ShareComposeMessageInfo messageInfo = new ShareComposeMessageInfo(entry.getKey(), new ArrayList<>(entry.getValue()), password, expirationDate, source, context, composeRequest);
                     List<ComposedMailMessage> generatedTransportMessages = messageGenerator.generateTransportMessagesFor(messageInfo, shareReference, cidMapping);
                     for (ComposedMailMessage generatedTransportMessage : generatedTransportMessages) {
                         generatedTransportMessage.setAppendToSentFolder(false);
-                        for (MailPart part : mailParts) {
-                            generatedTransportMessage.addEnclosedPart(part);
-                        }
+                        generatedTransportMessage.addEnclosedPart(mailPart);
                         transportMessages.add(generatedTransportMessage);
                     }
                 }
@@ -407,9 +412,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 User user = composeRequest.getUser();
                 Recipient userRecipient = Recipient.createInternalRecipient(user.getDisplayName(), sendAddr, user);
                 sentMessage = messageGenerator.generateSentMessageFor(new ShareComposeMessageInfo(personalLink, Collections.singletonList(userRecipient), password, expirationDate, source, context, composeRequest), shareReference, cidMapping);
-                for (MailPart part : mailParts) {
-                    sentMessage.addEnclosedPart(part);
-                }
+                sentMessage.addEnclosedPart(mailPart);
             }
 
             // Commit attachment storage
@@ -443,7 +446,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         }
         return user;
     }
-    
+
     private Map<String, byte[]> generatePreviewImages(Session session, ShareReference reference) throws OXException {
         List<Item> items = reference.getItems();
         if (null == items || items.isEmpty()) {
@@ -484,7 +487,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                     dataProperties.put("PreviewScaleType", "cover");
                     dataProperties.put(DataProperties.PROPERTY_NAME, items.get(i).getName());
                     dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
-                    SimpleData<InputStream> data = new SimpleData<InputStream>(document.getData(), dataProperties);
+                    SimpleData<InputStream> data = new SimpleData<>(document.getData(), dataProperties);
                     PreviewDocument preview = previewService.getPreviewFor(data, PreviewOutput.IMAGE, session, 0);
                     InputStream in = null;
                     try {
@@ -508,7 +511,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         }
         return previews;
     }
-    
+
     private Map<String, String> getCidMapping(Map<String, byte[]> previewImages) {
         if (null == previewImages || previewImages.size() == 0) {
             return Collections.emptyMap();
@@ -519,33 +522,30 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         }
         return cidMapping;
     }
-    
-    private List<MailPart> createPreviewParts(Map<String, String> cidMapping, Map<String, byte[]> previews) throws OXException {
-        List<MailPart> parts = new ArrayList<>(cidMapping.size());
+
+    private MailPart createPreviewPart(Map<String, String> cidMapping, Map<String, byte[]> previews) throws OXException {
+        MimeMultipart relatedMultipart = new MimeMultipart("related");
         for (String id : cidMapping.keySet()) {
-            MailPart part = new MIMEMultipartMailPart(previews.get(id));
             String contentId = cidMapping.get(id);
-            part.setContentDisposition("inline");
-            part.setContentId("<" + contentId + ">");
-            parts.add(part);
+            MimeBodyPart imagePart = new MimeBodyPart();
+            try {
+                imagePart.setDisposition("inline");
+                imagePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "image/png");
+                imagePart.setContentID("<" + contentId + ">");
+                imagePart.setHeader("X-Attachment-Id", contentId);
+                imagePart.setDataHandler(new DataHandler(new MessageDataSource(new ByteArrayInputStream(previews.get(id)), "image/png")));
+                relatedMultipart.addBodyPart(imagePart);
+            } catch (MessagingException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
-        return parts;
-//        MimeBodyPart imagePart = new MimeBodyPart();
-//        try {
-//            imagePart.setDisposition("inline");
-//            imagePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE,contentType);
-//            imagePart.setContentID("<" + contentId + ">");
-//            imagePart.setHeader("X-Attachment-Id", contentId);
-//            imagePart.setDataHandler(new DataHandler(new MessageDataSource(thumbnail, contentType)));
-//
-//            MimeMultipart relatedMultipart = new MimeMultipart("related");
-//            relatedMultipart.addBodyPart(imagePart);
-//            return relatedMultipart;
-//        } catch (MessagingException e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }
-//        return new MimeMultipart();
+        return new MimeMailPart(relatedMultipart);
+
+        //        return new MimeMultipart();
     }
 
 }
