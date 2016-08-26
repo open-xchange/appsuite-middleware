@@ -51,6 +51,7 @@ package com.openexchange.chronos.service;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -67,6 +68,13 @@ public interface CalendarSession extends CalendarParameters {
      * @return The underlying server session
      */
     ServerSession getSession();
+
+    /**
+     * Gets host data information about the underlying HTTP request.
+     *
+     * @return The host data
+     */
+    HostData getHostData();
 
     /**
      * Gets the session's user.

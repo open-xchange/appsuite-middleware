@@ -57,8 +57,11 @@ import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.exception.OXException;
+import com.openexchange.framework.request.RequestContext;
+import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -75,6 +78,7 @@ public class DefaultCalendarSession implements CalendarSession {
     private final Map<String, Object> parameters;
     private final ServerSession session;
     private final EntityResolver entityResolver;
+    private final HostData hostData;
 
     /**
      * Initializes a new {@link DefaultCalendarSession}.
@@ -88,6 +92,8 @@ public class DefaultCalendarSession implements CalendarSession {
         this.parameters = new HashMap<String, Object>();
         this.session = ServerSessionAdapter.valueOf(session);
         this.entityResolver = new DefaultEntityResolver(this.session, Services.getServiceLookup());
+        RequestContext requestContext = RequestContextHolder.get();
+        this.hostData = null != requestContext ? requestContext.getHostData() : null;
     }
 
     @Override
@@ -98,6 +104,11 @@ public class DefaultCalendarSession implements CalendarSession {
     @Override
     public ServerSession getSession() {
         return session;
+    }
+
+    @Override
+    public HostData getHostData() {
+        return hostData;
     }
 
     @Override
