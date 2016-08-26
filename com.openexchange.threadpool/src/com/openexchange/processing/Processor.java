@@ -67,6 +67,13 @@ public interface Processor {
     boolean execute(Object optKey, Runnable task);
 
     /**
+     * Stops this processor waiting until empty.
+     *
+     * @throws InterruptedException If interrupted while waiting
+     */
+    void stopWhenEmpty() throws InterruptedException;
+
+    /**
      * Shuts-down this processor.
      */
     void stop();

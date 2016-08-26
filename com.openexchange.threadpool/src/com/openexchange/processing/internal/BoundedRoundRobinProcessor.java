@@ -79,7 +79,7 @@ public class BoundedRoundRobinProcessor extends RoundRobinProcessor {
         int count;
         do {
             count = numberOfPendingTasks.get();
-            if (count > maxTasks) {
+            if (count >= maxTasks) {
                 // Limitation exceeded... Denied
                 return false;
             }

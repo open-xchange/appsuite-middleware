@@ -78,6 +78,11 @@ public class DefaultTaskManager implements TaskManager {
     }
 
     @Override
+    public boolean isEmpty() {
+        return tasks.isEmpty();
+    }
+
+    @Override
     public Object getExecuterKey() {
         return taskKey;
     }
