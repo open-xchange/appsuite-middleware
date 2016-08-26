@@ -445,8 +445,18 @@ public class RdbUserPermissionBitsStorage extends UserPermissionBitsStorage {
                 if (1 == length) {
                     sb.append(" WHERE u.user = ? AND u.cid = ?");
                 } else {
-                    sb.append(" WHERE u.user IN (");
-                    sb = new StringBuilder(DBUtils.getIN(sb.toString(), length, "AND u.cid = ?"));
+                    if (DBUtils.IN_LIMIT <= length) {
+                        sb.append(" INNER JOIN (");
+                        sb.append("SELECT ? AS user");
+                        for (int i = 1; i < length; i++) {
+                            sb.append(" UNION ALL SELECT ?");
+                        }
+                        sb.append(") AS x ON u.user = x.user WHERE u.cid = ?");
+
+                    } else {
+                        sb.append(" WHERE u.user IN (");
+                        sb = new StringBuilder(DBUtils.getIN(sb.toString(), length, "AND u.cid = ?"));
+                    }
                 }
                 stmt = connection.prepareStatement(sb.toString());
                 int pos = 1;
