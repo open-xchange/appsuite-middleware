@@ -190,8 +190,8 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
 
         Verifier verifier = new Verifier((String) arguments.get(org.scribe.model.OAuthConstants.CODE));
         Token accessToken = scribeOAuthService.getAccessToken(null, verifier);
-
-        return new DefaultOAuthToken(accessToken.getToken(), accessToken.getSecret());
+        
+        return new DefaultOAuthToken(accessToken.getToken(), accessToken.getSecret(), accessToken.getExpiry().getTime());
     }
 
     @Override

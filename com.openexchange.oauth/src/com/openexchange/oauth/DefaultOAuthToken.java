@@ -58,6 +58,7 @@ public class DefaultOAuthToken implements OAuthToken {
 
     private String token;
     private String secret;
+    private long expiration;
 
     /**
      * Initializes a new {@link DefaultOAuthToken}.
@@ -71,11 +72,13 @@ public class DefaultOAuthToken implements OAuthToken {
      *
      * @param token The token string
      * @param secret The secret string
+     * @param expiration The expiration date
      */
-    public DefaultOAuthToken(final String token, final String secret) {
+    public DefaultOAuthToken(final String token, final String secret, long expiration) {
         super();
         this.token = token;
         this.secret = secret;
+        this.expiration = expiration;
     }
 
     @Override
@@ -106,4 +109,22 @@ public class DefaultOAuthToken implements OAuthToken {
         this.secret = secret;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.OAuthToken#getExpiration()
+     */
+    @Override
+    public long getExpiration() {
+        return expiration;
+    }
+
+    /**
+     * Sets the expiration
+     *
+     * @param expiration The expiration to set
+     */
+    public void setExpiration(long expiration) {
+        this.expiration = expiration;
+    }
 }

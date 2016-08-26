@@ -163,7 +163,7 @@ public class MockOAuthService implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.util.Map, int, int)
      */
     @Override
-    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) {
+    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes, long expiration) {
         // Nothing to do
 
     }

@@ -72,6 +72,11 @@ public interface OAuthToken {
         public String getSecret() {
             return "";
         }
+
+        @Override
+        public long getExpiration() {
+            return -1;
+        }
     };
 
     /**
@@ -87,5 +92,13 @@ public interface OAuthToken {
      * @return The secret
      */
     String getSecret();
+
+    /**
+     * Gets the expiration date of the {@link OAuthToken}.
+     * A -1 value indicates that the token never expires unless revoked
+     * 
+     * @return The expiration date
+     */
+    long getExpiration();
 
 }

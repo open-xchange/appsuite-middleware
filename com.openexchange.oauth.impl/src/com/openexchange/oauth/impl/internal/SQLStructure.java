@@ -88,7 +88,8 @@ public class SQLStructure {
         ACCESS_TOKEN("accessToken"),
         ACCESS_SECRET("accessSecret"),
         SERVICE_ID("serviceId"),
-        SCOPE("scope");
+        SCOPE("scope"),
+        EXPIRATION_DATE("expiration_date");
 
         public static Set<OAUTH_COLUMN> updateableColumns = EnumSet.complementOf(EnumSet.of(CID, USER, ID, SERVICE_ID));
 
@@ -134,6 +135,8 @@ public class SQLStructure {
                 case SCOPE:
                     Set<OAuthScope> enabledScopes = account.getEnabledScopes();
                     return Strings.concat(" ", enabledScopes.toArray(new Object[enabledScopes.size()]));
+                case EXPIRATION_DATE:
+                    return account.getExpiration();
                 default:
                     break;
             }

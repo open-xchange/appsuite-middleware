@@ -170,9 +170,10 @@ public interface OAuthService {
      * @param user The user identifier
      * @param contextId The context identifier
      * @param a {@link Set} with {@link OAuthScope}s to enable for the {@link OAuthAccount}
+     * @param expiration the expiration time of the {@link OAuthToken}
      * @throws OXException If deletion fails
      */
-    void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId, Set<OAuthScope> scopes) throws OXException;
+    void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId, Set<OAuthScope> scopes, long expiration) throws OXException;
 
     /**
      * Updates the specified account

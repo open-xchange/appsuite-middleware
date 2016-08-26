@@ -220,9 +220,9 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             OAuthService oAuthService = Services.getService(OAuthService.class);
             int accountId = liveconnectOAuthAccount.getId();
             Map<String, Object> arguments = new HashMap<String, Object>(3);
-            arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
+            arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken, accessToken.getExpiry().getTime()));
             arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
-            oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId(), liveconnectOAuthAccount.getEnabledScopes());
+            oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId(), liveconnectOAuthAccount.getEnabledScopes(), liveconnectOAuthAccount.getExpiration());
 
             // Reload
             return oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());

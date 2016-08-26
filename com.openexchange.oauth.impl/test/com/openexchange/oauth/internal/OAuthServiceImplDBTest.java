@@ -183,6 +183,11 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             public String getToken() {
                 return "requestToken";
             }
+
+            @Override
+            public long getExpiration() {
+                return 3600;
+            }
         });
 
         Set<OAuthScope> scopes = new HashSet<>();
@@ -207,6 +212,11 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             @Override
             public String getToken() {
                 return "requestToken";
+            }
+
+            @Override
+            public long getExpiration() {
+                return 3600;
             }
         });
 
@@ -283,7 +293,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         final Map<String, Object> update = new HashMap<String, Object>();
         update.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "updatedDisplayName");
         update.put(OAuthConstants.ARGUMENT_SESSION, null);
-        oauth.updateAccount(1, update, 23, 1, scopes);
+        oauth.updateAccount(1, update, 23, 1, scopes, System.currentTimeMillis() + 3600);
 
         assertResult("SELECT 1 FROM oauthAccounts WHERE cid = 1 AND user = 23 AND displayName = 'updatedDisplayName' AND id = 1");
     }
@@ -313,6 +323,11 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             @Override
             public String getToken() {
                 return "requestToken";
+            }
+
+            @Override
+            public long getExpiration() {
+                return 3600;
             }
         });
 
@@ -346,7 +361,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             final Map<String, Object> update = new HashMap<String, Object>();
             update.put(OAuthConstants.ARGUMENT_DISPLAY_NAME, "updatedDisplayName");
             update.put(OAuthConstants.ARGUMENT_SESSION, null);
-            oauth.updateAccount(12, update, 23, 1, scopes);
+            oauth.updateAccount(12, update, 23, 1, scopes, System.currentTimeMillis() + 3600);
             fail("Should have died");
         } catch (final OXException x) {
             // Hooray!

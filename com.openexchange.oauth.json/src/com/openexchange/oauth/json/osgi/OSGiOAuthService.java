@@ -125,8 +125,8 @@ public final class OSGiOAuthService extends AbstractOSGiDelegateService<OAuthSer
     }
 
     @Override
-    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
-        getService0().updateAccount(accountId, arguments, user, contextId, scopes);
+    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes, long expiration) throws OXException {
+        getService0().updateAccount(accountId, arguments, user, contextId, scopes, expiration);
     }
 
     @Override

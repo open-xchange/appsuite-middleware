@@ -89,4 +89,14 @@ public final class ScribeOAuthToken implements OAuthToken {
         return token == null ? "<empty-token>" : token.toString();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.OAuthToken#getExpiration()
+     */
+    @Override
+    public long getExpiration() {
+        return token == null ? -1 : token.getExpiry().getTime();
+    }
+
 }
