@@ -335,12 +335,10 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             // There was only a single one available
             int userId = first.getUserId();
             int contextId = first.getContextId();
-            if (false == processor.execute(UserAndContext.newInstance(userId, contextId), new NotificationsHandler(Iterators.singletonIterator(first), first.getTopic(), userId, contextId))) {
-                try {
-                    doHandle(Iterators.singletonIterator(first), first.getTopic(), userId, contextId);
-                } catch (Exception e) {
-                    LOG.error("Failed to handle notification with topic {} for user {} in context {}", first.getTopic(), I(userId), I(contextId), e);
-                }
+            NotificationsHandler task = new NotificationsHandler(Iterators.singletonIterator(first), first.getTopic(), userId, contextId);
+            if (false == processor.execute(UserAndContext.newInstance(userId, contextId), task)) {
+                // Processor rejected task execution. Perform with current thread.
+                task.run();
             }
         } else {
             // Handle them all
@@ -348,12 +346,10 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                 UserAndTopicKey key = entry.getKey();
                 int userId = key.userId;
                 int contextId = key.contextId;
-                if (false == processor.execute(UserAndContext.newInstance(userId, contextId), new NotificationsHandler(entry.getValue().iterator(), key.topic, userId, contextId))) {
-                    try {
-                        doHandle(entry.getValue().iterator(), key.topic, userId, contextId);
-                    } catch (Exception e) {
-                        LOG.error("Failed to handle notification(s) with topic {} for user {} in context {}", key.topic, I(userId), I(contextId), e);
-                    }
+                NotificationsHandler task = new NotificationsHandler(entry.getValue().iterator(), key.topic, userId, contextId);
+                if (false == processor.execute(UserAndContext.newInstance(userId, contextId), task)) {
+                    // Processor rejected task execution. Perform with current thread.
+                    task.run();
                 }
             }
         }
