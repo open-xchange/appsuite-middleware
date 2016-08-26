@@ -47,104 +47,46 @@
  *
  */
 
-package com.openexchange.find.contacts;
+package com.openexchange.find.basic.contacts;
 
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import com.openexchange.find.facet.FacetType;
-import com.openexchange.java.Strings;
+import com.openexchange.find.contacts.ContactsFacetType;
+import com.openexchange.find.contacts.ContactsStrings;
+import com.openexchange.find.facet.FormattableDisplayItem;
+import com.openexchange.groupware.contact.helpers.ContactField;
+
 
 /**
- * The {@link FacetType}s for the contacts module.
+ * {@link UserFieldsFacet}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.3
  */
-public enum ContactsFacetType implements FacetType {
+public class UserFieldsFacet extends ContactSearchFieldFacet {
 
     /**
-     * The "name" field facet
+     * serialVersionUID
      */
-    NAME("name", null),
-    /**
-     * The "email" field facet
-     */
-    EMAIL("email", null),
-    /**
-     * The "phone" field facet
-     */
-    PHONE("phone", null),
-    /**
-     * The "address" field facet
-     */
-    ADDRESS("address", null),
-    /**
-     * The "contact type" facet
-     */
-    CONTACT_TYPE("contact_type", ContactsStrings.FACET_TYPE_CONTACT_TYPE),
-    /**
-     * The "contact" facet
-     */
-    CONTACT("contact", ContactsStrings.FACET_TYPE_CONTACT),
-    /**
-     * The "department" facet
-     */
-    DEPARTMENT("department", null),
-    /**
-     * The "user fields" facet
-     */
-    USER_FIELDS("user_fields", null)
-    ;
-
-    private final String id;
-    private final String displayName;
-    private final List<FacetType> conflictingFacets = new LinkedList<>();
+    private static final long serialVersionUID = -5647640557042838626L;
+    
+    static final ContactField[] USER_FIELDS = {
+        ContactField.USERFIELD01, ContactField.USERFIELD02, ContactField.USERFIELD03, ContactField.USERFIELD04, ContactField.USERFIELD05, ContactField.USERFIELD06, 
+        ContactField.USERFIELD07, ContactField.USERFIELD08, ContactField.USERFIELD09, ContactField.USERFIELD10, ContactField.USERFIELD11, ContactField.USERFIELD12,
+        ContactField.USERFIELD13, ContactField.USERFIELD14, ContactField.USERFIELD15, ContactField.USERFIELD16, ContactField.USERFIELD17, ContactField.USERFIELD18,
+        ContactField.USERFIELD19, ContactField.USERFIELD20
+    };
 
     /**
-     * Initializes a new {@link ContactsFacetType}.
-     *
-     * @param id The identifier of this facet
-     * @param displayName The display name, or <code>null</code> if not relevant.
+     * Initializes a new {@link UserFieldsFacet}.
      */
-    private ContactsFacetType(String id, String displayName) {
-        this.id = id;
-        this.displayName = displayName;
+    public UserFieldsFacet(String query, List<String> tokenized) {
+        super(ContactsFacetType.USER_FIELDS, new FormattableDisplayItem(ContactsStrings.FACET_USER_FIELDS, query), tokenized);
+
     }
 
     @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    @Override
-    public List<FacetType> getConflictingFacets() {
-        return conflictingFacets;
-    }
-
-    /**
-     * Gets a {@link ContactsFacetType} by its id.
-     * @return The type or <code>null</code>, if the id is invalid.
-     */
-    public static ContactsFacetType getById(String id) {
-        if (Strings.isEmpty(id)) {
-            return null;
-        }
-
-        return typesById.get(id);
-    }
-
-    private static final Map<String, ContactsFacetType> typesById = new HashMap<>();
-    static {
-        for (ContactsFacetType type : values()) {
-            typesById.put(type.getId(), type);
-        }
+    protected ContactField[] getFields() {
+        return USER_FIELDS;
     }
 
 }
