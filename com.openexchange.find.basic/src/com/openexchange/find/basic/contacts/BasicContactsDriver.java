@@ -120,6 +120,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
     private static final String EMAIL_FIELDS_NAME = "EMAIL_FIELDS";
     private static final String NAME_FIELDS_NAME = "NAME_FIELDS";
     private static final String PHONE_FIELDS_NAME = "PHONE_FIELDS";
+    private static final String USER_FIELDS_NAME = "USER_FIELDS";
 
     private static final String ADDRESSBOOK_FIELDS_CONFIG = "com.openexchange.contact.search.fields";
 
@@ -225,14 +226,14 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             excludeAdminTerm.addSearchTerm(isNullTerm);
             SingleSearchTerm notEqualsTerm = new SingleSearchTerm(SingleOperation.NOT_EQUALS);
             notEqualsTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
-            notEqualsTerm.addOperand(new ConstantOperand<Integer>(session.getContext().getMailadmin()));
+            notEqualsTerm.addOperand(new ConstantOperand<>(session.getContext().getMailadmin()));
             excludeAdminTerm.addSearchTerm(notEqualsTerm);
             searchTerm.addSearchTerm(excludeAdminTerm);
         }
         /*
          * search
          */
-        List<Document> contactDocuments = new ArrayList<Document>();
+        List<Document> contactDocuments = new ArrayList<>();
         SortOptions sortOptions = new SortOptions(searchRequest.getStart(), searchRequest.getSize());
         List<Contact> contacts = null;
         SearchIterator<Contact> searchIterator = null;
@@ -262,7 +263,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         /*
          * collect possible facets for current auto-complete iteration
          */
-        List<Facet> facets = new ArrayList<Facet>();
+        List<Facet> facets = new ArrayList<>();
         String prefix = autocompleteRequest.getPrefix();
         int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
         if (Strings.isNotEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
@@ -320,14 +321,14 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
                 String folderID = folderIDs.get(0);
                 SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
                 searchTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
-                searchTerm.addOperand(new ConstantOperand<String>(folderID));
+                searchTerm.addOperand(new ConstantOperand<>(folderID));
                 return searchTerm;
             } else {
                 CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
                 for (String folderID : folderIDs) {
                     SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
                     searchTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
-                    searchTerm.addOperand(new ConstantOperand<String>(folderID));
+                    searchTerm.addOperand(new ConstantOperand<>(folderID));
                     orTerm.addSearchTerm(searchTerm);
                 }
                 return orTerm;
@@ -360,7 +361,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             case CONTACT:
                 SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
                 searchTerm.addOperand(new ContactFieldOperand(ContactField.OBJECT_ID));
-                searchTerm.addOperand(new ConstantOperand<Integer>(Integer.valueOf(queries.get(0))));
+                searchTerm.addOperand(new ConstantOperand<>(Integer.valueOf(queries.get(0))));
                 return searchTerm;
             case CONTACT_TYPE:
                 return ContactTypeFacet.getInstance().getSearchTerm(session, queries);
@@ -372,6 +373,8 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
                 return Utils.getSearchTerm(session, PhoneFacet.PHONE_FIELDS, queries);
             case DEPARTMENT:
                 return Utils.getSearchTerm(session, DepartmentFacet.DEPARTMENT_FIELDS, queries);
+            case USER_FIELDS:
+                return Utils.getSearchTerm(session, UserFieldsFacet.USER_FIELDS, queries);
             default:
                 throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
         }
@@ -402,7 +405,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
     }
 
     private static ContactField[] merge(ContactField[]...fields) {
-        Set<ContactField> mergedFields = new HashSet<ContactField>();
+        Set<ContactField> mergedFields = new HashSet<>();
         for (ContactField[] contactFields : fields) {
             mergedFields.addAll(Arrays.asList(contactFields));
         }
@@ -411,7 +414,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
 
     private static ContactField[] getConfiguredAddressbookFields() {
 
-        ArrayList<ContactField> contacFields = new ArrayList<ContactField>();
+        ArrayList<ContactField> contacFields = new ArrayList<>();
         try {
             ConfigurationService confServ = Services.getConfigurationService();
             List<String> fields = confServ.getProperty(ADDRESSBOOK_FIELDS_CONFIG, "", ",");
@@ -432,6 +435,9 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
                         continue;
                     case PHONE_FIELDS_NAME:
                         contacFields.addAll(Arrays.asList(PhoneFacet.PHONE_FIELDS));
+                        continue;
+                    case USER_FIELDS_NAME:
+                        contacFields.addAll(Arrays.asList(UserFieldsFacet.USER_FIELDS));
                         continue;
                 }
                 try {
