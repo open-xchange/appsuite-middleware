@@ -521,6 +521,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         // Get & send message's textual representation
         String textMessage = message.getMessage().toString();
         webSocketService.sendMessage(textMessage, clientAndPathFilter.getPathFilter(), uac.getUserId(), uac.getContextId());
+        LOG.debug("Sent notification \"{}\" via Web Sockets using path filter \"{}\" to user {} in context {}", notification.getTopic(), clientAndPathFilter.getPathFilter(), uac.getUserId(), uac.getContextId());
     }
 
     private Map<String, ClientAndPathFilter> getResolveResultsFor(Collection<PushMatch> matches) throws OXException {

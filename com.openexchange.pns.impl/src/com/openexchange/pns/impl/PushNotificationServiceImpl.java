@@ -381,7 +381,9 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                 LOG.warn("No such transport '{}' for client '{}' to publish notification from user {} in context {} for topic {}", transportId, client, I(userId), I(contextId), topic);
             } else {
                 while (notifications.hasNext()) {
-                    transport.transport(notifications.next(), hit.getMatches());
+                    PushNotification notification = notifications.next();
+                    transport.transport(notification, hit.getMatches());
+                    LOG.debug("Transported notification \"{}\" via transport '{}' to client '{}'", notification.getTopic(), transportId, client);
                 }
             }
         }
