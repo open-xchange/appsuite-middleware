@@ -53,6 +53,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -68,13 +69,16 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
+import com.openexchange.pns.DefaultPushSubscription;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.PushSubscription;
+import com.openexchange.pns.PushSubscription.Nature;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.subscription.storage.ClientAndTransport;
 import com.openexchange.pns.subscription.storage.MapBackedHits;
+import com.openexchange.pns.subscription.storage.rdb.cache.RdbPushSubscriptionRegistryCache;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -85,8 +89,12 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
 
+    /** Controls whether to use cache instance instead of querying database */
+    private static final boolean USE_CACHE = false;
+
     private final DatabaseService databaseService;
     private final ContextService contextService;
+    private volatile RdbPushSubscriptionRegistryCache cache;
 
     /**
      * Initializes a new {@link RdbPushSubscriptionRegistry}.
@@ -100,8 +108,150 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
         this.contextService = contextService;
     }
 
+    /**
+     * Sets the cache instance (if enabled)
+     *
+     * @param cache The cache
+     */
+    public void setCache(RdbPushSubscriptionRegistryCache cache) {
+        if (USE_CACHE) {
+            this.cache = cache;
+        }
+    }
+
+    /**
+     * Loads the subscriptions belonging to given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The user-associated subscriptions
+     * @throws OXException If subscriptions cannot be loaded
+     */
+    public List<PushSubscription> loadSubscriptionsFor(int userId, int contextId) throws OXException {
+        Connection con = databaseService.getReadOnly(contextId);
+        try {
+            return loadSubscriptionsFor(userId, contextId, con);
+        } finally {
+            databaseService.backReadOnly(contextId, con);
+        }
+    }
+
+    /**
+     * Loads the subscriptions belonging to given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param con The connection to use
+     * @return The user-associated subscriptions
+     * @throws OXException If subscriptions cannot be loaded
+     */
+    public List<PushSubscription> loadSubscriptionsFor(int userId, int contextId, Connection con) throws OXException {
+        if (null == con) {
+            return loadSubscriptionsFor(userId, contextId);
+        }
+
+        List<byte[]> ids = null;
+        {
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement("SELECT id FROM pns_subscription WHERE cid=? AND user=?");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, userId);
+                rs = stmt.executeQuery();
+                if (false == rs.next()) {
+                    return Collections.emptyList();
+                }
+
+                ids = new LinkedList<>();
+                do {
+                    ids.add(rs.getBytes(1));
+                } while (rs.next());
+            } catch (SQLException e) {
+                throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+            }
+        }
+
+        List<PushSubscription> subscriptions = new ArrayList<>(ids.size());
+        for (byte[] id : ids) {
+            PushSubscription subscription = loadById(id, userId, contextId, con);
+            if (null != subscription) {
+                subscriptions.add(subscription);
+            }
+        }
+        return subscriptions;
+    }
+
+    /**
+     * Loads the subscription identified by given ID.
+     *
+     * @param id The ID
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param con The connection to use
+     * @return The subscription or <code>null</code>
+     * @throws OXException If load attempt fails
+     */
+    public static PushSubscription loadById(byte[] id, int userId, int contextId, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT token, client, transport, all_flag FROM pns_subscription_topic_exact WHERE id=?");
+            stmt.setBytes(1, id);
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return null;
+            }
+            List<String> topics = new LinkedList<>();
+            DefaultPushSubscription.Builder builder = DefaultPushSubscription.builder();
+            builder.contextId(contextId).userId(userId).nature(Nature.PERSISTENT);
+            builder.token(rs.getString(1));
+            builder.client(rs.getString(2));
+            builder.transportId(rs.getString(3));
+            if (rs.getInt(4) > 0) {
+                topics.add("*");
+            }
+            Databases.closeSQLStuff(rs, stmt);
+
+            stmt = con.prepareStatement("SELECT topic FROM pns_subscription_topic_wildcard WHERE id=?");
+            stmt.setBytes(1, id);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                String prefix = rs.getString(1);
+                topics.add(prefix + (prefix.endsWith(":") ? "*" : ":*"));
+            }
+            Databases.closeSQLStuff(rs, stmt);
+
+            stmt = con.prepareStatement("SELECT topic FROM pns_subscription WHERE id=?");
+            stmt.setBytes(1, id);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                String topic = rs.getString(1);
+                topics.add(topic);
+            }
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            builder.topics(topics);
+            return builder.build();
+        } catch (SQLException e) {
+            throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
     @Override
     public MapBackedHits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException {
+        // Check cache
+        RdbPushSubscriptionRegistryCache cache = this.cache;
+        if (null != cache) {
+            return cache.getCollectionFor(userId, contextId).getInterestedSubscriptions(topic);
+        }
+
         Connection con = databaseService.getReadOnly(contextId);
         try {
             return getSubscriptions(userId, contextId, topic, con);
@@ -115,7 +265,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @param affiliation The affiliation
+     * @param topic The topic
      * @param con The connection to use
      * @return All subscriptions for specified affiliation
      * @throws OXException If subscriptions cannot be returned
@@ -159,10 +309,10 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                     } else {
                         matchingTopic = rs.getString(6);
                         if (rs.wasNull()) {
-                            // E.g. "com/open-xchange/mail/new"
+                            // E.g. "ox:mail:new"
                             matchingTopic = rs.getString(7);
                         } else {
-                            // E.g. "com/open-xchange/mail/*"
+                            // E.g. "ox:mail:*"
                             matchingTopic = new StringBuilder(matchingTopic).append('*').toString();
                         }
                     }
@@ -356,6 +506,12 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                     stmt = null;
                 }
             }
+
+            // Insert into in-memory collection as well
+            RdbPushSubscriptionRegistryCache cache = this.cache;
+            if (null != cache) {
+                cache.addAndInvalidateIfPresent(subscription);
+            }
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -427,7 +583,16 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             rs = null;
             stmt = null;
 
-            return deleteById(id, con);
+            boolean deleted = deleteById(id, null, con);
+            if (deleted) {
+                // Remove from in-memory collection as well
+                RdbPushSubscriptionRegistryCache cache = this.cache;
+                if (null != cache) {
+                    cache.removeAndInvalidateIfPresent(subscription);
+                }
+            }
+
+            return deleted;
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -439,11 +604,12 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
      * Deletes the subscription identified by given ID.
      *
      * @param id The ID
+     * @param cleanUpTask The optional clean-up task
      * @param con The connection to use
      * @return <code>true</code> if such a subscription was deleted; otherwise <code>false</code>
      * @throws OXException If delete attempt fails
      */
-    public static boolean deleteById(byte[] id, Connection con) throws OXException {
+    public boolean deleteById(byte[] id, Runnable cleanUpTask, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("DELETE FROM pns_subscription_topic_exact WHERE id=?");
@@ -462,9 +628,15 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             Databases.closeSQLStuff(stmt);
             stmt = null;
 
+            if (null != cleanUpTask) {
+                cleanUpTask.run();
+            }
+
             return rows > 0;
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
         }
@@ -554,10 +726,17 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
     private int deleteSubscription(List<byte[]> ids, Connection con) throws OXException {
         int deleted = 0;
         for (byte[] id : ids) {
-            if (deleteById(id, con)) {
+            if (deleteById(id, null, con)) {
                 deleted++;
             }
         }
+
+        // Clear cache
+        RdbPushSubscriptionRegistryCache cache = this.cache;
+        if (null != cache) {
+            cache.clear(true);
+        }
+
         return deleted;
     }
 
@@ -599,7 +778,16 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             stmt.setInt(4, subscription.getUserId());
             stmt.setString(5, subscription.getToken());
             int rows = stmt.executeUpdate();
-            return rows > 0;
+            boolean updated = rows > 0;
+
+            if (updated) {
+                RdbPushSubscriptionRegistryCache cache = this.cache;
+                if (null != cache) {
+                    cache.dropFor(subscription.getUserId(), subscription.getContextId());
+                }
+            }
+
+            return updated;
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {

@@ -49,6 +49,14 @@
 
 package com.openexchange.pns.subscription.storage.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
+import com.openexchange.caching.CacheService;
+import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
@@ -63,6 +71,12 @@ import com.openexchange.pns.subscription.storage.groupware.PnsCreateTableTask;
 import com.openexchange.pns.subscription.storage.groupware.PnsDeleteListener;
 import com.openexchange.pns.subscription.storage.inmemory.InMemoryPushSubscriptionRegistry;
 import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
+import com.openexchange.pns.subscription.storage.rdb.cache.RdbPushSubscriptionRegistryCache;
+import com.openexchange.pns.subscription.storage.rdb.cache.RdbPushSubscriptionRegistryInvalidator;
+import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 
 /**
@@ -72,6 +86,8 @@ import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry
  * @since v7.8.3
  */
 public class PushSubscriptionRegistryActivator extends HousekeepingActivator {
+
+    private RdbPushSubscriptionRegistryCache cache;
 
     /**
      * Initializes a new {@link PushSubscriptionRegistryActivator}.
@@ -87,14 +103,25 @@ public class PushSubscriptionRegistryActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContextService.class };
+        return new Class<?>[] { DatabaseService.class, ContextService.class, CacheService.class, CacheEventService.class, ThreadPoolService.class };
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(PushSubscriptionRegistryActivator.class);
+
+        // Create database-backed registry
+        RdbPushSubscriptionRegistry persistentRegistry = new RdbPushSubscriptionRegistry(getService(DatabaseService.class), getService(ContextService.class));
+
+        // Create cache instance
+        final RdbPushSubscriptionRegistryCache cache = new RdbPushSubscriptionRegistryCache(persistentRegistry, getService(CacheEventService.class), getService(CacheService.class));
+        this.cache = cache;
+        persistentRegistry.setCache(cache);
+
         // Track subscription providers
         PushSubscriptionProviderTracker providerTracker = new PushSubscriptionProviderTracker(context);
         rememberTracker(providerTracker);
+        track(CacheEventService.class, new RdbPushSubscriptionRegistryInvalidator(cache, context));
         openTrackers();
 
         // Register update task, create table job and delete listener
@@ -102,13 +129,80 @@ public class PushSubscriptionRegistryActivator extends HousekeepingActivator {
         if (registerGroupwareStuff) {
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PnsCreateTableTask(this)));
             registerService(CreateTableService.class, new CreatePnsSubscriptionTable());
-            registerService(DeleteListener.class, new PnsDeleteListener());
+            registerService(DeleteListener.class, new PnsDeleteListener(persistentRegistry));
         }
 
         // Register service
-        PushSubscriptionRegistry persistentRegistry = new RdbPushSubscriptionRegistry(getService(DatabaseService.class), getService(ContextService.class));
         PushSubscriptionRegistry volatileRegistry = new InMemoryPushSubscriptionRegistry();
         registerService(PushSubscriptionRegistry.class, new CompositePushSubscriptionRegistry(persistentRegistry, volatileRegistry, providerTracker));
+
+        // Register event handler
+        {
+            EventHandler eventHandler = new EventHandler() {
+
+                @Override
+                public void handleEvent(final Event event) {
+                    if (false == SessiondEventConstants.TOPIC_LAST_SESSION.equals(event.getTopic())) {
+                        return;
+                    }
+
+                    ThreadPoolService threadPool = getService(ThreadPoolService.class);
+                    if (null == threadPool) {
+                        doHandleEvent(event);
+                    } else {
+                        AbstractTask<Void> t = new AbstractTask<Void>() {
+
+                            @Override
+                            public Void call() throws Exception {
+                                try {
+                                    doHandleEvent(event);
+                                } catch (Exception e) {
+                                    logger.warn("Handling event {} failed.", event.getTopic(), e);
+                                }
+                                return null;
+                            }
+                        };
+                        threadPool.submit(t, CallerRunsBehavior.<Void> getInstance());
+                    }
+                }
+
+                /**
+                 * Handles given event.
+                 *
+                 * @param lastSessionEvent The event
+                 */
+                protected void doHandleEvent(Event lastSessionEvent) {
+                    Integer contextId = (Integer) lastSessionEvent.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+                    if (null != contextId) {
+                        Integer userId = (Integer) lastSessionEvent.getProperty(SessiondEventConstants.PROP_USER_ID);
+                        if (null != userId) {
+                            cache.dropFor(userId.intValue(), contextId.intValue(), false);
+                        }
+                    }
+                }
+            };
+
+            Dictionary<String, Object> serviceProperties = new Hashtable<>(1);
+            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
+            registerService(EventHandler.class, eventHandler, serviceProperties);
+        }
+
+        logger.info("Bundle {} successfully started", context.getBundle().getSymbolicName());
+    }
+
+    @Override
+    protected synchronized void stopBundle() throws Exception {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(PushSubscriptionRegistryActivator.class);
+
+        RdbPushSubscriptionRegistryCache cache = this.cache;
+        if (null != cache) {
+            this.cache = null;
+            cache.clear(false);
+        }
+
+        super.stopBundle();
+
+        logger.info("Bundle {} successfully stopped", context.getBundle().getSymbolicName());
     }
 
 }

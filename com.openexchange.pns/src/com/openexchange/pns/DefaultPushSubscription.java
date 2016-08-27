@@ -253,4 +253,47 @@ public class DefaultPushSubscription implements PushSubscription {
         return nature;
     }
 
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + userId;
+        result = prime * result + ((token == null) ? 0 : token.hashCode());
+        result = prime * result + ((transportId == null) ? 0 : transportId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof PushSubscription)) {
+            return false;
+        }
+        PushSubscription other = (PushSubscription) obj;
+        if (contextId != other.getContextId()) {
+            return false;
+        }
+        if (userId != other.getUserId()) {
+            return false;
+        }
+        if (token == null) {
+            if (other.getToken() != null) {
+                return false;
+            }
+        } else if (!token.equals(other.getToken())) {
+            return false;
+        }
+        if (transportId == null) {
+            if (other.getTransportId() != null) {
+                return false;
+            }
+        } else if (!transportId.equals(other.getTransportId())) {
+            return false;
+        }
+        return true;
+    }
+
 }

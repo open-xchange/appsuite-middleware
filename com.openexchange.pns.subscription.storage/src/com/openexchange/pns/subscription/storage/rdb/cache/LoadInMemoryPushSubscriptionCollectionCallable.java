@@ -47,86 +47,46 @@
  *
  */
 
-package com.openexchange.pns.subscription.storage.groupware;
+package com.openexchange.pns.subscription.storage.rdb.cache;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.groupware.delete.DeleteListener;
-import com.openexchange.pns.PushExceptionCodes;
+import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
-import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link PnsDeleteListener}
+ * {@link LoadInMemoryPushSubscriptionCollectionCallable}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class PnsDeleteListener implements DeleteListener {
+public class LoadInMemoryPushSubscriptionCollectionCallable implements Callable<InMemoryPushSubscriptionCollection> {
 
+    private final int userId;
+    private final int contextId;
     private final RdbPushSubscriptionRegistry registry;
 
     /**
-     * Initializes a new {@link PnsDeleteListener}.
+     * Initializes a new {@link LoadInMemoryPushSubscriptionCollectionCallable}.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param registry The registry to use
      */
-    public PnsDeleteListener(RdbPushSubscriptionRegistry registry) {
+    public LoadInMemoryPushSubscriptionCollectionCallable(int userId, int contextId, RdbPushSubscriptionRegistry registry) {
         super();
+        this.userId = userId;
+        this.contextId = contextId;
         this.registry = registry;
     }
 
     @Override
-    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
-        if (DeleteEvent.TYPE_USER == event.getType()) {
-            int contextId = event.getContext().getContextId();
-            int userId = event.getId();
-            List<byte[]> ids = getSubscriptionIds(userId, contextId, writeCon);
-            if (!ids.isEmpty()) {
-                for (byte[] id : ids) {
-                    registry.deleteById(id, null, writeCon);
-                }
-            }
-        } else if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
-            int contextId = event.getContext().getContextId();
-            List<byte[]> ids = getSubscriptionIds(0, contextId, writeCon);
-            if (!ids.isEmpty()) {
-                for (byte[] id : ids) {
-                    registry.deleteById(id, null, writeCon);
-                }
-            }
-        }
-    }
-
-    private List<byte[]> getSubscriptionIds(int userId, int contextId, Connection con) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement(userId > 0 ? "SELECT id FROM pns_subscription WHERE cid=? AND user = ?" : "SELECT id FROM pns_subscription WHERE cid=?");
-            int pos = 1;
-            stmt.setInt(pos++, contextId);
-            if (userId > 0) {
-                stmt.setInt(pos++, userId);
-            }
-            rs = stmt.executeQuery();
-            if (false == rs.next()) {
-                return Collections.emptyList();
-            }
-
-            List<byte[]> ids = new LinkedList<>();
-            do {
-                ids.add(rs.getBytes(1));
-            } while (rs.next());
-            return ids;
-        } catch (SQLException e) {
-            throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-        }
+    public InMemoryPushSubscriptionCollection call() throws OXException {
+        List<PushSubscription> subscriptions = registry.loadSubscriptionsFor(userId, contextId);
+        InMemoryPushSubscriptionCollection collection = new InMemoryPushSubscriptionCollection(userId, contextId);
+        collection.addSubscription(subscriptions);
+        return collection;
     }
 
 }

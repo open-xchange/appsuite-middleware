@@ -107,14 +107,14 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
 
         // Now check for prefix matches
         if (!matchingPrefixTopic.isEmpty()) {
-            int pos = topic.lastIndexOf('/');
+            int pos = topic.lastIndexOf(':');
             while (pos > 0) {
                 String prefix = topic.substring(0, pos);
                 Set<PushSubscriptionWrapper> wrappers = matchingPrefixTopic.get(prefix);
                 if (null != wrappers) {
-                    map = checkAndAddMatches(userId, contextId, wrappers, prefix + "/*", map);
+                    map = checkAndAddMatches(userId, contextId, wrappers, prefix + ":*", map);
                 }
-                pos = prefix.lastIndexOf('/');
+                pos = prefix.lastIndexOf(':');
             }
         }
 
@@ -135,7 +135,7 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
         }
 
         Map<ClientAndTransport, List<PushMatch>> toFill = map;
-        for (PushSubscriptionWrapper wrapper : matchingAllSubscriptions) {
+        for (PushSubscriptionWrapper wrapper : wrappers) {
             if (wrapper.belongsTo(userId, contextId)) {
                 PushSubscription subscription = wrapper.getSubscription();
                 String token = subscription.getToken();
