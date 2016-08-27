@@ -323,7 +323,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             int userId = first.getUserId();
             int contextId = first.getContextId();
             NotificationsHandler task = new NotificationsHandler(Iterators.singletonIterator(first), first.getTopic(), userId, contextId);
-            if (false == processor.execute(UserAndContext.newInstance(userId, contextId), task)) {
+            if (false == tryExecuteTask(task, userId, contextId)) {
                 // Processor rejected task execution. Perform with current thread.
                 task.run();
             }
@@ -338,12 +338,16 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                 int userId = key.userId;
                 int contextId = key.contextId;
                 NotificationsHandler task = new NotificationsHandler(entry.getValue().iterator(), key.topic, userId, contextId);
-                if (false == processor.execute(UserAndContext.newInstance(userId, contextId), task)) {
+                if (false == tryExecuteTask(task, userId, contextId)) {
                     // Processor rejected task execution. Perform with current thread.
                     task.run();
                 }
             }
         }
+    }
+
+    private boolean tryExecuteTask(NotificationsHandler task, int userId, int contextId) {
+        return processor.execute(UserAndContext.newInstance(userId, contextId), task);
     }
 
     private void put(PushNotification notification, Map<UserAndTopicKey, List<PushNotification>> polledNotifications) {
