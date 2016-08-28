@@ -59,6 +59,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.KnownTopic;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushNotifications;
@@ -74,6 +75,8 @@ import com.openexchange.pns.subscription.storage.MapBackedHits;
  * @since v7.8.0
  */
 public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistry {
+
+    private static final String ALL = KnownTopic.ALL.getName();
 
     /** The subscriptions in this list match all events. */
     private final Set<PushSubscriptionWrapper> matchingAllSubscriptions;
@@ -103,7 +106,7 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
         Map<ClientAndTransport, List<PushMatch>> map = null;
 
         // Add subscriptions matching everything
-        map = checkAndAddMatches(userId, contextId, matchingAllSubscriptions, "*", map);
+        map = checkAndAddMatches(userId, contextId, matchingAllSubscriptions, ALL, map);
 
         // Now check for prefix matches
         if (!matchingPrefixTopic.isEmpty()) {
@@ -167,7 +170,7 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
 
         for (Iterator<String> iter = subscription.getTopics().iterator(); iter.hasNext();) {
             String topic = iter.next();
-            if ("*".equals(topic)) {
+            if (ALL.equals(topic)) {
                 matchingAllSubscriptions.add(new PushSubscriptionWrapper(subscription));
             } else {
                 try {

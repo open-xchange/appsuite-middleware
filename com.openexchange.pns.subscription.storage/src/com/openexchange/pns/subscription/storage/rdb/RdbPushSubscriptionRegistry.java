@@ -70,6 +70,8 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.DefaultPushSubscription.Builder;
+import com.openexchange.pns.KnownTopic;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushNotifications;
@@ -150,12 +152,16 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             return loadSubscriptionsFor(userId, contextId);
         }
 
-        List<byte[]> ids = null;
+        Map<UUID, BuilderAndTopics> builders;
         {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                stmt = con.prepareStatement("SELECT id FROM pns_subscription WHERE cid=? AND user=?");
+                stmt = con.prepareStatement(
+                    "SELECT p.id, p.token, p.client, p.transport, p.all_flag, w.topic AS prefix, e.topic FROM pns_subscription p"
+                        + " LEFT JOIN pns_subscription_topic_wildcard w ON p.id=w.id"
+                        + " LEFT JOIN pns_subscription_topic_exact e ON p.id=e.id"
+                        + " WHERE p.cid=? AND p.user=?");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
                 rs = stmt.executeQuery();
@@ -163,10 +169,44 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                     return Collections.emptyList();
                 }
 
-                ids = new LinkedList<>();
+                builders = new LinkedHashMap<>();
                 do {
-                    ids.add(rs.getBytes(1));
+                    UUID uuid = UUIDs.toUUID(rs.getBytes(1));
+                    List<String> topics;
+                    {
+                        BuilderAndTopics builderAndTopics = builders.get(uuid);
+                        if (null == builderAndTopics) {
+                            // Create new BuilderAndTopics instance and start with a new topics list
+                            topics = new LinkedList<>();
+                            DefaultPushSubscription.Builder builder = DefaultPushSubscription.builder()
+                                .contextId(contextId)
+                                .userId(userId)
+                                .nature(Nature.PERSISTENT)
+                                .token(rs.getString(2))
+                                .client(rs.getString(3))
+                                .transportId(rs.getString(4));
+                            if (rs.getInt(5) > 0) {
+                                topics.add(KnownTopic.ALL.getName());
+                            }
+                            builderAndTopics = new BuilderAndTopics(builder, topics);
+                            builders.put(uuid, builderAndTopics);
+                        } else {
+                            // Grab topics list
+                            topics = builderAndTopics.topics;
+                        }
+                    }
+                    String prefix = rs.getString(6);
+                    if (null != prefix) {
+                        // E.g. "ox:mail:*"
+                        topics.add(prefix + (prefix.endsWith(":") ? "*" : ":*"));
+                    }
+                    String topic = rs.getString(7);
+                    if (null != topic) {
+                        // E.g. "ox:mail:new"
+                        topics.add(topic);
+                    }
                 } while (rs.next());
+
             } catch (SQLException e) {
                 throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
@@ -174,12 +214,11 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             }
         }
 
-        List<PushSubscription> subscriptions = new ArrayList<>(ids.size());
-        for (byte[] id : ids) {
-            PushSubscription subscription = loadById(id, userId, contextId, con);
-            if (null != subscription) {
-                subscriptions.add(subscription);
-            }
+        List<PushSubscription> subscriptions = new ArrayList<>(builders.size());
+        for (BuilderAndTopics builderAndTopics : builders.values()) {
+            DefaultPushSubscription.Builder builder = builderAndTopics.builder;
+            builder.topics(builderAndTopics.topics);
+            subscriptions.add(builder.build());
         }
         return subscriptions;
     }
@@ -198,12 +237,19 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT token, client, transport, all_flag FROM pns_subscription_topic_exact WHERE id=?");
+            stmt = con.prepareStatement(
+                "SELECT p.token, p.client, p.transport, p.all_flag, w.topic AS prefix, e.topic FROM pns_subscription p"
+                    + " LEFT JOIN pns_subscription_topic_wildcard w ON p.id=w.id"
+                    + " LEFT JOIN pns_subscription_topic_exact e ON p.id=e.id"
+                    + " WHERE p.id=? AND p.cid=? AND p.user=?");
             stmt.setBytes(1, id);
+            stmt.setInt(2, contextId);
+            stmt.setInt(3, userId);
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 return null;
             }
+
             List<String> topics = new LinkedList<>();
             DefaultPushSubscription.Builder builder = DefaultPushSubscription.builder();
             builder.contextId(contextId).userId(userId).nature(Nature.PERSISTENT);
@@ -211,30 +257,20 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             builder.client(rs.getString(2));
             builder.transportId(rs.getString(3));
             if (rs.getInt(4) > 0) {
-                topics.add("*");
+                topics.add(KnownTopic.ALL.getName());
             }
-            Databases.closeSQLStuff(rs, stmt);
-
-            stmt = con.prepareStatement("SELECT topic FROM pns_subscription_topic_wildcard WHERE id=?");
-            stmt.setBytes(1, id);
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                String prefix = rs.getString(1);
-                topics.add(prefix + (prefix.endsWith(":") ? "*" : ":*"));
-            }
-            Databases.closeSQLStuff(rs, stmt);
-
-            stmt = con.prepareStatement("SELECT topic FROM pns_subscription WHERE id=?");
-            stmt.setBytes(1, id);
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                String topic = rs.getString(1);
-                topics.add(topic);
-            }
-            Databases.closeSQLStuff(rs, stmt);
-            rs = null;
-            stmt = null;
-
+            do {
+                String prefix = rs.getString(6);
+                if (null != prefix) {
+                    // E.g. "ox:mail:*"
+                    topics.add(prefix + (prefix.endsWith(":") ? "*" : ":*"));
+                }
+                String topic = rs.getString(7);
+                if (null != topic) {
+                    // E.g. "ox:mail:new"
+                    topics.add(topic);
+                }
+            } while (rs.next());
             builder.topics(topics);
             return builder.build();
         } catch (SQLException e) {
@@ -305,7 +341,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                 {
                     boolean all = rs.getInt(5) > 0;
                     if (all) {
-                        matchingTopic = "*";
+                        matchingTopic = KnownTopic.ALL.getName();
                     } else {
                         matchingTopic = rs.getString(6);
                         if (rs.wasNull()) {
@@ -437,7 +473,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             boolean isAll = false;
             for (Iterator<String> iter = subscription.getTopics().iterator(); !isAll && iter.hasNext();) {
                 String topic = iter.next();
-                if ("*".equals(topic)) {
+                if (KnownTopic.ALL.getName().equals(topic)) {
                     isAll = true;
                 } else {
                     try {
@@ -817,6 +853,20 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    // -----------------------------------------------------------------------------------------------------
+
+    private static final class BuilderAndTopics {
+
+        final DefaultPushSubscription.Builder builder;
+        final List<String> topics;
+
+        BuilderAndTopics(Builder builder, List<String> topics) {
+            super();
+            this.builder = builder;
+            this.topics = topics;
         }
     }
 

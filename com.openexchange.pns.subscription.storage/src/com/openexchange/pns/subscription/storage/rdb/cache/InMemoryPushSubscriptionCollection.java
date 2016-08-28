@@ -58,6 +58,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.pns.KnownTopic;
 import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.subscription.storage.ClientAndTransport;
@@ -71,6 +72,8 @@ import com.openexchange.pns.subscription.storage.inmemory.InMemoryPushMatch;
  * @since v7.8.3
  */
 public class InMemoryPushSubscriptionCollection {
+
+    private static final String ALL = KnownTopic.ALL.getName();
 
     private final int userId;
     private final int contextId;
@@ -125,7 +128,7 @@ public class InMemoryPushSubscriptionCollection {
         Map<ClientAndTransport, List<PushMatch>> map = null;
 
         // Add subscriptions matching everything
-        map = checkAndAddMatches(matchingAllSubscriptions, "*", map);
+        map = checkAndAddMatches(matchingAllSubscriptions, ALL, map);
 
         // Now check for prefix matches
         if (!matchingPrefixTopic.isEmpty()) {
@@ -209,7 +212,7 @@ public class InMemoryPushSubscriptionCollection {
 
         for (Iterator<String> iter = subscription.getTopics().iterator(); iter.hasNext();) {
             String topic = iter.next();
-            if ("*".equals(topic)) {
+            if (ALL.equals(topic)) {
                 matchingAllSubscriptions.add(subscription);
             } else {
                 if (topic.endsWith(":*")) {

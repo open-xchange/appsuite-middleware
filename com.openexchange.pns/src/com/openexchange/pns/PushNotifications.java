@@ -114,6 +114,8 @@ public class PushNotifications {
 
     // -----------------------------------------------------------------------------------------------------------
 
+    private static final String ALL = KnownTopic.ALL.getName();
+
     /**
      * Validates the topic name.
      *
@@ -125,7 +127,7 @@ public class PushNotifications {
             throw new IllegalArgumentException("topic is is null, empty or only consists of white-space characters");
         }
 
-        if ("*".equals(topic)) {
+        if (ALL.equals(topic)) {
             return;
         }
 
@@ -140,11 +142,11 @@ public class PushNotifications {
         for (int i = 0; i < length; i++) {
             char ch = topic.charAt(i);
             if (ch == ':') {
-                // Can't start or end with a '/' but anywhere else is okay
+                // Can't start or end with a ':' but anywhere else is okay
                 if (i == 0 || (i == length - 1)) {
                     throw new IllegalArgumentException("invalid topic: " + topic);
                 }
-                // Can't have "//" as that implies empty token
+                // Can't have "::" as that implies empty token
                 if (topic.charAt(i - 1) == ':') {
                     throw new IllegalArgumentException("invalid topic: " + topic);
                 }
