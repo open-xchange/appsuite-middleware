@@ -58,8 +58,6 @@ import com.openexchange.file.storage.FileStorageFolder;
  */
 public final class Utils {
 
-    private static final String RATE_LIMIT_MSG = "oauth_accesses_per_access_token";
-
     /**
      * Initializes a new {@link Utils}.
      */
