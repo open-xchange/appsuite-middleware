@@ -135,7 +135,9 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
             return hits;
         }
 
-        moreHits.addFirst(hits);
+        if (false == hits.isEmpty()) {
+            moreHits.addFirst(hits);
+        }
         return new IteratorBackedHits(moreHits);
     }
 

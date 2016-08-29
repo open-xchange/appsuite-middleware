@@ -532,7 +532,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
     @Override
     public boolean servesClient(String client) throws OXException {
-        return resolvers.getAllSupportedClients().contains(client);
+        return resolvers.getAllSupportedClients().contains(new WebSocketClient(client, null));
     }
 
     @Override
