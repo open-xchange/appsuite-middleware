@@ -70,19 +70,23 @@ public interface MessageGenerator extends Applicable {
      *
      * @param info The message info providing the link and target recipients
      * @param shareReference The share reference
+     * @param cidMapping Maps file ids to previews' content ids
+     * @param moreFiles 
      * @return The generated messages
      * @throws OXException If messages cannot be generated
      */
-    List<ComposedMailMessage> generateTransportMessagesFor(ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> cidMapping) throws OXException;
+    List<ComposedMailMessage> generateTransportMessagesFor(ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> cidMapping, int moreFiles) throws OXException;
 
     /**
      * Generates the messages, that is supposed to be added to standard sent folder.
      *
      * @param info The message info providing the link and user's recipient
      * @param shareReference The share reference to apply
+     * @param cidMapping Maps file ids to previews' content ids
+     * @param moreFiles 
      * @return The generated message
      * @throws OXException If message cannot be generated
      */
-    ComposedMailMessage generateSentMessageFor(ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> cidMapping) throws OXException;
+    ComposedMailMessage generateSentMessageFor(ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> cidMapping, int moreFiles) throws OXException;
 
 }

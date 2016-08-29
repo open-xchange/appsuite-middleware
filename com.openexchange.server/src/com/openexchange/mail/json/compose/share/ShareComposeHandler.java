@@ -72,6 +72,8 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.idn.IDNA;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
@@ -396,7 +398,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 MessageGenerator messageGenerator = generatorRegistry.getMessageGeneratorFor(composeRequest);
                 for (Map.Entry<ShareComposeLink, Set<Recipient>> entry : links.entrySet()) {
                     ShareComposeMessageInfo messageInfo = new ShareComposeMessageInfo(entry.getKey(), new ArrayList<>(entry.getValue()), password, expirationDate, source, context, composeRequest);
-                    List<ComposedMailMessage> generatedTransportMessages = messageGenerator.generateTransportMessagesFor(messageInfo, shareReference, cidMapping);
+                    List<ComposedMailMessage> generatedTransportMessages = messageGenerator.generateTransportMessagesFor(messageInfo, shareReference, cidMapping, shareReference.getItems().size() - 6);
                     for (ComposedMailMessage generatedTransportMessage : generatedTransportMessages) {
                         generatedTransportMessage.setAppendToSentFolder(false);
                         for (MailPart imagePart : imageParts) {
@@ -409,7 +411,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 String sendAddr = session.getUserSettingMail().getSendAddr();
                 User user = composeRequest.getUser();
                 Recipient userRecipient = Recipient.createInternalRecipient(user.getDisplayName(), sendAddr, user);
-                sentMessage = messageGenerator.generateSentMessageFor(new ShareComposeMessageInfo(personalLink, Collections.singletonList(userRecipient), password, expirationDate, source, context, composeRequest), shareReference, cidMapping);
+                sentMessage = messageGenerator.generateSentMessageFor(new ShareComposeMessageInfo(personalLink, Collections.singletonList(userRecipient), password, expirationDate, source, context, composeRequest), shareReference, cidMapping, shareReference.getItems().size() - 6);
                 for (MailPart imagePart : imageParts) {
                     sentMessage.addEnclosedPart(imagePart);
                 }
@@ -488,9 +490,28 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                             ImageTransformations transformed = transformationService.transfom(document).scale(200, 150, ScaleType.COVER, true).compress();
                             encodedThumbnail = new ThresholdFileHolder();
                             previews.put(id, encodedThumbnail);
-                            encodedThumbnail.write(transformed.getInputStream(mimeType));
+                            encodedThumbnail.write(transformed.getTransformedImage(mimeType).getImageStream());
                         } catch (IOException e) {
                             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                        }
+                    } else if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("audio/mpeg")) {
+                        if (Mp3CoverExtractor.isSupported(mimeType)) {
+                            Mp3CoverExtractor mp3CoverExtractor = new Mp3CoverExtractor();
+                            try {
+                                ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+                                fileHolder.write(document);
+                                fileHolder.setContentType("audio/mpeg");
+                                fileHolder.setName(id + ".mp3");
+                                IFileHolder mp3Cover = mp3CoverExtractor.extractCover(fileHolder);
+                                ImageTransformations transformed = transformationService.transfom(mp3Cover.getStream()).scale(200, 150, ScaleType.COVER, true).compress();
+                                encodedThumbnail = new ThresholdFileHolder();
+                                previews.put(id, encodedThumbnail);
+                                encodedThumbnail.write(transformed.getTransformedImage("image/jpeg").getImageStream());
+                            } catch (IOException e) {
+                                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                            } finally {
+                                Streams.close(document);
+                            }
                         }
                     } else {
                         dataProperties.put("PreviewWidth", "200");
@@ -548,11 +569,19 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 String contentId = cidMapping.get(id);
                 MimeBodyPart imagePart = new MimeBodyPart();
                 imagePart.setDisposition("inline");
-                imagePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "image/png");
+                imagePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "image/jpeg");
                 imagePart.setContentID("<" + contentId + ">");
                 imagePart.setHeader("X-Attachment-Id", contentId);
-                imagePart.setDataHandler(new DataHandler(new FileHolderDataSource(previews.get(id), "image/png")));
-                parts.add(new MimeMailPart(imagePart));
+                imagePart.setDataHandler(new DataHandler(new FileHolderDataSource(previews.get(id), "image/jpeg")));
+                MimeMailPart mimeMailPart = new MimeMailPart(imagePart);
+                mimeMailPart.setContentDisposition("inline");
+                mimeMailPart.setContentId("<" + contentId + ">");
+                mimeMailPart.setContentType("image/jpeg");
+                mimeMailPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "image/jpeg");
+                mimeMailPart.setHeader(MessageHeaders.HDR_CONTENT_ID, "<" + contentId + ">");
+                mimeMailPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, "inline");
+                mimeMailPart.setHeader("X-Attachment-Id", contentId);
+                parts.add(mimeMailPart);
             }
             return parts;
         } catch (MessagingException e) {
