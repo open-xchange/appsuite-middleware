@@ -272,7 +272,6 @@ final class DropboxExceptionHandler {
     static final OXException handleSearchErrorException(SearchErrorException e, String folderId, String pattern) {
         switch (e.errorValue.tag()) {
             case PATH:
-                // FIXME: Use the 'pattern' for 'fileId' in the mapLookupError?
                 return mapLookupError(e.errorValue.getPathValue(), folderId, pattern, e);
             case OTHER:
             default:
@@ -382,7 +381,6 @@ final class DropboxExceptionHandler {
                 return FileStorageExceptionCodes.NO_CREATE_ACCESS.create(e, folderId);
             case CONFLICT:
                 // Fall through to 'unexpected error'
-                // TODO: Maybe introduce a conflict exception
             default:
                 return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
