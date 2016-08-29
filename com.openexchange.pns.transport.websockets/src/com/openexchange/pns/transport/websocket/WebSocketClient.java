@@ -129,4 +129,18 @@ public final class WebSocketClient {
         return true;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(32);
+        builder.append("{");
+        if (client != null) {
+            builder.append("client=").append(client).append(", ");
+        }
+        if (pathFilter != null) {
+            builder.append("pathFilter=").append(pathFilter).append(", ");
+        }
+        builder.append("}");
+        return builder.toString();
+    }
+
 }
