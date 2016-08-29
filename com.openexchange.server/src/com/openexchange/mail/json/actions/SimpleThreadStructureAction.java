@@ -342,10 +342,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             SearchTerm<?> searchTerm = null;
             if (filterApplied || category_filter != null) {
                 mailInterface.openFor(folderId);
-                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
-
                 {
-
                     // Check if mail categories are enabled
                     MailCategoriesConfigService categoriesService = MailJSONActivator.SERVICES.get().getOptionalService(MailCategoriesConfigService.class);
                     if (categoriesService != null && categoriesService.isEnabled(req.getSession()) && category_filter != null && !category_filter.equals("none")) {
