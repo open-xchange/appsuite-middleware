@@ -268,10 +268,6 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
      */
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
-        // TODO: Dropbox V2 API supports permissions for shared folders. Consider updating?
-        //       More info: 
-        //         - https://www.dropbox.com/developers/documentation/http/documentation#sharing-update_folder_member
-        //         - https://www.dropbox.com/developers/documentation/http/documentation#sharing-update_folder_policy
         return identifier;
     }
 
