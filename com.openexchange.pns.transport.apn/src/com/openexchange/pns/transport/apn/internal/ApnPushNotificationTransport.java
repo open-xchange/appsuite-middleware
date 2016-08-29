@@ -49,6 +49,7 @@
 
 package com.openexchange.pns.transport.apn.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -212,8 +213,25 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
             for (Map.Entry<String, List<PayloadPerDevice>> clientPayload : clientPayloads.entrySet()) {
                 PushedNotifications notifications = null;
                 try {
+                    // Send to devices
                     ApnOptions options = getHighestRankedApnOptionsFor(clientPayload.getKey());
-                    notifications = Push.payloads(options.getKeystore(), options.getPassword(), options.isProduction(), clientPayload.getValue());
+                    final List<PayloadPerDevice> payloads = clientPayload.getValue();
+                    notifications = Push.payloads(options.getKeystore(), options.getPassword(), options.isProduction(), payloads);
+
+                    // Log it
+                    Object ostr = new Object() {
+
+                        @Override
+                        public String toString() {
+                            StringBuilder sb = new StringBuilder(payloads.size() * 16);
+                            for (PayloadPerDevice payloadPerDevice : payloads) {
+                                sb.append(payloadPerDevice.getDevice().getToken()).append(", ");
+                            }
+                            sb.setLength(sb.length() - 2);
+                            return sb.toString();
+                        }
+                    };
+                    LOG.info("Sent notification \"{}\" via transport '{}' for user {} in context {} to device(s): {}", notification.getTopic(), ID, I(notification.getUserId()), I(notification.getContextId()), ostr);
                 } catch (CommunicationException e) {
                     LOG.warn("error submitting push notifications", e);
                 } catch (KeystoreException e) {

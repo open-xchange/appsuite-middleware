@@ -545,6 +545,10 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         if (null != notification && null != matches && !matches.isEmpty()) {
             // Determine associated client and path filter
             Map<String, ClientAndPathFilter> clientToFilter = getResolveResultsFor(matches);
+            if (null == clientToFilter) {
+                // No appropriate client/path-filter associated with specified matches
+                return;
+            }
 
             // Sort incoming matches by user-context pairs
             for (Map.Entry<UserAndContext, List<PushMatch>> userAssociatedMatches : sortByUser(matches).entrySet()) {
@@ -570,8 +574,10 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
         // Get & send message's textual representation
         String textMessage = message.getMessage().toString();
-        webSocketService.sendMessage(textMessage, clientAndPathFilter.getPathFilter(), uac.getUserId(), uac.getContextId());
-        LOG.debug("Sent notification \"{}\" via Web Sockets using path filter \"{}\" to user {} in context {}", notification.getTopic(), clientAndPathFilter.getPathFilter(), uac.getUserId(), uac.getContextId());
+        int userId = uac.getUserId();
+        int contextId = uac.getContextId();
+        webSocketService.sendMessage(textMessage, clientAndPathFilter.getPathFilter(), userId, contextId);
+        LOG.info("Sent notification \"{}\" via transport '{}' using path filter \"{}\" to user {} in context {}", notification.getTopic(), ID, clientAndPathFilter.getPathFilter(), I(userId), I(contextId));
     }
 
     private Map<String, ClientAndPathFilter> getResolveResultsFor(Collection<PushMatch> matches) throws OXException {
@@ -582,7 +588,10 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         for (String client : clients) {
             for (WebSocketToClientResolver resolver : resolvers) {
                 String pathFilter = resolver.getPathFilterFor(client);
-                if (pathFilter != null) {
+                if (pathFilter == null) {
+                    // Client unknown
+                    LOG.warn("Client \"{}\" is unknown, hence cannot resolve it to an appropriate path filter expression.");
+                } else {
                     if (null == applicable) {
                         applicable = new HashMap<>(clients.size());
                     }
@@ -594,6 +603,10 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     }
 
     private Set<String> extractClientsFrom(Collection<PushMatch> userMatches) {
+        if (1 == userMatches.size()) {
+            return Collections.singleton(userMatches.iterator().next().getClient());
+        }
+
         Set<String> clients = new HashSet<>();
         for (PushMatch userMatch : userMatches) {
             clients.add(userMatch.getClient());
@@ -602,6 +615,11 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     }
 
     private Map<UserAndContext, List<PushMatch>> sortByUser(Collection<PushMatch> matches) {
+        if (1 == matches.size()) {
+            PushMatch match = matches.iterator().next();
+            return Collections.singletonMap(UserAndContext.newInstance(match.getUserId(), match.getContextId()), Collections.singletonList(match));
+        }
+
         Map<UserAndContext, List<PushMatch>> byUser = new LinkedHashMap<>();
 
         // Only one match is needed as there is no difference per match
