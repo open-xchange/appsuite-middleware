@@ -113,7 +113,7 @@ public final class TwitterActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         // Nothing to do
-        return null;
+        return EMPTY_CLASSES;
     }
 
 }
