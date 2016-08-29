@@ -49,8 +49,7 @@
 
 package com.openexchange.pns.subscription.storage;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -86,8 +85,13 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
         super();
         this.persistentRegistry = persistentRegistry;
         this.volatileRegistry = volatileRegistry;
+
+        List<PushSubscriptionRegistry> registries = new ArrayList<>(2);
+        // Exclude volatile in-memory registry for now
+        //registries.add(volatileRegistry);
+        registries.add(persistentRegistry);
+        this.registries = new CopyOnWriteArrayList<PushSubscriptionRegistry>(registries);
         this.providers = providers;
-        this.registries = new CopyOnWriteArrayList<PushSubscriptionRegistry>(Arrays.<PushSubscriptionRegistry> asList(persistentRegistry, volatileRegistry));
     }
 
     @Override
@@ -117,7 +121,7 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
         }
 
         // Build hits from queried registries
-        MapBackedHits hits = new MapBackedHits(null == map ? Collections.<ClientAndTransport, List<PushMatch>> emptyMap() : map);
+        MapBackedHits hits = null == map ? null : new MapBackedHits(map);
 
         // Check for more hits from providers
         LinkedList<Hits> moreHits = null;
@@ -132,12 +136,13 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
         }
 
         if (null == moreHits) {
-            return hits;
+            return null == hits ? Hits.EMPTY_HITS : hits;
         }
 
-        if (false == hits.isEmpty()) {
+        if (null != hits) {
             moreHits.addFirst(hits);
         }
+
         return new IteratorBackedHits(moreHits);
     }
 
