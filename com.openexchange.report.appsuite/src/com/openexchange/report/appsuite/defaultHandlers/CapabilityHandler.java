@@ -175,15 +175,17 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             } else {
                 userReport.set(Report.MACDETAIL, Report.MAILADMIN, Boolean.FALSE);
             }
-            // Get all relevant logins for this user and add them to the report
-            Calendar cal = Calendar.getInstance();
-            Date endDate = cal.getTime();
-            cal.add(Calendar.YEAR, -1);
-            Date startDate = cal.getTime();
-            LoginCounterService loginCounterService = Services.getService(LoginCounterService.class);
-            HashMap<String, Long> userLogins = loginCounterService.getLastClientLogIns(userReport.getUser().getId(), userReport.getContext().getContextId(), startDate, endDate);
-            userReport.set(Report.MACDETAIL, Report.USER_LOGINS, userLogins);
+            userReport.set(Report.MACDETAIL, Report.USER_LOGINS, getUserLoginsForPastYear(userReport.getContext().getContextId(), userReport.getUser().getId()));
         }
+    }
+    
+    public HashMap<String, Long> getUserLoginsForPastYear(int contextId, int userId) throws OXException {
+        Calendar cal = Calendar.getInstance();
+        Date endDate = cal.getTime();
+        cal.add(Calendar.YEAR, -1);
+        Date startDate = cal.getTime();
+        LoginCounterService loginCounterService = Services.getService(LoginCounterService.class);
+        return loginCounterService.getLastClientLogIns(userId, contextId, startDate, endDate);
     }
 
     // In the context report we keep a count of users/disabled users/admins that share the same capabilities
@@ -191,7 +193,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     @Override
     public void merge(UserReport userReport, ContextReport contextReport) {
         if (userReport.getUser().isGuest()) {
-            handleGuests(userReport, contextReport);
+            incrementGuestOrLinkCount(userReport, contextReport);
         } else {
             handleInternalUser(userReport, contextReport);
         }
@@ -423,18 +425,18 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
         // Depending on the users type, we have to increase the accompanying count
         if (userReport.get(Report.MACDETAIL, Report.MAILADMIN, Boolean.class)) {
-            incCount(counts, Report.ADMIN);
+            incrementCounter(counts, Report.ADMIN);
         } else if (userReport.get(Report.MACDETAIL, Report.DISABLED, Boolean.class)) {
-            incCount(counts, Report.DISABLED);
+            incrementCounter(counts, Report.DISABLED);
         }
 
         // Get the users client logins and save them also to this context/capability-set
         HashMap<String, Long> userLogins = userReport.get(Report.MACDETAIL, Report.USER_LOGINS, HashMap.class);
         for (Entry<String, Long> clientName : userLogins.entrySet()) {
-            incCount(counts, clientName.getKey());
+            incrementCounter(counts, clientName.getKey());
         }
 
-        incCount(counts, Report.TOTAL);
+        incrementCounter(counts, Report.TOTAL);
 
         contextReport.set(Report.MACDETAIL, capString, userLogins);
 
@@ -450,40 +452,23 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         capSContextMap.get(contextReport.getContext().getContextId()).add(userReport.getUser().getId());
     }
 
-    /**
-     * Distinguish the guest type (link or guest) and increment the predestined parameter in the
-     * given context report
-     *
-     * @param userReport
-     * @param contextReport
-     */
-    private void handleGuests(UserReport userReport, ContextReport contextReport) {
-        String capString = userReport.get(Report.MACDETAIL, Report.CAPABILITIES, String.class);
-        // The context report maintains a mapping of unique capabilities set -> a map of counts for admins / disabled users  and regular users
-        HashMap<String, Long> counts = contextReport.get(Report.MACDETAIL, capString, HashMap.class);
-        if (counts == null) {
-            counts = new HashMap<String, Long>();
-        }
+    private void incrementGuestOrLinkCount(UserReport userReport, ContextReport contextReport) {
+        String userCapabilities = userReport.get(Report.MACDETAIL, Report.CAPABILITIES, String.class);
+        HashMap<String, Long> contextTotals = contextReport.get(Report.MACDETAIL, userCapabilities, new HashMap<String, Long>(), HashMap.class);
         if (userReport.getUser().getMail().isEmpty()) {
-            incCount(counts, Report.LINKS);
+            incrementCounter(contextTotals, Report.LINKS);
         } else {
-            incCount(counts, Report.GUESTS);
+            incrementCounter(contextTotals, Report.GUESTS);
         }
-        contextReport.set(Report.MACDETAIL, capString, counts);
+        contextReport.set(Report.MACDETAIL, userCapabilities, contextTotals);
     }
 
-    /**
-     * Increments the value of an element in the given map, identified by the given key
-     *
-     * @param elementMap
-     * @param keyInMap
-     */
-    private void incCount(HashMap<String, Long> elementMap, String keyInMap) {
-        Long value = elementMap.get(keyInMap);
+    private void incrementCounter(HashMap<String, Long> counterMap, String keyOfValueToIncrement) {
+        Long value = counterMap.get(keyOfValueToIncrement);
         if (value == null) {
             value = Long.valueOf(0);
         }
-        elementMap.put(keyInMap, value + 1);
+        counterMap.put(keyOfValueToIncrement, value + 1);
     }
 
     /**
@@ -700,18 +685,22 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
      *
      * @param capSValueMap - A list of {@link HashMap}<String, Object>s with the counted values of a capability-set
      */
-    private void sumClientsInSingleMap(ArrayList capSValueMap) {
+    private void sumClientsInSingleMap(ArrayList<Object> capSValueMap) {
         for (Object valueMap : capSValueMap) {
             HashMap<String, Object> capSMap = (HashMap<String, Object>) valueMap;
-            HashMap<String, Object> clients = new HashMap<>();
-            for (Iterator<Map.Entry<String, Object>> it = capSMap.entrySet().iterator(); it.hasNext();) {
-                Map.Entry<String, Object> entry = it.next();
-                if (entry.getKey().contains("client:")) {
-                    clients.put(entry.getKey().replace("client:", ""), entry.getValue());
-                    it.remove();
-                }
-            }
-            capSMap.put(Report.CLIENT_LOGINS, clients);
+            capSMap.put(Report.CLIENT_LOGINS, extractClientMapFromCapSContent(capSMap));
         }
+    }
+    
+    private HashMap<String, Object> extractClientMapFromCapSContent(HashMap<String, Object> capSMap) {
+        HashMap<String, Object> clients = new HashMap<>();
+        for (Iterator<Map.Entry<String, Object>> it = capSMap.entrySet().iterator(); it.hasNext();) {
+            Map.Entry<String, Object> entry = it.next();
+            if (entry.getKey().contains("client:")) {
+                clients.put(entry.getKey().replace("client:", ""), entry.getValue());
+                it.remove();
+            }
+        }
+        return clients;
     }
 }
