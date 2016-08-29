@@ -66,6 +66,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.mail.internet.idn.IDNA;
 import org.osgi.framework.BundleContext;
 import com.damienmiller.BCrypt;
@@ -2705,7 +2707,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         return retval;
     }
-
+    
+    /**
+     * Property name black list REGEX. Taken from the oxsysreport
+     */
+    private static final Pattern PROPERTY_BLACK_LIST = Pattern.compile("[pP]assword[[:blank:]]*|[sS]ecret[[:blank:]]*|[kK]ey[[:blank:]]*|secretSource[[:blank:]]*|secretRandom[[:blank:]]*|[sS]alt[[:blank:]]*|SSLKey(Pass|Name)[[:blank:]]*|[lL]ogin[[:blank:]]*");
+    
     /**
      *
      * {@inheritDoc}
@@ -2739,7 +2746,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             List<ConfigurationProperty> capabilitiesSource = capabilityService.getConfigurationSource(user_id, ctx.getId().intValue(), searchPattern);
 
             for (ConfigurationProperty property: capabilitiesSource) {
-                userProperties.add(new UserProperty(property.getScope(), property.getName(), property.getValue()));
+                Matcher m = PROPERTY_BLACK_LIST.matcher(property.getName());
+                String value = m.find() ? "<OBFUSCATED>" : property.getValue();
+                userProperties.add(new UserProperty(property.getScope(), property.getName(), value));
             }
 
             Collections.sort(userProperties, new OXUserPropertySorter());
