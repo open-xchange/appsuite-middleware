@@ -49,17 +49,7 @@
 
 package com.openexchange.file.storage.dropbox;
 
-import java.util.Date;
-import com.dropbox.client2.RESTUtility;
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.exception.DropboxServerException;
-import com.dropbox.client2.exception.DropboxUnlinkedException;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.java.Strings;
-import com.openexchange.oauth.OAuthExceptionCodes;
-
 
 /**
  * {@link Utils} - Utility class for Dropbox resources.
@@ -147,72 +137,4 @@ public final class Utils {
         }
         return fileId;
     }
-
-    /**
-     * Parses a date from the supplied dropbox date format string.
-     *
-     * @param dateString The dropbox date
-     * @return The date, or <code>null</code>, if the supplied input string was <code>null</code> or not parsable
-     */
-    public static Date parseDate(String dateString) {
-        if (Strings.isEmpty(dateString)) {
-            return null;
-        }
-        synchronized (RESTUtility.class) {
-            return RESTUtility.parseDate(dateString);
-        }
-    }
-
-    /**
-     * Wraps the supplied exception into the most appropriate OX exception.
-     *
-     * @param e The exception
-     * @param path The path of the dropbox entry where the exception occurred, or <code>null</code> if not relevant
-     * @return The most appropriate OX exception, ready to be re-thrown
-     */
-    public static OXException handle(Exception e, String path) {
-        if (OXException.class.isInstance(e)) {
-            return (OXException) e;
-        }
-        if (DropboxServerException.class.isInstance(e)) {
-            DropboxServerException serverException = (DropboxServerException) e;
-            if (null != path && DropboxServerException._404_NOT_FOUND == serverException.error) {
-                return FileStorageExceptionCodes.NOT_FOUND.create(e, DropboxConstants.ID, path);
-            }
-            if (DropboxServerException._403_FORBIDDEN == serverException.error && Strings.asciiLowerCase(e.toString()).indexOf("access token") >= 0) {
-                return OAuthExceptionCodes.INVALID_ACCOUNT.create();
-            }
-            if (DropboxServerException._503_SERVICE_UNAVAILABLE == serverException.error && serverException.body != null) {
-                String error = serverException.body.error;
-                if (error != null && error.contains(RATE_LIMIT_MSG)) {
-                    return FileStorageExceptionCodes.STORAGE_RATE_LIMIT.create();
-                }
-            }
-            if (429 == serverException.error) {
-                return FileStorageExceptionCodes.STORAGE_RATE_LIMIT.create();
-            }
-
-            String msg = null;
-            if (serverException.body != null) {
-                msg = serverException.body.userError;
-                if (msg == null) {
-                    msg = serverException.body.error;
-                }
-            }
-
-            if (msg == null) {
-                msg = "unknown error";
-            }
-
-            return FileStorageExceptionCodes.PROTOCOL_ERROR.create(serverException, new StringBuilder("HTTP (").append(serverException.error).append(')').toString(), msg);
-        }
-        if (DropboxUnlinkedException.class.isInstance(e)) {
-            return FileStorageExceptionCodes.UNLINKED_ERROR.create(e, new Object[0]);
-        }
-        if (DropboxException.class.isInstance(e)) {
-            return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, DropboxConstants.ID, e.getMessage());
-        }
-        return FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-    }
-
 }

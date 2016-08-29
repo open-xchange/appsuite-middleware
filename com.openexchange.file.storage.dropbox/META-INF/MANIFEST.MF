@@ -97,7 +97,5 @@ Import-Package: com.dropbox.core,
  org.scribe.services,
  org.scribe.utils,
  org.slf4j
-Bundle-ClassPath: lib/dropbox-java-sdk-1.5.3.jar,
- lib/json_simple-1.1.jar,
- .
+Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.file.storage.dropbox.osgi.DropboxActivator
