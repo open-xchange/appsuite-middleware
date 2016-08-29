@@ -103,9 +103,6 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
             if (!Tools.columnExists(writeCon, "oauthAccounts", "scope")) {
                 toCreate.add(new Column("scope", "varchar(767)"));
             }
-            if (!Tools.columnExists(writeCon, "oauthAccounts", "expiration_date")) {
-                toCreate.add(new Column("expiration_date", "bigint(64)"));
-            }
             if (!toCreate.isEmpty()) {
                 Tools.addColumns(writeCon, "oauthAccounts", toCreate.toArray(new Column[toCreate.size()]));
             }

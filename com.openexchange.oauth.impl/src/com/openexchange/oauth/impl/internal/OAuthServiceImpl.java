@@ -179,7 +179,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, serviceId, scope, expiration_date FROM oauthAccounts WHERE cid = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, serviceId, scope FROM oauthAccounts WHERE cid = ? AND user = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, user);
             rs = stmt.executeQuery();
@@ -204,7 +204,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                         Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), Module.valuesOf(scopes));
                         account.setEnabledScopes(enabledScopes);
                     }
-                    account.setExpiration(rs.getLong(7));
                     accounts.add(account);
                 } catch (final OXException e) {
                     if (!OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.equals(e)) {
@@ -231,7 +230,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, scope, expiration_date FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ?");
+            stmt = con.prepareStatement("SELECT id, displayName, accessToken, accessSecret, scope FROM oauthAccounts WHERE cid = ? AND user = ? AND serviceId = ?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, user);
             stmt.setString(3, serviceMetaData);
@@ -254,7 +253,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 String scopes = rs.getString(5);
                 Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), Module.valuesOf(scopes));
                 account.setEnabledScopes(enabledScopes);
-                account.setExpiration(rs.getLong(6));
                 accounts.add(account);
             } while (rs.next());
             return accounts;
@@ -640,8 +638,8 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
     }
 
     @Override
-    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes, long expiration) throws OXException {
-        final List<Setter> list = setterFrom(arguments, scopes, expiration);
+    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
+        final List<Setter> list = setterFrom(arguments, scopes);
         if (list.isEmpty()) {
             /*
              * Nothing to update
@@ -841,11 +839,9 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                  */
                 account.setToken(accessToken.getToken());
                 account.setSecret(accessToken.getSecret());
-                account.setExpiration(accessToken.getExpiry().getTime());
             } else {
                 account.setToken(oAuthToken.getToken());
                 account.setSecret(oAuthToken.getSecret());
-                account.setExpiration(oAuthToken.getExpiration());
             }
         } catch (final org.scribe.exceptions.OAuthException e) {
             throw handleScribeOAuthException(e);
@@ -926,7 +922,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         int set(int pos, PreparedStatement stmt) throws SQLException;
     }
 
-    private List<Setter> setterFrom(final Map<String, Object> arguments, final Set<OAuthScope> scopes, final long expiration) throws OXException {
+    private List<Setter> setterFrom(final Map<String, Object> arguments, final Set<OAuthScope> scopes) throws OXException {
         final List<Setter> ret = new ArrayList<Setter>(4);
         /*
          * Check for display name
@@ -994,24 +990,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             }
 
         });
-        /*
-         * Expiration Date
-         */
-        ret.add(new Setter() {
-
-            @Override
-            public void appendTo(StringBuilder stmtBuilder) {
-                stmtBuilder.append("expiration_date = ?");
-            }
-
-            @Override
-            public int set(int pos, PreparedStatement stmt) throws SQLException {
-                stmt.setLong(pos, expiration);
-                return ++pos;
-            }
-
-        });
-
         /*
          * Other arguments?
          */
