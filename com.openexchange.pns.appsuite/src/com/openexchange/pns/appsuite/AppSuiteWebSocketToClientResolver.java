@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.Set;
 import com.openexchange.ajax.Client;
 import com.openexchange.exception.OXException;
+import com.openexchange.pns.transport.websocket.WebSocketClient;
 import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
 import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSockets;
@@ -94,8 +95,8 @@ public class AppSuiteWebSocketToClientResolver implements WebSocketToClientResol
     }
 
     @Override
-    public Set<String> getSupportedClients() {
-        return Collections.singleton(Client.APPSUITE_UI.getClientId());
+    public Set<WebSocketClient> getSupportedClients() {
+        return Collections.singleton(new WebSocketClient(Client.APPSUITE_UI.getClientId(), PATH_FILTER_APPSUITE_UI));
     }
 
 }

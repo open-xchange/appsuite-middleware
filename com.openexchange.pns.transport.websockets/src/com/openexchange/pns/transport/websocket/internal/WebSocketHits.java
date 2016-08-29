@@ -47,77 +47,82 @@
  *
  */
 
-package com.openexchange.pns.transport.websocket.osgi;
+package com.openexchange.pns.transport.websocket.internal;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import org.osgi.framework.BundleContext;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.pns.Hit;
+import com.openexchange.pns.Hits;
 import com.openexchange.pns.transport.websocket.WebSocketClient;
-import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
-import com.openexchange.pns.transport.websocket.internal.WebSocketToClientResolverRegistry;
 
 /**
- * {@link WebSocketToClientResolverTracker}
+ * {@link WebSocketHits}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class WebSocketToClientResolverTracker extends RankingAwareNearRegistryServiceTracker<WebSocketToClientResolver> implements WebSocketToClientResolverRegistry {
+final class WebSocketHits implements Hits {
 
-    private final ConcurrentMap<WebSocketClient, Boolean> supportedClients;
+    private final int userId;
+    private final int contextId;
+    private final Set<WebSocketClient> clients;
 
     /**
-     * Initializes a new {@link WebSocketToClientResolverTracker}.
+     * Initializes a new {@link HitsImplementation}.
+     *
+     * @param clients The set of clients having an open Web Socket
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    public WebSocketToClientResolverTracker(BundleContext context) {
-        super(context, WebSocketToClientResolver.class, 0);
-        supportedClients = new ConcurrentHashMap<>(16, 0.9F, 1);
+    WebSocketHits(Set<WebSocketClient> clients, int userId, int contextId) {
+        super();
+        this.contextId = contextId;
+        this.userId = userId;
+        this.clients = clients;
     }
 
     @Override
-    protected boolean onServiceAppeared(WebSocketToClientResolver resolver) {
-        List<String> toRemove = new LinkedList<>();
-        boolean invalid = true;
-        try {
-            Set<WebSocketClient> clients = resolver.getSupportedClients();
-            for (WebSocketClient clientToAdd : clients) {
-                if (null != supportedClients.putIfAbsent(clientToAdd, Boolean.TRUE)) {
-                    // There is already such a client...
-                    return false;
-                }
-            }
-            invalid = false;
-            return true;
-        } finally {
-            if (invalid) {
-                for (String clientToRemove : toRemove) {
-                    supportedClients.remove(clientToRemove);
-                }
-            }
+    public Iterator<Hit> iterator() {
+        return new IteratorImpl(clients.iterator(), userId, contextId);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return clients.isEmpty();
+    }
+
+    // ------------------------------------------------------------------------------
+
+    private static final class IteratorImpl implements Iterator<Hit> {
+
+        private final Iterator<WebSocketClient> iterator;
+        private final int userId;
+        private final int contextId;
+
+        /**
+         * Initializes a new {@link IteratorImplementation}.
+         */
+        IteratorImpl(Iterator<WebSocketClient> iterator, int userId, int contextId) {
+            super();
+            this.iterator = iterator;
+            this.userId = userId;
+            this.contextId = contextId;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
+        }
+
+        @Override
+        public Hit next() {
+            WebSocketClient client = iterator.next();
+            return new WebSocketHit(client.getClient(), userId, contextId);
+        }
+
+        @Override
+        public void remove() {
+            iterator.remove();
         }
     }
-
-    @Override
-    protected void onServiceRemoved(WebSocketToClientResolver resolver) {
-        Set<WebSocketClient> clients = resolver.getSupportedClients();
-        for (WebSocketClient clientToRemove : clients) {
-            supportedClients.remove(clientToRemove);
-        }
-    }
-
-    @Override
-    public Set<WebSocketClient> getAllSupportedClients() {
-        return Collections.unmodifiableSet(supportedClients.keySet());
-    }
-
-    @Override
-    public boolean containsClient(String client) {
-        return null != client && supportedClients.containsKey(new WebSocketClient(client, null));
-    }
-
 }
