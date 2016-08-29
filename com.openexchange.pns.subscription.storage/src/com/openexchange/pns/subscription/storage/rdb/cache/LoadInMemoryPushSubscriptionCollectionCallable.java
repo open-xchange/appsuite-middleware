@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,67 +47,46 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.subscription.storage.rdb.cache;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
+import java.util.List;
+import java.util.concurrent.Callable;
+import com.openexchange.exception.OXException;
+import com.openexchange.pns.PushSubscription;
+import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
 
 /**
- * {@link KnownTopic} - An enumeration for well-known topics.
+ * {@link LoadInMemoryPushSubscriptionCollectionCallable}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public enum KnownTopic {
+public class LoadInMemoryPushSubscriptionCollectionCallable implements Callable<InMemoryPushSubscriptionCollection> {
+
+    private final int userId;
+    private final int contextId;
+    private final RdbPushSubscriptionRegistry registry;
 
     /**
-     * <code>*</code>
-     * <p>
-     * The special topic matching all topic identifiers.
-     */
-    ALL("*"),
-    /**
-     * <code>ox:mail:new</code>
-     * <p>
-     * The topic for a newly arrived mail.
-     */
-    MAIL_NEW("ox:mail:new"),
-
-    ;
-
-    private final String name;
-
-    private KnownTopic(final String name) {
-        this.name = name;
-    }
-
-    /**
-     * Gets the topic name
+     * Initializes a new {@link LoadInMemoryPushSubscriptionCollectionCallable}.
      *
-     * @return The topic name
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param registry The registry to use
      */
-    public String getName() {
-        return name;
+    public LoadInMemoryPushSubscriptionCollectionCallable(int userId, int contextId, RdbPushSubscriptionRegistry registry) {
+        super();
+        this.userId = userId;
+        this.contextId = contextId;
+        this.registry = registry;
     }
 
-    private static final Map<String, KnownTopic> STRING2NAME;
-    static {
-        final KnownTopic[] values = KnownTopic.values();
-        final Map<String, KnownTopic> m = new HashMap<String, KnownTopic>(values.length);
-        for (final KnownTopic name : values) {
-            m.put(name.getName(), name);
-        }
-        STRING2NAME = ImmutableMap.copyOf(m);
+    @Override
+    public InMemoryPushSubscriptionCollection call() throws OXException {
+        List<PushSubscription> subscriptions = registry.loadSubscriptionsFor(userId, contextId);
+        InMemoryPushSubscriptionCollection collection = new InMemoryPushSubscriptionCollection(userId, contextId);
+        collection.addSubscription(subscriptions);
+        return collection;
     }
 
-    /**
-     * Gets the associated {@code KnownTopic} enum.
-     *
-     * @param sName The name string
-     * @return The {@code KnownTopic} enum or <code>null</code>
-     */
-    public static KnownTopic nameFor(final String sName) {
-        return null == sName ? null : STRING2NAME.get(sName);
-    }
 }
