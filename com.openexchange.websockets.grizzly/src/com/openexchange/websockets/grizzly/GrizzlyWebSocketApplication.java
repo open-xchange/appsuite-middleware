@@ -225,8 +225,8 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         }
 
         // Check if any satisfies given filter
-        for (SessionBoundWebSocket SessionBoundSocket : userSockets.values()) {
-            if (WebSockets.matches(pathFilter, SessionBoundSocket)) {
+        for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
+            if (WebSockets.matches(pathFilter, sessionBoundSocket)) {
                 return true;
             }
         }

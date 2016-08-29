@@ -220,7 +220,12 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     }
 
     private String generateValue(String connectionId, String path) {
-        return new StringBuilder(48).append(connectionId).append(':').append(null == path ? "" : path).toString();
+        if (null == path) {
+            return new StringBuilder(34).append(connectionId).append(':').toString();
+        }
+
+        // With path info
+        return new StringBuilder(48).append(connectionId).append(':').append(path).toString();
     }
 
     @Override
