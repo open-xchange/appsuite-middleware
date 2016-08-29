@@ -92,12 +92,15 @@ public enum ContactsFacetType implements FacetType {
      * The "department" facet
      */
     DEPARTMENT("department", null),
-
+    /**
+     * The "user fields" facet
+     */
+    USER_FIELDS("user_fields", null)
     ;
 
     private final String id;
     private final String displayName;
-    private final List<FacetType> conflictingFacets = new LinkedList<FacetType>();
+    private final List<FacetType> conflictingFacets = new LinkedList<>();
 
     /**
      * Initializes a new {@link ContactsFacetType}.
@@ -137,7 +140,7 @@ public enum ContactsFacetType implements FacetType {
         return typesById.get(id);
     }
 
-    private static final Map<String, ContactsFacetType> typesById = new HashMap<String, ContactsFacetType>();
+    private static final Map<String, ContactsFacetType> typesById = new HashMap<>();
     static {
         for (ContactsFacetType type : values()) {
             typesById.put(type.getId(), type);

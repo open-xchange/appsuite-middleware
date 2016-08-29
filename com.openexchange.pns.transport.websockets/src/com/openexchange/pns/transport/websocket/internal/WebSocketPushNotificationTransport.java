@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.BufferingQueue;
 import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.Hits;
+import com.openexchange.pns.KnownTopic;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
@@ -73,6 +76,7 @@ import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushNotification;
 import com.openexchange.pns.PushNotificationTransport;
+import com.openexchange.pns.PushSubscriptionProvider;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.UserAndContext;
@@ -83,6 +87,7 @@ import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.pns.PushSubscription.Nature;
+import com.openexchange.pns.transport.websocket.WebSocketClient;
 import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
 import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketListener;
@@ -94,11 +99,15 @@ import com.openexchange.websockets.WebSocketService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class WebSocketPushNotificationTransport implements PushNotificationTransport, WebSocketListener {
+public class WebSocketPushNotificationTransport implements PushNotificationTransport, WebSocketListener, PushSubscriptionProvider {
+
+    /** The topic for all */
+    private static final String ALL = KnownTopic.ALL.getName();
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WebSocketPushNotificationTransport.class);
 
-    private static final String ID = KnownTransport.WEB_SOCKET.getTransportId();
+    /** The identifier of the Web Socket transport */
+    static final String ID = KnownTransport.WEB_SOCKET.getTransportId();
 
     private static final String TOKEN_PREFIX = "ws::";
 
@@ -238,7 +247,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     }
 
     /**
-     * Creates the subscription's token for specified arguments; e.g.
+     * Creates the artificial Web Socket subscription token for specified arguments; e.g.
      * <pre>"ws::17-1337::open-xchange-appsuite"</pre>
      *
      * @param client The client identifier
@@ -246,9 +255,50 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
      * @param contextId The context identifier
      * @return The appropriate token to use
      */
-    private String createTokenFor(String client, int userId, int contextId) {
+    static String createTokenFor(String client, int userId, int contextId) {
         return new StringBuilder(24).append(TOKEN_PREFIX).append(userId).append('-').append(contextId).append("::").append(client).toString();
     }
+
+    // ---------------------------------------------------------------------------------------------------------
+
+    @Override
+    public Hits getInterestedSubscriptions(final int userId, final int contextId, String topic) throws OXException {
+        // Remember checked clients
+        Map<WebSocketClient, Boolean> checkedOnes = new LinkedHashMap<>();
+        final Set<WebSocketClient> hasOpenWebSocket = new LinkedHashSet<>();
+        boolean anyOpen = false;
+
+        // Check resolvers
+        for (WebSocketToClientResolver resolver : resolvers) {
+            Set<WebSocketClient> clients = resolver.getSupportedClients();
+            for (WebSocketClient client : clients) {
+                Boolean exists = checkedOnes.get(client);
+                if (null == exists) {
+                    String pathFilter = client.getPathFilter();
+                    try {
+                        exists = Boolean.valueOf(webSocketService.exists(pathFilter, userId, contextId));
+                    } catch (OXException e) {
+                        LOG.error("Failed to check for any open filter-satisfying Web Socket using filter \"{}\" for user {} in context {}. Assuming there is any...", null == pathFilter ? "<none>" : pathFilter, I(userId), I(contextId), e);
+                        exists = Boolean.TRUE;
+                    }
+                    checkedOnes.put(client, exists);
+                }
+                if (exists.booleanValue()) {
+                    hasOpenWebSocket.add(client);
+                    anyOpen = true;
+                }
+            }
+        }
+
+        if (false == anyOpen) {
+            return Hits.EMPTY_HITS;
+        }
+
+        // Advertise subscription for each client that has an open Web Socket
+        return new WebSocketHits(hasOpenWebSocket, userId, contextId);
+    }
+
+    // ---------------------------------------------------------------------------------------------------------
 
     @Override
     public void onMessage(WebSocket socket, String text) {
@@ -284,47 +334,6 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         LOG.debug("Initialized new handling for connected Web Socket for user {} in context {}", I(userId), I(contextId));
     }
 
-    /**
-     * Handles the connecting for specified Web Socket associated with given client.
-     *
-     * @param client The client
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     */
-    protected void handleConnect(String client, int userId, int contextId) {
-        synchronized (this) {
-            // Stopped
-            if (stopped) {
-                return;
-            }
-
-            // Create subscription instance
-            DefaultPushSubscription subscription = DefaultPushSubscription.builder()
-                .client(client)
-                .contextId(contextId)
-                .nature(Nature.PERSISTENT)
-                .token(createTokenFor(client, userId, contextId))
-                .topics(Collections.singletonList("*"))
-                .transportId(ID)
-                .userId(userId)
-                .build();
-
-            // Check if there is a queued unsubscription for it
-            boolean removed = scheduledUnsubscriptions.remove(new Unsubscription(subscription));
-            if (removed) {
-                // Already/still subscribed...
-                LOG.info("Dropped scheduled unsubscribing Web Socket subscription for client {} from user {} in context {}", client, I(userId), I(contextId));
-            } else {
-                // Subscribe...
-                try {
-                    subscriptionRegistry.registerSubscription(subscription); // No-op if existent...
-                } catch (OXException e) {
-                    LOG.error("Failed to add push subscription for Web Socket for client {} from user {} in context {}", client, I(userId), I(contextId), e);
-                }
-            }
-        }
-    }
-
     @Override
     public void onWebSocketClose(WebSocket socket) {
         final String client = resolveToClient(socket);
@@ -348,6 +357,47 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         long delay = timerFrequency(services); // 2sec delay
         timerService.schedule(timerTask, delay);
         LOG.debug("Initialized new handling for closed Web Socket for user {} in context {}", I(userId), I(contextId));
+    }
+
+    /**
+     * Handles the connecting for specified Web Socket associated with given client.
+     *
+     * @param client The client
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    protected void handleConnect(String client, int userId, int contextId) {
+        synchronized (this) {
+            // Stopped
+            if (stopped) {
+                return;
+            }
+
+            // Create subscription instance
+            DefaultPushSubscription subscription = DefaultPushSubscription.builder()
+                .client(client)
+                .contextId(contextId)
+                .nature(Nature.PERSISTENT)
+                .token(createTokenFor(client, userId, contextId))
+                .topics(Collections.singletonList(ALL))
+                .transportId(ID)
+                .userId(userId)
+                .build();
+
+            // Check if there is a queued unsubscription for it
+            boolean removed = scheduledUnsubscriptions.remove(new Unsubscription(subscription));
+            if (removed) {
+                // Already/still subscribed...
+                LOG.info("Dropped scheduled unsubscribing Web Socket subscription for client {} from user {} in context {}", client, I(userId), I(contextId));
+            } else {
+                // Subscribe...
+                try {
+                    subscriptionRegistry.registerSubscription(subscription); // No-op if existent...
+                } catch (OXException e) {
+                    LOG.error("Failed to add push subscription for Web Socket for client {} from user {} in context {}", client, I(userId), I(contextId), e);
+                }
+            }
+        }
     }
 
     /**
@@ -387,7 +437,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
                 .contextId(contextId)
                 .nature(Nature.PERSISTENT)
                 .token(createTokenFor(client, userId, contextId))
-                .topics(Collections.singletonList("*"))
+                .topics(Collections.singletonList(ALL))
                 .transportId(ID)
                 .userId(userId)
                 .build();
@@ -482,7 +532,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
     @Override
     public boolean servesClient(String client) throws OXException {
-        return resolvers.getAllSupportedClients().contains(client);
+        return resolvers.getAllSupportedClients().contains(new WebSocketClient(client, null));
     }
 
     @Override
@@ -495,6 +545,10 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         if (null != notification && null != matches && !matches.isEmpty()) {
             // Determine associated client and path filter
             Map<String, ClientAndPathFilter> clientToFilter = getResolveResultsFor(matches);
+            if (null == clientToFilter) {
+                // No appropriate client/path-filter associated with specified matches
+                return;
+            }
 
             // Sort incoming matches by user-context pairs
             for (Map.Entry<UserAndContext, List<PushMatch>> userAssociatedMatches : sortByUser(matches).entrySet()) {
@@ -520,7 +574,10 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
         // Get & send message's textual representation
         String textMessage = message.getMessage().toString();
-        webSocketService.sendMessage(textMessage, clientAndPathFilter.getPathFilter(), uac.getUserId(), uac.getContextId());
+        int userId = uac.getUserId();
+        int contextId = uac.getContextId();
+        webSocketService.sendMessage(textMessage, clientAndPathFilter.getPathFilter(), userId, contextId);
+        LOG.info("Sent notification \"{}\" via transport '{}' using path filter \"{}\" to user {} in context {}", notification.getTopic(), ID, clientAndPathFilter.getPathFilter(), I(userId), I(contextId));
     }
 
     private Map<String, ClientAndPathFilter> getResolveResultsFor(Collection<PushMatch> matches) throws OXException {
@@ -531,7 +588,10 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         for (String client : clients) {
             for (WebSocketToClientResolver resolver : resolvers) {
                 String pathFilter = resolver.getPathFilterFor(client);
-                if (pathFilter != null) {
+                if (pathFilter == null) {
+                    // Client unknown
+                    LOG.warn("Client \"{}\" is unknown, hence cannot resolve it to an appropriate path filter expression.");
+                } else {
                     if (null == applicable) {
                         applicable = new HashMap<>(clients.size());
                     }
@@ -543,6 +603,10 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     }
 
     private Set<String> extractClientsFrom(Collection<PushMatch> userMatches) {
+        if (1 == userMatches.size()) {
+            return Collections.singleton(userMatches.iterator().next().getClient());
+        }
+
         Set<String> clients = new HashSet<>();
         for (PushMatch userMatch : userMatches) {
             clients.add(userMatch.getClient());
@@ -551,6 +615,11 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     }
 
     private Map<UserAndContext, List<PushMatch>> sortByUser(Collection<PushMatch> matches) {
+        if (1 == matches.size()) {
+            PushMatch match = matches.iterator().next();
+            return Collections.singletonMap(UserAndContext.newInstance(match.getUserId(), match.getContextId()), Collections.singletonList(match));
+        }
+
         Map<UserAndContext, List<PushMatch>> byUser = new LinkedHashMap<>();
 
         // Only one match is needed as there is no difference per match

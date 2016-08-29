@@ -61,6 +61,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang.StringUtils;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
 import org.glassfish.grizzly.http.HttpContent;
 import org.glassfish.grizzly.http.HttpRequestPacket;
@@ -174,13 +175,14 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public void sendToUser(String message, String pathFilter, int userId, int contextId) {
+    public void sendToUser(final String message, String pathFilter, int userId, int contextId) {
         ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
         if (null != userSockets) {
             for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
                 if (WebSockets.matches(pathFilter, sessionBoundSocket.getPath())) {
                     try {
                         sessionBoundSocket.sendMessage(message);
+                        LOG.debug("Sent message \"{}\" via Web Socket using path filter \"{}\" to user {} in context {}", new Object() { @Override public String toString(){ return StringUtils.abbreviate(message, 12); }}, pathFilter, userId, contextId);
                     } catch (OXException e) {
                         LOG.error("Failed to send message to Web Socket: {}", sessionBoundSocket, e);
                     }
@@ -223,8 +225,8 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         }
 
         // Check if any satisfies given filter
-        for (SessionBoundWebSocket SessionBoundSocket : userSockets.values()) {
-            if (WebSockets.matches(pathFilter, SessionBoundSocket)) {
+        for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
+            if (WebSockets.matches(pathFilter, sessionBoundSocket)) {
                 return true;
             }
         }

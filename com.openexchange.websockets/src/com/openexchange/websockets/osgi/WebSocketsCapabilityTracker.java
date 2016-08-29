@@ -111,16 +111,12 @@ public class WebSocketsCapabilityTracker implements ServiceTrackerCustomizer<Obj
         if (service instanceof WebSocketService) {
             webSocketServiceAvailable = true;
             if (null != capabilityService && !capabilityDeclared) {
-                capabilityService.declareCapability(CAPABILITY_WEBSOCKET);
-                capabilityDeclared = true;
+                declareCapability();
             }
         } else if (service instanceof CapabilityService) {
-            if (webSocketServiceAvailable) {
-                capabilityService = (CapabilityService) service;
-                if (!capabilityDeclared) {
-                    capabilityService.declareCapability(CAPABILITY_WEBSOCKET);
-                    capabilityDeclared = true;
-                }
+            capabilityService = (CapabilityService) service;
+            if (webSocketServiceAvailable && !capabilityDeclared) {
+                declareCapability();
             }
         } else {
             // Discard...
@@ -131,6 +127,11 @@ public class WebSocketsCapabilityTracker implements ServiceTrackerCustomizer<Obj
         return service;
     }
 
+    private void declareCapability() {
+        capabilityService.declareCapability(CAPABILITY_WEBSOCKET);
+        capabilityDeclared = true;
+    }
+
     @Override
     public void modifiedService(ServiceReference<Object> reference, Object service) {
         // Ignore
@@ -139,22 +140,24 @@ public class WebSocketsCapabilityTracker implements ServiceTrackerCustomizer<Obj
     @Override
     public synchronized void removedService(ServiceReference<Object> reference, Object service) {
         if (service instanceof WebSocketService) {
-            webSocketServiceAvailable = false;
             if (null != capabilityService && capabilityDeclared) {
-                capabilityService.undeclareCapability(CAPABILITY_WEBSOCKET);
-                capabilityDeclared = false;
+                undeclareCapability();
             }
+            webSocketServiceAvailable = false;
         } else if (service instanceof CapabilityService) {
-            CapabilityService capabilityService = (CapabilityService) service;
             if (capabilityDeclared) {
-                capabilityService.undeclareCapability(CAPABILITY_WEBSOCKET);
-                capabilityDeclared = false;
+                undeclareCapability();
             }
             this.capabilityService = null;
         }
 
         // Unget anyway
         context.ungetService(reference);
+    }
+
+    private void undeclareCapability() {
+        capabilityService.undeclareCapability(CAPABILITY_WEBSOCKET);
+        capabilityDeclared = false;
     }
 
 }

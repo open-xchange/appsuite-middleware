@@ -267,7 +267,12 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                 return;
             }
 
-            scheduledNotifcations.offerIfAbsentElseReset(notification);
+            boolean added = scheduledNotifcations.offerIfAbsentElseReset(notification);
+            if (added) {
+                LOG.info("Scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
+            } else {
+                LOG.info("Reset & re-scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
+            }
 
             if (null == scheduledTimerTask) {
                 Runnable task = new Runnable() {
@@ -290,8 +295,8 @@ public class PushNotificationServiceImpl implements PushNotificationService {
      * Checks for an available notifications.
      */
     protected void checkNotifications() {
-        PushNotification first = null;
-        Map<UserAndTopicKey, List<PushNotification>> polledNotifications = null;
+        List<PushNotification> polled = null;
+        int numAdded = 0;
 
         // Leave this mutually exclusive section as fast as possible...
         lock.lock();
@@ -300,63 +305,54 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                 return;
             }
 
-            first = scheduledNotifcations.poll();
-            if (null == first) {
-                // No notifications with an expired delay
+            PushNotification notification = scheduledNotifcations.poll();
+            if (null == notification) {
+                // Queue has no notification with an expired delay
                 return;
             }
 
-            // There is at least one. Check further...
-            PushNotification notification = scheduledNotifcations.poll();
-            if (null != notification) {
-                // Further ones available. Start grouping...
-                polledNotifications = new LinkedHashMap<>();
-
-                // Put first polled notification
-                put(first, polledNotifications);
-
-                // Put others as well
-                do {
-                    put(notification, polledNotifications);
-                    notification = scheduledNotifcations.poll();
-                } while (null != notification);
-            }
-
-            // Drop timer task if queue is empty
-            if (scheduledNotifcations.isEmpty()) {
-                cancelTimerTask();
-            }
+            // Check for more
+            polled = new LinkedList<>();
+            do {
+                polled.add(notification);
+                numAdded++;
+                notification = scheduledNotifcations.poll();
+            } while (null != notification);
         } finally {
             lock.unlock();
         }
 
-        // Distribute notifications (w/o holding lock)
-        if (null == polledNotifications) {
+        if (1 == numAdded) {
             // There was only a single one available
+            PushNotification first = polled.get(0);
             int userId = first.getUserId();
             int contextId = first.getContextId();
-            if (false == processor.execute(UserAndContext.newInstance(userId, contextId), new NotificationsHandler(Iterators.singletonIterator(first), first.getTopic(), userId, contextId))) {
-                try {
-                    doHandle(Iterators.singletonIterator(first), first.getTopic(), userId, contextId);
-                } catch (Exception e) {
-                    LOG.error("Failed to handle notification with topic {} for user {} in context {}", first.getTopic(), I(userId), I(contextId), e);
-                }
+            NotificationsHandler task = new NotificationsHandler(Iterators.singletonIterator(first), first.getTopic(), userId, contextId);
+            if (false == tryExecuteTask(task, userId, contextId)) {
+                // Processor rejected task execution. Perform with current thread.
+                task.run();
             }
         } else {
             // Handle them all
+            Map<UserAndTopicKey, List<PushNotification>> polledNotifications = new LinkedHashMap<>();
+            for (PushNotification notification : polled) {
+                put(notification, polledNotifications);
+            }
             for (Map.Entry<UserAndTopicKey, List<PushNotification>> entry : polledNotifications.entrySet()) {
                 UserAndTopicKey key = entry.getKey();
                 int userId = key.userId;
                 int contextId = key.contextId;
-                if (false == processor.execute(UserAndContext.newInstance(userId, contextId), new NotificationsHandler(entry.getValue().iterator(), key.topic, userId, contextId))) {
-                    try {
-                        doHandle(entry.getValue().iterator(), key.topic, userId, contextId);
-                    } catch (Exception e) {
-                        LOG.error("Failed to handle notification(s) with topic {} for user {} in context {}", key.topic, I(userId), I(contextId), e);
-                    }
+                NotificationsHandler task = new NotificationsHandler(entry.getValue().iterator(), key.topic, userId, contextId);
+                if (false == tryExecuteTask(task, userId, contextId)) {
+                    // Processor rejected task execution. Perform with current thread.
+                    task.run();
                 }
             }
         }
+    }
+
+    private boolean tryExecuteTask(NotificationsHandler task, int userId, int contextId) {
+        return processor.execute(UserAndContext.newInstance(userId, contextId), task);
     }
 
     private void put(PushNotification notification, Map<UserAndTopicKey, List<PushNotification>> polledNotifications) {
@@ -394,7 +390,9 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                 LOG.warn("No such transport '{}' for client '{}' to publish notification from user {} in context {} for topic {}", transportId, client, I(userId), I(contextId), topic);
             } else {
                 while (notifications.hasNext()) {
-                    transport.transport(notifications.next(), hit.getMatches());
+                    PushNotification notification = notifications.next();
+                    LOG.info("Trying to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId));
+                    transport.transport(notification, hit.getMatches());
                 }
             }
         }

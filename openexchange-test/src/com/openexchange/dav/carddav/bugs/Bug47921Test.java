@@ -87,35 +87,35 @@ public class Bug47921Test extends CardDAVTest {
 		 */
     	String uid = randomUID();
     	String vCard =
-    	    "BEGIN:VCARD\r\n" +
-	        "VERSION:3.0\r\n" +
-	        "PRODID:-//Apple Inc.//Mac OS X 10.11.6//EN\r\n" +
-	        "N:Herbert;Tester;;;\r\n" +
-	        "FN:Tester Herbert\r\n" +
-	        "ORG:Acme Testdorf;\r\n" +
-	        "TITLE:Verkaufsberater Großabnehmer\r\n" +
-	        "item1.EMAIL;type=INTERNET;type=pref:Tester.Herbert@ncvspcvswfw-wqfvewew.io\r\n" +
-	        "item1.X-ABLabel:_$!<Other>!$_\r\n" +
-	        "TEL;type=WORK;type=FAX;type=pref:+49 (0) 511 86056-595\r\n" +
-	        "TEL;type=CELL;type=VOICE:+49 (0) 172 18 984 04\r\n" +
-	        "ADR;type=WORK;type=pref:;;Acme Testdorf GmbH;;;;\r\n" +
-	        "NOTE:Tester Herbert\nVerkaufsberater Großabnehmer\n\nTelefon: +49 (0) 511 86056-577\n\r\n" +
-	        "URL;type=WORK;type=pref:www.ncvspcvswfw-wqfvewew.io\r\n" +
-	        "Horstaheimer Stra√üe 303\nD 72942 Testdorf\nDeutschland\r\n" +
-	        "tel;charset=utf-8;type=work:+49 (0) 511 86056-577\r\n" +
-	        "Horstaheimer Stra√üe 303\n\r\n" +
-	        "D 72942 Testdorf\nwww.ncvspcvswfw-wqfvewew.io <http://www.ncvspcvswfw-wqfvewew.io>\n\n \n\r\n" +
-	        "Horstaheimer Stra√üe 303;Testdorf;;D 72942;Deutschland\r\n" +
-	        "label;charset=utf-8;type=work:Acme Testdorf GmbH\r\n" +
-	        "Horstaheimer Stra√üe 303\nD 72942 Testdorf\nDeutschland\r\n" +
-	        "tel;charset=utf-8;type=work:+49 (0) 511 86056-577\r\n" +
-	        "Horstaheimer Stra√üe 303\n\r\n" +
-	        "D 72942 Testdorf\nwww.ncvspcvswfw-wqfvewew.io <http://www.ncvspcvswfw-wqfvewew.io>\n\n \n\r\n" +
-	        "Horstaheimer Stra√üe 303;Testdorf;;D 72942;Deutschland\r\n" +
-	        "label;charset=utf-8;type=work:Acme Testdorf GmbH\r\n" +
+            "BEGIN:VCARD\r\n" +
+            "VERSION:3.0\r\n" +
+            "PRODID:-//Apple Inc.//Mac OS X 10.11.6//EN\r\n" +
+            "N:Herbert;Tester;;;\r\n" +
+            "FN:Tester Herbert\r\n" +
+            "ORG:Acme Testdorf;\r\n" +
+            "TITLE:Verkaufsberater Gro\u00dfabnehmer\r\n" +
+            "item1.EMAIL;type=INTERNET;type=pref:Tester.Herbert@ncvspcvswfw-wqfvewew.io\r\n" +
+            "item1.X-ABLabel:_$!<Other>!$_\r\n" +
+            "TEL;type=WORK;type=FAX;type=pref:+49 (0) 511 86056-595\r\n" +
+            "TEL;type=CELL;type=VOICE:+49 (0) 172 18 984 04\r\n" +
+            "ADR;type=WORK;type=pref:;;Acme Testdorf GmbH;;;;\r\n" +
+            "NOTE:Tester Herbert\nVerkaufsberater Gro\u00dfabnehmer\n\nTelefon: +49 (0) 511 86056-577\n\r\n" +
+            "URL;type=WORK;type=pref:www.ncvspcvswfw-wqfvewew.io\r\n" +
+            "Horstaheimer Stra\u221a\u00fce 303\nD 72942 Testdorf\nDeutschland\r\n" +
+            "tel;charset=utf-8;type=work:+49 (0) 511 86056-577\r\n" +
+            "Horstaheimer Stra\u221a\u00fce 303\n\r\n" +
+            "D 72942 Testdorf\nwww.ncvspcvswfw-wqfvewew.io <http://www.ncvspcvswfw-wqfvewew.io>\n\n \n\r\n" +
+            "Horstaheimer Stra\u221a\u00fce 303;Testdorf;;D 72942;Deutschland\r\n" +
+            "label;charset=utf-8;type=work:Acme Testdorf GmbH\r\n" +
+            "Horstaheimer Stra\u221a\u00fce 303\nD 72942 Testdorf\nDeutschland\r\n" +
+            "tel;charset=utf-8;type=work:+49 (0) 511 86056-577\r\n" +
+            "Horstaheimer Stra\u221a\u00fce 303\n\r\n" +
+            "D 72942 Testdorf\nwww.ncvspcvswfw-wqfvewew.io <http://www.ncvspcvswfw-wqfvewew.io>\n\n \n\r\n" +
+            "Horstaheimer Stra\u221a\u00fce 303;Testdorf;;D 72942;Deutschland\r\n" +
+            "label;charset=utf-8;type=work:Acme Testdorf GmbH\r\n" +
             "REV:" + formatAsUTC(new Date()) + "\r\n" +
             "UID:" + uid + "\r\n" +
-	        "END:VCARD\r\n"
+            "END:VCARD\r\n"
 		;
     	postVCard(uid, vCard, 0);
     	/*

@@ -62,6 +62,12 @@ import com.google.common.collect.ImmutableMap;
 public enum KnownTopic {
 
     /**
+     * <code>*</code>
+     * <p>
+     * The special topic matching all topic identifiers.
+     */
+    ALL("*"),
+    /**
      * <code>ox:mail:new</code>
      * <p>
      * The topic for a newly arrived mail.

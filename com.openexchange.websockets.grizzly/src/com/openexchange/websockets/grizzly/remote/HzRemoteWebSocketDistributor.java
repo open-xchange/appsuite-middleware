@@ -62,6 +62,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastException;
@@ -219,7 +220,12 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     }
 
     private String generateValue(String connectionId, String path) {
-        return new StringBuilder(48).append(connectionId).append(':').append(null == path ? "" : path).toString();
+        if (null == path) {
+            return new StringBuilder(34).append(connectionId).append(':').toString();
+        }
+
+        // With path info
+        return new StringBuilder(48).append(connectionId).append(':').append(path).toString();
     }
 
     @Override
@@ -321,19 +327,21 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         if (!effectiveOtherMembers.isEmpty()) {
             IExecutorService executor = hzInstance.getExecutorService("default");
 
-            for (Distribution.DistributionPayload distributionPayload : payloads) {
+            for (final Distribution.DistributionPayload distributionPayload : payloads) {
                 boolean async = distributionPayload.async;
                 Map<Member, Future<Void>> futureMap = executor.submitToMembers(new PortableMessageDistributor(distributionPayload.message, distributionPayload.pathFilter, userId, contextId, async), effectiveOtherMembers);
                 if (false == async) {
                     // Wait for completion of each submitted task
                     for (Iterator<Entry<Member, Future<Void>>> it = futureMap.entrySet().iterator(); it.hasNext();) {
-                        Future<Void> future = it.next().getValue();
+                        Map.Entry<Member, Future<Void>> futureMapEntry = it.next();
+                        Future<Void> future = futureMapEntry.getValue();
                         // Check Future's return value
                         int retryCount = 3;
                         while (retryCount-- > 0) {
                             try {
                                 future.get();
                                 retryCount = 0;
+                                LOG.debug("Submitted message \"{}\" to remote Web Socket(s) connected to member \"{}\" using path filter \"{}\" to user {} in context {}", new Object() { @Override public String toString(){ return StringUtils.abbreviate(distributionPayload.message, 12); }}, futureMapEntry.getKey(), distributionPayload.pathFilter, userId, contextId);
                             } catch (InterruptedException e) {
                                 // Interrupted - Keep interrupted state
                                 LOG.debug("Interrupted while waiting for {} to complete", PortableMessageDistributor.class.getSimpleName(), e);

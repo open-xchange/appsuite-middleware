@@ -110,23 +110,28 @@ public abstract class SocketIOPacket {
     }
 
     private String encodePacketId() {
-        if (id < 0) {
-            return "";
-        }
-
-        return String.valueOf(id);
+        return id < 0 ? "" : Integer.toString(id);
     }
 
     public String encode() throws SocketIOProtocolException {
-        String str = String.valueOf(type.value());
+        StringBuilder sb = new StringBuilder(32);
+        String tail = sb.append(encodePacketId()).append(encodeArgs()).toString();
 
-        String tail = encodePacketId() + encodeArgs();
+        sb.setLength(0);
+        sb.append(String.valueOf(type.value()));
+        sb.append(encodeAttachments());
 
-        str += encodeAttachments();
-        str += SocketIOProtocol.encodeNamespace(namespace, !tail.isEmpty());
-        str += tail;
+        // Append namespace
+        if (!namespace.equals(SocketIOProtocol.DEFAULT_NAMESPACE)) {
+            sb.append(namespace);
+            if (tail.length() > 0) {
+                sb.append(SocketIOProtocol.NAMESPACE_DELIMITER);
+            }
+        }
 
-        return str;
+        // Append tail
+        sb.append(tail);
+        return sb.toString();
     }
 
 }

@@ -63,16 +63,25 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.client.utils.DateUtils;
 import org.apache.http.conn.ClientConnectionRequest;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.cookie.ClientCookie;
+import org.apache.http.cookie.CookieSpec;
+import org.apache.http.cookie.CookieSpecFactory;
+import org.apache.http.cookie.MalformedCookieException;
+import org.apache.http.cookie.SetCookie;
 import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
+import org.apache.http.impl.cookie.BasicExpiresHandler;
+import org.apache.http.impl.cookie.BrowserCompatSpec;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -80,6 +89,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.TextUtils;
 import com.openexchange.rest.client.httpclient.ssl.EasySSLSocketFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -164,6 +174,14 @@ public final class HttpClients {
                 return new DefaultConnectionReuseStrategy();
             }
         };
+
+        c.getCookieSpecs().register("lenient", new CookieSpecFactory() {
+            @Override
+            public CookieSpec newInstance(HttpParams params) {
+                return new LenientCookieSpec();
+            }
+        });
+        HttpClientParams.setCookiePolicy(c.getParams(), "lenient");
 
         c.addResponseInterceptor(new HttpResponseInterceptor() {
 
@@ -527,6 +545,43 @@ public final class HttpClients {
         public long getContentLength() {
             // length of ungzipped content is not known
             return -1;
+        }
+    }
+
+    private static class LenientCookieSpec extends BrowserCompatSpec {
+
+        // See org.apache.http.impl.cookie.BrowserCompatSpec.DEFAULT_DATE_PATTERNS
+        private static final String[] DEFAULT_DATE_PATTERNS = new String[] {
+            DateUtils.PATTERN_RFC1123,
+            DateUtils.PATTERN_RFC1036,
+            DateUtils.PATTERN_ASCTIME,
+            "EEE, dd-MMM-yyyy HH:mm:ss z",
+            "EEE, dd-MMM-yyyy HH-mm-ss z",
+            "EEE, dd MMM yy HH:mm:ss z",
+            "EEE dd-MMM-yyyy HH:mm:ss z",
+            "EEE dd MMM yyyy HH:mm:ss z",
+            "EEE dd-MMM-yyyy HH-mm-ss z",
+            "EEE dd-MMM-yy HH:mm:ss z",
+            "EEE dd MMM yy HH:mm:ss z",
+            "EEE,dd-MMM-yy HH:mm:ss z",
+            "EEE,dd-MMM-yyyy HH:mm:ss z",
+            "EEE, dd-MM-yyyy HH:mm:ss z",
+            "EEE, dd MMM yyyy HH:mm:ss Z",
+        };
+
+        /** Initializes a new {@link LenientCookieSpec}. */
+        LenientCookieSpec() {
+            super();
+            registerAttribHandler(ClientCookie.EXPIRES_ATTR, new BasicExpiresHandler(DEFAULT_DATE_PATTERNS) {
+                @Override public void parse(SetCookie cookie, String value) throws MalformedCookieException {
+                    if (TextUtils.isEmpty(value)) {
+                        // You should set whatever you want in cookie
+                        cookie.setExpiryDate(null);
+                    } else {
+                        super.parse(cookie, value);
+                    }
+                }
+            });
         }
     }
 

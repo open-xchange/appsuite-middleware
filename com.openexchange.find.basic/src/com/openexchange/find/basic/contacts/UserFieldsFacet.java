@@ -47,73 +47,46 @@
  *
  */
 
-package com.openexchange.twitter.osgi;
+package com.openexchange.find.basic.contacts;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.twitter.TwitterService;
-import com.openexchange.twitter.internal.TwitterConfiguration;
-import com.openexchange.twitter.internal.TwitterServiceImpl;
+import java.util.List;
+import com.openexchange.find.contacts.ContactsFacetType;
+import com.openexchange.find.contacts.ContactsStrings;
+import com.openexchange.find.facet.FormattableDisplayItem;
+import com.openexchange.groupware.contact.helpers.ContactField;
+
 
 /**
- * {@link TwitterActivator} - The activator for twitter bundle.
+ * {@link UserFieldsFacet}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.3
  */
-public final class TwitterActivator extends HousekeepingActivator {
+public class UserFieldsFacet extends ContactSearchFieldFacet {
 
     /**
-     * Initializes a new {@link TwitterActivator}.
+     * serialVersionUID
      */
-    public TwitterActivator() {
-        super();
+    private static final long serialVersionUID = -5647640557042838626L;
+    
+    static final ContactField[] USER_FIELDS = {
+        ContactField.USERFIELD01, ContactField.USERFIELD02, ContactField.USERFIELD03, ContactField.USERFIELD04, ContactField.USERFIELD05, ContactField.USERFIELD06, 
+        ContactField.USERFIELD07, ContactField.USERFIELD08, ContactField.USERFIELD09, ContactField.USERFIELD10, ContactField.USERFIELD11, ContactField.USERFIELD12,
+        ContactField.USERFIELD13, ContactField.USERFIELD14, ContactField.USERFIELD15, ContactField.USERFIELD16, ContactField.USERFIELD17, ContactField.USERFIELD18,
+        ContactField.USERFIELD19, ContactField.USERFIELD20
+    };
+
+    /**
+     * Initializes a new {@link UserFieldsFacet}.
+     */
+    public UserFieldsFacet(String query, List<String> tokenized) {
+        super(ContactsFacetType.USER_FIELDS, new FormattableDisplayItem(ContactsStrings.FACET_USER_FIELDS, query), tokenized);
+
     }
 
     @Override
-    public void startBundle() throws Exception {
-        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TwitterActivator.class);
-        try {
-            log.info("starting bundle: com.openexchange.twitter");
-            /*
-             * Service trackers
-             */
-            track(ConfigurationService.class, new ConfigurationServiceTrackerCustomizer(context));
-            openTrackers();
-            /*
-             * Register
-             */
-            registerService(TwitterService.class, new TwitterServiceImpl());
-            registerService(Reloadable.class, TwitterConfiguration.getInstance());
-        } catch (final Exception e) {
-            log.error("Failed start-up of bundle com.openexchange.twitter", e);
-            throw e;
-        }
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TwitterActivator.class);
-        try {
-            log.info("stopping bundle: com.openexchange.twitter");
-            /*
-             * Unregister
-             */
-            unregisterServices();
-            /*
-             * Close trackers
-             */
-            closeTrackers();
-        } catch (final Exception e) {
-            log.error("Failed shut-down of bundle com.openexchange.twitter", e);
-            throw e;
-        }
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        // Nothing to do
-        return EMPTY_CLASSES;
+    protected ContactField[] getFields() {
+        return USER_FIELDS;
     }
 
 }

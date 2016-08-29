@@ -47,77 +47,94 @@
  *
  */
 
-package com.openexchange.pns.transport.websocket.osgi;
+package com.openexchange.pns.transport.websocket.internal;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import org.osgi.framework.BundleContext;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.pns.transport.websocket.WebSocketClient;
-import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
-import com.openexchange.pns.transport.websocket.internal.WebSocketToClientResolverRegistry;
+import com.openexchange.pns.PushMatch;
+
 
 /**
- * {@link WebSocketToClientResolverTracker}
+ * {@link PushMatchImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class WebSocketToClientResolverTracker extends RankingAwareNearRegistryServiceTracker<WebSocketToClientResolver> implements WebSocketToClientResolverRegistry {
+public class PushMatchImpl implements PushMatch {
 
-    private final ConcurrentMap<WebSocketClient, Boolean> supportedClients;
+    private final int contextId;
+    private final int userId;
+    private final String client;
+    private final String transportId;
+    private final String token;
+    private final String topic;
 
     /**
-     * Initializes a new {@link WebSocketToClientResolverTracker}.
+     * Initializes a new {@link PushMatchImpl}.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param client The client identifier
+     * @param transportId The transport identifier
+     * @param token The token
+     * @param topic The matching topic
      */
-    public WebSocketToClientResolverTracker(BundleContext context) {
-        super(context, WebSocketToClientResolver.class, 0);
-        supportedClients = new ConcurrentHashMap<>(16, 0.9F, 1);
+    public PushMatchImpl(int userId, int contextId, String client, String transportId, String token, String topic) {
+        super();
+        this.userId = userId;
+        this.contextId = contextId;
+        this.client = client;
+        this.transportId = transportId;
+        this.token = token;
+        this.topic = topic;
     }
 
     @Override
-    protected boolean onServiceAppeared(WebSocketToClientResolver resolver) {
-        List<String> toRemove = new LinkedList<>();
-        boolean invalid = true;
-        try {
-            Set<WebSocketClient> clients = resolver.getSupportedClients();
-            for (WebSocketClient clientToAdd : clients) {
-                if (null != supportedClients.putIfAbsent(clientToAdd, Boolean.TRUE)) {
-                    // There is already such a client...
-                    return false;
-                }
-            }
-            invalid = false;
-            return true;
-        } finally {
-            if (invalid) {
-                for (String clientToRemove : toRemove) {
-                    supportedClients.remove(clientToRemove);
-                }
-            }
+    public String getClient() {
+        return client;
+    }
+
+    @Override
+    public int getUserId() {
+        return userId;
+    }
+
+    @Override
+    public int getContextId() {
+        return contextId;
+    }
+
+    @Override
+    public String getTransportId() {
+        return transportId;
+    }
+
+    @Override
+    public String getToken() {
+        return token;
+    }
+
+    @Override
+    public String getTopic() {
+        return topic;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(128);
+        builder.append("{contextId=").append(contextId).append(", userId=").append(userId).append(", ");
+        if (client != null) {
+            builder.append("client=").append(client).append(", ");
         }
-    }
-
-    @Override
-    protected void onServiceRemoved(WebSocketToClientResolver resolver) {
-        Set<WebSocketClient> clients = resolver.getSupportedClients();
-        for (WebSocketClient clientToRemove : clients) {
-            supportedClients.remove(clientToRemove);
+        if (transportId != null) {
+            builder.append("transportId=").append(transportId).append(", ");
         }
-    }
-
-    @Override
-    public Set<WebSocketClient> getAllSupportedClients() {
-        return Collections.unmodifiableSet(supportedClients.keySet());
-    }
-
-    @Override
-    public boolean containsClient(String client) {
-        return null != client && supportedClients.containsKey(new WebSocketClient(client, null));
+        if (token != null) {
+            builder.append("token=").append(token).append(", ");
+        }
+        if (topic != null) {
+            builder.append("topic=").append(topic).append(", ");
+        }
+        builder.append("}");
+        return builder.toString();
     }
 
 }

@@ -47,73 +47,46 @@
  *
  */
 
-package com.openexchange.twitter.osgi;
+package com.openexchange.pns.subscription.storage.rdb.cache;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.twitter.TwitterService;
-import com.openexchange.twitter.internal.TwitterConfiguration;
-import com.openexchange.twitter.internal.TwitterServiceImpl;
+import java.util.List;
+import java.util.concurrent.Callable;
+import com.openexchange.exception.OXException;
+import com.openexchange.pns.PushSubscription;
+import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
 
 /**
- * {@link TwitterActivator} - The activator for twitter bundle.
+ * {@link LoadInMemoryPushSubscriptionCollectionCallable}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class TwitterActivator extends HousekeepingActivator {
+public class LoadInMemoryPushSubscriptionCollectionCallable implements Callable<InMemoryPushSubscriptionCollection> {
+
+    private final int userId;
+    private final int contextId;
+    private final RdbPushSubscriptionRegistry registry;
 
     /**
-     * Initializes a new {@link TwitterActivator}.
+     * Initializes a new {@link LoadInMemoryPushSubscriptionCollectionCallable}.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param registry The registry to use
      */
-    public TwitterActivator() {
+    public LoadInMemoryPushSubscriptionCollectionCallable(int userId, int contextId, RdbPushSubscriptionRegistry registry) {
         super();
+        this.userId = userId;
+        this.contextId = contextId;
+        this.registry = registry;
     }
 
     @Override
-    public void startBundle() throws Exception {
-        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TwitterActivator.class);
-        try {
-            log.info("starting bundle: com.openexchange.twitter");
-            /*
-             * Service trackers
-             */
-            track(ConfigurationService.class, new ConfigurationServiceTrackerCustomizer(context));
-            openTrackers();
-            /*
-             * Register
-             */
-            registerService(TwitterService.class, new TwitterServiceImpl());
-            registerService(Reloadable.class, TwitterConfiguration.getInstance());
-        } catch (final Exception e) {
-            log.error("Failed start-up of bundle com.openexchange.twitter", e);
-            throw e;
-        }
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TwitterActivator.class);
-        try {
-            log.info("stopping bundle: com.openexchange.twitter");
-            /*
-             * Unregister
-             */
-            unregisterServices();
-            /*
-             * Close trackers
-             */
-            closeTrackers();
-        } catch (final Exception e) {
-            log.error("Failed shut-down of bundle com.openexchange.twitter", e);
-            throw e;
-        }
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        // Nothing to do
-        return EMPTY_CLASSES;
+    public InMemoryPushSubscriptionCollection call() throws OXException {
+        List<PushSubscription> subscriptions = registry.loadSubscriptionsFor(userId, contextId);
+        InMemoryPushSubscriptionCollection collection = new InMemoryPushSubscriptionCollection(userId, contextId);
+        collection.addSubscription(subscriptions);
+        return collection;
     }
 
 }

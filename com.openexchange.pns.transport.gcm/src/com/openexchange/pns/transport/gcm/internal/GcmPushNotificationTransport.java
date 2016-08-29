@@ -49,6 +49,7 @@
 
 package com.openexchange.pns.transport.gcm.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -204,7 +205,7 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
                 return;
             }
 
-            List<String> registrationIDs = new ArrayList<String>(size);
+            final List<String> registrationIDs = new ArrayList<String>(size);
             for (int i = 0; i < size; i += MULTICAST_LIMIT) {
                 // Prepare chunk
                 int length = Math.min(size, i + MULTICAST_LIMIT) - i;
@@ -218,6 +219,21 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
                     MulticastResult result = null;
                     try {
                         result = sender.sendNoRetry(getMessage(client, notification), registrationIDs);
+
+                        // Log it
+                        Object ostr = new Object() {
+
+                            @Override
+                            public String toString() {
+                                StringBuilder sb = new StringBuilder(registrationIDs.size() * 16);
+                                for (String registrationID : registrationIDs) {
+                                    sb.append(registrationID).append(", ");
+                                }
+                                sb.setLength(sb.length() - 2);
+                                return sb.toString();
+                            }
+                        };
+                        LOG.info("Sent notification \"{}\" via transport '{}' for user {} in context {} to registration ID(s): {}", notification.getTopic(), ID, I(notification.getUserId()), I(notification.getContextId()), ostr);
                     } catch (IOException e) {
                         LOG.warn("Error publishing push notification", e);
                     }

@@ -50,6 +50,7 @@
 package com.openexchange.pns.appsuite;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONArray;
@@ -110,7 +111,7 @@ public class AppSuiteWebSocketMessageGenerator implements PushMessageGenerator {
             public Collection<Object> generateArgsFrom(PushNotification notification) throws OXException {
                 Map<String, Object> messageData = notification.getMessageData();
                 // Socket.io compatible text message?
-                return messageData.values();
+                return Collections.<Object> singleton(new JSONObject(messageData));
             }
         });
 

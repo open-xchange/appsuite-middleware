@@ -49,6 +49,7 @@
 
 package com.openexchange.pns.transport.wns.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
@@ -218,6 +219,7 @@ public class WnsPushNotificationTransport extends ServiceTracker<WnsOptionsProvi
                             String status = response.notificationStatus;
                             if (ar.com.fernandospr.wns.model.types.WnsNotificationStatusType.RECEIVED.equals(status)) {
                                 // All fine
+                                LOG.info("Sent notification \"{}\" via transport '{}' to channel URI \"{}\" for user {} in context {}", notification.getTopic(), ID, channelUri, I(notification.getUserId()), I(notification.getContextId()));
                                 retryCount = 6;
                             } else if (ar.com.fernandospr.wns.model.types.WnsNotificationStatusType.DROPPED.equals(status)) {
                                 // The notification was explicitly dropped because of an error or because the client has explicitly rejected these notifications.
