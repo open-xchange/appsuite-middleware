@@ -47,35 +47,46 @@
  *
  */
 
-package com.openexchange.processing;
+package com.openexchange.find.basic.contacts;
+
+import java.util.List;
+import com.openexchange.find.contacts.ContactsFacetType;
+import com.openexchange.find.contacts.ContactsStrings;
+import com.openexchange.find.facet.FormattableDisplayItem;
+import com.openexchange.groupware.contact.helpers.ContactField;
+
 
 /**
- * {@link Processor}
+ * {@link UserFieldsFacet}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.3
  */
-public interface Processor {
+public class UserFieldsFacet extends ContactSearchFieldFacet {
 
     /**
-     * Schedules the specified task for being executed associated with given key (if any).
-     *
-     * @param optKey The optional key; if <code>null</code> calling {@link Thread} instance is referenced as key
-     * @param task The task to execute
-     * @return <code>true</code> if successfully scheduled for execution; otherwise <code>false</code> to signal that task cannot be accepted
+     * serialVersionUID
      */
-    boolean execute(Object optKey, Runnable task);
+    private static final long serialVersionUID = -5647640557042838626L;
+    
+    static final ContactField[] USER_FIELDS = {
+        ContactField.USERFIELD01, ContactField.USERFIELD02, ContactField.USERFIELD03, ContactField.USERFIELD04, ContactField.USERFIELD05, ContactField.USERFIELD06, 
+        ContactField.USERFIELD07, ContactField.USERFIELD08, ContactField.USERFIELD09, ContactField.USERFIELD10, ContactField.USERFIELD11, ContactField.USERFIELD12,
+        ContactField.USERFIELD13, ContactField.USERFIELD14, ContactField.USERFIELD15, ContactField.USERFIELD16, ContactField.USERFIELD17, ContactField.USERFIELD18,
+        ContactField.USERFIELD19, ContactField.USERFIELD20
+    };
 
     /**
-     * Stops this processor waiting until empty.
-     *
-     * @throws InterruptedException If interrupted while waiting
+     * Initializes a new {@link UserFieldsFacet}.
      */
-    void stopWhenEmpty() throws InterruptedException;
+    public UserFieldsFacet(String query, List<String> tokenized) {
+        super(ContactsFacetType.USER_FIELDS, new FormattableDisplayItem(ContactsStrings.FACET_USER_FIELDS, query), tokenized);
 
-    /**
-     * Shuts-down this processor.
-     */
-    void stop();
+    }
+
+    @Override
+    protected ContactField[] getFields() {
+        return USER_FIELDS;
+    }
 
 }

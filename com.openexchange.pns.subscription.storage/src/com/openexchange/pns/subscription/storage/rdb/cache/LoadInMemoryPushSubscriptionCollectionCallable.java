@@ -47,35 +47,46 @@
  *
  */
 
-package com.openexchange.processing;
+package com.openexchange.pns.subscription.storage.rdb.cache;
+
+import java.util.List;
+import java.util.concurrent.Callable;
+import com.openexchange.exception.OXException;
+import com.openexchange.pns.PushSubscription;
+import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry;
 
 /**
- * {@link Processor}
+ * {@link LoadInMemoryPushSubscriptionCollectionCallable}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @since v7.8.3
  */
-public interface Processor {
+public class LoadInMemoryPushSubscriptionCollectionCallable implements Callable<InMemoryPushSubscriptionCollection> {
+
+    private final int userId;
+    private final int contextId;
+    private final RdbPushSubscriptionRegistry registry;
 
     /**
-     * Schedules the specified task for being executed associated with given key (if any).
+     * Initializes a new {@link LoadInMemoryPushSubscriptionCollectionCallable}.
      *
-     * @param optKey The optional key; if <code>null</code> calling {@link Thread} instance is referenced as key
-     * @param task The task to execute
-     * @return <code>true</code> if successfully scheduled for execution; otherwise <code>false</code> to signal that task cannot be accepted
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param registry The registry to use
      */
-    boolean execute(Object optKey, Runnable task);
+    public LoadInMemoryPushSubscriptionCollectionCallable(int userId, int contextId, RdbPushSubscriptionRegistry registry) {
+        super();
+        this.userId = userId;
+        this.contextId = contextId;
+        this.registry = registry;
+    }
 
-    /**
-     * Stops this processor waiting until empty.
-     *
-     * @throws InterruptedException If interrupted while waiting
-     */
-    void stopWhenEmpty() throws InterruptedException;
-
-    /**
-     * Shuts-down this processor.
-     */
-    void stop();
+    @Override
+    public InMemoryPushSubscriptionCollection call() throws OXException {
+        List<PushSubscription> subscriptions = registry.loadSubscriptionsFor(userId, contextId);
+        InMemoryPushSubscriptionCollection collection = new InMemoryPushSubscriptionCollection(userId, contextId);
+        collection.addSubscription(subscriptions);
+        return collection;
+    }
 
 }

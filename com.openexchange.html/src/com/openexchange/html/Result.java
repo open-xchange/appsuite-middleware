@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,35 +47,28 @@
  *
  */
 
-package com.openexchange.processing;
+package com.openexchange.html;
+
 
 /**
- * {@link Processor}
+ * {@link Result} - Enumeration for possible results of checks/tests.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @since v7.8.3
  */
-public interface Processor {
+public enum Result {
 
     /**
-     * Schedules the specified task for being executed associated with given key (if any).
-     *
-     * @param optKey The optional key; if <code>null</code> calling {@link Thread} instance is referenced as key
-     * @param task The task to execute
-     * @return <code>true</code> if successfully scheduled for execution; otherwise <code>false</code> to signal that task cannot be accepted
+     * The check/test is passed positively.
      */
-    boolean execute(Object optKey, Runnable task);
-
+    ALLOW,
     /**
-     * Stops this processor waiting until empty.
-     *
-     * @throws InterruptedException If interrupted while waiting
+     * The check/test is should not be considered.
      */
-    void stopWhenEmpty() throws InterruptedException;
-
+    NEUTRAL,
     /**
-     * Shuts-down this processor.
+     * The check/test is not passed.
      */
-    void stop();
+    DENY;
 
 }

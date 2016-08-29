@@ -65,6 +65,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.BufferingQueue;
 import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.KnownTopic;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
@@ -95,6 +96,8 @@ import com.openexchange.websockets.WebSocketService;
  * @since v7.8.3
  */
 public class WebSocketPushNotificationTransport implements PushNotificationTransport, WebSocketListener {
+
+    private static final String ALL = KnownTopic.ALL.getName();
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WebSocketPushNotificationTransport.class);
 
@@ -304,7 +307,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
                 .contextId(contextId)
                 .nature(Nature.PERSISTENT)
                 .token(createTokenFor(client, userId, contextId))
-                .topics(Collections.singletonList("*"))
+                .topics(Collections.singletonList(ALL))
                 .transportId(ID)
                 .userId(userId)
                 .build();
@@ -387,7 +390,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
                 .contextId(contextId)
                 .nature(Nature.PERSISTENT)
                 .token(createTokenFor(client, userId, contextId))
-                .topics(Collections.singletonList("*"))
+                .topics(Collections.singletonList(ALL))
                 .transportId(ID)
                 .userId(userId)
                 .build();
@@ -521,6 +524,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         // Get & send message's textual representation
         String textMessage = message.getMessage().toString();
         webSocketService.sendMessage(textMessage, clientAndPathFilter.getPathFilter(), uac.getUserId(), uac.getContextId());
+        LOG.debug("Sent notification \"{}\" via Web Sockets using path filter \"{}\" to user {} in context {}", notification.getTopic(), clientAndPathFilter.getPathFilter(), uac.getUserId(), uac.getContextId());
     }
 
     private Map<String, ClientAndPathFilter> getResolveResultsFor(Collection<PushMatch> matches) throws OXException {
