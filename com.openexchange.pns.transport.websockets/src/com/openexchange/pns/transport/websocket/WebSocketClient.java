@@ -47,33 +47,86 @@
  *
  */
 
-package com.openexchange.pns.transport.websocket.internal;
-
-import java.util.Set;
-import com.openexchange.pns.transport.websocket.WebSocketClient;
-import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
+package com.openexchange.pns.transport.websocket;
 
 /**
- * {@link WebSocketToClientResolverRegistry}
+ * {@link WebSocketClient} - Provides the client identifier and the associated path filter expression to associate a Web Socket with that client.
+ * <p>
+ * {@link #equals(Object) equals()} method only considers client identifier.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface WebSocketToClientResolverRegistry extends Iterable<WebSocketToClientResolver> {
+public final class WebSocketClient {
+
+    private final String client;
+    private final String pathFilter;
+    private Integer hash;
 
     /**
-     * Gets the set containing the identifiers of all supported clients.
+     * Initializes a new {@link WebSocketClient}.
      *
-     * @return The identifiers of all supported clients
+     * @param client The identifier of the client; e.g. <code>"open-xchange-appsuite"</code>
+     * @param pathFilter The path filter expression that applies to the client; e.g. <code>"/socket.io/*"</code>
      */
-    Set<WebSocketClient> getAllSupportedClients();
+    public WebSocketClient(String client, String pathFilter) {
+        super();
+        this.client = client;
+        this.pathFilter = pathFilter;
+    }
 
     /**
-     * Checks whether there is a resolver for specified client identifier.
+     * Gets the client identifier; e.g. <code>"open-xchange-appsuite"</code>
      *
-     * @param client The client identifier to check
-     * @return <code>true</code> if there is a resolver associated with given client identifier; otherwise <code>false</code>
+     * @return The client identifier
      */
-    boolean containsClient(String client);
+    public String getClient() {
+        return client;
+    }
+
+    /**
+     * Gets the path filter expression that applies to the client; e.g. <code>"/socket.io/*"</code>
+     *
+     * @return The path filter expression
+     */
+    public String getPathFilter() {
+        return pathFilter;
+    }
+
+    @Override
+    public int hashCode() {
+        Integer tmp = this.hash;
+        if (null == tmp) {
+            // No concurrency here. In worst case each thread computes its own hash code
+            int prime = 31;
+            int result = 1;
+            result = prime * result + ((client == null) ? 0 : client.hashCode());
+            tmp = Integer.valueOf(result);
+            this.hash = tmp;
+        }
+        return tmp.intValue();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (WebSocketClient.class != obj.getClass()) {
+            return false;
+        }
+        WebSocketClient other = (WebSocketClient) obj;
+        if (client == null) {
+            if (other.client != null) {
+                return false;
+            }
+        } else if (!client.equals(other.client)) {
+            return false;
+        }
+        return true;
+    }
 
 }

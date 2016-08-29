@@ -66,7 +66,7 @@ public interface WebSocketToClientResolver {
      *
      * @return The supported clients
      */
-    Set<String> getSupportedClients();
+    Set<WebSocketClient> getSupportedClients();
 
     /**
      * Resolves the given open Web Socket to a client identifier that is associated with it.
