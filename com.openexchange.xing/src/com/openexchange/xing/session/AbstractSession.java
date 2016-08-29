@@ -318,7 +318,7 @@ public abstract class AbstractSession implements Session {
                     HttpConnectionParams.setConnectionTimeout(httpParams, DEFAULT_TIMEOUT_MILLIS);
                     HttpConnectionParams.setSoTimeout(httpParams, DEFAULT_TIMEOUT_MILLIS);
                     HttpConnectionParams.setSocketBufferSize(httpParams, 8192);
-                    HttpProtocolParams.setUserAgent(httpParams, "Open-Xchange-XING/1.0.0");d
+                    HttpProtocolParams.setUserAgent(httpParams, "Open-Xchange-XING/1.0.0");
 
                     final DefaultHttpClient c = new DefaultHttpClient(cm, httpParams) {
 
