@@ -270,7 +270,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             final StringBuilder sqlBuilder = new StringBuilder(2048);
             sqlBuilder.append("UPDATE db_pool,db_cluster SET ");
 
-            final List<Object> params = new LinkedList<Object>();
+            final List<Object> params = new LinkedList<>();
             boolean first = true;
 
             if (db.getName() != null && db.getName().length() > 0) {
@@ -868,7 +868,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             stmt = con.prepareStatement("SELECT id,text FROM reason_text");
             final ResultSet rs = stmt.executeQuery();
-            final ArrayList<MaintenanceReason> list = new ArrayList<MaintenanceReason>();
+            final ArrayList<MaintenanceReason> list = new ArrayList<>();
             while (rs.next()) {
                 list.add(new MaintenanceReason(rs.getInt("id"), rs.getString("text")));
             }
@@ -911,7 +911,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             stmt = con.prepareStatement("SELECT id,text FROM reason_text WHERE text like ?");
             stmt.setString(1, new_search_pattern);
             final ResultSet rs = stmt.executeQuery();
-            final ArrayList<MaintenanceReason> list = new ArrayList<MaintenanceReason>();
+            final ArrayList<MaintenanceReason> list = new ArrayList<>();
             while (rs.next()) {
                 list.add(new MaintenanceReason(rs.getInt("id"), rs.getString("text")));
             }
@@ -967,7 +967,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 stmt_count++;
             }
             final ResultSet rs = stmt.executeQuery();
-            final ArrayList<MaintenanceReason> list = new ArrayList<MaintenanceReason>();
+            final ArrayList<MaintenanceReason> list = new ArrayList<>();
             while (rs.next()) {
                 list.add(new MaintenanceReason(rs.getInt("id"), rs.getString("text")));
             }
@@ -1009,7 +1009,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final List<Filestore> stores = new ArrayList<Filestore>();
+        final List<Filestore> stores = new ArrayList<>();
         try {
             stmt = con.prepareStatement("SELECT id,uri,size,max_context FROM filestore WHERE uri LIKE ?");
             stmt.setString(1, pattern.replace('*', '%'));
@@ -1048,7 +1048,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final List<Integer> ids = new ArrayList<Integer>();
+        final List<Integer> ids = new ArrayList<>();
         try {
             stmt = con.prepareStatement("SELECT id FROM filestore");
             result = stmt.executeQuery();
@@ -1331,7 +1331,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
 
             // Load potential candidates
-            List<Candidate> candidates = new LinkedList<Candidate>();
+            List<Candidate> candidates = new LinkedList<>();
             {
                 stmt = con.prepareStatement("SELECT filestore.id, filestore.max_context, COUNT(context.cid) AS num FROM filestore LEFT JOIN context ON filestore.id=context.filestore_id GROUP BY filestore.id ORDER BY num ASC");
                 rs = stmt.executeQuery();
@@ -1453,9 +1453,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      * @throws StorageException if parsing the configuration option fails.
      */
     private long getAverageFilestoreSpaceForUser() throws StorageException {
-        AdminCache cache = ClientAdminThread.cache;
-        PropertyHandler prop = cache.getProperties();
-        String value = prop.getProp("AVERAGE_USER_SIZE", "100");
+        String value = prop.getUserProp("AVERAGE_USER_SIZE", "100");
         try {
             return Long.parseLong(value);
         } catch (final NumberFormatException e) {
@@ -1531,7 +1529,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             pstmt.setString(2, my_search_pattern);
             pstmt.setString(3, my_search_pattern);
             final ResultSet rs = pstmt.executeQuery();
-            final ArrayList<Database> tmp = new ArrayList<Database>();
+            final ArrayList<Database> tmp = new ArrayList<>();
 
             while (rs.next()) {
 
@@ -1614,7 +1612,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             stmt.setString(2, my_search_pattern);
 
             final ResultSet rs = stmt.executeQuery();
-            final ArrayList<Server> tmp = new ArrayList<Server>();
+            final ArrayList<Server> tmp = new ArrayList<>();
             while (rs.next()) {
                 final Server srv = new Server();
                 srv.setId(rs.getInt("server_id"));
@@ -1940,7 +1938,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             result = stmt.executeQuery();
 
             if (false == result.next()) {
-                return new ArrayList<URI>(1);
+                return new ArrayList<>(1);
             }
 
             class FidAndName {
@@ -1954,7 +1952,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 }
             };
 
-            List<FidAndName> fids = new LinkedList<FidAndName>();
+            List<FidAndName> fids = new LinkedList<>();
             do {
                 int filestoreId = result.getInt(1);
                 String path = result.getString(2);
@@ -1964,8 +1962,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             result = null;
             stmt = null;
 
-            Map<Integer, String> baseUris = new HashMap<Integer, String>(fids.size());
-            List<URI> uris = new ArrayList<URI>(fids.size());
+            Map<Integer, String> baseUris = new HashMap<>(fids.size());
+            List<URI> uris = new ArrayList<>(fids.size());
             for (FidAndName fid : fids) {
                 int filestoreId = fid.filestoreId;
 
@@ -2161,7 +2159,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         Collection<FilestoreContextBlock> blocks = makeBlocksFromFilestoreContexts();
 
         // Sort by database.
-        Map<Integer, Collection<FilestoreContextBlock>> dbMap = new HashMap<Integer, Collection<FilestoreContextBlock>>();
+        Map<Integer, Collection<FilestoreContextBlock>> dbMap = new HashMap<>();
         for (FilestoreContextBlock block : blocks) {
             int poolId = block.writeDBPoolID;
             String schema = block.schema;
@@ -2171,14 +2169,14 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             Collection<FilestoreContextBlock> dbBlock = dbMap.get(I(block.writeDBPoolID));
             if (null == dbBlock) {
-                dbBlock = new ArrayList<FilestoreContextBlock>();
+                dbBlock = new ArrayList<>();
                 dbMap.put(I(block.writeDBPoolID), dbBlock);
             }
             dbBlock.add(block);
         }
 
         // Create callables for every database server and submit them to the completion service.
-        final CompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
+        final CompletionService<Void> completionService = new ThreadPoolCompletionService<>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
         int taskCount = 0;
         for (final Collection<FilestoreContextBlock> dbBlock : dbMap.values()) {
             completionService.submit(new Callable<Void>() {
@@ -2206,7 +2204,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
     private Collection<FilestoreContextBlock> makeBlocksFromFilestoreContexts() throws StorageException {
         final AdminCacheExtended cache = this.cache;
-        final ConcurrentMap<MultiKey, FilestoreContextBlock> blocks = new ConcurrentHashMap<MultiKey, FilestoreContextBlock>();
+        final ConcurrentMap<MultiKey, FilestoreContextBlock> blocks = new ConcurrentHashMap<>();
 
         Connection con = null;
         PreparedStatement stmt = null;
@@ -2231,7 +2229,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
             closeSQLStuff(result, stmt);
 
-            Set<PoolAndSchema> retval = new LinkedHashSet<PoolAndSchema>();
+            Set<PoolAndSchema> retval = new LinkedHashSet<>();
 
             stmt = con.prepareStatement("SELECT write_db_pool_id, db_schema FROM context_server2db_pool WHERE server_id=?");
             stmt.setInt(1, serverId);
@@ -2240,7 +2238,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 retval.add(new PoolAndSchema(result.getInt(1), result.getString(2)));
             }
 
-            CompletionService<Void> completionService = new ThreadPoolCompletionService<Void>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
+            CompletionService<Void> completionService = new ThreadPoolCompletionService<>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
             int taskCount = 0;
 
             for (final PoolAndSchema poolAndSchema : retval) {
@@ -2392,11 +2390,11 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     private void updateFilestoresWithUsageFromBlocks(final List<Filestore> stores, final Collection<FilestoreContextBlock> blocks) throws StorageException {
-        Map<Integer, Long> filestore2ctxUsage = new HashMap<Integer, Long>();
-        Map<Integer, Integer> filestore2ctxCount = new HashMap<Integer, Integer>();
+        Map<Integer, Long> filestore2ctxUsage = new HashMap<>();
+        Map<Integer, Integer> filestore2ctxCount = new HashMap<>();
 
-        Map<Integer, Long> filestore2usrUsage = new HashMap<Integer, Long>();
-        Map<Integer, Integer> filestore2usrCount = new HashMap<Integer, Integer>();
+        Map<Integer, Long> filestore2usrUsage = new HashMap<>();
+        Map<Integer, Integer> filestore2usrCount = new HashMap<>();
 
         for (FilestoreContextBlock block : blocks) {
             for (FilestoreInfo info : block.contextFilestores.values()) {
@@ -2508,7 +2506,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
         // Get count and usage for given file storage
         final AdminCacheExtended cache = this.cache;
-        Map<PoolAndSchema, List<Integer>> map = new LinkedHashMap<PoolAndSchema, List<Integer>>();
+        Map<PoolAndSchema, List<Integer>> map = new LinkedHashMap<>();
         int count = 0;
 
         {
@@ -2525,7 +2523,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                     PoolAndSchema poolAndSchema = new PoolAndSchema(result.getInt(2), result.getString(3));
                     List<Integer> cids = map.get(poolAndSchema);
                     if (null == cids) {
-                        cids = new LinkedList<Integer>();
+                        cids = new LinkedList<>();
                         map.put(poolAndSchema, cids);
                     }
                     cids.add(Integer.valueOf(result.getInt(1)));
@@ -2541,7 +2539,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
         }
 
-        CompletionService<Long> completionService = new ThreadPoolCompletionService<Long>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
+        CompletionService<Long> completionService = new ThreadPoolCompletionService<>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
         int taskCount = 0;
 
         for (Map.Entry<PoolAndSchema, List<Integer>> entry : map.entrySet()) {
@@ -2626,7 +2624,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
 
         Set<UserAndContext> users = Filestore2UserUtil.getUsersFor(filestoreId, cache);
-        CompletionService<Long> completionService = new ThreadPoolCompletionService<Long>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
+        CompletionService<Long> completionService = new ThreadPoolCompletionService<>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
         int taskCount = 0;
 
         for (final UserAndContext usrAndCtx : users) {
@@ -2694,7 +2692,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 return Collections.emptyMap();
             }
 
-            Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+            Map<Integer, Integer> map = new HashMap<>();
             do {
                 Integer fsId = Integer.valueOf(result.getInt(1));
                 Integer count = map.get(fsId);
