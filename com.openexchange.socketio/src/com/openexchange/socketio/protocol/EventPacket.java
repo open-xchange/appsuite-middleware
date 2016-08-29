@@ -23,7 +23,15 @@
 
 package com.openexchange.socketio.protocol;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONValue;
 import com.openexchange.socketio.server.SocketIOProtocolException;
 
 /**
@@ -54,13 +62,87 @@ public abstract class EventPacket extends SocketIOPacket {
 
     @Override
     protected String encodeArgs() throws SocketIOProtocolException {
+        Object[] args = getArgs();
         // adding name of the event as a first argument
-        JSONArray data = new JSONArray();
+        JSONArray data = new JSONArray(args.length + 1);
+
+        // append arguments
         data.put(getName());
-        for (Object arg : getArgs()) {
-            data.put(arg);
+        for (Object arg : args) {
+            data.put(coerceToJSON(arg));
+        }
+        return data.toString();
+    }
+
+    /**
+     * Coerces given Java object to its JSON representation.
+     *
+     * @param value The Java object to coerce
+     * @return The resulting JSON representation
+     */
+    private Object coerceToJSON(final Object value) {
+        if (null == value || JSONObject.NULL.equals(value)) {
+            return JSONObject.NULL;
         }
 
-        return data.toString();
+        if (value instanceof JSONValue) {
+            return value;
+        }
+
+        if (value instanceof Map) {
+            return new JSONObject((Map<String, ?>) value);
+        }
+
+        if (value instanceof Collection) {
+            return new JSONArray((Collection<?>) value);
+        }
+
+        if (isArray(value)) {
+            return new JSONArray(Arrays.asList((Object[]) value));
+        }
+
+        if (value instanceof String) {
+            return value.toString();
+        }
+
+        if (value instanceof Number) {
+            Number n = (Number) value;
+            if (n instanceof AtomicInteger) {
+                return Integer.valueOf(n.intValue());
+            } else if (n instanceof AtomicLong) {
+                return Long.valueOf(n.longValue());
+            } else {
+                return n;
+            }
+        }
+
+        if (value instanceof byte[]) {
+            return (value);
+        }
+
+        if (value instanceof Boolean) {
+            return (value);
+        }
+        if (value instanceof AtomicBoolean) {
+            return Boolean.valueOf(((AtomicBoolean) value).get());
+        }
+
+        // As string as last resort
+        return value.toString();
+    }
+
+    /**
+     * Checks if specified object is an array.
+     *
+     * @param object The object to check
+     * @return <code>true</code> if specified object is an array; otherwise <code>false</code>
+     */
+    private boolean isArray(final Object object) {
+        /*-
+         * getClass().isArray() is significantly slower on Sun Java 5 or 6 JRE than on IBM.
+         * So much that using clazz.getName().charAt(0) == '[' is faster on Sun JVM.
+         */
+        // return (null != object && object.getClass().isArray());
+        return (null != object && '[' == object.getClass().getName().charAt(0));
     }
 }
