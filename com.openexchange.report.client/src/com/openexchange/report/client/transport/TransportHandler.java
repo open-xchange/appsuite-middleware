@@ -52,6 +52,8 @@ package com.openexchange.report.client.transport;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -62,6 +64,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Map.Entry;
 import javax.management.openmbean.CompositeData;
 import javax.net.ssl.HttpsURLConnection;
@@ -84,7 +87,7 @@ import com.openexchange.tools.encoding.Base64;
  */
 public class TransportHandler {
 
-    private static final String REPORT_SERVER_URL = "activation.open-xchange.com";
+    private static final String REPORT_SERVER_URL = "localhost";
     
     private static final String REPORT_SERVER_CLIENT_AUTHENTICATION_STRING = "rhadsIsAgTicOpyodNainPacloykAuWyribZydkarbEncherc4";
 
@@ -104,21 +107,16 @@ public class TransportHandler {
         send(metadata, savereport);
     }
 
-    private void send(JSONObject metadata, boolean savereport) throws IOException {
+    private void send(JSONObject metadata, boolean savereport) throws IOException, JSONException {
         final ReportConfiguration reportConfiguration = new ReportConfiguration();
-
-        final StringBuffer report = new StringBuffer();
-        report.append(POST_CLIENT_AUTHENTICATION_STRING_KEY);
-        report.append("=");
-        report.append(URLEncoder.encode(REPORT_SERVER_CLIENT_AUTHENTICATION_STRING, URL_ENCODING));
-        report.append("&");
-        report.append(POST_LICENSE_KEYS_KEY);
-        report.append("=");
-        report.append(URLEncoder.encode(reportConfiguration.getLicenseKeys(), URL_ENCODING));
-        report.append("&");
-        report.append(POST_METADATA_KEY);
-        report.append("=");
-        report.append(URLEncoder.encode(metadata.toString(), URL_ENCODING));
+        
+        try {
+            if (metadata.getBoolean("needsComposition") == true) {
+              sendComposedReport(metadata, savereport);  
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         if ("true".equals(reportConfiguration.getUseProxy().trim())) {
             System.setProperty("https.proxyHost", reportConfiguration.getProxyAddress().trim());
@@ -126,9 +124,17 @@ public class TransportHandler {
         }
 
         if (savereport) {
-            saveReportToHardDrive(report);
+            saveReportToHardDrive(metadata);
         } else {
-            sendReport(true, reportConfiguration, report);
+            sendReport(true, reportConfiguration, metadata);
+        }
+    }
+    
+    private void sendComposedReport(JSONObject metadata, boolean savereport) throws JSONException {
+        if (metadata.getString("reportType").contains("oxaas")) {
+            metadata.remove("oxaas");
+        } else {
+            metadata.remove("macdetail");
         }
     }
 
@@ -142,8 +148,23 @@ public class TransportHandler {
      * @param report
      * @throws MalformedURLException
      * @throws IOException
+     * @throws JSONException 
      */
-    private void sendReport(boolean isHttps, ReportConfiguration reportConfiguration, StringBuffer report) throws MalformedURLException, IOException {
+    private void sendReport(boolean isHttps, ReportConfiguration reportConfiguration, JSONObject metadata) throws MalformedURLException, IOException, JSONException {
+        
+        String reportString = createReportString(metadata);
+        final StringBuffer report = new StringBuffer();
+        report.append(POST_CLIENT_AUTHENTICATION_STRING_KEY);
+        report.append("=");
+        report.append(URLEncoder.encode(REPORT_SERVER_CLIENT_AUTHENTICATION_STRING, URL_ENCODING));
+        report.append("&");
+        report.append(POST_LICENSE_KEYS_KEY);
+        report.append("=");
+        report.append(URLEncoder.encode(reportConfiguration.getLicenseKeys(), URL_ENCODING));
+        report.append("&");
+        report.append(POST_METADATA_KEY);
+        report.append("=");
+        report.append(URLEncoder.encode(reportString, URL_ENCODING));
 
         HttpURLConnection httpURLConnection = (HttpURLConnection) new URL("http://" + REPORT_SERVER_URL + "/").openConnection();
         if (isHttps) {
@@ -168,6 +189,9 @@ public class TransportHandler {
         try {
             final DataOutputStream stream = new DataOutputStream(httpURLConnection.getOutputStream());
             stream.writeBytes(report.toString());
+            if (metadata.getBoolean("needsComposition")) {
+                appendStoredContentToOutputstream(metadata, stream);
+            }
             stream.flush();
             stream.close();
         } catch (SSLException e) {
@@ -175,18 +199,18 @@ public class TransportHandler {
             System.err.println("Report sending failure, unable to send with ssl.");
             if (isHttps) {
                 System.out.println("Trying to send without ssl.");
-                sendReport(false, reportConfiguration, report);
+                sendReport(false, reportConfiguration, metadata);
                 return;
             } else
-                saveReportToHardDrive(report);
+                saveReportToHardDrive(metadata);
         }
 
         if (httpURLConnection.getResponseCode() != HttpURLConnection.HTTP_OK) {
             System.err.println("Report sending failure, unable to send via http...");
             if (isHttps)
-                sendReport(false, reportConfiguration, report);
+                sendReport(false, reportConfiguration, metadata);
             else
-                saveReportToHardDrive(report);
+                saveReportToHardDrive(metadata);
             throw new MalformedURLException("Problem contacting report server: " + httpURLConnection.getResponseCode());
         }
         final BufferedReader in = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
@@ -196,24 +220,60 @@ public class TransportHandler {
         }
         in.close();
     }
+    
+    private String createReportString(JSONObject metadata) throws JSONException {
+        String reportString = metadata.toString();
+        if (metadata.getBoolean("needsComposition")) {
+            reportString = reportString.substring(0, reportString.lastIndexOf("}")) + ",";
+        }
+        return reportString;
+    }
+
+    private void appendStoredContentToOutputstream(JSONObject metadata, DataOutputStream stream) throws IOException, JSONException {
+        FileInputStream is = null;
+        Scanner sc = null;
+        try {
+            is = new FileInputStream(metadata.getString("storageFolderPath") + "/" + metadata.getString("uuid") + ".report");
+            sc = new Scanner(is, "UTF-8");
+            while (sc.hasNext()) {
+                stream.writeBytes(sc.nextLine());
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+            if (sc != null) {
+                sc.close();
+            }
+        }
+        //end of report
+        stream.writeBytes("}");
+    }
 
     /**
      * Save the given report to hard-drive and print the location into the logfile.
      * 
      * @param report
      * @throws IOException
+     * @throws JSONException 
      */
-    private void saveReportToHardDrive(final StringBuffer report) throws IOException {
-        File tmpfile = File.createTempFile("oxreport", ".json", new File("/tmp"));
+    private void saveReportToHardDrive(final JSONObject metadata) throws IOException, JSONException {
+        String reportString = createReportString(metadata);
+        File tmpfile = File.createTempFile("oxreport", ".json", new File(metadata.getString("storageFolderPath")));
         System.out.println("Saving report to " + tmpfile.getAbsolutePath());
+        // Compose report from stored data, depending on the report-type
         DataOutputStream tfo = new DataOutputStream(new FileOutputStream(tmpfile));
-        tfo.writeBytes(report.toString());
+        tfo.writeBytes(reportString);
+        if (metadata.getBoolean("needsComposition")) {
+            appendStoredContentToOutputstream(metadata, tfo);
+        }
         tfo.close();
     }
 
     private JSONObject buildJSONObject(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, Map<String, String> serverConfiguration, final String[] versions, final ClientLoginCount clc, final ClientLoginCount clcYear) throws JSONException {
         final JSONObject retval = new JSONObject();
-
         final JSONObject total = new JSONObject();
         final JSONObject macdetail = new JSONObject();
         final JSONObject detail = new JSONObject();

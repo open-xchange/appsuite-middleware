@@ -277,6 +277,21 @@ might be the case for automated executions of the report client) execute
 the report client with the option -s (send\_only). Now no report will be
 displayed after the report has been sent to activation.open-xchange.com.
 
+## Report performance and storage
+With version 7.8.3 two new properties are introduced.
+
+	com.openexchange.report.client.fileStorage=/report_storage
+
+Describes the storage path for all report relevant data. Saving a report will place a JSON-Version of the report in that folder.
+
+	com.openexchange.report.client.maxChunkSize=1000
+	
+This property enables the client to store parts of the report on hard drive to keep memory usage small. A chunk is either a CapabilitySet for the default report (Core) or a user for the OXaaS report types (Cloudplugins).
+
+The stored parts are combined into a single .report file and then deleted when the report is finished. The .report file is not deleted automatically.
+
+
+
 ## Available options
 
 	$ /opt/open-xchange/sbin/report -h
@@ -299,7 +314,7 @@ lists all available options:
     -f,--savereport                                   Save the report as JSON String instead of sending it
     -b,--showaccesscombination <showaccesscombination>  Show access combination for bitmask
     -e,--run-appsuite-report                          Schedule an appsuite style report. Will print out the reports UUID or, if a report is being generated, the UUID of the pending report
-    -t,--report-type <report-type>                    The type of the report to run. Leave this off for the 'default' report. 'Known reports next to 'default': 'extended', 'oscs-extended' Enables additional options, as listed below (provisioning-bundels needed)
+    -t,--report-type <report-type>                    The type of the report to run. Leave this off for the 'default' report. 'Known reports next to 'default': 'extended', 'oxaas-extended' Enables additional options, as listed below (provisioning-bundels needed)
     --inspect-appsuite-reports                     	  Prints information about currently running reports
     --cancel-appsuite-reports                      	  Cancels pending reports     
     -g,--get-appsuite-report                          Retrieve the report that was generated, can (and should) be combined with the options for sending, displaying or saving the report

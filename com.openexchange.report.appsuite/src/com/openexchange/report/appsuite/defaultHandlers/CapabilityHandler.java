@@ -281,12 +281,12 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         Map<String, Object> macdetail = report.getNamespace(Report.MACDETAIL);
 
         ArrayList<Object> values = new ArrayList(macdetail.values());
-        // TODO QS-VS: warum auskommentiert?
-        //        this.sumClientsInSingleMap(values);
 
         // Merge all stored data into report files, if neccessary
         if (report.isNeedsComposition()) {
             storeAndMergeReportParts(report);
+        } else {
+            this.sumClientsInSingleMap(values);
         }
 
         if (report.getType().equals("extended")) {
@@ -303,12 +303,15 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             }
             // calculate correct drive average values
             this.calculateCorrectDriveAvg(report.get(Report.TOTAL, Report.DRIVE_TOTAL, LinkedHashMap.class));
+            report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, new ArrayList(macdetail.values()));
         }
 
         // Compose the report-content, if neccessary
         if (report.isNeedsComposition()) {
+            storeAndMergeReportParts(report);
             report.composeReportFromStoredParts(Report.CAPABILITY_SETS, JsonObjectType.ARRAY, Report.MACDETAIL, 1);
         }
+        
         report.clearNamespace(Report.MACDETAIL);
 
         report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, values);
@@ -326,7 +329,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
 
         // Get all capability sets
-        ArrayList<HashMap<String, Object>> capSets = report.get(Report.MACDETAIL, Report.CAPABILITY_SETS, ArrayList.class);
+        ArrayList<HashMap<String, Object>> capSets = report.get(Report.MACDETAIL, Report.CAPABILITY_SETS, new ArrayList<>(), ArrayList.class);
         // serialize each capability set into a single HashMap and merge the data if a file for the
         // given capability set already exists
         for (HashMap<String, Object> singleCapS : capSets) {
@@ -341,7 +344,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             }
         }
         // remove whole capability set content
-        report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, new ArrayList<>());
+        report.clearNamespace(Report.MACDETAIL);
     }
 
     private void storeCapSContentToFiles(String reportUUID, String folderPath, HashMap<String, Object> data) throws JSONException, IOException {
@@ -605,7 +608,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         // Merge drive metrics into files and remove the data from the report, if neccessary
         if (report.isNeedsComposition()) {
             capSMap.put(Report.CAPABILITIES, compositionCapS);
-            report.get(Report.MACDETAIL, Report.CAPABILITY_SETS, ArrayList.class).add(capSMap);
+            report.get(Report.MACDETAIL, Report.CAPABILITY_SETS, new ArrayList<>(), ArrayList.class).add(capSMap);
             storeAndMergeReportParts(report);
         }
     }

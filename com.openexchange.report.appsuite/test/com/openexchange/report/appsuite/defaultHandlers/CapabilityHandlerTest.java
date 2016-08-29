@@ -357,7 +357,7 @@ public class CapabilityHandlerTest {
     @Test
     public void testStoreAndMergeReportPartsCleanUp() {
         capabilityHandlerTest.storeAndMergeReportParts(reportStoring);
-        assertEquals("Not all capability-set entrys were removed after storing and merge", 0, reportStoring.get(Report.MACDETAIL, Report.CAPABILITY_SETS, ArrayList.class).size());
+        assertEquals("Not all capability-set entrys were removed after storing and merge", null, reportStoring.get(Report.MACDETAIL, Report.CAPABILITY_SETS, ArrayList.class));
     }
 
     @Test
