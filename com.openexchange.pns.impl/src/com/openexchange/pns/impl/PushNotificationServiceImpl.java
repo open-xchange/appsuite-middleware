@@ -267,7 +267,12 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                 return;
             }
 
-            scheduledNotifcations.offerIfAbsentElseReset(notification);
+            boolean added = scheduledNotifcations.offerIfAbsentElseReset(notification);
+            if (added) {
+                LOG.info("Scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
+            } else {
+                LOG.info("Reset & re-scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
+            }
 
             if (null == scheduledTimerTask) {
                 Runnable task = new Runnable() {
@@ -386,8 +391,8 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             } else {
                 while (notifications.hasNext()) {
                     PushNotification notification = notifications.next();
+                    LOG.info("Trying to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId));
                     transport.transport(notification, hit.getMatches());
-                    LOG.debug("Transported notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId));
                 }
             }
         }
