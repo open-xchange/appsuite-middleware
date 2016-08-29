@@ -78,6 +78,8 @@ import org.apache.http.TokenIterator;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.client.utils.DateUtils;
 import org.apache.http.conn.ClientConnectionRequest;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.params.ConnManagerParams;
@@ -86,10 +88,17 @@ import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.cookie.ClientCookie;
+import org.apache.http.cookie.CookieSpec;
+import org.apache.http.cookie.CookieSpecFactory;
+import org.apache.http.cookie.MalformedCookieException;
+import org.apache.http.cookie.SetCookie;
 import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.impl.cookie.BasicExpiresHandler;
+import org.apache.http.impl.cookie.BrowserCompatSpec;
 import org.apache.http.message.BasicHeaderElementIterator;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -97,6 +106,7 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.TextUtils;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.xing.XingAPI;
@@ -152,11 +162,11 @@ public abstract class AbstractSession implements Session {
         this.appKeyPair = appKeyPair;
         this.accessTokenPair = accessTokenPair;
     }
-    
+
     /**
-     * Initializes a new {@link WebAuthSession} with the specified {@link ConsumerPair}. 
+     * Initializes a new {@link WebAuthSession} with the specified {@link ConsumerPair}.
      * The session will be used to create a Xing profile, based on the OX account (upsell).
-     * 
+     *
      * @param appKeyPair
      * @param consumerPair
      */
@@ -206,7 +216,7 @@ public abstract class AbstractSession implements Session {
     public AccessTokenPair getAccessTokenPair() {
         return accessTokenPair;
     }
-    
+
     @Override
     public ConsumerPair getConsumerPair() {
         return consumerPair;
@@ -308,7 +318,7 @@ public abstract class AbstractSession implements Session {
                     HttpConnectionParams.setConnectionTimeout(httpParams, DEFAULT_TIMEOUT_MILLIS);
                     HttpConnectionParams.setSoTimeout(httpParams, DEFAULT_TIMEOUT_MILLIS);
                     HttpConnectionParams.setSocketBufferSize(httpParams, 8192);
-                    HttpProtocolParams.setUserAgent(httpParams, "Open-Xchange-XING/1.0.0");
+                    HttpProtocolParams.setUserAgent(httpParams, "Open-Xchange-XING/1.0.0");d
 
                     final DefaultHttpClient c = new DefaultHttpClient(cm, httpParams) {
 
@@ -322,6 +332,14 @@ public abstract class AbstractSession implements Session {
                             return new XingConnectionReuseStrategy();
                         }
                     };
+
+                    c.getCookieSpecs().register("lenient", new CookieSpecFactory() {
+                        @Override
+                        public CookieSpec newInstance(HttpParams params) {
+                            return new LenientCookieSpec();
+                        }
+                    });
+                    HttpClientParams.setCookiePolicy(c.getParams(), "lenient");
 
                     c.addRequestInterceptor(new HttpRequestInterceptor() {
 
@@ -649,4 +667,42 @@ public abstract class AbstractSession implements Session {
         }
 
     }
+
+    private static class LenientCookieSpec extends BrowserCompatSpec {
+
+        // See org.apache.http.impl.cookie.BrowserCompatSpec.DEFAULT_DATE_PATTERNS
+        private static final String[] DEFAULT_DATE_PATTERNS = new String[] {
+            DateUtils.PATTERN_RFC1123,
+            DateUtils.PATTERN_RFC1036,
+            DateUtils.PATTERN_ASCTIME,
+            "EEE, dd-MMM-yyyy HH:mm:ss z",
+            "EEE, dd-MMM-yyyy HH-mm-ss z",
+            "EEE, dd MMM yy HH:mm:ss z",
+            "EEE dd-MMM-yyyy HH:mm:ss z",
+            "EEE dd MMM yyyy HH:mm:ss z",
+            "EEE dd-MMM-yyyy HH-mm-ss z",
+            "EEE dd-MMM-yy HH:mm:ss z",
+            "EEE dd MMM yy HH:mm:ss z",
+            "EEE,dd-MMM-yy HH:mm:ss z",
+            "EEE,dd-MMM-yyyy HH:mm:ss z",
+            "EEE, dd-MM-yyyy HH:mm:ss z",
+            "EEE, dd MMM yyyy HH:mm:ss Z",
+        };
+
+        /** Initializes a new {@link LenientCookieSpec}. */
+        LenientCookieSpec() {
+            super();
+            registerAttribHandler(ClientCookie.EXPIRES_ATTR, new BasicExpiresHandler(DEFAULT_DATE_PATTERNS) {
+                @Override public void parse(SetCookie cookie, String value) throws MalformedCookieException {
+                    if (TextUtils.isEmpty(value)) {
+                        // You should set whatever you want in cookie
+                        cookie.setExpiryDate(null);
+                    } else {
+                        super.parse(cookie, value);
+                    }
+                }
+            });
+        }
+    }
+
 }
