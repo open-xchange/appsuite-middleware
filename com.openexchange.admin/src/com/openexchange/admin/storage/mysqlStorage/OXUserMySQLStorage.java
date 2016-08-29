@@ -55,7 +55,6 @@ import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -82,10 +81,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
-
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceException;
-
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -688,30 +685,37 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
             final HashSet<String> alias = usrdata.getAliases();
             if(null != alias) {
-                //TODO: for compatibility reason; also delete from / insert into user_attributes
-                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, userId);
-                stmt.setString(3, "alias");
-                stmt.executeUpdate();
-                stmt.close();
-
-                aliasStorage.deleteAliase(con, contextId, userId);
-
+                //TODO: for compatibility reason also delete from / insert into user_attributes
+                Set<String> storedAliases = aliasStorage.getAliases(contextId, userId);
                 for (final String elem : alias) {
                     if (elem != null && elem.trim().length() > 0) {
-                        stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value,uuid) VALUES (?,?,?,?,?)");
-                        byte[] uuidBinary = UUIDs.toByteArray(UUID.randomUUID());
-                        stmt.setInt(1, contextId);
-                        stmt.setInt(2, userId);
-                        stmt.setString(3, "alias");
-                        stmt.setString(4, elem);
-                        stmt.setBytes(5, uuidBinary);
-                        stmt.executeUpdate();
-                        stmt.close();
+                        if (!storedAliases.contains(elem)) {
+                            stmt = con.prepareStatement("INSERT INTO user_attribute (cid,id,name,value,uuid) VALUES (?,?,?,?,?)");
+                            byte[] uuidBinary = UUIDs.toByteArray(UUID.randomUUID());
+                            stmt.setInt(1, contextId);
+                            stmt.setInt(2, userId);
+                            stmt.setString(3, "alias");
+                            stmt.setString(4, elem);
+                            stmt.setBytes(5, uuidBinary);
+                            stmt.executeUpdate();
+                            stmt.close();
 
-                        aliasStorage.createAlias(con, contextId, userId, elem, uuidBinary);
+                            aliasStorage.createAlias(con, contextId, userId, elem, uuidBinary);
+                        } else {
+                            stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=? AND value=?");
+                            stmt.setInt(1, contextId);
+                            stmt.setInt(2, userId);
+                            stmt.setString(3, "alias");
+                            stmt.setString(4, elem);
+                            stmt.executeUpdate();
+                            stmt.close();
+                            
+                            storedAliases.remove(elem);
+                        }
                     }
+                }
+                for (String storedAlias : storedAliases) {
+                    aliasStorage.deleteAlias(con, contextId, userId, storedAlias);
                 }
             } else if (usrdata.isAliasesset()) {
                 stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");
@@ -721,7 +725,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 stmt.executeUpdate();
                 stmt.close();
 
-                aliasStorage.deleteAliase(con, contextId, userId);
+                aliasStorage.deleteAliases(con, contextId, userId);
             }
 
             if(usrdata.isUserAttributesset()) {
@@ -2583,7 +2587,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 //Delete aliases
                 UserAliasStorage aliasStorage = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class);
-                aliasStorage.deleteAliase(write_ox_con, ctx.getId(), user_id);
+                aliasStorage.deleteAliases(write_ox_con, ctx.getId(), user_id);
 
                 log.info("Deleted user {}({}) ...", user_id, ctx.getId());
 

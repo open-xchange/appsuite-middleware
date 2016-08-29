@@ -253,7 +253,7 @@ public class RdbAliasStorage implements UserAliasStorage {
     }
 
     @Override
-    public boolean deleteAliase(Connection con, int contextId, int userId) throws OXException {
+    public boolean deleteAliases(Connection con, int contextId, int userId) throws OXException {
         boolean useExistingConnection = true;
         if (con == null) {
             con = Database.get(contextId, true);
