@@ -62,14 +62,25 @@ public class TextMessage implements Message<String> {
 
     /**
      * Initializes a new {@link TextMessage}.
+     *
+     * @param text The text for this message
+     * @throws IllegalArgumentException If text is <code>null</code>
      */
     public TextMessage(String text) {
         super();
+        if (null == text) {
+            throw new IllegalArgumentException("text must not be null");
+        }
         this.text = text;
     }
 
     @Override
     public String getMessage() {
+        return text;
+    }
+
+    @Override
+    public String toString() {
         return text;
     }
 

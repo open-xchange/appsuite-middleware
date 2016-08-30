@@ -99,7 +99,7 @@ public class DefaultPushSubscription implements PushSubscription {
         /** Creates a new builder */
         Builder() {
             super();
-            nature = Nature.VOLATILE; // Volatile nature by default
+            nature = Nature.PERSISTENT; // Persistent nature by default
         }
 
         /**
@@ -181,7 +181,7 @@ public class DefaultPushSubscription implements PushSubscription {
          * @return This builder
          */
         public Builder nature(Nature nature) {
-            this.nature = null == nature ? Nature.VOLATILE : nature;
+            this.nature = null == nature ? Nature.PERSISTENT : nature;
             return this;
         }
 
@@ -294,6 +294,29 @@ public class DefaultPushSubscription implements PushSubscription {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(96);
+        sb.append("{userId=").append(userId).append(", contextId=").append(contextId).append(", ");
+        if (client != null) {
+            sb.append("client=").append(client).append(", ");
+        }
+        if (topics != null) {
+            sb.append("topics=").append(topics).append(", ");
+        }
+        if (transportId != null) {
+            sb.append("transportId=").append(transportId).append(", ");
+        }
+        if (token != null) {
+            sb.append("token=").append(token).append(", ");
+        }
+        if (nature != null) {
+            sb.append("nature=").append(nature);
+        }
+        sb.append("}");
+        return sb.toString();
     }
 
 }
