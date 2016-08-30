@@ -118,7 +118,5 @@ Import-Package: com.fasterxml.jackson.core,
  org.xml.sax,
  org.xml.sax.ext,
  org.xml.sax.helpers
-Eclipse-RegisterBuddy: com.openexchange.xerces.sun 
- 
 Bundle-Activator: com.openexchange.twitter.osgi.TwitterActivator
 Export-Package: com.openexchange.twitter

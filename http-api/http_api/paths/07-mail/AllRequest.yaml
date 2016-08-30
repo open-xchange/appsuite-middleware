@@ -34,7 +34,7 @@
         description: A positive integer number to specify how many items shall be returned according to given sorting; overrides `left_hand_limit`/`right_hand_limit` parameters and is equal to `left_hand_limit=0` and `right_hand_limit=<limit>`.
         required: false
       - in: query
-        name: filter
+        name: categoryid
         type: string
         description: The category id to filter for. If set to "general" all mails which does not belong to any other category are retrieved.
         required: false

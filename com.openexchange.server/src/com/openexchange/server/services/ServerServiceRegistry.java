@@ -191,22 +191,17 @@ public final class ServerServiceRegistry {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder(256);
-        sb.append("Server service registry:\n");
-        if (services.isEmpty()) {
-            sb.append("<empty>");
-        } else {
-            final Iterator<Map.Entry<Class<?>, Object>> iter = services.entrySet().iterator();
-            while (true) {
-                final Map.Entry<Class<?>, Object> e = iter.next();
-                sb.append(e.getKey().getName()).append(": ").append(e.getValue().toString());
-                if (iter.hasNext()) {
-                    sb.append('\n');
-                } else {
-                    break;
-                }
-            }
+        Iterator<Map.Entry<Class<?>, Object>> iter = services.entrySet().iterator();
+        if (false == iter.hasNext()) {
+            return "Server service registry:\n<empty>";
         }
+
+        StringBuilder sb = new StringBuilder(512);
+        sb.append("Server service registry:");
+        do {
+            Map.Entry<Class<?>, Object> e = iter.next();
+            sb.append('\n').append(e.getKey().getName()).append(": ").append(e.getValue().toString());
+        } while (iter.hasNext());
         return sb.toString();
     }
 

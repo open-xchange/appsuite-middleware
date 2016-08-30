@@ -63,15 +63,26 @@ public class JsonMessage implements Message<JSONValue> {
 
     /**
      * Initializes a new {@link JsonMessage}.
+     *
+     * @param jsonValue The JSON value
+     * @throws IllegalArgumentException If JSON value is <code>null</code>
      */
     public JsonMessage(JSONValue jsonValue) {
         super();
+        if (null == jsonValue) {
+            throw new IllegalArgumentException("jsonValue must not be null");
+        }
         this.jsonValue = jsonValue;
     }
 
     @Override
     public JSONValue getMessage() {
         return jsonValue;
+    }
+
+    @Override
+    public String toString() {
+        return jsonValue.toString();
     }
 
 }

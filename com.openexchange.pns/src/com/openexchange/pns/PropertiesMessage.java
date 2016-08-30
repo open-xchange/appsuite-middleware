@@ -63,15 +63,26 @@ public class PropertiesMessage implements Message<Map<String, Object>> {
 
     /**
      * Initializes a new {@link PropertiesMessage}.
+     *
+     * @param properties The properties of this message
+     * @throws IllegalArgumentException If properties reference is <code>null</code>
      */
     public PropertiesMessage(Map<String, Object> properties) {
         super();
+        if (null == properties) {
+            throw new IllegalArgumentException("properties must not be null");
+        }
         this.properties = properties;
     }
 
     @Override
     public Map<String, Object> getMessage() {
         return properties;
+    }
+
+    @Override
+    public String toString() {
+        return properties.toString();
     }
 
 }

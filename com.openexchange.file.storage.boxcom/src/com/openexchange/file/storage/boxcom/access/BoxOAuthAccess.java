@@ -106,7 +106,6 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
     public BoxOAuthAccess(FileStorageAccount fsAccount, Session session) {
         super(session);
         this.fsAccount = fsAccount;
-        this.session = session;
     }
 
     @Override
@@ -190,7 +189,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         OAuthAccount account = getOAuthAccount();
         ExtendedNonRefreshingBoxClient boxClient = new ExtendedNonRefreshingBoxClient(account.getMetaData().getAPIKey(session), account.getMetaData().getAPISecret(session), new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
         applyOAuthToken(boxClient);
-        return new OAuthClient<ExtendedNonRefreshingBoxClient>(boxClient, getOAuthAccount().getToken());
+        return new OAuthClient<>(boxClient, getOAuthAccount().getToken());
     }
 
     @Override
@@ -226,7 +225,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
      * @param boxOAuthInfo
      */
     private void applyOAuthToken(BoxClient boxClient) {
-        Map<String, Object> tokenSpec = new HashMap<String, Object>(6);
+        Map<String, Object> tokenSpec = new HashMap<>(6);
         OAuthAccount boxOAuthAccount = getOAuthAccount();
         tokenSpec.put(BoxOAuthToken.FIELD_ACCESS_TOKEN, boxOAuthAccount.getToken());
         tokenSpec.put(BoxOAuthToken.FIELD_REFRESH_TOKEN, boxOAuthAccount.getSecret());
@@ -267,7 +266,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
             // Update account
             OAuthService oAuthService = Services.getService(OAuthService.class);
             int accountId = boxOAuthAccount.getId();
-            Map<String, Object> arguments = new HashMap<String, Object>(3);
+            Map<String, Object> arguments = new HashMap<>(3);
             arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
             arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
             oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId());
@@ -281,7 +280,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
     private void createOAuthClient(OAuthAccount account) throws OXException {
         BoxClient boxClient = new NonRefreshingBoxClient(account.getMetaData().getAPIKey(session), account.getMetaData().getAPISecret(session), new BoxResourceHub(), new BoxJSONParser(new BoxResourceHub()), (new BoxConfigBuilder()).build());
         applyOAuthToken(boxClient);
-        OAuthClient<BoxClient> oAuthClient = new OAuthClient<BoxClient>(boxClient, getOAuthAccount().getToken());
+        OAuthClient<BoxClient> oAuthClient = new OAuthClient<>(boxClient, getOAuthAccount().getToken());
         setOAuthClient(oAuthClient);
     }
 }

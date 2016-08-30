@@ -49,6 +49,7 @@
 
 package com.openexchange.websockets.grizzly.remote;
 
+import java.util.Collection;
 import com.openexchange.websockets.WebSocket;
 
 /**
@@ -81,17 +82,24 @@ public interface RemoteWebSocketDistributor  {
     boolean existsAnyRemote(String pathFilter, int userId, int contextId);
 
     /**
-     * Call-back for a connected Web Socket.
+     * Adds a connected Web Socket.
      *
      * @param socket The Web Socket
      */
-    void onWebSocketConnect(WebSocket socket);
+    void addWebSocket(WebSocket socket);
 
     /**
-     * Call-back for a closed Web Socket.
+     * Adds connected Web Sockets.
+     *
+     * @param sockets The Web Sockets
+     */
+    void addWebSocket(Collection<WebSocket> sockets);
+
+    /**
+     * Removes a closed Web Socket.
      *
      * @param socket The Web Socket
      */
-    void onWebSocketClose(WebSocket socket);
+    void removeWebSocket(WebSocket socket);
 
 }

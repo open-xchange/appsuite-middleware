@@ -49,6 +49,7 @@
 
 package com.openexchange.websockets.grizzly.osgi;
 
+import java.util.List;
 import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -57,6 +58,8 @@ import org.slf4j.Logger;
 import com.hazelcast.config.Config;
 import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
+import com.openexchange.websockets.WebSocket;
+import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
 import com.openexchange.websockets.grizzly.remote.HzRemoteWebSocketDistributor;
 
 /**
@@ -96,6 +99,17 @@ public class HzTracker implements ServiceTrackerCustomizer<HazelcastInstance, Ha
         LOG.info("Using distributed Grizzly Web Sockets map '{}'.", mapName);
         activator.addService(HazelcastInstance.class, hzInstance);
         remoteDistributor.setHazelcastResources(hzInstance, mapName);
+
+        GrizzlyWebSocketApplication app = GrizzlyWebSocketApplication.getGrizzlyWebSocketApplication();
+        if (null != app) {
+            List<WebSocket> sockets = app.listLocalWebSockets();
+            int size = sockets.size();
+            if (size > 0) {
+                remoteDistributor.addWebSocket(sockets);
+                LOG.info("Added {} existing Web Socket(s) to distributed Grizzly Web Sockets map '{}'.", Integer.valueOf(size), mapName);
+            }
+        }
+
         return hzInstance;
     }
 

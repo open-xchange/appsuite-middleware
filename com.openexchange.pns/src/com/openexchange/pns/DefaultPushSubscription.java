@@ -99,7 +99,7 @@ public class DefaultPushSubscription implements PushSubscription {
         /** Creates a new builder */
         Builder() {
             super();
-            nature = Nature.VOLATILE; // Volatile nature by default
+            nature = Nature.PERSISTENT; // Persistent nature by default
         }
 
         /**
@@ -181,7 +181,7 @@ public class DefaultPushSubscription implements PushSubscription {
          * @return This builder
          */
         public Builder nature(Nature nature) {
-            this.nature = null == nature ? Nature.VOLATILE : nature;
+            this.nature = null == nature ? Nature.PERSISTENT : nature;
             return this;
         }
 
@@ -251,6 +251,72 @@ public class DefaultPushSubscription implements PushSubscription {
     @Override
     public Nature getNature() {
         return nature;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + contextId;
+        result = prime * result + userId;
+        result = prime * result + ((token == null) ? 0 : token.hashCode());
+        result = prime * result + ((transportId == null) ? 0 : transportId.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof PushSubscription)) {
+            return false;
+        }
+        PushSubscription other = (PushSubscription) obj;
+        if (contextId != other.getContextId()) {
+            return false;
+        }
+        if (userId != other.getUserId()) {
+            return false;
+        }
+        if (token == null) {
+            if (other.getToken() != null) {
+                return false;
+            }
+        } else if (!token.equals(other.getToken())) {
+            return false;
+        }
+        if (transportId == null) {
+            if (other.getTransportId() != null) {
+                return false;
+            }
+        } else if (!transportId.equals(other.getTransportId())) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(96);
+        sb.append("{userId=").append(userId).append(", contextId=").append(contextId).append(", ");
+        if (client != null) {
+            sb.append("client=").append(client).append(", ");
+        }
+        if (topics != null) {
+            sb.append("topics=").append(topics).append(", ");
+        }
+        if (transportId != null) {
+            sb.append("transportId=").append(transportId).append(", ");
+        }
+        if (token != null) {
+            sb.append("token=").append(token).append(", ");
+        }
+        if (nature != null) {
+            sb.append("nature=").append(nature);
+        }
+        sb.append("}");
+        return sb.toString();
     }
 
 }

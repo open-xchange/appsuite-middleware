@@ -67,7 +67,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.html.HtmlService;
-import com.openexchange.html.MediaTypeChecker;
 import com.openexchange.html.internal.HtmlServiceImpl;
 import com.openexchange.html.internal.WhitelistedSchemes;
 import com.openexchange.html.internal.jericho.JerichoParser;
@@ -118,12 +117,6 @@ public class HTMLServiceActivator extends HousekeepingActivator {
              * Service trackers
              */
             track(ProxyRegistry.class, new ProxyRegistryCustomizer(context));
-
-            trackService(MediaTypeChecker.class);
-            MediaTypeChecker mediaTypeChecker = new MediaTypeChecker();
-            registerService(Reloadable.class, mediaTypeChecker);
-            registerService(MediaTypeChecker.class, mediaTypeChecker);
-            
             /*
              * Open trackers
              */

@@ -47,66 +47,46 @@
  *
  */
 
-package com.openexchange.html;
+package com.openexchange.find.basic.contacts;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
-import com.openexchange.html.osgi.Services;
-import com.openexchange.java.Strings;
+import java.util.List;
+import com.openexchange.find.contacts.ContactsFacetType;
+import com.openexchange.find.contacts.ContactsStrings;
+import com.openexchange.find.facet.FormattableDisplayItem;
+import com.openexchange.groupware.contact.helpers.ContactField;
+
 
 /**
- * {@link MediaTypeChecker}
+ * {@link UserFieldsFacet}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class MediaTypeChecker implements Reloadable {
+public class UserFieldsFacet extends ContactSearchFieldFacet {
 
-    private volatile String[] forbiddenMediaType = null;
-    private static final String HARMFUL_MEDIA_TYPES = "com.openexchange.mail.harmful.media.types";
+    /**
+     * serialVersionUID
+     */
+    private static final long serialVersionUID = -5647640557042838626L;
+    
+    static final ContactField[] USER_FIELDS = {
+        ContactField.USERFIELD01, ContactField.USERFIELD02, ContactField.USERFIELD03, ContactField.USERFIELD04, ContactField.USERFIELD05, ContactField.USERFIELD06, 
+        ContactField.USERFIELD07, ContactField.USERFIELD08, ContactField.USERFIELD09, ContactField.USERFIELD10, ContactField.USERFIELD11, ContactField.USERFIELD12,
+        ContactField.USERFIELD13, ContactField.USERFIELD14, ContactField.USERFIELD15, ContactField.USERFIELD16, ContactField.USERFIELD17, ContactField.USERFIELD18,
+        ContactField.USERFIELD19, ContactField.USERFIELD20
+    };
 
-    public boolean isHarmFul(String mediaType, String value) {
-        for (String possibleHarmful : getForbiddenMediaTypes()) {
-            if (possibleHarmful.contentEquals(mediaType)) {
-                //TODO do some checking
+    /**
+     * Initializes a new {@link UserFieldsFacet}.
+     */
+    public UserFieldsFacet(String query, List<String> tokenized) {
+        super(ContactsFacetType.USER_FIELDS, new FormattableDisplayItem(ContactsStrings.FACET_USER_FIELDS, query), tokenized);
 
-            }
-        }
-        return false;
-    }
-
-    private String[] getForbiddenMediaTypes() {
-        if (forbiddenMediaType == null) {
-            ConfigurationService configurationService = Services.getService(ConfigurationService.class);
-            if (configurationService != null) {
-                String text = configurationService.getProperty(HARMFUL_MEDIA_TYPES);
-                if (Strings.isEmpty(text)) {
-                    forbiddenMediaType = new String[0];
-                } else {
-                    forbiddenMediaType = Strings.splitByComma(text);
-                }
-            } else {
-                return new String[0];
-            }
-        }
-        return forbiddenMediaType;
     }
 
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        String text = configService.getProperty(HARMFUL_MEDIA_TYPES);
-        if (Strings.isEmpty(text)) {
-            forbiddenMediaType = new String[0];
-        } else {
-            forbiddenMediaType = Strings.splitByComma(text);
-        }
-    }
-
-    @Override
-    public Interests getInterests() {
-        return Reloadables.interestsForProperties(HARMFUL_MEDIA_TYPES);
+    protected ContactField[] getFields() {
+        return USER_FIELDS;
     }
 
 }
