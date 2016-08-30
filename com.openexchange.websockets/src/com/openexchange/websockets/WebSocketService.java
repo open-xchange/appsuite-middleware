@@ -49,6 +49,7 @@
 
 package com.openexchange.websockets;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -177,5 +178,15 @@ public interface WebSocketService {
      * @return The handler which will be notified of progress.
      */
     SendControl sendMessageAsync(String message, String pathFilter, int userId, int contextId) throws OXException;
+
+    // -------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Lists all currently locally available Web Sockets.
+     *
+     * @return Locally available Web Sockets
+     * @throws OXException If Web Sockets cannot be returned
+     */
+    List<WebSocket> listLocalWebSockets() throws OXException;
 
 }

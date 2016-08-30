@@ -155,6 +155,21 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     }
 
     /**
+     * Lists all currently locally available Web Sockets.
+     *
+     * @return Locally available Web Sockets
+     */
+    public List<com.openexchange.websockets.WebSocket> listLocalWebSockets() {
+        List<com.openexchange.websockets.WebSocket> websockets = new LinkedList<>();
+        for (ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets : openSockets.values()) {
+            for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
+                websockets.add(sessionBoundSocket);
+            }
+        }
+        return websockets;
+    }
+
+    /**
      * Asynchronously sends specified text message to all locally managed Web Socket connections.
      *
      * @param message The text message to send
