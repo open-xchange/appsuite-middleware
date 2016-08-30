@@ -47,48 +47,28 @@
  *
  */
 
-package com.openexchange.chronos.service;
+package com.openexchange.chronos.recurrence;
 
-import java.util.Calendar;
-import java.util.Iterator;
-import com.openexchange.chronos.Event;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 /**
- * {@link RecurrenceService}
+ * {@link UnitTests}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public interface RecurrenceService {
+@RunWith(Suite.class)
+@SuiteClasses({ RecurrencePositionTest.class, RecurrenceDatePositionTest.class, OccurrencesTest.class
+})
+public class UnitTests {
 
     /**
-     * Calculates the expanded instances of a recurring event with optional boundaries and an optional limit.
-     * If no limit is given an internal limit kicks in avoiding an endless calculation.
-     * If no boundaries are given the calculation starts with the first occurrence and lasts until the end of the series.
-     * 
-     * @param master
-     * @param start
-     * @param limit
-     * @return
+     * Initializes a new {@link UnitTests}.
      */
-    public Iterator<Event> calculateInstances(Event master, Calendar start, Calendar end, Integer limit);
-
-    /**
-     * Calculates a reccurrence date position for a given 1-based position of a recurring event.
-     *
-     * @param master
-     * @param position
-     * @return The date position of a given 1-based position. Null if the position is out of boundaries.
-     */
-    public Calendar calculateRecurrenceDatePosition(Event master, int position);
-
-    /**
-     * Calculates a 1-based recurrence position for a given reccurence date position of a recurring event.
-     * 
-     * @param master
-     * @param datePosition
-     * @return The Position of the given datePosition. 1-based. 0 if not found or out of boundaries.
-     */
-    public int calculateRecurrencePosition(Event master, Calendar datePosition);
+    public UnitTests() {
+        super();
+    }
 
 }

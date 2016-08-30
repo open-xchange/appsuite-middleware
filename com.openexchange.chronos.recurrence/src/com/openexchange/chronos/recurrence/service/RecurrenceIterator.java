@@ -50,37 +50,40 @@
 package com.openexchange.chronos.recurrence.service;
 
 import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.util.Date;
 import java.util.Iterator;
-import java.util.TimeZone;
-import org.dmfs.rfc5545.DateTime;
+import java.util.NoSuchElementException;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.service.RecurrenceService;
 
 /**
- * {@link RecurrenceServiceImpl}
+ * {@link RecurrenceIterator}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class RecurrenceServiceImpl implements RecurrenceService {
+public class RecurrenceIterator implements Iterator<Event> {
 
-    @Override
-    public Iterator<Event> calculateInstances(Event master, final Calendar start, final Calendar end, Integer limit) {
-        return new RecurrenceIterator(master, start, end, limit);
-    }
+    public static final int MAX = 1000;
 
-    @Override
-    public Calendar calculateRecurrenceDatePosition(Event master, int position) {
-        if (!master.containsRecurrenceRule()) {
-            return null;
-        }
-        if (position <= 0) {
-            return null;
-        }
+    private Event master;
+    private Calendar start;
+    private Calendar end;
+    private Integer limit;
+    private Long next;
+    private int count;
+    private RecurrenceRuleIterator inner;
+
+    public RecurrenceIterator(Event master, Calendar start, Calendar end, Integer limit) {
+        this.master = master;
+        this.start = start;
+        this.end = end;
+        this.limit = limit;
+        this.next = null;
+        count = 0;
+
         RecurrenceRule rrule = null;
         try {
             rrule = new RecurrenceRule(master.getRecurrenceRule());
@@ -88,50 +91,75 @@ public class RecurrenceServiceImpl implements RecurrenceService {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        Calendar seriesStart = master.getStart();
+        inner = rrule.iterator(seriesStart.getTimeInMillis(), seriesStart.getTimeZone());
 
-        int counter = 1;
-        RecurrenceRuleIterator iterator = rrule.iterator(new DateTime(TimeZone.getTimeZone(master.getStartTimezone()), master.getStartDate().getTime()));
-        while (iterator.hasNext()) {
-            long nextMillis = iterator.nextMillis();
-            if (counter++ == position) {
-                Calendar retval = GregorianCalendar.getInstance(TimeZone.getTimeZone(master.getStartTimezone()));
-                retval.setTimeInMillis(nextMillis);
-                return retval;
+        if (this.start != null) {
+            while (inner.hasNext()) {
+                long nextMillis = inner.peekMillis();
+                Date nextEnd = calculateEnd(master, new Date(nextMillis));
+                if (nextEnd.getTime() > start.getTimeInMillis()) {
+                    break;
+                } else {
+                    inner.nextMillis();
+                }
+
             }
         }
 
-        return null;
+        innerNext();
+    }
+
+    private void innerNext() {
+        if (count >= MAX) {
+            return;
+        }
+
+        if (limit != null && count >= limit) {
+            next = null;
+            return;
+        }
+
+        if (!inner.hasNext()) {
+            next = null;
+            return;
+        }
+
+        if (this.end != null && inner.peekMillis() >= this.end.getTimeInMillis()) {
+            next = null;
+            return;
+        }
+
+        count++;
+        next = inner.nextMillis();
+    }
+
+    private Date calculateEnd(Event master, Date start) {
+        long startMillis = master.getStartDate().getTime();
+        long endMillis = master.getEndDate().getTime();
+        long duration = endMillis - startMillis;
+        return new Date(start.getTime() + duration);
     }
 
     @Override
-    public int calculateRecurrencePosition(Event master, Calendar datePosition) {
-        if (!master.containsRecurrenceRule()) {
-            return 0;
-        }
-        if (datePosition.compareTo(master.getStart()) < 0) {
-            return 0;
-        }
-        RecurrenceRule rrule = null;
-        try {
-            rrule = new RecurrenceRule(master.getRecurrenceRule());
-        } catch (InvalidRecurrenceRuleException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+    public boolean hasNext() {
+        return next != null;
+    }
 
-        int position = 1;
-        RecurrenceRuleIterator iterator = rrule.iterator(new DateTime(TimeZone.getTimeZone(master.getStartTimezone()), master.getStartDate().getTime()));
-        while (iterator.hasNext()) {
-            long nextMillis = iterator.nextMillis();
-            if (nextMillis > datePosition.getTimeInMillis()) {
-                break;
-            }
-            if (nextMillis == datePosition.getTimeInMillis()) {
-                return position;
-            }
-            position++;
+    @Override
+    public Event next() {
+        if (next == null) {
+            throw new NoSuchElementException();
         }
-        return 0;
+        Event retval = master.clone();
+        retval.removeId();
+        retval.removeRecurrenceRule();
+        retval.removeDeleteExceptionDates();
+        retval.removeChangeExceptionDates();
+        retval.setStartDate(new Date(next));
+        retval.setEndDate(calculateEnd(master, retval.getStartDate()));
+        innerNext();
+        return retval;
     }
 
 }

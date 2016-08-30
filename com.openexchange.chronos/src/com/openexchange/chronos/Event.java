@@ -49,9 +49,13 @@
 
 package com.openexchange.chronos;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * {@link Event2}
@@ -1173,9 +1177,335 @@ public class Event {
         return setFields.contains(EventField.ATTACHMENTS);
     }
 
+    /**
+     * Returns the Start of the event as Calendar with appropriate TimeZone.
+     * 
+     * @return The Start of the event
+     */
+    public Calendar getStart() {
+        Calendar retval = GregorianCalendar.getInstance(TimeZone.getTimeZone(getStartTimezone()));
+        retval.setTime(getStartDate());
+        return retval;
+    }
+
+    /**
+     * Returns the End of the event as Calendar with appropriate TimeZone.
+     * 
+     * @return The End of the event
+     */
+    public Calendar getEnd() {
+        Calendar retval = GregorianCalendar.getInstance(TimeZone.getTimeZone(getStartTimezone()));
+        retval.setTime(getEndDate());
+        return retval;
+    }
+
+    /**
+     * Sets the timezone of the start and end date.
+     * 
+     * @param timeZone The timezone
+     */
+    public void setTimeZone(String timeZone) {
+        setStartTimezone(timeZone);
+        setEndTimezone(timeZone);
+    }
+
+    /**
+     * Returns the start timezone, ignoring whatever the end timezone ist.
+     * 
+     * @return The start timezon
+     */
+    public String getTimeZone() {
+        return getStartTimezone();
+    }
+
+    /**
+     * Removes the start and end timezone.
+     */
+    public void removeTimeZone() {
+        removeStartTimezone();
+        removeEndTimezone();
+    }
+
+    /**
+     * Gets a value indicating whether the start and end timezone are set or not.
+     * 
+     * @return
+     */
+    public boolean containsTimeZone() {
+        return containsStartTimezone() && containsEndTimezone();
+    }
+
     @Override
     public String toString() {
         return "Event [id=" + id + ", summary=" + summary + ", startDate=" + startDate + ", endDate=" + endDate + "]";
+    }
+
+    @Override
+    public Event clone() {
+        Event clone = new Event();
+        if (containsAllDay()) {
+            clone.setAllDay(getAllDay());
+        }
+        if (containsAttachments()) {
+            clone.setAttachments(cloneList(getAttachments()));
+        }
+        if (containsAttendees()) {
+            clone.setAttendees(cloneList(getAttendees()));
+        }
+        if (containsCategories()) {
+            clone.setCategories(cloneList(getCategories()));
+        }
+        if (containsChangeExceptionDates()) {
+            clone.setChangeExceptionDates(cloneList(getChangeExceptionDates()));
+        }
+        if (containsClassification()) {
+            clone.setClassification(getClassification());
+        }
+        if (containsColor()) {
+            clone.setColor(getColor());
+        }
+        if (containsCreated()) {
+            clone.setCreated(getCreated());
+        }
+        if (containsCreatedBy()) {
+            clone.setCreatedBy(getCreatedBy());
+        }
+        if (containsDeleteExceptionDates()) {
+            clone.setDeleteExceptionDates(cloneList(getDeleteExceptionDates()));
+        }
+        if (containsDescription()) {
+            clone.setDescription(getDescription());
+        }
+        if (containsEndDate()) {
+            clone.setEndDate(getEndDate());
+        }
+        if (containsEndTimezone()) {
+            clone.setEndTimezone(getEndTimezone());
+        }
+        if (containsId()) {
+            clone.setId(getId());
+        }
+        if (containsLastModified()) {
+            clone.setLastModified(getLastModified());
+        }
+        if (containsLocation()) {
+            clone.setLocation(getLocation());
+        }
+        if (containsModifiedBy()) {
+            clone.setModifiedBy(getModifiedBy());
+        }
+        if (containsOrganizer()) {
+            clone.setOrganizer(getOrganizer());
+        }
+        if (containsPublicFolderId()) {
+            clone.setPublicFolderId(getPublicFolderId());
+        }
+        if (containsRecurrenceId()) {
+            clone.setRecurrenceId(getRecurrenceId());
+        }
+        if (containsRecurrenceRule()) {
+            clone.setRecurrenceRule(getRecurrenceRule());
+        }
+        if (containsSequence()) {
+            clone.setSequence(getSequence());
+        }
+        if (containsStartDate()) {
+            clone.setStartDate(getStartDate());
+        }
+        if (containsStartTimezone()) {
+            clone.setStartTimezone(getStartTimezone());
+        }
+        if (containsStatus()) {
+            clone.setStatus(getStatus());
+        }
+        if (containsSummary()) {
+            clone.setSummary(getSummary());
+        }
+        if (containsTransp()) {
+            clone.setTransp(getTransp());
+        }
+        if (containsUid()) {
+            clone.setUid(getUid());
+        }
+        return clone;
+    }
+
+    private <T> List<T> cloneList(List<T> list) {
+        List<T> retval = new ArrayList<T>();
+        retval.addAll(list);
+        return retval;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + (allDay ? 1231 : 1237);
+        result = prime * result + ((attachments == null) ? 0 : attachments.hashCode());
+        result = prime * result + ((attendees == null) ? 0 : attendees.hashCode());
+        result = prime * result + ((categories == null) ? 0 : categories.hashCode());
+        result = prime * result + ((changeExceptionDates == null) ? 0 : changeExceptionDates.hashCode());
+        result = prime * result + ((classification == null) ? 0 : classification.hashCode());
+        result = prime * result + ((color == null) ? 0 : color.hashCode());
+        result = prime * result + ((created == null) ? 0 : created.hashCode());
+        result = prime * result + createdBy;
+        result = prime * result + ((deleteExceptionDates == null) ? 0 : deleteExceptionDates.hashCode());
+        result = prime * result + ((description == null) ? 0 : description.hashCode());
+        result = prime * result + ((endDate == null) ? 0 : endDate.hashCode());
+        result = prime * result + ((endTimezone == null) ? 0 : endTimezone.hashCode());
+        result = prime * result + id;
+        result = prime * result + ((lastModified == null) ? 0 : lastModified.hashCode());
+        result = prime * result + ((location == null) ? 0 : location.hashCode());
+        result = prime * result + modifiedBy;
+        result = prime * result + ((organizer == null) ? 0 : organizer.hashCode());
+        result = prime * result + publicFolderId;
+        result = prime * result + ((recurrenceId == null) ? 0 : recurrenceId.hashCode());
+        result = prime * result + ((recurrenceRule == null) ? 0 : recurrenceRule.hashCode());
+        result = prime * result + sequence;
+        result = prime * result + seriesId;
+        result = prime * result + ((setFields == null) ? 0 : setFields.hashCode());
+        result = prime * result + ((startDate == null) ? 0 : startDate.hashCode());
+        result = prime * result + ((startTimezone == null) ? 0 : startTimezone.hashCode());
+        result = prime * result + ((status == null) ? 0 : status.hashCode());
+        result = prime * result + ((summary == null) ? 0 : summary.hashCode());
+        result = prime * result + ((transp == null) ? 0 : transp.hashCode());
+        result = prime * result + ((uid == null) ? 0 : uid.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Event other = (Event) obj;
+        if (allDay != other.allDay)
+            return false;
+        if (attachments == null) {
+            if (other.attachments != null)
+                return false;
+        } else if (!attachments.equals(other.attachments))
+            return false;
+        if (attendees == null) {
+            if (other.attendees != null)
+                return false;
+        } else if (!attendees.equals(other.attendees))
+            return false;
+        if (categories == null) {
+            if (other.categories != null)
+                return false;
+        } else if (!categories.equals(other.categories))
+            return false;
+        if (changeExceptionDates == null) {
+            if (other.changeExceptionDates != null)
+                return false;
+        } else if (!changeExceptionDates.equals(other.changeExceptionDates))
+            return false;
+        if (classification != other.classification)
+            return false;
+        if (color == null) {
+            if (other.color != null)
+                return false;
+        } else if (!color.equals(other.color))
+            return false;
+        if (created == null) {
+            if (other.created != null)
+                return false;
+        } else if (!created.equals(other.created))
+            return false;
+        if (createdBy != other.createdBy)
+            return false;
+        if (deleteExceptionDates == null) {
+            if (other.deleteExceptionDates != null)
+                return false;
+        } else if (!deleteExceptionDates.equals(other.deleteExceptionDates))
+            return false;
+        if (description == null) {
+            if (other.description != null)
+                return false;
+        } else if (!description.equals(other.description))
+            return false;
+        if (endDate == null) {
+            if (other.endDate != null)
+                return false;
+        } else if (!endDate.equals(other.endDate))
+            return false;
+        if (endTimezone == null) {
+            if (other.endTimezone != null)
+                return false;
+        } else if (!endTimezone.equals(other.endTimezone))
+            return false;
+        if (id != other.id)
+            return false;
+        if (lastModified == null) {
+            if (other.lastModified != null)
+                return false;
+        } else if (!lastModified.equals(other.lastModified))
+            return false;
+        if (location == null) {
+            if (other.location != null)
+                return false;
+        } else if (!location.equals(other.location))
+            return false;
+        if (modifiedBy != other.modifiedBy)
+            return false;
+        if (organizer == null) {
+            if (other.organizer != null)
+                return false;
+        } else if (!organizer.equals(other.organizer))
+            return false;
+        if (publicFolderId != other.publicFolderId)
+            return false;
+        if (recurrenceId == null) {
+            if (other.recurrenceId != null)
+                return false;
+        } else if (!recurrenceId.equals(other.recurrenceId))
+            return false;
+        if (recurrenceRule == null) {
+            if (other.recurrenceRule != null)
+                return false;
+        } else if (!recurrenceRule.equals(other.recurrenceRule))
+            return false;
+        if (sequence != other.sequence)
+            return false;
+        if (seriesId != other.seriesId)
+            return false;
+        if (setFields == null) {
+            if (other.setFields != null)
+                return false;
+        } else if (!setFields.equals(other.setFields))
+            return false;
+        if (startDate == null) {
+            if (other.startDate != null)
+                return false;
+        } else if (!startDate.equals(other.startDate))
+            return false;
+        if (startTimezone == null) {
+            if (other.startTimezone != null)
+                return false;
+        } else if (!startTimezone.equals(other.startTimezone))
+            return false;
+        if (status != other.status)
+            return false;
+        if (summary == null) {
+            if (other.summary != null)
+                return false;
+        } else if (!summary.equals(other.summary))
+            return false;
+        if (transp == null) {
+            if (other.transp != null)
+                return false;
+        } else if (!transp.equals(other.transp))
+            return false;
+        if (uid == null) {
+            if (other.uid != null)
+                return false;
+        } else if (!uid.equals(other.uid))
+            return false;
+        return true;
     }
 
 }

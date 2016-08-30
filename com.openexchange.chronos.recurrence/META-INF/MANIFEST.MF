@@ -10,6 +10,7 @@ Import-Package: com.openexchange.chronos,
  com.openexchange.chronos.service,
  com.openexchange.osgi,
  com.openexchange.server,
+ org.dmfs.rfc5545,
+ org.dmfs.rfc5545.recur,
  org.osgi.framework,
  org.slf4j
-Bundle-ActivationPolicy: lazy
