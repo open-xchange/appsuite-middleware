@@ -74,7 +74,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Module(name = "oauth", description = "The OAuth module is used to manage multiple OAuth accounts for certian online services for a user. The OAuth mechanism allows the Open-Xchange application to act as behalf of this user using previously obtained access tokens granted by user.")
+@Module(name = "oauth", description = "The OAuth module is used to manage multiple OAuth accounts for certain online services for a user. The OAuth mechanism allows the Open-Xchange application to act on behalf of this user using previously obtained access tokens granted by the user.")
 public class ReauthorizeAction extends AbstractOAuthTokenAction {
 
     @Override
