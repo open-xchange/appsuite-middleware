@@ -66,7 +66,6 @@ import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketService;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketSessionToucher;
 import com.openexchange.websockets.grizzly.remote.HzRemoteWebSocketDistributor;
-import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributor;
 import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributorFactory;
 
 /**
@@ -120,7 +119,7 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
             registerService(WebSocketService.class, new GrizzlyWebSocketService(app, remoteDistributor));
             this.app = app;
 
-            PortableMessageDistributor.setGrizzlyWebSocketApplication(app);
+            GrizzlyWebSocketApplication.setGrizzlyWebSocketApplication(app);
 
             long period = GrizzlyWebSocketSessionToucher.getTouchPeriod(getService(ConfigurationService.class));
             sessionToucherTask = getService(TimerService.class).scheduleAtFixedRate(new GrizzlyWebSocketSessionToucher(app), period, period);
@@ -143,7 +142,7 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
                 }
             }
 
-            PortableMessageDistributor.setGrizzlyWebSocketApplication(null);
+            GrizzlyWebSocketApplication.setGrizzlyWebSocketApplication(null);
 
             WebApplicationService webApplicationService = getService(WebApplicationService.class);
             if (null != webApplicationService) {
@@ -164,13 +163,11 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
 
     @Override
     public <S> boolean addService(Class<S> clazz, S service) {
-        // TODO Auto-generated method stub
         return super.addService(clazz, service);
     }
 
     @Override
     public <S> boolean removeService(Class<? extends S> clazz) {
-        // TODO Auto-generated method stub
         return super.removeService(clazz);
     }
 

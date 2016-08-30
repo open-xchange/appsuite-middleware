@@ -426,41 +426,95 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------
 
-    private void addToHzMultiMap(int userId, int contextId, String connectionId, String path) {
+    private void addMultipleToHzMultiMap(Collection<WebSocket> sockets) {
+        if (null == sockets || sockets.isEmpty()) {
+            return;
+        }
+
+        HazelcastInstance hzInstance = this.hzInstance;
+        if (null == hzInstance) {
+            LOG.warn("Missing Hazelcast instance. Failed to add Web Sockets");
+            return;
+        }
+
+        String mapName = this.mapName;
+        if (null == mapName) {
+            LOG.warn("Missing Hazelcast map name. Failed to add Web Sockets");
+            return;
+        }
+
+        MultiMap<String, String> map;
         try {
-            HazelcastInstance hzInstance = this.hzInstance;
-            if (null == hzInstance) {
-                LOG.warn("Missing Hazelcast instance. Failed to add Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId));
-                return;
-            }
+            map = map(mapName, hzInstance);
+        } catch (Exception e) {
+            LOG.warn("Failed to aquire Hazelcast MultiMap", e);
+            return;
+        }
 
-            String mapName = this.mapName;
-            if (null == mapName) {
-                LOG.warn("Missing Hazelcast map name. Failed to add Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId));
-                return;
-            }
+        for (WebSocket socket : sockets) {
+            int userId = socket.getUserId();
+            int contextId = socket.getContextId();
+            String path = socket.getPath();
 
-            map(mapName, hzInstance).put(generateKey(userId, contextId, memberUuid), generateValue(connectionId, path));
+            try {
+                map.put(generateKey(userId, contextId, memberUuid), generateValue(socket.getConnectionId().getId(), path));
+            } catch (Exception e) {
+                LOG.warn("Failed to add Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId), e);
+            }
+        }
+    }
+
+    private void addToHzMultiMap(WebSocket socket) {
+        if (null == socket) {
+            return;
+        }
+
+        int userId = socket.getUserId();
+        int contextId = socket.getContextId();
+        String path = socket.getPath();
+
+        HazelcastInstance hzInstance = this.hzInstance;
+        if (null == hzInstance) {
+            LOG.warn("Missing Hazelcast instance. Failed to remove Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId));
+            return;
+        }
+
+        String mapName = this.mapName;
+        if (null == mapName) {
+            LOG.warn("Missing Hazelcast map name. Failed to remove Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId));
+            return;
+        }
+
+        try {
+            map(mapName, hzInstance).put(generateKey(userId, contextId, memberUuid), generateValue(socket.getConnectionId().getId(), path));
         } catch (Exception e) {
             LOG.warn("Failed to add Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId), e);
         }
     }
 
-    private void removeFromHzMultiMap(int userId, int contextId, String connectionId, String path) {
+    private void removeFromHzMultiMap(WebSocket socket) {
+        if (null == socket) {
+            return;
+        }
+
+        int userId = socket.getUserId();
+        int contextId = socket.getContextId();
+        String path = socket.getPath();
+
+        HazelcastInstance hzInstance = this.hzInstance;
+        if (null == hzInstance) {
+            LOG.warn("Missing Hazelcast instance. Failed to remove Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId));
+            return;
+        }
+
+        String mapName = this.mapName;
+        if (null == mapName) {
+            LOG.warn("Missing Hazelcast map name. Failed to remove Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId));
+            return;
+        }
+
         try {
-            HazelcastInstance hzInstance = this.hzInstance;
-            if (null == hzInstance) {
-                LOG.warn("Missing Hazelcast instance. Failed to remove Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId));
-                return;
-            }
-
-            String mapName = this.mapName;
-            if (null == mapName) {
-                LOG.warn("Missing Hazelcast map name. Failed to remove Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId));
-                return;
-            }
-
-            map(mapName, hzInstance).remove(generateKey(userId, contextId, memberUuid), generateValue(connectionId, path));
+            map(mapName, hzInstance).remove(generateKey(userId, contextId, memberUuid), generateValue(socket.getConnectionId().getId(), path));
         } catch (Exception e) {
             LOG.warn("Failed to remove Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId), e);
         }
@@ -468,24 +522,19 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
 
     // -------------------------------------------------------------------------------------------------------------------------------------------------
 
-    /**
-     * Call-back for a connected Web Socket.
-     *
-     * @param socket The Web Socket
-     */
     @Override
-    public void onWebSocketConnect(WebSocket socket) {
-        addToHzMultiMap(socket.getUserId(), socket.getContextId(), socket.getConnectionId().getId(), socket.getPath());
+    public void addWebSocket(WebSocket socket) {
+        addToHzMultiMap(socket);
     }
 
-    /**
-     * Call-back for a closed Web Socket.
-     *
-     * @param socket The Web Socket
-     */
     @Override
-    public void onWebSocketClose(WebSocket socket) {
-        removeFromHzMultiMap(socket.getUserId(), socket.getContextId(), socket.getConnectionId().getId(), socket.getPath());
+    public void addWebSocket(Collection<WebSocket> sockets) {
+        addMultipleToHzMultiMap(sockets);
+    }
+
+    @Override
+    public void removeWebSocket(WebSocket socket) {
+        removeFromHzMultiMap(socket);
     }
 
 }

@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
@@ -110,6 +111,28 @@ import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
 public class GrizzlyWebSocketApplication extends WebSocketApplication {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketApplication.class);
+
+    private static final AtomicReference<GrizzlyWebSocketApplication> APPLICATION_REFERENCE = new AtomicReference<GrizzlyWebSocketApplication>();
+
+    /**
+     * Sets the application
+     *
+     * @param application The application or <code>null</code>
+     */
+    public static void setGrizzlyWebSocketApplication(GrizzlyWebSocketApplication application) {
+        APPLICATION_REFERENCE.set(application);
+    }
+
+    /**
+     * Gets the application
+     *
+     * @return The application or <code>null</code>
+     */
+    public static GrizzlyWebSocketApplication getGrizzlyWebSocketApplication() {
+        return APPLICATION_REFERENCE.get();
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     private final ConcurrentMap<UserAndContext, ConcurrentMap<ConnectionId, SessionBoundWebSocket>> openSockets;
     private final ServiceLookup services;
@@ -496,7 +519,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                     }
                 }
 
-                remoteDistributor.onWebSocketConnect(sessionBoundSocket);
+                remoteDistributor.addWebSocket(sessionBoundSocket);
             } else {
                 super.onConnect(socket);
             }
@@ -520,7 +543,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 sockets.remove(sessionBoundSocket.getConnectionId());
             }
 
-            remoteDistributor.onWebSocketClose(sessionBoundSocket);
+            remoteDistributor.removeWebSocket(sessionBoundSocket);
 
             socket.close();
         } else {
