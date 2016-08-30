@@ -115,12 +115,31 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     private static final AtomicReference<GrizzlyWebSocketApplication> APPLICATION_REFERENCE = new AtomicReference<GrizzlyWebSocketApplication>();
 
     /**
-     * Sets the application
+     * Initializes a new {@link GrizzlyWebSocketApplication} instance (if not already performed).
      *
-     * @param application The application or <code>null</code>
+     * @param listenerRegistry The listern registry to use
+     * @param remoteDistributor The remote distributor to manage remote Web Sockets
+     * @param services The service look-up
+     * @return The newly created (or existing) instance
      */
-    public static void setGrizzlyWebSocketApplication(GrizzlyWebSocketApplication application) {
-        APPLICATION_REFERENCE.set(application);
+    public static GrizzlyWebSocketApplication initializeGrizzlyWebSocketApplication(WebSocketListenerRegistry listenerRegistry, RemoteWebSocketDistributor remoteDistributor, ServiceLookup services) {
+        GrizzlyWebSocketApplication app;
+        GrizzlyWebSocketApplication newApp;
+        do {
+            app = APPLICATION_REFERENCE.get();
+            if (null != app) {
+                return app;
+            }
+            newApp = new GrizzlyWebSocketApplication(listenerRegistry, remoteDistributor, services);
+        } while (!APPLICATION_REFERENCE.compareAndSet(app, newApp));
+        return newApp;
+    }
+
+    /**
+     * Unsets the application
+     */
+    public static void unsetGrizzlyWebSocketApplication() {
+        APPLICATION_REFERENCE.set(null);
     }
 
     /**
@@ -143,7 +162,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     /**
      * Initializes a new {@link GrizzlyWebSocketApplication}.
      */
-    public GrizzlyWebSocketApplication(WebSocketListenerRegistry listenerRegistry, RemoteWebSocketDistributor remoteDistributor, ServiceLookup services) {
+    private GrizzlyWebSocketApplication(WebSocketListenerRegistry listenerRegistry, RemoteWebSocketDistributor remoteDistributor, ServiceLookup services) {
         super();
         this.listenerRegistry = listenerRegistry;
         this.remoteDistributor = remoteDistributor;

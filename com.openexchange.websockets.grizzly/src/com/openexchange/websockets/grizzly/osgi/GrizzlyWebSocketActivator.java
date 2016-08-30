@@ -113,13 +113,11 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
         GrizzlyWebSocketApplication app = this.app;
         if (null == app) {
             WebApplicationService webApplicationService = getService(WebApplicationService.class);
-            app = new GrizzlyWebSocketApplication(listenerTracker, remoteDistributor, this);
+            app = GrizzlyWebSocketApplication.initializeGrizzlyWebSocketApplication(listenerTracker, remoteDistributor, this);
             listenerTracker.setApplication(app);
             webApplicationService.registerWebSocketApplication("", "/*", app, null);
             registerService(WebSocketService.class, new GrizzlyWebSocketService(app, remoteDistributor));
             this.app = app;
-
-            GrizzlyWebSocketApplication.setGrizzlyWebSocketApplication(app);
 
             long period = GrizzlyWebSocketSessionToucher.getTouchPeriod(getService(ConfigurationService.class));
             sessionToucherTask = getService(TimerService.class).scheduleAtFixedRate(new GrizzlyWebSocketSessionToucher(app), period, period);
@@ -142,7 +140,7 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
                 }
             }
 
-            GrizzlyWebSocketApplication.setGrizzlyWebSocketApplication(null);
+            GrizzlyWebSocketApplication.unsetGrizzlyWebSocketApplication();
 
             WebApplicationService webApplicationService = getService(WebApplicationService.class);
             if (null != webApplicationService) {
