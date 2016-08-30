@@ -1167,7 +1167,6 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If module's visible public folders that are not visible in hierarchic tree-view cannot be determined
      */
     public static boolean hasVisibleFoldersNotSeenInTreeView(final int module, final int userId, final int[] groups, final UserPermissionBits permissionBits, final Context ctx, final Connection readCon) throws OXException {
-        final StringBuilder condBuilder = new StringBuilder(32).append("AND (ot.type IN (").append(PUBLIC).append(',').append(TRASH).append("))");
         Connection rc = readCon;
         boolean closeReadCon = false;
         PreparedStatement stmt = null;
@@ -1181,11 +1180,10 @@ public final class OXFolderIteratorSQL {
             /*
              * Statement to select all user-visible public folders
              */
-            stmt = rc.prepareStatement(getSQLUserVisibleFolders("ot.fuid, ot.parent, ot.module", // fuid, parent, ...
-            permissionIds(userId, groups, ctx), StringCollection.getSqlInString(permissionBits.getAccessibleModules()), condBuilder.toString(), getSubfolderOrderBy(STR_OT)));
+            String condition = "AND (ot.type IN (" + PUBLIC + "," + TRASH + "))";
+            stmt = rc.prepareStatement(getSQLUserVisibleFolders("ot.fuid, ot.parent, ot.module",
+                permissionIds(userId, groups, ctx), StringCollection.getSqlInString(permissionBits.getAccessibleModules()), condition, getSubfolderOrderBy(STR_OT)));
             int pos = 1;
-            // stmt.setInt(pos++, contextId);
-            // stmt.setInt(pos++, userId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
