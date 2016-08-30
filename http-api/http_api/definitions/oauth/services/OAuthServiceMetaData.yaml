@@ -6,3 +6,6 @@ properties:
   displayName:
     type: string
     description: The service's display name.
+  availableScopes:
+    type: array
+    description: The available scopes for the OAuth provider

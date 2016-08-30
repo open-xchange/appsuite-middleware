@@ -15,3 +15,9 @@ properties:
   secret:
     type: string
     description: The token secret.
+  enabledScopes:
+    type: array
+    description: The enabled scopes for this OAuth account
+  availableScopes:
+    type: array
+    description: The available scopes for the OAuth provider of this OAuth account
