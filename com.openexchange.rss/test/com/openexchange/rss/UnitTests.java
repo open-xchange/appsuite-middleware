@@ -57,6 +57,7 @@ import com.openexchange.rss.actions.RssActionTestReconfiguredHosts;
 import com.openexchange.rss.actions.RssActionTestReconfiguredPorts;
 import com.openexchange.rss.actions.RssActionTestReconfiguredPortsAndHosts;
 import com.openexchange.rss.preprocessors.PreprocessorChainingTest;
+import com.openexchange.rss.util.RssPropertiesTest;
 
 /**
  * Unit tests for the bundle com.openexchange.rss
@@ -70,7 +71,8 @@ import com.openexchange.rss.preprocessors.PreprocessorChainingTest;
     RssActionTest.class,
     RssActionTestReconfiguredHosts.class,
     RssActionTestReconfiguredPorts.class,
-    RssActionTestReconfiguredPortsAndHosts.class
+    RssActionTestReconfiguredPortsAndHosts.class,
+    RssPropertiesTest.class
 })
 public class UnitTests {
 

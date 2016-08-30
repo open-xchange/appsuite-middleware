@@ -138,8 +138,7 @@ Bundle-ClassPath: .,
  lib/concurrentlinkedhashmap-lru-1.3.2.jar,
  lib/concurrentlinkedhashmap-1.0.1-custom.jar,
  lib/brownies-collections-0.9.6.jar,
- lib/jdo2-api-2.3-eb.jar,
- lib/ical4j-1.0.6.jar
+ lib/jdo2-api-2.3-eb.jar
 Export-Package: com.googlecode.concurrentlinkedhashmap,
  com.javacodegeeks.concurrent,
  com.mysql.jdbc;version="5.1.30",

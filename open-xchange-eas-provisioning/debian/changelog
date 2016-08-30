@@ -1,3 +1,9 @@
+open-xchange-eas-provisioning (7.6.2-59) stable; urgency=medium
+
+  * Build for patch 2016-08-29 (3518)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 19 Aug 2016 13:19:19 +0200
+
 open-xchange-eas-provisioning (7.6.2-58) stable; urgency=medium
 
   * Build for patch 2016-08-01 (3463)

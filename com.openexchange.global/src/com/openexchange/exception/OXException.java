@@ -1306,7 +1306,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     private static final Pattern P = Pattern.compile("(\\p{L}) {2,}(\\p{L})");
     /** Drops multiple subsequent white-spaces from given message */
     private static String dropSubsequentWhitespaces(String message) {
-        if (null == message) {
+        if (null == message || message.indexOf("  ") < 0) {
             return message;
         }
         return P.matcher(message).replaceAll("$1 $2");

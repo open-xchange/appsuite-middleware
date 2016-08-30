@@ -1,3 +1,9 @@
+open-xchange-admin-contextrestore (7.6.2-59) stable; urgency=medium
+
+  * Build for patch 2016-08-29 (3518)
+
+ -- Jan Bauerdick <jan.bauerdick@open-xchange.com>  Fri, 19 Aug 2016 13:18:59 +0200
+
 open-xchange-admin-contextrestore (7.6.2-58) stable; urgency=medium
 
   * Build for patch 2016-08-01 (3463)
