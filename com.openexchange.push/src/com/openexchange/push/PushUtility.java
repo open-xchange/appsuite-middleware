@@ -177,11 +177,6 @@ public final class PushUtility {
      * @return <code>true</code> if client identifier is allowed; otherwise <code>false</code>
      */
     public static final boolean allowedClient(final String client) {
-        boolean b = true;
-        if (b) {
-            return true;
-        }
-
         final PushClientWhitelist clientWhitelist = PushClientWhitelist.getInstance();
         return clientWhitelist.isEmpty() || clientWhitelist.isAllowed(client);
     }
