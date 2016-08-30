@@ -49,6 +49,10 @@
 
 package com.openexchange.pns;
 
+import java.util.Map;
+import java.util.Map.Entry;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap.Builder;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 
@@ -62,6 +66,124 @@ public class PushNotifications {
 
     private PushNotifications() {
         super();
+    }
+
+    /**
+     * Creates a new message data builder instance.
+     *
+     * @return The new builder instance
+     */
+    public static MessageDataBuilder messageDataBilder() {
+        return new MessageDataBuilder();
+    }
+
+    /** A builder for message data */
+    public static final class MessageDataBuilder {
+
+        private final Builder<String, Object> builder;
+
+        MessageDataBuilder() {
+            builder = ImmutableMap.builder();
+        }
+
+        /**
+         * Associates field with value in the built map.
+         * <p>
+         * Duplicate keys are not allowed, and will cause {@link #build() build} to fail.
+         *
+         * @param field The field to insert
+         * @param value The value to associate with
+         * @return This builder instance
+         */
+        public MessageDataBuilder put(PushNotificationField field, Object value) {
+            builder.put(field.getId(), value);
+            return this;
+        }
+
+        /**
+         * Associates key with value in the built map.
+         * <p>
+         * Duplicate keys are not allowed, and will cause {@link #build() build} to fail.
+         *
+         * @param key The key to insert
+         * @param value The value to associate with
+         * @return This builder instance
+         */
+        public MessageDataBuilder put(String key, Object value) {
+            builder.put(key, value);
+            return this;
+        }
+
+        /**
+         * Puts specified entry into the built map.
+         * <p>
+         * Duplicate keys are not allowed, and will cause {@link #build() build} to fail.
+         *
+         * @param entry The entry to insert
+         * @return This builder instance
+         */
+        public MessageDataBuilder put(Entry<? extends String, ? extends Object> entry) {
+            builder.put(entry);
+            return this;
+        }
+
+        /**
+         * Associates all of the given map's keys and values in the built map.
+         * <p>
+         * Duplicate keys are not allowed, and will cause {@link #build() build} to fail.
+         *
+         * @param map The map to insert
+         * @return This builder instance
+         */
+        public MessageDataBuilder putAll(Map<? extends String, ? extends Object> map) {
+            builder.putAll(map);
+            return this;
+        }
+
+        /**
+         * Adds all of the given entries to the built map.
+         * <p>
+         * Duplicate keys are not allowed, and will cause {@link #build() build} to fail.
+         *
+         * @param entries The entries to insert
+         * @return This builder instance
+         */
+        public MessageDataBuilder putAll(Iterable<? extends Entry<? extends String, ? extends Object>> entries) {
+            builder.putAll(entries);
+            return this;
+        }
+
+        /**
+         * Builds the resulting (immutable) message data.
+         *
+         * @return The (immutable) message data
+         */
+        public Map<String, Object> build() {
+            return builder.build();
+        }
+    }
+
+    /**
+     * Builds the (immutable) message data for specified arguments.
+     *
+     * @param args The arguments
+     * @return The (immutable) message data
+     */
+    public static Map<String, Object> messageDataFor(Object... args) {
+        if (null == args) {
+            return null;
+        }
+
+        int length = args.length;
+        if (0 == length || (length % 2) != 0) {
+            return null;
+        }
+
+        Builder<String, Object> builder = ImmutableMap.builder();
+        for (int i = 0; i < length; i+=2) {
+            builder.put(args[i].toString(), args[i+1]);
+        }
+        return builder.build();
     }
 
     /**

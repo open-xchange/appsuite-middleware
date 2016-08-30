@@ -67,12 +67,24 @@ public enum KnownTopic {
      * The special topic matching all topic identifiers.
      */
     ALL("*"),
+
+    // ------------------------------------------------ MAIL ----------------------------------------------------
+
     /**
      * <code>ox:mail:new</code>
      * <p>
      * The topic for a newly arrived mail.
      */
     MAIL_NEW("ox:mail:new"),
+
+    // ------------------------------------------------ CALENDAR ------------------------------------------------
+
+    /**
+     * <code>ox:calendar:new</code>
+     * <p>
+     * The topic for a newly created appointment.
+     */
+    CALENDAR_NEW("ox:calendar:new"),
 
     ;
 
