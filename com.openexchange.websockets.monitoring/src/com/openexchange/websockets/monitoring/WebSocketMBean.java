@@ -72,4 +72,16 @@ public interface WebSocketMBean {
      */
     List<List<String>> listWebSockets() throws MBeanException;
 
+    /**
+     * Closes all locally available Web Sockets matching specified path filter expression (if any).
+     * <p>
+     * In case no path filter expression is given (<code>pathFilter == null</code>), all user-associated Web Sockets are closed.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param pathFilter The optional path filter expression or <code>null</code>
+     * @throws MBeanException If closing Web Sockets fails
+     */
+    void closeWebSockets(int userId, int contextId, String pathFilter) throws MBeanException;
+
 }

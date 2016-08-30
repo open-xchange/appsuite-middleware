@@ -100,4 +100,16 @@ public class WebSocketMBeanImpl extends StandardMBean implements WebSocketMBean 
         }
     }
 
+    @Override
+    public void closeWebSockets(int userId, int contextId, String pathFilter) throws MBeanException {
+        try {
+            webSocketService.closeWebSockets(userId, contextId, pathFilter);
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(WebSocketMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
 }

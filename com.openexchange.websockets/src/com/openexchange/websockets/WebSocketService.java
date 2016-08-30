@@ -189,4 +189,16 @@ public interface WebSocketService {
      */
     List<WebSocket> listLocalWebSockets() throws OXException;
 
+    /**
+     * Closes all locally available Web Sockets matching specified path filter expression (if any).
+     * <p>
+     * In case no path filter expression is given (<code>pathFilter == null</code>), all user-associated Web Sockets are closed.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param pathFilter The optional path filter expression or <code>null</code>
+     * @throws OXException If closing Web Sockets fails
+     */
+    void closeWebSockets(int userId, int contextId, String pathFilter) throws OXException;
+
 }

@@ -138,4 +138,10 @@ public class GrizzlyWebSocketService implements WebSocketService {
     public List<WebSocket> listLocalWebSockets() throws OXException {
         return localApp.listLocalWebSockets();
     }
+
+    @Override
+    public void closeWebSockets(int userId, int contextId, String pathFilter) throws OXException {
+        localApp.closeWebSockets(userId, contextId, pathFilter);
+    }
+
 }
