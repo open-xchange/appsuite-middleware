@@ -303,8 +303,6 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-
-    //TODO QS-VS Need optimization?
     private void loadAllNecessaryDBConnections(LinkedHashMap<Integer, ArrayList<Integer>> contextUserMap) throws SQLException, OXException {
 
         Set<Integer> alreadyProcessed = new HashSet<Integer>();

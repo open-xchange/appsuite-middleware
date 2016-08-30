@@ -106,7 +106,7 @@ public class LocalReportService extends AbstractReportService {
     private static AtomicReference<ExecutorService> EXECUTOR_SERVICE_REF = new AtomicReference<ExecutorService>();
 
     private final AtomicInteger threadNumber = new AtomicInteger();
-
+    
     //--------------------Public override methods--------------------
     /**
      * {@inheritDoc}
@@ -273,14 +273,14 @@ public class LocalReportService extends AbstractReportService {
         pendingReports.put(uuid, report);
         reportCache.asMap().put(PENDING_REPORTS_PRE_KEY + reportConfig.getType(), pendingReports);
 
-        setUpContextAnalyzer(uuid, reportConfig.getType(), allContextIds, report);
+        setUpContextAnalyzer(uuid, allContextIds, report);
         return uuid;
     }
 
     //--------------------Private helper methods--------------------
-    private void setUpContextAnalyzer(String uuid, String reportType, List<Integer> allContextIds, Report report) throws OXException {
+    private void setUpContextAnalyzer(String uuid, List<Integer> allContextIds, Report report) throws OXException {
         DatabaseService databaseService = Services.getService(DatabaseService.class);
-        ExecutorService reportSchemaThreadPool = Executors.newFixedThreadPool(20, new ThreadFactory() {
+        ExecutorService reportSchemaThreadPool = Executors.newFixedThreadPool(report.getMAxThreadPoolSize(), new ThreadFactory() {
 
             @Override
             public Thread newThread(Runnable r) {
@@ -319,7 +319,7 @@ public class LocalReportService extends AbstractReportService {
                     if (finishedContexts.get() != 0) {
                         report.setTaskState(report.getNumberOfTasks(), report.getNumberOfPendingTasks() - finishedContexts.get());
                         if (report.getNumberOfPendingTasks() <= 0) {
-                            finishUpReport(reportType, reportCache.asMap().get(PENDING_REPORTS_PRE_KEY + reportType), report);
+                            finishUpReport(report.getType(), reportCache.asMap().get(PENDING_REPORTS_PRE_KEY + report.getType()), report);
                         }
                     }
                     
@@ -328,8 +328,6 @@ public class LocalReportService extends AbstractReportService {
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 }
-            } else {
-                Future<Integer> finishedContexts = EXECUTOR_SERVICE_REF.get().submit(new AnalyzeContextBatch(uuid, reportType, Arrays.asList(contextsInSameSchema)));
             }
             
             LOG.debug("{} assigned. {} contexts still to assign.", contextsInSameSchema.length, contextsToProcess.size());

@@ -192,6 +192,10 @@ public class Report implements Serializable {
 
     private boolean isShowMailMetrics;
 
+    private int threadPriority;
+
+    private int maxThreadPoolSize;
+
     /**
      * Initializes a new {@link Report}.
      *
@@ -296,6 +300,8 @@ public class Report implements Serializable {
         this.storageFolderPath = reportConfig.getStoragePath();
         this.maxChunkSize = reportConfig.getMaxChunkSize();
         this.needsComposition = false;
+        this.threadPriority = reportConfig.getThreadPriority();
+        this.maxThreadPoolSize = reportConfig.getMaxThreadPoolSize();
     }
 
     private static Class[] allowedTypes = new Class[] { Integer.class, Long.class, Float.class, Short.class, Double.class, Byte.class, Boolean.class, String.class };
@@ -583,7 +589,6 @@ public class Report implements Serializable {
         MAP, ARRAY
     };
 
-    // TODO QS-VS: Exception handling verbessern OXExceptions verwenden
     /**
      * Gather all report parts and merge them into a report-file, with a ".report" ending, inside the
      * reports folder-path. The result is stored in the same folder . The "*.part" files are deleted in the process
@@ -735,5 +740,13 @@ public class Report implements Serializable {
             result += "  ";
         }
         return result;
+    }
+
+    public int getThreadPriority() {
+        return this.threadPriority;
+    }
+
+    public int getMAxThreadPoolSize() {
+        return this.maxThreadPoolSize;
     }
 }

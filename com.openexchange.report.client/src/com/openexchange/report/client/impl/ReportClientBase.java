@@ -307,8 +307,10 @@ public class ReportClientBase extends AbstractJMXTools {
             ReportConfiguration reportConfiguration = new ReportConfiguration();
             String storagePath = reportConfiguration.getReportStorage().trim();
             int chunkSize = Integer.parseInt(reportConfiguration.getMaxChunkSize().trim());
+            int threadPriority = Integer.parseInt(reportConfiguration.getThreadPriority().trim());
+            int maxThreadPoolSize = Integer.parseInt(reportConfiguration.getMaxThreadPoolSize().trim());
             
-            ReportConfigs reportConfigs = new ReportConfigs(reportType, false, isCustomTimeframe, timeframeStart.getTime(), timeframeEnd.getTime(), isSingleTenant, singeTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics, storagePath, chunkSize);
+            ReportConfigs reportConfigs = new ReportConfigs(reportType, false, isCustomTimeframe, timeframeStart.getTime(), timeframeEnd.getTime(), isSingleTenant, singeTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics, storagePath, chunkSize, threadPriority, maxThreadPoolSize);
 
             //Start the report generation
             System.out.println("Starting the Open-Xchange report client. Note that the report generation may take a little while.");
@@ -920,7 +922,6 @@ public class ReportClientBase extends AbstractJMXTools {
             System.out.println("Report was finished: " + new Date(end));
             System.out.println("\n------ report -------");
             JSONObject data = new JSONObject((String) report.get("data"));
-            //TODO QS-VS: Korrektur der Methode zum Output der Daten, Einrückungen werden komplett ignoriert
             if (data.getBoolean("needsComposition")) {
                 System.out.println("{");
                 for (String string : data.keySet()) {
@@ -928,10 +929,10 @@ public class ReportClientBase extends AbstractJMXTools {
                         System.out.println("  \"" + string + "\" : \"" + data.get(string) + "\",");
                     } else if(data.get(string) instanceof Boolean) {
                         System.out.println("  \"" + string + "\" : " + data.get(string) + ",");
-                        // TODO QS-VS: Besser aus dem Report selbst herauslesen welcher Parameter das Lesen von Platte triggert
                     } else if (string.equals("macdetail") || string.equals("oxaas")){
                        try {
                         Report.printStoredReportContentToConsole((String) report.get("storageFolderPath"), (String) report.get("uuid"));
+                        System.out.print(",");
                        } catch (IOException e) {
                         e.printStackTrace();
                        } 

@@ -72,7 +72,6 @@ import com.openexchange.report.appsuite.UserReportCumulator;
 import com.openexchange.report.appsuite.defaultHandlers.CapabilityHandler;
 import com.openexchange.report.appsuite.defaultHandlers.ClientLoginCount;
 import com.openexchange.report.appsuite.defaultHandlers.Total;
-import com.openexchange.report.appsuite.internal.HazelcastReportService;
 import com.openexchange.report.appsuite.internal.LocalReportService;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.management.ReportMXBeanImpl;
@@ -203,7 +202,7 @@ public class ReportActivator extends HousekeepingActivator {
         ClientLoginCount clc = new ClientLoginCount();
         Services.add(clc);
 
-        registerService(ReportService.class, new HazelcastReportService(new LocalReportService()));
+        registerService(ReportService.class, new LocalReportService());
         trackService(ReportService.class);
 
         trackService(LogLevelService.class);

@@ -159,4 +159,18 @@ public class ReportConfiguration {
         }
         return "";
     }
+    
+    public String getMaxThreadPoolSize() {
+        if (null != properties.getProperty("com.openexchange.report.client.maxThreadPoolSize")) {
+            return properties.getProperty("com.openexchange.report.client.maxThreadPoolSize");
+        }
+        return "";
+    }
+    
+    public String getThreadPriority() {
+        if (null != properties.getProperty("com.openexchange.report.client.ThreadPriority")) {
+            return properties.getProperty("com.openexchange.report.client.ThreadPriority");
+        }
+        return "";
+    }
 }

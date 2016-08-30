@@ -44,6 +44,10 @@ public class ReportConfigs implements Serializable, CompositeData{
     private boolean isShowMailMetrics;
     
     private HashMap<String, Object> attributeMap;
+
+    private int threadPriority;
+
+    private int maxThreadPoolSize;
     
     @Override
     public CompositeType getCompositeType() {
@@ -98,10 +102,12 @@ public class ReportConfigs implements Serializable, CompositeData{
                                 (boolean) cd.get("isShowDriveMetrics"), 
                                 (boolean) cd.get("isShowMailMetrics"),
                                 (String) cd.get("storagePath"),
-                                (int) cd.get("maxChunkSize"));
+                                (int) cd.get("maxChunkSize"),
+                                (int) cd.get("threadPriority"),
+                                (int) cd.get("maxThreadPoolSize"));
     }
 
-    public ReportConfigs(String type, boolean isSingleDeployment, boolean isConfigTimerange, Long consideredTimeframeStart, Long consideredTimeframeEnd, boolean isShowSingleTenant, Long singleTenantId, boolean isAdminIgnore, boolean isShowDriveMetrics, boolean isShowMailMetrics, String storagePath, int maxChunkSize) {
+    public ReportConfigs(String type, boolean isSingleDeployment, boolean isConfigTimerange, Long consideredTimeframeStart, Long consideredTimeframeEnd, boolean isShowSingleTenant, Long singleTenantId, boolean isAdminIgnore, boolean isShowDriveMetrics, boolean isShowMailMetrics, String storagePath, int maxChunkSize, int threadPriority, int maxThreadPoolSize) {
         super();
         this.type = type;
         this.isSingleDeployment = isSingleDeployment;
@@ -115,6 +121,8 @@ public class ReportConfigs implements Serializable, CompositeData{
         this.isShowMailMetrics = isShowMailMetrics;
         this.storagePath = storagePath;
         this.maxChunkSize = maxChunkSize;
+        this.threadPriority = threadPriority;
+        this.maxThreadPoolSize = maxThreadPoolSize;
         this.attributeMap = new HashMap<>();
         this.attributeMap.put("type", type);
         this.attributeMap.put("isSingleDeployment", isSingleDeployment);
@@ -128,6 +136,8 @@ public class ReportConfigs implements Serializable, CompositeData{
         this.attributeMap.put("isShowMailMetrics", isShowMailMetrics);
         this.attributeMap.put("storagePath", storagePath);
         this.attributeMap.put("maxChunkSize", maxChunkSize);
+        this.attributeMap.put("threadPriority", threadPriority);
+        this.attributeMap.put("maxThreadPoolSize", maxThreadPoolSize);
         
     }
 
@@ -229,5 +239,21 @@ public class ReportConfigs implements Serializable, CompositeData{
 
     public void setMaxChunkSize(int maxChunkSize) {
         this.maxChunkSize = maxChunkSize;
+    }
+
+    public int getThreadPriority() {
+        return this.threadPriority;
+    }
+    
+    public void setThreadPriority(int priority) {
+        this.threadPriority = priority;
+    }
+
+    public int getMaxThreadPoolSize() {
+        return this.maxThreadPoolSize;
+    }
+    
+    public void setMaxThreadPoolSize(int poolSize) {
+        this.maxThreadPoolSize = poolSize;
     }
 }

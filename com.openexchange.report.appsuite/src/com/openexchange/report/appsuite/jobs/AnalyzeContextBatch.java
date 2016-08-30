@@ -89,21 +89,6 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
 
     /**
      *
-     * Initializes a new {@link AnalyzeContextBatch}.
-     *
-     * @param uuid The uuid of the report we're running
-     * @param reportType The type of report that is being run
-     * @param chunk a list of context IDs to analyze
-     */
-    public AnalyzeContextBatch(String uuid, String reportType, List<Integer> chunk) {
-        super();
-        this.uuid = uuid;
-        this.reportType = reportType;
-        this.contextIds = chunk;
-    }
-
-    /**
-     *
      * Initializes a new {@link AnalyzeContextBatch} with a report instead of just a report-type.
      * This means, additional options are selected and stored in the report object.
      *
@@ -123,7 +108,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
     public Integer call() throws Exception {
         Thread currentThread = Thread.currentThread();
         int previousPriority = currentThread.getPriority();
-        currentThread.setPriority(Thread.MIN_PRIORITY);
+        currentThread.setPriority(report.getThreadPriority());
 
         try {
             if (reportType == null) {

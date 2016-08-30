@@ -3,10 +3,8 @@ package com.openexchange.report.appsuite.serialization.osgi;
 
 import static com.openexchange.report.appsuite.serialization.osgi.StringParserServiceRegistry.getServiceRegistry;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
-import com.openexchange.report.appsuite.serialization.PortableReportFactory;
 import com.openexchange.tools.strings.StringParser;
 
 /**
@@ -48,7 +46,6 @@ public class ReportSerializationActivator extends HousekeepingActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-        registerService(CustomPortableFactory.class, new PortableReportFactory());
 
         final ServiceRegistry registry = getServiceRegistry();
         registry.clearRegistry();
