@@ -535,6 +535,14 @@ public final class HtmlServiceImpl implements HtmlService {
             html = processDownlevelRevealedConditionalComments(html);
             html = dropDoubleAccents(html);
             html = dropSlashedTags(html);
+            
+            // Repetitive sanitizing until no further replacement/changes performed
+            final boolean[] sanitized = new boolean[] { true };
+            while (sanitized[0]) {
+                sanitized[0] = false;
+                // Start sanitizing round
+                html = SaneScriptTags.saneScriptTags(html, sanitized);
+            }
 
             // CSS- and tag-wise sanitizing
             try {
@@ -564,14 +572,6 @@ public final class HtmlServiceImpl implements HtmlService {
                 htmlSanitizeResult.setTruncated(handler.isMaxContentSizeExceeded());
             } catch (final ParsingDeniedException e) {
                 LOG.warn("HTML content will be returned un-white-listed.", e);
-            }
-
-            // Repetitive sanitizing until no further replacement/changes performed
-            final boolean[] sanitized = new boolean[] { true };
-            while (sanitized[0]) {
-                sanitized[0] = false;
-                // Start sanitizing round
-                html = SaneScriptTags.saneScriptTags(html, sanitized);
             }
 
             // Replace HTML entities

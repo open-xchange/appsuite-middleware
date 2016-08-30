@@ -54,7 +54,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -79,36 +78,25 @@ import com.sun.syndication.feed.synd.SyndFeed;
 @PrepareForTest({ Services.class })
 public class RssActionTestReconfiguredPorts {
 
-    private RssAction action;
-
     private ConfigurationService configurationService = Mockito.mock(ConfigurationService.class);
-
-    private TimoutHttpURLFeedFetcher fetcher = Mockito.mock(TimoutHttpURLFeedFetcher.class);
 
     List<URL> urls = new ArrayList<>();
 
     List<OXException> warnings = new ArrayList<>();
 
-    @Before
-    public void setUp() throws Exception {
-        PowerMockito.mockStatic(Services.class);
-        Mockito.when(Services.getService(ConfigurationService.class)).thenReturn(configurationService);
-
-        action = new RssAction();
-
-        MockUtils.injectValueIntoPrivateField(action, "fetcher", fetcher);
-    }
-
     // tests bug 45402: SSRF at RSS feeds
     @Test
     public void testGetAcceptedFeeds_emptyPortListConfigured_allowAllPorts() throws OXException, MalformedURLException {
         PowerMockito.mockStatic(Services.class);
+        Mockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
         Mockito.when(Services.getService(ConfigurationService.class)).thenReturn(configurationService);
+
         RssAction newAction = new RssAction();
         MockUtils.injectValueIntoPrivateField(newAction, "fetcher", Mockito.mock(TimoutHttpURLFeedFetcher.class));
 
-        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports", RssProperties.PORT_WHITELIST)).thenReturn("");
-        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.blacklist", RssProperties.HOST_BLACKLIST)).thenReturn(RssProperties.HOST_BLACKLIST);
+        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports", RssProperties.PORT_WHITELIST_DEFAULT)).thenReturn("");
+        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.blacklist", RssProperties.HOST_BLACKLIST_DEFAULT)).thenReturn(RssProperties.HOST_BLACKLIST_DEFAULT);
+        Mockito.when(configurationService.getProperty(RssProperties.SCHEMES_KEY, RssProperties.SCHEMES_DEFAULT)).thenReturn(RssProperties.SCHEMES_DEFAULT);
 
         urls.add(new URL("http://tollerLaden.de:80/this/is/not/nice"));
         urls.add(new URL("http://tollerLaden.de:88/this/is/not/nice"));

@@ -102,9 +102,11 @@ public class RssActionTest {
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(Services.class);
+        Mockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
         Mockito.when(Services.getService(ConfigurationService.class)).thenReturn(configurationService);
-        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.blacklist", RssProperties.HOST_BLACKLIST)).thenReturn(RssProperties.HOST_BLACKLIST);
-        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports", RssProperties.PORT_WHITELIST)).thenReturn(RssProperties.PORT_WHITELIST);
+        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.blacklist", RssProperties.HOST_BLACKLIST_DEFAULT)).thenReturn(RssProperties.HOST_BLACKLIST_DEFAULT);
+        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports", RssProperties.PORT_WHITELIST_DEFAULT)).thenReturn(RssProperties.PORT_WHITELIST_DEFAULT);
+        Mockito.when(configurationService.getProperty(RssProperties.SCHEMES_KEY, RssProperties.SCHEMES_DEFAULT)).thenReturn(RssProperties.SCHEMES_DEFAULT);
 
         action = new RssAction();
         MockitoAnnotations.initMocks(this);
@@ -228,5 +230,44 @@ public class RssActionTest {
 
         assertEquals(6, acceptedFeedsFromUrls.size());
         assertEquals(10, warnings.size());
+    }
+
+    // tests bug 47891: RSS reader allows to detect local files
+    @Test
+    public void testGetAcceptedFeeds_onlyInvalidSchemes_returnNoCorrectData() throws OXException, MalformedURLException {
+        urls.add(new URL("netdoc://tollerLaden.de/this/is/secured/never/nice/too/asFile.xml"));
+        urls.add(new URL("file://tollerLaden.de/this/is/secured/never/nice/too/asFile.xml"));
+        urls.add(new URL("mailto://tollerLaden.de/this/is/secured/never/nice/too/asFile.xml"));
+        urls.add(new URL("netdoc://tollerLaden.de/this/is/secured/never/nice"));
+        urls.add(new URL("file://tollerLaden.de/"));
+        urls.add(new URL("mailto://tollerLaden.de/this/is/"));
+
+        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
+
+        assertEquals(0, acceptedFeedsFromUrls.size());
+        assertEquals(6, warnings.size());
+    }
+
+    // tests bug 47891: RSS reader allows to detect local files
+    @Test
+    public void testGetAcceptedFeeds_mixedValidAndInvalidSchemes_returnData() throws OXException, MalformedURLException {
+        urls.add(new URL("netdoc://tollerLaden.de:80/is/secured/never/nice/too/asFile.xml"));
+        urls.add(new URL("file://tollerLaden.de/is/secured/never/nice/too/asFile.xml"));
+        urls.add(new URL("mailto://tollerLaden.de/this/is/secured/never/nice/too/asFile.xml"));
+        urls.add(new URL("netdoc://tollerLaden.de/this/is/secured/never/nice"));
+        urls.add(new URL("file://tollerLaden.de/"));
+        urls.add(new URL("mailto://tollerLaden.de/this/is/"));
+        urls.add(new URL("https://tollerLaden.de:80/this/is/secured/not/nice"));
+        urls.add(new URL("https://tollerLaden2.de/this/is/secured/nice/too/asFile.xml"));
+        urls.add(new URL("http://tollerLaden.de/this/is/never/nice"));
+        urls.add(new URL("ftp://tollerLaden.de/this/is/never/nice/too/asFile.xml"));
+        // should be used later when URI is supported
+        //        urls.add(new URL("news://tollerLaden.de/this/is/never/nice/too/asFile.xml"));
+        //        urls.add(new URL("feed://tollerLaden.de/this/is/never/nice/too/asFile.xml"));
+
+        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
+
+        assertEquals(4, acceptedFeedsFromUrls.size());
+        assertEquals(6, warnings.size());
     }
 }

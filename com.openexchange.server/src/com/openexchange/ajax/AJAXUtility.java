@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.html.HtmlServices.fullUrlDecode;
 import static com.openexchange.java.Streams.close;
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
@@ -187,16 +188,7 @@ public final class AJAXUtility {
         String s = sInput;
 
         // Do URL decoding until fully decoded
-        {
-            int pos;
-            while ((pos = s.indexOf('%')) >= 0 && pos < s.length() - 1) {
-                try {
-                    s = new URLCodec("UTF-8").decode(s);
-                } catch (org.apache.commons.codec.DecoderException e) {
-                    break;
-                }
-            }
-        }
+        s = fullUrlDecode(s);
 
         // Drop ASCII control characters
         s = PATTERN_CONTROL.matcher(s).replaceAll("");
