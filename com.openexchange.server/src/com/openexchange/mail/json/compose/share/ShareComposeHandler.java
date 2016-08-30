@@ -65,6 +65,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.activation.DataHandler;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
@@ -74,6 +78,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor;
+import com.openexchange.ajax.requesthandler.converters.preview.PreviewConst;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
@@ -89,6 +94,7 @@ import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -121,6 +127,8 @@ import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareLink;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -473,73 +481,29 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         if (null == fileAccessFactory) {
             return java.util.Collections.emptyMap();
         }
-        IDBasedFileAccess access = fileAccessFactory.createAccess(session);
+        ThreadPoolService threadPoolService = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        if (null == threadPoolService) {
+            return java.util.Collections.emptyMap();
+        }
+        List<PreviewTask> previewTasks = new ArrayList<>(6);
         Map<String, ThresholdFileHolder> previews = new HashMap<>(6);
         boolean error = true;
         try {
             for (int k = Math.min(items.size(), 6), i = 0; k-- > 0; i++) {
                 String id = items.get(i).getId();
-                File file = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
-                DataProperties dataProperties = new DataProperties(4);
-                String mimeType = file.getFileMIMEType();
-                InputStream document = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
-                try {
-                    ThresholdFileHolder encodedThumbnail = null;
-                    if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("image")) {
-                        try {
-                            ImageTransformations transformed = transformationService.transfom(document).scale(200, 150, ScaleType.COVER, true).compress();
-                            encodedThumbnail = new ThresholdFileHolder();
-                            previews.put(id, encodedThumbnail);
-                            encodedThumbnail.write(transformed.getTransformedImage(mimeType).getImageStream());
-                        } catch (IOException e) {
-                            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-                        }
-                    } else if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("audio/mpeg")) {
-                        if (Mp3CoverExtractor.isSupported(mimeType)) {
-                            Mp3CoverExtractor mp3CoverExtractor = new Mp3CoverExtractor();
-                            try {
-                                ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-                                fileHolder.write(document);
-                                fileHolder.setContentType("audio/mpeg");
-                                fileHolder.setName(id + ".mp3");
-                                IFileHolder mp3Cover = mp3CoverExtractor.extractCover(fileHolder);
-                                ImageTransformations transformed = transformationService.transfom(mp3Cover.getStream()).scale(200, 150, ScaleType.COVER, true).compress();
-                                encodedThumbnail = new ThresholdFileHolder();
-                                previews.put(id, encodedThumbnail);
-                                encodedThumbnail.write(transformed.getTransformedImage("image/jpeg").getImageStream());
-                            } catch (IOException e) {
-                                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-                            } finally {
-                                Streams.close(document);
-                            }
-                        }
-                    } else {
-                        dataProperties.put("PreviewWidth", "200");
-                        dataProperties.put("PreviewHeight", "150");
-                        dataProperties.put("PreviewScaleType", "cover");
-                        dataProperties.put(DataProperties.PROPERTY_NAME, items.get(i).getName());
-                        dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
-                        SimpleData<InputStream> data = new SimpleData<>(document, dataProperties);
-                        PreviewDocument preview = previewService.getPreviewFor(data, PreviewOutput.IMAGE, session, 0);
-                        InputStream in = null;
-                        try {
-                            in = preview.getThumbnail();
-                            encodedThumbnail = new ThresholdFileHolder();
-                            previews.put(id, encodedThumbnail);
-                            encodedThumbnail.write(in);
-                        } finally {
-                            Streams.close(in);
-                        }
-                    }
-                } finally {
-                    Streams.close(document);
-                }
+                PreviewTask previewTask = new PreviewTask(id, fileAccessFactory, transformationService, previewService, session);
+                previewTasks.add(previewTask);
+            }
+            List<Future<Pair<String, ThresholdFileHolder>>> previewImages = threadPoolService.invokeAll(previewTasks);
+            for (Future<Pair<String, ThresholdFileHolder>> preview : previewImages) {
+                Pair<String, ThresholdFileHolder> encodedThumbnail = preview.get(500, TimeUnit.MILLISECONDS);
+                String id = encodedThumbnail.getFirst();
+                ThresholdFileHolder thumbnail = encodedThumbnail.getSecond();
+                previews.put(id, thumbnail);
             }
             error = false;
-        } catch (OXException e) {
-            if (!"PREVIEW".equals(e.getPrefix())) {
-                throw e;
-            }
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            // 
         } finally {
             if (error) {
                 for (ThresholdFileHolder tfh : previews.values()) {
@@ -587,6 +551,91 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
+    }
+    
+    private static class PreviewTask extends AbstractTask<Pair<String, ThresholdFileHolder>> {
+
+        private final String id;
+        private final IDBasedFileAccessFactory fileAccess;
+        private final ImageTransformationService transformationService;
+        private final PreviewService previewService;
+        private final Session session;
+        
+        public PreviewTask(String id, IDBasedFileAccessFactory fileAccess, ImageTransformationService transformationService, PreviewService previewService, Session session) {
+            super();
+            this.id = id;
+            this.fileAccess = fileAccess;
+            this.transformationService = transformationService;
+            this.previewService = previewService;
+            this.session = session;
+        }
+
+        @Override
+        public Pair<String, ThresholdFileHolder> call() throws Exception {
+            IDBasedFileAccess access = fileAccess.createAccess(session);
+            File file = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+            DataProperties dataProperties = new DataProperties(4);
+            String mimeType = file.getFileMIMEType();
+            InputStream document = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
+            ThresholdFileHolder encodedThumbnail = null;
+            try {
+                if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("image")) {
+                    try {
+                        ImageTransformations transformed = transformationService.transfom(document).scale(200, 150, ScaleType.COVER, true).compress();
+                        encodedThumbnail = new ThresholdFileHolder();
+                        encodedThumbnail.write(transformed.getTransformedImage(mimeType).getImageStream());
+                    } catch (IOException e) {
+                        throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                    }
+                } else if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("audio/mpeg")) {
+                    if (Mp3CoverExtractor.isSupported(mimeType)) {
+                        Mp3CoverExtractor mp3CoverExtractor = new Mp3CoverExtractor();
+                        try {
+                            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+                            fileHolder.write(document);
+                            fileHolder.setContentType("audio/mpeg");
+                            fileHolder.setName(id + ".mp3");
+                            IFileHolder mp3Cover = mp3CoverExtractor.extractCover(fileHolder);
+                            ImageTransformations transformed = transformationService.transfom(mp3Cover.getStream()).scale(200, 150, ScaleType.COVER, true).compress();
+                            encodedThumbnail = new ThresholdFileHolder();
+                            encodedThumbnail.write(transformed.getTransformedImage("image/jpeg").getImageStream());
+                        } catch (IOException e) {
+                            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                        } finally {
+                            Streams.close(document);
+                        }
+                    }
+                } else {
+                    dataProperties.put("PreviewWidth", "200");
+                    dataProperties.put("PreviewHeight", "150");
+                    dataProperties.put("PreviewScaleType", "cover");
+                    dataProperties.put(DataProperties.PROPERTY_NAME, id);
+                    dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
+                    SimpleData<InputStream> data = new SimpleData<>(document, dataProperties);
+                    PreviewDocument preview = previewService.getPreviewFor(data, PreviewOutput.IMAGE, session, 0);
+                    InputStream in = null;
+                    try {
+                        in = preview.getThumbnail();
+                        encodedThumbnail = new ThresholdFileHolder();
+                        encodedThumbnail.write(in);
+                    } finally {
+                        Streams.close(in);
+                    }
+                }
+            } catch (OXException e) {
+                if (!"PREVIEW".equals(e.getPrefix())) {
+                    throw e;
+                }
+            } finally {
+                Streams.close(document);
+            }
+            if (null == encodedThumbnail) {
+                encodedThumbnail = new ThresholdFileHolder();
+                encodedThumbnail.write(PreviewConst.DEFAULT_THUMBNAIL);
+            }
+            return new Pair<String, ThresholdFileHolder>(id, encodedThumbnail);
+        }
+
     }
 
 }
