@@ -53,7 +53,9 @@ import java.util.AbstractQueue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
@@ -465,6 +467,32 @@ public class UnsychronizedBufferingQueue<E> extends AbstractQueue<E> {
     @Override
     public int size() {
         return q.size();
+    }
+
+    /**
+     * Removes all elements with an expired delay from this queue and returns them.
+     *
+     * @return The drained elements
+     */
+    public Collection<E> drain() {
+        BufferedElement<E> first = q.peek();
+        if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
+            return Collections.emptyList();
+        }
+
+        Collection<E> c = new LinkedList<>();
+        c.add(q.poll().getElement());
+
+        boolean peek = true;
+        while (peek) {
+            BufferedElement<E> be = q.peek();
+            if (be == null || be.getDelay(TimeUnit.NANOSECONDS) > 0) {
+                peek = false;
+            } else {
+                c.add(q.poll().getElement());
+            }
+        }
+        return c;
     }
 
     /**
