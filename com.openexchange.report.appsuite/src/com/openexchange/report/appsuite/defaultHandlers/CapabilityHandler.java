@@ -133,8 +133,6 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
 
     @Override
     public void runUserReport(UserReport userReport) throws OXException {
-        //TODO QS-VS: Testen!
-        
         this.createCapabilityInformations(userReport);
 
         if (!userReport.getUser().isGuest()) {
