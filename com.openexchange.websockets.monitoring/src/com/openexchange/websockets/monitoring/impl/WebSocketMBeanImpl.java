@@ -83,13 +83,11 @@ public class WebSocketMBeanImpl extends StandardMBean implements WebSocketMBean 
         try {
             List<WebSocket> webSockets = webSocketService.listLocalWebSockets();
 
-            int size = webSockets.size();
-            List<List<String>> list = new ArrayList<List<String>>(size);
-            for (int i = 0; i < size; i++) {
-                WebSocket webSocket = webSockets.get(i);
+            List<List<String>> list = new ArrayList<List<String>>(webSockets.size());
+            for (WebSocket webSocket : webSockets) {
                 if (null != webSocket) {
                     String path = webSocket.getPath();
-                    list.add(Arrays.asList(Integer.toString(webSocket.getContextId()), Integer.toString(webSocket.getUserId()), null == path ? "<none>" : path));
+                    list.add(Arrays.asList(Integer.toString(webSocket.getContextId()), Integer.toString(webSocket.getUserId()), null == path ? "<none>" : path, webSocket.getConnectionId().getId()));
                 }
             }
 
