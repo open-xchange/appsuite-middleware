@@ -51,7 +51,6 @@ package com.openexchange.websockets.grizzly.remote.portable;
 
 import java.io.IOException;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicReference;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
@@ -63,19 +62,6 @@ import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PortableMessageDistributor extends AbstractCustomPortable implements Callable<Void> {
-
-    private static final AtomicReference<GrizzlyWebSocketApplication> APPLICATION_REFERENCE = new AtomicReference<GrizzlyWebSocketApplication>();
-
-    /**
-     * Sets the application
-     *
-     * @param application The application or <code>null</code>
-     */
-    public static void setGrizzlyWebSocketApplication(GrizzlyWebSocketApplication application) {
-        APPLICATION_REFERENCE.set(application);
-    }
-
-    // ---------------------------------------------------------------------------------------------------------------------
 
     /** The unique portable class ID of the {@link PortableMessageDistributor}: <code>600</code> */
     public static final int CLASS_ID = 600;
@@ -119,7 +105,7 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
 
     @Override
     public Void call() throws Exception {
-        GrizzlyWebSocketApplication application = APPLICATION_REFERENCE.get();
+        GrizzlyWebSocketApplication application = GrizzlyWebSocketApplication.getGrizzlyWebSocketApplication();
         if (null != application) {
             if (async) {
                 application.sendToUserAsync(message, filter, userId, contextId);

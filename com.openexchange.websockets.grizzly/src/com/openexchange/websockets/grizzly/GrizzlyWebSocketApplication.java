@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
@@ -111,6 +112,47 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketApplication.class);
 
+    private static final AtomicReference<GrizzlyWebSocketApplication> APPLICATION_REFERENCE = new AtomicReference<GrizzlyWebSocketApplication>();
+
+    /**
+     * Initializes a new {@link GrizzlyWebSocketApplication} instance (if not already performed).
+     *
+     * @param listenerRegistry The listern registry to use
+     * @param remoteDistributor The remote distributor to manage remote Web Sockets
+     * @param services The service look-up
+     * @return The newly created (or existing) instance
+     */
+    public static GrizzlyWebSocketApplication initializeGrizzlyWebSocketApplication(WebSocketListenerRegistry listenerRegistry, RemoteWebSocketDistributor remoteDistributor, ServiceLookup services) {
+        GrizzlyWebSocketApplication app;
+        GrizzlyWebSocketApplication newApp;
+        do {
+            app = APPLICATION_REFERENCE.get();
+            if (null != app) {
+                return app;
+            }
+            newApp = new GrizzlyWebSocketApplication(listenerRegistry, remoteDistributor, services);
+        } while (!APPLICATION_REFERENCE.compareAndSet(app, newApp));
+        return newApp;
+    }
+
+    /**
+     * Unsets the application
+     */
+    public static void unsetGrizzlyWebSocketApplication() {
+        APPLICATION_REFERENCE.set(null);
+    }
+
+    /**
+     * Gets the application
+     *
+     * @return The application or <code>null</code>
+     */
+    public static GrizzlyWebSocketApplication getGrizzlyWebSocketApplication() {
+        return APPLICATION_REFERENCE.get();
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
     private final ConcurrentMap<UserAndContext, ConcurrentMap<ConnectionId, SessionBoundWebSocket>> openSockets;
     private final ServiceLookup services;
     private final WebSocketListenerRegistry listenerRegistry;
@@ -120,7 +162,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     /**
      * Initializes a new {@link GrizzlyWebSocketApplication}.
      */
-    public GrizzlyWebSocketApplication(WebSocketListenerRegistry listenerRegistry, RemoteWebSocketDistributor remoteDistributor, ServiceLookup services) {
+    private GrizzlyWebSocketApplication(WebSocketListenerRegistry listenerRegistry, RemoteWebSocketDistributor remoteDistributor, ServiceLookup services) {
         super();
         this.listenerRegistry = listenerRegistry;
         this.remoteDistributor = remoteDistributor;
@@ -152,6 +194,21 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             remove(socket);
             socket.close();
         }
+    }
+
+    /**
+     * Lists all currently locally available Web Sockets.
+     *
+     * @return Locally available Web Sockets
+     */
+    public List<com.openexchange.websockets.WebSocket> listLocalWebSockets() {
+        List<com.openexchange.websockets.WebSocket> websockets = new LinkedList<>();
+        for (ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets : openSockets.values()) {
+            for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
+                websockets.add(sessionBoundSocket);
+            }
+        }
+        return websockets;
     }
 
     /**
@@ -481,7 +538,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                     }
                 }
 
-                remoteDistributor.onWebSocketConnect(sessionBoundSocket);
+                remoteDistributor.addWebSocket(sessionBoundSocket);
             } else {
                 super.onConnect(socket);
             }
@@ -505,7 +562,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 sockets.remove(sessionBoundSocket.getConnectionId());
             }
 
-            remoteDistributor.onWebSocketClose(sessionBoundSocket);
+            remoteDistributor.removeWebSocket(sessionBoundSocket);
 
             socket.close();
         } else {

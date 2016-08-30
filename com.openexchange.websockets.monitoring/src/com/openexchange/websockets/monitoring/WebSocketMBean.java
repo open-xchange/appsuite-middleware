@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,79 +47,29 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.websockets.monitoring;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
+import java.util.List;
+import javax.management.MBeanException;
+
 
 /**
- * {@link KnownTopic} - An enumeration for well-known topics.
+ * {@link WebSocketMBean} - The MBean for Web Sockets.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public enum KnownTopic {
+public interface WebSocketMBean {
+
+    /** The MBean's domain */
+    public static final String DOMAIN = "com.openexchange.websockets";
 
     /**
-     * <code>*</code>
-     * <p>
-     * The special topic matching all topic identifiers.
-     */
-    ALL("*"),
-
-    // ------------------------------------------------ MAIL ----------------------------------------------------
-
-    /**
-     * <code>ox:mail:new</code>
-     * <p>
-     * The topic for a newly arrived mail.
-     */
-    MAIL_NEW("ox:mail:new"),
-
-    // ------------------------------------------------ CALENDAR ------------------------------------------------
-
-    /**
-     * <code>ox:calendar:new</code>
-     * <p>
-     * The topic for a newly created appointment.
-     */
-    CALENDAR_NEW("ox:calendar:new"),
-
-    ;
-
-    private final String name;
-
-    private KnownTopic(final String name) {
-        this.name = name;
-    }
-
-    /**
-     * Gets the topic name
+     * Lists Web Sockets opened on this node
      *
-     * @return The topic name
+     * @return The Web Sockets opened on this node
+     * @throws MBeanException If Web Sockets cannot be returned
      */
-    public String getName() {
-        return name;
-    }
+    List<List<String>> listWebSockets() throws MBeanException;
 
-    private static final Map<String, KnownTopic> STRING2NAME;
-    static {
-        final KnownTopic[] values = KnownTopic.values();
-        final Map<String, KnownTopic> m = new HashMap<String, KnownTopic>(values.length);
-        for (final KnownTopic name : values) {
-            m.put(name.getName(), name);
-        }
-        STRING2NAME = ImmutableMap.copyOf(m);
-    }
-
-    /**
-     * Gets the associated {@code KnownTopic} enum.
-     *
-     * @param sName The name string
-     * @return The {@code KnownTopic} enum or <code>null</code>
-     */
-    public static KnownTopic nameFor(final String sName) {
-        return null == sName ? null : STRING2NAME.get(sName);
-    }
 }

@@ -223,6 +223,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.pns.PushNotificationService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.quota.QuotaProvider;
@@ -441,6 +442,9 @@ public final class ServerActivator extends HousekeepingActivator {
         track(MessageGeneratorRegistry.class, new RegistryCustomizer<MessageGeneratorRegistry>(context, MessageGeneratorRegistry.class));
         track(AttachmentStorageRegistry.class, new RegistryCustomizer<AttachmentStorageRegistry>(context, AttachmentStorageRegistry.class));
         track(EnabledCheckerRegistry.class, new RegistryCustomizer<EnabledCheckerRegistry>(context, EnabledCheckerRegistry.class));
+
+        // Push notification service (PNS)
+        track(PushNotificationService.class, new RegistryCustomizer<PushNotificationService>(context, PushNotificationService.class));
 
         // Image transformation service
         track(ImageTransformationService.class, new RegistryCustomizer<ImageTransformationService>(context, ImageTransformationService.class));
