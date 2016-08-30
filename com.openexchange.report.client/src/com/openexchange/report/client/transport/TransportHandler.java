@@ -87,8 +87,8 @@ import com.openexchange.tools.encoding.Base64;
  */
 public class TransportHandler {
 
-    private static final String REPORT_SERVER_URL = "localhost";
-    
+    private static final String REPORT_SERVER_URL = "activation.open-xchange.com";
+
     private static final String REPORT_SERVER_CLIENT_AUTHENTICATION_STRING = "rhadsIsAgTicOpyodNainPacloykAuWyribZydkarbEncherc4";
 
     private static final String POST_CLIENT_AUTHENTICATION_STRING_KEY = "clientauthenticationstring";
@@ -109,10 +109,10 @@ public class TransportHandler {
 
     private void send(JSONObject metadata, boolean savereport) throws IOException, JSONException {
         final ReportConfiguration reportConfiguration = new ReportConfiguration();
-        
+
         try {
             if (metadata.getBoolean("needsComposition") == true) {
-              sendComposedReport(metadata, savereport);  
+                sendComposedReport(metadata, savereport);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -129,7 +129,7 @@ public class TransportHandler {
             sendReport(true, reportConfiguration, metadata);
         }
     }
-    
+
     private void sendComposedReport(JSONObject metadata, boolean savereport) throws JSONException {
         if (metadata.getString("reportType").contains("oxaas")) {
             metadata.remove("oxaas");
@@ -148,10 +148,10 @@ public class TransportHandler {
      * @param report
      * @throws MalformedURLException
      * @throws IOException
-     * @throws JSONException 
+     * @throws JSONException
      */
     private void sendReport(boolean isHttps, ReportConfiguration reportConfiguration, JSONObject metadata) throws MalformedURLException, IOException, JSONException {
-        
+
         String reportString = createReportString(metadata);
         final StringBuffer report = new StringBuffer();
         report.append(POST_CLIENT_AUTHENTICATION_STRING_KEY);
@@ -190,7 +190,7 @@ public class TransportHandler {
             final DataOutputStream stream = new DataOutputStream(httpURLConnection.getOutputStream());
             stream.writeBytes(report.toString());
             if (metadata.getBoolean("needsComposition")) {
-                appendStoredContentToOutputstream(metadata, stream);
+                appendStoredContentToOutputstream(metadata, stream, true);
             }
             stream.flush();
             stream.close();
@@ -220,7 +220,7 @@ public class TransportHandler {
         }
         in.close();
     }
-    
+
     private String createReportString(JSONObject metadata) throws JSONException {
         String reportString = metadata.toString();
         if (metadata.getBoolean("needsComposition")) {
@@ -229,14 +229,18 @@ public class TransportHandler {
         return reportString;
     }
 
-    private void appendStoredContentToOutputstream(JSONObject metadata, DataOutputStream stream) throws IOException, JSONException {
+    private void appendStoredContentToOutputstream(JSONObject metadata, DataOutputStream stream, boolean useURLEncoding) throws IOException, JSONException {
         FileInputStream is = null;
         Scanner sc = null;
         try {
             is = new FileInputStream(metadata.getString("storageFolderPath") + "/" + metadata.getString("uuid") + ".report");
             sc = new Scanner(is, "UTF-8");
             while (sc.hasNext()) {
-                stream.writeBytes(sc.nextLine());
+                String line = sc.nextLine();
+                if (useURLEncoding) {
+                    line = URLEncoder.encode(line, URL_ENCODING);
+                }
+                stream.writeBytes(line);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -249,7 +253,11 @@ public class TransportHandler {
             }
         }
         //end of report
-        stream.writeBytes("}");
+        String endOfReport = "}";
+        if (useURLEncoding) {
+            endOfReport = URLEncoder.encode(endOfReport, URL_ENCODING);
+        }
+        stream.writeBytes(endOfReport);
     }
 
     /**
@@ -257,7 +265,7 @@ public class TransportHandler {
      * 
      * @param report
      * @throws IOException
-     * @throws JSONException 
+     * @throws JSONException
      */
     private void saveReportToHardDrive(final JSONObject metadata) throws IOException, JSONException {
         String reportString = createReportString(metadata);
@@ -267,7 +275,7 @@ public class TransportHandler {
         DataOutputStream tfo = new DataOutputStream(new FileOutputStream(tmpfile));
         tfo.writeBytes(reportString);
         if (metadata.getBoolean("needsComposition")) {
-            appendStoredContentToOutputstream(metadata, tfo);
+            appendStoredContentToOutputstream(metadata, tfo, false);
         }
         tfo.close();
     }
