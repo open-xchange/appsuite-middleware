@@ -224,6 +224,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.passwordmechs.PasswordMechFactory;
+import com.openexchange.pns.PushNotificationService;
 import com.openexchange.preview.PreviewService;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.quota.QuotaProvider;
@@ -445,6 +446,9 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // OAuth service
         track(OAuthService.class, new RegistryCustomizer<OAuthService>(context, OAuthService.class));
+
+        // Push notification service (PNS)
+        track(PushNotificationService.class, new RegistryCustomizer<PushNotificationService>(context, PushNotificationService.class));
 
         // Image transformation service
         track(ImageTransformationService.class, new RegistryCustomizer<ImageTransformationService>(context, ImageTransformationService.class));

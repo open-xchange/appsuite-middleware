@@ -47,79 +47,72 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.websockets.monitoring.osgi;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
+import javax.management.ObjectName;
+import org.slf4j.Logger;
+import com.openexchange.management.ManagementService;
+import com.openexchange.management.Managements;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.websockets.WebSocketService;
+import com.openexchange.websockets.monitoring.WebSocketMBean;
+import com.openexchange.websockets.monitoring.impl.WebSocketMBeanImpl;
+
 
 /**
- * {@link KnownTopic} - An enumeration for well-known topics.
+ * {@link WebSocketMonitoringActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public enum KnownTopic {
+public class WebSocketMonitoringActivator extends HousekeepingActivator {
 
     /**
-     * <code>*</code>
-     * <p>
-     * The special topic matching all topic identifiers.
+     * Initializes a new {@link WebSocketMonitoringActivator}.
      */
-    ALL("*"),
-
-    // ------------------------------------------------ MAIL ----------------------------------------------------
-
-    /**
-     * <code>ox:mail:new</code>
-     * <p>
-     * The topic for a newly arrived mail.
-     */
-    MAIL_NEW("ox:mail:new"),
-
-    // ------------------------------------------------ CALENDAR ------------------------------------------------
-
-    /**
-     * <code>ox:calendar:new</code>
-     * <p>
-     * The topic for a newly created appointment.
-     */
-    CALENDAR_NEW("ox:calendar:new"),
-
-    ;
-
-    private final String name;
-
-    private KnownTopic(final String name) {
-        this.name = name;
+    public WebSocketMonitoringActivator() {
+        super();
     }
 
-    /**
-     * Gets the topic name
-     *
-     * @return The topic name
-     */
-    public String getName() {
-        return name;
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
     }
 
-    private static final Map<String, KnownTopic> STRING2NAME;
-    static {
-        final KnownTopic[] values = KnownTopic.values();
-        final Map<String, KnownTopic> m = new HashMap<String, KnownTopic>(values.length);
-        for (final KnownTopic name : values) {
-            m.put(name.getName(), name);
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ManagementService.class, WebSocketService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(WebSocketMonitoringActivator.class);
+
+        ManagementService managementService = getService(ManagementService.class);
+        try {
+            ObjectName objectName = Managements.getObjectName(WebSocketMBean.class.getName(), WebSocketMBean.DOMAIN);
+            managementService.registerMBean(objectName, new WebSocketMBeanImpl(getService(WebSocketService.class)));
+            logger.warn("Registered MBean {}", WebSocketMBean.class.getName());
+        } catch (Exception e) {
+            logger.warn("Could not register MBean {}", WebSocketMBean.class.getName(), e);
         }
-        STRING2NAME = ImmutableMap.copyOf(m);
     }
 
-    /**
-     * Gets the associated {@code KnownTopic} enum.
-     *
-     * @param sName The name string
-     * @return The {@code KnownTopic} enum or <code>null</code>
-     */
-    public static KnownTopic nameFor(final String sName) {
-        return null == sName ? null : STRING2NAME.get(sName);
+    @Override
+    protected void stopBundle() throws Exception {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(WebSocketMonitoringActivator.class);
+
+        ManagementService managementService = getService(ManagementService.class);
+        if (null != managementService) {
+            try {
+                managementService.unregisterMBean(Managements.getObjectName(WebSocketMBean.class.getName(), WebSocketMBean.DOMAIN));
+                logger.warn("Unregistered MBean {}", WebSocketMBean.class.getName());
+            } catch (Exception e) {
+                logger.warn("Could not un-register MBean {}", WebSocketMBean.class.getName(), e);
+            }
+        }
+
+        super.stopBundle();
     }
+
 }

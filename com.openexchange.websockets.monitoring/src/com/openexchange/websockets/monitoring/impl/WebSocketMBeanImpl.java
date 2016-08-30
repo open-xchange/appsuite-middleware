@@ -47,79 +47,59 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.websockets.monitoring.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import javax.management.MBeanException;
+import javax.management.NotCompliantMBeanException;
+import javax.management.StandardMBean;
+import com.openexchange.websockets.WebSocket;
+import com.openexchange.websockets.WebSocketService;
+import com.openexchange.websockets.monitoring.WebSocketMBean;
+
 
 /**
- * {@link KnownTopic} - An enumeration for well-known topics.
+ * {@link WebSocketMBeanImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public enum KnownTopic {
+public class WebSocketMBeanImpl extends StandardMBean implements WebSocketMBean {
+
+    private final WebSocketService webSocketService;
 
     /**
-     * <code>*</code>
-     * <p>
-     * The special topic matching all topic identifiers.
+     * Initializes a new {@link WebSocketMBeanImpl}.
      */
-    ALL("*"),
-
-    // ------------------------------------------------ MAIL ----------------------------------------------------
-
-    /**
-     * <code>ox:mail:new</code>
-     * <p>
-     * The topic for a newly arrived mail.
-     */
-    MAIL_NEW("ox:mail:new"),
-
-    // ------------------------------------------------ CALENDAR ------------------------------------------------
-
-    /**
-     * <code>ox:calendar:new</code>
-     * <p>
-     * The topic for a newly created appointment.
-     */
-    CALENDAR_NEW("ox:calendar:new"),
-
-    ;
-
-    private final String name;
-
-    private KnownTopic(final String name) {
-        this.name = name;
+    public WebSocketMBeanImpl(WebSocketService webSocketService) throws NotCompliantMBeanException {
+        super(WebSocketMBean.class);
+        this.webSocketService = webSocketService;
     }
 
-    /**
-     * Gets the topic name
-     *
-     * @return The topic name
-     */
-    public String getName() {
-        return name;
-    }
+    @Override
+    public List<List<String>> listWebSockets() throws MBeanException {
+        try {
+            List<WebSocket> webSockets = webSocketService.listLocalWebSockets();
 
-    private static final Map<String, KnownTopic> STRING2NAME;
-    static {
-        final KnownTopic[] values = KnownTopic.values();
-        final Map<String, KnownTopic> m = new HashMap<String, KnownTopic>(values.length);
-        for (final KnownTopic name : values) {
-            m.put(name.getName(), name);
+            int size = webSockets.size();
+            List<List<String>> list = new ArrayList<List<String>>(size);
+            for (int i = 0; i < size; i++) {
+                WebSocket webSocket = webSockets.get(i);
+                if (null != webSocket) {
+                    String path = webSocket.getPath();
+                    list.add(Arrays.asList(Integer.toString(webSocket.getContextId()), Integer.toString(webSocket.getUserId()), null == path ? "<none>" : path));
+                }
+            }
+
+            return list;
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(WebSocketMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
         }
-        STRING2NAME = ImmutableMap.copyOf(m);
     }
 
-    /**
-     * Gets the associated {@code KnownTopic} enum.
-     *
-     * @param sName The name string
-     * @return The {@code KnownTopic} enum or <code>null</code>
-     */
-    public static KnownTopic nameFor(final String sName) {
-        return null == sName ? null : STRING2NAME.get(sName);
-    }
 }
