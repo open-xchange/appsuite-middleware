@@ -140,4 +140,11 @@ public class UserAndContext {
         return true;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(32);
+        builder.append("{contextId=").append(contextId).append(", userId=").append(userId).append("}");
+        return builder.toString();
+    }
+
 }
