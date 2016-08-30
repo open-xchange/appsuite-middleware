@@ -54,8 +54,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -274,8 +272,8 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
      * Triggers all due notifications.
      */
     public void triggerDistribution() {
-        List<Distribution> distributions = new LinkedList<Distribution>();
-        if (0 < publishQueue.drainTo(distributions)) {
+        Collection<Distribution> distributions = publishQueue.drain();
+        if (false == distributions.isEmpty()) {
             HazelcastInstance hzInstance = this.hzInstance;
             if (null == hzInstance) {
                 LOG.warn("Missing Hazelcast instance. Failed to remotely distribute notifications");
@@ -389,7 +387,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
      * @param distributions The distributions to sort
      * @return The user-wise sorted distributions
      */
-    private Map<UserAndContext, Set<Distribution.DistributionPayload>> sortyByUser(List<Distribution> distributions) {
+    private Map<UserAndContext, Set<Distribution.DistributionPayload>> sortyByUser(Collection<Distribution> distributions) {
         Map<UserAndContext, Set<Distribution.DistributionPayload>> map = new LinkedHashMap<>();
         for (Distribution distribution : distributions) {
             UserAndContext uac = UserAndContext.newInstance(distribution.getUserId(), distribution.getContextId());
