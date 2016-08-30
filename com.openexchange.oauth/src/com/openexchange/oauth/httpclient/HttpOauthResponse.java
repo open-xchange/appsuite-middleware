@@ -50,39 +50,44 @@
 package com.openexchange.oauth.httpclient;
 
 import java.util.Map;
-
 import org.scribe.model.Response;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPResponse;
+import com.openexchange.oauth.OAuthExceptionCodes;
 
 public class HttpOauthResponse implements HTTPResponse {
 
-	private final Response delegate;
+    private final Response delegate;
 
-	HttpOauthResponse(Response oauthResponse){
-		delegate = oauthResponse;
-	}
+    HttpOauthResponse(Response oauthResponse) {
+        delegate = oauthResponse;
+    }
 
-	@Override
-	public <R> R getPayload(Class<R> klass) throws OXException {
-		return (R) delegate.getBody(); // TODO: Funky
-	}
+    @Override
+    public <R> R getPayload(Class<R> klass) throws OXException {
+        try {
+            return (R) delegate.getBody(); // TODO: Funky
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            throw OAuthExceptionCodes.NOT_A_VALID_RESPONSE.create(e);
+        } catch (Exception e) {
+            throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
 
-	@Override
-	public Map<String, String> getCookies() {
-		throw new UnsupportedOperationException("Implement me ;)");
-		//return delegate.getHeaders(); //MAYBE?
-	}
+    @Override
+    public Map<String, String> getCookies() {
+        throw new UnsupportedOperationException("Implement me ;)");
+        //return delegate.getHeaders(); //MAYBE?
+    }
 
-	@Override
-	public Map<String, String> getHeaders() {
-		return delegate.getHeaders();
-	}
-	
-	@Override
-	public int getStatus() {
-	    return delegate.getCode();
-	}
+    @Override
+    public Map<String, String> getHeaders() {
+        return delegate.getHeaders();
+    }
+
+    @Override
+    public int getStatus() {
+        return delegate.getCode();
+    }
 
 }

@@ -72,13 +72,16 @@ public class RestClientActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return null;
+        return EMPTY_CLASSES;
     }
 
     @Override
     protected void startBundle() throws Exception {
         trackService(TimerService.class);
         registerService(EndpointManagerFactory.class, new EndpointManagerFactoryImpl(this));
+
+        // Avoid annoying WARN logging
+        //System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.client.protocol.ResponseProcessCookies", "fatal");
     }
 
 }
