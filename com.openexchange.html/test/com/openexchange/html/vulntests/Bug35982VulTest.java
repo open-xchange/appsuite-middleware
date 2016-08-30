@@ -75,6 +75,6 @@ public class Bug35982VulTest extends AbstractSanitizing {
             "</body>\n" +
             "</html>";
 
-        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "x=/xss/;alert(x.source)");
+        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "<script>");
     }
 }

@@ -104,7 +104,9 @@ public class ImportWriter extends DataWriter {
 
             jsonwriter.object();
             writeDepth1(jsonObject);
-
+            if (Category.CATEGORY_ERROR.getType().equals(exception.getCategory().getType())) {
+                writeParameter("line_number", String.valueOf(importResult.getEntryNumber()));
+            }
             final List<ConversionWarning> warnings = importResult.getWarnings();
             if (warnings != null && warnings.size() > 0) {
             	jsonwriter.key("warnings");
