@@ -79,6 +79,7 @@ import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.report.InfostoreInformationService;
 import com.openexchange.report.LoginCounterService;
 import com.openexchange.report.appsuite.ContextReport;
@@ -132,34 +133,9 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
 
     @Override
     public void runUserReport(UserReport userReport) throws OXException {
-        // First look up the capabilities for this user
-        CapabilitySet capabilities = new CapabilitySet(0);
-        if (userReport.getUser().isGuest()) {
-            capabilities = Services.getService(CapabilityService.class).getCapabilities(userReport.getUser().getCreatedBy(), userReport.getContext().getContextId());
-        } else {
-            capabilities = Services.getService(CapabilityService.class).getCapabilities(userReport.getUser().getId(), userReport.getContext().getContextId());
-        }
-
-        // Next, turn them into a list of strings
-        ArrayList<String> c = new ArrayList<String>(capabilities.size());
-
-        for (Capability capability : capabilities) {
-            c.add(capability.getId().toLowerCase());
-        }
-
-        // Sort them alphabetically so we can more easily find the same list of capabilities again
-        Collections.sort(c);
-
-        StringBuilder cString = new StringBuilder();
-        for (String cap : c) {
-            cString.append(cap).append(",");
-        }
-
-        cString.setLength(cString.length() - 1);
-
-        // Remember both the list and the identifying comma-separated String in the userReport
-        userReport.set(Report.MACDETAIL, Report.CAPABILITIES, cString.toString());
-        userReport.set(Report.MACDETAIL, Report.CAPABILITY_LIST, c);
+        //TODO QS-VS: Testen!
+        
+        this.createCapabilityInformations(userReport);
 
         if (!userReport.getUser().isGuest()) {
             // Determine if the user is disabled
@@ -179,11 +155,47 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
     }
     
+    private void createCapabilityInformations(UserReport userReport) throws OXException {
+        CapabilitySet userCapabilitySet = getUserCapabilities(userReport.getUser(), userReport.getContext());
+        ArrayList<String> userCapabilityIds = createSortedListOfCapabilityIds(userCapabilitySet);
+        userReport.set(Report.MACDETAIL, Report.CAPABILITIES, createCommaSeparatedStringOfIds(userCapabilityIds));
+        userReport.set(Report.MACDETAIL, Report.CAPABILITY_LIST, userCapabilityIds);
+    }
+    
+    private CapabilitySet getUserCapabilities(User user, Context context) throws OXException {
+        CapabilitySet userCapabilitySet = new CapabilitySet(0);
+        if (user.isGuest()) {
+            userCapabilitySet = Services.getService(CapabilityService.class).getCapabilities(user.getCreatedBy(), context.getContextId());
+        } else {
+            userCapabilitySet = Services.getService(CapabilityService.class).getCapabilities(user.getId(), context.getContextId());
+        }
+        return userCapabilitySet;
+    }
+    
+    private ArrayList<String> createSortedListOfCapabilityIds(CapabilitySet userCapabilitySet) {
+        ArrayList<String> userCapabilityIds = new ArrayList<String>(userCapabilitySet.size());
+
+        for (Capability capability : userCapabilitySet) {
+            userCapabilityIds.add(capability.getId().toLowerCase());
+        }
+        Collections.sort(userCapabilityIds);
+        return userCapabilityIds;
+    }
+    
+    private String createCommaSeparatedStringOfIds(ArrayList<String> userCapabilityIds) {
+        StringBuilder capabilityIdsAsString = new StringBuilder();
+        for (String capabilityId : userCapabilityIds) {
+            capabilityIdsAsString.append(capabilityId).append(",");
+        }
+        capabilityIdsAsString.setLength(capabilityIdsAsString.length() - 1);
+        return capabilityIdsAsString.toString();
+    }
+    
     public HashMap<String, Long> getUserLoginsForPastYear(int contextId, int userId) throws OXException {
-        Calendar cal = Calendar.getInstance();
-        Date endDate = cal.getTime();
-        cal.add(Calendar.YEAR, -1);
-        Date startDate = cal.getTime();
+        Calendar calender = Calendar.getInstance();
+        Date endDate = calender.getTime();
+        calender.add(Calendar.YEAR, -1);
+        Date startDate = calender.getTime();
         LoginCounterService loginCounterService = Services.getService(LoginCounterService.class);
         return loginCounterService.getLastClientLogIns(userId, contextId, startDate, endDate);
     }
