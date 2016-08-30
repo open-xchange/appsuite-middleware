@@ -53,7 +53,6 @@ import static com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtr
 import static com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor.isMp3FileExt;
 import static com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor.isSupported;
 import static com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor.isSupportedFileExt;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -77,6 +76,7 @@ import org.jaudiotagger.tag.images.Artwork;
 import org.jaudiotagger.tag.mp4.Mp4FieldKey;
 import org.jaudiotagger.tag.mp4.Mp4Tag;
 import org.jaudiotagger.tag.mp4.field.Mp4TagCoverField;
+import com.openexchange.ajax.container.TmpFileFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -88,8 +88,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
-import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -108,8 +107,6 @@ public final class Mp3ImageDataSource implements ImageDataSource {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Mp3ImageDataSource.class);
 
     private static final Mp3ImageDataSource INSTANCE = new Mp3ImageDataSource();
-
-    private static final int TEMP_FILE_TTL = 300000;
 
     /**
      * Gets the instance.
@@ -159,29 +156,30 @@ public final class Mp3ImageDataSource implements ImageDataSource {
         String mimeType = null;
         byte[] imageBytes = null;
         {
-            final ManagedFile managedFile = optData(fileId, folderId, ServerSessionAdapter.valueOf(session), ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class));
+            TmpFileFileHolder tfh = optData(fileId, folderId, ServerSessionAdapter.valueOf(session));
             try {
-                final File tmpFile = managedFile.getFile();
+                //final File tmpFile = managedFile.getFile();
                 // Check for MP3
-                if (isMp3(managedFile.getContentType()) || isMp3FileExt(managedFile.getFileName())) {
+                if (isMp3(tfh.getContentType()) || isMp3FileExt(tfh.getName())) {
                     // Create MP3 file
-                    final MP3File mp3 = new MP3File(tmpFile, MP3File.LOAD_IDV2TAG, true);
+                    MP3File mp3 = new MP3File(tfh.getTmpFile(), MP3File.LOAD_IDV2TAG, true);
+
                     // Get appropriate cover tag
-                    final AbstractID3v2Tag id3v2Tag = mp3.getID3v2Tag();
+                    AbstractID3v2Tag id3v2Tag = mp3.getID3v2Tag();
                     if (null == id3v2Tag) {
                         LOG.warn("Extracting cover image from MP3 failed. Missing ID3v2 tag.");
                     } else {
-                        final TagField imageField = id3v2Tag.getFirstField(FieldKey.COVER_ART);
+                        TagField imageField = id3v2Tag.getFirstField(FieldKey.COVER_ART);
                         if (imageField instanceof AbstractID3v2Frame) {
-                            final AbstractTagFrameBody body = ((AbstractID3v2Frame) imageField).getBody();
+                            AbstractTagFrameBody body = ((AbstractID3v2Frame) imageField).getBody();
                             if (body instanceof FrameBodyAPIC) {
-                                final FrameBodyAPIC imageFrameBody = (FrameBodyAPIC) body;
+                                FrameBodyAPIC imageFrameBody = (FrameBodyAPIC) body;
                                 if (!imageFrameBody.isImageUrl()) {
                                     imageBytes = (byte[]) getObjectValue(DataTypes.OBJ_PICTURE_DATA, imageFrameBody);
                                     mimeType = (String) getObjectValue(DataTypes.OBJ_MIME_TYPE, imageFrameBody);
                                 }
                             } else if (body instanceof FrameBodyPIC) {
-                                final FrameBodyPIC imageFrameBody = (FrameBodyPIC) body;
+                                FrameBodyPIC imageFrameBody = (FrameBodyPIC) body;
                                 if (!imageFrameBody.isImageUrl()) {
                                     imageBytes = (byte[]) getObjectValue(DataTypes.OBJ_PICTURE_DATA, imageFrameBody);
                                     mimeType = (String) getObjectValue(DataTypes.OBJ_MIME_TYPE, imageFrameBody);
@@ -191,57 +189,68 @@ public final class Mp3ImageDataSource implements ImageDataSource {
                             }
                         }
                     }
-                } else if (isSupported(managedFile.getContentType()) || isSupportedFileExt(managedFile.getFileName())) {
+                } else if (isSupported(tfh.getContentType()) || isSupportedFileExt(tfh.getName())) {
                     // Grab audio file
-                    final AudioFile f = AudioFileIO.read(tmpFile);
-                    final org.jaudiotagger.tag.Tag tag = f.getTag();
+                    AudioFile f = AudioFileIO.read(tfh.getTmpFile());
+                    org.jaudiotagger.tag.Tag tag = f.getTag();
                     if (tag instanceof Mp4Tag) {
-                        final Mp4Tag mp4tag = (Mp4Tag) tag;
-                        final List<TagField> coverarts = mp4tag.get(Mp4FieldKey.ARTWORK);
+                        Mp4Tag mp4tag = (Mp4Tag) tag;
+                        List<TagField> coverarts = mp4tag.get(Mp4FieldKey.ARTWORK);
                         if (null != coverarts && !coverarts.isEmpty()) {
                             final Mp4TagCoverField coverArtField = (Mp4TagCoverField) coverarts.get(0);
                             imageBytes = coverArtField.getData();
                             mimeType = Mp4TagCoverField.getMimeTypeForImageType(coverArtField.getFieldType());
                         }
                     } else {
-                        final Artwork artwork = tag.getFirstArtwork();
+                        Artwork artwork = tag.getFirstArtwork();
                         if (null != artwork) {
                             imageBytes = artwork.getBinaryData();
                             mimeType = artwork.getMimeType();
                         }
                     }
                 }
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            } catch (final TagException e) {
+            } catch (TagException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } catch (final ReadOnlyFileException e) {
+            } catch (ReadOnlyFileException e) {
                 throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            } catch (final CannotReadException e) {
+            } catch (CannotReadException e) {
                 throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            } catch (final InvalidAudioFrameException e) {
+            } catch (InvalidAudioFrameException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
-                managedFile.delete();
+                Streams.close(tfh);
             }
         }
+
         // Return
-        final DataProperties properties = new DataProperties();
         if (imageBytes == null) {
-            LOG.debug("Requested a non-existing image in MP3 file: file-id={} folder={} context={} session-user={}\nReturning an empty image as fallback.", fileId, folderId, session.getContextId(), session.getUserId());
+            LOG.debug("Requested a non-existing image in MP3 file: file-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", fileId, folderId, session.getContextId(), session.getUserId());
+            DataProperties properties = new DataProperties();
             properties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
             properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
             return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
         }
+
+        if (com.openexchange.ajax.helper.ImageUtils.isSvg(imageBytes)) {
+            LOG.debug("Detected a possibly harmful SVG image in MP3 file: file-id={} folder={} context={} session-user={}. Returning an empty image as fallback.", fileId, folderId, session.getContextId(), session.getUserId());
+            DataProperties properties = new DataProperties();
+            properties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
+            properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
+            return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(new byte[0])), properties);
+        }
+
+        DataProperties properties = new DataProperties();
         properties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
         properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(imageBytes.length));
         if (null != mimeType) {
             final List<String> extensions = MimeType2ExtMap.getFileExtensions(mimeType);
             properties.put(DataProperties.PROPERTY_NAME, "image." + extensions.get(0));
         }
-        return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(imageBytes)), properties);
+        return new SimpleData<D>((D) (Streams.newByteArrayInputStream(imageBytes)), properties);
     }
 
     private Object getObjectValue(final String identifier, final AbstractTagFrameBody imageFrameBody) {
@@ -354,31 +363,27 @@ public final class Mp3ImageDataSource implements ImageDataSource {
         }
     }
 
-    private static ManagedFile optData(final String fileId, final String folderId, final ServerSession session, final ManagedFileManagement fileManagement) throws OXException {
+    private static TmpFileFileHolder optData(String fileId, String folderId, ServerSession session) throws OXException {
         if (!session.getUserPermissionBits().hasInfostore()) {
             throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(fileId, folderId);
         }
-        final ServerServiceRegistry serviceRegistry = ServerServiceRegistry.getInstance();
-        IDBasedFileAccess fileAccess = serviceRegistry.getService(IDBasedFileAccessFactory.class).createAccess(session);
+        IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class);
+        IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+        TmpFileFileHolder tfh = null;
+        boolean error = true;
         try {
-            final com.openexchange.file.storage.File audioFile = fileAccess.getFileMetadata(fileId, FileStorageFileAccess.CURRENT_VERSION);
-            final String fileName = audioFile.getFileName();
-            final ManagedFile managedFile;
-            if (null == fileName) {
-                managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION), TEMP_FILE_TTL); // Stream is closed during creation of ManagedFile
-            } else {
-                final int pos = fileName.indexOf('.');
-                if (pos > 0) {
-                    managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION), fileName.substring(pos), TEMP_FILE_TTL); // Stream is closed during creation of ManagedFile
-                } else {
-                    managedFile = fileManagement.createManagedFile(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION), TEMP_FILE_TTL); // Stream is closed during creation of ManagedFile
-                }
-            }
-            managedFile.setContentType(audioFile.getFileMIMEType());
-            managedFile.setFileName(fileName);
-            return managedFile;
+            com.openexchange.file.storage.File audioFile = fileAccess.getFileMetadata(fileId, FileStorageFileAccess.CURRENT_VERSION);
+            tfh = new TmpFileFileHolder();
+            tfh.write(fileAccess.getDocument(fileId, FileStorageFileAccess.CURRENT_VERSION)); // Stream is closed in write()
+            tfh.setContentType(audioFile.getFileMIMEType());
+            tfh.setName(audioFile.getFileName());
+            error = false;
+            return tfh;
         } finally {
             fileAccess.finish();
+            if (error) {
+                Streams.close(tfh);
+            }
         }
     }
 

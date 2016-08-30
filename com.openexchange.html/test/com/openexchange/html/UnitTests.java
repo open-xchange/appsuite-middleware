@@ -58,6 +58,7 @@ import com.openexchange.html.internal.css.Bug30114Test;
 import com.openexchange.html.internal.css.Bug36024Test;
 import com.openexchange.html.internal.css.CSSMatcherTest;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
+import com.openexchange.html.vulntests.Bug47781VulTest;
 
 /**
  * Test suite for all integrated unit tests of the HTMLService implementation.
@@ -76,6 +77,7 @@ import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
     Bug35982Test.class,
     Bug36024Test.class,
     Bug36412Test.class,
+    Bug47781VulTest.class,
     ConformHtmlTest.class,
     HtmlServiceImplTest.class,
     FilterJerichoHandlerTest.class,
