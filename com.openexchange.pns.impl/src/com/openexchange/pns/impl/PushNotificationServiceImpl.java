@@ -269,9 +269,9 @@ public class PushNotificationServiceImpl implements PushNotificationService {
 
             boolean added = scheduledNotifcations.offerIfAbsentElseReset(notification);
             if (added) {
-                LOG.info("Scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
+                LOG.debug("Scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
             } else {
-                LOG.info("Reset & re-scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
+                LOG.debug("Reset & re-scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
             }
 
             if (null == scheduledTimerTask) {
@@ -378,6 +378,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         // Query appropriate subscriptions
         Hits hits = subscriptionRegistry.getInterestedSubscriptions(userId, contextId, topic);
         if (null == hits || hits.isEmpty()) {
+            LOG.info("No subscriptions of interest for topic \"{}\" for user {} in context {}", topic, I(userId), I(contextId));
             return;
         }
 
