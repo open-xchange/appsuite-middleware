@@ -168,8 +168,8 @@ public class ReportConfiguration {
     }
     
     public String getThreadPriority() {
-        if (null != properties.getProperty("com.openexchange.report.client.ThreadPriority")) {
-            return properties.getProperty("com.openexchange.report.client.ThreadPriority");
+        if (null != properties.getProperty("com.openexchange.report.client.threadPriority")) {
+            return properties.getProperty("com.openexchange.report.client.threadPriority");
         }
         return "";
     }

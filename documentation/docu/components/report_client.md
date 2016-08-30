@@ -291,6 +291,15 @@ This property enables the client to store parts of the report on hard drive to k
 The stored parts are combined into a single .report file and then deleted when the report is finished. The .report file is not deleted automatically.
 
 
+	com.openexchange.report.client.maxThreadPoolSize
+	
+The report will use multithreading for faster processing. Therefore the user can edit the threadpoolsize by editing this property value. Each thread is processing the needed values from a schema. If the threadpool is smaller then the schemas in the database, the threads are queued.
+
+	com.openexchange.report.client.threadPriority
+	
+This property determines the used threads priotity. It can range from 1 (lowest) to 10 (highest).
+
+
 
 ## Available options
 
