@@ -606,12 +606,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     I(inFolder),
                     I(action));
                 throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.create();
-            } else if (action_folder != inFolder && check_special_action == action) {
+            } else if (cdao.getEffectiveFolderId() != inFolder && check_special_action == action) {
                 LOG.debug(
                     "Permission Exception 3 (fid!inFolder) for user:oid:fid:inFolder:action {}:{}:{}:{}:{}",
                     I(so.getUserId()),
                     I(oid),
-                    I(action_folder),
+                    I(cdao.getEffectiveFolderId()),
                     I(inFolder),
                     I(action));
                 throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_3.create();
