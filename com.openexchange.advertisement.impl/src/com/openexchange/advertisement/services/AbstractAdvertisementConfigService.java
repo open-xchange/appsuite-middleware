@@ -109,8 +109,8 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
     private static final String SQL_DELETE_MAPPING = "DELETE FROM advertisement_mapping where configId=?;";
     private static final String SQL_SELECT_MAPPING_SIMPLE = "Select configId from advertisement_mapping where reseller=? AND package=?;";
     private static final String SQL_SELECT_CONFIG = "Select config from advertisement_config where configId=?;";
-    protected static final String RESELLER_ALL = "default";
     protected static final String PACKAGE_ALL = "default";
+    protected static final String RESELLER_ALL = "default";
     private static final String PREVIEW_CONFIG = "com.openexchange.advertisement.preview";
 
     /**
@@ -330,7 +330,15 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                     if (stmt.executeUpdate() == 0) {
                         // Nothing to update. Insert new row instead.
                         DBUtils.closeSQLStuff(stmt);
-                        String reseller = getReseller(ctxId);
+                        String reseller = null;
+                        try {
+                            reseller = getReseller(ctxId);
+                        } catch (OXException e) {
+                            // no reseller found
+                        }
+                        if (reseller == null) {
+                            reseller = RESELLER_ALL;
+                        }
                         stmt = con.prepareStatement(SQL_INSERT_CONFIG, Statement.RETURN_GENERATED_KEYS);
                         stmt.setString(1, reseller);
                         stmt.setString(2, config);
@@ -347,7 +355,15 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 if (config == null) {
                     return;
                 }
-                String reseller = getReseller(ctxId);
+                String reseller = null;
+                try {
+                    reseller = getReseller(ctxId);
+                } catch (OXException e) {
+                    // no reseller found
+                }
+                if (reseller == null) {
+                    reseller = RESELLER_ALL;
+                }
                 stmt = con.prepareStatement(SQL_INSERT_CONFIG, Statement.RETURN_GENERATED_KEYS);
                 stmt.setString(1, reseller);
                 stmt.setString(2, config);
