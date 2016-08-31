@@ -50,10 +50,14 @@
 package com.openexchange.websockets.grizzly.remote.portable;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.concurrent.Callable;
+import java.util.regex.Pattern;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
+import com.openexchange.java.Strings;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
 
 /**
@@ -62,6 +66,73 @@ import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class PortableMessageDistributor extends AbstractCustomPortable implements Callable<Void> {
+
+    private static final String DELIM = "?==?";
+    private static final Pattern P_DELIM = Pattern.compile("\\?==\\?");
+    private static final Pattern P_ESCAPE = Pattern.compile("\\?=3D=3D\\?");
+
+    /**
+     * Joins specified messages
+     *
+     * @param messages The messages
+     * @return The joined message
+     */
+    private static String joinMessages(Collection<String> messages) {
+        if (messages == null || messages.isEmpty()) {
+            return null;
+        }
+
+        int size = messages.size();
+        if (1 == size) {
+            return escape(messages.iterator().next());
+        }
+
+        Iterator<String> it = messages.iterator();
+        StringBuilder sb = new StringBuilder(size * 32);
+        sb.append(escape(it.next()));
+        for (int i = size - 1; i-- > 0;) {
+            sb.append(DELIM).append(escape(it.next()));
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Splits joined message
+     *
+     * @param message The joined message
+     * @return The split messages
+     */
+    private static String[] splitMessage(String message) {
+        if (Strings.isEmpty(message)) {
+            return null;
+        }
+
+        if (message.indexOf(DELIM) < 0) {
+            return new String[] { unescape(message) };
+        }
+
+        String[] split = P_DELIM.split(message);
+        for (int i = split.length; i-- > 0;) {
+            split[i] = unescape(split[i]);
+        }
+        return split;
+    }
+
+    private static String escape(String toEscape) {
+        if (toEscape.indexOf(DELIM) < 0) {
+            return toEscape;
+        }
+        return P_DELIM.matcher(toEscape).replaceAll("?=3D=3D?");
+    }
+
+    private static String unescape(String toUnescape) {
+        if (toUnescape.indexOf("?=3D=3D?") < 0) {
+            return toUnescape;
+        }
+        return P_ESCAPE.matcher(toUnescape).replaceAll(DELIM);
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------------
 
     /** The unique portable class ID of the {@link PortableMessageDistributor}: <code>600</code> */
     public static final int CLASS_ID = 600;
@@ -88,6 +159,19 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
     /**
      * Initializes a new {@link PortableMessageDistributor}.
      *
+     * @param messages The text messages to distribute
+     * @param filter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param async Whether to send asynchronously or blocking
+     */
+    public PortableMessageDistributor(Collection<String> messages, String filter, int userId, int contextId, boolean async) {
+        this(joinMessages(messages), filter, userId, contextId, async);
+    }
+
+    /**
+     * Initializes a new {@link PortableMessageDistributor}.
+     *
      * @param message The text message to distribute
      * @param filter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
      * @param userId The user identifier
@@ -107,10 +191,13 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
     public Void call() throws Exception {
         GrizzlyWebSocketApplication application = GrizzlyWebSocketApplication.getGrizzlyWebSocketApplication();
         if (null != application) {
-            if (async) {
-                application.sendToUserAsync(message, filter, userId, contextId);
-            } else {
-                application.sendToUser(message, filter, userId, contextId);
+            String[] messages = splitMessage(message);
+            for (String msg : messages) {
+                if (async) {
+                    application.sendToUserAsync(msg, filter, userId, contextId);
+                } else {
+                    application.sendToUser(msg, filter, userId, contextId);
+                }
             }
         }
         return null;

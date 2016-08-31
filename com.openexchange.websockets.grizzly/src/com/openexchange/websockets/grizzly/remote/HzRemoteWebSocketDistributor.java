@@ -50,18 +50,19 @@
 package com.openexchange.websockets.grizzly.remote;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
+import com.google.common.collect.Lists;
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
@@ -72,7 +73,6 @@ import com.hazelcast.core.MultiMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.BufferingQueue;
-import com.openexchange.session.UserAndContext;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.websockets.WebSocket;
@@ -91,7 +91,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HzRemoteWebSocketDistributor.class);
 
     private static int delayDuration(ConfigurationService configService) {
-        int defaultValue = 5000;
+        int defaultValue = 1500;
         if (null == configService) {
             return defaultValue;
         }
@@ -99,7 +99,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     }
 
     private static int maxDelayDuration(ConfigurationService configService) {
-        int defaultValue = 10000;
+        int defaultValue = 3000;
         if (null == configService) {
             return defaultValue;
         }
@@ -107,7 +107,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     }
 
     private static int timerFrequency(ConfigurationService configService) {
-        int defaultValue = 3000;
+        int defaultValue = 750;
         if (null == configService) {
             return defaultValue;
         }
@@ -297,9 +297,9 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                 // Determine other cluster members
                 Set<Member> otherMembers = getOtherMembers(cluster.getMembers(), localMember);
 
-                for (Map.Entry<UserAndContext, Set<Distribution.DistributionPayload>> userMessages : sortyByUser(distributions).entrySet()) {
-                    UserAndContext uac = userMessages.getKey();
-                    doSendRemote(userMessages.getValue(), uac.getUserId(), uac.getContextId(), hzMap, otherMembers, hzInstance);
+                for (Map.Entry<DistributionKey, Set<String>> userMessages : sortyByUser(distributions).entrySet()) {
+                    DistributionKey key = userMessages.getKey();
+                    doSendRemote(new ArrayList<String>(userMessages.getValue()), key.userId, key.contextId, key.async, key.pathFilter, hzMap, otherMembers, hzInstance);
                 }
             } catch (Exception e) {
                 LOG.warn("Failed to remotely distribute notifications", e);
@@ -313,11 +313,13 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
      * @param payloads The notifications to distribute
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param async The async flag
+     * @param pathFilter The optional path filter expression
      * @param hzMap The Hazelcast map to use
      * @param otherMembers The other cluster members (excluding this one)
      * @param hzInstance The Haszelcast instance to use
      */
-    protected void doSendRemote(Set<Distribution.DistributionPayload> payloads, int userId, int contextId, MultiMap<String, String> hzMap, Set<Member> otherMembers, HazelcastInstance hzInstance) {
+    protected void doSendRemote(List<String> payloads, int userId, int contextId, boolean async, String pathFilter, MultiMap<String, String> hzMap, Set<Member> otherMembers, HazelcastInstance hzInstance) {
         // Determine other cluster members holding an open Web Socket connection for current user
         Set<Member> effectiveOtherMembers = new LinkedHashSet<>(otherMembers);
         for (Iterator<Member> it = effectiveOtherMembers.iterator(); it.hasNext(); ) {
@@ -331,54 +333,55 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         if (!effectiveOtherMembers.isEmpty()) {
             IExecutorService executor = hzInstance.getExecutorService("default");
 
-            for (final Distribution.DistributionPayload distributionPayload : payloads) {
-                boolean async = distributionPayload.async;
-                Map<Member, Future<Void>> futureMap = executor.submitToMembers(new PortableMessageDistributor(distributionPayload.message, distributionPayload.pathFilter, userId, contextId, async), effectiveOtherMembers);
+            for (List<String> partition : Lists.partition(payloads, 5)) {
+                Map<Member, Future<Void>> futureMap = executor.submitToMembers(new PortableMessageDistributor(partition, pathFilter, userId, contextId, async), effectiveOtherMembers);
                 if (false == async) {
                     // Wait for completion of each submitted task
-                    for (Iterator<Entry<Member, Future<Void>>> it = futureMap.entrySet().iterator(); it.hasNext();) {
-                        Map.Entry<Member, Future<Void>> futureMapEntry = it.next();
-                        Future<Void> future = futureMapEntry.getValue();
-                        // Check Future's return value
-                        int retryCount = 3;
-                        while (retryCount-- > 0) {
-                            try {
-                                future.get();
-                                retryCount = 0;
-                                LOG.debug("Submitted message \"{}\" to remote Web Socket(s) connected to member \"{}\" using path filter \"{}\" to user {} in context {}", new Object() { @Override public String toString(){ return StringUtils.abbreviate(distributionPayload.message, 12); }}, futureMapEntry.getKey(), distributionPayload.pathFilter, userId, contextId);
-                            } catch (InterruptedException e) {
-                                // Interrupted - Keep interrupted state
-                                LOG.debug("Interrupted while waiting for {} to complete", PortableMessageDistributor.class.getSimpleName(), e);
-                                Thread.currentThread().interrupt();
-                            } catch (CancellationException e) {
-                                // Canceled
-                                LOG.debug("Canceled while waiting for {} to complete", PortableMessageDistributor.class.getSimpleName(), e);
-                                retryCount = 0;
-                            } catch (ExecutionException e) {
-                                Throwable cause = e.getCause();
-
-                                // Check for Hazelcast timeout
-                                if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
-                                    if (cause instanceof RuntimeException) {
-                                        throw ((RuntimeException) cause);
-                                    }
-                                    if (cause instanceof Error) {
-                                        throw (Error) cause;
-                                    }
-                                    throw new IllegalStateException("Not unchecked", cause);
-                                }
-
-                                // Timeout while awaiting remote result
-                                if (retryCount <= 0) {
-                                    // No further retry
-                                    cancelFutureSafe(future);
-                                }
-                            }
-                        }
+                    for (Map.Entry<Member, Future<Void>> element : futureMap.entrySet()) {
+                        handleSubmittedFuture(element.getValue(), pathFilter, element.getKey(), userId, contextId);
                     }
                 }
             }
         }
+    }
+
+    private void handleSubmittedFuture(Future<Void> future, String pathFilter, Member member, int userId, int contextId) throws Error {
+        // Check Future's return value
+        int retryCount = 3;
+        while (retryCount-- > 0) {
+            try {
+                future.get();
+                retryCount = 0;
+                LOG.debug("Submitted message(s) to remote Web Socket(s) connected to member \"{}\" using path filter \"{}\" to user {} in context {}", member, pathFilter, I(userId), I(contextId));
+            } catch (InterruptedException e) {
+                // Interrupted - Keep interrupted state
+                LOG.debug("Interrupted while waiting for {} to complete on member \"{}\" using path filter \"{}\" for user {} in context {}", PortableMessageDistributor.class.getSimpleName(), member, pathFilter, I(userId), I(contextId), e);
+                Thread.currentThread().interrupt();
+            } catch (CancellationException e) {
+                // Canceled
+                LOG.debug("Canceled while waiting for {} to complete on member \"{}\" using path filter \"{}\" for user {} in context {}", PortableMessageDistributor.class.getSimpleName(), member, pathFilter, I(userId), I(contextId), e);
+                retryCount = 0;
+            } catch (ExecutionException e) {
+                Throwable cause = e.getCause();
+
+                // Check for Hazelcast timeout
+                if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                    if (cause instanceof RuntimeException) {
+                        throw ((RuntimeException) cause);
+                    }
+                    if (cause instanceof Error) {
+                        throw (Error) cause;
+                    }
+                    throw new IllegalStateException("Not unchecked", cause);
+                }
+
+                // Timeout while awaiting remote result
+                if (retryCount <= 0) {
+                    // No further retry
+                    cancelFutureSafe(future);
+                }
+            }
+        } // End of while loop
     }
 
     /**
@@ -387,14 +390,14 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
      * @param distributions The distributions to sort
      * @return The user-wise sorted distributions
      */
-    private Map<UserAndContext, Set<Distribution.DistributionPayload>> sortyByUser(Collection<Distribution> distributions) {
-        Map<UserAndContext, Set<Distribution.DistributionPayload>> map = new LinkedHashMap<>();
+    private Map<DistributionKey, Set<String>> sortyByUser(Collection<Distribution> distributions) {
+        Map<DistributionKey, Set<String>> map = new LinkedHashMap<>();
         for (Distribution distribution : distributions) {
-            UserAndContext uac = UserAndContext.newInstance(distribution.getUserId(), distribution.getContextId());
-            Set<Distribution.DistributionPayload> userMessages = map.get(uac);
+            DistributionKey key = new DistributionKey(distribution.getUserId(), distribution.getContextId(), distribution.isAsync(), distribution.getPathFilter());
+            Set<String> userMessages = map.get(key);
             if (null == userMessages) {
                 userMessages = new LinkedHashSet<>();
-                map.put(uac, userMessages);
+                map.put(key, userMessages);
             }
             userMessages.addAll(distribution.getPayloads());
         }
@@ -542,6 +545,71 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     @Override
     public void removeWebSocket(WebSocket socket) {
         removeFromHzMultiMap(socket);
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------------
+
+    private static final class DistributionKey {
+
+        final int userId;
+        final int contextId;
+        final boolean async;
+        final String pathFilter;
+        private final int hash;
+
+        /**
+         * Initializes a new {@link Distribution}.
+         */
+        DistributionKey(int userId, int contextId, boolean async, String pathFilter) {
+            super();
+            this.userId = userId;
+            this.contextId = contextId;
+            this.async = async;
+            this.pathFilter = pathFilter;
+            int prime = 31;
+            int result = 1;
+            result = prime * result + (async ? 1231 : 1237);
+            result = prime * result + contextId;
+            result = prime * result + userId;
+            result = prime * result + ((pathFilter == null) ? 0 : pathFilter.hashCode());
+            hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            DistributionKey other = (DistributionKey) obj;
+            if (async != other.async) {
+                return false;
+            }
+            if (contextId != other.contextId) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            if (pathFilter == null) {
+                if (other.pathFilter != null) {
+                    return false;
+                }
+            } else if (!pathFilter.equals(other.pathFilter)) {
+                return false;
+            }
+            return true;
+        }
     }
 
 }

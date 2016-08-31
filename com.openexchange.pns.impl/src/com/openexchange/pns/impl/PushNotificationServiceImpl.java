@@ -93,7 +93,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             synchronized (PushNotificationServiceImpl.class) {
                 tmp = delayDuration;
                 if (null == tmp) {
-                    int defaultValue = 3000; // 3 seconds
+                    int defaultValue = 1500; // 1,5 seconds
                     if (null == configService) {
                         return defaultValue;
                     }
@@ -113,7 +113,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             synchronized (PushNotificationServiceImpl.class) {
                 tmp = timerFrequency;
                 if (null == tmp) {
-                    int defaultValue = 1500; // 1,5 seconds
+                    int defaultValue = 750; // 0,75 seconds
                     if (null == configService) {
                         return defaultValue;
                     }
@@ -318,6 +318,10 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                 numAdded++;
                 notification = scheduledNotifcations.poll();
             } while (null != notification);
+
+            if (scheduledNotifcations.isEmpty()) {
+                cancelTimerTask();
+            }
         } finally {
             lock.unlock();
         }

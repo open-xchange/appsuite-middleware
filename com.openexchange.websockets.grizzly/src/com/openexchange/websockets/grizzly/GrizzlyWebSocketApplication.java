@@ -534,6 +534,8 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         }
     }
 
+    private static final int MAX_SIZE = 8;
+
     @Override
     public void onConnect(WebSocket socket) {
         // Override this method to take control over socket collection
@@ -545,15 +547,20 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 UserAndContext userAndContext = UserAndContext.newInstance(sessionBoundSocket.getUserId(), sessionBoundSocket.getContextId());
                 ConcurrentMap<ConnectionId, SessionBoundWebSocket> sockets = openSockets.get(userAndContext);
                 if (sockets == null) {
-                    sockets = new ConcurrentHashMap<>(8, 0.9F, 1);
+                    sockets = new BoundedConcurrentHashMap<>(MAX_SIZE, 0.9F, 1, MAX_SIZE);
                     ConcurrentMap<ConnectionId, SessionBoundWebSocket> existing = openSockets.putIfAbsent(userAndContext, sockets);
                     if (existing != null) {
                         sockets = existing;
                     }
                 }
 
-                if (null != sockets.putIfAbsent(sessionBoundSocket.getConnectionId(), sessionBoundSocket)) {
-                    throw new HandshakeException("Such a Web Socket connection already exists: " + sessionBoundSocket.getConnectionId());
+                try {
+                    if (null != sockets.putIfAbsent(sessionBoundSocket.getConnectionId(), sessionBoundSocket)) {
+                        throw new HandshakeException("Such a Web Socket connection already exists: " + sessionBoundSocket.getConnectionId());
+                    }
+                } catch (BoundedConcurrentHashMap.BoundaryExceededException e) {
+                    // Max. number of sockets per user exceeded
+                    throw new HandshakeException("Max. number of Web Sockets (" + MAX_SIZE + ") exceeded for user " + userAndContext.getUserId() + " in context " + userAndContext.getContextId());
                 }
 
                 synchronized (sessionBoundSocket) {
