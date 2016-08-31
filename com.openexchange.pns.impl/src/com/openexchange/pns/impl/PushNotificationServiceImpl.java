@@ -61,7 +61,7 @@ import org.slf4j.Logger;
 import com.google.common.collect.Iterators;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.UnsychronizedBufferingQueue;
+import com.openexchange.java.UnsynchronizedBufferingQueue;
 import com.openexchange.pns.Hit;
 import com.openexchange.pns.Hits;
 import com.openexchange.pns.PushNotification;
@@ -93,7 +93,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             synchronized (PushNotificationServiceImpl.class) {
                 tmp = delayDuration;
                 if (null == tmp) {
-                    int defaultValue = 3000; // 3 seconds
+                    int defaultValue = 1500; // 1,5 seconds
                     if (null == configService) {
                         return defaultValue;
                     }
@@ -113,7 +113,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             synchronized (PushNotificationServiceImpl.class) {
                 tmp = timerFrequency;
                 if (null == tmp) {
-                    int defaultValue = 1500; // 1,5 seconds
+                    int defaultValue = 750; // 0,75 seconds
                     if (null == configService) {
                         return defaultValue;
                     }
@@ -185,7 +185,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
 
     private final Processor processor;
 
-    private final UnsychronizedBufferingQueue<PushNotification> scheduledNotifcations; // Accessed synchronized
+    private final UnsynchronizedBufferingQueue<PushNotification> scheduledNotifcations; // Accessed synchronized
     private ScheduledTimerTask scheduledTimerTask; // Accessed synchronized
     private boolean stopped; // Accessed synchronized
 
@@ -202,7 +202,32 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         this.configService = configService;
         this.timerService = timerService;
         this.transportRegistry = transportRegistry;
-        scheduledNotifcations = new UnsychronizedBufferingQueue<>(delayDuration(configService));
+        scheduledNotifcations = new UnsynchronizedBufferingQueue<>(delayDuration(configService));
+    }
+
+    @Override
+    public long getNumberOfBufferedNotifications() throws OXException {
+        lock.lock();
+        try {
+            if (stopped) {
+                // Already stopped
+                return 0L;
+            }
+
+            return scheduledNotifcations.size();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public long getNumberOfSubmittedNotifications() throws OXException {
+        return processor.getNumberOfBufferedTasks();
+    }
+
+    @Override
+    public long getNumberOfProcessingNotifications() throws OXException {
+        return processor.getNumberOfExecutingTasks();
     }
 
     /**
@@ -269,9 +294,9 @@ public class PushNotificationServiceImpl implements PushNotificationService {
 
             boolean added = scheduledNotifcations.offerIfAbsentElseReset(notification);
             if (added) {
-                LOG.info("Scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
+                LOG.debug("Scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
             } else {
-                LOG.info("Reset & re-scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
+                LOG.debug("Reset & re-scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
             }
 
             if (null == scheduledTimerTask) {
@@ -318,6 +343,10 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                 numAdded++;
                 notification = scheduledNotifcations.poll();
             } while (null != notification);
+
+            if (scheduledNotifcations.isEmpty()) {
+                cancelTimerTask();
+            }
         } finally {
             lock.unlock();
         }
@@ -378,6 +407,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         // Query appropriate subscriptions
         Hits hits = subscriptionRegistry.getInterestedSubscriptions(userId, contextId, topic);
         if (null == hits || hits.isEmpty()) {
+            LOG.info("No subscriptions of interest for topic \"{}\" for user {} in context {}", topic, I(userId), I(contextId));
             return;
         }
 

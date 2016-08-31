@@ -54,26 +54,48 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * {@link Distribution}
+ * {@link RemoteMessage}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class Distribution {
+public class RemoteMessage {
 
-    private final Queue<DistributionPayload> payloads;
+    private final Queue<String> payloads;
+    private final String pathFilter;
     private final int userId;
     private final int contextId;
+    private final boolean async;
     private volatile Integer hash;
 
     /**
-     * Initializes a new {@link Distribution}.
+     * Initializes a new {@link RemoteMessage}.
      */
-    public Distribution(String message, String pathFilter, int userId, int contextId, boolean async) {
+    public RemoteMessage(String message, String pathFilter, int userId, int contextId, boolean async) {
         super();
         this.userId = userId;
         this.contextId = contextId;
-        payloads = new ConcurrentLinkedQueue<>(Arrays.asList(new DistributionPayload(message, pathFilter, async)));
+        this.async = async;
+        this.pathFilter = pathFilter;
+        payloads = new ConcurrentLinkedQueue<>(Arrays.asList(message));
+    }
+
+    /**
+     * Gets the async flag
+     *
+     * @return The async flag
+     */
+    public boolean isAsync() {
+        return async;
+    }
+
+    /**
+     * Gets the path filter
+     *
+     * @return The path filter
+     */
+    public String getPathFilter() {
+        return pathFilter;
     }
 
     /**
@@ -99,7 +121,7 @@ public class Distribution {
      *
      * @return The payloads
      */
-    public Queue<DistributionPayload> getPayloads() {
+    public Queue<String> getPayloads() {
         return payloads;
     }
 
@@ -108,16 +130,16 @@ public class Distribution {
      *
      * @param other The distribution providing the pay,oads to merge
      */
-    public void mergeWith(Distribution other) {
+    public void mergeWith(RemoteMessage other) {
         if (this == other) {
             return;
         }
         if (null == other) {
             return;
         }
-        Queue<DistributionPayload> thisPayloads = payloads;
+        Queue<String> thisPayloads = payloads;
         synchronized (thisPayloads) {
-            for (DistributionPayload otherPayload : other.payloads) {
+            for (String otherPayload : other.payloads) {
                 if (!thisPayloads.contains(otherPayload)) {
                     thisPayloads.add(otherPayload);
                 }
@@ -132,8 +154,10 @@ public class Distribution {
             // May be computed concurrently...
             int prime = 31;
             int result = 1;
+            result = prime * result + (async ? 1231 : 1237);
             result = prime * result + contextId;
             result = prime * result + userId;
+            result = prime * result + ((pathFilter == null) ? 0 : pathFilter.hashCode());
             tmp = Integer.valueOf(result);
             hash = tmp;
         }
@@ -145,80 +169,30 @@ public class Distribution {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof Distribution)) {
+        if (obj == null) {
             return false;
         }
-        Distribution other = (Distribution) obj;
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        RemoteMessage other = (RemoteMessage) obj;
+        if (async != other.async) {
+            return false;
+        }
         if (contextId != other.contextId) {
             return false;
         }
         if (userId != other.userId) {
             return false;
         }
+        if (pathFilter == null) {
+            if (other.pathFilter != null) {
+                return false;
+            }
+        } else if (!pathFilter.equals(other.pathFilter)) {
+            return false;
+        }
         return true;
-    }
-
-    // --------------------------------------------------------------------------------------------------------
-
-    /** A distribution payload */
-    public static class DistributionPayload {
-
-        final String message;
-        final String pathFilter;
-        final boolean async;
-        private volatile Integer hash;
-
-        DistributionPayload(String message, String pathFilter, boolean async) {
-            super();
-            this.message = message;
-            this.pathFilter = pathFilter;
-            this.async = async;
-        }
-
-        @Override
-        public int hashCode() {
-            Integer tmp = hash;
-            if (null == tmp) {
-                // May be computed concurrently...
-                int prime = 31;
-                int result = 1;
-                result = prime * result + (async ? 1231 : 1237);
-                result = prime * result + ((message == null) ? 0 : message.hashCode());
-                result = prime * result + ((pathFilter == null) ? 0 : pathFilter.hashCode());
-                tmp = Integer.valueOf(result);
-                hash = tmp;
-            }
-            return tmp.intValue();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof DistributionPayload)) {
-                return false;
-            }
-            DistributionPayload other = (DistributionPayload) obj;
-            if (async != other.async) {
-                return false;
-            }
-            if (message == null) {
-                if (other.message != null) {
-                    return false;
-                }
-            } else if (!message.equals(other.message)) {
-                return false;
-            }
-            if (pathFilter == null) {
-                if (other.pathFilter != null) {
-                    return false;
-                }
-            } else if (!pathFilter.equals(other.pathFilter)) {
-                return false;
-            }
-            return true;
-        }
     }
 
 }

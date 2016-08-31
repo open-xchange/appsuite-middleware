@@ -72,6 +72,15 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
         wsTransport = transport;
     }
 
+    /**
+     * Gets the remote end-point.
+     *
+     * @return The remote end-point
+     */
+    public WebSocket getRemoteEndpoint() {
+        return remoteEndpoint;
+    }
+
     // ---------------------------------------------- WebSocketListener stuff ------------------------------------------------------
 
     /**
@@ -275,9 +284,9 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
         }
     }
 
-    private void disconnectEndpoint(WebSocket remote_endpoint ) {
+    private void disconnectEndpoint(WebSocket remoteEndpoint ) {
         try {
-            remote_endpoint.close();
+            remoteEndpoint.close();
         } catch (Exception ex) {
             // ignore
         }

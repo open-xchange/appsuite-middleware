@@ -122,7 +122,7 @@ public class SetConfigRequest implements AJAXRequest<SetConfigResponse> {
     @Override
     public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
         if (config == null) {
-            return Method.GET;
+            return Method.DELETE;
         }
         return Method.PUT;
     }

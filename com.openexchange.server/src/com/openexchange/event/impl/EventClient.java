@@ -51,6 +51,7 @@ package com.openexchange.event.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -69,6 +70,8 @@ import com.openexchange.folder.FolderService;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.Types;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.groupware.calendar.RecurringResultsInterface;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Contact;
@@ -78,6 +81,12 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.pns.DefaultPushNotification;
+import com.openexchange.pns.KnownTopic;
+import com.openexchange.pns.PushNotification;
+import com.openexchange.pns.PushNotificationField;
+import com.openexchange.pns.PushNotificationService;
+import com.openexchange.pns.PushNotifications;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -134,6 +143,58 @@ public class EventClient {
 
         final EventObject eventObject = new EventObject(appointment, CREATED, session);
         EventQueue.add(eventObject);
+
+        PushNotificationService pushNotificationService = ServerServiceRegistry.getInstance().getService(PushNotificationService.class);
+        if (null != pushNotificationService) {
+            for (Map.Entry<Integer, Set<Integer>> entry : affectedUsers.entrySet()) {
+                int userId = entry.getKey().intValue();
+                Integer folderId = entry.getValue().iterator().next();
+                Date[] startAndEndDate = determineStartAndEndDate(appointment);
+
+                Map<String, Object> messageData = PushNotifications.messageDataBilder()
+                    .put(PushNotificationField.ID, Integer.valueOf(appointment.getObjectID()))
+                    .put(PushNotificationField.FOLDER, folderId)
+                    .put(PushNotificationField.APPOINTMENT_TITLE, appointment.getTitle())
+                    .put(PushNotificationField.APPOINTMENT_LOCATION, appointment.getLocation())
+                    .put(PushNotificationField.APPOINTMENT_START_DATE, startAndEndDate[0])
+                    .put(PushNotificationField.APPOINTMENT_END_DATE, startAndEndDate[1])
+                    .build();
+
+                PushNotification notification = DefaultPushNotification.builder()
+                    .contextId(contextId)
+                    .userId(userId)
+                    .topic(KnownTopic.CALENDAR_NEW.getName())
+                    .messageData(messageData)
+                    .build();
+                pushNotificationService.handle(notification);
+            }
+        }
+    }
+
+    /**
+     * Determines specified appointment's end date
+     *
+     * @param appointment The appointment
+     * @return The end date
+     */
+    private Date[] determineStartAndEndDate(Appointment appointment) {
+        if (appointment.getRecurrenceType() == CalendarObject.NONE) {
+            return new Date[] { appointment.getStartDate(), appointment.getEndDate() };
+        }
+
+        CalendarCollectionService calColl = ServerServiceRegistry.getInstance().getService(CalendarCollectionService.class);
+        RecurringResultsInterface recuResults = null;
+        try {
+            recuResults = calColl.calculateFirstRecurring(appointment);
+        } catch (final OXException e) {
+            LOG.error("Failed calculating recurrence {}", appointment.getObjectID(), e);
+        }
+        if (recuResults != null && recuResults.size() == 1) {
+            return new Date[] { new Date(recuResults.getRecurringResult(0).getStart()), new Date(recuResults.getRecurringResult(0).getEnd()) };
+        }
+
+        LOG.warn("Failed loading first recurring appointment from appointment object: {} / {}\n\n\n", appointment.getRecurrenceType(), appointment.getObjectID());
+        return new Date[] { appointment.getStartDate(), appointment.getEndDate() };
     }
 
     public void modify(final Appointment appointment) throws OXException {
@@ -830,27 +891,25 @@ public class EventClient {
     private Map<Integer, Set<Integer>> getAffectedUsers(final CalendarObject[] objects, final FolderObject[] folders) throws OXException {
         final Map<Integer, Set<Integer>> retval = getAffectedUsers(folders);
         for (final CalendarObject object : objects) {
-            if (null == object) {
-                continue;
-            }
-            getFolderSet(retval, userId).add(I(object.getParentFolderID()));
-            final UserParticipant[] participants = object.getUsers();
-            if (null == participants) {
-                continue;
-            }
-            for (final UserParticipant participant : object.getUsers()) {
-                final int participantId = participant.getIdentifier();
-                if (Participant.NO_ID == participantId) {
-                    continue;
+            if (null != object) {
+                getFolderSet(retval, userId).add(I(object.getParentFolderID()));
+                UserParticipant[] participants = object.getUsers();
+                if (null != participants) {
+                    for (final UserParticipant participant : participants) {
+                        final int participantId = participant.getIdentifier();
+                        if (Participant.NO_ID == participantId) {
+                            continue;
+                        }
+                        getFolderSet(retval, participantId);
+                        final int folderId = participant.getPersonalFolderId();
+                        if (UserParticipant.NO_PFID == folderId || 0 == folderId) {
+                            continue;
+                        }
+                        final FolderService folderService = ServerServiceRegistry.getInstance().getService(FolderService.class, true);
+                        final FolderObject folder = folderService.getFolderObject(folderId, contextId);
+                        addFolderToAffectedMap(retval, folder);
+                    }
                 }
-                getFolderSet(retval, participantId);
-                final int folderId = participant.getPersonalFolderId();
-                if (UserParticipant.NO_PFID == folderId || 0 == folderId) {
-                    continue;
-                }
-                final FolderService folderService = ServerServiceRegistry.getInstance().getService(FolderService.class, true);
-                final FolderObject folder = folderService.getFolderObject(folderId, contextId);
-                addFolderToAffectedMap(retval, folder);
             }
         }
         return retval;

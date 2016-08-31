@@ -49,6 +49,7 @@
 
 package com.openexchange.websockets;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
@@ -177,5 +178,43 @@ public interface WebSocketService {
      * @return The handler which will be notified of progress.
      */
     SendControl sendMessageAsync(String message, String pathFilter, int userId, int contextId) throws OXException;
+
+    // -------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Gets the number of open Web Sockets on this node
+     *
+     * @return The number of open Web Sockets
+     * @throws OXException If number of open Web Sockets cannot be returned
+     */
+    long getNumberOfWebSockets() throws OXException;
+
+    /**
+     * Gets the number of buffered messages that are supposed to be sent to remote cluster members.
+     *
+     * @return The number of buffered messages
+     * @throws OXException If number of buffered messages cannot be returned
+     */
+    long getNumberOfBufferedMessages() throws OXException;
+
+    /**
+     * Lists all currently locally available Web Sockets.
+     *
+     * @return Locally available Web Sockets
+     * @throws OXException If Web Sockets cannot be returned
+     */
+    List<WebSocket> listLocalWebSockets() throws OXException;
+
+    /**
+     * Closes all locally available Web Sockets matching specified path filter expression (if any).
+     * <p>
+     * In case no path filter expression is given (<code>pathFilter == null</code>), all user-associated Web Sockets are closed.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param pathFilter The optional path filter expression or <code>null</code>
+     * @throws OXException If closing Web Sockets fails
+     */
+    void closeWebSockets(int userId, int contextId, String pathFilter) throws OXException;
 
 }

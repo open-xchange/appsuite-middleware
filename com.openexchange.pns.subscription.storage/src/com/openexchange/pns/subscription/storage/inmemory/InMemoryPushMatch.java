@@ -66,6 +66,7 @@ public class InMemoryPushMatch implements PushMatch {
     private final String transportId;
     private final String token;
     private final String topic;
+    private int hash; // Default to 0
 
     /**
      * Initializes a new {@link InMemoryPushMatch}.
@@ -115,6 +116,70 @@ public class InMemoryPushMatch implements PushMatch {
     @Override
     public String getTopic() {
         return topic;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = hash;
+        if (result == 0 ) {
+            int prime = 31;
+            result = 1;
+            result = prime * result + contextId;
+            result = prime * result + userId;
+            result = prime * result + ((token == null) ? 0 : token.hashCode());
+            result = prime * result + ((client == null) ? 0 : client.hashCode());
+            result = prime * result + ((topic == null) ? 0 : topic.hashCode());
+            result = prime * result + ((transportId == null) ? 0 : transportId.hashCode());
+
+            hash = result;
+        }
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof PushMatch)) {
+            return false;
+        }
+        PushMatch other = (PushMatch) obj;
+        if (contextId != other.getContextId()) {
+            return false;
+        }
+        if (userId != other.getUserId()) {
+            return false;
+        }
+        if (token == null) {
+            if (other.getToken() != null) {
+                return false;
+            }
+        } else if (!token.equals(other.getToken())) {
+            return false;
+        }
+        if (client == null) {
+            if (other.getClient() != null) {
+                return false;
+            }
+        } else if (!client.equals(other.getClient())) {
+            return false;
+        }
+        if (topic == null) {
+            if (other.getTopic() != null) {
+                return false;
+            }
+        } else if (!topic.equals(other.getTopic())) {
+            return false;
+        }
+        if (transportId == null) {
+            if (other.getTransportId() != null) {
+                return false;
+            }
+        } else if (!transportId.equals(other.getTransportId())) {
+            return false;
+        }
+        return true;
     }
 
 }

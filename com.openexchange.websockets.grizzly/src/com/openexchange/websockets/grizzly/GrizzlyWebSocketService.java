@@ -49,9 +49,11 @@
 
 package com.openexchange.websockets.grizzly;
 
+import java.util.List;
 import java.util.concurrent.Future;
 import com.openexchange.exception.OXException;
 import com.openexchange.websockets.SendControl;
+import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketExceptionCodes;
 import com.openexchange.websockets.WebSocketService;
 import com.openexchange.websockets.WebSockets;
@@ -129,4 +131,27 @@ public class GrizzlyWebSocketService implements WebSocketService {
         remoteDistributor.sendRemote(message, pathFilter, userId, contextId, true);
         return new SendControlImpl<Void>(f);
     }
+
+    // -------------------------------------------------------------------------------------------------------------
+
+    @Override
+    public List<WebSocket> listLocalWebSockets() throws OXException {
+        return localApp.listLocalWebSockets();
+    }
+
+    @Override
+    public long getNumberOfBufferedMessages() throws OXException {
+        return remoteDistributor.getNumberOfBufferedMessages();
+    }
+
+    @Override
+    public void closeWebSockets(int userId, int contextId, String pathFilter) throws OXException {
+        localApp.closeWebSockets(userId, contextId, pathFilter);
+    }
+
+    @Override
+    public long getNumberOfWebSockets() throws OXException {
+        return localApp.getNumberOfWebSockets();
+    }
+
 }

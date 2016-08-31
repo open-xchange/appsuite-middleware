@@ -49,6 +49,7 @@
 
 package com.openexchange.websockets.grizzly;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.nio.charset.Charset;
 import java.util.Collection;
@@ -60,6 +61,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
@@ -111,6 +113,47 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketApplication.class);
 
+    private static final AtomicReference<GrizzlyWebSocketApplication> APPLICATION_REFERENCE = new AtomicReference<GrizzlyWebSocketApplication>();
+
+    /**
+     * Initializes a new {@link GrizzlyWebSocketApplication} instance (if not already performed).
+     *
+     * @param listenerRegistry The listern registry to use
+     * @param remoteDistributor The remote distributor to manage remote Web Sockets
+     * @param services The service look-up
+     * @return The newly created (or existing) instance
+     */
+    public static GrizzlyWebSocketApplication initializeGrizzlyWebSocketApplication(WebSocketListenerRegistry listenerRegistry, RemoteWebSocketDistributor remoteDistributor, ServiceLookup services) {
+        GrizzlyWebSocketApplication app;
+        GrizzlyWebSocketApplication newApp;
+        do {
+            app = APPLICATION_REFERENCE.get();
+            if (null != app) {
+                return app;
+            }
+            newApp = new GrizzlyWebSocketApplication(listenerRegistry, remoteDistributor, services);
+        } while (!APPLICATION_REFERENCE.compareAndSet(app, newApp));
+        return newApp;
+    }
+
+    /**
+     * Unsets the application
+     */
+    public static void unsetGrizzlyWebSocketApplication() {
+        APPLICATION_REFERENCE.set(null);
+    }
+
+    /**
+     * Gets the application
+     *
+     * @return The application or <code>null</code>
+     */
+    public static GrizzlyWebSocketApplication getGrizzlyWebSocketApplication() {
+        return APPLICATION_REFERENCE.get();
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
     private final ConcurrentMap<UserAndContext, ConcurrentMap<ConnectionId, SessionBoundWebSocket>> openSockets;
     private final ServiceLookup services;
     private final WebSocketListenerRegistry listenerRegistry;
@@ -120,7 +163,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     /**
      * Initializes a new {@link GrizzlyWebSocketApplication}.
      */
-    public GrizzlyWebSocketApplication(WebSocketListenerRegistry listenerRegistry, RemoteWebSocketDistributor remoteDistributor, ServiceLookup services) {
+    private GrizzlyWebSocketApplication(WebSocketListenerRegistry listenerRegistry, RemoteWebSocketDistributor remoteDistributor, ServiceLookup services) {
         super();
         this.listenerRegistry = listenerRegistry;
         this.remoteDistributor = remoteDistributor;
@@ -136,14 +179,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     public void shutDown() {
         for (Iterator<ConcurrentMap<ConnectionId, SessionBoundWebSocket>> i = openSockets.values().iterator(); i.hasNext();) {
             for (Iterator<SessionBoundWebSocket> iter = i.next().values().iterator(); iter.hasNext();) {
-                SessionBoundWebSocket sessionBoundSocket = iter.next();
-
-                Collection<WebSocketListener> listeners = sessionBoundSocket.getListeners();
-                for (WebSocketListener listener : listeners) {
-                    listener.onClose(sessionBoundSocket, null);
-                }
-
-                sessionBoundSocket.close();
+                closeSocketSafe(iter.next());
                 iter.remove();
             }
             i.remove();
@@ -151,6 +187,67 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         for (WebSocket socket : ImmutableSet.<WebSocket> copyOf(getWebSockets())) {
             remove(socket);
             socket.close();
+        }
+    }
+
+    /**
+     * Gets the number of open Web Sockets on this node
+     *
+     * @return The number of open Web Sockets
+     */
+    public long getNumberOfWebSockets() {
+        long count = 0L;
+        for (ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets : openSockets.values()) {
+            count += userSockets.size();
+        }
+        return count;
+    }
+
+    /**
+     * Lists all currently locally available Web Sockets.
+     *
+     * @return Locally available Web Sockets
+     */
+    public List<com.openexchange.websockets.WebSocket> listLocalWebSockets() {
+        List<com.openexchange.websockets.WebSocket> websockets = new LinkedList<>();
+        for (ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets : openSockets.values()) {
+            for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
+                websockets.add(sessionBoundSocket);
+            }
+        }
+        return websockets;
+    }
+
+    /**
+     * Closes all locally available Web Sockets matching specified path filter expression (if any).
+     * <p>
+     * In case no path filter expression is given (<code>pathFilter == null</code>), all user-associated Web Sockets are closed.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param pathFilter The optional path filter expression or <code>null</code>
+     */
+    public void closeWebSockets(int userId, int contextId, String pathFilter) {
+        ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
+        if (null == userSockets) {
+            return;
+        }
+
+        for (Iterator<SessionBoundWebSocket> it = userSockets.values().iterator(); it.hasNext();) {
+            SessionBoundWebSocket sessionBoundSocket = it.next();
+            if (WebSockets.matches(pathFilter, sessionBoundSocket.getPath())) {
+                closeSocketSafe(sessionBoundSocket);
+                it.remove();
+            }
+        }
+    }
+
+    private void closeSocketSafe(SessionBoundWebSocket webSocket) {
+        try {
+            remoteDistributor.removeWebSocket(webSocket);
+            webSocket.close();
+        } catch (Exception e) {
+            LOG.error("Failed closing Web Socket () with path {} for user {} in context {}", webSocket.getConnectionId(), webSocket.getPath(), I(webSocket.getUserId()), I(webSocket.getContextId()), e);
         }
     }
 
@@ -450,6 +547,8 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         }
     }
 
+    private static final int MAX_SIZE = 8;
+
     @Override
     public void onConnect(WebSocket socket) {
         // Override this method to take control over socket collection
@@ -461,15 +560,20 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 UserAndContext userAndContext = UserAndContext.newInstance(sessionBoundSocket.getUserId(), sessionBoundSocket.getContextId());
                 ConcurrentMap<ConnectionId, SessionBoundWebSocket> sockets = openSockets.get(userAndContext);
                 if (sockets == null) {
-                    sockets = new ConcurrentHashMap<>(8, 0.9F, 1);
+                    sockets = new BoundedConcurrentHashMap<>(MAX_SIZE, 0.9F, 1, MAX_SIZE);
                     ConcurrentMap<ConnectionId, SessionBoundWebSocket> existing = openSockets.putIfAbsent(userAndContext, sockets);
                     if (existing != null) {
                         sockets = existing;
                     }
                 }
 
-                if (null != sockets.putIfAbsent(sessionBoundSocket.getConnectionId(), sessionBoundSocket)) {
-                    throw new HandshakeException("Such a Web Socket connection already exists: " + sessionBoundSocket.getConnectionId());
+                try {
+                    if (null != sockets.putIfAbsent(sessionBoundSocket.getConnectionId(), sessionBoundSocket)) {
+                        throw new HandshakeException("Such a Web Socket connection already exists: " + sessionBoundSocket.getConnectionId());
+                    }
+                } catch (BoundedConcurrentHashMap.BoundaryExceededException e) {
+                    // Max. number of sockets per user exceeded
+                    throw new HandshakeException("Max. number of Web Sockets (" + MAX_SIZE + ") exceeded for user " + userAndContext.getUserId() + " in context " + userAndContext.getContextId());
                 }
 
                 synchronized (sessionBoundSocket) {
@@ -481,7 +585,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                     }
                 }
 
-                remoteDistributor.onWebSocketConnect(sessionBoundSocket);
+                remoteDistributor.addWebSocket(sessionBoundSocket);
             } else {
                 super.onConnect(socket);
             }
@@ -499,15 +603,13 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         if (socket instanceof SessionBoundWebSocket) {
             SessionBoundWebSocket sessionBoundSocket = (SessionBoundWebSocket) socket;
 
-            UserAndContext userAndContext = UserAndContext.newInstance(sessionBoundSocket.getUserId(), sessionBoundSocket.getContextId());
-            ConcurrentMap<ConnectionId, SessionBoundWebSocket> sockets = openSockets.get(userAndContext);
-            if (sockets != null) {
-                sockets.remove(sessionBoundSocket.getConnectionId());
+            UserAndContext key = UserAndContext.newInstance(sessionBoundSocket.getUserId(), sessionBoundSocket.getContextId());
+            ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(key);
+            if (userSockets != null) {
+                userSockets.remove(sessionBoundSocket.getConnectionId());
             }
 
-            remoteDistributor.onWebSocketClose(sessionBoundSocket);
-
-            socket.close();
+            closeSocketSafe(sessionBoundSocket);
         } else {
             super.onClose(socket, frame);
         }

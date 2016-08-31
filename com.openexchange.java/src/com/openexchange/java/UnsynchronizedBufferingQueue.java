@@ -53,7 +53,9 @@ import java.util.AbstractQueue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
@@ -61,7 +63,7 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
 /**
- * {@link UnsychronizedBufferingQueue} - The unsychronized view for a {@link BufferingQueue}.
+ * {@link UnsynchronizedBufferingQueue} - The unsynchronized view for a {@link BufferingQueue}.
  * <p>
  * Wraps an event queue as a buffer for elements that should be available in the queue after a defined time span. Offering the same
  * elements again optionally resets the buffering time via {@link #offerIfAbsentElseReset(BufferedElement)}, up to a defined maximum
@@ -74,7 +76,7 @@ import java.util.concurrent.TimeUnit;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class UnsychronizedBufferingQueue<E> extends AbstractQueue<E> {
+public class UnsynchronizedBufferingQueue<E> extends AbstractQueue<E> {
 
     /** The backing priority queue */
     final PriorityQueue<BufferedElement<E>> q = new PriorityQueue<BufferedElement<E>>();
@@ -83,58 +85,58 @@ public class UnsychronizedBufferingQueue<E> extends AbstractQueue<E> {
     private final long defaultMaxDelayDuration;
 
     /**
-     * Creates a new {@link UnsychronizedBufferingQueue} that is initially empty, without specific default buffer durations, i.e. each added element
+     * Creates a new {@link UnsynchronizedBufferingQueue} that is initially empty, without specific default buffer durations, i.e. each added element
      * is available immediately after adding.
      */
-    public UnsychronizedBufferingQueue() {
+    public UnsynchronizedBufferingQueue() {
         this(0L, 0L);
     }
 
     /**
-     * Creates a new {@link UnsychronizedBufferingQueue} that is initially empty, using the supplied duration as default for newly added elements.
+     * Creates a new {@link UnsynchronizedBufferingQueue} that is initially empty, using the supplied duration as default for newly added elements.
      *
      * @param defaultDelayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
      */
-    public UnsychronizedBufferingQueue(long defaultDelayDuration) {
+    public UnsynchronizedBufferingQueue(long defaultDelayDuration) {
         this(defaultDelayDuration, 0L);
     }
 
     /**
-     * Creates a new {@link UnsychronizedBufferingQueue} that is initially empty, using the supplied durations as default for newly added elements.
+     * Creates a new {@link UnsynchronizedBufferingQueue} that is initially empty, using the supplied durations as default for newly added elements.
      *
      * @param defaultDelayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
      * @param defaultMaxDelayDuration The the maximum delay duration (in milliseconds) to use, independently of repeated offer operations
      */
-    public UnsychronizedBufferingQueue(long defaultDelayDuration, long defaultMaxDelayDuration) {
+    public UnsynchronizedBufferingQueue(long defaultDelayDuration, long defaultMaxDelayDuration) {
         super();
         this.defaultDelayDuration = defaultDelayDuration;
         this.defaultMaxDelayDuration = defaultMaxDelayDuration;
     }
 
     /**
-     * Creates a {@link UnsychronizedBufferingQueue} initially containing the elements of the given collection, without specific default durations.
+     * Creates a {@link UnsynchronizedBufferingQueue} initially containing the elements of the given collection, without specific default durations.
      *
      * @param c the collection of elements to initially contain
      * @throws NullPointerException if the specified collection or any of its elements are null
      */
-    public UnsychronizedBufferingQueue(Collection<? extends E> c) {
+    public UnsynchronizedBufferingQueue(Collection<? extends E> c) {
         this(c, 0L);
     }
 
     /**
-     * Creates a {@link UnsychronizedBufferingQueue} initially containing the elements of the given collection, using the supplied duration as
+     * Creates a {@link UnsynchronizedBufferingQueue} initially containing the elements of the given collection, using the supplied duration as
      * default for newly added elements.
      *
      * @param defaultDelayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
      * @param c the collection of elements to initially contain
      * @throws NullPointerException if the specified collection or any of its elements are null
      */
-    public UnsychronizedBufferingQueue(Collection<? extends E> c, long defaultDelayDuration) {
+    public UnsynchronizedBufferingQueue(Collection<? extends E> c, long defaultDelayDuration) {
         this(c, defaultDelayDuration, 0L);
     }
 
     /**
-     * Creates a {@link UnsychronizedBufferingQueue} initially containing the elements of the given collection, using the supplied durations as
+     * Creates a {@link UnsynchronizedBufferingQueue} initially containing the elements of the given collection, using the supplied durations as
      * default for newly added elements.
      *
      * @param defaultDelayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
@@ -142,7 +144,7 @@ public class UnsychronizedBufferingQueue<E> extends AbstractQueue<E> {
      * @param c the collection of elements to initially contain
      * @throws NullPointerException if the specified collection or any of its elements are null
      */
-    public UnsychronizedBufferingQueue(Collection<? extends E> c, long defaultDelayDuration, long defaultMaxDelayDuration) {
+    public UnsynchronizedBufferingQueue(Collection<? extends E> c, long defaultDelayDuration, long defaultMaxDelayDuration) {
         this(defaultDelayDuration, defaultMaxDelayDuration);
         this.addAll(c);
     }
@@ -465,6 +467,32 @@ public class UnsychronizedBufferingQueue<E> extends AbstractQueue<E> {
     @Override
     public int size() {
         return q.size();
+    }
+
+    /**
+     * Removes all elements with an expired delay from this queue and returns them.
+     *
+     * @return The drained elements
+     */
+    public Collection<E> drain() {
+        BufferedElement<E> first = q.peek();
+        if (first == null || first.getDelay(TimeUnit.NANOSECONDS) > 0) {
+            return Collections.emptyList();
+        }
+
+        Collection<E> c = new LinkedList<>();
+        c.add(q.poll().getElement());
+
+        boolean peek = true;
+        while (peek) {
+            BufferedElement<E> be = q.peek();
+            if (be == null || be.getDelay(TimeUnit.NANOSECONDS) > 0) {
+                peek = false;
+            } else {
+                c.add(q.poll().getElement());
+            }
+        }
+        return c;
     }
 
     /**
