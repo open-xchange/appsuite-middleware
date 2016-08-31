@@ -230,6 +230,8 @@ public class ReportClientBaseTest {
         PowerMockito.whenNew(ReportConfiguration.class).withAnyArguments().thenReturn(reportConfiguration);
         Mockito.when(reportConfiguration.getMaxChunkSize()).thenReturn("100");
         Mockito.when(reportConfiguration.getReportStorage()).thenReturn("/test/");
+        Mockito.when(reportConfiguration.getMaxThreadPoolSize()).thenReturn("20");
+        Mockito.when(reportConfiguration.getThreadPriority()).thenReturn("1");
         
     }
 

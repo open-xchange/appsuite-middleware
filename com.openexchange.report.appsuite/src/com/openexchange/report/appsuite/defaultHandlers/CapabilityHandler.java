@@ -401,7 +401,6 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             fw = new FileWriter(storedDataFile);
             fw.write(jsonData.toString(2));
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } finally {
             if (fileLock != null) {
@@ -680,9 +679,6 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                     additionalCounts.put(Report.CONTEXT_USERS_MIN, storedValue);
                 }
             } else if (entry.getValue() instanceof HashMap) {
-                //                if (additionalCounts.get(entry.getValue()) == null) {
-                //                    additionalCounts.put(entry.getKey(), new HashMap<String, Object>());
-                //                }
                 merge((HashMap<String, Object>) additionalCounts.get(entry.getKey()), (HashMap<String, Object>) entry.getValue());
             }
         }
