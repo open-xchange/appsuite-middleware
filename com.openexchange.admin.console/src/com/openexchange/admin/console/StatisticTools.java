@@ -166,6 +166,8 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption usmSessionStats = null;
     private CLIOption clusterStats = null;
     private CLIOption grizzlyStats = null;
+    private CLIOption pnsStats = null;
+    private CLIOption webSocketStats = null;
     private CLIOption documentconverterstats = null;
     private CLIOption officestats = null;
     private CLIOption eventadminstats = null;
@@ -238,6 +240,14 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(showGrizzlyData(mbc));
             count++;
         }
+        if (null != parser.getOptionValue(this.pnsStats) && 0 == count) {
+            System.out.print(showPnsData(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.webSocketStats) && 0 == count) {
+            System.out.print(showWebSocketData(mbc));
+            count++;
+        }
         if (null != parser.getOptionValue(this.gcStats) && 0 == count) {
             System.out.print(showGcData(mbc));
             count++;
@@ -261,6 +271,8 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(showEventAdminData(mbc));
             System.out.print(showNioBufferData(mbc));
             System.out.println(showRtData(mbc));
+            System.out.println(showPnsData(mbc));
+            System.out.println(showWebSocketData(mbc));
             count++;
         }
         if (null != parser.getOptionValue(this.showoperation) && 0 == count) {
@@ -524,6 +536,8 @@ public class StatisticTools extends AbstractJMXTools {
             NeededQuadState.notneeded);
         this.clusterStats = setShortLongOpt(parser, 'c', "clusterstats", "shows the cluster statistics", false, NeededQuadState.notneeded);
         this.grizzlyStats = setShortLongOpt(parser, 'g', "grizzlystats", "shows the grizzly statistics", false, NeededQuadState.notneeded);
+        this.pnsStats = setLongOpt(parser, "pnsstats", "shows the push notification service statistics", false, false);
+        this.webSocketStats = setLongOpt(parser, "websocketstats", "shows the web socket statistics", false, false);
         this.gcStats = setShortLongOpt(
             parser,
             OPT_GC_STATS_SHORT,
@@ -785,6 +799,24 @@ public class StatisticTools extends AbstractJMXTools {
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * Prints PNS related management info to given PrintStream if PNS's MBeans can be found.
+     *
+     * @param mbeanServerConnection The MBeanServerConnection to be used for querying MBeans.
+     */
+    static String showPnsData(final MBeanServerConnection mbeanServerConnection) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
+        return getStats(mbeanServerConnection, "com.openexchange.pns:name=PushNotificationMBean").toString();
+    }
+
+    /**
+     * Prints Web Socket related management info to given PrintStream if Web Socket's MBeans can be found.
+     *
+     * @param mbeanServerConnection The MBeanServerConnection to be used for querying MBeans.
+     */
+    static String showWebSocketData(final MBeanServerConnection mbeanServerConnection) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
+        return getStats(mbeanServerConnection, "com.openexchange.websockets:name=WebSocketMBean").toString();
     }
 
     static String showDocumentConverterData(final MBeanServerConnection mbeanServerConnection) throws InstanceNotFoundException, AttributeNotFoundException, IntrospectionException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException {
