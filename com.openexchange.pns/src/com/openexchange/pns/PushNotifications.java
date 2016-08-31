@@ -96,7 +96,9 @@ public class PushNotifications {
          * @return This builder instance
          */
         public MessageDataBuilder put(PushNotificationField field, Object value) {
-            builder.put(field.getId(), value);
+            if (field != null && value != null) {
+                builder.put(field.getId(), value);
+            }
             return this;
         }
 
@@ -110,7 +112,9 @@ public class PushNotifications {
          * @return This builder instance
          */
         public MessageDataBuilder put(String key, Object value) {
-            builder.put(key, value);
+            if (key != null && value != null) {
+                builder.put(key, value);
+            }
             return this;
         }
 
@@ -181,7 +185,9 @@ public class PushNotifications {
 
         Builder<String, Object> builder = ImmutableMap.builder();
         for (int i = 0; i < length; i+=2) {
-            builder.put(args[i].toString(), args[i+1]);
+            if (args[i] != null && args[i+1] != null) {
+                builder.put(args[i].toString(), args[i+1]);
+            }
         }
         return builder.build();
     }
