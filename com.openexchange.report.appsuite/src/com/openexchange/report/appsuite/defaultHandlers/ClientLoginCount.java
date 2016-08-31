@@ -67,6 +67,7 @@ import com.openexchange.report.appsuite.serialization.Report;
 public class ClientLoginCount implements ReportSystemHandler {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ClientLoginCount.class);
+    private Report report;
 
     @Override
     public boolean appliesTo(String reportType) {
@@ -78,11 +79,12 @@ public class ClientLoginCount implements ReportSystemHandler {
         Calendar cal = Calendar.getInstance();
         // We have to add the counts for two periods: one month and one year
         try {
+            this.report = report;
             // For a year
             Date endDate = cal.getTime();
             cal.add(Calendar.YEAR, -1);
             Date startDate = cal.getTime();
-            runReport(report, "clientlogincountyear", startDate, endDate);
+            addClientLoginsToNamespaceInReport("clientlogincountyear", startDate, endDate);
 
             // For a month
             cal = Calendar.getInstance();
@@ -90,46 +92,42 @@ public class ClientLoginCount implements ReportSystemHandler {
             endDate = cal.getTime();
             cal.add(Calendar.DATE, -30);
             startDate = cal.getTime();
-            runReport(report, "clientlogincount", startDate, endDate);
+            addClientLoginsToNamespaceInReport("clientlogincount", startDate, endDate);
         } catch (OXException x) {
             LOG.error("", x);
         }
-
     }
-
-    private void runReport(Report report, String ns, Date startDate, Date endDate) throws OXException {
+    
+    private void addClientLoginsToNamespaceInReport(String ns, Date startDate, Date endDate) throws OXException {
         // Use the LoginCounterService to retrieve the sum of logins for the clients (usm, olox2, mobileapp, carddav, caldav) in the given timeframe
         LoginCounterService loginCounterService = Services.getService(LoginCounterService.class);
 
         Map<String, Integer> usmEasResult = loginCounterService.getNumberOfLogins(startDate, endDate, true, "USM-EAS");
         Integer usmEas = usmEasResult.get(LoginCounterService.SUM);
-        report.set(ns, "usm-eas", usmEas.toString());
+        this.report.set(ns, "usm-eas", usmEas.toString());
 
         Map<String, Integer> olox2Result = loginCounterService.getNumberOfLogins(startDate, endDate, true, "OpenXchange.HTTPClient.OXAddIn");
         Integer olox2 = olox2Result.get(LoginCounterService.SUM);
-        report.set(ns, "olox2", olox2.toString());
+        this.report.set(ns, "olox2", olox2.toString());
 
         Map<String, Integer> mobileAppResult = loginCounterService.getNumberOfLogins(startDate, endDate, true, "com.openexchange.mobileapp");
         Integer mobileApp = mobileAppResult.get(LoginCounterService.SUM);
-        report.set(ns, "mobileapp", mobileApp.toString());
+        this.report.set(ns, "mobileapp", mobileApp.toString());
 
         Map<String, Integer> cardDavResults = loginCounterService.getNumberOfLogins(startDate, endDate, true, "CARDDAV");
         Integer cardDav = cardDavResults.get(LoginCounterService.SUM);
-        report.set(ns, "carddav", cardDav.toString());
+        this.report.set(ns, "carddav", cardDav.toString());
 
         Map<String, Integer> calDavResults = loginCounterService.getNumberOfLogins(startDate, endDate, true, "CALDAV");
         Integer calDav = calDavResults.get(LoginCounterService.SUM);
-        report.set(ns, "caldav", calDav.toString());
+        this.report.set(ns, "caldav", calDav.toString());
 
         Map<String, Integer> ox6Results = loginCounterService.getNumberOfLogins(startDate, endDate, true, "com.openexchange.ox.gui.dhtml");
         Integer ox6 = ox6Results.get(LoginCounterService.SUM);
-        report.set(ns, "ox6", ox6.toString());
+        this.report.set(ns, "ox6", ox6.toString());
 
         Map<String, Integer> appsuiteResults = loginCounterService.getNumberOfLogins(startDate, endDate, true, "open-xchange-appsuite");
         Integer appsuite = appsuiteResults.get(LoginCounterService.SUM);
-        report.set(ns, "appsuite", appsuite.toString());
-
-
+        this.report.set(ns, "appsuite", appsuite.toString());
     }
-
 }
