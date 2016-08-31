@@ -63,7 +63,7 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 
 /**
- * {@link UnsynchronizedBufferingQueue} - The unsychronized view for a {@link BufferingQueue}.
+ * {@link UnsynchronizedBufferingQueue} - The unsynchronized view for a {@link BufferingQueue}.
  * <p>
  * Wraps an event queue as a buffer for elements that should be available in the queue after a defined time span. Offering the same
  * elements again optionally resets the buffering time via {@link #offerIfAbsentElseReset(BufferedElement)}, up to a defined maximum
