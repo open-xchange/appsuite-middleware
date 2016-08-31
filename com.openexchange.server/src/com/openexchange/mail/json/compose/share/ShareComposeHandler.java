@@ -503,7 +503,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             }
             error = false;
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            // 
+            //
         } finally {
             if (error) {
                 for (ThresholdFileHolder tfh : previews.values()) {
@@ -552,7 +552,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             throw MimeMailException.handleMessagingException(e);
         }
     }
-    
+
     private static class PreviewTask extends AbstractTask<Pair<String, ThresholdFileHolder>> {
 
         private final String id;
@@ -560,7 +560,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         private final ImageTransformationService transformationService;
         private final PreviewService previewService;
         private final Session session;
-        
+
         public PreviewTask(String id, IDBasedFileAccessFactory fileAccess, ImageTransformationService transformationService, PreviewService previewService, Session session) {
             super();
             this.id = id;
@@ -590,12 +590,13 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 } else if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("audio/mpeg")) {
                     if (Mp3CoverExtractor.isSupported(mimeType)) {
                         Mp3CoverExtractor mp3CoverExtractor = new Mp3CoverExtractor();
+                        IFileHolder mp3Cover = null;
                         try {
                             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
                             fileHolder.write(document);
                             fileHolder.setContentType("audio/mpeg");
                             fileHolder.setName(id + ".mp3");
-                            IFileHolder mp3Cover = mp3CoverExtractor.extractCover(fileHolder);
+                            mp3Cover = mp3CoverExtractor.extractCover(fileHolder);
                             ImageTransformations transformed = transformationService.transfom(mp3Cover.getStream()).scale(200, 150, ScaleType.COVER, true).compress();
                             encodedThumbnail = new ThresholdFileHolder();
                             encodedThumbnail.write(transformed.getTransformedImage("image/jpeg").getImageStream());
@@ -603,6 +604,9 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
                         } finally {
                             Streams.close(document);
+                            if (null != mp3Cover) {
+                                mp3Cover.close();
+                            }
                         }
                     }
                 } else {
@@ -633,7 +637,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 encodedThumbnail = new ThresholdFileHolder();
                 encodedThumbnail.write(PreviewConst.DEFAULT_THUMBNAIL);
             }
-            return new Pair<String, ThresholdFileHolder>(id, encodedThumbnail);
+            return new Pair<>(id, encodedThumbnail);
         }
 
     }
