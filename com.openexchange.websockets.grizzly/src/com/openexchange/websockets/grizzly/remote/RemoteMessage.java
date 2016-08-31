@@ -54,12 +54,12 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * {@link Distribution}
+ * {@link RemoteMessage}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class Distribution {
+public class RemoteMessage {
 
     private final Queue<String> payloads;
     private final String pathFilter;
@@ -69,9 +69,9 @@ public class Distribution {
     private volatile Integer hash;
 
     /**
-     * Initializes a new {@link Distribution}.
+     * Initializes a new {@link RemoteMessage}.
      */
-    public Distribution(String message, String pathFilter, int userId, int contextId, boolean async) {
+    public RemoteMessage(String message, String pathFilter, int userId, int contextId, boolean async) {
         super();
         this.userId = userId;
         this.contextId = contextId;
@@ -130,7 +130,7 @@ public class Distribution {
      *
      * @param other The distribution providing the pay,oads to merge
      */
-    public void mergeWith(Distribution other) {
+    public void mergeWith(RemoteMessage other) {
         if (this == other) {
             return;
         }
@@ -175,7 +175,7 @@ public class Distribution {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        Distribution other = (Distribution) obj;
+        RemoteMessage other = (RemoteMessage) obj;
         if (async != other.async) {
             return false;
         }
