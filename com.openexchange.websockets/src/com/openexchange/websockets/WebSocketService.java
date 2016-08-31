@@ -182,6 +182,22 @@ public interface WebSocketService {
     // -------------------------------------------------------------------------------------------------------------
 
     /**
+     * Gets the number of open Web Sockets on this node
+     *
+     * @return The number of open Web Sockets
+     * @throws OXException If number of open Web Sockets cannot be returned
+     */
+    long getNumberOfWebSockets() throws OXException;
+
+    /**
+     * Gets the number of buffered messages that are supposed to be sent to remote cluster members.
+     *
+     * @return The number of buffered messages
+     * @throws OXException If number of buffered messages cannot be returned
+     */
+    long getNumberOfBufferedMessages() throws OXException;
+
+    /**
      * Lists all currently locally available Web Sockets.
      *
      * @return Locally available Web Sockets

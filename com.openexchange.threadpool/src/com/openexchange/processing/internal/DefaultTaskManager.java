@@ -78,6 +78,11 @@ public class DefaultTaskManager implements TaskManager {
     }
 
     @Override
+    public int size() {
+        return tasks.size();
+    }
+
+    @Override
     public boolean isEmpty() {
         return tasks.isEmpty();
     }

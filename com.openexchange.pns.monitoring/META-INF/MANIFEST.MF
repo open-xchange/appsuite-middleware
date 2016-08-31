@@ -1,15 +1,14 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: The monitoring bundle for Web Sockets
-Bundle-SymbolicName: com.openexchange.websockets.monitoring
+Bundle-Name: The monitoring bundle for Push Notification Service
+Bundle-SymbolicName: com.openexchange.pns.monitoring
 Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.java,
- com.openexchange.management,
+Import-Package: com.openexchange.management,
  com.openexchange.osgi,
+ com.openexchange.pns,
  com.openexchange.server,
- com.openexchange.websockets,
  javax.crypto,
  javax.crypto.interfaces,
  javax.crypto.spec,
@@ -22,4 +21,4 @@ Import-Package: com.openexchange.java,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Bundle-Activator: com.openexchange.websockets.monitoring.osgi.WebSocketMonitoringActivator
+Bundle-Activator: com.openexchange.pns.monitoring.osgi.PushNotificationMonitoringActivator

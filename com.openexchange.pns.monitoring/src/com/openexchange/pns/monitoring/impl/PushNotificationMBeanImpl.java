@@ -47,58 +47,67 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.monitoring.impl;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import javax.management.MBeanException;
+import javax.management.NotCompliantMBeanException;
+import com.openexchange.management.AnnotatedStandardMBean;
+import com.openexchange.pns.PushNotificationService;
+import com.openexchange.pns.monitoring.PushNotificationMBean;
+
 
 /**
- * {@link PushNotificationService} - The service that handles specified push notifications.
+ * {@link PushNotificationMBeanImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-@SingletonService
-public interface PushNotificationService {
+public class PushNotificationMBeanImpl extends AnnotatedStandardMBean implements PushNotificationMBean {
+
+    private final PushNotificationService pushNotificationService;
 
     /**
-     * Handles the specified notification.
-     * <p>
-     * Looks up associated subscriptions and delivers the notification using the appropriate {@link PushNotificationTransport transport}.
-     *
-     * @param notification The push notification to handle
-     * @throws OXException If handling push notification fails
+     * Initializes a new {@link PushNotificationMBeanImpl}.
      */
-    void handle(PushNotification notification) throws OXException;
+    public PushNotificationMBeanImpl(PushNotificationService pushNotificationService) throws NotCompliantMBeanException {
+        super("Management Bean for Push Notification Service", PushNotificationMBean.class);
+        this.pushNotificationService = pushNotificationService;
+    }
 
-    // ----------------------------------------------------------------------------------------
+    @Override
+    public long getNumberOfBufferedNotifications() throws MBeanException {
+        try {
+            return pushNotificationService.getNumberOfBufferedNotifications();
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
 
-    /**
-     * Gets the number of buffered notifications that are supposed to be transported.
-     *
-     * @return The number of buffered notifications
-     * @throws OXException If number of buffered notifications cannot be returned
-     */
-    long getNumberOfBufferedNotifications() throws OXException;
+    @Override
+    public long getNumberOfSubmittedNotifications() throws MBeanException {
+        try {
+            return pushNotificationService.getNumberOfSubmittedNotifications();
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
 
-    /**
-     * Gets the number of submitted notifications.
-     * <p>
-     * A notification is in submitted state if fetched from buffer and submitted for being transported, but not yet done.
-     *
-     * @return The number of submitted notifications
-     * @throws OXException If number of submitted notifications cannot be returned
-     */
-    long getNumberOfSubmittedNotifications() throws OXException;
-
-    /**
-     * Gets the number of notifications that are currently processed.
-     * <p>
-     * A notification is in processing state if currently transported
-     *
-     * @return The number of processing notifications
-     * @throws OXException If number of processing notifications cannot be returned
-     */
-    long getNumberOfProcessingNotifications() throws OXException;
+    @Override
+    public long getNumberOfProcessingNotifications() throws MBeanException {
+        try {
+            return pushNotificationService.getNumberOfProcessingNotifications();
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
 
 }

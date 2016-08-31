@@ -205,6 +205,31 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         scheduledNotifcations = new UnsynchronizedBufferingQueue<>(delayDuration(configService));
     }
 
+    @Override
+    public long getNumberOfBufferedNotifications() throws OXException {
+        lock.lock();
+        try {
+            if (stopped) {
+                // Already stopped
+                return 0L;
+            }
+
+            return scheduledNotifcations.size();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public long getNumberOfSubmittedNotifications() throws OXException {
+        return processor.getNumberOfBufferedTasks();
+    }
+
+    @Override
+    public long getNumberOfProcessingNotifications() throws OXException {
+        return processor.getNumberOfExecutingTasks();
+    }
+
     /**
      * Stops this service
      *

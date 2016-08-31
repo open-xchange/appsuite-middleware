@@ -191,6 +191,19 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     }
 
     /**
+     * Gets the number of open Web Sockets on this node
+     *
+     * @return The number of open Web Sockets
+     */
+    public long getNumberOfWebSockets() {
+        long count = 0L;
+        for (ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets : openSockets.values()) {
+            count += userSockets.size();
+        }
+        return count;
+    }
+
+    /**
      * Lists all currently locally available Web Sockets.
      *
      * @return Locally available Web Sockets

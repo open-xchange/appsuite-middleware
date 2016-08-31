@@ -158,6 +158,16 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         }
     }
 
+    @Override
+    public long getNumberOfBufferedMessages() {
+        lock.lock();
+        try {
+            return remoteMsgs.size();
+        } finally {
+            lock.unlock();
+        }
+    }
+
     /**
      * Sets the Hazelcast resources to use.
      *
