@@ -79,6 +79,7 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor;
 import com.openexchange.ajax.requesthandler.converters.preview.PreviewConst;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
@@ -466,23 +467,16 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
 
     private Map<String, ThresholdFileHolder> generatePreviewImages(Session session, ShareReference reference) throws OXException {
         List<Item> items = reference.getItems();
-        if (null == items || items.isEmpty()) {
-            return java.util.Collections.emptyMap();
-        }
         PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
-        if (null == previewService) {
-            return java.util.Collections.emptyMap();
-        }
         ImageTransformationService transformationService = ServerServiceRegistry.getInstance().getService(ImageTransformationService.class);
-        if (null == transformationService) {
-            return java.util.Collections.emptyMap();
-        }
         IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class);
-        if (null == fileAccessFactory) {
-            return java.util.Collections.emptyMap();
-        }
         ThreadPoolService threadPoolService = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-        if (null == threadPoolService) {
+        ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        boolean documentPreviewEnabled = false;
+        if (null != configurationService) {
+            documentPreviewEnabled = configurationService.getBoolProperty("com.openexchange.mail.compose.share.documentPreviewEnabled", false);
+        }
+        if (null == items || items.isEmpty() || null == previewService || null == transformationService || null == fileAccessFactory || null == threadPoolService) {
             return java.util.Collections.emptyMap();
         }
         List<PreviewTask> previewTasks = new ArrayList<>(6);
@@ -491,7 +485,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         try {
             for (int k = Math.min(items.size(), 6), i = 0; k-- > 0; i++) {
                 String id = items.get(i).getId();
-                PreviewTask previewTask = new PreviewTask(id, fileAccessFactory, transformationService, previewService, session);
+                PreviewTask previewTask = new PreviewTask(id, fileAccessFactory, transformationService, previewService, session, documentPreviewEnabled);
                 previewTasks.add(previewTask);
             }
             List<Future<Pair<String, ThresholdFileHolder>>> previewImages = threadPoolService.invokeAll(previewTasks);
@@ -503,7 +497,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             }
             error = false;
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            //
+            return java.util.Collections.emptyMap();
         } finally {
             if (error) {
                 for (ThresholdFileHolder tfh : previews.values()) {
@@ -560,70 +554,59 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         private final ImageTransformationService transformationService;
         private final PreviewService previewService;
         private final Session session;
+        private final boolean documentPreviewEnabled;
 
-        public PreviewTask(String id, IDBasedFileAccessFactory fileAccess, ImageTransformationService transformationService, PreviewService previewService, Session session) {
+        public PreviewTask(String id, IDBasedFileAccessFactory fileAccess, ImageTransformationService transformationService, PreviewService previewService, Session session, boolean documentPreviewEnabled) {
             super();
             this.id = id;
             this.fileAccess = fileAccess;
             this.transformationService = transformationService;
             this.previewService = previewService;
             this.session = session;
+            this.documentPreviewEnabled = documentPreviewEnabled;
         }
 
         @Override
         public Pair<String, ThresholdFileHolder> call() throws Exception {
             IDBasedFileAccess access = fileAccess.createAccess(session);
             File file = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
-            DataProperties dataProperties = new DataProperties(4);
             String mimeType = file.getFileMIMEType();
             InputStream document = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
             ThresholdFileHolder encodedThumbnail = null;
             try {
+
+                // Document is an image
                 if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("image")) {
-                    try {
-                        ImageTransformations transformed = transformationService.transfom(document).scale(200, 150, ScaleType.COVER, true).compress();
-                        encodedThumbnail = new ThresholdFileHolder();
-                        encodedThumbnail.write(transformed.getTransformedImage(mimeType).getImageStream());
-                    } catch (IOException e) {
-                        throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-                    }
-                } else if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("audio/mpeg")) {
+                    encodedThumbnail = transformImage(document, mimeType);
+                }
+
+                // Document is an audio file
+                else if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("audio/mpeg")) {
                     if (Mp3CoverExtractor.isSupported(mimeType)) {
-                        Mp3CoverExtractor mp3CoverExtractor = new Mp3CoverExtractor();
                         IFileHolder mp3Cover = null;
                         try {
-                            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-                            fileHolder.write(document);
-                            fileHolder.setContentType("audio/mpeg");
-                            fileHolder.setName(id + ".mp3");
-                            mp3Cover = mp3CoverExtractor.extractCover(fileHolder);
-                            ImageTransformations transformed = transformationService.transfom(mp3Cover.getStream()).scale(200, 150, ScaleType.COVER, true).compress();
-                            encodedThumbnail = new ThresholdFileHolder();
-                            encodedThumbnail.write(transformed.getTransformedImage("image/jpeg").getImageStream());
-                        } catch (IOException e) {
-                            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                            mp3Cover = getCoverImage(document);
+                            encodedThumbnail = transformImage(mp3Cover.getStream(), "image/jpeg");
                         } finally {
-                            Streams.close(document);
                             if (null != mp3Cover) {
                                 mp3Cover.close();
                             }
                         }
                     }
-                } else {
-                    dataProperties.put("PreviewWidth", "200");
-                    dataProperties.put("PreviewHeight", "150");
-                    dataProperties.put("PreviewScaleType", "cover");
-                    dataProperties.put(DataProperties.PROPERTY_NAME, id);
-                    dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
-                    SimpleData<InputStream> data = new SimpleData<>(document, dataProperties);
-                    PreviewDocument preview = previewService.getPreviewFor(data, PreviewOutput.IMAGE, session, 0);
-                    InputStream in = null;
-                    try {
-                        in = preview.getThumbnail();
-                        encodedThumbnail = new ThresholdFileHolder();
-                        encodedThumbnail.write(in);
-                    } finally {
-                        Streams.close(in);
+                }
+
+                // Document is something else, try to get preview image with document converter
+                else {
+                    if (documentPreviewEnabled) {
+                        PreviewDocument preview = getDocumentPreview(document, mimeType, session);
+                        InputStream in = null;
+                        try {
+                            in = preview.getThumbnail();
+                            encodedThumbnail = new ThresholdFileHolder();
+                            encodedThumbnail.write(in);
+                        } finally {
+                            Streams.close(in);
+                        }
                     }
                 }
             } catch (OXException e) {
@@ -638,6 +621,44 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 encodedThumbnail.write(PreviewConst.DEFAULT_THUMBNAIL);
             }
             return new Pair<>(id, encodedThumbnail);
+        }
+
+        private ThresholdFileHolder transformImage(InputStream image, String mimeType) throws OXException {
+            try {
+                ImageTransformations transformed = transformationService.transfom(image).scale(200, 150, ScaleType.COVER, true).compress();
+                ThresholdFileHolder transformedImage = new ThresholdFileHolder();
+                transformedImage.write(transformed.getTransformedImage(mimeType).getImageStream());
+                return transformedImage;
+            } catch (IOException e) {
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
+        }
+
+        private IFileHolder getCoverImage(InputStream audioFile) throws OXException {
+            Mp3CoverExtractor mp3CoverExtractor = new Mp3CoverExtractor();
+            ThresholdFileHolder fileHolder = null;
+            try {
+                fileHolder = new ThresholdFileHolder();
+                fileHolder.write(audioFile);
+                fileHolder.setContentType("audio/mpeg");
+                fileHolder.setName(id + ".mp3");
+                return mp3CoverExtractor.extractCover(fileHolder);
+            } finally {
+                if (null != fileHolder) {
+                    fileHolder.close();
+                }
+            }
+        }
+
+        private PreviewDocument getDocumentPreview(InputStream document, String mimeType, Session session) throws OXException {
+            DataProperties dataProperties = new DataProperties(5);
+            dataProperties.put("PreviewWidth", "200");
+            dataProperties.put("PreviewHeight", "150");
+            dataProperties.put("PreviewScaleType", "cover");
+            dataProperties.put(DataProperties.PROPERTY_NAME, id);
+            dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
+            SimpleData<InputStream> data = new SimpleData<>(document, dataProperties);
+            return previewService.getPreviewFor(data, PreviewOutput.IMAGE, session, 0);
         }
 
     }
