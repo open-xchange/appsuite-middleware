@@ -127,7 +127,9 @@ public class PushNotifications {
          * @return This builder instance
          */
         public MessageDataBuilder put(Entry<? extends String, ? extends Object> entry) {
-            builder.put(entry);
+            if (entry != null && entry.getKey() != null && entry.getValue() != null) {
+                builder.put(entry);
+            }
             return this;
         }
 
@@ -140,7 +142,13 @@ public class PushNotifications {
          * @return This builder instance
          */
         public MessageDataBuilder putAll(Map<? extends String, ? extends Object> map) {
-            builder.putAll(map);
+            if (null != map) {
+                for (Map.Entry<? extends String, ? extends Object> entry : map.entrySet()) {
+                    if (entry != null && entry.getKey() != null && entry.getValue() != null) {
+                        builder.put(entry);
+                    }
+                }
+            }
             return this;
         }
 
@@ -153,7 +161,13 @@ public class PushNotifications {
          * @return This builder instance
          */
         public MessageDataBuilder putAll(Iterable<? extends Entry<? extends String, ? extends Object>> entries) {
-            builder.putAll(entries);
+            if (entries != null) {
+                for (Entry<? extends String,? extends Object> entry : entries) {
+                    if (entry != null && entry.getKey() != null && entry.getValue() != null) {
+                        builder.put(entry);
+                    }
+                }
+            }
             return this;
         }
 
