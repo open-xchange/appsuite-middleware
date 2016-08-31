@@ -74,7 +74,7 @@ import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.UnsychronizedBufferingQueue;
+import com.openexchange.java.UnsynchronizedBufferingQueue;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.websockets.WebSocket;
@@ -121,7 +121,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     private final Lock lock;
     private final TimerService timerService;
     private final ConfigurationService configService;
-    private final UnsychronizedBufferingQueue<RemoteMessage> remoteMsgs;
+    private final UnsynchronizedBufferingQueue<RemoteMessage> remoteMsgs;
     private ScheduledTimerTask timerTask;
 
     private volatile HazelcastInstance hzInstance;
@@ -135,12 +135,12 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         this.timerService = timerService;
         this.configService = configService;
         lock = new ReentrantLock();
-        remoteMsgs = new UnsychronizedBufferingQueue<RemoteMessage>(delayDuration(configService), maxDelayDuration(configService)) {
+        remoteMsgs = new UnsynchronizedBufferingQueue<RemoteMessage>(delayDuration(configService), maxDelayDuration(configService)) {
 
             @Override
-            protected UnsychronizedBufferingQueue.BufferedElement<RemoteMessage> transfer(RemoteMessage toOffer, UnsychronizedBufferingQueue.BufferedElement<RemoteMessage> existing) {
+            protected UnsynchronizedBufferingQueue.BufferedElement<RemoteMessage> transfer(RemoteMessage toOffer, UnsynchronizedBufferingQueue.BufferedElement<RemoteMessage> existing) {
                 toOffer.mergeWith(existing.getElement());
-                return new UnsychronizedBufferingQueue.BufferedElement<RemoteMessage>(toOffer, existing);
+                return new UnsynchronizedBufferingQueue.BufferedElement<RemoteMessage>(toOffer, existing);
             }
         };
     }

@@ -61,7 +61,7 @@ import org.slf4j.Logger;
 import com.google.common.collect.Iterators;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.UnsychronizedBufferingQueue;
+import com.openexchange.java.UnsynchronizedBufferingQueue;
 import com.openexchange.pns.Hit;
 import com.openexchange.pns.Hits;
 import com.openexchange.pns.PushNotification;
@@ -185,7 +185,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
 
     private final Processor processor;
 
-    private final UnsychronizedBufferingQueue<PushNotification> scheduledNotifcations; // Accessed synchronized
+    private final UnsynchronizedBufferingQueue<PushNotification> scheduledNotifcations; // Accessed synchronized
     private ScheduledTimerTask scheduledTimerTask; // Accessed synchronized
     private boolean stopped; // Accessed synchronized
 
@@ -202,7 +202,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         this.configService = configService;
         this.timerService = timerService;
         this.transportRegistry = transportRegistry;
-        scheduledNotifcations = new UnsychronizedBufferingQueue<>(delayDuration(configService));
+        scheduledNotifcations = new UnsynchronizedBufferingQueue<>(delayDuration(configService));
     }
 
     /**
