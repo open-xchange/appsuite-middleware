@@ -50,8 +50,10 @@
 package com.openexchange.push;
 
 import java.util.HashSet;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 
@@ -73,7 +75,10 @@ public final class PushClientWhitelist {
         return instance;
     }
 
+    // --------------------------------------------------------------------------------------
+
     private final ConcurrentMap<Pattern, Pattern> map;
+    private final Queue<PushClientChecker> checkers;
 
     /**
      * Initializes a new {@link PushClientWhitelist}.
@@ -81,6 +86,28 @@ public final class PushClientWhitelist {
     private PushClientWhitelist() {
         super();
         map = new ConcurrentHashMap<Pattern, Pattern>(4, 0.9f, 1);
+        checkers = new ConcurrentLinkedQueue<>();
+    }
+
+
+    /**
+     * Adds the specified checker to this client white-list.
+     *
+     * @param checker The checker to add
+     * @return <code>true</code> if successfully added; otherwise <code>false</code>
+     */
+    public boolean addChecker(PushClientChecker checker) {
+        return null == checker ? false : checkers.offer(checker);
+    }
+
+    /**
+     * Removes the specified checker from this client white-list.
+     *
+     * @param checker The checker to remove
+     * @return <code>true</code> if such a checker is removed; otherwise <code>false</code>
+     */
+    public boolean removeChecker(PushClientChecker checker) {
+        return null == checker ? false : checkers.remove(checker);
     }
 
     /**
@@ -130,7 +157,9 @@ public final class PushClientWhitelist {
     }
 
     /**
-     * Checks if this white-list is empty.
+     * Checks if this white-list is configuration-wise empty.
+     * <p>
+     * That is if property <var>"com.openexchange.push.allowedClients"</var> is empty.
      *
      * @return <code>true</code> if this white-list is empty; otherwise <code>false</code>
      */
@@ -157,11 +186,21 @@ public final class PushClientWhitelist {
         if (null == clientId) {
             return false;
         }
-        for (final Pattern pattern : map.keySet()) {
+
+        // Check configured patterns
+        for (Pattern pattern : map.keySet()) {
             if (pattern.matcher(clientId).matches()) {
                 return true;
             }
         }
+
+        // Iterate checkers
+        for (PushClientChecker checker : checkers) {
+            if (checker.isAllowed(clientId)) {
+                return true;
+            }
+        }
+
         return false;
     }
 

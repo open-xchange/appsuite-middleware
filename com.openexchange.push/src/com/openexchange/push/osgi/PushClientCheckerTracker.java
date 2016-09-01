@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,41 +49,49 @@
 
 package com.openexchange.push.osgi;
 
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.event.EventFactoryService;
-import com.openexchange.osgi.HousekeepingActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.push.PushClientChecker;
+import com.openexchange.push.PushClientWhitelist;
 
 /**
- * {@link PushActivator} - The activator for push bundle.
+ * {@link PushClientCheckerTracker} - Tracks checkers and adds/removes them to/from {@link PushClientWhitelist}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class PushActivator extends HousekeepingActivator {
+public class PushClientCheckerTracker implements ServiceTrackerCustomizer<PushClientChecker, PushClientChecker> {
+
+    private final BundleContext context;
 
     /**
-     * Initializes a new {@link PushActivator}.
+     * Initializes a new {@link PushClientCheckerTracker}.
      */
-    public PushActivator() {
+    public PushClientCheckerTracker(BundleContext context) {
         super();
+        this.context = context;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { EventAdmin.class, EventFactoryService.class };
+    public PushClientChecker addingService(ServiceReference<PushClientChecker> reference) {
+        PushClientChecker checker = context.getService(reference);
+        if (PushClientWhitelist.getInstance().addChecker(checker)) {
+            return checker;
+        }
+        context.ungetService(reference);
+        return null;
     }
 
     @Override
-    public void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        track(PushClientChecker.class, new PushClientCheckerTracker(context));
-        openTrackers();
+    public void modifiedService(ServiceReference<PushClientChecker> reference, PushClientChecker checker) {
+        // Nothing
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    public void removedService(ServiceReference<PushClientChecker> reference, PushClientChecker checker) {
+        PushClientWhitelist.getInstance().removeChecker(checker);
+        context.ungetService(reference);
     }
 
 }

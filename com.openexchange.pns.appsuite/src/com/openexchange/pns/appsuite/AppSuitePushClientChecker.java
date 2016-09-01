@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,43 +47,31 @@
  *
  */
 
-package com.openexchange.push.osgi;
+package com.openexchange.pns.appsuite;
 
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.event.EventFactoryService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.ajax.Client;
 import com.openexchange.push.PushClientChecker;
 
 /**
- * {@link PushActivator} - The activator for push bundle.
+ * {@link AppSuitePushClientChecker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class PushActivator extends HousekeepingActivator {
+public class AppSuitePushClientChecker implements PushClientChecker {
+
+    private static final String CLIENT_ID_APPSUITE_UI = Client.APPSUITE_UI.getClientId();
 
     /**
-     * Initializes a new {@link PushActivator}.
+     * Initializes a new {@link AppSuitePushClientChecker}.
      */
-    public PushActivator() {
+    public AppSuitePushClientChecker() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { EventAdmin.class, EventFactoryService.class };
-    }
-
-    @Override
-    public void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        track(PushClientChecker.class, new PushClientCheckerTracker(context));
-        openTrackers();
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    public boolean isAllowed(String clientId) {
+        return CLIENT_ID_APPSUITE_UI.equals(clientId);
     }
 
 }
