@@ -227,7 +227,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
     }
 
     @Override
-    public IDTuple copy(final IDTuple source, String version, final String destFolder, File update, InputStream newFil, List<Field> modifiedFields) throws OXException {
+    public IDTuple copy(final IDTuple source, final String version, final String destFolder, File update, InputStream newFil, List<Field> modifiedFields) throws OXException {
         if (version != CURRENT_VERSION) {
             // can only copy the current revision
             throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(BoxConstants.ID);
@@ -245,7 +245,6 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                     String boxFolderId = toBoxFolderId(destFolder);
                     com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(boxClient, boxFolderId);
-                    com.box.sdk.BoxFolder.Info folderInfo = boxFolder.getInfo();
 
                     // Check destination folder
                     String title = fileInfo.getName();
@@ -262,12 +261,11 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                                 ext = "";
                             }
                         }
+
                         int count = 1;
                         boolean keepOn = true;
                         while (keepOn) {
                             keepOn = false;
-                            // TODO: Expensive as it needs to iterate through all the files in a folder... 
-                            //       Consider the possibility of checking if the file exists in the folder with the exists method
                             for (com.box.sdk.BoxItem.Info info : boxFolder) {
                                 // Check for filename clashes and append a number at the end of the filename
                                 if (info instanceof Info && title.equals(info.getName())) {
@@ -279,8 +277,8 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         }
                     }
 
-                    fileInfo.setName(title);
-                    Info copiedFile = boxFile.copy(boxFolder);
+                    // Copy the file
+                    Info copiedFile = boxFile.copy(boxFolder, title);
 
                     return new IDTuple(destFolder, copiedFile.getID());
                 } catch (final BoxAPIException e) {
