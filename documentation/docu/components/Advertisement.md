@@ -8,11 +8,11 @@ These configurations will be stored as JSON strings within the configdb in the t
 
 #### Global
 
-The global scheme is the default scheme. It assumes that there are no (or one) reseller and just one package. It uses the "default" default value for both reseller and package.
+The global scheme is the default scheme. It assumes that there are no (or one) reseller and just one package. It uses the default value for both reseller and package.
 
 #### TaxonomyTypes
 
-The TaxonomyTypes scheme retrieves the package name by retrieving the taxonomy types of a user. For this purpose it uses a configurable subset of taxonomy types which can be configured via the com.openexchange.advertisement.taxonomy.types property. It retrieves the first taxonomy type which matches one type of the configured subset. Therefore it should be avoided to use more than one taxonomy type of the subset for the same user or context.
+The TaxonomyTypes scheme retrieves the package name by retrieving the taxonomy types of a user. For this purpose it uses a configurable subset of taxonomy types which can be configured via the com.openexchange.advertisement.<reseller>.taxonomy.types property. It retrieves the first taxonomy type which matches one type of the configured subset. Therefore it should be avoided to use more than one taxonomy type of the subset for the same user or context.
 
 #### AccessCombinations
 
