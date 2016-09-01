@@ -49,11 +49,9 @@
 
 package com.openexchange.file.storage.boxcom;
 
-import java.text.ParseException;
 import java.util.Collections;
-import org.slf4j.Logger;
-import com.box.boxjavalibv2.dao.BoxTypedObject;
-import com.box.boxjavalibv2.utils.ISO8601DateParser;
+import java.util.Date;
+import com.box.sdk.BoxFolder.Info;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
@@ -67,10 +65,9 @@ import com.openexchange.file.storage.TypeAware;
  * {@link BoxFolder}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class BoxFolder extends DefaultFileStorageFolder implements TypeAware {
-
-    private static final String TYPE_FOLDER = BoxConstants.TYPE_FOLDER;
 
     private FileStorageFolderType type;
 
@@ -124,11 +121,11 @@ public final class BoxFolder extends DefaultFileStorageFolder implements TypeAwa
      * @param accountDisplayName The account's display name
      * @throws OXException If parsing Box.com directory fails
      */
-    public BoxFolder parseDirEntry(com.box.boxjavalibv2.dao.BoxFolder dir, String rootFolderId, String accountDisplayName) throws OXException {
+    public BoxFolder parseDirEntry(Info dir, String rootFolderId, String accountDisplayName) throws OXException {
         if (null != dir) {
             try {
-                id = dir.getId();
-                rootFolder = isRootFolder(dir.getId(), rootFolderId);
+                id = dir.getID();
+                rootFolder = isRootFolder(dir.getID(), rootFolderId);
                 b_rootFolder = true;
 
                 if (rootFolder) {
@@ -136,47 +133,31 @@ public final class BoxFolder extends DefaultFileStorageFolder implements TypeAwa
                     setParentId(null);
                     setName(null == accountDisplayName ? dir.getName() : accountDisplayName);
                 } else {
-                    com.box.boxjavalibv2.dao.BoxFolder parent = dir.getParent();
+                    Info parent = dir.getParent();
                     // A shared folder does not have a parent in the current user's "context"
                     if (parent == null) {
                         setParentId(FileStorageFolder.ROOT_FULLNAME);
                     } else {
-                        setParentId(isRootFolder(parent.getId(), rootFolderId) ? FileStorageFolder.ROOT_FULLNAME : parent.getId());
+                        setParentId(isRootFolder(parent.getID(), rootFolderId) ? FileStorageFolder.ROOT_FULLNAME : parent.getID());
                     }
                     setName(dir.getName());
                 }
 
                 {
-                    String createdAt = dir.getCreatedAt();
+                    Date createdAt = dir.getCreatedAt();
                     if (null != createdAt) {
-                        try {
-                            creationDate = (ISO8601DateParser.parse(createdAt));
-                        } catch (ParseException e) {
-                            Logger logger = org.slf4j.LoggerFactory.getLogger(BoxFile.class);
-                            logger.warn("Could not parse date from: {}", createdAt, e);
-                        }
+                        creationDate = createdAt;
                     }
                 }
                 {
-                    String modifiedAt = dir.getModifiedAt();
+                    Date modifiedAt = dir.getModifiedAt();
                     if (null != modifiedAt) {
-                        try {
-                            lastModifiedDate = (ISO8601DateParser.parse(modifiedAt));
-                        } catch (ParseException e) {
-                            Logger logger = org.slf4j.LoggerFactory.getLogger(BoxFile.class);
-                            logger.warn("Could not parse date from: {}", modifiedAt, e);
-                        }
+                        lastModifiedDate = modifiedAt;
                     }
                 }
 
                 {
-                    boolean hasSubfolders = false;
-                    for (BoxTypedObject child : dir.getItemCollection().getEntries()) {
-                        if (TYPE_FOLDER.equals(child.getType())) {
-                            hasSubfolders = true;
-                            break;
-                        }
-                    }
+                    boolean hasSubfolders = !dir.getPathCollection().isEmpty();
                     setSubfolders(hasSubfolders);
                     setSubscribedSubfolders(hasSubfolders);
                 }
