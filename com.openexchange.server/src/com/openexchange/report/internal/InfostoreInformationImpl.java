@@ -210,7 +210,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
         Integer sum = 0;
         for (Entry<String, Integer> currentFilestore : filestoreMap.entrySet()) {
             sum += currentFilestore.getValue();
-            if (resultMap.get("min") == null || resultMap.get("min") == 0 || resultMap.get("min") > currentFilestore.getValue()) {
+            if (resultMap.get("min") == null || resultMap.get("min") == 0 || (resultMap.get("min") > currentFilestore.getValue() && currentFilestore.getValue() != 0)) {
                 resultMap.put("min", currentFilestore.getValue());
             }
             if (resultMap.get("max") == null || resultMap.get("max") == 0 || resultMap.get("max") < currentFilestore.getValue()) {
