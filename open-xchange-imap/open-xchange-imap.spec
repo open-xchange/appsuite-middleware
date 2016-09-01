@@ -100,6 +100,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-3413
     ox_add_property com.openexchange.imap.initWithSpecialUse false $PFILE
+
+    # SoftwareChange_Request-3524
+    ox_add_property com.openexchange.imap.setSpecialUseFlags false $PFILE
 fi
 
 %clean
