@@ -232,20 +232,17 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                 BoxAPIConnection apiConnection = getAPIConnection();
                 com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(folderId));
 
-                //TODO: is it possible to rename and move?
+                // Rename & Move has to be done with two subsequent requests
                 // Rename
                 if (!Strings.isEmpty(newName)) {
                     boxFolder.rename(newName);
                 }
-
                 // Move
                 if (!Strings.isEmpty(newParentId)) {
                     com.box.sdk.BoxFolder destinationBoxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(newParentId));
                     boxFolder.move(destinationBoxFolder);
                 }
 
-                //TODO: Verify whether the new identifier is reflected with the 'move' operation right away, 
-                //      or there is a need to retrieve the folder's information again 
                 return toFileStorageFolderId(boxFolder.getID());
             }
         });
@@ -263,8 +260,6 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                     boxFolder.rename(newName);
                 }
 
-                //TODO: Verify whether the new identifier is reflected with the 'rename' operation right away, 
-                //      or there is a need to retrieve the folder's information again 
                 return toFileStorageFolderId(boxFolder.getID());
             }
         });
