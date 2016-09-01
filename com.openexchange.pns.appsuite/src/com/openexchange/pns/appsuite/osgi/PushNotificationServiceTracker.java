@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,43 +47,57 @@
  *
  */
 
-package com.openexchange.push.osgi;
+package com.openexchange.pns.appsuite.osgi;
 
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.event.EventFactoryService;
-import com.openexchange.osgi.HousekeepingActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.pns.PushNotificationService;
+import com.openexchange.pns.appsuite.AppSuitePushClientChecker;
 import com.openexchange.push.PushClientChecker;
 
 /**
- * {@link PushActivator} - The activator for push bundle.
+ * {@link PushNotificationServiceTracker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class PushActivator extends HousekeepingActivator {
+public class PushNotificationServiceTracker implements ServiceTrackerCustomizer<PushNotificationService, PushNotificationService> {
+
+    private final BundleContext context;
+    private ServiceRegistration<PushClientChecker> serviceRegistration;
 
     /**
-     * Initializes a new {@link PushActivator}.
+     * Initializes a new {@link PushNotificationServiceTracker}.
      */
-    public PushActivator() {
+    public PushNotificationServiceTracker(BundleContext context) {
         super();
+        this.context = context;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { EventAdmin.class, EventFactoryService.class };
+    public synchronized PushNotificationService addingService(ServiceReference<PushNotificationService> reference) {
+        PushNotificationService service = context.getService(reference);
+        serviceRegistration = context.registerService(PushClientChecker.class, new AppSuitePushClientChecker(), null);
+        return service;
     }
 
     @Override
-    public void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        track(PushClientChecker.class, new PushClientCheckerTracker(context));
-        openTrackers();
+    public void modifiedService(ServiceReference<PushNotificationService> reference, PushNotificationService service) {
+        // Ignore
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    public synchronized void removedService(ServiceReference<PushNotificationService> reference, PushNotificationService service) {
+        ServiceRegistration<PushClientChecker> serviceRegistration = this.serviceRegistration;
+        if (null != serviceRegistration) {
+            this.serviceRegistration = null;
+            serviceRegistration.unregister();
+        }
+
+        context.ungetService(reference);
     }
+
 
 }

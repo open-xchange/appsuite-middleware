@@ -51,6 +51,7 @@ package com.openexchange.pns.appsuite.osgi;
 
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushMessageGenerator;
+import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.appsuite.AppSuiteWebSocketMessageGenerator;
 import com.openexchange.pns.appsuite.AppSuiteWebSocketToClientResolver;
 import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
@@ -77,6 +78,9 @@ public class AppSuitePushStuffActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        track(PushNotificationService.class, new PushNotificationServiceTracker(context));
+        openTrackers();
+
         registerService(PushMessageGenerator.class, new AppSuiteWebSocketMessageGenerator());
         registerService(WebSocketToClientResolver.class, new AppSuiteWebSocketToClientResolver());
     }
