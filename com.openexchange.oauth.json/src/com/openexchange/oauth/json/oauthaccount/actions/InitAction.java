@@ -330,13 +330,13 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
      * @throws OXException if the {@link OAuthScope}s can not be retrieved or if the <code>scopes</code> URL parameter is missing form the request
      */
     private Set<OAuthScope> getScopes(AJAXRequestData request, String serviceId) throws OXException {
+        OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
         // Get the scope parameter
         String scope = request.getParameter("scopes");
         if (isEmpty(scope)) {
-            throw OAuthExceptionCodes.MISSING_SCOPE.create();
+            return scopeRegistry.getAvailableScopes(API.resolveFromServiceId(serviceId));
         }
         // Get the scopes
-        OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
         return scopeRegistry.getAvailableScopes(API.resolveFromServiceId(serviceId), Module.valuesOf(scope));
     }
 
