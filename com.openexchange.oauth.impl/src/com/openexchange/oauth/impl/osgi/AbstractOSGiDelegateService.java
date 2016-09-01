@@ -66,7 +66,7 @@ public abstract class AbstractOSGiDelegateService<S> {
 
     private final AtomicReference<S> service;
 
-    private volatile ServiceTracker tracker;
+    private volatile ServiceTracker<?, ?> tracker;
 
     /**
      * Initializes a new {@link AbstractOSGiDelegateService}.
@@ -74,7 +74,7 @@ public abstract class AbstractOSGiDelegateService<S> {
     protected AbstractOSGiDelegateService(final Class<S> clazz) {
         super();
         this.clazz = clazz;
-        service = new AtomicReference<S>();
+        service = new AtomicReference<>();
     }
 
     /**
@@ -87,9 +87,9 @@ public abstract class AbstractOSGiDelegateService<S> {
     public final <I extends AbstractOSGiDelegateService<S>> I start(final BundleContext bundleContext) {
         if (null == tracker) {
             synchronized (this) {
-                ServiceTracker tmp = tracker;
+                ServiceTracker<?, ?> tmp = tracker;
                 if (null == tracker) {
-                    tracker = tmp = new ServiceTracker(bundleContext, clazz.getName(), new Customizer<S>(service, bundleContext));
+                    tracker = tmp = new ServiceTracker<>(bundleContext, clazz.getName(), new Customizer<>(service, bundleContext));
                     tmp.open();
                 }
             }
@@ -101,7 +101,7 @@ public abstract class AbstractOSGiDelegateService<S> {
      * Stops tracking the delegate service.
      */
     public final void stop() {
-        final ServiceTracker tmp = tracker;
+        final ServiceTracker<?, ?> tmp = tracker;
         if (null != tmp) {
             tmp.close();
         }

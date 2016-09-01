@@ -104,6 +104,7 @@ public interface OAuthService {
      * @param serviceMetaData The identifier of service meta data
      * @param callbackUrl The optional call-back URL
      * @param currentHost The name of this host
+     * @param session The session
      * @param a {@link Set} with {@link OAuthScope}s to enable for the {@link OAuthAccount}
      * @throws OXException If initialisation fails
      * @return The OAuth interaction providing needed steps
@@ -170,7 +171,6 @@ public interface OAuthService {
      * @param user The user identifier
      * @param contextId The context identifier
      * @param a {@link Set} with {@link OAuthScope}s to enable for the {@link OAuthAccount}
-     * @param expiration the expiration time of the {@link OAuthToken}
      * @throws OXException If deletion fails
      */
     void updateAccount(int accountId, Map<String, Object> arguments, int user, int contextId, Set<OAuthScope> scopes) throws OXException;
@@ -185,7 +185,7 @@ public interface OAuthService {
      * @param user
      * @param contextId
      * @param a {@link Set} with {@link OAuthScope}s to enable for the {@link OAuthAccount}
-     * @return
+     * @return the updated {@link OAuthAccount}
      * @throws OXException
      */
     OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId, Set<OAuthScope> scopes) throws OXException;
@@ -208,7 +208,7 @@ public interface OAuthService {
      * @param api The API type
      * @param session The session
      * @return The default account for this API type
-     * @throws OXException
+     * @throws OXException if no account for the API can be found.
      */
     OAuthAccount getDefaultAccount(API api, Session session) throws OXException;
 

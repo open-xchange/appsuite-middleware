@@ -105,9 +105,11 @@ public final class OAuthUtil {
     }
 
     /**
-     * Builds the 'init' call-back URL for OAuth
+     * Builds the 'init' call-back URL for the given {@link OAuthAccount}
      * 
-     * @return the 'init' call-back URL for OAuth
+     * @param session The session
+     * @param account The {@link OAuthAccount}
+     * @return the 'init' call-back URL for the given {@link OAuthAccount}
      */
     public static final String buildCallbackURL(Session session, OAuthAccount account) {
         RequestContext requestContext = RequestContextHolder.get();
@@ -129,9 +131,10 @@ public final class OAuthUtil {
     }
 
     /**
-     * Tries to determine the hostname by first looking in to the {@link RequestContext},
+     * Tries to determine the hostname by first looking in to {@link HostData},
      * then through Java and if still not available, falls back to 'localhost' as last resort.
      * 
+     * @param hostData The {@link HostData}
      * @return The hostname
      */
     private static final String determineHost(HostData hostData) {

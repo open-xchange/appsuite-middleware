@@ -86,9 +86,9 @@ public abstract class AbstractExtendedScribeAwareOAuthServiceMetaData extends Ab
     /**
      * Initializes a new {@link AbstractExtendedScribeAwareOAuthServiceMetaData}.
      * 
-     * @param services
-     * @param id
-     * @param displayName
+     * @param services The {@link ServiceLookup}
+     * @param api The {@link API}
+     * @param scopes The {@link OAuthScope}s
      */
     public AbstractExtendedScribeAwareOAuthServiceMetaData(ServiceLookup services, API api, OAuthScope... scopes) {
         this(services, api, false, true, scopes);

@@ -52,6 +52,7 @@ package com.openexchange.oauth.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import javax.xml.ws.handler.MessageContext.Scope;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
@@ -82,8 +83,8 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
      * Initialises a new {@link AbstractScribeAwareOAuthServiceMetaData}.
      *
      * @param services the service lookup instance
-     * @param id The OAuth identifier
-     * @param displayName The display name
+     * @param api The {@link API}
+     * @param scopes The {@link Scope}s
      */
     public AbstractScribeAwareOAuthServiceMetaData(final ServiceLookup services, API api, OAuthScope... scopes) {
         super(scopes);
@@ -94,7 +95,7 @@ public abstract class AbstractScribeAwareOAuthServiceMetaData extends AbstractOA
         setDisplayName(api.getShortName());
 
         // Common properties for all OAuthServiceMetaData implementations.
-        propertyNames = new ArrayList<OAuthPropertyID>();
+        propertyNames = new ArrayList<>();
         propertyNames.add(OAuthPropertyID.apiKey);
         propertyNames.add(OAuthPropertyID.apiSecret);
 
