@@ -86,6 +86,7 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
@@ -469,8 +470,10 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     //                        throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(x, x.getMessage());
                     //                    }
 
-                    fileInfo.setDescription(file.getDescription()); //FIXME: possible NPE
-                    boxFile.updateInfo(fileInfo);
+                    if (!Strings.isEmpty(file.getDescription())) {
+                        fileInfo.setDescription(file.getDescription()); //FIXME: possible NPE
+                        boxFile.updateInfo(fileInfo);
+                    }
 
                     return new IDTuple(file.getFolderId(), fileInfo.getID());
                 } catch (BoxAPIException e) {

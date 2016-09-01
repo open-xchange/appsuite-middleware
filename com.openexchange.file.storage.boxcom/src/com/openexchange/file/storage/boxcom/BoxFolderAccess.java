@@ -346,6 +346,11 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
                 FileStorageFolder f = parseBoxFolder(info);
                 list.add(f);
                 while (!rootFolderId.equals(fid)) {
+                    // Check if we reached a root folder
+                    if (info.getParent() == null) {
+                        fid = "0";
+                        continue;
+                    }
                     fid = info.getParent().getID();
                     boxFolder = new com.box.sdk.BoxFolder(apiConnection, fid);
                     info = boxFolder.getInfo();
