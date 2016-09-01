@@ -572,7 +572,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             @Override
             protected TimedResult<File> doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
-                com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, folderId);
+                com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(folderId));
 
                 List<File> files = new LinkedList<File>();
                 for (com.box.sdk.BoxItem.Info info : boxFolder) {

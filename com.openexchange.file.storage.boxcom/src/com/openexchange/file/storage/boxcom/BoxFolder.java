@@ -157,7 +157,7 @@ public final class BoxFolder extends DefaultFileStorageFolder implements TypeAwa
                 }
 
                 {
-                    boolean hasSubfolders = !dir.getPathCollection().isEmpty();
+                    boolean hasSubfolders = dir.getPathCollection() != null && !dir.getPathCollection().isEmpty();
                     setSubfolders(hasSubfolders);
                     setSubscribedSubfolders(hasSubfolders);
                 }
