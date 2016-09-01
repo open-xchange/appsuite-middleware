@@ -47,10 +47,11 @@
  *
  */
 
-package com.openexchange.sessiond;
+package com.openexchange.sessiond.mbean;
 
 import java.util.Set;
 import javax.management.MBeanException;
+import com.openexchange.management.MBeanMethodAnnotation;
 
 /**
  * {@link SessiondMBean} - The MBean for sessiond
@@ -68,6 +69,7 @@ public interface SessiondMBean {
      * @param contextId The context ID
      * @return The number of removed sessions belonging to the user or <code>-1</code> if an error occurred
      */
+    @MBeanMethodAnnotation (description="Clears all sessions belonging to the user identified by given user ID in specified context", parameters={"userId", "contextId"}, parameterDescriptions={"The user identifier", "The context identifier"})
     public int clearUserSessions(int userId, int contextId);
 
     /**
@@ -75,6 +77,7 @@ public interface SessiondMBean {
      *
      * @param contextId The context ID
      */
+    @MBeanMethodAnnotation (description="Clears all sessions belonging to specified context", parameters={"contextId"}, parameterDescriptions={"The context identifier"})
     public void clearContextSessions(int contextId);
 
     /**
@@ -82,6 +85,7 @@ public interface SessiondMBean {
      *
      * @param contextId The context identifiers to remove sessions for
      */
+    @MBeanMethodAnnotation (description="Clears all sessions in whole cluster belonging to specified context identifiers", parameters={"contextIds"}, parameterDescriptions={"The context identifiers"})
     public void clearContextSessionsGlobal(Set<Integer> contextIds) throws MBeanException;
 
     /**
@@ -89,6 +93,7 @@ public interface SessiondMBean {
      *
      * @return The number of short-term sessions
      */
+    @MBeanMethodAnnotation (description="Gets the number of short-term sessions.", parameters={}, parameterDescriptions={})
     int[] getNumberOfShortTermSessions();
 
     /**
@@ -96,11 +101,13 @@ public interface SessiondMBean {
      *
      * @return The number of long-term sessions
      */
+    @MBeanMethodAnnotation (description="Gets the number of long-term sessions.", parameters={}, parameterDescriptions={})
     int[] getNumberOfLongTermSessions();
 
     /**
      * Clear all sessions in central session storage. This does not affect the local short term session container.
      */
+    @MBeanMethodAnnotation (description="Clear all sessions in central session storage. This does not affect the local short term session container.", parameters={}, parameterDescriptions={})
     public void clearSessionStorage() throws MBeanException;
 
 }
