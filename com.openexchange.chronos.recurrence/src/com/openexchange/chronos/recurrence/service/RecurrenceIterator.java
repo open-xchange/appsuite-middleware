@@ -92,7 +92,7 @@ public class RecurrenceIterator implements Iterator<Event> {
             e.printStackTrace();
         }
         Calendar seriesStart = master.getStart();
-        inner = rrule.iterator(seriesStart.getTimeInMillis(), seriesStart.getTimeZone());
+        inner = rrule.iterator(seriesStart.getTimeInMillis(), master.isAllDay() ? null : seriesStart.getTimeZone());
 
         if (this.start != null) {
             while (inner.hasNext()) {
