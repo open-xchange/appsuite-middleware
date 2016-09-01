@@ -168,8 +168,8 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
      */
     private void createOAuthClient(OAuthAccount account) throws OXException {
         OAuthServiceMetaData boxMetaData = account.getMetaData();
-        BoxAPIConnection boxAPI = new BoxAPIConnection(boxMetaData.getAPIKey(session), boxMetaData.getAPISecret(session), getOAuthAccount().getToken(), getOAuthAccount().getSecret());
-        OAuthClient<BoxAPIConnection> oAuthClient = new OAuthClient<>(boxAPI, getOAuthAccount().getToken());
+        BoxAPIConnection boxAPI = new BoxAPIConnection(boxMetaData.getAPIKey(session), boxMetaData.getAPISecret(session), account.getToken(), account.getSecret());
+        OAuthClient<BoxAPIConnection> oAuthClient = new OAuthClient<>(boxAPI, account.getToken());
         setOAuthClient(oAuthClient);
     }
 }
