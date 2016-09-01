@@ -179,7 +179,9 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     public void shutDown() {
         for (Iterator<ConcurrentMap<ConnectionId, SessionBoundWebSocket>> i = openSockets.values().iterator(); i.hasNext();) {
             for (Iterator<SessionBoundWebSocket> iter = i.next().values().iterator(); iter.hasNext();) {
-                closeSocketSafe(iter.next());
+                SessionBoundWebSocket sessionBoundSocket = iter.next();
+                sessionBoundSocket.send("session:invalid");
+                closeSocketSafe(sessionBoundSocket);
                 iter.remove();
             }
             i.remove();
@@ -236,6 +238,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         for (Iterator<SessionBoundWebSocket> it = userSockets.values().iterator(); it.hasNext();) {
             SessionBoundWebSocket sessionBoundSocket = it.next();
             if (WebSockets.matches(pathFilter, sessionBoundSocket.getPath())) {
+                sessionBoundSocket.send("session:invalid");
                 closeSocketSafe(sessionBoundSocket);
                 it.remove();
             }
