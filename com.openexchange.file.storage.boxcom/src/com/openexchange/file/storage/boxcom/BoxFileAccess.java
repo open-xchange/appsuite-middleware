@@ -422,8 +422,9 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     try {
                         boxFile.canUploadVersion(file.getFileName(), file.getFileSize(), boxFolderId);
                     } catch (BoxAPIException e) {
-                        // TODO: Could a 404 happen?
-                        if (e.getResponseCode() != 404) {
+                        if (e.getResponseCode() == 404) {
+                            LOGGER.debug("Pre-flight check: File does not exist.");
+                        } else {
                             throw handleHttpResponseError(file.getId(), account.getId(), e);
                         }
                     }
@@ -464,14 +465,14 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         fileInfo = boxFile.getInfo();
                         checkFileValidity(fileInfo);
                     }
-                    //TODO: Do we need this check?
-                    //                    if (null == boxFile) {
-                    //                        IllegalStateException x = new IllegalStateException("box.com upload failed");
-                    //                        throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(x, x.getMessage());
-                    //                    }
+
+                    if (null == fileInfo) {
+                        IllegalStateException x = new IllegalStateException("box.com upload failed");
+                        throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(x, x.getMessage());
+                    }
 
                     if (!Strings.isEmpty(file.getDescription())) {
-                        fileInfo.setDescription(file.getDescription()); //FIXME: possible NPE
+                        fileInfo.setDescription(file.getDescription());
                         boxFile.updateInfo(fileInfo);
                     }
 
