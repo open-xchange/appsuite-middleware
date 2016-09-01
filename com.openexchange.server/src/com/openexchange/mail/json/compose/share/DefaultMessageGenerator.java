@@ -557,7 +557,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
             Map<String, String> filenameMapping = generateFilenameMapping(items, translator);
             Map<String, String> previewImages = new HashMap<>(cidMapping.size());
             for (String preview : cidMapping.keySet()) {
-                previewImages.put(preview, "<img src=\"cid:" + cidMapping.get(preview) + "\"/>");
+                previewImages.put(preview, "<img src=\"cid:" + cidMapping.get(preview) + "\" heigth=200 width=150 />");
             }
             vars.put(VARIABLE_PREVIEW, previewImages);
             vars.put(VARIABLE_FILE_NAMES, filenameMapping);
