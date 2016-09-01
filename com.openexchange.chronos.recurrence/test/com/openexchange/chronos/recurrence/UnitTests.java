@@ -60,7 +60,12 @@ import org.junit.runners.Suite.SuiteClasses;
  * @since v7.10.0
  */
 @RunWith(Suite.class)
-@SuiteClasses({ RecurrencePositionTest.class, RecurrenceDatePositionTest.class, OccurrencesTest.class, DSTShiftTest.class
+@SuiteClasses({
+    RecurrencePositionTest.class,
+    RecurrenceDatePositionTest.class,
+    OccurrencesTest.class,
+    DSTShiftTest.class,
+    HourlyTest.class
 })
 public class UnitTests {
 

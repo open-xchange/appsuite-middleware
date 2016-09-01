@@ -110,7 +110,8 @@ public abstract class RecurrenceServiceTest {
         clone.setStartDate(start);
         clone.setEndDate(end);
 
-        assertTrue("Not equal.", clone.equals(instance));
+        boolean equals = clone.equals(instance);
+        assertTrue("Not equal.", equals);
     }
 
     protected Calendar getCal(String date) {
