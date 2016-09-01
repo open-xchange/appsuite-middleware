@@ -100,8 +100,6 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BoxFileAccess.class);
 
-    private static final String THUMBNAIL_EXTENSION = "png";
-
     private final BoxAccountAccess accountAccess;
     final int userId;
 
@@ -471,7 +469,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     //                        throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(x, x.getMessage());
                     //                    }
 
-                    fileInfo.setDescription(file.getDescription());
+                    fileInfo.setDescription(file.getDescription()); //FIXME: possible NPE
                     boxFile.updateInfo(fileInfo);
 
                     return new IDTuple(file.getFolderId(), fileInfo.getID());
