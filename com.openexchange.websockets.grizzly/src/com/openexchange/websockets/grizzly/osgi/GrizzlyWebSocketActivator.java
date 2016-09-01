@@ -49,12 +49,17 @@
 
 package com.openexchange.websockets.grizzly.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -121,6 +126,12 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
 
             long period = GrizzlyWebSocketSessionToucher.getTouchPeriod(getService(ConfigurationService.class));
             sessionToucherTask = getService(TimerService.class).scheduleAtFixedRate(new GrizzlyWebSocketSessionToucher(app), period, period);
+        }
+
+        {
+            Dictionary<String, Object> props = new Hashtable<>(2);
+            props.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            registerService(EventHandler.class, new GrizzlyWebSocketEventHandler(), props);
         }
     }
 
