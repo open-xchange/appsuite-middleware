@@ -1,0 +1,76 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+###
+# Infos about Web Sockets:
+#   buffered-count:    The number of buffered notifications.
+#   submitted-count:   The number of submitted notifications
+#   processing-count:  The number of processing notifications
+###
+
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showruntimestats --pnsstats";
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+    if (-x $showruntimestats) {
+        print "yes\n";
+        exit 0;
+    }
+    else {
+        print "no\n";
+        exit 0;
+    }
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config")
+{
+    print "graph_title Push Notification Service\n";
+    print "graph_args --base 1000 -l 0\n";
+    print "graph_category Open Xchange\n";
+    print "graph_vlabel Number\n";
+    
+    print "buffered-count.label count\n";
+    print "buffered-count.draw LINE1\n";
+    print "buffered-count.type DERIVE\n";
+    print "buffered-count.min 0\n";
+    
+    print "submitted-message.label buffered-message\n";
+    print "submitted-message.draw LINE1\n";
+    print "submitted-message.type DERIVE\n";
+    print "submitted-message.min 0\n";
+    
+    print "processing-message.label buffered-message\n";
+    print "processing-message.draw LINE1\n";
+    print "processing-message.type DERIVE\n";
+    print "processing-message.min 0\n";
+
+    exit 0
+}
+
+open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
+
+while (<SHOWRUNTIME>)
+{
+    if ( $_ =~ /PushNotificationMBean,NumberOfBufferedNotifications/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "buffered-count.value $val\n";
+        next;
+    }
+    if ( $_ =~ /PushNotificationMBean,NumberOfSubmittedNotifications/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "submitted-count.value $val\n";
+        next;
+    }
+    if ( $_ =~ /PushNotificationMBean,NumberOfProcessingNotifications/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "processing-count.value $val\n";
+        next;
+    }
+}
+
+close (SHOWRUNTIME);

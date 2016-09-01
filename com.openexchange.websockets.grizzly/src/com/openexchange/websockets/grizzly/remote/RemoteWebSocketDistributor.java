@@ -61,6 +61,13 @@ import com.openexchange.websockets.WebSocket;
 public interface RemoteWebSocketDistributor  {
 
     /**
+     * Gets the number of buffered messages that are supposed to be sent to remote cluster members.
+     *
+     * @return The number of buffered messages
+     */
+    long getNumberOfBufferedMessages();
+
+    /**
      * Sends the given text message to remote nodes having an open Web Socket connection for specified user.
      *
      * @param message The text message to send

@@ -58,8 +58,10 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import com.openexchange.exception.ExceptionUtils;
+import com.openexchange.exception.OXException;
 import com.openexchange.processing.Processor;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.TimerService;
@@ -79,6 +81,7 @@ public class RoundRobinProcessor implements Processor {
     private final int numThreads;
     final BlockingDeque<TaskManager> roundRobinQueue;
     final Map<Object, TaskManager> taskManagers;
+    final AtomicLong numberOfExecutingTasks;
     final AtomicInteger numberOfActiveSelectors;
     final AtomicBoolean stopped;
 
@@ -98,6 +101,7 @@ public class RoundRobinProcessor implements Processor {
         pool = newPool;
         taskManagers = new HashMap<Object, TaskManager>(256);
         roundRobinQueue = new LinkedBlockingDeque<TaskManager>();
+        numberOfExecutingTasks = new AtomicLong(0);
 
         // Start selector threads
         stopped = new AtomicBoolean(false);
@@ -106,6 +110,22 @@ public class RoundRobinProcessor implements Processor {
             newPool.execute(new Selector());
             numberOfActiveSelectors.incrementAndGet();
         }
+    }
+
+    @Override
+    public long getNumberOfBufferedTasks() throws OXException {
+        synchronized (taskManagers) {
+            long count = 0;
+            for (TaskManager taskManager : taskManagers.values()) {
+                count+= taskManager.size();
+            }
+            return count;
+        }
+    }
+
+    @Override
+    public long getNumberOfExecutingTasks() throws OXException {
+        return numberOfExecutingTasks.get();
     }
 
     /**
@@ -350,7 +370,12 @@ public class RoundRobinProcessor implements Processor {
                             roundRobinQueue.offerLast(manager);
 
                             // Perform task
-                            task.run();
+                            numberOfExecutingTasks.incrementAndGet();
+                            try {
+                                task.run();
+                            } finally {
+                                numberOfExecutingTasks.decrementAndGet();
+                            }
 
                             if (Thread.interrupted()) {
                                 // Cleared interrupted status after run() method

@@ -47,33 +47,30 @@
  *
  */
 
-package com.openexchange.socketio.osgi;
+package com.openexchange.pns.monitoring.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.service.http.HttpService;
+import javax.management.ObjectName;
+import org.slf4j.Logger;
+import com.openexchange.management.ManagementService;
+import com.openexchange.management.Managements;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.socketio.websocket.WsSocketIOServlet;
-import com.openexchange.socketio.websocket.WsTransport;
-import com.openexchange.socketio.websocket.WsTransportConnectionRegistry;
-import com.openexchange.timer.TimerService;
-import com.openexchange.websockets.WebSocketListener;
+import com.openexchange.pns.PushNotificationService;
+import com.openexchange.pns.monitoring.PushNotificationMBean;
+import com.openexchange.pns.monitoring.impl.PushNotificationMBeanImpl;
 
 
 /**
- * {@link SocketIoActivator}
+ * {@link PushNotificationMonitoringActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class SocketIoActivator extends HousekeepingActivator {
-
-    private WsTransportConnectionRegistry connectionRegistry;
+public class PushNotificationMonitoringActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link SocketIoActivator}.
+     * Initializes a new {@link PushNotificationMonitoringActivator}.
      */
-    public SocketIoActivator() {
+    public PushNotificationMonitoringActivator() {
         super();
     }
 
@@ -84,36 +81,35 @@ public class SocketIoActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HttpService.class, TimerService.class };
+        return new Class<?>[] { ManagementService.class, PushNotificationService.class };
     }
 
     @Override
-    protected synchronized void startBundle() throws Exception {
-        TimerService timerService = getService(TimerService.class);
+    protected void startBundle() throws Exception {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationMonitoringActivator.class);
 
-        WsTransportConnectionRegistry connectionRegistry = new WsTransportConnectionRegistry();
-        this.connectionRegistry = connectionRegistry;
-        registerService(WebSocketListener.class, connectionRegistry);
-
-        WsTransport transport = new WsTransport(connectionRegistry);
-        connectionRegistry.setTransport(transport);
-
-        Dictionary<String, String> initParams = new Hashtable<>(2);
-        initParams.put("allowAllOrigins", "true");
-        getService(HttpService.class).registerServlet("/socket.io", new WsSocketIOServlet(transport, timerService), initParams, null);
-    }
-
-    @Override
-    protected synchronized void stopBundle() throws Exception {
-        WsTransportConnectionRegistry connectionRegistry = this.connectionRegistry;
-        if (null != connectionRegistry) {
-            this.connectionRegistry = null;
-            connectionRegistry.shutDown();
+        ManagementService managementService = getService(ManagementService.class);
+        try {
+            ObjectName objectName = Managements.getObjectName(PushNotificationMBean.class.getName(), PushNotificationMBean.DOMAIN);
+            managementService.registerMBean(objectName, new PushNotificationMBeanImpl(getService(PushNotificationService.class)));
+            logger.warn("Registered MBean {}", PushNotificationMBean.class.getName());
+        } catch (Exception e) {
+            logger.warn("Could not register MBean {}", PushNotificationMBean.class.getName(), e);
         }
+    }
 
-        HttpService httpService = getService(HttpService.class);
-        if (null != httpService) {
-            httpService.unregister("/socket.io");
+    @Override
+    protected void stopBundle() throws Exception {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationMonitoringActivator.class);
+
+        ManagementService managementService = getService(ManagementService.class);
+        if (null != managementService) {
+            try {
+                managementService.unregisterMBean(Managements.getObjectName(PushNotificationMBean.class.getName(), PushNotificationMBean.DOMAIN));
+                logger.warn("Unregistered MBean {}", PushNotificationMBean.class.getName());
+            } catch (Exception e) {
+                logger.warn("Could not un-register MBean {}", PushNotificationMBean.class.getName(), e);
+            }
         }
 
         super.stopBundle();

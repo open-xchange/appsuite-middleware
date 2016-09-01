@@ -243,7 +243,6 @@ public class DovecotPushRESTService {
             .messageData(messageData)
             .build();
         pushNotificationService.handle(notification);
-        LOGGER.info("Successfully parsed & triggered '{}' notification for user {} in context {}", KnownTopic.MAIL_NEW.getName(), userId, contextId);
     }
 
     private void setEventProperties(long uid, String fullName, String from, String subject, int unread, Map<String, Object> props) {

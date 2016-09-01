@@ -47,66 +47,67 @@
  *
  */
 
-package com.openexchange.pns;
+package com.openexchange.pns.monitoring.impl;
+
+import javax.management.MBeanException;
+import javax.management.NotCompliantMBeanException;
+import com.openexchange.management.AnnotatedStandardMBean;
+import com.openexchange.pns.PushNotificationService;
+import com.openexchange.pns.monitoring.PushNotificationMBean;
+
 
 /**
- * {@link PushMatch} - Represents a push subscription.
+ * {@link PushNotificationMBeanImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface PushMatch {
+public class PushNotificationMBeanImpl extends AnnotatedStandardMBean implements PushNotificationMBean {
+
+    private final PushNotificationService pushNotificationService;
 
     /**
-     * Gets the user identifier
-     *
-     * @return The user identifier
+     * Initializes a new {@link PushNotificationMBeanImpl}.
      */
-    int getUserId();
+    public PushNotificationMBeanImpl(PushNotificationService pushNotificationService) throws NotCompliantMBeanException {
+        super("Management Bean for Push Notification Service", PushNotificationMBean.class);
+        this.pushNotificationService = pushNotificationService;
+    }
 
-    /**
-     * Gets the context identifier
-     *
-     * @return The context identifier
-     */
-    int getContextId();
-
-    /**
-     * Gets the identifier of the client associated with this subscription.
-     *
-     * @return The client identifier
-     */
-    String getClient();
-
-    /**
-     * Gets the topic (colon-separated string) of this match; e.g.
-     * <pre>"ox:mail:new"</pre>
-     *
-     * @return The topic
-     */
-    String getTopic();
-
-    /**
-     * Gets the identifier of the associated push transport.
-     *
-     * @return The transport identifier
-     */
-    String getTransportId();
-
-    /**
-     * Gets the subscription's token
-     *
-     * @return The token
-     */
-    String getToken();
-
-    /**
-     * Checks if this match is considered equal to specified object.
-     *
-     * @param other The other object
-     * @return <code>true</code> if considered equal; otherwise <code>false</code>
-     */
     @Override
-    boolean equals(Object other);
+    public long getNumberOfBufferedNotifications() throws MBeanException {
+        try {
+            return pushNotificationService.getNumberOfBufferedNotifications();
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    @Override
+    public long getNumberOfSubmittedNotifications() throws MBeanException {
+        try {
+            return pushNotificationService.getNumberOfSubmittedNotifications();
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    @Override
+    public long getNumberOfProcessingNotifications() throws MBeanException {
+        try {
+            return pushNotificationService.getNumberOfProcessingNotifications();
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
 
 }

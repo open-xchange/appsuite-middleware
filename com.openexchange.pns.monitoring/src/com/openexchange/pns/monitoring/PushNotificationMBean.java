@@ -47,53 +47,52 @@
  *
  */
 
-package com.openexchange.processing;
+package com.openexchange.pns.monitoring;
 
-import com.openexchange.exception.OXException;
+import javax.management.MBeanException;
+import com.openexchange.management.MBeanMethodAnnotation;
+
 
 /**
- * {@link Processor}
+ * {@link PushNotificationMBean} - The MBean for Push Notification Service.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @since v7.8.3
  */
-public interface Processor {
+public interface PushNotificationMBean {
+
+    /** The MBean's domain */
+    public static final String DOMAIN = "com.openexchange.pns";
 
     /**
-     * Schedules the specified task for being executed associated with given key (if any).
+     * Gets the number of buffered notifications that are supposed to be transported.
      *
-     * @param optKey The optional key; if <code>null</code> calling {@link Thread} instance is referenced as key
-     * @param task The task to execute
-     * @return <code>true</code> if successfully scheduled for execution; otherwise <code>false</code> to signal that task cannot be accepted
+     * @return The number of buffered notifications
+     * @throws MBeanException If number of buffered notifications cannot be returned
      */
-    boolean execute(Object optKey, Runnable task);
+    @MBeanMethodAnnotation (description="Gets the number of buffered notifications that are supposed to be transported", parameters={}, parameterDescriptions={})
+    long getNumberOfBufferedNotifications() throws MBeanException;
 
     /**
-     * Gets the number of buffered tasks awaiting being executed.
+     * Gets the number of submitted notifications.
+     * <p>
+     * A notification is in submitted state if fetched from buffer and submitted for being transported, but not yet done.
      *
-     * @return The number of buffered tasks
-     * @throws OXException If number of buffered tasks cannot be returned
+     * @return The number of submitted notifications
+     * @throws MBeanException If number of submitted notifications cannot be returned
      */
-    long getNumberOfBufferedTasks() throws OXException;
+    @MBeanMethodAnnotation (description="Gets the number of submitted notifications", parameters={}, parameterDescriptions={})
+    long getNumberOfSubmittedNotifications() throws MBeanException;
 
     /**
-     * Gets the number of tasks that are currently executed.
+     * Gets the number of notifications that are currently processed.
+     * <p>
+     * A notification is in processing state if currently transported
      *
-     * @return The number of executing tasks
-     * @throws OXException If number of executing tasks cannot be returned
+     * @return The number of processing notifications
+     * @throws MBeanException If number of processing notifications cannot be returned
      */
-    long getNumberOfExecutingTasks() throws OXException;
-
-    /**
-     * Stops this processor waiting until empty.
-     *
-     * @throws InterruptedException If interrupted while waiting
-     */
-    void stopWhenEmpty() throws InterruptedException;
-
-    /**
-     * Shuts-down this processor.
-     */
-    void stop();
+    @MBeanMethodAnnotation (description="Gets the number of notifications that are currently processed", parameters={}, parameterDescriptions={})
+    long getNumberOfProcessingNotifications() throws MBeanException;
 
 }

@@ -50,7 +50,6 @@
 package com.openexchange.pns.subscription.storage;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -81,14 +80,15 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
     /**
      * Initializes a new {@link CompositePushSubscriptionRegistry}.
      */
-    public CompositePushSubscriptionRegistry(PushSubscriptionRegistry persistentRegistry, PushSubscriptionRegistry volatileRegistry, ServiceListing<PushSubscriptionProvider> providers) {
+    public CompositePushSubscriptionRegistry(PushSubscriptionRegistry persistentRegistry, PushSubscriptionRegistry volatileRegistry, ServiceListing<PushSubscriptionProvider> providers, boolean useVolatileRegistry) {
         super();
         this.persistentRegistry = persistentRegistry;
-        this.volatileRegistry = volatileRegistry;
+        this.volatileRegistry = useVolatileRegistry ? volatileRegistry : null;
 
         List<PushSubscriptionRegistry> registries = new ArrayList<>(2);
-        // Exclude volatile in-memory registry for now
-        //registries.add(volatileRegistry);
+        if (useVolatileRegistry) {
+            registries.add(volatileRegistry);
+        }
         registries.add(persistentRegistry);
         this.registries = new CopyOnWriteArrayList<PushSubscriptionRegistry>(registries);
         this.providers = providers;
@@ -103,19 +103,23 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
             if (false == currentHits.isEmpty()) {
                 Map<ClientAndTransport, List<PushMatch>> currentMap = ((MapBackedHits) currentHits).getMap();
 
-                // Yet initialized?
+                // Already initialized?
                 if (null == map) {
-                    map = new LinkedHashMap<>();
-                }
-
-                // Add hits
-                for (Map.Entry<ClientAndTransport, List<PushMatch>> entry : currentMap.entrySet()) {
-                    List<PushMatch> list = map.get(entry.getKey());
-                    if (null == list) {
-                        list = new LinkedList<>();
-                        map.put(entry.getKey(), list);
+                    map = currentMap;
+                } else {
+                    // Merge hits
+                    for (Map.Entry<ClientAndTransport, List<PushMatch>> entry : currentMap.entrySet()) {
+                        List<PushMatch> list = map.get(entry.getKey());
+                        if (null == list) {
+                            list = new LinkedList<>();
+                            map.put(entry.getKey(), list);
+                        }
+                        for (PushMatch newMatch : entry.getValue()) {
+                            if (!list.contains(newMatch)) {
+                                list.add(newMatch);
+                            }
+                        }
                     }
-                    list.addAll(entry.getValue());
                 }
             }
         }
@@ -148,10 +152,10 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
 
     @Override
     public void registerSubscription(PushSubscription subscription) throws OXException {
-        if (Nature.PERSISTENT == subscription.getNature()) {
-            persistentRegistry.registerSubscription(subscription);
-        } else {
+        if (Nature.VOLATILE == subscription.getNature() && null != volatileRegistry) {
             volatileRegistry.registerSubscription(subscription);
+        } else {
+            persistentRegistry.registerSubscription(subscription);
         }
     }
 
@@ -160,14 +164,16 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
         // Is nature given?
         Nature nature = subscription.getNature();
 
-        if (Nature.VOLATILE == nature) {
+        if (Nature.VOLATILE == subscription.getNature() && null != volatileRegistry) {
             return volatileRegistry.unregisterSubscription(subscription);
         } else if (Nature.PERSISTENT == nature) {
             return persistentRegistry.unregisterSubscription(subscription);
         } else {
             // Don't know better
             boolean removed = persistentRegistry.unregisterSubscription(subscription);
-            removed |= volatileRegistry.unregisterSubscription(subscription);
+            if (null != volatileRegistry) {
+                removed |= volatileRegistry.unregisterSubscription(subscription);
+            }
             return removed;
         }
     }
@@ -175,14 +181,18 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
     @Override
     public int unregisterSubscription(String token, String transportId) throws OXException {
         int numRemoved = persistentRegistry.unregisterSubscription(token, transportId);
-        numRemoved += volatileRegistry.unregisterSubscription(token, transportId);
+        if (null != volatileRegistry) {
+            numRemoved += volatileRegistry.unregisterSubscription(token, transportId);
+        }
         return numRemoved;
     }
 
     @Override
     public boolean updateToken(PushSubscription subscription, String newToken) throws OXException {
         boolean updated = persistentRegistry.updateToken(subscription, newToken);
-        updated |= volatileRegistry.updateToken(subscription, newToken);
+        if (null != volatileRegistry) {
+            updated |= volatileRegistry.updateToken(subscription, newToken);
+        }
         return updated;
     }
 
