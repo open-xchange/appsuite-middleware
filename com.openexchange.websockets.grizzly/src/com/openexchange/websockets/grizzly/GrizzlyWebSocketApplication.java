@@ -262,6 +262,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         for (Iterator<SessionBoundWebSocket> it = userSockets.values().iterator(); it.hasNext();) {
             SessionBoundWebSocket sessionBoundSocket = it.next();
             if (sessionId.equals(sessionBoundSocket.getSessionId())) {
+                sessionBoundSocket.send("session:invalid");
                 closeSocketSafe(sessionBoundSocket);
                 it.remove();
             }
