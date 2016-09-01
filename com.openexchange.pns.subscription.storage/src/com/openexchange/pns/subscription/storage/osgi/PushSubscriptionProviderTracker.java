@@ -93,6 +93,17 @@ public class PushSubscriptionProviderTracker extends RankingAwareNearRegistrySer
     }
 
     @Override
+    protected void onServiceAdded(PushSubscriptionProvider provider) {
+        for (PushSubscriptionListener listener : listeners) {
+            try {
+                listener.addedProvider(provider);
+            } catch (OXException e) {
+                LOG.error("'{}' failed to handle added subscription provider", listener.getClass().getName(), e);
+            }
+        }
+    }
+
+    @Override
     protected void onServiceDisappeared(PushSubscriptionProvider provider) {
         for (PushSubscriptionListener listener : listeners) {
             try {

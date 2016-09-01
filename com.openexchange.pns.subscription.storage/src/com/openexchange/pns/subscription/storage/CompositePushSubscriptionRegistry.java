@@ -158,6 +158,7 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
 
     @Override
     public void registerSubscription(PushSubscription subscription) throws OXException {
+        List<PushSubscriptionListener> listeners = this.listeners.getServiceList();
         for (PushSubscriptionListener listener : listeners) {
             if(!listener.addingSubscription(subscription)) {
                 LOG.info("Listener {} denied registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), subscription.getUserId(), subscription.getContextId());
@@ -168,6 +169,10 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
             volatileRegistry.registerSubscription(subscription);
         } else {
             persistentRegistry.registerSubscription(subscription);
+        }
+
+        for (PushSubscriptionListener listener : listeners) {
+            listener.addedSubscription(subscription);
         }
     }
 
