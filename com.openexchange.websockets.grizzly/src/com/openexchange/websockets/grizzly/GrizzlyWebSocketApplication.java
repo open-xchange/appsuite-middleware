@@ -279,7 +279,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 if (WebSockets.matches(pathFilter, sessionBoundSocket.getPath())) {
                     try {
                         sessionBoundSocket.sendMessage(message);
-                        LOG.debug("Sent message \"{}\" via Web Socket using path filter \"{}\" to user {} in context {}", new Object() { @Override public String toString(){ return StringUtils.abbreviate(message, 12); }}, pathFilter, userId, contextId);
+                        LOG.info("Sent message \"{}\" via Web Socket using path filter \"{}\" to user {} in context {}", new Object() { @Override public String toString(){ return StringUtils.abbreviate(message, 12); }}, pathFilter, userId, contextId);
                     } catch (OXException e) {
                         LOG.error("Failed to send message to Web Socket: {}", sessionBoundSocket, e);
                     }
