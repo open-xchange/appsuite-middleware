@@ -135,25 +135,9 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     @Override
     public void runUserReport(UserReport userReport) throws OXException {
         this.createCapabilityInformations(userReport);
-
-        if (!userReport.getUser().isGuest()) {
-            // Determine if the user is disabled
-            if (!userReport.getUser().isMailEnabled()) {
-                userReport.set(Report.MACDETAIL, Report.DISABLED, Boolean.TRUE);
-            } else {
-                userReport.set(Report.MACDETAIL, Report.DISABLED, Boolean.FALSE);
-            }
-
-            // Determine if the user is the admin user
-            if (userReport.getContext().getMailadmin() == userReport.getUser().getId()) {
-                userReport.set(Report.MACDETAIL, Report.MAILADMIN, Boolean.TRUE);
-            } else {
-                userReport.set(Report.MACDETAIL, Report.MAILADMIN, Boolean.FALSE);
-            }
-            userReport.set(Report.MACDETAIL, Report.USER_LOGINS, getUserLoginsForPastYear(userReport.getContext().getContextId(), userReport.getUser().getId()));
-        }
+        this.addUserInformationToReport(userReport);
     }
-
+    
     private void createCapabilityInformations(UserReport userReport) throws OXException {
         CapabilitySet userCapabilitySet = getUserCapabilities(userReport.getUser(), userReport.getContext());
         ArrayList<String> userCapabilityIds = createSortedListOfCapabilityIds(userCapabilitySet);
@@ -188,6 +172,25 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
         capabilityIdsAsString.setLength(capabilityIdsAsString.length() - 1);
         return capabilityIdsAsString.toString();
+    }
+    
+    private void addUserInformationToReport(UserReport userReport) throws OXException {
+        if (!userReport.getUser().isGuest()) {
+            // Determine if the user is disabled
+            if (!userReport.getUser().isMailEnabled()) {
+                userReport.set(Report.MACDETAIL, Report.DISABLED, Boolean.TRUE);
+            } else {
+                userReport.set(Report.MACDETAIL, Report.DISABLED, Boolean.FALSE);
+            }
+
+            // Determine if the user is the admin user
+            if (userReport.getContext().getMailadmin() == userReport.getUser().getId()) {
+                userReport.set(Report.MACDETAIL, Report.MAILADMIN, Boolean.TRUE);
+            } else {
+                userReport.set(Report.MACDETAIL, Report.MAILADMIN, Boolean.FALSE);
+            }
+            userReport.set(Report.MACDETAIL, Report.USER_LOGINS, getUserLoginsForPastYear(userReport.getContext().getContextId(), userReport.getUser().getId()));
+        }
     }
 
     public HashMap<String, Long> getUserLoginsForPastYear(int contextId, int userId) throws OXException {
@@ -238,7 +241,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                 storedCapSData = prepareCapSData(contextReport, entry.getKey(), quota);
             }
             // And add our counts to it
-            add(storedCapSData, counts, false);
+            addNewValuesToExistingValues(storedCapSData, counts);
             // Save it back to the report
             report.set(Report.MACDETAIL, capSpec, storedCapSData);
         }
@@ -418,7 +421,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             sc.close();
             HashMap<String, Object> storedData = (HashMap<String, Object>) JSONCoercion.parseAndCoerceToNative(content);
             // Merge the data of the two files into dataToStore
-            merge(data, storedData);
+            mergeNewValuesWithStoredValues(storedData, data);
         } catch (FileNotFoundException e1) {
             e1.printStackTrace();
         } catch (InterruptedException e1) {
@@ -636,53 +639,31 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
     }
 
-    /**
-     * Add all values from counts to saveCounts. Also calculate Context-users-min/max/avg in savedCounts, depending
-     * on the new values.
-     *
-     * @param savedCounts
-     * @param counts
-     */
-    private void add(HashMap<String, Object> savedCounts, HashMap<String, Object> counts, boolean sumContexts) {
+    private void addNewValuesToExistingValues(HashMap<String, Object> existingValues, HashMap<String, Object> newValues) {
         Long additionalContexts = 1l;
-        if (sumContexts && counts.get(Report.CONTEXTS) != null) {
-            additionalContexts = Long.parseLong(String.valueOf(counts.get(Report.CONTEXTS)));
-        }
-        savedCounts.put(Report.CONTEXTS, Long.parseLong(String.valueOf(savedCounts.get(Report.CONTEXTS))) + additionalContexts);
-        for (Map.Entry<String, Object> entry : counts.entrySet()) {
+        existingValues.put(Report.CONTEXTS, Long.parseLong(String.valueOf(existingValues.get(Report.CONTEXTS))) + additionalContexts);
+        for (Map.Entry<String, Object> entry : newValues.entrySet()) {
             if (entry.getValue() instanceof Long) {
-                Long value = (Long) savedCounts.get(entry.getKey());
+                Long value = (Long) existingValues.get(entry.getKey());
                 if (value == null) {
                     value = Long.valueOf(0);
                 }
-                savedCounts.put(entry.getKey(), value + (Long) entry.getValue());
+                existingValues.put(entry.getKey(), value + (Long) entry.getValue());
                 if (entry.getKey().equals(Report.TOTAL)) {
                     Long newValue = (Long) entry.getValue();
-                    if (newValue > (Long) savedCounts.get(Report.CONTEXT_USERS_MAX)) {
-                        savedCounts.put(Report.CONTEXT_USERS_MAX, newValue);
+                    if (newValue > (Long) existingValues.get(Report.CONTEXT_USERS_MAX)) {
+                        existingValues.put(Report.CONTEXT_USERS_MAX, newValue);
                     }
-                    if (newValue < (Long) savedCounts.get(Report.CONTEXT_USERS_MIN) || (Long) savedCounts.get(Report.CONTEXT_USERS_MIN) == 0l) {
-                        savedCounts.put(Report.CONTEXT_USERS_MIN, newValue);
+                    if (newValue < (Long) existingValues.get(Report.CONTEXT_USERS_MIN) || (Long) existingValues.get(Report.CONTEXT_USERS_MIN) == 0l) {
+                        existingValues.put(Report.CONTEXT_USERS_MIN, newValue);
                     }
-                    savedCounts.put(Report.CONTEXT_USERS_AVG, (Long) savedCounts.get(Report.TOTAL) / (Long) savedCounts.get(Report.CONTEXTS));
-                    if (sumContexts) {
-                        savedCounts.put(Report.TOTAL, value + newValue);
-                    }
-                } else if (sumContexts && !entry.getKey().contains("context")) {
-                    savedCounts.put(entry.getKey(), value + (Long) entry.getValue());
+                    existingValues.put(Report.CONTEXT_USERS_AVG, (Long) existingValues.get(Report.TOTAL) / (Long) existingValues.get(Report.CONTEXTS));
                 }
             }
         }
     }
 
-    /**
-     * Add all values from counts to saveCounts. Also calculate Context-users-min/max/avg in savedCounts, depending
-     * on the new values.
-     * 
-     * @param additionalCounts
-     * @param storedCounts
-     */
-    private void merge(HashMap<String, Object> additionalCounts, HashMap<String, Object> storedCounts) {
+    private void mergeNewValuesWithStoredValues(HashMap<String, Object> storedCounts, HashMap<String, Object> additionalCounts) {
         if (storedCounts.get(Report.CONTEXTS) != null && additionalCounts.get(Report.CONTEXTS) != null) {
             Long additionalContexts = Long.parseLong(String.valueOf(storedCounts.get(Report.CONTEXTS)));
             additionalCounts.put(Report.CONTEXTS, Long.parseLong(String.valueOf(additionalCounts.get(Report.CONTEXTS))) + additionalContexts);
@@ -708,7 +689,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                     additionalCounts.put(Report.CONTEXT_USERS_MIN, storedValue);
                 }
             } else if (entry.getValue() instanceof HashMap) {
-                merge((HashMap<String, Object>) additionalCounts.get(entry.getKey()), (HashMap<String, Object>) entry.getValue());
+                mergeNewValuesWithStoredValues((HashMap<String, Object>) entry.getValue(), (HashMap<String, Object>) additionalCounts.get(entry.getKey()));
             }
         }
     }
