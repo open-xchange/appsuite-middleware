@@ -53,27 +53,35 @@ import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import org.osgi.framework.Constants;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.DependentServiceRegisterer;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
+import com.openexchange.pns.PushSubscriptionListener;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.impl.ListenerStartingSubscriptionListener;
 import com.openexchange.pns.impl.PushNotificationServiceImpl;
-import com.openexchange.pns.impl.SignalingPushClientChecker;
+import com.openexchange.pns.impl.SubscriptionAwarePushClientChecker;
 import com.openexchange.pns.impl.event.PushEventHandler;
 import com.openexchange.processing.ProcessorService;
 import com.openexchange.push.PushClientChecker;
 import com.openexchange.push.PushEventConstants;
+import com.openexchange.push.PushListenerService;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.timer.TimerService;
 
 
@@ -88,6 +96,7 @@ public class PushNotificationServiceImplActivator extends HousekeepingActivator 
     private PushNotificationServiceImpl serviceImpl;
     private List<ServiceRegistration<?>> registrations;
     private PushNotificationTransportTracker transportTracker;
+    private ServiceTracker<?, ?> dependentTracker;
 
     /**
      * Initializes a new {@link PushNotificationServiceImplActivator}.
@@ -148,6 +157,13 @@ public class PushNotificationServiceImplActivator extends HousekeepingActivator 
     private synchronized void reinit(boolean hardShutDown, ConfigurationService configService) throws OXException {
         Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationServiceImplActivator.class);
 
+        ServiceTracker<?, ?> tracker = this.dependentTracker;
+        if (null != tracker) {
+            this.dependentTracker = null;
+            tracker.close();
+            tracker = null;
+        }
+
         List<ServiceRegistration<?>> registrations = this.registrations;
         if (null != registrations) {
             this.registrations = null;
@@ -185,12 +201,31 @@ public class PushNotificationServiceImplActivator extends HousekeepingActivator 
         }
 
         // Register client checker
-        registrations.add(context.registerService(PushClientChecker.class, new SignalingPushClientChecker(), null));
+        Dictionary<String, Object> props = new Hashtable<>(2);
+        props.put(Constants.SERVICE_RANKING, Integer.valueOf(1));
+        registrations.add(context.registerService(PushClientChecker.class, new SubscriptionAwarePushClientChecker(registry), props));
+
+        // Register other listener, too
+        try {
+            DependentServiceRegisterer<PushSubscriptionListener> registerer = new DependentServiceRegisterer<>(context, PushSubscriptionListener.class, ListenerStartingSubscriptionListener.class, null, PushListenerService.class, SessiondService.class);
+            tracker = new ServiceTracker<>(context, registerer.getFilter(), registerer);
+            this.dependentTracker = tracker;
+            tracker.open();
+        } catch (InvalidSyntaxException e) {
+            logger.error("Failed to initialize dependent service tracker", e);
+        }
     }
 
     @Override
     protected synchronized void stopBundle() throws Exception {
         Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationServiceImplActivator.class);
+
+        ServiceTracker<?, ?> tracker = this.dependentTracker;
+        if (null != tracker) {
+            this.dependentTracker = null;
+            tracker.close();
+            tracker = null;
+        }
 
         List<ServiceRegistration<?>> registrations = this.registrations;
         if (null != registrations) {

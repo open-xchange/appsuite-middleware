@@ -197,8 +197,8 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
         // Check resolvers
         for (WebSocketToClientResolver resolver : resolvers) {
-            Set<WebSocketClient> clients = resolver.getSupportedClients();
-            for (WebSocketClient client : clients) {
+            Map<String, WebSocketClient> clients = resolver.getSupportedClients();
+            for (WebSocketClient client : clients.values()) {
                 Boolean exists = checkedOnes.get(client);
                 if (null == exists) {
                     String pathFilter = client.getPathFilter();
@@ -223,11 +223,10 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     public boolean hasInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
         // Check resolvers
         for (WebSocketToClientResolver resolver : resolvers) {
-            Set<WebSocketClient> clients = new LinkedHashSet<WebSocketClient>(resolver.getSupportedClients());
-            clients.retainAll(Collections.<WebSocketClient> singleton(new WebSocketClient(client, null)));
-
-            if (!clients.isEmpty()) {
-                String pathFilter = clients.iterator().next().getPathFilter();
+            Map<String, WebSocketClient> clients = resolver.getSupportedClients();
+            WebSocketClient wsClient = clients.get(client);
+            if (null != wsClient) {
+                String pathFilter = wsClient.getPathFilter();
                 Boolean exists;
                 try {
                     exists = Boolean.valueOf(webSocketService.exists(pathFilter, userId, contextId));
@@ -253,8 +252,8 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
         // Check resolvers
         for (WebSocketToClientResolver resolver : resolvers) {
-            Set<WebSocketClient> clients = resolver.getSupportedClients();
-            for (WebSocketClient client : clients) {
+            Map<String, WebSocketClient> clients = resolver.getSupportedClients();
+            for (WebSocketClient client : clients.values()) {
                 Boolean exists = checkedOnes.get(client);
                 if (null == exists) {
                     String pathFilter = client.getPathFilter();
@@ -285,11 +284,10 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     public Hits getInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
         // Check resolvers
         for (WebSocketToClientResolver resolver : resolvers) {
-            Set<WebSocketClient> clients = new LinkedHashSet<WebSocketClient>(resolver.getSupportedClients());
-            clients.retainAll(Collections.<WebSocketClient> singleton(new WebSocketClient(client, null)));
-
-            if (!clients.isEmpty()) {
-                String pathFilter = clients.iterator().next().getPathFilter();
+            Map<String, WebSocketClient> clients = resolver.getSupportedClients();
+            WebSocketClient wsClient = clients.get(client);
+            if (null != wsClient) {
+                String pathFilter = wsClient.getPathFilter();
                 Boolean exists;
                 try {
                     exists = Boolean.valueOf(webSocketService.exists(pathFilter, userId, contextId));
@@ -298,7 +296,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
                     exists = Boolean.TRUE;
                 }
                 if (exists.booleanValue()) {
-                    return new WebSocketHits(clients, userId, contextId);
+                    return new WebSocketHits(Collections.singleton(wsClient), userId, contextId);
                 }
             }
         }
@@ -310,7 +308,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
     @Override
     public boolean servesClient(String client) throws OXException {
-        return resolvers.getAllSupportedClients().contains(new WebSocketClient(client, null));
+        return resolvers.getAllSupportedClients().containsKey(client);
     }
 
     @Override

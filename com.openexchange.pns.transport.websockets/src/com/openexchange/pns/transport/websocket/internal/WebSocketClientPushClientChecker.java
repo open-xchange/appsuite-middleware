@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,77 +47,50 @@
  *
  */
 
-package com.openexchange.pns.transport.websocket.osgi;
+package com.openexchange.pns.transport.websocket.internal;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import org.osgi.framework.BundleContext;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.pns.transport.websocket.WebSocketClient;
 import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
-import com.openexchange.pns.transport.websocket.internal.WebSocketToClientResolverRegistry;
+import com.openexchange.push.PushClientChecker;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link WebSocketToClientResolverTracker}
+ * {@link WebSocketClientPushClientChecker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class WebSocketToClientResolverTracker extends RankingAwareNearRegistryServiceTracker<WebSocketToClientResolver> implements WebSocketToClientResolverRegistry {
+public class WebSocketClientPushClientChecker implements PushClientChecker {
 
-    private final ConcurrentMap<String, WebSocketClient> supportedClients;
+    private final WebSocketToClientResolverRegistry resolvers;
 
     /**
-     * Initializes a new {@link WebSocketToClientResolverTracker}.
+     * Initializes a new {@link WebSocketClientPushClientChecker}.
      */
-    public WebSocketToClientResolverTracker(BundleContext context) {
-        super(context, WebSocketToClientResolver.class, 0);
-        supportedClients = new ConcurrentHashMap<>(16, 0.9F, 1);
+    public WebSocketClientPushClientChecker(WebSocketToClientResolverRegistry resolvers) {
+        super();
+        this.resolvers = resolvers;
+
     }
 
     @Override
-    protected boolean onServiceAppeared(WebSocketToClientResolver resolver) {
-        List<String> toRemove = new LinkedList<>();
-        boolean invalid = true;
-        try {
-            Map<String, WebSocketClient> clients = resolver.getSupportedClients();
-            for (Map.Entry<String, WebSocketClient> clientToAdd : clients.entrySet()) {
-                if (null != supportedClients.putIfAbsent(clientToAdd.getKey(), clientToAdd.getValue())) {
-                    // There is already such a client...
-                    return false;
-                }
-            }
-            invalid = false;
-            return true;
-        } finally {
-            if (invalid) {
-                for (String clientToRemove : toRemove) {
-                    supportedClients.remove(clientToRemove);
-                }
+    public boolean isAllowed(String clientId, Session session) throws OXException {
+        if (null == session || Strings.isEmpty(clientId)) {
+            // Unable to check
+            return false;
+        }
+
+        for (WebSocketToClientResolver resolver : resolvers) {
+            WebSocketClient webSocketClient = resolver.getSupportedClients().get(clientId);
+            if (null != webSocketClient) {
+                return webSocketClient.isInterestedInNewMail();
             }
         }
-    }
 
-    @Override
-    protected void onServiceRemoved(WebSocketToClientResolver resolver) {
-        Map<String, WebSocketClient> clients = resolver.getSupportedClients();
-        for (String clientToRemove : clients.keySet()) {
-            supportedClients.remove(clientToRemove);
-        }
-    }
-
-    @Override
-    public Map<String, WebSocketClient> getAllSupportedClients() {
-        return Collections.unmodifiableMap(supportedClients);
-    }
-
-    @Override
-    public boolean containsClient(String client) {
-        return null != client && supportedClients.containsKey(client);
+        return false;
     }
 
 }

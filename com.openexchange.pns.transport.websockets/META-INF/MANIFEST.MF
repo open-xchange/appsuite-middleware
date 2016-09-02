@@ -13,6 +13,7 @@ Import-Package:
  com.openexchange.osgi,
  com.openexchange.osgi.util,
  com.openexchange.pns,
+ com.openexchange.push,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.websockets,

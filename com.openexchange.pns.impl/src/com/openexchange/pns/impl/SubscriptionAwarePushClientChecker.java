@@ -51,23 +51,28 @@ package com.openexchange.pns.impl;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.pns.KnownTopic;
+import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.push.PushClientChecker;
 import com.openexchange.session.Session;
 
 
 /**
- * {@link SignalingPushClientChecker}
+ * {@link SubscriptionAwarePushClientChecker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class SignalingPushClientChecker implements PushClientChecker {
+public class SubscriptionAwarePushClientChecker implements PushClientChecker {
+
+    private final PushSubscriptionRegistry registry;
 
     /**
-     * Initializes a new {@link SignalingPushClientChecker}.
+     * Initializes a new {@link SubscriptionAwarePushClientChecker}.
      */
-    public SignalingPushClientChecker() {
+    public SubscriptionAwarePushClientChecker(PushSubscriptionRegistry subscriptionRegistry) {
         super();
+        this.registry = subscriptionRegistry;
 
     }
 
@@ -77,6 +82,8 @@ public class SignalingPushClientChecker implements PushClientChecker {
             // Unable to check
             return false;
         }
+
+        return registry.hasInterestedSubscriptions(clientId, session.getUserId(), session.getContextId(), KnownTopic.MAIL_NEW.getName());
 
         /*-
          * Apparently PNS service has been registered.
@@ -90,7 +97,6 @@ public class SignalingPushClientChecker implements PushClientChecker {
          *  - Is it safe to drop listener because Web Socket teared down?
          * are too complex to handle robustly
          */
-        return true;
     }
 
 }

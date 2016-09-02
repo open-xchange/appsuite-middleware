@@ -87,6 +87,7 @@ import com.openexchange.push.impl.balancing.reschedulerpolicy.PermanentListenerR
 import com.openexchange.push.impl.osgi.Services;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 
@@ -147,6 +148,19 @@ public final class PushManagerRegistry implements PushListenerService {
         initialPushUsers = new HashSet<PushUser>(256); // Always wrapped by surrounding synchronized block
         map = new ConcurrentHashMap<Class<? extends PushManagerService>, PushManagerService>();
         reschedulerRef = new AtomicReference<PermanentListenerRescheduler>();
+    }
+
+    private boolean hasWebMail(Session session) {
+        try {
+            boolean hasWebMail = ServerSessionAdapter.valueOf(session).getUserPermissionBits().hasWebMail();
+            if (false == hasWebMail) {
+                LOG.info("User {} in context {} has no 'WebMail' permission. Hence, no listener will be started.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+            }
+            return hasWebMail;
+        } catch (OXException e) {
+            LOG.error("Failed to check if 'WebMail' permission is allowed for user {} in context {}", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
+            return false;
+        }
     }
 
     private CredentialStorage optCredentialStorage() throws OXException {
@@ -463,7 +477,7 @@ public final class PushManagerRegistry implements PushListenerService {
 
     @Override
     public boolean registerPermanentListenerFor(Session session, String clientId) throws OXException {
-        if (!PushUtility.allowedClient(clientId, null, true)) {
+        if (!hasWebMail(session) || !PushUtility.allowedClient(clientId, null, true)) {
             /*
              * No permanent push listener for the client.
              */
@@ -778,7 +792,7 @@ public final class PushManagerRegistry implements PushListenerService {
         /*
          * Check session's client identifier
          */
-        if (!PushUtility.allowedClient(session.getClient(), session, true)) {
+        if (!hasWebMail(session) || !PushUtility.allowedClient(session.getClient(), session, true)) {
             /*
              * No push listener for the client associated with current session.
              */
