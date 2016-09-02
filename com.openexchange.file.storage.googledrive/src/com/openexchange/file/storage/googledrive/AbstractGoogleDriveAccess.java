@@ -59,6 +59,9 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.scope.Module;
 import com.openexchange.session.Session;
 
 /**
@@ -150,7 +153,7 @@ public abstract class AbstractGoogleDriveAccess {
                 return FileStorageExceptionCodes.STORAGE_RATE_LIMIT.create(e, new Object[0]);
             }
             if (e.getMessage().indexOf("insufficientPermissions") > 0) {
-                return FileStorageExceptionCodes.STORAGE_RATE_LIMIT.create(e, new Object[0]);
+                return OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(e, API.GOOGLE.getShortName(), Module.drive);
             }
         }
 
