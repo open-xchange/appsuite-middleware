@@ -67,6 +67,7 @@ import com.google.gdata.client.contacts.ContactsService;
 import com.google.gdata.data.Link;
 import com.google.gdata.data.contacts.ContactEntry;
 import com.google.gdata.data.contacts.ContactFeed;
+import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -79,7 +80,9 @@ import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
 import com.openexchange.java.ImageTypeDetector;
 import com.openexchange.java.Streams;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.scope.Module;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
@@ -125,7 +128,7 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
                 transfer(in, out);
 
                 com.google.gdata.util.ContentType ct = gRequest.getResponseContentType();
-                if(ct != null) {
+                if (ct != null) {
                     mimeType = ct.getMediaType();
                 }
                 bytes = out.toByteArray();
@@ -136,7 +139,7 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
                 }
             }
 
-            if(null != bytes) {
+            if (null != bytes) {
                 final ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(bytes);
                 if (mimeType == null) {
                     mimeType = ImageTypeDetector.getMimeType(bytes);
@@ -156,6 +159,7 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
         }
         return null;
     }
+
     private static void transfer(final InputStream in, final OutputStream out) throws IOException {
         final byte[] buffer = new byte[4096];
         int length;
@@ -204,7 +208,7 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
                     contact.setImage1(bytes);
                     contact.setImageContentType(photo.getContentType());
                 }
-            } catch(ServiceException e) {
+            } catch (ServiceException e) {
                 throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             } catch (IOException e) {
                 throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -346,29 +350,22 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
     }
 
     private int fetchResults(final ContactsService contactsService, final Query query, final List<Contact> contacts) throws OXException, IOException, ServiceException {
-        ContactFeed contactFeed = contactsService.getFeed(query, ContactFeed.class);
+        ContactFeed contactFeed;
+        try {
+            contactFeed = contactsService.getFeed(query, ContactFeed.class);
+        } catch (AuthenticationException e) {
+            throw SubscriptionErrorMessage.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), Module.contacts);
+        } catch (NullPointerException e) {
+            if (e.getMessage().equals("No authentication header information")) {
+                throw SubscriptionErrorMessage.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), Module.contacts);
+            }
+            throw e;
+        }
+
         for (ContactEntry entry : contactFeed.getEntries()) {
             Contact contact = new Contact();
             parser.parseContact(entry, contact);
             loadingPhotoHandler.handlePhoto(contactsService, entry, contact);
-
-            /**
-                //Note: mainContactId will be "" in case if the contact doesn't have any phone number.
-                if (!Strings.isEmpty(mainContactId)) {
-                    List<GroupMembershipInfo> groupMembershipInfos = entry.getGroupMembershipInfos();
-                    for (GroupMembershipInfo groupMembershipInfo : groupMembershipInfos) {
-                        String groupId = groupMembershipInfo.getHref();
-                        if (groupId.contains("/")) {
-                            groupId = groupId.substring(groupId.lastIndexOf("/") + 1);
-                        }
-                        String contactIds = (groupContactMap.get(groupId) != null ? groupContactMap.get(groupId) : "") + mainContactId + ",";
-                        groupContactMap.put(groupId, contactIds);
-                    }
-                }
-
-             *
-             */
-
             contacts.add(contact);
         }
         return contactFeed.getEntries().size();
