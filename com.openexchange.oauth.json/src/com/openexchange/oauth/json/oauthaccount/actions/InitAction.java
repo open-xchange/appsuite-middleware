@@ -76,7 +76,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -85,14 +84,11 @@ import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.Parameterizable;
-import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.Tools;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
-import com.openexchange.oauth.scope.Module;
 import com.openexchange.oauth.scope.OAuthScope;
-import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -108,7 +104,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "serviceId", description = "The service meta data identifier; e.g. \"com.openexchange.oauth.twitter\""), 
     @Parameter(name = "scopes", description = "A space separated list with scopes"),
 }, responseDescription = "An JSON representation of the resulting interaction providing needed information to complete account creation. See OAuth interaction data.")
-public final class InitAction extends AbstractOAuthAJAXActionService {
+public final class InitAction extends AbstractOAuthTokenAction {
 
     /**
      * Initializes a new {@link InitAction}.
@@ -319,25 +315,6 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
         }
 
         return callbackUrlBuilder.toString();
-    }
-
-    /**
-     * Gets the scopes from the request and converts them to {@link OAuthScope}s using the {@link OAuthScopeRegistry}
-     * 
-     * @param request The {@link AJAXRequestData}
-     * @param serviceId The OAuth service provider's identifier
-     * @return A {@link Set} with all {@link OAuthScope}s to enable
-     * @throws OXException if the {@link OAuthScope}s can not be retrieved or if the <code>scopes</code> URL parameter is missing form the request
-     */
-    private Set<OAuthScope> getScopes(AJAXRequestData request, String serviceId) throws OXException {
-        OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
-        // Get the scope parameter
-        String scope = request.getParameter("scopes");
-        if (isEmpty(scope)) {
-            return scopeRegistry.getAvailableScopes(API.resolveFromServiceId(serviceId));
-        }
-        // Get the scopes
-        return scopeRegistry.getAvailableScopes(API.resolveFromServiceId(serviceId), Module.valuesOf(scope));
     }
 
     /**

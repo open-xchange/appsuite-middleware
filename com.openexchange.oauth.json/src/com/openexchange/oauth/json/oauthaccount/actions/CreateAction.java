@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
-import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
@@ -63,19 +62,15 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
-import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
-import com.openexchange.oauth.scope.Module;
 import com.openexchange.oauth.scope.OAuthScope;
-import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -111,10 +106,6 @@ public final class CreateAction extends AbstractOAuthTokenAction {
             if (serviceId == null) {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create(AccountField.SERVICE_ID.getName());
             }
-            final String scope = request.getParameter("scopes");
-            if (isEmpty(scope)) {
-                throw OAuthExceptionCodes.MISSING_SCOPE.create();
-            }
 
             // Get service meta data
             final OAuthService oAuthService = getOAuthService();
@@ -126,8 +117,7 @@ public final class CreateAction extends AbstractOAuthTokenAction {
             final Map<String, Object> arguments = processOAuthArguments(request, session, service);
 
             // Get the scopes
-            OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
-            Set<OAuthScope> scopes = scopeRegistry.getAvailableScopes(API.resolveFromServiceId(serviceId), Module.valuesOf(scope));
+            Set<OAuthScope> scopes = getScopes(request, serviceId);
 
             // By now it doesn't matter which interaction type is passed
             OAuthAccount newAccount;

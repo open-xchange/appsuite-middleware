@@ -49,20 +49,27 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
+import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.oauth.OAuthConstants.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
+import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
+import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -250,5 +257,25 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
             acceptable_versions = Strings.isEmpty(acceptable_versions) ? "unknown" : acceptable_versions;
         }
         return OAuthExceptionCodes.OAUTH_PROBLEM_UNEXPECTED.create(oauth_problem);
+    }
+    
+
+    /**
+     * Gets the scopes from the request and converts them to {@link OAuthScope}s using the {@link OAuthScopeRegistry}
+     * 
+     * @param request The {@link AJAXRequestData}
+     * @param serviceId The OAuth service provider's identifier
+     * @return A {@link Set} with all {@link OAuthScope}s to enable
+     * @throws OXException if the {@link OAuthScope}s can not be retrieved or if the <code>scopes</code> URL parameter is missing form the request
+     */
+    protected Set<OAuthScope> getScopes(AJAXRequestData request, String serviceId) throws OXException {
+        OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
+        // Get the scope parameter
+        String scope = request.getParameter("scopes");
+        if (isEmpty(scope)) {
+            return scopeRegistry.getAvailableScopes(API.resolveFromServiceId(serviceId));
+        }
+        // Get the scopes
+        return scopeRegistry.getAvailableScopes(API.resolveFromServiceId(serviceId), Module.valuesOf(scope));
     }
 }
