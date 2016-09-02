@@ -80,7 +80,7 @@ public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertiseme
 
     private static final String TAXONOMY_TYPES = "taxonomy/types";
     private static final String TAXONOMY_TYPES_CONFIG_CASCADE = "config/com.openexchange.config.cascade.types";
-    private static final String TAXONOMY_TYPE_CONFIGURATION = "com.openexchange.advertisement.taxonomy.types";
+    private static final String TAXONOMY_TYPE_CONFIGURATION = ".taxonomy.types";
 
     /**
      * Gets the instance of {@code TaxonomyTypesAdvertisementConfigService}.
@@ -112,7 +112,13 @@ public class TaxonomyTypesAdvertisementConfigService extends AbstractAdvertiseme
         // Retrieve possible taxonomy types
         ConfigViewFactory configurationService = Services.getService(ConfigViewFactory.class);
         ConfigView view = configurationService.getView();
-        String typesString = view.get(TAXONOMY_TYPE_CONFIGURATION, String.class);
+        String reseller = null;
+        try {
+            reseller = this.getReseller(session.getContextId());
+        } catch (OXException e) {
+            reseller = RESELLER_ALL;
+        }
+        String typesString = view.get(AdvertisementConfigService.CONFIG_PREFIX + reseller + TAXONOMY_TYPE_CONFIGURATION, String.class);
         if (Strings.isEmpty(typesString)) {
             return PACKAGE_ALL;
         }

@@ -47,71 +47,68 @@
  *
  */
 
-package com.openexchange.pns.subscription.storage.osgi;
+package com.openexchange.pns;
 
-import org.osgi.framework.BundleContext;
-import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.osgi.ServiceListing;
-import com.openexchange.pns.PushSubscriptionProvider;
-import com.openexchange.pns.PushSubscriptionListener;
 
 /**
- * {@link PushSubscriptionProviderTracker}
+ * {@link PushSubscriptionListener} - A listener for subscription registry events.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class PushSubscriptionProviderTracker extends RankingAwareNearRegistryServiceTracker<PushSubscriptionProvider> {
-
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PushSubscriptionProviderTracker.class);
-
-    private final ServiceListing<PushSubscriptionListener> listeners;
+public interface PushSubscriptionListener {
 
     /**
-     * Initializes a new {@link PushSubscriptionProviderTracker}.
+     * Invoked when a subscription is about to be added to registry.
+     *
+     * @param subscription The subscription to add
+     * @return <code>true</code> to allow given subscription being added; otherwise <code>false</code>
+     * @throws OXException If handling fails
      */
-    public PushSubscriptionProviderTracker(ServiceListing<PushSubscriptionListener> listeners, BundleContext context) {
-        super(context, PushSubscriptionProvider.class, 0);
-        this.listeners = listeners;
-    }
+    boolean addingSubscription(PushSubscription subscription) throws OXException;
 
-    @Override
-    protected boolean onServiceAppeared(PushSubscriptionProvider provider) {
-        for (PushSubscriptionListener listener : listeners) {
-            try {
-                if (!listener.addingProvider(provider)) {
-                    return false;
-                }
-            } catch (OXException e) {
-                LOG.error("'{}' failed to handle appeared subscription provider", listener.getClass().getName(), e);
-            }
-        }
+    /**
+     * Invoked when a subscription is added to registry.
+     *
+     * @param subscription The added subscription
+     * @throws OXException If handling fails
+     */
+    void addedSubscription(PushSubscription subscription) throws OXException;
 
-        return true;
-    }
+    /**
+     * Invoked when a subscription is removed from registry.
+     *
+     * @param subscription The removed subscription
+     * @throws OXException If handling fails
+     */
+    void removedSubscription(PushSubscription subscription) throws OXException;
 
-    @Override
-    protected void onServiceAdded(PushSubscriptionProvider provider) {
-        for (PushSubscriptionListener listener : listeners) {
-            try {
-                listener.addedProvider(provider);
-            } catch (OXException e) {
-                LOG.error("'{}' failed to handle added subscription provider", listener.getClass().getName(), e);
-            }
-        }
-    }
+    // ----------------------------------------------------------------------------------------------------------------------
 
-    @Override
-    protected void onServiceDisappeared(PushSubscriptionProvider provider) {
-        for (PushSubscriptionListener listener : listeners) {
-            try {
-                listener.removedProvider(provider);
-            } catch (OXException e) {
-                LOG.error("'{}' failed to handle disappeared subscription provider", listener.getClass().getName(), e);
-            }
-        }
-    }
+    /**
+     * Invoked when a subscription provider is about to be added to registry.
+     *
+     * @param subscription The subscription provider to add
+     * @return <code>true</code> to allow given subscription provider being added; otherwise <code>false</code>
+     * @throws OXException If handling fails
+     */
+    boolean addingProvider(PushSubscriptionProvider provider) throws OXException;
+
+    /**
+     * Invoked when a subscription provider is added to registry.
+     *
+     * @param subscription The added subscription provider
+     * @throws OXException If handling fails
+     */
+    void addedProvider(PushSubscriptionProvider provider) throws OXException;
+
+    /**
+     * Invoked when a subscription provider is removed from registry.
+     *
+     * @param provider The removed subscription provider
+     * @throws OXException If handling fails
+     */
+    void removedProvider(PushSubscriptionProvider provider) throws OXException;
 
 }

@@ -78,7 +78,6 @@ import com.openexchange.reseller.data.ResellerAdmin;
 public class AdvertisementPackageServiceImpl implements AdvertisementPackageService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AdvertisementConfigService.class);
-    private static final String CONFIG_PREFIX = "com.openexchange.advertisement.";
     private static final String CONFIG_SUFFIX = ".packageScheme";
 
     private final List<AdvertisementConfigService> services = new CopyOnWriteArrayList<>();
@@ -137,10 +136,10 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
 
             ConcurrentHashMap<String, AdvertisementConfigService> map = new ConcurrentHashMap<>(reseller.size());
             for (ResellerAdmin res: reseller){
-                String packageScheme = view.get(CONFIG_PREFIX + res.getName() + CONFIG_SUFFIX, String.class);
+                String packageScheme = view.get(AdvertisementConfigService.CONFIG_PREFIX + res.getName() + CONFIG_SUFFIX, String.class);
                 if (packageScheme == null) {
                     //fallback to reseller id
-                    packageScheme = view.get(CONFIG_PREFIX + res.getId() + CONFIG_SUFFIX, String.class);
+                    packageScheme = view.get(AdvertisementConfigService.CONFIG_PREFIX + res.getId() + CONFIG_SUFFIX, String.class);
 
                     if (packageScheme == null) {
                         //fallback to global
@@ -157,7 +156,7 @@ public class AdvertisementPackageServiceImpl implements AdvertisementPackageServ
             // Add 'default' as a default reseller
             String oxall = DEFAULT_RESELLER;
 
-            String packageScheme = view.get(CONFIG_PREFIX + oxall + CONFIG_SUFFIX, String.class);
+            String packageScheme = view.get(AdvertisementConfigService.CONFIG_PREFIX + oxall + CONFIG_SUFFIX, String.class);
             if (packageScheme == null) {
                 //fallback to global
                 packageScheme = DEFAULT_SCHEME_ID;

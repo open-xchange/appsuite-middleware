@@ -54,12 +54,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.pns.Hits;
 import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.PushSubscriptionListener;
 import com.openexchange.pns.PushSubscription.Nature;
 import com.openexchange.pns.PushSubscriptionProvider;
 
@@ -72,15 +74,18 @@ import com.openexchange.pns.PushSubscriptionProvider;
  */
 public class CompositePushSubscriptionRegistry implements PushSubscriptionRegistry {
 
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CompositePushSubscriptionRegistry.class);
+
     private final List<PushSubscriptionRegistry> registries;
     private final PushSubscriptionRegistry persistentRegistry;
     private final PushSubscriptionRegistry volatileRegistry;
     private final ServiceListing<PushSubscriptionProvider> providers;
+    private final ServiceListing<PushSubscriptionListener> listeners;
 
     /**
      * Initializes a new {@link CompositePushSubscriptionRegistry}.
      */
-    public CompositePushSubscriptionRegistry(PushSubscriptionRegistry persistentRegistry, PushSubscriptionRegistry volatileRegistry, ServiceListing<PushSubscriptionProvider> providers, boolean useVolatileRegistry) {
+    public CompositePushSubscriptionRegistry(PushSubscriptionRegistry persistentRegistry, PushSubscriptionRegistry volatileRegistry, ServiceListing<PushSubscriptionProvider> providers, ServiceListing<PushSubscriptionListener> listeners, boolean useVolatileRegistry) {
         super();
         this.persistentRegistry = persistentRegistry;
         this.volatileRegistry = useVolatileRegistry ? volatileRegistry : null;
@@ -92,6 +97,7 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
         registries.add(persistentRegistry);
         this.registries = new CopyOnWriteArrayList<PushSubscriptionRegistry>(registries);
         this.providers = providers;
+        this.listeners = listeners;
     }
 
     @Override
@@ -152,10 +158,21 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
 
     @Override
     public void registerSubscription(PushSubscription subscription) throws OXException {
+        List<PushSubscriptionListener> listeners = this.listeners.getServiceList();
+        for (PushSubscriptionListener listener : listeners) {
+            if(!listener.addingSubscription(subscription)) {
+                LOG.info("Listener {} denied registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), subscription.getUserId(), subscription.getContextId());
+            }
+        }
+
         if (Nature.VOLATILE == subscription.getNature() && null != volatileRegistry) {
             volatileRegistry.registerSubscription(subscription);
         } else {
             persistentRegistry.registerSubscription(subscription);
+        }
+
+        for (PushSubscriptionListener listener : listeners) {
+            listener.addedSubscription(subscription);
         }
     }
 
@@ -164,18 +181,26 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
         // Is nature given?
         Nature nature = subscription.getNature();
 
+        boolean removed;
         if (Nature.VOLATILE == subscription.getNature() && null != volatileRegistry) {
-            return volatileRegistry.unregisterSubscription(subscription);
+            removed = volatileRegistry.unregisterSubscription(subscription);
         } else if (Nature.PERSISTENT == nature) {
-            return persistentRegistry.unregisterSubscription(subscription);
+            removed = persistentRegistry.unregisterSubscription(subscription);
         } else {
             // Don't know better
-            boolean removed = persistentRegistry.unregisterSubscription(subscription);
+            removed = persistentRegistry.unregisterSubscription(subscription);
             if (null != volatileRegistry) {
                 removed |= volatileRegistry.unregisterSubscription(subscription);
             }
-            return removed;
         }
+
+        if (removed) {
+            for (PushSubscriptionListener listener : listeners) {
+                listener.removedSubscription(subscription);
+            }
+        }
+
+        return removed;
     }
 
     @Override

@@ -179,7 +179,9 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     public void shutDown() {
         for (Iterator<ConcurrentMap<ConnectionId, SessionBoundWebSocket>> i = openSockets.values().iterator(); i.hasNext();) {
             for (Iterator<SessionBoundWebSocket> iter = i.next().values().iterator(); iter.hasNext();) {
-                closeSocketSafe(iter.next());
+                SessionBoundWebSocket sessionBoundSocket = iter.next();
+                sessionBoundSocket.send("session:invalid");
+                closeSocketSafe(sessionBoundSocket);
                 iter.remove();
             }
             i.remove();
@@ -236,6 +238,34 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         for (Iterator<SessionBoundWebSocket> it = userSockets.values().iterator(); it.hasNext();) {
             SessionBoundWebSocket sessionBoundSocket = it.next();
             if (WebSockets.matches(pathFilter, sessionBoundSocket.getPath())) {
+                sessionBoundSocket.send("session:invalid");
+                closeSocketSafe(sessionBoundSocket);
+                it.remove();
+            }
+        }
+    }
+
+    /**
+     * Closes all locally available Web Sockets associated with specified session.
+     *
+     * @param sessionId The session identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    public void closeWebSocketForSession(String sessionId, int userId, int contextId) {
+        if (null == sessionId) {
+            return;
+        }
+
+        ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
+        if (null == userSockets) {
+            return;
+        }
+
+        for (Iterator<SessionBoundWebSocket> it = userSockets.values().iterator(); it.hasNext();) {
+            SessionBoundWebSocket sessionBoundSocket = it.next();
+            if (sessionId.equals(sessionBoundSocket.getSessionId())) {
+                sessionBoundSocket.send("session:invalid");
                 closeSocketSafe(sessionBoundSocket);
                 it.remove();
             }
@@ -462,15 +492,15 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
 
     private Session checkSession(String sessionId, HttpRequestPacket requestPacket, Parameters parameters) {
         // Acquire needed service
-        SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
-        if (null == sessiondService) {
+        SessiondService sessiond = SessiondService.SERVICE_REFERENCE.get();
+        if (null == sessiond) {
             org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketSessionToucher.class);
             logger.warn("", ServiceExceptionCode.absentService(SessiondServiceExtended.class));
             throw new HandshakeException("Missing parameter Sessiond service.");
         }
 
         // Look-up appropriate session
-        Session session = sessiondService.getSession(sessionId);
+        Session session = sessiond instanceof SessiondServiceExtended ? ((SessiondServiceExtended) sessiond).getSession(sessionId, false) : sessiond.getSession(sessionId);
         if (null == session) {
             throw new HandshakeException("No such session: " + sessionId);
         }
@@ -482,13 +512,13 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         // Check context
         Context context = getContextFrom(session);
         if (!context.isEnabled()) {
-            sessiondService.removeSession(sessionId);
+            sessiond.removeSession(sessionId);
             LOG.info("The context {} associated with session is locked.", Integer.toString(session.getContextId()));
             throw new HandshakeException("Context locked: " + session.getContextId());
         }
 
         // Check user
-        User user = getUserFrom(session, context, sessiondService);
+        User user = getUserFrom(session, context, sessiond);
         if (!user.isMailEnabled()) {
             LOG.info("User {} in context {} is not activated.", Integer.toString(user.getId()), Integer.toString(session.getContextId()));
             throw new HandshakeException("Session expired: " + sessionId);
