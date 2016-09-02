@@ -392,6 +392,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             Collection<String> infos = hzMap.get(generateKey(userId, contextId, member.getUuid()));
             if (null == infos || infos.isEmpty()) {
                 it.remove();
+                LOG.info("Cluster member \"{}\" signals no connected Web Socket(s) for user {} in context {}", member, I(userId), I(contextId));
             }
         }
 
@@ -443,6 +444,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                 // Timeout while awaiting remote result
                 if (retryCount <= 0) {
                     // No further retry
+                    LOG.warn("Repeatedly failed submitting message(s) to remote Web Socket(s) connected to member \"{}\" using path filter \"{}\" to user {} in context {}", member, pathFilter, I(userId), I(contextId));
                     cancelFutureSafe(future);
                 }
             }
