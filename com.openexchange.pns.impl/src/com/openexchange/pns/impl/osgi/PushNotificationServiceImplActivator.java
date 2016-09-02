@@ -49,8 +49,10 @@
 
 package com.openexchange.pns.impl.osgi;
 
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.List;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
@@ -67,8 +69,10 @@ import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.impl.PushNotificationServiceImpl;
+import com.openexchange.pns.impl.SignalingPushClientChecker;
 import com.openexchange.pns.impl.event.PushEventHandler;
 import com.openexchange.processing.ProcessorService;
+import com.openexchange.push.PushClientChecker;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.timer.TimerService;
 
@@ -82,7 +86,7 @@ import com.openexchange.timer.TimerService;
 public class PushNotificationServiceImplActivator extends HousekeepingActivator implements Reloadable {
 
     private PushNotificationServiceImpl serviceImpl;
-    private ServiceRegistration<PushNotificationService> serviceRegistration;
+    private List<ServiceRegistration<?>> registrations;
     private PushNotificationTransportTracker transportTracker;
 
     /**
@@ -137,22 +141,20 @@ public class PushNotificationServiceImplActivator extends HousekeepingActivator 
         // Register PushNotificationService
         reinit(false, getService(ConfigurationService.class));
 
-        // register PushMessageGeneratorRegistry
+        // Register PushMessageGeneratorRegistry
         registerService(PushMessageGeneratorRegistry.class, generatorTracker);
-
-        // Register proxy'ing event handler
-        {
-            Dictionary<String, Object> props = new Hashtable<>(2);
-            props.put(EventConstants.EVENT_TOPIC, PushEventConstants.TOPIC);
-            registerService(EventHandler.class, new PushEventHandler(serviceImpl), props);
-        }
     }
 
     private synchronized void reinit(boolean hardShutDown, ConfigurationService configService) throws OXException {
-        ServiceRegistration<PushNotificationService> serviceRegistration = this.serviceRegistration;
-        if (null != serviceRegistration) {
-            this.serviceRegistration = null;
-            serviceRegistration.unregister();
+        Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationServiceImplActivator.class);
+
+        List<ServiceRegistration<?>> registrations = this.registrations;
+        if (null != registrations) {
+            this.registrations = null;
+            for (ServiceRegistration<?> registration : registrations) {
+                registration.unregister();
+            }
+            registrations = null;
         }
 
         PushNotificationServiceImpl serviceImpl = this.serviceImpl;
@@ -160,6 +162,7 @@ public class PushNotificationServiceImplActivator extends HousekeepingActivator 
             this.serviceImpl = null;
             PushNotificationServiceImpl.cleanseInits();
             serviceImpl.stop(false == hardShutDown);
+            serviceImpl = null;
         }
 
         PushSubscriptionRegistry registry = getService(PushSubscriptionRegistry.class);
@@ -168,22 +171,43 @@ public class PushNotificationServiceImplActivator extends HousekeepingActivator 
 
         serviceImpl = new PushNotificationServiceImpl(registry, configService, timerService, processorService, transportTracker);
         this.serviceImpl = serviceImpl;
-        this.serviceRegistration = context.registerService(PushNotificationService.class, serviceImpl, null);
+
+        registrations = new ArrayList<>(6);
+        this.registrations = registrations;
+        registrations.add(context.registerService(PushNotificationService.class, serviceImpl, null));
+        logger.info("Successfully started Push Notification Service (PNS)");
+
+        // Register proxy'ing event handler
+        {
+            Dictionary<String, Object> props = new Hashtable<>(2);
+            props.put(EventConstants.EVENT_TOPIC, PushEventConstants.TOPIC);
+            registrations.add(context.registerService(EventHandler.class, new PushEventHandler(serviceImpl), props));
+        }
+
+        // Register client checker
+        registrations.add(context.registerService(PushClientChecker.class, new SignalingPushClientChecker(), null));
     }
 
     @Override
     protected synchronized void stopBundle() throws Exception {
-        ServiceRegistration<PushNotificationService> serviceRegistration = this.serviceRegistration;
-        if (null != serviceRegistration) {
-            this.serviceRegistration = null;
-            serviceRegistration.unregister();
+        Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationServiceImplActivator.class);
+
+        List<ServiceRegistration<?>> registrations = this.registrations;
+        if (null != registrations) {
+            this.registrations = null;
+            for (ServiceRegistration<?> registration : registrations) {
+                registration.unregister();
+            }
+            registrations.clear();
         }
 
         PushNotificationServiceImpl serviceImpl = this.serviceImpl;
         if (null != serviceImpl) {
             this.serviceImpl = null;
             serviceImpl.stop(true);
+            logger.info("Successfully stopped Push Notification Service (PNS)");
         }
+
         super.stopBundle();
     }
 

@@ -61,11 +61,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushSubscriptionProvider;
-import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.transport.websocket.internal.WebSocketPushNotificationTransport;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.timer.TimerService;
-import com.openexchange.websockets.WebSocketListener;
 import com.openexchange.websockets.WebSocketService;
 
 
@@ -109,15 +105,13 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
         return Reloadables.interestsForProperties(
             "com.openexchange.pns.transport.websocket.enabled",
             "com.openexchange.pns.transport.websocket.delayDuration",
-            "com.openexchange.pns.transport.websocket.timerFrequency",
-            "com.openexchange.pns.transport.websocket.advertiseSubscriptionAsProvider"
+            "com.openexchange.pns.transport.websocket.timerFrequency"
             );
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, PushSubscriptionRegistry.class, PushMessageGeneratorRegistry.class,
-            WebSocketService.class, TimerService.class, ThreadPoolService.class };
+        return new Class<?>[] { ConfigurationService.class, PushMessageGeneratorRegistry.class, WebSocketService.class };
     }
 
     @Override
@@ -171,20 +165,12 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
             return;
         }
 
-        boolean advertiseSubscriptionAsProvider = configService.getBoolProperty("com.openexchange.pns.transport.websocket.advertiseSubscriptionAsProvider", true);
-
         WebSocketPushNotificationTransport.cleanseInits();
         webSocketTransport = new WebSocketPushNotificationTransport(resolverTracker, this);
         this.webSocketTransport = webSocketTransport;
 
         serviceRegistrations = new ArrayList<>(4);
-        if (advertiseSubscriptionAsProvider) {
-            // Register a provider that signals interests depending on currently open Web Socket connections in whole cluster
-            serviceRegistrations.add(context.registerService(PushSubscriptionProvider.class, webSocketTransport, null));
-        } else {
-            // Track opened/closed Web Socket connections and perform dedicated subscribe/unsubscribe operations
-            serviceRegistrations.add(context.registerService(WebSocketListener.class, webSocketTransport, null));
-        }
+        serviceRegistrations.add(context.registerService(PushSubscriptionProvider.class, webSocketTransport, null));
         serviceRegistrations.add(context.registerService(PushNotificationTransport.class, webSocketTransport, null));
         this.serviceRegistrations = serviceRegistrations;
     }

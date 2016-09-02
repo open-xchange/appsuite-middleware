@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,110 +47,49 @@
  *
  */
 
-package com.openexchange.pns.transport.websocket.internal;
+package com.openexchange.pns.impl;
 
-import com.openexchange.pns.PushSubscription;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.push.PushClientChecker;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link Unsubscription} - An unsubscription from a Web Socket transport.
+ * {@link SignalingPushClientChecker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-final class Unsubscription {
-
-    private final int userId;
-    private final int contextId;
-    private final String client;
-    private final PushSubscription subscription;
-    private volatile Integer hash;
+public class SignalingPushClientChecker implements PushClientChecker {
 
     /**
-     * Initializes a new {@link Unsubscription}.
-     *
-     * @param subscription The subscription to unsubscribe
+     * Initializes a new {@link SignalingPushClientChecker}.
      */
-    public Unsubscription(PushSubscription subscription) {
+    public SignalingPushClientChecker() {
         super();
-        this.subscription = subscription;
-        this.userId = subscription.getUserId();
-        this.contextId = subscription.getContextId();
-        this.client = subscription.getClient();
-    }
 
-    /**
-     * Gets the subscription
-     *
-     * @return The subscription
-     */
-    public PushSubscription getSubscription() {
-        return subscription;
-    }
-
-    /**
-     * Gets the client
-     *
-     * @return The client
-     */
-    public String getClient() {
-        return client;
-    }
-
-    /**
-     * Gets the context identifier
-     *
-     * @return The context identifier
-     */
-    public int getContextId() {
-        return contextId;
-    }
-
-    /**
-     * Gets the user identifier
-     *
-     * @return The user identifier
-     */
-    public int getUserId() {
-        return userId;
     }
 
     @Override
-    public int hashCode() {
-        Integer tmp = hash;
-        if (null == tmp) {
-            int prime = 31;
-            int result = 1;
-            result = prime * result + contextId;
-            result = prime * result + userId;
-            result = prime * result + ((client == null) ? 0 : client.hashCode());
-            tmp = Integer.valueOf(result);
-            hash = tmp;
+    public boolean isAllowed(String clientId, Session session) throws OXException {
+        if (null == session || Strings.isEmpty(clientId)) {
+            // Unable to check
+            return false;
         }
-        return tmp.intValue();
-    }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof Unsubscription)) {
-            return false;
-        }
-        Unsubscription other = (Unsubscription) obj;
-        if (contextId != other.contextId) {
-            return false;
-        }
-        if (userId != other.userId) {
-            return false;
-        }
-        if (client == null) {
-            if (other.client != null) {
-                return false;
-            }
-        } else if (!client.equals(other.client)) {
-            return false;
-        }
+        /*-
+         * Apparently PNS service has been registered.
+         *
+         * Thus simply signal to allow as potentially every client may subscribe to "ox:mail:new" event, since:
+         * Conditions/dependencies like:
+         *  - Exists such a subscription?
+         *  - Or is there a Web Socket?
+         *  - Will a Web Socket be opened later on?
+         *  - Will there be subscription later on?
+         *  - Is it safe to drop listener because Web Socket teared down?
+         * are too complex to handle robustly
+         */
         return true;
     }
 

@@ -119,16 +119,28 @@ public class InMemoryPushSubscriptionCollection {
     }
 
     /**
-     * Gets the interested subscriptions for given topic.
+     * Checks for interested subscriptions for given topic.
      *
      * @param topic The topic
-     * @return The subscriptions or an empty collection
+     * @return <code>true</code> if there is such a subscription; otherwise <code>false</code>
      */
-    public synchronized MapBackedHits getInterestedSubscriptions(String topic) {
-        Map<ClientAndTransport, List<PushMatch>> map = null;
+    public synchronized boolean hasInterestedSubscriptions(String topic) {
+        return hasInterestedSubscriptions(null, topic);
+    }
 
-        // Add subscriptions matching everything
-        map = checkAndAddMatches(matchingAllSubscriptions, ALL, map);
+    /**
+     * Checks for interested subscriptions for given client and topic.
+     *
+     * @param client The client identifier
+     * @param topic The topic
+     * @return <code>true</code> if there is such a subscription; otherwise <code>false</code>
+     */
+    public synchronized boolean hasInterestedSubscriptions(String client, String topic) {
+        // Check subscriptions matching everything
+        boolean hasAny = checkMatches(matchingAllSubscriptions, client);
+        if (hasAny) {
+            return true;
+        }
 
         // Now check for prefix matches
         if (!matchingPrefixTopic.isEmpty()) {
@@ -137,7 +149,75 @@ public class InMemoryPushSubscriptionCollection {
                 String prefix = topic.substring(0, pos);
                 Set<PushSubscription> subscriptions = matchingPrefixTopic.get(prefix);
                 if (null != subscriptions) {
-                    map = checkAndAddMatches(subscriptions, prefix + ":*", map);
+                    hasAny = checkMatches(subscriptions, client);
+                    if (hasAny) {
+                        return true;
+                    }
+                }
+                pos = prefix.lastIndexOf(':');
+            }
+        }
+
+        // Check the subscriptions for matching topic names
+        {
+            Set<PushSubscription> subscriptions = matchingTopic.get(topic);
+            if (null != subscriptions) {
+                hasAny = checkMatches(subscriptions, client);
+                if (hasAny) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean checkMatches(Set<PushSubscription> subscriptions, String optMatchingClient) {
+        if (null == subscriptions) {
+            return false;
+        }
+
+        for (PushSubscription subscription : subscriptions) {
+            String client = subscription.getClient();
+            if (null == optMatchingClient || optMatchingClient.equals(client)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Gets the interested subscriptions for given topic.
+     *
+     * @param topic The topic
+     * @return The subscriptions or an empty collection
+     */
+    public synchronized MapBackedHits getInterestedSubscriptions(String topic) {
+        return getInterestedSubscriptions(null, topic);
+    }
+
+    /**
+     * Gets the interested subscriptions for given client and topic.
+     *
+     * @param client The client identifier
+     * @param topic The topic
+     * @return The subscriptions or an empty collection
+     */
+    public synchronized MapBackedHits getInterestedSubscriptions(String client, String topic) {
+        Map<ClientAndTransport, List<PushMatch>> map = null;
+
+        // Add subscriptions matching everything
+        map = checkAndAddMatches(matchingAllSubscriptions, client, ALL, map);
+
+        // Now check for prefix matches
+        if (!matchingPrefixTopic.isEmpty()) {
+            int pos = topic.lastIndexOf(':');
+            while (pos > 0) {
+                String prefix = topic.substring(0, pos);
+                Set<PushSubscription> subscriptions = matchingPrefixTopic.get(prefix);
+                if (null != subscriptions) {
+                    map = checkAndAddMatches(subscriptions, client, prefix + ":*", map);
                 }
                 pos = prefix.lastIndexOf(':');
             }
@@ -147,35 +227,37 @@ public class InMemoryPushSubscriptionCollection {
         {
             Set<PushSubscription> subscriptions = matchingTopic.get(topic);
             if (null != subscriptions) {
-                map = checkAndAddMatches(subscriptions, topic, map);
+                map = checkAndAddMatches(subscriptions, client, topic, map);
             }
         }
 
         return null == map ? MapBackedHits.EMPTY : new MapBackedHits(map);
     }
 
-    private Map<ClientAndTransport, List<PushMatch>> checkAndAddMatches(Set<PushSubscription> subscriptions, String matchingTopic, Map<ClientAndTransport, List<PushMatch>> map) {
+    private Map<ClientAndTransport, List<PushMatch>> checkAndAddMatches(Set<PushSubscription> subscriptions, String optMatchingClient, String matchingTopic, Map<ClientAndTransport, List<PushMatch>> map) {
         if (null == subscriptions) {
             return map;
         }
 
         Map<ClientAndTransport, List<PushMatch>> toFill = map;
         for (PushSubscription subscription : subscriptions) {
-            String token = subscription.getToken();
             String client = subscription.getClient();
-            String transportId = subscription.getTransportId();
+            if (null == optMatchingClient || optMatchingClient.equals(client)) {
+                String token = subscription.getToken();
+                String transportId = subscription.getTransportId();
 
-            // Add to appropriate list
-            if (null == toFill) {
-                toFill = new LinkedHashMap<>(6);
+                // Add to appropriate list
+                if (null == toFill) {
+                    toFill = new LinkedHashMap<>(6);
+                }
+                ClientAndTransport cat = new ClientAndTransport(client, transportId);
+                List<PushMatch> matches = toFill.get(cat);
+                if (null == matches) {
+                    matches = new LinkedList<PushMatch>();
+                    toFill.put(cat, matches);
+                }
+                matches.add(new InMemoryPushMatch(userId, contextId, client, transportId, token, matchingTopic));
             }
-            ClientAndTransport cat = new ClientAndTransport(client, transportId);
-            List<PushMatch> matches = toFill.get(cat);
-            if (null == matches) {
-                matches = new LinkedList<PushMatch>();
-                toFill.put(cat, matches);
-            }
-            matches.add(new InMemoryPushMatch(userId, contextId, client, transportId, token, matchingTopic));
         }
 
         return toFill;

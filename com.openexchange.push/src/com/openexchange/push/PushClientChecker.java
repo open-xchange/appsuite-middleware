@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,48 +47,27 @@
  *
  */
 
-package com.openexchange.push.osgi;
+package com.openexchange.push;
 
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.event.EventFactoryService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.push.PushUtility;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link PushActivator} - The activator for push bundle.
+ * {@link PushClientChecker} - Checks if a certain client is allowed to receive push events.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class PushActivator extends HousekeepingActivator {
+public interface PushClientChecker {
 
     /**
-     * Initializes a new {@link PushActivator}.
+     * Checks if given client is allowed to receive push events.
+     *
+     * @param clientId The identifier of the client to check
+     * @param session The optional client-associated session or <code>null</code>
+     * @return <code>true</code> if allowed; otherwise <code>false</code>
+     * @throws OXException If check fails
      */
-    public PushActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { EventAdmin.class, EventFactoryService.class };
-    }
-
-    @Override
-    public void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        PushClientCheckerTracker checkerListing = new PushClientCheckerTracker(context);
-        rememberTracker(checkerListing);
-        openTrackers();
-
-        PushUtility.setPushClientCheckerListing(checkerListing);
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        PushUtility.setPushClientCheckerListing(null);
-        Services.setServiceLookup(null);
-        super.stopBundle();
-    }
+    boolean isAllowed(String clientId, Session session) throws OXException;
 
 }
