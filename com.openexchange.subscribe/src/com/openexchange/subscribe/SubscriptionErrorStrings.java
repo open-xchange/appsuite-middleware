@@ -51,7 +51,6 @@ package com.openexchange.subscribe;
 
 import com.openexchange.i18n.LocalizableStrings;
 
-
 /**
  * {@link SubscriptionErrorStrings}
  *
@@ -91,5 +90,8 @@ public class SubscriptionErrorStrings implements LocalizableStrings {
 
     // You already have such a subscription.
     public static final String DUPLICATE_SUBSCRIPTION_DISPLAY = "You already have such a subscription.";
+
+    // You need to explicitely authorise %1$s to subscribe to %2$s
+    public static final String NO_SCOPE_PERMISSION = "You need to explicitely authorise %1$s to subscribe to %2$s";
 
 }
