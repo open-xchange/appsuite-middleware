@@ -75,16 +75,14 @@ import com.openexchange.session.Session;
  */
 public final class BoxFolderAccess extends AbstractBoxResourceAccess implements FileStorageFolderAccess {
 
-    //private final BoxAccountAccess accountAccess;
     private final int userId;
     private final String accountDisplayName;
 
     /**
      * Initializes a new {@link BoxFolderAccess}.
      */
-    public BoxFolderAccess(final BoxOAuthAccess boxAccess, final FileStorageAccount account, final Session session, final BoxAccountAccess accountAccess) throws OXException {
+    public BoxFolderAccess(final BoxOAuthAccess boxAccess, final FileStorageAccount account, final Session session) throws OXException {
         super(boxAccess, account, session);
-        //this.accountAccess = accountAccess;
         userId = session.getUserId();
         accountDisplayName = account.getDisplayName();
     }
@@ -104,7 +102,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
         return perform(new BoxClosure<Boolean>() {
 
             @Override
-            protected Boolean doPerform(BoxOAuthAccess boxAccess) throws BoxAPIException, OXException {
+            protected Boolean doPerform() throws BoxAPIException, OXException {
                 try {
                     BoxAPIConnection apiConnection = getAPIConnection();
                     com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(folderId));
@@ -126,7 +124,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
         return perform(new BoxClosure<FileStorageFolder>() {
 
             @Override
-            protected FileStorageFolder doPerform(BoxOAuthAccess boxAccess) throws BoxAPIException, OXException {
+            protected FileStorageFolder doPerform() throws BoxAPIException, OXException {
                 try {
                     BoxAPIConnection apiConnection = getAPIConnection();
                     com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(folderId));
@@ -166,7 +164,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
         return perform(new BoxClosure<FileStorageFolder[]>() {
 
             @Override
-            protected FileStorageFolder[] doPerform(BoxOAuthAccess boxAccess) throws BoxAPIException, OXException {
+            protected FileStorageFolder[] doPerform() throws BoxAPIException, OXException {
                 try {
                     BoxAPIConnection apiConnection = getAPIConnection();
                     com.box.sdk.BoxFolder parentBoxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(parentIdentifier));
@@ -202,7 +200,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
         return perform(new BoxClosure<String>() {
 
             @Override
-            protected String doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected String doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
                 com.box.sdk.BoxFolder parentBoxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(toCreate.getParentId()));
 
@@ -228,7 +226,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
         return perform(new BoxClosure<String>() {
 
             @Override
-            protected String doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected String doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
                 com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(folderId));
 
@@ -253,7 +251,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
         return perform(new BoxClosure<String>() {
 
             @Override
-            protected String doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected String doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
                 com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(folderId));
                 if (!Strings.isEmpty(newName)) {
@@ -275,7 +273,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
         return perform(new BoxClosure<String>() {
 
             @Override
-            protected String doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected String doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
                 com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(folderId));
                 boxFolder.delete(true);
@@ -295,7 +293,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
         perform(new BoxClosure<Void>() {
 
             @Override
-            protected Void doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected Void doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
                 com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(folderId));
 
@@ -330,7 +328,7 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
         return perform(new BoxClosure<FileStorageFolder[]>() {
 
             @Override
-            protected FileStorageFolder[] doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected FileStorageFolder[] doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
                 String fid = toBoxFolderId(folderId);
                 com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, fid);

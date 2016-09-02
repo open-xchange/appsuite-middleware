@@ -153,7 +153,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<Boolean>() {
 
             @Override
-            protected Boolean doPerform(BoxOAuthAccess boxAccess) throws BoxAPIException, OXException {
+            protected Boolean doPerform() throws BoxAPIException, OXException {
                 try {
                     BoxAPIConnection boxClient = boxAccess.<BoxAPIConnection> getClient().client;
                     com.box.sdk.BoxFile file = new com.box.sdk.BoxFile(boxClient, id);
@@ -174,7 +174,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<File>() {
 
             @Override
-            protected File doPerform(BoxOAuthAccess boxAccess) throws BoxAPIException, OXException {
+            protected File doPerform() throws BoxAPIException, OXException {
                 try {
                     BoxAPIConnection boxClient = boxAccess.<BoxAPIConnection> getClient().client;
 
@@ -205,7 +205,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
             return perform(new BoxClosure<IDTuple>() {
 
                 @Override
-                protected IDTuple doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+                protected IDTuple doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                     try {
                         BoxAPIConnection boxClient = boxAccess.<BoxAPIConnection> getClient().client;
                         com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(boxClient, file.getId());
@@ -236,7 +236,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<IDTuple>() {
 
             @Override
-            protected IDTuple doPerform(BoxOAuthAccess boxAccess) throws BoxAPIException, OXException {
+            protected IDTuple doPerform() throws BoxAPIException, OXException {
                 try {
                     BoxAPIConnection boxClient = boxAccess.<BoxAPIConnection> getClient().client;
                     com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(boxClient, source.getId());
@@ -293,7 +293,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<IDTuple>() {
 
             @Override
-            protected IDTuple doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected IDTuple doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 try {
                     BoxAPIConnection apiConnection = getAPIConnection();
                     com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, source.getId());
@@ -350,7 +350,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<InputStream>() {
 
             @Override
-            protected InputStream doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected InputStream doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 try {
                     BoxAPIConnection apiConnection = getAPIConnection();
                     com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, id);
@@ -381,7 +381,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<InputStream>() {
 
             @Override
-            protected InputStream doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected InputStream doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 try {
                     BoxAPIConnection apiConnection = getAPIConnection();
                     com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, id);
@@ -407,7 +407,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<IDTuple>() {
 
             @Override
-            protected IDTuple doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected IDTuple doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 try {
                     //TODO: rework upload logic
                     BoxAPIConnection apiConnection = getAPIConnection();
@@ -487,7 +487,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         perform(new BoxClosure<Void>() {
 
             @Override
-            protected Void doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected Void doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
                 com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, folderId);
 
@@ -514,7 +514,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<List<IDTuple>>() {
 
             @Override
-            protected List<IDTuple> doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected List<IDTuple> doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
 
                 for (IDTuple idTuple : ids) {
@@ -543,7 +543,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<TimedResult<File>>() {
 
             @Override
-            protected TimedResult<File> doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected TimedResult<File> doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
                 com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, folderId);
 
@@ -570,7 +570,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<TimedResult<File>>() {
 
             @Override
-            protected TimedResult<File> doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected TimedResult<File> doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
                 com.box.sdk.BoxFolder boxFolder = new com.box.sdk.BoxFolder(apiConnection, toBoxFolderId(folderId));
 
@@ -595,7 +595,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<TimedResult<File>>() {
 
             @Override
-            protected TimedResult<File> doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected TimedResult<File> doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
 
                 List<File> files = new LinkedList<File>();
@@ -632,7 +632,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         return perform(new BoxClosure<SearchIterator<File>>() {
 
             @Override
-            protected SearchIterator<File> doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected SearchIterator<File> doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
                 List<File> files = new LinkedList<File>();
 
@@ -786,7 +786,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         perform(new BoxClosure<Void>() {
 
             @Override
-            protected Void doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected Void doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
                 com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, id);
                 boxFile.unlock();
@@ -800,7 +800,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
         perform(new BoxClosure<Void>() {
 
             @Override
-            protected Void doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected Void doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 BoxAPIConnection apiConnection = getAPIConnection();
                 com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, id);
                 boxFile.lock(new Date());

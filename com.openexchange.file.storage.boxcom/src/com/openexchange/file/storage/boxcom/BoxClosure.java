@@ -75,13 +75,12 @@ public abstract class BoxClosure<R> {
     /**
      * Performs the actual operation
      *
-     * @param boxAccess The Box.com access to use
      * @return The return value
      * @throws OXException If an Open-Xchange error occurred
      * @throws BoxAPIException If a Box API error is occurred
      * @throws UnsupportedEncodingException If an encoding problem occurred
      */
-    protected abstract R doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException;
+    protected abstract R doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException;
 
     /**
      * Performs this closure's operation.
@@ -104,7 +103,7 @@ public abstract class BoxClosure<R> {
 
     private R innerPerform(boolean handleAuthError, AbstractBoxResourceAccess resourceAccess, BoxOAuthAccess boxAccess, Session session) throws OXException {
         try {
-            return doPerform(boxAccess);
+            return doPerform();
         } catch (BoxAPIException e) {
             //TODO: Handle 404
             int statusCode = e.getResponseCode();

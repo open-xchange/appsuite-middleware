@@ -131,12 +131,12 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         BoxClosure<Boolean> closure = new BoxClosure<Boolean>() {
 
             @Override
-            protected Boolean doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
+            protected Boolean doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException {
                 try {
-                    BoxAPIConnection api = (BoxAPIConnection) boxAccess.getClient().client;
+                    ensureNotExpired();
+                    BoxAPIConnection api = (BoxAPIConnection) getClient().client;
                     BoxUser user = BoxUser.getCurrentUser(api);
                     user.getInfo();
-                    //client.getUsersManager().getCurrentUser(new BoxDefaultRequestObject());
                     return Boolean.TRUE;
                 } catch (BoxAPIException e) {
                     if (e.getResponseCode() == 401 || e.getResponseCode() == 403) {
