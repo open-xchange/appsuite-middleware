@@ -50,18 +50,19 @@
 package com.openexchange.file.storage.boxcom;
 
 import java.io.IOException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
-import com.box.boxjavalibv2.dao.BoxFile;
-import com.box.boxjavalibv2.dao.BoxFolder;
-import com.box.boxjavalibv2.dao.BoxTypedObject;
-import com.box.boxjavalibv2.exceptions.BoxServerException;
-import com.box.restclientv2.exceptions.BoxRestException;
-import com.box.restclientv2.exceptions.BoxSDKException;
+import com.box.sdk.BoxAPIConnection;
+import com.box.sdk.BoxAPIException;
+import com.box.sdk.BoxFile;
+import com.box.sdk.BoxFolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.boxcom.access.BoxOAuthAccess;
+import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.session.Session;
 
 /**
@@ -70,10 +71,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractBoxResourceAccess {
-
-    private static final String TYPE_FILE = BoxConstants.TYPE_FILE;
-
-    private static final String TYPE_FOLDER = BoxConstants.TYPE_FOLDER;
 
     protected final BoxOAuthAccess boxAccess;
     protected final Session session;
@@ -89,35 +86,6 @@ public abstract class AbstractBoxResourceAccess {
         this.account = account;
         this.session = session;
         rootFolderId = "0";
-
-        /*-
-         *
-        int keepOn = 1;
-        while (keepOn > 0) {
-            // Touch it...
-            try {
-                boxAccess.getBoxClient().getUsersManager().getCurrentUser(null);
-                keepOn = 0;
-            } catch (BoxRestException e) {
-                throw handleRestError(e);
-            } catch (BoxServerException e) {
-                if (SC_UNAUTHORIZED != e.getStatusCode() || keepOn > 1) {
-                    throw handleHttpResponseError(null, e);
-                }
-
-                keepOn = 2;
-                boxAccess.reinit(session);
-            } catch (AuthFatalFailureException e) {
-                if (keepOn > 1) {
-                    throw BoxExceptionCodes.UNLINKED_ERROR.create(e, new Object[0]);
-                }
-
-                keepOn = 2;
-                boxAccess.reinit(session);
-            }
-        }
-         *
-         */
     }
 
     /**
@@ -131,35 +99,35 @@ public abstract class AbstractBoxResourceAccess {
         return closure.perform(this, boxAccess, session);
     }
 
-    /**
-     * Checks if given typed object denotes a file
-     *
-     * @param typedObject The typed object to check
-     * @return <code>true</code> if typed object denotes a file; otherwise <code>false</code>
-     */
-    protected static boolean isFile(BoxTypedObject typedObject) {
-        return null != typedObject && TYPE_FILE.equals(typedObject.getType());
-    }
-
-    /**
-     * Checks if given typed object denotes a folder
-     *
-     * @param typedObject The typed object to check
-     * @return <code>true</code> if typed object denotes a folder; otherwise <code>false</code>
-     */
-    protected static boolean isFolder(BoxTypedObject typedObject) {
-        return null != typedObject && TYPE_FOLDER.equals(typedObject.getType());
-    }
-
-    /**
-     * Checks if given typed object is trashed
-     *
-     * @param boxFile The typed object to check
-     * @return <code>true</code> if typed object is trashed; otherwise <code>false</code>
-     */
-    protected static boolean isTrashed(BoxFile boxFile) {
-        return null != boxFile.getTrashedAt();
-    }
+    //    /**
+    //     * Checks if given typed object denotes a file
+    //     *
+    //     * @param typedObject The typed object to check
+    //     * @return <code>true</code> if typed object denotes a file; otherwise <code>false</code>
+    //     */
+    //    protected static boolean isFile(BoxTypedObject typedObject) {
+    //        return null != typedObject && TYPE_FILE.equals(typedObject.getType());
+    //    }
+    //
+    //    /**
+    //     * Checks if given typed object denotes a folder
+    //     *
+    //     * @param typedObject The typed object to check
+    //     * @return <code>true</code> if typed object denotes a folder; otherwise <code>false</code>
+    //     */
+    //    protected static boolean isFolder(BoxTypedObject typedObject) {
+    //        return null != typedObject && TYPE_FOLDER.equals(typedObject.getType());
+    //    }
+    //
+    //    /**
+    //     * Checks if given typed object is trashed
+    //     *
+    //     * @param boxFile The typed object to check
+    //     * @return <code>true</code> if typed object is trashed; otherwise <code>false</code>
+    //     */
+    //    protected static boolean isTrashed(BoxFile boxFile) {
+    //        return null != boxFile.getTrashedAt();
+    //    }
 
     /**
      * Checks if given typed object is trashed
@@ -167,34 +135,47 @@ public abstract class AbstractBoxResourceAccess {
      * @param folder The typed object to check
      * @return <code>true</code> if typed object is trashed; otherwise <code>false</code>
      */
-    protected static boolean isTrashed(BoxFolder folder) {
-        return hasTrashParent(folder);
+    protected static boolean isFolderTrashed(BoxFolder.Info folder) {
+        return hasTrashedParent(folder);
     }
 
     /**
-     * Checks if given typed object is trashed
-     *
-     * @param typedObject The typed object to check
-     * @return <code>true</code> if typed object is trashed; otherwise <code>false</code>
+     * Checks (recursively) whether the specified box folder has a trashed parent
+     * 
+     * @param boxFolder The box folder
+     * @return <code>true</code> if the parent folder is trashed; otherwise <code>false</code>
      */
-    protected static boolean isTrashed(BoxTypedObject typedObject) {
-        if (isFile(typedObject)) {
-            return null != ((BoxFile) typedObject).getTrashedAt();
-        } else if (isFolder(typedObject)) {
-            return hasTrashParent((BoxFolder) typedObject);
-        }
-        return false;
-    }
-
-    private static boolean hasTrashParent(BoxFolder boxFolder) {
-        BoxFolder parent = boxFolder.getParent();
+    private static boolean hasTrashedParent(BoxFolder.Info boxFolder) {
+        BoxFolder.Info parent = boxFolder.getParent();
         if (null == parent) {
             return false;
         }
-        if ("trash".equals(parent.getId())) {
+        if ("trash".equals(parent.getID())) {
             return true;
         }
-        return hasTrashParent(parent);
+        return hasTrashedParent(parent);
+    }
+
+    /**
+     * Checks if given file is trashed
+     *
+     * @param fileInfo The file to check
+     * @return <code>true</code> if the file is trashed; otherwise <code>false</code>
+     */
+    protected static boolean isFileTrashed(BoxFile.Info fileInfo) {
+        return fileInfo.getTrashedAt() != null;
+    }
+
+    /**
+     * Checks the file's validity
+     * 
+     * @param fileInfo The file's validity
+     * @throws OXException if the specified file was trashed
+     */
+    protected static void checkFileValidity(BoxFile.Info fileInfo) throws OXException {
+        if (isFileTrashed(fileInfo)) {
+            throw FileStorageExceptionCodes.NOT_A_FILE.create(BoxConstants.ID, fileInfo.getID());
+        }
     }
 
     /**
@@ -205,7 +186,7 @@ public abstract class AbstractBoxResourceAccess {
      * @return The re-initialized Box.com access
      * @throws OXException If authentication error could not be handled
      */
-    protected BoxOAuthAccess handleAuthError(BoxSDKException e, Session session) throws OXException {
+    protected BoxOAuthAccess handleAuthError(BoxAPIException e, Session session) throws OXException {
         try {
             boxAccess.initialize();
             return boxAccess;
@@ -218,17 +199,16 @@ public abstract class AbstractBoxResourceAccess {
     }
 
     /**
-     * Handles given REST error.
+     * Handles given API error.
      *
-     * @param e The REST error
+     * @param e The {@link BoxAPIException} error
      * @return The resulting exception
      */
-    protected static OXException handleRestError(BoxRestException e) {
+    protected static OXException handleRestError(BoxAPIException e) {
         Throwable cause = e.getCause();
 
-        if (cause instanceof BoxServerException) {
-            BoxServerException bx = (BoxServerException) cause;
-            return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + bx.getCustomMessage());
+        if (cause == null) {
+            return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getResponseCode() + " " + e.getResponse());
         }
 
         if (cause instanceof IOException) {
@@ -237,6 +217,9 @@ public abstract class AbstractBoxResourceAccess {
 
         return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, BoxConstants.ID, e.getMessage());
     }
+
+    /** Status code (400) indicating a bad requestn. */
+    private static final int SC_BAD_REQUEST = 400;
 
     /** Status code (401) indicating that the request requires HTTP authentication. */
     private static final int SC_UNAUTHORIZED = 401;
@@ -251,14 +234,30 @@ public abstract class AbstractBoxResourceAccess {
      * @param e The HTTP error
      * @return The resulting exception
      */
-    protected OXException handleHttpResponseError(String identifier, String accountId, BoxServerException e) {
-        if (null != identifier && SC_NOT_FOUND == e.getStatusCode()) {
+    protected OXException handleHttpResponseError(String identifier, String accountId, BoxAPIException e) {
+        if (null != identifier && SC_NOT_FOUND == e.getResponseCode()) {
             return FileStorageExceptionCodes.NOT_FOUND.create(e, "Box", identifier);
         }
-        if (null != accountId && SC_UNAUTHORIZED == e.getStatusCode()) {
+        if (null != accountId && SC_UNAUTHORIZED == e.getResponseCode()) {
             return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, accountId, BoxConstants.ID);
         }
-        return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getCustomMessage());
+        if (accountId != null && e.getResponseCode() == SC_BAD_REQUEST) {
+            try {
+                JSONObject responseBody = new JSONObject(e.getResponse());
+                String errorDesc = responseBody.getString("error_description");
+                if (errorDesc.equals("Refresh token has expired")) {
+                    try {
+                        //TODO: refresh token
+                        boxAccess.initialize();
+                    } catch (OXException ex) {
+                        return ex;
+                    }
+                }
+            } catch (JSONException e1) {
+                return FileStorageExceptionCodes.JSON_ERROR.create(e.getMessage());
+            }
+        }
+        return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getResponseCode() + " " + e.getResponse());
     }
 
     /**
@@ -281,4 +280,14 @@ public abstract class AbstractBoxResourceAccess {
         return rootFolderId.equals(boxId) || "0".equals(boxId) ? FileStorageFolder.ROOT_FULLNAME : boxId;
     }
 
+    /**
+     * Get a {@link BoxAPIConnection} from the {@link OAuthAccess}
+     * 
+     * @return A {@link BoxAPIException}
+     * @throws OXException if the API connection cannot be retrieved
+     */
+    protected BoxAPIConnection getAPIConnection() throws OXException {
+        boxAccess.ensureNotExpired();
+        return boxAccess.<BoxAPIConnection> getClient().client;
+    }
 }
