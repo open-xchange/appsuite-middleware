@@ -74,6 +74,7 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.oauth.API;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.scope.Module;
 import com.openexchange.server.ServiceExceptionCode;
@@ -146,11 +147,12 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                     GoogleJsonError details = ex.getDetails();
                     String message = details.getMessage();
                     if (message.toLowerCase().equals("insufficient permission")) {
-                        throw SubscriptionErrorMessage.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), Module.calendar);
+                        throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), Module.calendar);
                     }
-                    throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(message);
+                    throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(message);
                 }
             }
+            throw SubscriptionErrorMessage.IO_ERROR.create(e, e.getMessage());
         }
 
         // Handle everything in a background thread

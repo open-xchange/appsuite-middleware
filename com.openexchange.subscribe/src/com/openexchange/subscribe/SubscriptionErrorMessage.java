@@ -117,10 +117,6 @@ public enum SubscriptionErrorMessage implements DisplayableOXExceptionCode {
      */
     IO_ERROR(CATEGORY_ERROR, 14, "An I/O error occurred: %1$s"),
     /**
-     * The user '%1$s' in context '%2$s' has not authorised the '%3$s' provider to gain access to '%4%s'
-     */
-    NO_SCOPE_PERMISSION(CATEGORY_WARNING, 15, "The user needs to authorise the '%1$s' provider to gain access to '%2%s'", SubscriptionErrorStrings.NO_SCOPE_PERMISSION),
-    /**
      * An unexpected error occurred: %1$s.
      */
     UNEXPECTED_ERROR(CATEGORY_ERROR, 9999, SubscriptionErrorMessage.UNEXPECTED_ERROR_MSG),
