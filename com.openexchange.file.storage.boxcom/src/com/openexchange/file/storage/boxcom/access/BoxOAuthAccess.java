@@ -52,6 +52,8 @@ package com.openexchange.file.storage.boxcom.access;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxAPIException;
 import com.box.sdk.BoxAPIRequest;
@@ -64,7 +66,9 @@ import com.openexchange.file.storage.boxcom.BoxClosure;
 import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.Services;
 import com.openexchange.oauth.AbstractOAuthAccess;
+import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.access.OAuthAccess;
@@ -95,6 +99,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
             int oauthAccountId = getAccountId();
             OAuthService oAuthService = Services.getService(OAuthService.class);
             OAuthAccount boxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+            setOAuthAccount(boxOAuthAccount);
             createOAuthClient(boxOAuthAccount);
         }
     }
@@ -155,6 +160,22 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
 
     @Override
     public OAuthAccess ensureNotExpired() throws OXException {
+        BoxAPIConnection apiConnection = (BoxAPIConnection) getClient().client;
+        OAuthAccount oAuthAccount = getOAuthAccount();
+
+        // Box SDK performs an automatic access token refresh, so we need to see if the tokens were renewed
+        if (!oAuthAccount.getToken().equals(apiConnection.getAccessToken()) || !oAuthAccount.getSecret().equals(apiConnection.getRefreshToken())) {
+            OAuthService oauthService = Services.getService(OAuthService.class);
+
+            Map<String, Object> arguments = new HashMap<>();
+            arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(apiConnection.getAccessToken(), apiConnection.getRefreshToken()));
+            arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
+
+            int userId = session.getUserId();
+            int contextId = session.getContextId();
+            oauthService.updateAccount(oAuthAccount.getId(), arguments, userId, contextId);
+            setOAuthAccount(oauthService.getAccount(oAuthAccount.getId(), session, userId, contextId));
+        }
         return this;
     }
 

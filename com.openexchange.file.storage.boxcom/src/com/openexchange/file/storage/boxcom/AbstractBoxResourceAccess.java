@@ -50,6 +50,8 @@
 package com.openexchange.file.storage.boxcom;
 
 import java.io.IOException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxAPIException;
@@ -216,6 +218,9 @@ public abstract class AbstractBoxResourceAccess {
         return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, BoxConstants.ID, e.getMessage());
     }
 
+    /** Status code (400) indicating a bad requestn. */
+    private static final int SC_BAD_REQUEST = 400;
+
     /** Status code (401) indicating that the request requires HTTP authentication. */
     private static final int SC_UNAUTHORIZED = 401;
 
@@ -235,6 +240,22 @@ public abstract class AbstractBoxResourceAccess {
         }
         if (null != accountId && SC_UNAUTHORIZED == e.getResponseCode()) {
             return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, accountId, BoxConstants.ID);
+        }
+        if (accountId != null && e.getResponseCode() == SC_BAD_REQUEST) {
+            try {
+                JSONObject responseBody = new JSONObject(e.getResponse());
+                String errorDesc = responseBody.getString("error_description");
+                if (errorDesc.equals("Refresh token has expired")) {
+                    try {
+                        //TODO: refresh token
+                        boxAccess.initialize();
+                    } catch (OXException ex) {
+                        return ex;
+                    }
+                }
+            } catch (JSONException e1) {
+                return FileStorageExceptionCodes.JSON_ERROR.create(e.getMessage());
+            }
         }
         return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getResponseCode() + " " + e.getResponse());
     }
@@ -266,6 +287,7 @@ public abstract class AbstractBoxResourceAccess {
      * @throws OXException if the API connection cannot be retrieved
      */
     protected BoxAPIConnection getAPIConnection() throws OXException {
+        boxAccess.ensureNotExpired();
         return boxAccess.<BoxAPIConnection> getClient().client;
     }
 }
