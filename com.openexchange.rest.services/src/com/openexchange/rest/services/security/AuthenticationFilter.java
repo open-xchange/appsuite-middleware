@@ -135,7 +135,7 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         {
             PermitAll permitAll = getAnnotation(PermitAll.class);
             if (null != permitAll) {
-                grant(requestContext);
+                // Nothing to do
                 return;
             }
         }
@@ -198,7 +198,9 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             deny(requestContext);
         } else {
             if (authenticated(requestContext.getHeaders().getFirst(HttpHeaders.AUTHORIZATION))) {
-                grant(requestContext);
+                boolean secure = requestContext.getUriInfo().getRequestUri().getScheme().equals("https");
+                Principal principal = new TrustedAppPrincipal(requestContext.getUriInfo().getBaseUri().getHost());
+                requestContext.setSecurityContext(new SecurityContextImpl(principal, SecurityContext.BASIC_AUTH, secure));
             } else {
                 requestContext.abortWith(Response.status(Status.UNAUTHORIZED)
                     .header(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"OX REST\", encoding=\"UTF-8\"")
@@ -220,12 +222,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
             }
         }
         return false;
-    }
-
-    private void grant(ContainerRequestContext requestContext) {
-        boolean secure = requestContext.getUriInfo().getRequestUri().getScheme().equals("https");
-        Principal principal = new TrustedAppPrincipal(requestContext.getUriInfo().getBaseUri().getHost());
-        requestContext.setSecurityContext(new SecurityContextImpl(principal, SecurityContext.BASIC_AUTH, secure));
     }
 
     private boolean authenticated(String authHeader) {

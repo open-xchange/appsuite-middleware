@@ -79,9 +79,21 @@ public interface TaskManager {
         public Object getExecuterKey() {
             return null;
         }
+
+        @Override
+        public int size() {
+            return 0;
+        }
     };
 
     // --------------------------------------------------------------------------------------------------
+
+    /**
+     * Gets the number of tasks currently held by this task manager.
+     *
+     * @return The number of tasks
+     */
+    int size();
 
     /**
      * Checks if this task manager contains no tasks.

@@ -47,35 +47,52 @@
  *
  */
 
-package com.openexchange.file.storage.boxcom.access.extended.requests;
+package com.openexchange.pns.monitoring;
 
-import org.apache.http.HttpStatus;
-import com.box.boxjavalibv2.IBoxConfig;
-import com.box.boxjavalibv2.jsonparsing.IBoxJSONParser;
-import com.box.restclientv2.RestMethod;
-import com.box.restclientv2.exceptions.BoxRestException;
-import com.box.restclientv2.requestsbase.DefaultBoxRequest;
+import javax.management.MBeanException;
+import com.openexchange.management.MBeanMethodAnnotation;
+
 
 /**
- * {@link DeleteFileVersionRequest}
+ * {@link PushNotificationMBean} - The MBean for Push Notification Service.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class DeleteFileVersionRequest extends DefaultBoxRequest {
+public interface PushNotificationMBean {
 
-    public static final String URI = "/files/%s/versions/%s";
+    /** The MBean's domain */
+    public static final String DOMAIN = "com.openexchange.pns";
 
     /**
-     * Initializes a new {@link DeleteFileVersionRequest}.
-     * 
-     * @param config The IBoxConfig
-     * @param parser The parser
-     * @param fileId the file identifier
-     * @param version the version identifier
-     * @throws BoxRestException
+     * Gets the number of buffered notifications that are supposed to be transported.
+     *
+     * @return The number of buffered notifications
+     * @throws MBeanException If number of buffered notifications cannot be returned
      */
-    public DeleteFileVersionRequest(IBoxConfig config, IBoxJSONParser parser, String fileId, String version) throws BoxRestException {
-        super(config, parser, String.format(URI, fileId, version), RestMethod.DELETE, null);
-        setExpectedResponseCode(HttpStatus.SC_NO_CONTENT);
-    }
+    @MBeanMethodAnnotation (description="Gets the number of buffered notifications that are supposed to be transported", parameters={}, parameterDescriptions={})
+    long getNumberOfBufferedNotifications() throws MBeanException;
+
+    /**
+     * Gets the number of submitted notifications.
+     * <p>
+     * A notification is in submitted state if fetched from buffer and submitted for being transported, but not yet done.
+     *
+     * @return The number of submitted notifications
+     * @throws MBeanException If number of submitted notifications cannot be returned
+     */
+    @MBeanMethodAnnotation (description="Gets the number of submitted notifications", parameters={}, parameterDescriptions={})
+    long getNumberOfSubmittedNotifications() throws MBeanException;
+
+    /**
+     * Gets the number of notifications that are currently processed.
+     * <p>
+     * A notification is in processing state if currently transported
+     *
+     * @return The number of processing notifications
+     * @throws MBeanException If number of processing notifications cannot be returned
+     */
+    @MBeanMethodAnnotation (description="Gets the number of notifications that are currently processed", parameters={}, parameterDescriptions={})
+    long getNumberOfProcessingNotifications() throws MBeanException;
+
 }

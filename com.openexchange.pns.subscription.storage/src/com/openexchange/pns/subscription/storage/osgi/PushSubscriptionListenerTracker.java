@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,63 +47,25 @@
  *
  */
 
-package com.openexchange.file.storage.boxcom.access.extended.requests.requestobjects;
+package com.openexchange.pns.subscription.storage.osgi;
 
-import com.box.boxjavalibv2.dao.BoxFile;
-import com.box.boxjavalibv2.dao.BoxFolder;
-import com.box.boxjavalibv2.dao.BoxItem;
-import com.box.boxjavalibv2.jsonentities.MapJSONStringEntity;
-import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
+import org.osgi.framework.BundleContext;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.pns.PushSubscriptionListener;
 
 /**
- * {@link PreflightCheckRequestObject}
+ * {@link PushSubscriptionListenerTracker}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class PreflightCheckRequestObject extends BoxDefaultRequestObject {
+public class PushSubscriptionListenerTracker extends RankingAwareNearRegistryServiceTracker<PushSubscriptionListener> {
 
     /**
-     * Initializes a new {@link PreflightCheckRequestObject}.
+     * Initializes a new {@link PushSubscriptionListenerTracker}.
      */
-    public PreflightCheckRequestObject(String name, String parentId, long size) {
-        super();
-        setName(name);
-        setParent(parentId);
-        setSize(size);
+    public PushSubscriptionListenerTracker(BundleContext context) {
+        super(context, PushSubscriptionListener.class, 0);
     }
 
-    /**
-     * Set the name of the file
-     * 
-     * @param name the name of the file
-     * @return
-     */
-    private PreflightCheckRequestObject setName(String name) {
-        put(BoxFile.FIELD_NAME, name);
-        return this;
-    }
-
-    /**
-     * Set the parent folder of the file.
-     * 
-     * @param parentId the identifier of the parent folder
-     * @return
-     */
-    private PreflightCheckRequestObject setParent(String parentId) {
-        MapJSONStringEntity entity = new MapJSONStringEntity();
-        entity.put(BoxFolder.FIELD_ID, parentId);
-        put(BoxItem.FIELD_PARENT, entity);
-        return this;
-    }
-
-    /**
-     * Set the size of the file in bytes
-     * 
-     * @param size the size of the file in bytes
-     * @return
-     */
-    private PreflightCheckRequestObject setSize(long size) {
-        put(BoxFile.FIELD_SIZE, size);
-        return this;
-    }
 }

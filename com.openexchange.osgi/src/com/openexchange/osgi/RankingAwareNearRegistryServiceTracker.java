@@ -163,7 +163,7 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
 
     @Override
     public Iterator<S> iterator() {
-        return empty ? Collections.<S> emptyIterator() : asList().iterator();
+        return empty ? Collections.<S> emptyIterator() : new Iter<S>(services.getSnapshot());
     }
 
     /**
@@ -206,6 +206,34 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
             onServiceRemoved(service);
         }
         context.ungetService(reference);
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------
+
+    /** The iterator implementation */
+    private static final class Iter<S> implements Iterator<S> {
+
+        private final Iterator<RankedService<S>> iterator;
+
+        Iter(List<RankedService<S>> snapshot) {
+            super();
+            iterator = snapshot.iterator();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
+        }
+
+        @Override
+        public S next() {
+            return iterator.next().service;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("RankingAwareNearRegistryServiceTracker.Iter.remove()");
+        }
     }
 
 }

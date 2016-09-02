@@ -206,11 +206,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
          *
          */
         if (null == sessionControl) {
-            if ("unset".equalsIgnoreCase(sessionId)) {
-                LOG.debug("Session not found. ID: {}", sessionId);
-            } else {
-                LOG.info("Session not found. ID: {}", sessionId);
-            }
+            LOG.debug("Session not found. ID: {}", sessionId);
             return null;
         }
         return sessionControl.getSession();

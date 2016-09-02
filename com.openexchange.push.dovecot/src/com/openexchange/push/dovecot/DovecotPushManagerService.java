@@ -347,15 +347,15 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                         if (null == reason) {
                             removeListener = false;
                             unlock = false;
-                            LOGGER.info("Started Dovecot listener for user {} in context {} with session {}", I(userId), I(contextId), session.getSessionID());
+                            LOGGER.info("Started Dovecot listener for user {} in context {} with session {} ({})", I(userId), I(contextId), session.getSessionID(), session.getClient());
                             return listener;
                         }
 
                         // Registration failed
-                        LOGGER.info("Could not register Dovecot listener for user {} in context {} with session {}: {}", I(userId), I(contextId), session.getSessionID());
+                        LOGGER.info("Could not register Dovecot listener for user {} in context {} with session {} ({})", I(userId), I(contextId), session.getSessionID(), session.getClient());
                     } else {
                         // Already running for session user
-                        LOGGER.info("Did not start Dovecot listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
+                        LOGGER.info("Did not start Dovecot listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
                     }
                 } finally {
                     if (removeListener) {
@@ -367,7 +367,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                 }
             }
         } else {
-            LOGGER.info("Could not acquire lock to start Dovecot listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
+            LOGGER.info("Could not acquire lock to start Dovecot listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
         }
 
         // No listener registered for given session

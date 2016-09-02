@@ -114,7 +114,7 @@ public class AdvertisementTest extends AbstractConfigAwareAjaxSession {
         Map<String, String> result = new HashMap<>();
         result.put("com.openexchange.advertisement.default.packageScheme", packageScheme);
         if (packageScheme == "TaxonomyTypes") {
-            result.put("com.openexchange.advertisement.taxonomy.types", taxonomyTypes);
+            result.put("com.openexchange.advertisement.default.taxonomy.types", taxonomyTypes);
         }
         return result;
     }

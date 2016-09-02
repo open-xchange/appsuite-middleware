@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,34 +47,68 @@
  *
  */
 
-package com.openexchange.file.storage.boxcom.access;
+package com.openexchange.pns;
 
-import com.box.boxjavalibv2.authorization.OAuthAuthorization;
-import com.box.boxjavalibv2.authorization.OAuthDataController;
-import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
-
+import com.openexchange.exception.OXException;
 
 /**
- * {@link NonRefreshingOAuthAuthorization} - The non-refreshing Box.com OAuth authorization.
+ * {@link PushSubscriptionListener} - A listener for subscription registry events.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
+ * @since v7.8.3
  */
-public class NonRefreshingOAuthAuthorization extends OAuthAuthorization {
+public interface PushSubscriptionListener {
 
     /**
-     * Initializes a new {@link NonRefreshingOAuthAuthorization}.
+     * Invoked when a subscription is about to be added to registry.
      *
-     * @param oAuth The OAuth data controller
+     * @param subscription The subscription to add
+     * @return <code>true</code> to allow given subscription being added; otherwise <code>false</code>
+     * @throws OXException If handling fails
      */
-    public NonRefreshingOAuthAuthorization(OAuthDataController oAuth) {
-        super(oAuth);
-    }
+    boolean addingSubscription(PushSubscription subscription) throws OXException;
 
-    @Override
-    public void refresh() throws AuthFatalFailureException {
-        // {"error":"invalid_grant","error_description":"Refresh token has expired"}
-        throw new AuthFatalFailureException("Invalid grant. Refresh token has expired");
-    }
+    /**
+     * Invoked when a subscription is added to registry.
+     *
+     * @param subscription The added subscription
+     * @throws OXException If handling fails
+     */
+    void addedSubscription(PushSubscription subscription) throws OXException;
+
+    /**
+     * Invoked when a subscription is removed from registry.
+     *
+     * @param subscription The removed subscription
+     * @throws OXException If handling fails
+     */
+    void removedSubscription(PushSubscription subscription) throws OXException;
+
+    // ----------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Invoked when a subscription provider is about to be added to registry.
+     *
+     * @param subscription The subscription provider to add
+     * @return <code>true</code> to allow given subscription provider being added; otherwise <code>false</code>
+     * @throws OXException If handling fails
+     */
+    boolean addingProvider(PushSubscriptionProvider provider) throws OXException;
+
+    /**
+     * Invoked when a subscription provider is added to registry.
+     *
+     * @param subscription The added subscription provider
+     * @throws OXException If handling fails
+     */
+    void addedProvider(PushSubscriptionProvider provider) throws OXException;
+
+    /**
+     * Invoked when a subscription provider is removed from registry.
+     *
+     * @param provider The removed subscription provider
+     * @throws OXException If handling fails
+     */
+    void removedProvider(PushSubscriptionProvider provider) throws OXException;
 
 }
