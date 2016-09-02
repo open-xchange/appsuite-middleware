@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,60 +47,68 @@
  *
  */
 
-package com.openexchange.sessiond;
+package com.openexchange.pns;
 
-import java.util.Set;
-import javax.management.MBeanException;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SessiondMBean} - The MBean for sessiond
+ * {@link PushSubscriptionListener} - A listener for subscription registry events.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public interface SessiondMBean {
-
-    public static final String SESSIOND_DOMAIN = "com.openexchange.sessiond";
+public interface PushSubscriptionListener {
 
     /**
-     * Clears all sessions belonging to the user identified by given user ID in specified context
+     * Invoked when a subscription is about to be added to registry.
      *
-     * @param userId The user ID
-     * @param contextId The context ID
-     * @return The number of removed sessions belonging to the user or <code>-1</code> if an error occurred
+     * @param subscription The subscription to add
+     * @return <code>true</code> to allow given subscription being added; otherwise <code>false</code>
+     * @throws OXException If handling fails
      */
-    public int clearUserSessions(int userId, int contextId);
+    boolean addingSubscription(PushSubscription subscription) throws OXException;
 
     /**
-     * Clears all sessions belonging to specified context
+     * Invoked when a subscription is added to registry.
      *
-     * @param contextId The context ID
+     * @param subscription The added subscription
+     * @throws OXException If handling fails
      */
-    public void clearContextSessions(int contextId);
+    void addedSubscription(PushSubscription subscription) throws OXException;
 
     /**
-     * Clears all sessions belonging to given contexts.
+     * Invoked when a subscription is removed from registry.
      *
-     * @param contextId The context identifiers to remove sessions for
+     * @param subscription The removed subscription
+     * @throws OXException If handling fails
      */
-    public void clearContextSessionsGlobal(Set<Integer> contextIds) throws MBeanException;
+    void removedSubscription(PushSubscription subscription) throws OXException;
+
+    // ----------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Gets the number of short-term sessions.
+     * Invoked when a subscription provider is about to be added to registry.
      *
-     * @return The number of short-term sessions
+     * @param subscription The subscription provider to add
+     * @return <code>true</code> to allow given subscription provider being added; otherwise <code>false</code>
+     * @throws OXException If handling fails
      */
-    int[] getNumberOfShortTermSessions();
+    boolean addingProvider(PushSubscriptionProvider provider) throws OXException;
 
     /**
-     * Gets the number of long-term sessions.
+     * Invoked when a subscription provider is added to registry.
      *
-     * @return The number of long-term sessions
+     * @param subscription The added subscription provider
+     * @throws OXException If handling fails
      */
-    int[] getNumberOfLongTermSessions();
+    void addedProvider(PushSubscriptionProvider provider) throws OXException;
 
     /**
-     * Clear all sessions in central session storage. This does not affect the local short term session container.
+     * Invoked when a subscription provider is removed from registry.
+     *
+     * @param provider The removed subscription provider
+     * @throws OXException If handling fails
      */
-    public void clearSessionStorage() throws MBeanException;
+    void removedProvider(PushSubscriptionProvider provider) throws OXException;
 
 }

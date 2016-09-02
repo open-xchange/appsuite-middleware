@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.websockets.monitoring
 Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.management,
+Import-Package: com.openexchange.java,
+ com.openexchange.management,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.websockets,

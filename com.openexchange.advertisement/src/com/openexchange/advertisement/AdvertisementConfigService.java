@@ -62,6 +62,8 @@ import com.openexchange.session.Session;
  */
 public interface AdvertisementConfigService {
 
+    public static final String CONFIG_PREFIX = "com.openexchange.advertisement.";
+
     /**
      * Checks if an advertisement configuration is available for the given user
      *

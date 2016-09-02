@@ -68,6 +68,8 @@ import com.openexchange.websockets.WebSocketListener;
  */
 public class SocketIoActivator extends HousekeepingActivator {
 
+    private WsTransportConnectionRegistry connectionRegistry;
+
     /**
      * Initializes a new {@link SocketIoActivator}.
      */
@@ -86,13 +88,15 @@ public class SocketIoActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
+        TimerService timerService = getService(TimerService.class);
+
         WsTransportConnectionRegistry connectionRegistry = new WsTransportConnectionRegistry();
+        this.connectionRegistry = connectionRegistry;
         registerService(WebSocketListener.class, connectionRegistry);
 
         WsTransport transport = new WsTransport(connectionRegistry);
         connectionRegistry.setTransport(transport);
-        TimerService timerService = getService(TimerService.class);
 
         Dictionary<String, String> initParams = new Hashtable<>(2);
         initParams.put("allowAllOrigins", "true");
@@ -100,7 +104,13 @@ public class SocketIoActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
+        WsTransportConnectionRegistry connectionRegistry = this.connectionRegistry;
+        if (null != connectionRegistry) {
+            this.connectionRegistry = null;
+            connectionRegistry.shutDown();
+        }
+
         HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
             httpService.unregister("/socket.io");

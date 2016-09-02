@@ -133,13 +133,19 @@ public class AppSuiteWebSocketMessageGenerator implements PushMessageGenerator {
         // com.openexchange.pns.appsuite.AppSuiteWebSocketToClientResolver only accepts "/socket.io/*"
 
         String topic = notification.getTopic();
-        ArgsGenerator argsGenerator = generators.get(topic);
-        if (null == argsGenerator) {
-            throw PushExceptionCodes.MESSAGE_GENERATION_FAILED.create("Unhandled topic " + topic);
+        Collection<Object> args;
+        {
+            ArgsGenerator argsGenerator = generators.get(topic);
+            if (null == argsGenerator) {
+                // Default to wrap message data as a single JSON object
+                args = Collections.<Object> singleton(new JSONObject(notification.getMessageData()));
+            } else {
+                args = argsGenerator.generateArgsFrom(notification);
+            }
         }
 
         try {
-            return new JsonMessage(new JSONObject(3).put("name", topic).put("args", new JSONArray(argsGenerator.generateArgsFrom(notification))).put("namespace", DEFAULT_NAMESPACE));
+            return new JsonMessage(new JSONObject(3).put("name", topic).put("args", new JSONArray(args)).put("namespace", DEFAULT_NAMESPACE));
         } catch (JSONException e) {
             throw PushExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
