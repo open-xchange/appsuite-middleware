@@ -65,6 +65,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang.StringUtils;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
+import org.glassfish.grizzly.http.Cookies;
 import org.glassfish.grizzly.http.HttpContent;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.HttpResponsePacket;
@@ -94,6 +95,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.UserAndContext;
+import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.threadpool.ThreadPools;
@@ -526,7 +528,15 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
 
         // Check cookies/secret
         try {
-            HttpServletRequest servletRequest = new GrizzlyWebSocketHttpServletRequest(requestPacket, parameters);
+            Cookies cookies = new Cookies();
+            cookies.setHeaders(requestPacket.getHeaders());
+            if (cookies.get() == null) {
+                // No cookies available. Hence, no need to check secret.
+                throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
+            }
+
+            // Check secret...
+            HttpServletRequest servletRequest = new GrizzlyWebSocketHttpServletRequest(requestPacket, cookies, parameters);
             SessionUtility.checkSecret(hashSource, servletRequest, session);
         } catch (OXException e) {
             throw new HandshakeException(e.getPlainLogMessage());
