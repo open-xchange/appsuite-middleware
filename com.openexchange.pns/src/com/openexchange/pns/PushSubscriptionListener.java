@@ -69,7 +69,7 @@ public interface PushSubscriptionListener {
     boolean addingSubscription(PushSubscription subscription) throws OXException;
 
     /**
-     * Invoked when a subscription is added to registry.
+     * Invoked when a subscription was successfully added to registry.
      *
      * @param subscription The added subscription
      * @throws OXException If handling fails
@@ -77,7 +77,7 @@ public interface PushSubscriptionListener {
     void addedSubscription(PushSubscription subscription) throws OXException;
 
     /**
-     * Invoked when a subscription is removed from registry.
+     * Invoked when a subscription was successfully removed from registry.
      *
      * @param subscription The removed subscription
      * @throws OXException If handling fails
@@ -96,7 +96,7 @@ public interface PushSubscriptionListener {
     boolean addingProvider(PushSubscriptionProvider provider) throws OXException;
 
     /**
-     * Invoked when a subscription provider is added to registry.
+     * Invoked when a subscription provider was successfully added to registry.
      *
      * @param subscription The added subscription provider
      * @throws OXException If handling fails
@@ -104,7 +104,7 @@ public interface PushSubscriptionListener {
     void addedProvider(PushSubscriptionProvider provider) throws OXException;
 
     /**
-     * Invoked when a subscription provider is removed from registry.
+     * Invoked when a subscription provider was successfully removed from registry.
      *
      * @param provider The removed subscription provider
      * @throws OXException If handling fails
