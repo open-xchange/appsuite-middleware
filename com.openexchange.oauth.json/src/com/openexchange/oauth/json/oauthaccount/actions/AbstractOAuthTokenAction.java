@@ -271,7 +271,8 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
     protected Set<OAuthScope> getScopes(AJAXRequestData request, String serviceId) throws OXException {
         OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
         // Get the scope parameter
-        String scope = request.getParameter("scopes");
+        //String scope = request.getParameter("scopes");
+        String scope = "drive";
         if (isEmpty(scope)) {
             return scopeRegistry.getAvailableScopes(API.resolveFromServiceId(serviceId));
         }
