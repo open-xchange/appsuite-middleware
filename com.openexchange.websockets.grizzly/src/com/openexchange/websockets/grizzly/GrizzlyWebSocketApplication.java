@@ -51,6 +51,8 @@ package com.openexchange.websockets.grizzly;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashMap;
@@ -115,6 +117,17 @@ import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
 public class GrizzlyWebSocketApplication extends WebSocketApplication {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketApplication.class);
+
+    private static final String fallbackHost;
+    static {
+        String fbHost;
+        try {
+            fbHost = InetAddress.getLocalHost().getHostAddress();
+        } catch (final UnknownHostException e) {
+            fbHost = "localhost";
+        }
+        fallbackHost = fbHost;
+    }
 
     private static final AtomicReference<GrizzlyWebSocketApplication> APPLICATION_REFERENCE = new AtomicReference<GrizzlyWebSocketApplication>();
 
@@ -236,7 +249,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 WebSocketInfo info = WebSocketInfo.builder()
                     .connectionId(sessionBoundSocket.getConnectionId())
                     .contextId(sessionBoundSocket.getContextId())
-                    .memberUuid("local")
+                    .address(fallbackHost)
                     .path(sessionBoundSocket.getPath())
                     .userId(sessionBoundSocket.getUserId())
                     .build();

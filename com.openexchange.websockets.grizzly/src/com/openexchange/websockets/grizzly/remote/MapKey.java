@@ -70,13 +70,13 @@ class MapKey {
             throw new IllegalArgumentException("Invalid key: " + key);
         }
 
-        int colonPos = key.indexOf(':', atPos + 1);
-        if (colonPos < 0) {
+        int usPos = key.indexOf('_', atPos + 1);
+        if (usPos < 0) {
             throw new IllegalArgumentException("Invalid key: " + key);
         }
 
         try {
-            return new MapKey(Integer.parseInt(key.substring(0, atPos)), Integer.parseInt(key.substring(atPos + 1, colonPos)), key.substring(colonPos + 1));
+            return new MapKey(Integer.parseInt(key.substring(0, atPos)), Integer.parseInt(key.substring(atPos + 1, usPos)), key.substring(usPos + 1));
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid key: " + key, e);
         }
@@ -86,16 +86,16 @@ class MapKey {
 
     private final int userId;
     private final int contextId;
-    private final String memberUuid;
+    private final String address;
 
     /**
      * Initializes a new {@link MapKey}.
      */
-    MapKey(int userId, int contextId, String memberUuid) {
+    MapKey(int userId, int contextId, String address) {
         super();
         this.userId = userId;
         this.contextId = contextId;
-        this.memberUuid = memberUuid;
+        this.address = address;
     }
 
     /**
@@ -117,12 +117,12 @@ class MapKey {
     }
 
     /**
-     * Gets the member UUID
+     * Gets the member address; e.g. <code>"192.168.2.109:5557"</code>.
      *
-     * @return The member UUID
+     * @return The member address
      */
-    String getMemberUuid() {
-        return memberUuid;
+    String getAddress() {
+        return address;
     }
 
 }

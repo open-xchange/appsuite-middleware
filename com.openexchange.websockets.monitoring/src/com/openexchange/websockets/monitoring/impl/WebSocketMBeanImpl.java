@@ -113,7 +113,7 @@ public class WebSocketMBeanImpl extends AnnotatedStandardMBean implements WebSoc
             for (WebSocketInfo info : infos) {
                 if (null != info) {
                     String path = info.getPath();
-                    list.add(Arrays.asList(Integer.toString(info.getContextId()), Integer.toString(info.getUserId()), info.getMemberUuid(), null == path ? "<none>" : path, info.getConnectionId().getId()));
+                    list.add(Arrays.asList(Integer.toString(info.getContextId()), Integer.toString(info.getUserId()), info.getAddress(), null == path ? "<none>" : path, info.getConnectionId().getId()));
                 }
             }
 

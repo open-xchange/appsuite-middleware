@@ -66,6 +66,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import com.google.common.collect.Lists;
+import com.google.common.collect.MultimapBuilder.SetMultimapBuilder;
+import com.google.common.collect.SetMultimap;
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
@@ -73,6 +75,7 @@ import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiMap;
+import com.hazelcast.nio.Address;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.UnsynchronizedBufferingQueue;
@@ -124,6 +127,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     private final Lock lock;
     private final TimerService timerService;
     private final ConfigurationService configService;
+    private final SetMultimap<String, String> myValues;
     private final UnsynchronizedBufferingQueue<RemoteMessage> remoteMsgs;
     private ScheduledTimerTask timerTask;
 
@@ -137,6 +141,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         super();
         this.timerService = timerService;
         this.configService = configService;
+        myValues = SetMultimapBuilder.hashKeys().hashSetValues(4).build();
         lock = new ReentrantLock();
         remoteMsgs = new UnsynchronizedBufferingQueue<RemoteMessage>(delayDuration(configService), maxDelayDuration(configService)) {
 
@@ -152,6 +157,27 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
      * Shuts-down this remote distributor.
      */
     public void shutDown() {
+        synchronized (myValues) {
+            if (!myValues.isEmpty()) {
+                HazelcastInstance hzInstance = this.hzInstance;
+                if (null != hzInstance) {
+                    String mapName = this.mapName;
+                    if (null != mapName) {
+                        try {
+                            // Get the Hazelcast map reference
+                            MultiMap<String, String> hzMap = map(mapName, hzInstance);
+
+                            for (Entry<String, String> entry : myValues.entries()) {
+                                hzMap.remove(entry.getKey(), entry.getValue());
+                            }
+                        } catch (Exception e) {
+                            LOG.warn("Failed to remove keys from Hazelcast map.", e);
+                        }
+                    }
+                }
+            }
+        }
+
         unsetHazelcastResources();
         lock.lock();
         try {
@@ -199,7 +225,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                 WebSocketInfo info = WebSocketInfo.builder()
                     .connectionId(ConnectionId.newInstance(value.getConnectionId()))
                     .contextId(key.getContextId())
-                    .memberUuid(key.getMemberUuid())
+                    .address(key.getAddress())
                     .path(value.getPath())
                     .userId(key.getUserId())
                     .build();
@@ -262,8 +288,8 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         }
     }
 
-    private String generateKey(int userId, int contextId, String memberUuid) {
-        return new StringBuilder(48).append(userId).append('@').append(contextId).append(':').append(memberUuid).toString();
+    private String generateKey(int userId, int contextId, String host, int port) {
+        return new StringBuilder(48).append(userId).append('@').append(contextId).append('_').append(host).append(':').append(port).toString();
     }
 
     private MapKey parseKey(String key) {
@@ -321,7 +347,8 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             // Iterate other members & check for a matching open Web Socket
             for (Iterator<Member> it = otherMembers.iterator(); it.hasNext();) {
                 Member member = it.next();
-                Collection<String> infos = hzMap.get(generateKey(userId, contextId, member.getUuid()));
+                Address address = member.getAddress();
+                Collection<String> infos = hzMap.get(generateKey(userId, contextId, address.getHost(), address.getPort()));
                 if (null != infos && !infos.isEmpty()) {
                     if (null == pathFilter) {
                         // Well, either one is enough then...
@@ -453,7 +480,8 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         Set<Member> effectiveOtherMembers = new LinkedHashSet<>(otherMembers);
         for (Iterator<Member> it = effectiveOtherMembers.iterator(); it.hasNext(); ) {
             Member member = it.next();
-            Collection<String> infos = hzMap.get(generateKey(userId, contextId, member.getUuid()));
+            Address address = member.getAddress();
+            Collection<String> infos = hzMap.get(generateKey(userId, contextId, address.getHost(), address.getPort()));
             if (null == infos || infos.isEmpty()) {
                 it.remove();
                 LOG.info("Cluster member \"{}\" signals no connected Web Socket(s) for user {} in context {}", member, I(userId), I(contextId));
@@ -595,8 +623,13 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             String path = socket.getPath();
 
             try {
-                String memberUuid = hzInstance.getCluster().getLocalMember().getUuid();
-                map.put(generateKey(userId, contextId, memberUuid), generateValue(socket.getConnectionId().getId(), path));
+                Address address = hzInstance.getCluster().getLocalMember().getAddress();
+                String key = generateKey(userId, contextId, address.getHost(), address.getPort());
+                String value = generateValue(socket.getConnectionId().getId(), path);
+                map.put(key, value);
+                synchronized (myValues) {
+                    myValues.put(key, value);
+                }
             } catch (Exception e) {
                 LOG.warn("Failed to add Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId), e);
             }
@@ -625,8 +658,13 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         }
 
         try {
-            String memberUuid = hzInstance.getCluster().getLocalMember().getUuid();
-            map(mapName, hzInstance).put(generateKey(userId, contextId, memberUuid), generateValue(socket.getConnectionId().getId(), path));
+            Address address = hzInstance.getCluster().getLocalMember().getAddress();
+            String key = generateKey(userId, contextId, address.getHost(), address.getPort());
+            String value = generateValue(socket.getConnectionId().getId(), path);
+            map(mapName, hzInstance).put(key, value);
+            synchronized (myValues) {
+                myValues.put(key, value);
+            }
         } catch (Exception e) {
             LOG.warn("Failed to add Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId), e);
         }
@@ -654,8 +692,13 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         }
 
         try {
-            String memberUuid = hzInstance.getCluster().getLocalMember().getUuid();
-            map(mapName, hzInstance).remove(generateKey(userId, contextId, memberUuid), generateValue(socket.getConnectionId().getId(), path));
+            Address address = hzInstance.getCluster().getLocalMember().getAddress();
+            String key = generateKey(userId, contextId, address.getHost(), address.getPort());
+            String value = generateValue(socket.getConnectionId().getId(), path);
+            synchronized (myValues) {
+                myValues.remove(key, value);
+            }
+            map(mapName, hzInstance).remove(key, value);
         } catch (Exception e) {
             LOG.warn("Failed to remove Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId), e);
         }

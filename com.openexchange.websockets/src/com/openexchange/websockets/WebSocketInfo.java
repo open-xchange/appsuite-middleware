@@ -71,7 +71,7 @@ public class WebSocketInfo {
 
         private int userId;
         private int contextId;
-        private String memberUuid;
+        private String address;
         private ConnectionId connectionId;
         private String path;
 
@@ -110,12 +110,12 @@ public class WebSocketInfo {
         }
 
         /**
-         * Sets the member UUID
+         * Sets the member address
          *
-         * @param memberUuid The member UUID
+         * @param address The member address
          */
-        public Builder memberUuid(String memberUuid) {
-            this.memberUuid = memberUuid;
+        public Builder address(String address) {
+            this.address = address;
             return this;
         }
 
@@ -135,7 +135,7 @@ public class WebSocketInfo {
          * @return The <code>WebSocketInfo</code> instance
          */
         public WebSocketInfo build() {
-            return new WebSocketInfo(userId, contextId, memberUuid, connectionId, path);
+            return new WebSocketInfo(userId, contextId, address, connectionId, path);
         }
     }
 
@@ -143,18 +143,18 @@ public class WebSocketInfo {
 
     private final int userId;
     private final int contextId;
-    private final String memberUuid;
+    private final String address;
     private final ConnectionId connectionId;
     private final String path;
 
     /**
      * Initializes a new {@link WebSocketInfo}.
      */
-    WebSocketInfo(int userId, int contextId, String memberUuid, ConnectionId connectionId, String path) {
+    WebSocketInfo(int userId, int contextId, String address, ConnectionId connectionId, String path) {
         super();
         this.userId = userId;
         this.contextId = contextId;
-        this.memberUuid = memberUuid;
+        this.address = address;
         this.connectionId = connectionId;
         this.path = path;
     }
@@ -178,12 +178,12 @@ public class WebSocketInfo {
     }
 
     /**
-     * Gets the member UUID
+     * Gets the member address
      *
-     * @return The member UUID
+     * @return The member address
      */
-    public String getMemberUuid() {
-        return memberUuid;
+    public String getAddress() {
+        return address;
     }
 
     /**
