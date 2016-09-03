@@ -650,7 +650,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                     }
                 } catch (BoundedConcurrentHashMap.BoundaryExceededException e) {
                     // Max. number of sockets per user exceeded
-                    throw new HandshakeException("Max. number of Web Sockets (" + MAX_SIZE + ") exceeded for user " + userAndContext.getUserId() + " in context " + userAndContext.getContextId());
+                    throw new HandshakeException("Max. number of Web Sockets (" + e.getMaxSize() + ") exceeded for user " + userAndContext.getUserId() + " in context " + userAndContext.getContextId());
                 }
 
                 synchronized (sessionBoundSocket) {
