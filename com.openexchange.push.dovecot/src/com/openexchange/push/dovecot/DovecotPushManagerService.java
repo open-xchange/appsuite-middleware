@@ -442,7 +442,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                         }
 
                         // Registration failed
-                        LOGGER.info("Could not register permanent Dovecot listener for user {} in context {} with session {}: {}", I(userId), I(contextId), session.getSessionID());
+                        LOGGER.info("Could not register permanent Dovecot listener for user {} in context {} with session {} ({})", I(userId), I(contextId), session.getSessionID(), session.getClient());
                     } else if (!current.isPermanent()) {
                         // Cancel current & replace
                         current.unregister(false);
@@ -458,10 +458,10 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                         }
 
                         // Registration failed
-                        LOGGER.info("Could not register permanent Dovecot listener for user {} in context {} with session {}: {}", I(userId), I(contextId), session.getSessionID());
+                        LOGGER.info("Could not register permanent Dovecot listener for user {} in context {} with session {} ({})", I(userId), I(contextId), session.getSessionID(), session.getClient());
                     } else {
                         // Already running for session user
-                        LOGGER.info("Did not start permanent Dovecot listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
+                        LOGGER.info("Did not start permanent Dovecot listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
                     }
                 } finally {
                     if (removeListener) {
@@ -473,7 +473,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
                 }
             }
         } else {
-            LOGGER.info("Could not acquire lock to start permanent Dovecot listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
+            LOGGER.info("Could not acquire lock to start permanent Dovecot listener for user {} in context {} with session {} ({}) as there is already an associated listener", I(userId), I(contextId), session.getSessionID(), session.getClient());
         }
 
         // No listener registered for given session
