@@ -118,7 +118,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketApplication.class);
 
-    private static final String fallbackHost;
+    private static final String LOCAL_HOST;
     static {
         String fbHost;
         try {
@@ -126,7 +126,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         } catch (final UnknownHostException e) {
             fbHost = "localhost";
         }
-        fallbackHost = fbHost;
+        LOCAL_HOST = fbHost;
     }
 
     private static final AtomicReference<GrizzlyWebSocketApplication> APPLICATION_REFERENCE = new AtomicReference<GrizzlyWebSocketApplication>();
@@ -249,7 +249,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 WebSocketInfo info = WebSocketInfo.builder()
                     .connectionId(sessionBoundSocket.getConnectionId())
                     .contextId(sessionBoundSocket.getContextId())
-                    .address(fallbackHost)
+                    .address(LOCAL_HOST)
                     .path(sessionBoundSocket.getPath())
                     .userId(sessionBoundSocket.getUserId())
                     .build();
