@@ -49,76 +49,80 @@
 
 package com.openexchange.websockets.grizzly.remote;
 
-import java.util.Collection;
-import java.util.List;
-import com.openexchange.websockets.WebSocket;
-import com.openexchange.websockets.WebSocketInfo;
-
 /**
- * {@link RemoteWebSocketDistributor} - Sends text messages to remote nodes having an open Web Socket connection for associated user.
+ * {@link MapKey} - A key for Hazelcast map.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface RemoteWebSocketDistributor  {
+class MapKey {
 
     /**
-     * Lists all available Web Socket information from whole cluster.
-     * <p>
-     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;"><b>Expensive operation!</b></div>
-     * <p>
+     * Parses the map key information from specified string.
      *
-     * @return All available Web Socket information or <code>null</code> if operation failed
+     * @param key The key as string
+     * @return The parsed key
+     * @throws IllegalArgumentException If key cannot be parsed
      */
-    List<WebSocketInfo> listClusterWebSocketInfo();
+    static MapKey parseFrom(String key) {
+        int atPos = key.indexOf('@', 0);
+        if (atPos < 0) {
+            throw new IllegalArgumentException("Invalid key: " + key);
+        }
+
+        int colonPos = key.indexOf(':', atPos + 1);
+        if (colonPos < 0) {
+            throw new IllegalArgumentException("Invalid key: " + key);
+        }
+
+        try {
+            return new MapKey(Integer.parseInt(key.substring(0, atPos)), Integer.parseInt(key.substring(atPos + 1, colonPos)), key.substring(colonPos + 1));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid key: " + key, e);
+        }
+    }
+
+    // ---------------------------------------------------------------------------------
+
+    private final int userId;
+    private final int contextId;
+    private final String memberUuid;
 
     /**
-     * Gets the number of buffered messages that are supposed to be sent to remote cluster members.
-     *
-     * @return The number of buffered messages
+     * Initializes a new {@link MapKey}.
      */
-    long getNumberOfBufferedMessages();
+    MapKey(int userId, int contextId, String memberUuid) {
+        super();
+        this.userId = userId;
+        this.contextId = contextId;
+        this.memberUuid = memberUuid;
+    }
 
     /**
-     * Sends the given text message to remote nodes having an open Web Socket connection for specified user.
+     * Gets the user identifier
      *
-     * @param message The text message to send
-     * @param pathFilter The path to filter by (e.g. <code>"/websockets/push"</code>)
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param async Whether to send asynchronously or with blocking behavior
+     * @return The user identifier
      */
-    void sendRemote(String message, String pathFilter, int userId, int contextId, boolean async);
+    int getUserId() {
+        return userId;
+    }
 
     /**
-     * Checks if there is any filter-satisfying Web Socket connection associated with specified user on a remote cluster member.
+     * Gets the context identifier
      *
-     * @param pathFilter The path to filter by (e.g. <code>"/websockets/push"</code>)
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if such a filter-satisfying Web Socket exists; otherwise <code>false</code>
+     * @return The context identifier
      */
-    boolean existsAnyRemote(String pathFilter, int userId, int contextId);
+    int getContextId() {
+        return contextId;
+    }
 
     /**
-     * Adds a connected Web Socket.
+     * Gets the member UUID
      *
-     * @param socket The Web Socket
+     * @return The member UUID
      */
-    void addWebSocket(WebSocket socket);
-
-    /**
-     * Adds connected Web Sockets.
-     *
-     * @param sockets The Web Sockets
-     */
-    void addWebSocket(Collection<WebSocket> sockets);
-
-    /**
-     * Removes a closed Web Socket.
-     *
-     * @param socket The Web Socket
-     */
-    void removeWebSocket(WebSocket socket);
+    String getMemberUuid() {
+        return memberUuid;
+    }
 
 }

@@ -84,6 +84,18 @@ public interface WebSocketMBean {
     long getNumberOfBufferedMessages() throws MBeanException;
 
     /**
+     * Lists all available Web Socket information from whole cluster.
+     * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;"><b>Expensive operation!</b></div>
+     * <p>
+     *
+     * @return All available Web Socket information
+     * @throws MBeanException If Web Socket information cannot be returned
+     */
+    @MBeanMethodAnnotation (description="Lists all available Web Socket information from whole cluster; each row provides context identifier, user identifier, member UUID, the path used when the socket was created, and connection identifier", parameters={}, parameterDescriptions={})
+    List<List<String>> listClusterWebSocketInfo() throws MBeanException;
+
+    /**
      * Lists Web Sockets opened on this node; each row provides:
      * <ul>
      * <li>context identifier,

@@ -57,6 +57,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
@@ -77,8 +78,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.UnsynchronizedBufferingQueue;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.websockets.ConnectionId;
 import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketExceptionCodes;
+import com.openexchange.websockets.WebSocketInfo;
 import com.openexchange.websockets.WebSockets;
 import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributor;
 
@@ -168,6 +171,48 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         }
     }
 
+    @Override
+    public List<WebSocketInfo> listClusterWebSocketInfo() {
+        try {
+            HazelcastInstance hzInstance = this.hzInstance;
+            if (null == hzInstance) {
+                LOG.warn("Missing Hazelcast instance. Failed to check for cluster Web Sockets' information");
+                return null;
+            }
+
+            String mapName = this.mapName;
+            if (null == mapName) {
+                LOG.warn("Missing Hazelcast map name. Failed to check for cluster Web Sockets' information");
+                return null;
+            }
+
+            // Get the Hazelcast map reference
+            MultiMap<String, String> hzMap = map(mapName, hzInstance);
+
+            // Iterate its entry set
+            Set<Entry<String, String>> entrySet = hzMap.entrySet();
+            List<WebSocketInfo> infos = new ArrayList<>(entrySet.size());
+            for (Map.Entry<String, String> mapEntry : entrySet) {
+                MapKey key = parseKey(mapEntry.getKey());
+                MapValue value = parseValue(mapEntry.getValue());
+
+                WebSocketInfo info = WebSocketInfo.builder()
+                    .connectionId(ConnectionId.newInstance(value.getConnectionId()))
+                    .contextId(key.getContextId())
+                    .memberUuid(key.getMemberUuid())
+                    .path(value.getPath())
+                    .userId(key.getUserId())
+                    .build();
+                infos.add(info);
+            }
+
+            return infos;
+        } catch (Exception e) {
+            LOG.warn("Failed to check for cluster Web Sockets' information", e);
+            return null;
+        }
+    }
+
     /**
      * Sets the Hazelcast resources to use.
      *
@@ -221,6 +266,15 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         return new StringBuilder(48).append(userId).append('@').append(contextId).append(':').append(memberUuid).toString();
     }
 
+    private MapKey parseKey(String key) {
+        try {
+            return MapKey.parseFrom(key);
+        } catch (Exception e) {
+            LOG.warn("Invalid key: {}", key);
+            return null;
+        }
+    }
+
     private String generateValue(String connectionId, String path) {
         if (null == path) {
             return new StringBuilder(34).append(connectionId).append(':').toString();
@@ -228,6 +282,15 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
 
         // With path info
         return new StringBuilder(48).append(connectionId).append(':').append(path).toString();
+    }
+
+    private MapValue parseValue(String socketInfo) {
+        try {
+            return MapValue.parseFrom(socketInfo);
+        } catch (Exception e) {
+            LOG.warn("Invalid socket info: {}", socketInfo);
+            return null;
+        }
     }
 
     @Override
@@ -267,7 +330,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
 
                     // Check if filter matches any
                     for (String info : infos) {
-                        if (WebSockets.matches(pathFilter, WebSocketInfo.parsePathFrom(info))) {
+                        if (WebSockets.matches(pathFilter, MapValue.parsePathFrom(info))) {
                             return true;
                         }
                     }
@@ -275,6 +338,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             }
 
             // Apparently no Web Socket open
+            LOG.info("Found no connected Web Sockets on remote cluster members using path filter {} for user {} in context {}", null == pathFilter ? "<none>" : pathFilter, I(userId), I(contextId));
             return false;
         } catch (Exception e) {
             LOG.warn("Failed to remotely check any open Web Socket using path filter {} for user {} in context {}", null == pathFilter ? "<none>" : pathFilter, I(userId), I(contextId), e);

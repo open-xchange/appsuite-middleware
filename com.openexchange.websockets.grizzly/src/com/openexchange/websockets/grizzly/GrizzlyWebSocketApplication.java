@@ -101,6 +101,7 @@ import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.user.UserService;
 import com.openexchange.websockets.ConnectionId;
+import com.openexchange.websockets.WebSocketInfo;
 import com.openexchange.websockets.WebSockets;
 import com.openexchange.websockets.grizzly.http.GrizzlyWebSocketHttpServletRequest;
 import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
@@ -220,6 +221,29 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             }
         }
         return websockets;
+    }
+
+    /**
+     * Lists all locally available Web Socket information.
+     *
+     * @return All available Web Socket information
+     */
+    public List<WebSocketInfo> listWebSocketInfo() {
+        // Only locally available...
+        List<WebSocketInfo> infos = new LinkedList<>();
+        for (ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets : openSockets.values()) {
+            for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
+                WebSocketInfo info = WebSocketInfo.builder()
+                    .connectionId(sessionBoundSocket.getConnectionId())
+                    .contextId(sessionBoundSocket.getContextId())
+                    .memberUuid("local")
+                    .path(sessionBoundSocket.getPath())
+                    .userId(sessionBoundSocket.getUserId())
+                    .build();
+                infos.add(info);
+            }
+        }
+        return infos;
     }
 
     /**
