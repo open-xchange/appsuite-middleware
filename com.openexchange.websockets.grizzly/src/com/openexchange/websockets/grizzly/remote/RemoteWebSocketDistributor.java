@@ -121,4 +121,12 @@ public interface RemoteWebSocketDistributor  {
      */
     void removeWebSocket(WebSocket socket);
 
+    /**
+     * Stops the cleaner task for given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    void stopCleanerTaskFor(int userId, int contextId);
+
 }

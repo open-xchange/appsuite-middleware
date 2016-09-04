@@ -60,6 +60,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
@@ -206,6 +207,27 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             remove(socket);
             socket.close();
         }
+    }
+
+    /**
+     * Removes all existing Web Socket connections from given candidates.
+     *
+     * @param candidates The candidates to remove from
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The cleaned candidates
+     */
+    public Set<ConnectionId> getNonExisting(Set<ConnectionId> candidates, int userId, int contextId) {
+        ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
+        if (null == userSockets || userSockets.isEmpty()) {
+            // None exists
+            return candidates;
+        }
+
+        for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
+            candidates.remove(sessionBoundSocket.getConnectionId());
+        }
+        return candidates;
     }
 
     /**
