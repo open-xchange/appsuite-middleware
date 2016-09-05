@@ -94,6 +94,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OneDriveOAuthAccess.class);
 
     private final FileStorageAccount fsAccount;
+
     /**
      * Initializes a new {@link OneDriveOAuthAccess}.
      */
@@ -129,11 +130,6 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
             setOAuthClient(new OAuthClient<>(HttpClients.getHttpClient("Open-Xchange OneDrive Client"), getOAuthAccount().getToken()));
         }
-    }
-
-    @Override
-    public void revoke() throws OXException {
-        // No revoke call
     }
 
     @Override

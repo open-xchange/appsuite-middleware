@@ -49,8 +49,6 @@
 
 package com.openexchange.file.storage.dropbox.access;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.dropbox.core.DbxException;
 import com.dropbox.core.DbxRequestConfig;
 import com.dropbox.core.v2.DbxClientV2;
@@ -73,8 +71,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class DropboxOAuth2Access extends AbstractOAuthAccess {
-
-    private static final Logger LOG = LoggerFactory.getLogger(DropboxOAuth2Access.class);
 
     private final FileStorageAccount fsAccount;
 
@@ -105,22 +101,6 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
             setOAuthClient(oAuthClient);
         } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#revoke()
-     */
-    @Override
-    public void revoke() throws OXException {
-        try {
-            DbxClientV2 client = (DbxClientV2) getClient().client;
-            client.auth().tokenRevoke();
-        } catch (DbxException e) {
-            // Simply log the revoke attempt, we can't do anything about it
-            LOG.debug("{}", e.getMessage(), e);
         }
     }
 
