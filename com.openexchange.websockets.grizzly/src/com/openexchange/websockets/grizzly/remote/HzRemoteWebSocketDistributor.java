@@ -499,11 +499,14 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             Collection<String> infos = hzMap.get(generateKey(userId, contextId, address.getHost(), address.getPort()));
             if (null == infos || infos.isEmpty()) {
                 it.remove();
-                LOG.info("Cluster member \"{}\" signals no connected Web Socket(s) for user {} in context {}", member, I(userId), I(contextId));
+            } else {
+                LOG.info("Cluster member \"{}\" signals to hold connected Web Socket(s) for user {} in context {}", member, I(userId), I(contextId));
             }
         }
 
-        if (!effectiveOtherMembers.isEmpty()) {
+        if (effectiveOtherMembers.isEmpty()) {
+            LOG.info("No remote cluster member holds any connected Web Socket(s) for user {} in context {}", I(userId), I(contextId));
+        } else {
             IExecutorService executor = hzInstance.getExecutorService("default");
 
             for (List<String> partition : Lists.partition(payloads, 5)) {
@@ -817,7 +820,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                 application.retainNonExisting(connectionIds.keySet(), userId, contextId);
 
                 if (connectionIds.isEmpty()) {
-                    LOG.info("Detected no orphaned entries in Hazelcast map during cleaner task run for user {} in context {}", I(connectionIds.size()), I(userId), I(contextId));
+                    LOG.info("Detected no orphaned entries in Hazelcast map during cleaner task run for user {} in context {}", I(userId), I(contextId));
                     return;
                 }
 

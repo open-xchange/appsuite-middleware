@@ -1235,7 +1235,7 @@ final class ListLsubCollection implements Serializable {
 
             IMAPResponse ir = (IMAPResponse) r[i];
             if (ir.keyEquals(cmd)) {
-                final ListLsubEntryImpl listLsubEntry = parseListResponse(ir, null);
+                final ListLsubEntryImpl listLsubEntry = parseListResponse(ir, null, null, ROOT_FULL_NAME);
                 {
                     final ListLsubEntryImpl oldEntry = listMap.get(ROOT_FULL_NAME);
                     if (null == oldEntry) {
@@ -1982,6 +1982,10 @@ final class ListLsubCollection implements Serializable {
     }
 
     private ListLsubEntryImpl parseListResponse(IMAPResponse listResponse, ConcurrentMap<String, ListLsubEntryImpl> lsubMap, String[] requiredAttributes) {
+        return parseListResponse(listResponse, lsubMap, requiredAttributes, null);
+    }
+
+    private ListLsubEntryImpl parseListResponse(IMAPResponse listResponse, ConcurrentMap<String, ListLsubEntryImpl> lsubMap, String[] requiredAttributes, String predefinedName) {
         /*-
          * Parses responses like:
          *
@@ -2069,7 +2073,7 @@ final class ListLsubCollection implements Serializable {
 
         // Read full name; decode the name (using RFC2060's modified UTF7)
         listResponse.skipSpaces();
-        String name = BASE64MailboxDecoder.decode(listResponse.readAtomString());
+        String name = null == predefinedName ? BASE64MailboxDecoder.decode(listResponse.readAtomString()) : predefinedName;
 
         // Return
         return new ListLsubEntryImpl(name, attributes, separator, changeState, hasInferiors, canOpen, hasChildren, lsubMap).setNamespace(isNamespace(name));
