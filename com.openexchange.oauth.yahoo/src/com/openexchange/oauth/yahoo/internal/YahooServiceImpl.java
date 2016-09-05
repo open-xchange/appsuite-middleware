@@ -66,7 +66,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.scribe.builder.ServiceBuilder;
-import org.scribe.builder.api.YahooApi;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
 import org.scribe.model.Token;
@@ -111,23 +110,21 @@ public class YahooServiceImpl implements YahooService {
         List<Contact> contacts = new ArrayList<Contact>();
         OAuthAccount account = null;
 
-
-            final com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
-            try {
-                account = oAuthService.getAccount(accountId, session, user, contextId);
-            } catch (final OXException e) {
-                LOG.error("", e);
-                return Collections.emptyList();
-            }
-            final Token accessToken = new Token(account.getToken(), account.getSecret());
-            contacts = useAccessTokenToAccessData(accessToken, session);
+        final com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
+        try {
+            account = oAuthService.getAccount(accountId, session, user, contextId);
+        } catch (final OXException e) {
+            LOG.error("", e);
+            return Collections.emptyList();
+        }
+        final Token accessToken = new Token(account.getToken(), account.getSecret());
+        contacts = useAccessTokenToAccessData(accessToken, session);
 
         return contacts;
     }
 
     private List<Contact> useAccessTokenToAccessData(final Token accessToken, Session session) throws OXException {
-        final OAuthService service = new ServiceBuilder().provider(YahooApi.class).apiKey(activator.getOAuthMetaData().getAPIKey(session)).apiSecret(
-            activator.getOAuthMetaData().getAPISecret(session)).build();
+        final OAuthService service = new ServiceBuilder().provider(YahooApi2.class).apiKey(activator.getOAuthMetaData().getAPIKey(session)).apiSecret(activator.getOAuthMetaData().getAPISecret(session)).build();
         // Get the GUID of the current user from yahoo. This is needed for later requests
         final String guid;
         {
@@ -315,7 +312,7 @@ public class YahooServiceImpl implements YahooService {
                                         date = Integer.parseInt(value.getString("day"));
                                     }
                                     if (value.has("month")) {
-                                        month = Integer.parseInt(value.getString("month")) -1;
+                                        month = Integer.parseInt(value.getString("month")) - 1;
                                     }
                                     if (value.has("year")) {
                                         year = Integer.parseInt(value.getString("year")) - 1900;
@@ -326,14 +323,14 @@ public class YahooServiceImpl implements YahooService {
                                 }
                             }
 
-                            else if (type.equals("otherid")){
-                                if (field.has("value") && field.has("flags")){
+                            else if (type.equals("otherid")) {
+                                if (field.has("value") && field.has("flags")) {
                                     final String kind = field.getString("flags");
                                     final Pattern pattern = Pattern.compile("\\[\"([^\"]*)\"\\]");
                                     final Matcher matcher = pattern.matcher(kind);
-                                    if (matcher.find()){
+                                    if (matcher.find()) {
                                         final String service = matcher.group(1);
-                                        oxContact.setInstantMessenger1(field.getString("value") + " ("+service+")");
+                                        oxContact.setInstantMessenger1(field.getString("value") + " (" + service + ")");
                                     }
                                 }
                             }
