@@ -59,7 +59,7 @@ import com.openexchange.oauth.scope.OAuthScope;
  */
 public enum TestOAuthScope implements OAuthScope {
 
-    calendar("some scopes the OAuth provider specifies for CALENDAR", Module.calendar),
+    calendar("some scopes the OAuth provider specifies for CALENDAR", Module.calendar_ro),
     drive("some scopes the OAuth provider specifies for DRIVE", Module.drive),
     ;
 

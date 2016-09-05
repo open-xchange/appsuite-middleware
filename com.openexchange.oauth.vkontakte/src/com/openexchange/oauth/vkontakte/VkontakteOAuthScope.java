@@ -58,7 +58,7 @@ import com.openexchange.oauth.scope.OAuthScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum VkontakteOAuthScope implements OAuthScope {
-    contacts("friends wall offline", Module.contacts);
+    contacts_ro("friends wall offline", Module.contacts_ro);
 
     private String mapping;
     private Module module;

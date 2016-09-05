@@ -355,10 +355,10 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
         try {
             contactFeed = contactsService.getFeed(query, ContactFeed.class);
         } catch (AuthenticationException e) {
-            throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), Module.contacts);
+            throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), Module.contacts_ro);
         } catch (NullPointerException e) {
             if (e.getMessage().equals("No authentication header information")) {
-                throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), Module.contacts);
+                throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), Module.contacts_ro);
             }
             throw e;
         }

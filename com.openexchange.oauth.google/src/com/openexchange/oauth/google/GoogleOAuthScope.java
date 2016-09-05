@@ -59,8 +59,10 @@ import com.openexchange.oauth.scope.OAuthScope;
  */
 public enum GoogleOAuthScope implements OAuthScope {
     mail("https://mail.google.com/", Module.mail),
-    calendar("https://www.googleapis.com/auth/calendar.readonly", Module.calendar),
-    contacts("https://www.googleapis.com/auth/contacts.readonly", Module.contacts),
+    calendar_ro("https://www.googleapis.com/auth/calendar.readonly", Module.calendar_ro),
+    contacts_ro("https://www.googleapis.com/auth/contacts.readonly", Module.contacts_ro),
+    calendar_rw("https://www.googleapis.com/auth/calendar", Module.calendar_rw),
+    contacts_rw("https://www.googleapis.com/auth/contacts", Module.contacts_rw),
     drive("https://www.googleapis.com/auth/drive", Module.drive);
 
     private String mapping;

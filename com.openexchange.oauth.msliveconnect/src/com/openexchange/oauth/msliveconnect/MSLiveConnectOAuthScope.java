@@ -59,8 +59,10 @@ import com.openexchange.oauth.scope.OAuthScope;
  */
 public enum MSLiveConnectOAuthScope implements OAuthScope {
     mail("wl.imap", Module.mail),
-    calendar("wl.calendars", Module.calendar),
-    contacts("wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses", Module.contacts),
+    calendar_ro("wl.calendars", Module.calendar_ro),
+    calendar_rw("wl.calendars_update", Module.calendar_rw),
+    contacts_ro("wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses", Module.contacts_ro),
+    contacts_rw("wl.contacts_create wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses", Module.contacts_rw),
     drive("wl.skydrive wl.skydrive_update", Module.drive);
 
     private String mapping;

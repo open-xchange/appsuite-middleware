@@ -60,14 +60,28 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum Module {
-    mail, calendar, contacts, drive, generic;
+    mail(false),
+    calendar_ro(true),
+    contacts_ro(true),
+    calendar_rw(false),
+    contacts_rw(false),
+    drive(true),
+    generic(true);
 
-    private static final String modules = Strings.concat(", ", (Object[])Module.values());
-    
+    private static final String modules = Strings.concat(", ", (Object[]) Module.values());
+    private final boolean isLegacy;
+
     /**
-     * Resolves the specified comma separated string of {@link Module}s to an array of {@link Module} values
+     * Initialises a new {@link Module}.
+     */
+    private Module(boolean isLegacy) {
+        this.isLegacy = isLegacy;
+    }
+
+    /**
+     * Resolves the specified space separated string of {@link Module}s to an array of {@link Module} values
      * 
-     * @param string A comma separated String containing the {@link Module} strings
+     * @param string A space separated String containing the {@link Module} strings
      * @return An array with the resolved {@link Module} values
      * @throws OXException if the specified string cannot be resolved to a valid {@link Module}
      */
@@ -83,5 +97,14 @@ public enum Module {
         }
 
         return list.toArray(new Module[list.size()]);
+    }
+
+    /**
+     * Gets the isLegacy
+     *
+     * @return The isLegacy
+     */
+    public boolean isLegacy() {
+        return isLegacy;
     }
 }

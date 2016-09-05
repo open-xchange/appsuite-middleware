@@ -152,12 +152,12 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
 
         BOXCOM(API.BOX_COM.getFullName(), Module.drive),
         DROPBOX(API.DROPBOX.getFullName(), Module.drive),
-        GOOGLE(API.GOOGLE.getFullName(), Module.calendar, Module.contacts, Module.drive),
-        MSLIVE_CONNECT(API.MS_LIVE_CONNECT.getFullName(), Module.calendar, Module.contacts, Module.drive),
-        LINKEDIN(API.LINKEDIN.getFullName(), Module.contacts),
-        VKONTAKTE(API.VKONTAKTE.getFullName(), Module.contacts),
-        XING(API.XING.getFullName(), Module.contacts),
-        YAHOO(API.YAHOO.getFullName(), Module.contacts),
+        GOOGLE(API.GOOGLE.getFullName(), Module.calendar_ro, Module.contacts_ro, Module.drive),
+        MSLIVE_CONNECT(API.MS_LIVE_CONNECT.getFullName(), Module.calendar_ro, Module.contacts_ro, Module.drive),
+        LINKEDIN(API.LINKEDIN.getFullName(), Module.contacts_ro),
+        VKONTAKTE(API.VKONTAKTE.getFullName(), Module.contacts_ro),
+        XING(API.XING.getFullName(), Module.contacts_ro),
+        YAHOO(API.YAHOO.getFullName(), Module.contacts_ro),
         ;
 
         private String scope;

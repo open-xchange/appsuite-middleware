@@ -58,7 +58,7 @@ import com.openexchange.oauth.scope.OAuthScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum XingOAuthScope implements OAuthScope {
-    contacts("", Module.contacts);
+    contacts_ro("", Module.contacts_ro);
 
     private String mapping;
     private Module module;

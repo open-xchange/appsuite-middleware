@@ -68,11 +68,14 @@ public enum OAuthScopeExceptionCodes implements DisplayableOXExceptionCode {
      * No scope found for module '%1$s' in the '%2$s' OAuth service
      */
     NO_SCOPE_FOR_MODULE("No scope found for module '%1$s' in the '%2$s' OAuth service", Category.CATEGORY_ERROR, 2),
-
     /**
      * The specified string '%1$s' cannot be resolved to a valid module. Valid modules are: '%2$s'
      */
     CANNOT_RESOLVE_MODULE("The specified string '%1$s' cannot be resolved to a valid module. Valid modules are: '%2$s'", CATEGORY_ERROR, 3),
+    /**
+     * No legacy scopes found for the '%1$s' OAuth service.
+     */
+    NO_LEGACY_SCOPES("No legacy scopes found for the '%1$s' OAuth service.", Category.CATEGORY_ERROR, 4),
     ;
 
     private final Category category;

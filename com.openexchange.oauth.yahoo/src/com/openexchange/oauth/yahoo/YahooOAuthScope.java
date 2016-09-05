@@ -59,7 +59,8 @@ import com.openexchange.oauth.scope.OAuthScope;
  */
 public enum YahooOAuthScope implements OAuthScope {
     mail("mail-x", Module.mail),
-    contacts("sdct-r", Module.contacts),
+    contacts_ro("sdct-r", Module.contacts_ro),
+    contacts_rw("sdct-w", Module.contacts_rw),
     ;
 
     private String mapping;

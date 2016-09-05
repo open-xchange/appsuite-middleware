@@ -60,8 +60,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.scope.Module;
 import com.openexchange.oauth.scope.OAuthScope;
-import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.oauth.scope.OAuthScopeExceptionCodes;
+import com.openexchange.oauth.scope.OAuthScopeRegistry;
 
 /**
  * {@link OAuthScopeRegistryImpl}
@@ -162,6 +162,26 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
             throw OAuthScopeExceptionCodes.NO_SCOPES.create(api.getFullName());
         }
         return Collections.unmodifiableSet(scopes);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.scope.OAuthScopeRegistry#getLegacyScopes(com.openexchange.oauth.API)
+     */
+    @Override
+    public Set<OAuthScope> getLegacyScopes(API api) throws OXException {
+        Set<OAuthScope> scopes = registry.get(api);
+        Set<OAuthScope> legacyScopes = new HashSet<>();
+        for (OAuthScope scope : scopes) {
+            if (scope.getModule().isLegacy()) {
+                legacyScopes.add(scope);
+            }
+        }
+        if (legacyScopes.isEmpty()) {
+            throw OAuthScopeExceptionCodes.NO_LEGACY_SCOPES.create(api.getFullName());
+        }
+        return Collections.unmodifiableSet(legacyScopes);
     }
 
     /*

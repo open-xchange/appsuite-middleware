@@ -128,7 +128,7 @@ public class Activator extends HousekeepingActivator {
 
         // Register the scope
         OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
-        scopeRegistry.registerScope(linkedInMetaDataService.getAPI(), LinkedInOAuthScope.contacts);
+        scopeRegistry.registerScope(linkedInMetaDataService.getAPI(), LinkedInOAuthScope.contacts_ro);
     }
 
     @Override

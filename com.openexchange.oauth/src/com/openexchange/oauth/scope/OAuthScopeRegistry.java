@@ -107,6 +107,22 @@ public interface OAuthScopeRegistry {
     Set<OAuthScope> getAvailableScopes(API api) throws OXException;
 
     /**
+     * <p>Returns an unmodifiable {@link Set} with all available legacy {@link OAuthScope}s of the specified OAuth {@link API}.</p>
+     * <p>The legacy scopes include:</p>
+     * <ul>
+     * <li>{@link Module#drive}</li>
+     * <li>{@link Module#calendar_ro}</li>
+     * <li>{@link Module#contacts_ro}</li>
+     * <li>{@link Module#generic}</li>
+     * </ul>
+     * 
+     * @param api The OAuth {@link API} for which to get all available {@link OAuthScope}s
+     * @return a unmodifiable {@link Set} with all available {@link OAuthScope}s
+     * @throws OXException if there is no such OAuth {@link API} known to the registry
+     */
+    Set<OAuthScope> getLegacyScopes(API api) throws OXException;
+
+    /**
      * Returns an unmodifiable {@link Set} with all available {@link OAuthScope}s that are associated with the specified
      * OAuth {@link API} and {@link Module}. If there is no {@link OAuthScope} associated with one of the specified
      * OAuth {@link API} and {@link Module}s, an {@link OXException} will be thrown
