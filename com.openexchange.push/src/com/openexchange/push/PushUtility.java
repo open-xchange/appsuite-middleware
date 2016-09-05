@@ -55,12 +55,14 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.push.osgi.Services;
 import com.openexchange.session.Session;
 
@@ -170,19 +172,66 @@ public final class PushUtility {
         }
     }
 
+    private static final AtomicReference<ServiceListing<PushClientChecker>> CHECKERS_REF = new AtomicReference<ServiceListing<PushClientChecker>>(null);
+
     /**
-     * Checks if specified client identifier is allowed according to white-list filter.
+     * Sets the {@link PushClientChecker} listing
+     *
+     * @param listing The listing to set
+     */
+    public static void setPushClientCheckerListing(ServiceListing<PushClientChecker> listing) {
+        CHECKERS_REF.set(listing);
+    }
+
+    private static final String PARAM_PUSH_ALLOWED = "ox:push:allowed";
+
+    /**
+     * Checks if specified client identifier is allowed according to white-list filter or any {@link PushClientChecker checker}.
      *
      * @param client The client identifier
+     * @param session The optional client-associated session
+     * @param onAdd Whether this method is called for adding or removing a listener
      * @return <code>true</code> if client identifier is allowed; otherwise <code>false</code>
      */
-    public static final boolean allowedClient(final String client) {
-        boolean b = true;
-        if (b) {
+    public static final boolean allowedClient(String client, Session session, boolean onAdd) {
+        PushClientWhitelist clientWhitelist = PushClientWhitelist.getInstance();
+        if (clientWhitelist.isEmpty() || clientWhitelist.isAllowed(client)) {
+            // Allowed per client white-list
             return true;
         }
 
-        final PushClientWhitelist clientWhitelist = PushClientWhitelist.getInstance();
-        return clientWhitelist.isEmpty() || clientWhitelist.isAllowed(client);
+        if (false == onAdd && null != session) {
+            // Called for possible listener removal
+            Boolean wasAllowed = (Boolean) session.getParameter(PARAM_PUSH_ALLOWED);
+            if (null != wasAllowed) {
+                return wasAllowed.booleanValue();
+            }
+        }
+
+        // Test if permitted by any checker (only permitted for adding a listener)
+        if (onAdd) {
+            ServiceListing<PushClientChecker> checkers = CHECKERS_REF.get();
+            if (null != checkers) {
+                for (PushClientChecker checker : checkers) {
+                    try {
+                        if (checker.isAllowed(client, session)) {
+                            // Allowed by checker
+                            if (onAdd && null != session) {
+                                session.setParameter(PARAM_PUSH_ALLOWED, Boolean.TRUE);
+                            }
+                            return true;
+                        }
+                    } catch (OXException e) {
+                        LOG.error("Checker '{}' failed to test if client {} is allowed to start a push listener", checker.getClass().getName(), client, e);
+                    }
+                }
+            }
+        }
+
+        // Not allowed...
+        if (onAdd && null != session) {
+            session.setParameter(PARAM_PUSH_ALLOWED, Boolean.FALSE);
+        }
+        return false;
     }
 }

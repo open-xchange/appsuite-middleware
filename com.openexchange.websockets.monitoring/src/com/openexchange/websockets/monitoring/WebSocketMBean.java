@@ -51,6 +51,7 @@ package com.openexchange.websockets.monitoring;
 
 import java.util.List;
 import javax.management.MBeanException;
+import com.openexchange.management.MBeanMethodAnnotation;
 
 
 /**
@@ -65,11 +66,61 @@ public interface WebSocketMBean {
     public static final String DOMAIN = "com.openexchange.websockets";
 
     /**
-     * Lists Web Sockets opened on this node
+     * Gets the number of open Web Sockets on this node
+     *
+     * @return The number of open Web Sockets
+     * @throws MBeanException If number of open Web Sockets cannot be returned
+     */
+    @MBeanMethodAnnotation (description="Gets the number of open Web Sockets on this node", parameters={}, parameterDescriptions={})
+    long getNumberOfWebSockets() throws MBeanException;
+
+    /**
+     * Gets the number of buffered messages that are supposed to be sent to remote cluster members.
+     *
+     * @return The number of buffered messages
+     * @throws MBeanException If number of buffered messages cannot be returned
+     */
+    @MBeanMethodAnnotation (description="Gets the number of buffered messages that are supposed to be sent to remote cluster members.", parameters={}, parameterDescriptions={})
+    long getNumberOfBufferedMessages() throws MBeanException;
+
+    /**
+     * Lists all available Web Socket information from whole cluster.
+     * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;"><b>Expensive operation!</b></div>
+     * <p>
+     *
+     * @return All available Web Socket information
+     * @throws MBeanException If Web Socket information cannot be returned
+     */
+    @MBeanMethodAnnotation (description="Lists all available Web Socket information from whole cluster; each row provides context identifier, user identifier, member address/port, the path used when the socket was created, and connection identifier", parameters={}, parameterDescriptions={})
+    List<List<String>> listClusterWebSocketInfo() throws MBeanException;
+
+    /**
+     * Lists Web Sockets opened on this node; each row provides:
+     * <ul>
+     * <li>context identifier,
+     * <li>user identifier,
+     * <li>the path used when the socket was created and
+     * <li>connection identifier
+     * </ul>
      *
      * @return The Web Sockets opened on this node
      * @throws MBeanException If Web Sockets cannot be returned
      */
+    @MBeanMethodAnnotation (description="Lists Web Sockets opened on this node; each row provides context identifier, user identifier, the path used when the socket was created, and connection identifier", parameters={}, parameterDescriptions={})
     List<List<String>> listWebSockets() throws MBeanException;
+
+    /**
+     * Closes all locally available Web Sockets matching specified path filter expression (if any).
+     * <p>
+     * In case no path filter expression is given (<code>pathFilter == null</code>), all user-associated Web Sockets are closed.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param pathFilter The optional path filter expression or <code>null</code>
+     * @throws MBeanException If closing Web Sockets fails
+     */
+    @MBeanMethodAnnotation (description="Closes all locally available Web Sockets matching specified path filter expression (if any).", parameters={"userId", "contextId", "pathFilter"}, parameterDescriptions={"The user identifier", "The context identifier", "The optional path filter expression; e.g. \"/socket.io/*\""})
+    void closeWebSockets(int userId, int contextId, String pathFilter) throws MBeanException;
 
 }

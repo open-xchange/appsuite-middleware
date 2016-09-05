@@ -49,18 +49,20 @@
 
 package com.openexchange.pns.subscription.storage;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.pns.Hits;
 import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushSubscription;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.PushSubscriptionListener;
 import com.openexchange.pns.PushSubscription.Nature;
 import com.openexchange.pns.PushSubscriptionProvider;
 
@@ -73,49 +75,87 @@ import com.openexchange.pns.PushSubscriptionProvider;
  */
 public class CompositePushSubscriptionRegistry implements PushSubscriptionRegistry {
 
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CompositePushSubscriptionRegistry.class);
+
     private final List<PushSubscriptionRegistry> registries;
     private final PushSubscriptionRegistry persistentRegistry;
     private final PushSubscriptionRegistry volatileRegistry;
     private final ServiceListing<PushSubscriptionProvider> providers;
+    private final ServiceListing<PushSubscriptionListener> listeners;
 
     /**
      * Initializes a new {@link CompositePushSubscriptionRegistry}.
      */
-    public CompositePushSubscriptionRegistry(PushSubscriptionRegistry persistentRegistry, PushSubscriptionRegistry volatileRegistry, ServiceListing<PushSubscriptionProvider> providers) {
+    public CompositePushSubscriptionRegistry(PushSubscriptionRegistry persistentRegistry, PushSubscriptionRegistry volatileRegistry, ServiceListing<PushSubscriptionProvider> providers, ServiceListing<PushSubscriptionListener> listeners, boolean useVolatileRegistry) {
         super();
         this.persistentRegistry = persistentRegistry;
-        this.volatileRegistry = volatileRegistry;
+        this.volatileRegistry = useVolatileRegistry ? volatileRegistry : null;
 
         List<PushSubscriptionRegistry> registries = new ArrayList<>(2);
-        // Exclude volatile in-memory registry for now
-        //registries.add(volatileRegistry);
+        if (useVolatileRegistry) {
+            registries.add(volatileRegistry);
+        }
         registries.add(persistentRegistry);
         this.registries = new CopyOnWriteArrayList<PushSubscriptionRegistry>(registries);
         this.providers = providers;
+        this.listeners = listeners;
+    }
+
+    @Override
+    public boolean hasInterestedSubscriptions(int userId, int contextId, String topic) throws OXException {
+        return hasInterestedSubscriptions(null, userId, contextId, topic);
+    }
+
+    @Override
+    public boolean hasInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
+        for (PushSubscriptionRegistry registry : registries) {
+            boolean hasAny = null == client ? registry.hasInterestedSubscriptions(userId, contextId, topic) : registry.hasInterestedSubscriptions(client, userId, contextId, topic);
+            if (hasAny) {
+                return true;
+            }
+        }
+
+        for (PushSubscriptionProvider provider : providers) {
+            boolean hasAny = null == client ? provider.hasInterestedSubscriptions(userId, contextId, topic) : provider.hasInterestedSubscriptions(client, userId, contextId, topic);
+            if (hasAny) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override
     public Hits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException {
+        return getInterestedSubscriptions(null, userId, contextId, topic);
+    }
+
+    @Override
+    public Hits getInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
         Map<ClientAndTransport, List<PushMatch>> map = null;
 
         for (PushSubscriptionRegistry registry : registries) {
-            Hits currentHits = registry.getInterestedSubscriptions(userId, contextId, topic);
+            Hits currentHits = null == client ? registry.getInterestedSubscriptions(userId, contextId, topic) : registry.getInterestedSubscriptions(client, userId, contextId, topic);
             if (false == currentHits.isEmpty()) {
                 Map<ClientAndTransport, List<PushMatch>> currentMap = ((MapBackedHits) currentHits).getMap();
 
-                // Yet initialized?
+                // Already initialized?
                 if (null == map) {
-                    map = new LinkedHashMap<>();
-                }
-
-                // Add hits
-                for (Map.Entry<ClientAndTransport, List<PushMatch>> entry : currentMap.entrySet()) {
-                    List<PushMatch> list = map.get(entry.getKey());
-                    if (null == list) {
-                        list = new LinkedList<>();
-                        map.put(entry.getKey(), list);
+                    map = currentMap;
+                } else {
+                    // Merge hits
+                    for (Map.Entry<ClientAndTransport, List<PushMatch>> entry : currentMap.entrySet()) {
+                        List<PushMatch> list = map.get(entry.getKey());
+                        if (null == list) {
+                            list = new LinkedList<>();
+                            map.put(entry.getKey(), list);
+                        }
+                        for (PushMatch newMatch : entry.getValue()) {
+                            if (!list.contains(newMatch)) {
+                                list.add(newMatch);
+                            }
+                        }
                     }
-                    list.addAll(entry.getValue());
                 }
             }
         }
@@ -126,7 +166,7 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
         // Check for more hits from providers
         LinkedList<Hits> moreHits = null;
         for (PushSubscriptionProvider provider : providers) {
-            Hits currentHits = provider.getInterestedSubscriptions(userId, contextId, topic);
+            Hits currentHits = null == client ? provider.getInterestedSubscriptions(userId, contextId, topic) : provider.getInterestedSubscriptions(client, userId, contextId, topic);
             if (false == currentHits.isEmpty()) {
                 if (null == moreHits) {
                     moreHits = new LinkedList<>();
@@ -148,10 +188,29 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
 
     @Override
     public void registerSubscription(PushSubscription subscription) throws OXException {
-        if (Nature.PERSISTENT == subscription.getNature()) {
-            persistentRegistry.registerSubscription(subscription);
-        } else {
+        List<PushSubscriptionListener> listeners = this.listeners.getServiceList();
+        for (PushSubscriptionListener listener : listeners) {
+            try {
+                if(!listener.addingSubscription(subscription)) {
+                    LOG.info("Listener {} denied registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()));
+                }
+            } catch (Exception e) {
+                LOG.info("Listener {} failed handling registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()), e);
+            }
+        }
+
+        if (Nature.VOLATILE == subscription.getNature() && null != volatileRegistry) {
             volatileRegistry.registerSubscription(subscription);
+        } else {
+            persistentRegistry.registerSubscription(subscription);
+        }
+
+        for (PushSubscriptionListener listener : listeners) {
+            try {
+                listener.addedSubscription(subscription);
+            } catch (Exception e) {
+                LOG.info("Listener {} failed handling performed registration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()), e);
+            }
         }
     }
 
@@ -160,29 +219,47 @@ public class CompositePushSubscriptionRegistry implements PushSubscriptionRegist
         // Is nature given?
         Nature nature = subscription.getNature();
 
-        if (Nature.VOLATILE == nature) {
-            return volatileRegistry.unregisterSubscription(subscription);
+        boolean removed;
+        if (Nature.VOLATILE == subscription.getNature() && null != volatileRegistry) {
+            removed = volatileRegistry.unregisterSubscription(subscription);
         } else if (Nature.PERSISTENT == nature) {
-            return persistentRegistry.unregisterSubscription(subscription);
+            removed = persistentRegistry.unregisterSubscription(subscription);
         } else {
             // Don't know better
-            boolean removed = persistentRegistry.unregisterSubscription(subscription);
-            removed |= volatileRegistry.unregisterSubscription(subscription);
-            return removed;
+            removed = persistentRegistry.unregisterSubscription(subscription);
+            if (null != volatileRegistry) {
+                removed |= volatileRegistry.unregisterSubscription(subscription);
+            }
         }
+
+        if (removed) {
+            for (PushSubscriptionListener listener : listeners) {
+                try {
+                    listener.removedSubscription(subscription);
+                } catch (Exception e) {
+                    LOG.info("Listener {} failed handling performed unregistration of subscription with topics '{}' for user {} in context {}", listener.getClass().getSimpleName(), subscription.getTopics(), I(subscription.getUserId()), I(subscription.getContextId()), e);
+                }
+            }
+        }
+
+        return removed;
     }
 
     @Override
     public int unregisterSubscription(String token, String transportId) throws OXException {
         int numRemoved = persistentRegistry.unregisterSubscription(token, transportId);
-        numRemoved += volatileRegistry.unregisterSubscription(token, transportId);
+        if (null != volatileRegistry) {
+            numRemoved += volatileRegistry.unregisterSubscription(token, transportId);
+        }
         return numRemoved;
     }
 
     @Override
     public boolean updateToken(PushSubscription subscription, String newToken) throws OXException {
         boolean updated = persistentRegistry.updateToken(subscription, newToken);
-        updated |= volatileRegistry.updateToken(subscription, newToken);
+        if (null != volatileRegistry) {
+            updated |= volatileRegistry.updateToken(subscription, newToken);
+        }
         return updated;
     }
 

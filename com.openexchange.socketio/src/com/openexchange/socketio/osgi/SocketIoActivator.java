@@ -52,7 +52,10 @@ package com.openexchange.socketio.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.http.HttpService;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.socketio.server.SocketIOManager;
 import com.openexchange.socketio.websocket.WsSocketIOServlet;
 import com.openexchange.socketio.websocket.WsTransport;
 import com.openexchange.socketio.websocket.WsTransportConnectionRegistry;
@@ -67,6 +70,9 @@ import com.openexchange.websockets.WebSocketListener;
  * @since v7.8.3
  */
 public class SocketIoActivator extends HousekeepingActivator {
+
+    private WsTransportConnectionRegistry connectionRegistry;
+    private ServiceTracker<ManagementService, ManagementService> mgmtTracker;
 
     /**
      * Initializes a new {@link SocketIoActivator}.
@@ -86,21 +92,41 @@ public class SocketIoActivator extends HousekeepingActivator {
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected synchronized void startBundle() throws Exception {
+        TimerService timerService = getService(TimerService.class);
+
         WsTransportConnectionRegistry connectionRegistry = new WsTransportConnectionRegistry();
+        this.connectionRegistry = connectionRegistry;
         registerService(WebSocketListener.class, connectionRegistry);
 
         WsTransport transport = new WsTransport(connectionRegistry);
         connectionRegistry.setTransport(transport);
-        TimerService timerService = getService(TimerService.class);
 
         Dictionary<String, String> initParams = new Hashtable<>(2);
         initParams.put("allowAllOrigins", "true");
-        getService(HttpService.class).registerServlet("/socket.io", new WsSocketIOServlet(transport, timerService), initParams, null);
+        WsSocketIOServlet servlet = new WsSocketIOServlet(transport, timerService);
+        getService(HttpService.class).registerServlet("/socket.io", servlet, initParams, null);
+
+        SocketIOManager socketIOManager = servlet.getSocketIOManager();
+        ServiceTracker<ManagementService, ManagementService> mgmtTracker = new ServiceTracker<>(context, ManagementService.class, new ManagementTracker(socketIOManager, connectionRegistry, context));
+        this.mgmtTracker = mgmtTracker;
+        mgmtTracker.open();
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
+        ServiceTracker<ManagementService, ManagementService> mgmtTracker = this.mgmtTracker;
+        if (null != mgmtTracker) {
+            this.mgmtTracker = null;
+            mgmtTracker.close();
+        }
+
+        WsTransportConnectionRegistry connectionRegistry = this.connectionRegistry;
+        if (null != connectionRegistry) {
+            this.connectionRegistry = null;
+            connectionRegistry.shutDown();
+        }
+
         HttpService httpService = getService(HttpService.class);
         if (null != httpService) {
             httpService.unregister("/socket.io");

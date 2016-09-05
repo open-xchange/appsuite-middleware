@@ -182,11 +182,50 @@ public interface WebSocketService {
     // -------------------------------------------------------------------------------------------------------------
 
     /**
+     * Gets the number of open Web Sockets on this node
+     *
+     * @return The number of open Web Sockets
+     * @throws OXException If number of open Web Sockets cannot be returned
+     */
+    long getNumberOfWebSockets() throws OXException;
+
+    /**
+     * Gets the number of buffered messages that are supposed to be sent to remote cluster members.
+     *
+     * @return The number of buffered messages
+     * @throws OXException If number of buffered messages cannot be returned
+     */
+    long getNumberOfBufferedMessages() throws OXException;
+
+    /**
      * Lists all currently locally available Web Sockets.
      *
      * @return Locally available Web Sockets
      * @throws OXException If Web Sockets cannot be returned
      */
     List<WebSocket> listLocalWebSockets() throws OXException;
+
+    /**
+     * Lists all available Web Socket information from whole cluster.
+     * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;"><b>Expensive operation!</b></div>
+     * <p>
+     *
+     * @return All available Web Socket information
+     * @throws OXException If Web Socket information cannot be returned
+     */
+    List<WebSocketInfo> listClusterWebSocketInfo() throws OXException;
+
+    /**
+     * Closes all locally available Web Sockets matching specified path filter expression (if any).
+     * <p>
+     * In case no path filter expression is given (<code>pathFilter == null</code>), all user-associated Web Sockets are closed.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param pathFilter The optional path filter expression or <code>null</code>
+     * @throws OXException If closing Web Sockets fails
+     */
+    void closeWebSockets(int userId, int contextId, String pathFilter) throws OXException;
 
 }

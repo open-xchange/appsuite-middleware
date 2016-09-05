@@ -181,7 +181,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                     /*
                      * Convert meta data to a map
                      */
-                    final Map<String, String> map = new HashMap<String, String>(4);
+                    final Map<String, String> map = new HashMap<>(4);
                     map.put("resourcename", cachedPreview.getFileName());
                     map.put("content-type", cachedPreview.getFileType());
                     // Decode contents
@@ -192,7 +192,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                         int pos;
                         if ((pos = indexOf(bytes, DELIM, prev, computedFailure)) >= 0) {
                             // Multiple contents
-                            contents = new LinkedList<String>();
+                            contents = new LinkedList<>();
                             final ByteArrayOutputStream baos = new ByteArrayOutputStream(8192 << 1);
                             do {
                                 baos.reset();
@@ -234,7 +234,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             final PreviewDocument previewDocument;
             {
                 InputStream stream = fileHolder.getStream();
-                final Reference<InputStream> ref = new Reference<InputStream>();
+                final Reference<InputStream> ref = new Reference<>();
                 if (streamIsEof(stream, null)) {
                     Streams.close(stream, fileHolder);
                     throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("File holder has not content, hence no preview can be generated.");
@@ -253,7 +253,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                 if (requestData.containsParameter("pages")) {
                     pages = requestData.getIntParameter("pages");
                 }
-                previewDocument = previewService.getPreviewFor(new SimpleData<InputStream>(stream, dataProperties), getOutput(), session, pages);
+                previewDocument = previewService.getPreviewFor(new SimpleData<>(stream, dataProperties), getOutput(), session, pages);
                 // Put to cache
                 if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", requestData, true)) {
                     final List<String> content = previewDocument.getContent();
@@ -344,7 +344,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         }
     }
 
-    private static final Set<String> BOOLS = new HashSet<String>(Arrays.asList("true", "yes", "y", "on", "1"));
+    private static final Set<String> BOOLS = new HashSet<>(Arrays.asList("true", "yes", "y", "on", "1"));
 
     /**
      * Parses specified value to a <code>boolean</code>:<br>
@@ -753,7 +753,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             dataProperties.put("PreviewLanguage", getUserLanguage(session));
 
             // Generate preview
-            Data<InputStream> data = new SimpleData<InputStream>(fileHolder.getStream(), dataProperties);
+            Data<InputStream> data = new SimpleData<>(fileHolder.getStream(), dataProperties);
             PreviewDocument previewDocument = candidate.getCachedPreviewFor(data, output, session, 1);
             if (null != previewDocument) {
                 byte[] thumbnailBuffer = null;
@@ -847,7 +847,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
             dataProperties.put("PreviewLanguage", getUserLanguage(session));
 
             // Generate preview
-            Data<InputStream> data = new SimpleData<InputStream>(fileHolder.getStream(), dataProperties);
+            Data<InputStream> data = new SimpleData<>(fileHolder.getStream(), dataProperties);
             previewService.triggerGetPreviewFor(data, output, session, 1);
         } catch (OXException e) {
             LOGGER.debug("Error while triggering RemotePreviewService", e);
@@ -960,7 +960,10 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
      * @param previewDocument The current {@link PreviewDocument}
      */
     public static void preventTransformations(AJAXRequestData requestData, PreviewDocument previewDocument) {
-        if ("com.openexchange.documentpreview.OfficePreviewDocument".equals(previewDocument.getClass().getName())) {
+        final String previewDocumentClassName = previewDocument.getClass().getName();
+
+        if ("com.openexchange.documentconverter.client.preview.DocumentConverterPreviewDocument".equals(previewDocumentClassName) ||
+            "com.openexchange.documentpreview.OfficePreviewDocument".equals(previewDocumentClassName)) {
             preventTransformations(requestData);
         }
     }

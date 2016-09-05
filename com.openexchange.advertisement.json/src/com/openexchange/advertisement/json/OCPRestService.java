@@ -90,9 +90,22 @@ public class OCPRestService {
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
         }
-        configService.setConfig(userId, ctxId, body.toString());
-        ResponseBuilder builder = Response.status(200);
-        return builder.build();
+        ConfigResult result = configService.setConfig(userId, ctxId, body.toString());
+        return createResponse(result);
+    }
+
+    private Response createResponse(ConfigResult result) throws OXException {
+        switch (result.getConfigResultType()) {
+            case CREATED:
+                return Response.status(201).build();
+            case ERROR:
+                throw result.getError();
+            case DELETED:
+            case IGNORED:
+            case UPDATED:
+            default:
+                return Response.status(200).build();
+        }
     }
 
     @PUT
@@ -104,9 +117,8 @@ public class OCPRestService {
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
         }
-        configService.setConfig(reseller, pack, body.toString());
-        ResponseBuilder builder = Response.status(200);
-        return builder.build();
+        ConfigResult result = configService.setConfig(reseller, pack, body.toString());
+        return createResponse(result);
     }
 
     @PUT
@@ -149,9 +161,8 @@ public class OCPRestService {
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
         }
-        configService.setConfigByName(name, ctxId, body.toString());
-        ResponseBuilder builder = Response.status(200);
-        return builder.build();
+        ConfigResult result = configService.setConfigByName(name, ctxId, body.toString());
+        return createResponse(result);
     }
 
     @DELETE
@@ -162,9 +173,8 @@ public class OCPRestService {
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
         }
-        configService.setConfig(userId, ctxId, null);
-        ResponseBuilder builder = Response.status(200);
-        return builder.build();
+        ConfigResult result = configService.setConfig(userId, ctxId, null);
+        return createResponse(result);
     }
 
     @DELETE
@@ -175,9 +185,8 @@ public class OCPRestService {
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
         }
-        configService.setConfig(reseller, pack, null);
-        ResponseBuilder builder = Response.status(200);
-        return builder.build();
+        ConfigResult result = configService.setConfig(reseller, pack, null);
+        return createResponse(result);
     }
 
     @DELETE
@@ -188,9 +197,8 @@ public class OCPRestService {
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
         }
-        configService.setConfigByName(name, ctxId, null);
-        ResponseBuilder builder = Response.status(200);
-        return builder.build();
+        ConfigResult result = configService.setConfigByName(name, ctxId, null);
+        return createResponse(result);
     }
 
 

@@ -118,8 +118,12 @@ public class PushSubscriptionRegistryActivator extends HousekeepingActivator {
         this.cache = cache;
         persistentRegistry.setCache(cache);
 
+        // Track subscription listeners
+        PushSubscriptionListenerTracker listenerTracker = new PushSubscriptionListenerTracker(context);
+        rememberTracker(listenerTracker);
+
         // Track subscription providers
-        PushSubscriptionProviderTracker providerTracker = new PushSubscriptionProviderTracker(context);
+        PushSubscriptionProviderTracker providerTracker = new PushSubscriptionProviderTracker(listenerTracker, context);
         rememberTracker(providerTracker);
         track(CacheEventService.class, new RdbPushSubscriptionRegistryInvalidator(cache, context));
         openTrackers();
@@ -134,7 +138,7 @@ public class PushSubscriptionRegistryActivator extends HousekeepingActivator {
 
         // Register service
         PushSubscriptionRegistry volatileRegistry = new InMemoryPushSubscriptionRegistry();
-        registerService(PushSubscriptionRegistry.class, new CompositePushSubscriptionRegistry(persistentRegistry, volatileRegistry, providerTracker));
+        registerService(PushSubscriptionRegistry.class, new CompositePushSubscriptionRegistry(persistentRegistry, volatileRegistry, providerTracker, listenerTracker, false));
 
         // Register event handler
         {

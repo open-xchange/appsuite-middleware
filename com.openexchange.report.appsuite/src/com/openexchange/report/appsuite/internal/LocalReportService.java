@@ -90,7 +90,7 @@ import com.openexchange.report.appsuite.storage.DataloaderMySQL;
  * @since v7.8.2
  */
 public class LocalReportService extends AbstractReportService {
-
+    
     //--------------------Class Attributes--------------------
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalReportService.class);
 
@@ -303,17 +303,23 @@ public class LocalReportService extends AbstractReportService {
         LOG.debug("{} contexts in total will get processed!", contextsToProcess.size());
         while (!contextsToProcess.isEmpty()) {
             Integer firstRemainingContext = contextsToProcess.get(0);
-            Integer[] contextsInSameSchema = ArrayUtils.toObject(databaseService.getContextsInSameSchema(firstRemainingContext.intValue()));
+            DataloaderMySQL dataloaderMySQL = new DataloaderMySQL();
+            ArrayList<Integer> contextsInSameSchema = null;
+            try {
+                contextsInSameSchema = dataloaderMySQL.getAllContextIdsInSameSchema(firstRemainingContext.intValue());
+            } catch (SQLException e1) {
+                throw ReportExceptionCodes.UNABLE_TO_RETRIEVE_ALL_CONTEXT_IDS.create();
+            }
 
-            LOG.debug("For {} contexts a new thread will be spawned. Contained contexts: {}", contextsInSameSchema.length, Arrays.toString(contextsInSameSchema));
-            for (int i = 0; i < contextsInSameSchema.length; i++) {
-                contextsToProcess.remove(contextsInSameSchema[i]);
+            LOG.debug("For {} contexts a new thread will be spawned. Contained contexts: {}", contextsInSameSchema.size(), Arrays.toString(contextsInSameSchema.toArray()));
+            for (int i = 0; i < contextsInSameSchema.size(); i++) {
+                contextsToProcess.remove(contextsInSameSchema.get(i));
             }
             if (EXECUTOR_SERVICE_REF.get().isShutdown()) {
                 break;
             }
             if (report != null) {
-                Future<Integer> finishedContexts = EXECUTOR_SERVICE_REF.get().submit(new AnalyzeContextBatch(uuid, report, Arrays.asList(contextsInSameSchema)));
+                Future<Integer> finishedContexts = EXECUTOR_SERVICE_REF.get().submit(new AnalyzeContextBatch(uuid, report, contextsInSameSchema));
                 
                 try {
                     if (finishedContexts.get() != 0) {
@@ -330,7 +336,7 @@ public class LocalReportService extends AbstractReportService {
                 }
             }
             
-            LOG.debug("{} assigned. {} contexts still to assign.", contextsInSameSchema.length, contextsToProcess.size());
+            LOG.debug("{} assigned. {} contexts still to assign.", contextsInSameSchema.size(), contextsToProcess.size());
         }
         LOG.debug("All {} contexts assigned.", allContextIds.size());
     }

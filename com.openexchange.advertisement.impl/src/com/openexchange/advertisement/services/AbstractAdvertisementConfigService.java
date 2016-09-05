@@ -57,6 +57,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.json.ImmutableJSONObject;
@@ -92,10 +93,6 @@ import com.openexchange.user.UserService;
  */
 public abstract class AbstractAdvertisementConfigService implements AdvertisementConfigService {
 
-    private enum Status {
-        CREATED, UPDATED, DELETED, IGNORED, ERROR
-    }
-
     private static final Logger LOG = LoggerFactory.getLogger(AdvertisementConfigService.class);
 
     /** The cache region name */
@@ -109,8 +106,8 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
     private static final String SQL_DELETE_MAPPING = "DELETE FROM advertisement_mapping where configId=?;";
     private static final String SQL_SELECT_MAPPING_SIMPLE = "Select configId from advertisement_mapping where reseller=? AND package=?;";
     private static final String SQL_SELECT_CONFIG = "Select config from advertisement_config where configId=?;";
-    protected static final String RESELLER_ALL = "default";
     protected static final String PACKAGE_ALL = "default";
+    protected static final String RESELLER_ALL = "default";
     private static final String PREVIEW_CONFIG = "com.openexchange.advertisement.preview";
 
     /**
@@ -295,91 +292,127 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
     }
 
     @Override
-    public void setConfigByName(String name, int contextId, String config) throws OXException {
-        ContextService contextService = Services.getService(ContextService.class);
-        Context ctx = contextService.getContext(contextId);
-        UserService userService = Services.getService(UserService.class);
-        int userId = userService.getUserId(name, ctx);
-        setConfig(userId, contextId, config);
-    }
-
-    @Override
-    public void setConfig(int userId, int ctxId, String config) throws OXException {
-        ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
-        ConfigView view = factory.getView(userId, ctxId);
-        ConfigProperty<String> property = view.property("user", PREVIEW_CONFIG, String.class);
-
-        DatabaseService dbService = Services.getService(DatabaseService.class);
-        Connection con = dbService.getWritable();
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-
+    public ConfigResult setConfigByName(String name, int contextId, String config) {
         try {
-            if (property.isDefined()) {
-                String value = property.get();
-                int configId = Integer.parseInt(value);
-                if (config == null) {
-                    stmt = con.prepareStatement(SQL_DELETE_CONFIG);
-                    stmt.setInt(1, configId);
-                    stmt.execute();
-                    property.set(null);
-                } else {
-                    stmt = con.prepareStatement(SQL_UPDATE_CONFIG);
-                    stmt.setString(1, config);
-                    stmt.setInt(2, configId);
-                    if (stmt.executeUpdate() == 0) {
-                        // Nothing to update. Insert new row instead.
-                        DBUtils.closeSQLStuff(stmt);
-                        String reseller = getReseller(ctxId);
-                        stmt = con.prepareStatement(SQL_INSERT_CONFIG, Statement.RETURN_GENERATED_KEYS);
-                        stmt.setString(1, reseller);
-                        stmt.setString(2, config);
-                        stmt.execute();
-                        result = stmt.getGeneratedKeys();
-                        if (!result.next()) {
-                            throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create("Insert operation failed to retrieve generated key.");
-                        }
-                        int resultConfigId = result.getInt(1);
-                        property.set(String.valueOf(resultConfigId));
-                    }
-                }
-            } else {
-                if (config == null) {
-                    return;
-                }
-                String reseller = getReseller(ctxId);
-                stmt = con.prepareStatement(SQL_INSERT_CONFIG, Statement.RETURN_GENERATED_KEYS);
-                stmt.setString(1, reseller);
-                stmt.setString(2, config);
-                stmt.execute();
-                result = stmt.getGeneratedKeys();
-                if (!result.next()) {
-                    throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create("Insert operation failed to retrieve generated key.");
-                }
-                int resultConfigId = result.getInt(1);
-                property.set(String.valueOf(resultConfigId));
-            }
-            //remove entry from cache
-            CacheService cacheService = Services.getService(CacheService.class);
-            if (cacheService != null) {
-                Cache cache = cacheService.getCache(CACHING_REGION);
-                cache.remove(cache.newCacheKey(ctxId, userId));
-            }
-        } catch (SQLException e) {
-            throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(result, stmt);
-            dbService.backWritable(con);
+            ContextService contextService = Services.getService(ContextService.class);
+            Context ctx = contextService.getContext(contextId);
+            UserService userService = Services.getService(UserService.class);
+            int userId = userService.getUserId(name, ctx);
+            return setConfig(userId, contextId, config);
+        } catch (OXException e) {
+            return new ConfigResult(ConfigResultType.ERROR, e);
         }
     }
 
     @Override
-    public void setConfig(String reseller, String pack, String config) throws OXException {
-        setConfigInternal(reseller, pack, config);
+    public ConfigResult setConfig(int userId, int ctxId, String config) {
+        try {
+            ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+            ConfigView view = factory.getView(userId, ctxId);
+            ConfigProperty<String> property = view.property("user", PREVIEW_CONFIG, String.class);
+
+            DatabaseService dbService = Services.getService(DatabaseService.class);
+            Connection con = dbService.getWritable();
+            PreparedStatement stmt = null;
+            ResultSet result = null;
+
+            try {
+                ConfigResult configResult = null;
+                if (property.isDefined()) {
+                    String value = property.get();
+                    int configId = Integer.parseInt(value);
+                    if (config == null) {
+                        stmt = con.prepareStatement(SQL_DELETE_CONFIG);
+                        stmt.setInt(1, configId);
+                        stmt.execute();
+                        property.set(null);
+                        configResult = new ConfigResult(ConfigResultType.DELETED, null);
+                    } else {
+                        stmt = con.prepareStatement(SQL_UPDATE_CONFIG);
+                        stmt.setString(1, config);
+                        stmt.setInt(2, configId);
+                        if (stmt.executeUpdate() == 0) {
+                            // Nothing to update. Insert new row instead.
+                            DBUtils.closeSQLStuff(stmt);
+                            String reseller = null;
+                            try {
+                                reseller = getReseller(ctxId);
+                            } catch (OXException e) {
+                                // no reseller found
+                            }
+                            if (reseller == null) {
+                                reseller = RESELLER_ALL;
+                            }
+                            stmt = con.prepareStatement(SQL_INSERT_CONFIG, Statement.RETURN_GENERATED_KEYS);
+                            stmt.setString(1, reseller);
+                            stmt.setString(2, config);
+                            stmt.execute();
+                            result = stmt.getGeneratedKeys();
+                            if (!result.next()) {
+                                throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create("Insert operation failed to retrieve generated key.");
+                            }
+                            int resultConfigId = result.getInt(1);
+                            property.set(String.valueOf(resultConfigId));
+                            configResult = new ConfigResult(ConfigResultType.CREATED, null);
+                        } else {
+                            configResult = new ConfigResult(ConfigResultType.UPDATED, null);
+                        }
+                    }
+                } else {
+                    if (config == null) {
+                        return new ConfigResult(ConfigResultType.IGNORED, null);
+                    }
+                    String reseller = null;
+                    try {
+                        reseller = getReseller(ctxId);
+                    } catch (OXException e) {
+                        // no reseller found
+                    }
+                    if (reseller == null) {
+                        reseller = RESELLER_ALL;
+                    }
+                    stmt = con.prepareStatement(SQL_INSERT_CONFIG, Statement.RETURN_GENERATED_KEYS);
+                    stmt.setString(1, reseller);
+                    stmt.setString(2, config);
+                    stmt.execute();
+                    result = stmt.getGeneratedKeys();
+                    if (!result.next()) {
+                        throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create("Insert operation failed to retrieve generated key.");
+                    }
+                    int resultConfigId = result.getInt(1);
+                    property.set(String.valueOf(resultConfigId));
+                    configResult = new ConfigResult(ConfigResultType.CREATED, null);
+                }
+                //remove entry from cache
+                CacheService cacheService = Services.getService(CacheService.class);
+                if (cacheService != null) {
+                    Cache cache = cacheService.getCache(CACHING_REGION);
+                    cache.remove(cache.newCacheKey(ctxId, userId));
+                }
+                return configResult;
+            } catch (SQLException e) {
+                return new ConfigResult(ConfigResultType.ERROR, AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage()));
+            } finally {
+                DBUtils.closeSQLStuff(result, stmt);
+                dbService.backWritable(con);
+            }
+        } catch (OXException e) {
+            return new ConfigResult(ConfigResultType.ERROR, e);
+        }
     }
 
-    private Status setConfigInternal(String reseller, String pack, String config) throws OXException {
-        Status status = Status.IGNORED;
+    @Override
+    public ConfigResult setConfig(String reseller, String pack, String config) {
+        try {
+            ConfigResultType type = setConfigInternal(reseller, pack, config);
+            return new ConfigResult(type, null);
+        } catch (OXException e) {
+            return new ConfigResult(ConfigResultType.ERROR, e);
+        }
+    }
+
+    private ConfigResultType setConfigInternal(String reseller, String pack, String config) throws OXException {
+        ConfigResultType status = ConfigResultType.IGNORED;
         if (Strings.isEmpty(reseller)) {
             reseller = RESELLER_ALL;
         }
@@ -411,7 +444,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                     stmt = con.prepareStatement(SQL_DELETE_MAPPING);
                     stmt.setInt(1, configId);
                     stmt.execute();
-                    status = Status.DELETED;
+                    status = ConfigResultType.DELETED;
                 } else {
                     stmt = con.prepareStatement(SQL_UPDATE_CONFIG);
                     stmt.setString(1, config);
@@ -434,9 +467,9 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                         stmt.setString(2, reseller);
                         stmt.setString(3, pack);
                         stmt.execute();
-                        status = Status.CREATED;
+                        status = ConfigResultType.CREATED;
                     } else {
-                        status = Status.UPDATED;
+                        status = ConfigResultType.UPDATED;
                     }
                 }
 
@@ -444,7 +477,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 DBUtils.closeSQLStuff(result, stmt);
                 if (config == null) {
                     readOnly = true;
-                    return Status.IGNORED;
+                    return ConfigResultType.IGNORED;
                 }
                 stmt = con.prepareStatement(SQL_INSERT_CONFIG, Statement.RETURN_GENERATED_KEYS);
                 stmt.setString(1, reseller);
@@ -461,7 +494,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 stmt.setString(2, pack);
                 stmt.setInt(3, resultConfigId);
                 stmt.execute();
-                status = Status.CREATED;
+                status = ConfigResultType.CREATED;
             }
 
             //clear read cache
@@ -493,7 +526,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
             if (array.isEmpty()) {
                 return Collections.emptyList();
             }
-            data = new HashMap<>(array.length());
+            data = new LinkedHashMap<>(array.length());
 
             for (Object value : array.asList()) {
                 if (!(value instanceof HashMap)) {
@@ -502,7 +535,8 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                 @SuppressWarnings("unchecked") 
                 HashMap<String, String> obj = (HashMap<String, String>) value;
                 String pack = obj.get("package");
-                String config = obj.get("config") == JSONObject.NULL ? null : (String) obj.get("config");
+                String config = obj.get("config");
+                config = config == JSONObject.NULL ? null : config;
                 data.put(pack, config);
             }
         } catch (JSONException e) {
@@ -513,10 +547,10 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
         List<ConfigResult> resultList = new ArrayList<>();
         for (String pack : data.keySet()) {
             try {
-                Status status = setConfigInternal(reseller, pack, data.get(pack));
-                resultList.add(new ConfigResult(status.name(), null));
+                ConfigResultType status = setConfigInternal(reseller, pack, data.get(pack));
+                resultList.add(new ConfigResult(status, null));
             } catch (OXException e) {
-                resultList.add(new ConfigResult(Status.ERROR.name(), e));
+                resultList.add(new ConfigResult(ConfigResultType.ERROR, e));
             }
         }
 

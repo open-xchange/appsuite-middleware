@@ -100,4 +100,13 @@ public interface PushMatch {
      */
     String getToken();
 
+    /**
+     * Checks if this match is considered equal to specified object.
+     *
+     * @param other The other object
+     * @return <code>true</code> if considered equal; otherwise <code>false</code>
+     */
+    @Override
+    boolean equals(Object other);
+
 }

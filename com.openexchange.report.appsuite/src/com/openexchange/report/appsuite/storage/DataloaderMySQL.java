@@ -101,5 +101,25 @@ public class DataloaderMySQL {
         }
         return result;
     }
+    
+    public ArrayList<Integer> getAllContextIdsInSameSchema(int cid) throws SQLException, OXException {
+        ArrayList<Integer> result = new ArrayList<>();
+        PreparedStatement stmt = null;
+        ResultSet sqlResult = null;
+        Connection currentConnection = this.dbService.getReadOnly();
+        try {
+            stmt = currentConnection.prepareStatement("SELECT cid FROM context_server2db_pool WHERE db_schema = (SELECT db_schema FROM context_server2db_pool where cid = "+cid+")");
+            sqlResult = stmt.executeQuery();
+            while (sqlResult.next()) {
+                result.add(sqlResult.getInt(1));
+            }
+        } catch (SQLException e) {
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(sqlResult, stmt);
+            dbService.backReadOnly(currentConnection);
+        }
+        return result;
+    }
 
 }

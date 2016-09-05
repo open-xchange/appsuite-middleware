@@ -71,4 +71,34 @@ public interface PushNotificationService {
      */
     void handle(PushNotification notification) throws OXException;
 
+    // ----------------------------------------------------------------------------------------
+
+    /**
+     * Gets the number of buffered notifications that are supposed to be transported.
+     *
+     * @return The number of buffered notifications
+     * @throws OXException If number of buffered notifications cannot be returned
+     */
+    long getNumberOfBufferedNotifications() throws OXException;
+
+    /**
+     * Gets the number of submitted notifications.
+     * <p>
+     * A notification is in submitted state if fetched from buffer and submitted for being transported, but not yet done.
+     *
+     * @return The number of submitted notifications
+     * @throws OXException If number of submitted notifications cannot be returned
+     */
+    long getNumberOfSubmittedNotifications() throws OXException;
+
+    /**
+     * Gets the number of notifications that are currently processed.
+     * <p>
+     * A notification is in processing state if currently transported
+     *
+     * @return The number of processing notifications
+     * @throws OXException If number of processing notifications cannot be returned
+     */
+    long getNumberOfProcessingNotifications() throws OXException;
+
 }

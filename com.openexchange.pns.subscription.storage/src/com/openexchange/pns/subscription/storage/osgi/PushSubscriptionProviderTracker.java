@@ -50,8 +50,12 @@
 package com.openexchange.pns.subscription.storage.osgi;
 
 import org.osgi.framework.BundleContext;
+import org.slf4j.Logger;
+import com.openexchange.exception.OXException;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.pns.PushSubscriptionProvider;
+import com.openexchange.pns.PushSubscriptionListener;
 
 /**
  * {@link PushSubscriptionProviderTracker}
@@ -61,11 +65,53 @@ import com.openexchange.pns.PushSubscriptionProvider;
  */
 public class PushSubscriptionProviderTracker extends RankingAwareNearRegistryServiceTracker<PushSubscriptionProvider> {
 
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PushSubscriptionProviderTracker.class);
+
+    private final ServiceListing<PushSubscriptionListener> listeners;
+
     /**
      * Initializes a new {@link PushSubscriptionProviderTracker}.
      */
-    public PushSubscriptionProviderTracker(BundleContext context) {
+    public PushSubscriptionProviderTracker(ServiceListing<PushSubscriptionListener> listeners, BundleContext context) {
         super(context, PushSubscriptionProvider.class, 0);
+        this.listeners = listeners;
+    }
+
+    @Override
+    protected boolean onServiceAppeared(PushSubscriptionProvider provider) {
+        for (PushSubscriptionListener listener : listeners) {
+            try {
+                if (!listener.addingProvider(provider)) {
+                    return false;
+                }
+            } catch (OXException e) {
+                LOG.error("'{}' failed to handle appeared subscription provider", listener.getClass().getName(), e);
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    protected void onServiceAdded(PushSubscriptionProvider provider) {
+        for (PushSubscriptionListener listener : listeners) {
+            try {
+                listener.addedProvider(provider);
+            } catch (OXException e) {
+                LOG.error("'{}' failed to handle added subscription provider", listener.getClass().getName(), e);
+            }
+        }
+    }
+
+    @Override
+    protected void onServiceDisappeared(PushSubscriptionProvider provider) {
+        for (PushSubscriptionListener listener : listeners) {
+            try {
+                listener.removedProvider(provider);
+            } catch (OXException e) {
+                LOG.error("'{}' failed to handle disappeared subscription provider", listener.getClass().getName(), e);
+            }
+        }
     }
 
 }

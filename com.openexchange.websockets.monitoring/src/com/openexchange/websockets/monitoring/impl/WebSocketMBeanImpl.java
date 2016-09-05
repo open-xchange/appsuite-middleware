@@ -54,8 +54,10 @@ import java.util.Arrays;
 import java.util.List;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
+import com.openexchange.java.Strings;
+import com.openexchange.management.AnnotatedStandardMBean;
 import com.openexchange.websockets.WebSocket;
+import com.openexchange.websockets.WebSocketInfo;
 import com.openexchange.websockets.WebSocketService;
 import com.openexchange.websockets.monitoring.WebSocketMBean;
 
@@ -66,7 +68,7 @@ import com.openexchange.websockets.monitoring.WebSocketMBean;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class WebSocketMBeanImpl extends StandardMBean implements WebSocketMBean {
+public class WebSocketMBeanImpl extends AnnotatedStandardMBean implements WebSocketMBean {
 
     private final WebSocketService webSocketService;
 
@@ -74,8 +76,54 @@ public class WebSocketMBeanImpl extends StandardMBean implements WebSocketMBean 
      * Initializes a new {@link WebSocketMBeanImpl}.
      */
     public WebSocketMBeanImpl(WebSocketService webSocketService) throws NotCompliantMBeanException {
-        super(WebSocketMBean.class);
+        super("Management Bean for Web Sockets", WebSocketMBean.class);
         this.webSocketService = webSocketService;
+    }
+
+    @Override
+    public long getNumberOfWebSockets() throws MBeanException {
+        try {
+            return webSocketService.getNumberOfWebSockets();
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(WebSocketMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    @Override
+    public long getNumberOfBufferedMessages() throws MBeanException {
+        try {
+            return webSocketService.getNumberOfBufferedMessages();
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(WebSocketMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    @Override
+    public List<List<String>> listClusterWebSocketInfo() throws MBeanException {
+        try {
+            List<WebSocketInfo> infos = webSocketService.listClusterWebSocketInfo();
+
+            List<List<String>> list = new ArrayList<List<String>>(infos.size());
+            for (WebSocketInfo info : infos) {
+                if (null != info) {
+                    String path = info.getPath();
+                    list.add(Arrays.asList(Integer.toString(info.getContextId()), Integer.toString(info.getUserId()), info.getAddress(), null == path ? "<none>" : path, info.getConnectionId().getId()));
+                }
+            }
+
+            return list;
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(WebSocketMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
     }
 
     @Override
@@ -83,17 +131,27 @@ public class WebSocketMBeanImpl extends StandardMBean implements WebSocketMBean 
         try {
             List<WebSocket> webSockets = webSocketService.listLocalWebSockets();
 
-            int size = webSockets.size();
-            List<List<String>> list = new ArrayList<List<String>>(size);
-            for (int i = 0; i < size; i++) {
-                WebSocket webSocket = webSockets.get(i);
+            List<List<String>> list = new ArrayList<List<String>>(webSockets.size());
+            for (WebSocket webSocket : webSockets) {
                 if (null != webSocket) {
                     String path = webSocket.getPath();
-                    list.add(Arrays.asList(Integer.toString(webSocket.getContextId()), Integer.toString(webSocket.getUserId()), null == path ? "<none>" : path));
+                    list.add(Arrays.asList(Integer.toString(webSocket.getContextId()), Integer.toString(webSocket.getUserId()), null == path ? "<none>" : path, webSocket.getConnectionId().getId()));
                 }
             }
 
             return list;
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(WebSocketMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    @Override
+    public void closeWebSockets(int userId, int contextId, String pathFilter) throws MBeanException {
+        try {
+            webSocketService.closeWebSockets(userId, contextId, Strings.isEmpty(pathFilter) ? null : pathFilter);
         } catch (Exception e) {
             org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(WebSocketMBeanImpl.class);
             logger.error("", e);
