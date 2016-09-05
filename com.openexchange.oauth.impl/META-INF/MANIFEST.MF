@@ -78,4 +78,5 @@ Import-Package: com.openexchange.ajax,
 Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.oauth.impl.osgi.Activator
 Export-Package: com.openexchange.oauth.impl,
- com.openexchange.oauth.impl.access.impl
+ com.openexchange.oauth.impl.access.impl,
+ com.openexchange.oauth.impl.internal.groupware
