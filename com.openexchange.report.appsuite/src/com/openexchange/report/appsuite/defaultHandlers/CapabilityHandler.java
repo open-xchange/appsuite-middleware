@@ -676,7 +676,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                 continue;
             }
             if (entry.getValue() instanceof Integer || entry.getValue() instanceof Long) {
-                Long value = (Long) additionalCounts.get(key);
+                Long value = additionalCounts.get(key) instanceof Integer ? Long.parseLong(String.valueOf(additionalCounts.get(key))) : (Long) additionalCounts.get(key);
                 Long storedValue = Long.parseLong(String.valueOf(entry.getValue()));
                 if (!StringUtils.containsIgnoreCase(key, "context") && !key.equals(Report.TOTAL)) {
                     additionalCounts.put(key, value + storedValue);

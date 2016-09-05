@@ -55,6 +55,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Streams;
 
 public class ReportConfiguration {
@@ -142,34 +143,6 @@ public class ReportConfiguration {
     public String getProxyPassword() {
         if (null != properties.getProperty("com.openexchange.report.client.proxy.password")) {
             return properties.getProperty("com.openexchange.report.client.proxy.password");
-        }
-        return "";
-    }
-    
-    public String getReportStorage() {
-        if (null != properties.getProperty("com.openexchange.report.client.fileStorage")) {
-            return properties.getProperty("com.openexchange.report.client.fileStorage");
-        }
-        return "";
-    }
-    
-    public String getMaxChunkSize() {
-        if (null != properties.getProperty("com.openexchange.report.client.maxChunkSize")) {
-            return properties.getProperty("com.openexchange.report.client.maxChunkSize");
-        }
-        return "";
-    }
-    
-    public String getMaxThreadPoolSize() {
-        if (null != properties.getProperty("com.openexchange.report.client.maxThreadPoolSize")) {
-            return properties.getProperty("com.openexchange.report.client.maxThreadPoolSize");
-        }
-        return "";
-    }
-    
-    public String getThreadPriority() {
-        if (null != properties.getProperty("com.openexchange.report.client.threadPriority")) {
-            return properties.getProperty("com.openexchange.report.client.threadPriority");
         }
         return "";
     }

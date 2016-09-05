@@ -9,6 +9,11 @@ import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.report.appsuite.serialization.internal.Services;
+import com.openexchange.report.appsuite.serialization.osgi.StringParserServiceRegistry;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.strings.StringParser;
 
 public class ReportConfigs implements Serializable, CompositeData{
 
@@ -27,10 +32,6 @@ public class ReportConfigs implements Serializable, CompositeData{
 
     private boolean isConfigTimerange;
     
-    private String storagePath;
-    
-    private int maxChunkSize;
-
     //--------------------OXCS-Report, relevant attributes--------------------
 
     private boolean isShowSingleTenant;
@@ -45,10 +46,6 @@ public class ReportConfigs implements Serializable, CompositeData{
     
     private HashMap<String, Object> attributeMap;
 
-    private int threadPriority;
-
-    private int maxThreadPoolSize;
-    
     @Override
     public CompositeType getCompositeType() {
         CompositeType compType = null;
@@ -100,15 +97,12 @@ public class ReportConfigs implements Serializable, CompositeData{
                                 (Long) cd.get("singleTenantId"), 
                                 (boolean) cd.get("isAdminIgnore"), 
                                 (boolean) cd.get("isShowDriveMetrics"), 
-                                (boolean) cd.get("isShowMailMetrics"),
-                                (String) cd.get("storagePath"),
-                                (int) cd.get("maxChunkSize"),
-                                (int) cd.get("threadPriority"),
-                                (int) cd.get("maxThreadPoolSize"));
+                                (boolean) cd.get("isShowMailMetrics"));
     }
 
-    public ReportConfigs(String type, boolean isSingleDeployment, boolean isConfigTimerange, Long consideredTimeframeStart, Long consideredTimeframeEnd, boolean isShowSingleTenant, Long singleTenantId, boolean isAdminIgnore, boolean isShowDriveMetrics, boolean isShowMailMetrics, String storagePath, int maxChunkSize, int threadPriority, int maxThreadPoolSize) {
+    public ReportConfigs(String type, boolean isSingleDeployment, boolean isConfigTimerange, Long consideredTimeframeStart, Long consideredTimeframeEnd, boolean isShowSingleTenant, Long singleTenantId, boolean isAdminIgnore, boolean isShowDriveMetrics, boolean isShowMailMetrics) {
         super();
+        
         this.type = type;
         this.isSingleDeployment = isSingleDeployment;
         this.isConfigTimerange = isConfigTimerange;
@@ -119,10 +113,6 @@ public class ReportConfigs implements Serializable, CompositeData{
         this.isAdminIgnore = isAdminIgnore;
         this.isShowDriveMetrics = isShowDriveMetrics;
         this.isShowMailMetrics = isShowMailMetrics;
-        this.storagePath = storagePath;
-        this.maxChunkSize = maxChunkSize;
-        this.threadPriority = threadPriority;
-        this.maxThreadPoolSize = maxThreadPoolSize;
         this.attributeMap = new HashMap<>();
         this.attributeMap.put("type", type);
         this.attributeMap.put("isSingleDeployment", isSingleDeployment);
@@ -134,11 +124,6 @@ public class ReportConfigs implements Serializable, CompositeData{
         this.attributeMap.put("isAdminIgnore", isAdminIgnore);
         this.attributeMap.put("isShowDriveMetrics", isShowDriveMetrics);
         this.attributeMap.put("isShowMailMetrics", isShowMailMetrics);
-        this.attributeMap.put("storagePath", storagePath);
-        this.attributeMap.put("maxChunkSize", maxChunkSize);
-        this.attributeMap.put("threadPriority", threadPriority);
-        this.attributeMap.put("maxThreadPoolSize", maxThreadPoolSize);
-        
     }
 
     //--------------------Getters and Setters--------------------
@@ -223,37 +208,5 @@ public class ReportConfigs implements Serializable, CompositeData{
 
     public void setConfigTimerange(boolean isConfigTimerange) {
         this.isConfigTimerange = isConfigTimerange;
-    }
-    
-    public String getStoragePath() {
-        return storagePath;
-    }
-    
-    public void setStoragePath(String storagePath) {
-        this.storagePath = storagePath;
-    }
-    
-    public int getMaxChunkSize() {
-        return maxChunkSize;
-    }
-
-    public void setMaxChunkSize(int maxChunkSize) {
-        this.maxChunkSize = maxChunkSize;
-    }
-
-    public int getThreadPriority() {
-        return this.threadPriority;
-    }
-    
-    public void setThreadPriority(int priority) {
-        this.threadPriority = priority;
-    }
-
-    public int getMaxThreadPoolSize() {
-        return this.maxThreadPoolSize;
-    }
-    
-    public void setMaxThreadPoolSize(int poolSize) {
-        this.maxThreadPoolSize = poolSize;
     }
 }

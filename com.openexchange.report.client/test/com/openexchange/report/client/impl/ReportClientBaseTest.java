@@ -228,11 +228,6 @@ public class ReportClientBaseTest {
         Mockito.when(report.get("type")).thenReturn("appsuite");
         Mockito.when(report.get("data")).thenReturn(APPSUITE_REPORT);
         PowerMockito.whenNew(ReportConfiguration.class).withAnyArguments().thenReturn(reportConfiguration);
-        Mockito.when(reportConfiguration.getMaxChunkSize()).thenReturn("100");
-        Mockito.when(reportConfiguration.getReportStorage()).thenReturn("/test/");
-        Mockito.when(reportConfiguration.getMaxThreadPoolSize()).thenReturn("20");
-        Mockito.when(reportConfiguration.getThreadPriority()).thenReturn("1");
-        
     }
 
     private void setUpOldReportStyle() throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException, InvalidAttributeValueException {

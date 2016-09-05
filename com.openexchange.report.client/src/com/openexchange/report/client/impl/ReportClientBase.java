@@ -49,8 +49,6 @@
 
 package com.openexchange.report.client.impl;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
@@ -60,8 +58,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
 import javax.management.InvalidAttributeValueException;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
@@ -76,7 +72,6 @@ import com.openexchange.admin.console.CLIOption;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.report.appsuite.serialization.ReportConfigs;
-import com.openexchange.report.appsuite.serialization.osgi.ReportSerializationActivator;
 import com.openexchange.report.client.configuration.ReportConfiguration;
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
@@ -303,14 +298,8 @@ public class ReportClientBase extends AbstractJMXTools {
                     isShowMailMetrics = true;
                 }
             }
-            
-            ReportConfiguration reportConfiguration = new ReportConfiguration();
-            String storagePath = reportConfiguration.getReportStorage().trim();
-            int chunkSize = Integer.parseInt(reportConfiguration.getMaxChunkSize().trim());
-            int threadPriority = Integer.parseInt(reportConfiguration.getThreadPriority().trim());
-            int maxThreadPoolSize = Integer.parseInt(reportConfiguration.getMaxThreadPoolSize().trim());
-            
-            ReportConfigs reportConfigs = new ReportConfigs(reportType, false, isCustomTimeframe, timeframeStart.getTime(), timeframeEnd.getTime(), isSingleTenant, singeTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics, storagePath, chunkSize, threadPriority, maxThreadPoolSize);
+
+            ReportConfigs reportConfigs = new ReportConfigs(reportType, false, isCustomTimeframe, timeframeStart.getTime(), timeframeEnd.getTime(), isSingleTenant, singeTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics);
 
             //Start the report generation
             System.out.println("Starting the Open-Xchange report client. Note that the report generation may take a little while.");

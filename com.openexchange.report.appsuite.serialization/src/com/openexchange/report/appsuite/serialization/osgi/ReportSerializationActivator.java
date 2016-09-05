@@ -5,6 +5,7 @@ import static com.openexchange.report.appsuite.serialization.osgi.StringParserSe
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.report.appsuite.serialization.internal.Services;
 import com.openexchange.tools.strings.StringParser;
 
 /**
@@ -46,7 +47,6 @@ public class ReportSerializationActivator extends HousekeepingActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-
         final ServiceRegistry registry = getServiceRegistry();
         registry.clearRegistry();
         final Class<?>[] classes = getNeededServices();
@@ -56,6 +56,7 @@ public class ReportSerializationActivator extends HousekeepingActivator {
                 registry.addService(classe, service);
             }
         }
+        Services.setServices(this);
     }
 
     /**
@@ -63,6 +64,7 @@ public class ReportSerializationActivator extends HousekeepingActivator {
      */
     @Override
     protected void stopBundle() throws Exception {
+        Services.setServices(null);
         getServiceRegistry().clearRegistry();
     }
 }

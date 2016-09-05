@@ -20,4 +20,5 @@ Import-Package: com.hazelcast.core,
  org.osgi.framework
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.report.appsuite.serialization
-Require-Bundle: com.openexchange.test
+Require-Bundle: com.openexchange.test,
+ com.openexchange.global

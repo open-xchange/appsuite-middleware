@@ -70,7 +70,9 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Scanner;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.report.appsuite.serialization.internal.Services;
 import com.openexchange.report.appsuite.serialization.osgi.StringParserServiceRegistry;
 import com.openexchange.tools.strings.StringParser;
 
@@ -297,11 +299,7 @@ public class Report implements Serializable {
         this.isAdminIgnore = reportConfig.isAdminIgnore();
         this.isShowDriveMetrics = reportConfig.isShowDriveMetrics();
         this.isShowMailMetrics = reportConfig.isShowMailMetrics();
-        this.storageFolderPath = reportConfig.getStoragePath();
-        this.maxChunkSize = reportConfig.getMaxChunkSize();
         this.needsComposition = false;
-        this.threadPriority = reportConfig.getThreadPriority();
-        this.maxThreadPoolSize = reportConfig.getMaxThreadPoolSize();
     }
 
     private static Class[] allowedTypes = new Class[] { Integer.class, Long.class, Float.class, Short.class, Double.class, Byte.class, Boolean.class, String.class };
@@ -565,15 +563,37 @@ public class Report implements Serializable {
     }
 
     public int getMaxChunkSize() {
+        if (this.maxChunkSize == 0) {
+            this.maxChunkSize = Integer.parseInt(Services.getService(ConfigurationService.class).getProperty("com.openexchange.report.serialization.maxChunkSize", "100"));
+        }
         return maxChunkSize;
     }
 
     public String getStorageFolderPath() {
+        if (this.storageFolderPath == null || this.storageFolderPath.length() == 0) {
+            this.storageFolderPath = Services.getService(ConfigurationService.class).getProperty("com.openexchange.report.serialization.fileStorage", "/tmp");
+        }
+        
         return storageFolderPath;
     }
 
     public void setStorageFolderPath(String storageFolderPath) {
         this.storageFolderPath = storageFolderPath;
+    }
+    
+    public int getThreadPriority() {
+        if (this.threadPriority == 0) {
+            this.threadPriority = Integer.parseInt(Services.getService(ConfigurationService.class).getProperty("com.openexchange.report.serialization.threadPriority", "1"));
+        }
+        return this.threadPriority;
+    }
+
+    public int getMAxThreadPoolSize() {
+        if (this.maxThreadPoolSize == 0) {
+            this.maxThreadPoolSize = Integer.parseInt(Services.getService(ConfigurationService.class).getProperty("com.openexchange.report.serialization.maxThreadPoolSize", "20"));
+        }
+        
+        return this.maxThreadPoolSize;
     }
 
     public boolean isNeedsComposition() {
@@ -740,13 +760,5 @@ public class Report implements Serializable {
             result += "  ";
         }
         return result;
-    }
-
-    public int getThreadPriority() {
-        return this.threadPriority;
-    }
-
-    public int getMAxThreadPoolSize() {
-        return this.maxThreadPoolSize;
     }
 }
