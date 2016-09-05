@@ -416,9 +416,6 @@ public class DatabaseImpl extends DBService {
         final Connection writecon = getWriteConnection(ctx);
 
         final int[] retval = new int[2];
-        int version_nr = 0;
-        int current_version = 0;
-        int infostore_id = 0;
 
         PreparedStatement stmt = null;
         ResultSet result = null;
@@ -428,11 +425,13 @@ public class DatabaseImpl extends DBService {
             stmt.setString(1, identifier);
             stmt.setInt(2, ctx.getContextId());
             result = stmt.executeQuery();
-            if (result.next()) {
-                version_nr = result.getInt(1);
-                infostore_id = result.getInt(2);
-                current_version = result.getInt(3);
+            if (!result.next()) {
+                // Apparently no such file is known
+                return retval;
             }
+            int version_nr = result.getInt(1);
+            int infostore_id = result.getInt(2);
+            int current_version = result.getInt(3);
             result.close();
             stmt.close();
 
@@ -448,20 +447,35 @@ public class DatabaseImpl extends DBService {
             set.remove(Integer.valueOf(version_nr));
             stmt.close();
 
-            if (version_nr == current_version) {
-                stmt = writecon.prepareStatement("UPDATE " + basetablename + " SET version=? " + " WHERE id=? AND  " + basetablename + ".cid=?");
-                stmt.setInt(1, set.last().intValue());
-                stmt.setInt(2, infostore_id);
-                stmt.setInt(3, ctx.getContextId());
-                retval[0] = stmt.executeUpdate();
+            if (set.isEmpty()) {
+                // There is no other version available. Keep that entry, but NULL'ify file store location
+                stmt = writecon.prepareStatement("UPDATE " + documentstable + " SET file_store_location=?, file_size=?, file_mimetype=?, file_md5sum=? WHERE cid=? AND infostore_id=? AND version_number=?");
+                stmt.setNull(1, java.sql.Types.VARCHAR);
+                stmt.setLong(2, 0L);
+                stmt.setNull(3, java.sql.Types.VARCHAR);
+                stmt.setNull(4, java.sql.Types.VARCHAR);
+                stmt.setInt(5, ctx.getContextId());
+                stmt.setInt(6, infostore_id);
+                stmt.setInt(7, version_nr);
+                stmt.executeUpdate();
+                stmt.close();
+            } else {
+                if (version_nr == current_version) {
+                    stmt = writecon.prepareStatement("UPDATE " + basetablename + " SET version=? " + " WHERE id=? AND  " + basetablename + ".cid=?");
+                    stmt.setInt(1, set.last().intValue());
+                    stmt.setInt(2, infostore_id);
+                    stmt.setInt(3, ctx.getContextId());
+                    retval[0] = stmt.executeUpdate();
+                    stmt.close();
+                }
+
+                stmt = writecon.prepareStatement("DELETE FROM " + documentstable + " WHERE cid=? AND file_store_location=?");
+                stmt.setInt(1, ctx.getContextId());
+                stmt.setString(2, identifier);
+                retval[1] = stmt.executeUpdate();
                 stmt.close();
             }
 
-            stmt = writecon.prepareStatement("DELETE FROM " + documentstable + " WHERE cid=? AND file_store_location=?");
-            stmt.setInt(1, ctx.getContextId());
-            stmt.setString(2, identifier);
-            retval[1] = stmt.executeUpdate();
-            stmt.close();
             commitDBTransaction();
         } catch (final SQLException e) {
             try {
