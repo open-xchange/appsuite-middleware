@@ -804,6 +804,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                 String key = generateKey(userId, contextId, address.getHost(), address.getPort());
                 Collection<String> collection = map.get(key);
                 if (null == collection || collection.isEmpty()) {
+                    LOG.info("Detected no orphaned entries in Hazelcast map during cleaner task run for user {} in context {}", I(userId), I(contextId));
                     return;
                 }
 
