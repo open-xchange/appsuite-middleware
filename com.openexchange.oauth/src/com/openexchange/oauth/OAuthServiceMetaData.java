@@ -90,6 +90,8 @@ public interface OAuthServiceMetaData {
     /**
      * Use {@link #getAPIKey(Session)} and also please implement {@link #getAPIKey(Session)}
      *
+     * <p><u><b>NOTE</b></u>:This method is <b>deprecated</b> and it will be removed in a future release.</p>
+     *
      * @return The API key
      */
     @Deprecated
@@ -106,6 +108,8 @@ public interface OAuthServiceMetaData {
 
     /**
      * Use {@link #getAPISecret(Session)} and also implement {@link #getAPISecret(Session)}
+     * 
+     * <p><u><b>NOTE</b></u>:This method is <b>deprecated</b> and it will be removed in a future release.</p>
      * 
      * @return The API secret
      */
@@ -145,6 +149,8 @@ public interface OAuthServiceMetaData {
 
     /**
      * Gets the optional scope; a comma-separated list of scope items.
+     * 
+     * <p><u><b>NOTE</b></u>:This method is <b>deprecated</b> and it will be removed in a future release.</p>
      *
      * @return The scope or <code>null</code>
      * @deprecated Use {@link #getAvailableScopes()} instead.
