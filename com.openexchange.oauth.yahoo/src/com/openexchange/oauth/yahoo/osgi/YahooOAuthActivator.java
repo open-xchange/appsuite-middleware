@@ -51,6 +51,7 @@ package com.openexchange.oauth.yahoo.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -114,6 +115,9 @@ public class YahooOAuthActivator extends HousekeepingActivator {
         // Register the scope
         OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
         scopeRegistry.registerScopes(oAuthMetaData.getAPI(), YahooOAuthScope.values());
+
+        // Register the update task
+        // track(DatabaseService.class, new DatabaseUpdateTaskServiceTracker(context));
 
         LOG.info("YahooService was started.");
     }
