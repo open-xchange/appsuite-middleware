@@ -210,24 +210,27 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     }
 
     /**
-     * Removes all existing Web Socket connections from given candidates.
+     * Removes all existing Web Socket connections from given candidates and retains the non-existing ones.
      *
      * @param candidates The candidates to remove from
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return The cleaned candidates
      */
-    public Set<ConnectionId> getNonExisting(Set<ConnectionId> candidates, int userId, int contextId) {
+    public void retainNonExisting(Set<ConnectionId> candidates, int userId, int contextId) {
+        if (null == candidates) {
+            return;
+        }
+
         ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
         if (null == userSockets || userSockets.isEmpty()) {
             // None exists
-            return candidates;
+            return;
         }
 
         for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
             candidates.remove(sessionBoundSocket.getConnectionId());
         }
-        return candidates;
     }
 
     /**

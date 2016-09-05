@@ -756,6 +756,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         if (null != cleanerTask) {
             cleanerTask.cancel();
             timerService.purge();
+            LOG.info("Stopped cleaner task for user {} in context {} as last active session was dropped", I(userId), I(contextId));
         }
     }
 
@@ -792,6 +793,8 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                     return;
                 }
 
+                LOG.info("Running cleaner task for user {} in context {}...", I(userId), I(contextId));
+
                 MultiMap<String, String> map = map(mapName, hzInstance);
 
                 Address address = hzInstance.getCluster().getLocalMember().getAddress();
@@ -811,15 +814,22 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                     }
                 }
 
-                application.getNonExisting(connectionIds.keySet(), userId, contextId);
-                for (Map.Entry<ConnectionId, MapValue> nonExisting : connectionIds.entrySet()) {
-                    MapValue v = nonExisting.getValue();
+                application.retainNonExisting(connectionIds.keySet(), userId, contextId);
+
+                if (connectionIds.isEmpty()) {
+                    LOG.info("Detected no orphaned entries in Hazelcast map during cleaner task run for user {} in context {}", I(connectionIds.size()), I(userId), I(contextId));
+                    return;
+                }
+
+                for (MapValue v : connectionIds.values()) {
                     String value = generateValue(v.getConnectionId(), v.getPath());
                     map.remove(key, value);
                     synchronized (myValues) {
                         myValues.remove(key, value);
                     }
                 }
+
+                LOG.info("Removed {} orphaned entries from Hazelcast map during cleaner task run for user {} in context {}", I(connectionIds.size()), I(userId), I(contextId));
             } catch (Exception e) {
                 LOG.warn("Failed to perform cleaner task for user {} in context {}", I(userId), I(contextId), e);
             }

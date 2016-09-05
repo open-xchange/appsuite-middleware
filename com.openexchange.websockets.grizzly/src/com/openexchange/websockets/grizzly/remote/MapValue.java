@@ -170,5 +170,18 @@ class MapValue {
         return true;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(48);
+        builder.append("{");
+        if (connectionId != null) {
+            builder.append("connectionId=").append(connectionId).append(", ");
+        }
+        if (path != null) {
+            builder.append("path=").append(path);
+        }
+        builder.append("}");
+        return builder.toString();
+    }
 
 }

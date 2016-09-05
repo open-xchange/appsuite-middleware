@@ -125,4 +125,15 @@ class MapKey {
         return address;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(48);
+        builder.append("{userId=").append(userId).append(", contextId=").append(contextId).append(", ");
+        if (address != null) {
+            builder.append("address=").append(address);
+        }
+        builder.append("}");
+        return builder.toString();
+    }
+
 }
