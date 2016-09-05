@@ -430,7 +430,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
             // Query local ones first
             Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
             for (Session session : sessions) {
-                if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient())) {
+                if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
                     return injectAnotherListenerUsing(session, false).injectedPushListener;
                 }
             }
@@ -439,17 +439,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
             if (sessiondService instanceof SessiondServiceExtended) {
                 sessions = ((SessiondServiceExtended) sessiondService).getSessions(userId, contextId, true);
                 for (Session session : sessions) {
-                    if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient())) {
-                        return injectAnotherListenerUsing(session, false).injectedPushListener;
-                    }
-                }
-            }
-
-            // Look-up remote sessions, too, if possible
-            if (sessiondService instanceof SessiondServiceExtended) {
-                sessions = ((SessiondServiceExtended) sessiondService).getSessions(userId, contextId, true);
-                for (Session session : sessions) {
-                    if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient())) {
+                    if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
                         return injectAnotherListenerUsing(session, false).injectedPushListener;
                     }
                 }

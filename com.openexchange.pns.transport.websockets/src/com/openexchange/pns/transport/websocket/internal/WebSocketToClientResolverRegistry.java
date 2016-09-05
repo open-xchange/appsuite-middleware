@@ -49,7 +49,7 @@
 
 package com.openexchange.pns.transport.websocket.internal;
 
-import java.util.Set;
+import java.util.Map;
 import com.openexchange.pns.transport.websocket.WebSocketClient;
 import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
 
@@ -66,7 +66,7 @@ public interface WebSocketToClientResolverRegistry extends Iterable<WebSocketToC
      *
      * @return The identifiers of all supported clients
      */
-    Set<WebSocketClient> getAllSupportedClients();
+    Map<String, WebSocketClient> getAllSupportedClients();
 
     /**
      * Checks whether there is a resolver for specified client identifier.

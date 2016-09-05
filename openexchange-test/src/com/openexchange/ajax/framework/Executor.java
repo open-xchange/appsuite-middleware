@@ -152,8 +152,12 @@ public class Executor extends Assert {
     public static <T extends AbstractAJAXResponse> T execute(final AJAXSession session, final AJAXRequest<T> request,
         final String protocol, final String hostname, final int sleep) throws OXException, IOException,
         JSONException {
-
-        final String urlString = protocol + "://" + hostname + request.getServletPath();
+        final String urlString;
+        if (request instanceof PortAwareAjaxRequest) {
+            urlString = protocol + "://" + hostname + ":" + ((PortAwareAjaxRequest<T>) request).getPort() + request.getServletPath();
+        } else {
+            urlString = protocol + "://" + hostname + request.getServletPath();
+        }
         final HttpUriRequest httpRequest;
         final Method method = request.getMethod();
         switch (method) {

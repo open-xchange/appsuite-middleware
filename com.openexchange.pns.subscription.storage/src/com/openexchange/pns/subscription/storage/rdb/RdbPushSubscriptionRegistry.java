@@ -281,16 +281,21 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
     }
 
     @Override
-    public MapBackedHits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException {
+    public boolean hasInterestedSubscriptions(int userId, int contextId, String topic) throws OXException {
+        return hasInterestedSubscriptions(null, userId, contextId, topic);
+    }
+
+    @Override
+    public boolean hasInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
         // Check cache
         RdbPushSubscriptionRegistryCache cache = this.cache;
         if (null != cache) {
-            return cache.getCollectionFor(userId, contextId).getInterestedSubscriptions(topic);
+            return cache.getCollectionFor(userId, contextId).hasInterestedSubscriptions(client, topic);
         }
 
         Connection con = databaseService.getReadOnly(contextId);
         try {
-            return getSubscriptions(userId, contextId, topic, con);
+            return hasSubscriptions(client, userId, contextId, topic, con);
         } finally {
             databaseService.backReadOnly(contextId, con);
         }
@@ -299,6 +304,7 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
     /**
      * Gets all subscriptions interested in specified topic belonging to given user.
      *
+     * @param optClient The optional client to filter by
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param topic The topic
@@ -306,9 +312,72 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
      * @return All subscriptions for specified affiliation
      * @throws OXException If subscriptions cannot be returned
      */
-    public MapBackedHits getSubscriptions(int userId, int contextId, String topic, Connection con) throws OXException {
+    public boolean hasSubscriptions(String optClient, int userId, int contextId, String topic, Connection con) throws OXException {
         if (null == con) {
-            return getInterestedSubscriptions(userId, contextId, topic);
+            return hasInterestedSubscriptions(optClient, userId, contextId, topic);
+        }
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement(
+                "SELECT 1 FROM pns_subscription s" +
+                " LEFT JOIN pns_subscription_topic_wildcard twc ON s.id=twc.id" +
+                " LEFT JOIN pns_subscription_topic_exact te ON s.id=te.id" +
+                " WHERE s.cid=? AND s.user=?" + (null == optClient ? "" : " AND s.client=?") + " AND ((s.all_flag=1) OR (te.topic=?) OR (? LIKE CONCAT(twc.topic, '%')));");
+            int pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            if (null != optClient) {
+                stmt.setString(pos++, optClient);
+            }
+            stmt.setString(pos++, topic);
+            stmt.setString(pos, topic);
+            rs = stmt.executeQuery();
+
+            return rs.next();
+        } catch (SQLException e) {
+            throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    @Override
+    public MapBackedHits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException {
+        return getInterestedSubscriptions(null, userId, contextId, topic);
+    }
+
+    @Override
+    public MapBackedHits getInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
+        // Check cache
+        RdbPushSubscriptionRegistryCache cache = this.cache;
+        if (null != cache) {
+            return cache.getCollectionFor(userId, contextId).getInterestedSubscriptions(client, topic);
+        }
+
+        Connection con = databaseService.getReadOnly(contextId);
+        try {
+            return getSubscriptions(client, userId, contextId, topic, con);
+        } finally {
+            databaseService.backReadOnly(contextId, con);
+        }
+    }
+
+    /**
+     * Gets all subscriptions interested in specified topic belonging to given user.
+     *
+     * @param optClient The optional client to filter by
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param topic The topic
+     * @param con The connection to use
+     * @return All subscriptions for specified affiliation
+     * @throws OXException If subscriptions cannot be returned
+     */
+    public MapBackedHits getSubscriptions(String optClient, int userId, int contextId, String topic, Connection con) throws OXException {
+        if (null == con) {
+            return getInterestedSubscriptions(optClient, userId, contextId, topic);
         }
 
         PreparedStatement stmt = null;
@@ -318,11 +387,15 @@ public class RdbPushSubscriptionRegistry implements PushSubscriptionRegistry {
                 "SELECT s.token, s.client, s.transport, s.last_modified, s.all_flag, twc.topic wildcard, te.topic FROM pns_subscription s" +
                 " LEFT JOIN pns_subscription_topic_wildcard twc ON s.id=twc.id" +
                 " LEFT JOIN pns_subscription_topic_exact te ON s.id=te.id" +
-                " WHERE s.cid=? AND s.user=? AND ((s.all_flag=1) OR (te.topic=?) OR (? LIKE CONCAT(twc.topic, '%')));");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.setString(3, topic);
-            stmt.setString(4, topic);
+                " WHERE s.cid=? AND s.user=?" + (null == optClient ? "" : " AND s.client=?") + " AND ((s.all_flag=1) OR (te.topic=?) OR (? LIKE CONCAT(twc.topic, '%')));");
+            int pos = 1;
+            stmt.setInt(pos++, contextId);
+            stmt.setInt(pos++, userId);
+            if (null != optClient) {
+                stmt.setString(pos++, optClient);
+            }
+            stmt.setString(pos++, topic);
+            stmt.setString(pos, topic);
             rs = stmt.executeQuery();
 
             if (false == rs.next()) {

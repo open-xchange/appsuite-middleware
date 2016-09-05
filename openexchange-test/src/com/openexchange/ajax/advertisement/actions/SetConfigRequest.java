@@ -54,9 +54,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.framework.PortAwareAjaxRequest;
 import com.openexchange.tools.encoding.Base64;
 
 /**
@@ -65,20 +65,20 @@ import com.openexchange.tools.encoding.Base64;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
-public class SetConfigRequest implements AJAXRequest<SetConfigResponse> {
+public class SetConfigRequest implements PortAwareAjaxRequest<SetConfigResponse> {
 
-    private String userId;
-    private String userName;
-    private String contextId;
-    private String reseller;
-    private String pack;
-    private String config;
-    private String login;
-    private String password;
+    private final String userId;
+    private final String userName;
+    private final String contextId;
+    private final String reseller;
+    private final String pack;
+    private final String config;
+    private final String login;
+    private final String password;
 
     /**
      * Initializes a new {@link SetConfigRequest}.
-     * 
+     *
      * @param userId
      * @param contextId
      * @param reseller
@@ -99,7 +99,7 @@ public class SetConfigRequest implements AJAXRequest<SetConfigResponse> {
 
     /**
      * Initializes a new {@link SetConfigRequest}.
-     * 
+     *
      * @param reseller
      * @param pack
      * @param config
@@ -110,7 +110,7 @@ public class SetConfigRequest implements AJAXRequest<SetConfigResponse> {
 
     /**
      * Initializes a new {@link SetConfigRequest}.
-     * 
+     *
      * @param userId
      * @param contextId
      * @param config
@@ -129,7 +129,7 @@ public class SetConfigRequest implements AJAXRequest<SetConfigResponse> {
 
     @Override
     public String getServletPath() {
-        
+
         if (userName != null) {
             return "/advertisement/v1/config/name";
         }
@@ -195,7 +195,7 @@ public class SetConfigRequest implements AJAXRequest<SetConfigResponse> {
 
         /**
          * Initializes a new {@link Parser}.
-         * 
+         *
          * @param failOnError
          */
         protected Parser(boolean failOnError) {
@@ -211,6 +211,11 @@ public class SetConfigRequest implements AJAXRequest<SetConfigResponse> {
         public SetConfigResponse parse(String body) throws JSONException {
             return new SetConfigResponse(new Response());
         }
+    }
+
+    @Override
+    public String getPort() {
+        return "8009";
     }
 
 }

@@ -47,48 +47,23 @@
  *
  */
 
-package com.openexchange.push.osgi;
-
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.event.EventFactoryService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.push.PushUtility;
+package com.openexchange.ajax.framework;
 
 /**
- * {@link PushActivator} - The activator for push bundle.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * {@link PortAwareAjaxRequest}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.3
+ * @param <T>
  */
-public final class PushActivator extends HousekeepingActivator {
+public interface PortAwareAjaxRequest<T extends AbstractAJAXResponse> extends AJAXRequest<T> {
 
     /**
-     * Initializes a new {@link PushActivator}.
+     * Retrieves the port to be used for this request
+     *
+     * @return The port
      */
-    public PushActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { EventAdmin.class, EventFactoryService.class };
-    }
-
-    @Override
-    public void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        PushClientCheckerTracker checkerListing = new PushClientCheckerTracker(context);
-        rememberTracker(checkerListing);
-        openTrackers();
-
-        PushUtility.setPushClientCheckerListing(checkerListing);
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        PushUtility.setPushClientCheckerListing(null);
-        Services.setServiceLookup(null);
-        super.stopBundle();
-    }
+    public String getPort();
 
 }

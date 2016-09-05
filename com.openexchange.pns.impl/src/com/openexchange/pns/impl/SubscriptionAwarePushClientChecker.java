@@ -47,48 +47,56 @@
  *
  */
 
-package com.openexchange.push.osgi;
+package com.openexchange.pns.impl;
 
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.event.EventFactoryService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.push.PushUtility;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.pns.KnownTopic;
+import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.push.PushClientChecker;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link PushActivator} - The activator for push bundle.
+ * {@link SubscriptionAwarePushClientChecker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class PushActivator extends HousekeepingActivator {
+public class SubscriptionAwarePushClientChecker implements PushClientChecker {
+
+    private final PushSubscriptionRegistry registry;
 
     /**
-     * Initializes a new {@link PushActivator}.
+     * Initializes a new {@link SubscriptionAwarePushClientChecker}.
      */
-    public PushActivator() {
+    public SubscriptionAwarePushClientChecker(PushSubscriptionRegistry subscriptionRegistry) {
         super();
+        this.registry = subscriptionRegistry;
+
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { EventAdmin.class, EventFactoryService.class };
-    }
+    public boolean isAllowed(String clientId, Session session) throws OXException {
+        if (null == session || Strings.isEmpty(clientId)) {
+            // Unable to check
+            return false;
+        }
 
-    @Override
-    public void startBundle() throws Exception {
-        Services.setServiceLookup(this);
+        return registry.hasInterestedSubscriptions(clientId, session.getUserId(), session.getContextId(), KnownTopic.MAIL_NEW.getName());
 
-        PushClientCheckerTracker checkerListing = new PushClientCheckerTracker(context);
-        rememberTracker(checkerListing);
-        openTrackers();
-
-        PushUtility.setPushClientCheckerListing(checkerListing);
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        PushUtility.setPushClientCheckerListing(null);
-        Services.setServiceLookup(null);
-        super.stopBundle();
+        /*-
+         * Apparently PNS service has been registered.
+         *
+         * Thus simply signal to allow as potentially every client may subscribe to "ox:mail:new" event, since:
+         * Conditions/dependencies like:
+         *  - Exists such a subscription?
+         *  - Or is there a Web Socket?
+         *  - Will a Web Socket be opened later on?
+         *  - Will there be subscription later on?
+         *  - Is it safe to drop listener because Web Socket teared down?
+         * are too complex to handle robustly
+         */
     }
 
 }

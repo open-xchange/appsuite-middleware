@@ -57,6 +57,7 @@ import javax.management.NotCompliantMBeanException;
 import com.openexchange.java.Strings;
 import com.openexchange.management.AnnotatedStandardMBean;
 import com.openexchange.websockets.WebSocket;
+import com.openexchange.websockets.WebSocketInfo;
 import com.openexchange.websockets.WebSocketService;
 import com.openexchange.websockets.monitoring.WebSocketMBean;
 
@@ -95,6 +96,28 @@ public class WebSocketMBeanImpl extends AnnotatedStandardMBean implements WebSoc
     public long getNumberOfBufferedMessages() throws MBeanException {
         try {
             return webSocketService.getNumberOfBufferedMessages();
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(WebSocketMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    @Override
+    public List<List<String>> listClusterWebSocketInfo() throws MBeanException {
+        try {
+            List<WebSocketInfo> infos = webSocketService.listClusterWebSocketInfo();
+
+            List<List<String>> list = new ArrayList<List<String>>(infos.size());
+            for (WebSocketInfo info : infos) {
+                if (null != info) {
+                    String path = info.getPath();
+                    list.add(Arrays.asList(Integer.toString(info.getContextId()), Integer.toString(info.getUserId()), info.getAddress(), null == path ? "<none>" : path, info.getConnectionId().getId()));
+                }
+            }
+
+            return list;
         } catch (Exception e) {
             org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(WebSocketMBeanImpl.class);
             logger.error("", e);

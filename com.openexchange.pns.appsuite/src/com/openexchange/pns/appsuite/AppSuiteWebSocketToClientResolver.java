@@ -50,7 +50,7 @@
 package com.openexchange.pns.appsuite;
 
 import java.util.Collections;
-import java.util.Set;
+import java.util.Map;
 import com.openexchange.ajax.Client;
 import com.openexchange.exception.OXException;
 import com.openexchange.pns.transport.websocket.WebSocketClient;
@@ -95,8 +95,8 @@ public class AppSuiteWebSocketToClientResolver implements WebSocketToClientResol
     }
 
     @Override
-    public Set<WebSocketClient> getSupportedClients() {
-        return Collections.singleton(new WebSocketClient(Client.APPSUITE_UI.getClientId(), PATH_FILTER_APPSUITE_UI));
+    public Map<String, WebSocketClient> getSupportedClients() {
+        return Collections.singletonMap(Client.APPSUITE_UI.getClientId(), new WebSocketClient(Client.APPSUITE_UI.getClientId(), PATH_FILTER_APPSUITE_UI, true));
     }
 
 }

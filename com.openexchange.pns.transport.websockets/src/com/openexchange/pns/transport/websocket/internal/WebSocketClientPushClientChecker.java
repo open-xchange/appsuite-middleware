@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,109 +49,48 @@
 
 package com.openexchange.pns.transport.websocket.internal;
 
-import com.openexchange.pns.PushSubscription;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.pns.transport.websocket.WebSocketClient;
+import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
+import com.openexchange.push.PushClientChecker;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link Unsubscription} - An unsubscription from a Web Socket transport.
+ * {@link WebSocketClientPushClientChecker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-final class Unsubscription {
+public class WebSocketClientPushClientChecker implements PushClientChecker {
 
-    private final int userId;
-    private final int contextId;
-    private final String client;
-    private final PushSubscription subscription;
-    private volatile Integer hash;
+    private final WebSocketToClientResolverRegistry resolvers;
 
     /**
-     * Initializes a new {@link Unsubscription}.
-     *
-     * @param subscription The subscription to unsubscribe
+     * Initializes a new {@link WebSocketClientPushClientChecker}.
      */
-    public Unsubscription(PushSubscription subscription) {
+    public WebSocketClientPushClientChecker(WebSocketToClientResolverRegistry resolvers) {
         super();
-        this.subscription = subscription;
-        this.userId = subscription.getUserId();
-        this.contextId = subscription.getContextId();
-        this.client = subscription.getClient();
-    }
+        this.resolvers = resolvers;
 
-    /**
-     * Gets the subscription
-     *
-     * @return The subscription
-     */
-    public PushSubscription getSubscription() {
-        return subscription;
-    }
-
-    /**
-     * Gets the client
-     *
-     * @return The client
-     */
-    public String getClient() {
-        return client;
-    }
-
-    /**
-     * Gets the context identifier
-     *
-     * @return The context identifier
-     */
-    public int getContextId() {
-        return contextId;
-    }
-
-    /**
-     * Gets the user identifier
-     *
-     * @return The user identifier
-     */
-    public int getUserId() {
-        return userId;
     }
 
     @Override
-    public int hashCode() {
-        Integer tmp = hash;
-        if (null == tmp) {
-            int prime = 31;
-            int result = 1;
-            result = prime * result + contextId;
-            result = prime * result + userId;
-            result = prime * result + ((client == null) ? 0 : client.hashCode());
-            tmp = Integer.valueOf(result);
-            hash = tmp;
+    public boolean isAllowed(String clientId, Session session) throws OXException {
+        if (null == session || Strings.isEmpty(clientId)) {
+            // Unable to check
+            return false;
         }
-        return tmp.intValue();
-    }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof Unsubscription)) {
-            return false;
-        }
-        Unsubscription other = (Unsubscription) obj;
-        if (contextId != other.contextId) {
-            return false;
-        }
-        if (userId != other.userId) {
-            return false;
-        }
-        if (client == null) {
-            if (other.client != null) {
-                return false;
+        for (WebSocketToClientResolver resolver : resolvers) {
+            WebSocketClient webSocketClient = resolver.getSupportedClients().get(clientId);
+            if (null != webSocketClient) {
+                return webSocketClient.isInterestedInNewMail();
             }
-        } else if (!client.equals(other.client)) {
-            return false;
         }
-        return true;
+
+        return false;
     }
 
 }

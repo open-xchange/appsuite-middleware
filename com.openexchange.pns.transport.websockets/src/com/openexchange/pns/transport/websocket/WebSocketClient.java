@@ -61,6 +61,7 @@ public final class WebSocketClient {
 
     private final String client;
     private final String pathFilter;
+    private final boolean interestedInNewMail;
     private Integer hash;
 
     /**
@@ -68,11 +69,22 @@ public final class WebSocketClient {
      *
      * @param client The identifier of the client; e.g. <code>"open-xchange-appsuite"</code>
      * @param pathFilter The path filter expression that applies to the client; e.g. <code>"/socket.io/*"</code>
+     * @param interestedInNewMail <code>true</code> if associated client is interested in special <code>"ox:mail:new"</code> notifications; otherwise <code>false</code>
      */
-    public WebSocketClient(String client, String pathFilter) {
+    public WebSocketClient(String client, String pathFilter, boolean interestedInNewMail) {
         super();
         this.client = client;
         this.pathFilter = pathFilter;
+        this.interestedInNewMail = interestedInNewMail;
+    }
+
+    /**
+     * Checks if associated client is interested in special <code>"ox:mail:new"</code> notifications.
+     *
+     * @return <code>true</code> if interested; otherwise <code>false</code>
+     */
+    public boolean isInterestedInNewMail() {
+        return interestedInNewMail;
     }
 
     /**

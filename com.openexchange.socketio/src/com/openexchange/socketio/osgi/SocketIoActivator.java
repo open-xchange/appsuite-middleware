@@ -52,7 +52,10 @@ package com.openexchange.socketio.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.http.HttpService;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.socketio.server.SocketIOManager;
 import com.openexchange.socketio.websocket.WsSocketIOServlet;
 import com.openexchange.socketio.websocket.WsTransport;
 import com.openexchange.socketio.websocket.WsTransportConnectionRegistry;
@@ -69,6 +72,7 @@ import com.openexchange.websockets.WebSocketListener;
 public class SocketIoActivator extends HousekeepingActivator {
 
     private WsTransportConnectionRegistry connectionRegistry;
+    private ServiceTracker<ManagementService, ManagementService> mgmtTracker;
 
     /**
      * Initializes a new {@link SocketIoActivator}.
@@ -100,11 +104,23 @@ public class SocketIoActivator extends HousekeepingActivator {
 
         Dictionary<String, String> initParams = new Hashtable<>(2);
         initParams.put("allowAllOrigins", "true");
-        getService(HttpService.class).registerServlet("/socket.io", new WsSocketIOServlet(transport, timerService), initParams, null);
+        WsSocketIOServlet servlet = new WsSocketIOServlet(transport, timerService);
+        getService(HttpService.class).registerServlet("/socket.io", servlet, initParams, null);
+
+        SocketIOManager socketIOManager = servlet.getSocketIOManager();
+        ServiceTracker<ManagementService, ManagementService> mgmtTracker = new ServiceTracker<>(context, ManagementService.class, new ManagementTracker(socketIOManager, connectionRegistry, context));
+        this.mgmtTracker = mgmtTracker;
+        mgmtTracker.open();
     }
 
     @Override
     protected synchronized void stopBundle() throws Exception {
+        ServiceTracker<ManagementService, ManagementService> mgmtTracker = this.mgmtTracker;
+        if (null != mgmtTracker) {
+            this.mgmtTracker = null;
+            mgmtTracker.close();
+        }
+
         WsTransportConnectionRegistry connectionRegistry = this.connectionRegistry;
         if (null != connectionRegistry) {
             this.connectionRegistry = null;

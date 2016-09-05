@@ -74,11 +74,24 @@ class BoundedConcurrentHashMap<K, V> implements ConcurrentMap<K, V> {
 
         private static final long serialVersionUID = -4673465413956939708L;
 
+        private final int maxSize;
+
         /**
          * Initializes a new {@link BoundaryExceededException}.
          */
         public BoundaryExceededException(int maxSize) {
             super("Max. size of " + maxSize + " is exceeded.");
+            this.maxSize = maxSize;
+        }
+
+
+        /**
+         * Gets the max. size that was exceeded.
+         *
+         * @return The max. size
+         */
+        public int getMaxSize() {
+            return maxSize;
         }
     }
 

@@ -176,8 +176,8 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                     context = contextService.getContext(guest.getContextID());
                 }
 
-                // Resolve & authenticate user
-                User user = authenticateUser(guest, loginInfo, context);
+                // Resolve user
+                User user = resolveUser(guest, context);
 
                 // Parse & check the HTTP request
                 String[] additionalsForHash = new String[] { String.valueOf(context.getContextId()), String.valueOf(user.getId()) };
@@ -190,6 +190,9 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                 for (LoginListener listener : listeners) {
                     listener.onBeforeAuthentication(request, properties);
                 }
+
+                // Authenticate user
+                authenticateUser(loginInfo, user, context);
 
                 // Pass to basic authentication service in case more handling needed
                 Authenticated  authenticated = basicService.handleLoginInfo(guest.getGuestID(), guest.getContextID());
@@ -457,11 +460,21 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
      * Authenticates the user associated with specified share using given login information.
      *
      * @param guest The guest
+     * @param context The context associated with the share
+     * @return The resolved user
+     * @throws OXException If resolving user fails
+     */
+    protected abstract User resolveUser(GuestInfo guest, Context context) throws OXException;
+
+    /**
+     * Authenticates the user associated with specified share using given arguments.
+     *
      * @param loginInfo The login information
+     * @param user The previously resolved user
      * @param context The context associated with the share
      * @return The authenticated user
      * @throws OXException If authentication fails
      */
-    protected abstract User authenticateUser(GuestInfo guest, LoginInfo loginInfo, Context context) throws OXException;
+    protected abstract void authenticateUser(LoginInfo loginInfo, User user, Context context) throws OXException;
 
 }

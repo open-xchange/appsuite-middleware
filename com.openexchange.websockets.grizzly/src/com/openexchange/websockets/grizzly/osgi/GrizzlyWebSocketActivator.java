@@ -133,6 +133,12 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
             props.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
             registerService(EventHandler.class, new GrizzlyWebSocketEventHandler(), props);
         }
+
+        {
+            Dictionary<String, Object> props = new Hashtable<>(2);
+            props.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
+            registerService(EventHandler.class, new CleanerStoppingEventHandler(remoteDistributor), props);
+        }
     }
 
     @Override
