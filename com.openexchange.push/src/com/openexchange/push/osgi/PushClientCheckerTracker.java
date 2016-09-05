@@ -49,46 +49,25 @@
 
 package com.openexchange.push.osgi;
 
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.event.EventFactoryService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.push.PushUtility;
+import org.osgi.framework.BundleContext;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.push.PushClientChecker;
 
 /**
- * {@link PushActivator} - The activator for push bundle.
+ * {@link PushClientCheckerTracker} - Tracks {@link PushClientChecker} instances.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class PushActivator extends HousekeepingActivator {
+public class PushClientCheckerTracker extends RankingAwareNearRegistryServiceTracker<PushClientChecker> {
 
     /**
-     * Initializes a new {@link PushActivator}.
+     * Initializes a new {@link PushClientCheckerTracker}.
+     *
+     * @param context The bundle context
      */
-    public PushActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { EventAdmin.class, EventFactoryService.class };
-    }
-
-    @Override
-    public void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        PushClientCheckerTracker checkerListing = new PushClientCheckerTracker(context);
-        rememberTracker(checkerListing);
-        openTrackers();
-
-        PushUtility.setPushClientCheckerListing(checkerListing);
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        PushUtility.setPushClientCheckerListing(null);
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    public PushClientCheckerTracker(BundleContext context) {
+        super(context, PushClientChecker.class);
     }
 
 }

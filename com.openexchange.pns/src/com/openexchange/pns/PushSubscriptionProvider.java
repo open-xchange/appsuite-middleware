@@ -70,4 +70,41 @@ public interface PushSubscriptionProvider {
      */
     Hits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException;
 
+    /**
+     * Gets all subscriptions interested in specified topic belonging to given client of specified user.
+     *
+     * @param client The client identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param topic The topic
+     * @return All matching subscriptions for specified topic
+     * @throws OXException If interested subscriptions cannot be returned
+     */
+    Hits getInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException;
+
+    // ------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Checks if there is any subscription interested in specified topic belonging to given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param topic The topic
+     * @return <code>true</code> if there is such a subscription; otherwise <code>false</code>
+     * @throws OXException If interested subscriptions cannot be checked
+     */
+    boolean hasInterestedSubscriptions(int userId, int contextId, String topic) throws OXException;
+
+    /**
+     * Checks if there is any subscription interested in specified topic belonging to given client of specified user.
+     *
+     * @param client The client identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param topic The topic
+     * @return <code>true</code> if there is such a subscription; otherwise <code>false</code>
+     * @throws OXException If interested subscriptions cannot be checked
+     */
+    boolean hasInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException;
+
 }

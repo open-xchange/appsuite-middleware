@@ -47,48 +47,78 @@
  *
  */
 
-package com.openexchange.push.osgi;
+package com.openexchange.websockets.grizzly.osgi;
 
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.event.EventFactoryService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.push.PushUtility;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
+import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
+
 
 /**
- * {@link PushActivator} - The activator for push bundle.
+ * {@link CleanerStoppingEventHandler}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class PushActivator extends HousekeepingActivator {
+public class CleanerStoppingEventHandler implements EventHandler {
+
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(CleanerStoppingEventHandler.class);
+
+    private final RemoteWebSocketDistributor distributor;
 
     /**
-     * Initializes a new {@link PushActivator}.
+     * Initializes a new {@link CleanerStoppingEventHandler}.
      */
-    public PushActivator() {
+    public CleanerStoppingEventHandler(RemoteWebSocketDistributor distributor) {
         super();
+        this.distributor = distributor;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { EventAdmin.class, EventFactoryService.class };
+    public void handleEvent(final Event event) {
+        if (false == SessiondEventConstants.TOPIC_LAST_SESSION.equals(event.getTopic())) {
+            return;
+        }
+
+        ThreadPoolService threadPool = ThreadPools.getThreadPool();
+        if (null == threadPool) {
+            doHandleEvent(event);
+        } else {
+            AbstractTask<Void> t = new AbstractTask<Void>() {
+
+                @Override
+                public Void call() throws Exception {
+                    try {
+                        doHandleEvent(event);
+                    } catch (Exception e) {
+                        LOG.warn("Handling event {} failed.", event.getTopic(), e);
+                    }
+                    return null;
+                }
+            };
+            threadPool.submit(t, CallerRunsBehavior.<Void> getInstance());
+        }
     }
 
-    @Override
-    public void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        PushClientCheckerTracker checkerListing = new PushClientCheckerTracker(context);
-        rememberTracker(checkerListing);
-        openTrackers();
-
-        PushUtility.setPushClientCheckerListing(checkerListing);
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        PushUtility.setPushClientCheckerListing(null);
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    /**
+     * Handles given event.
+     *
+     * @param lastSessionEvent The event
+     */
+    protected void doHandleEvent(Event lastSessionEvent) {
+        Integer contextId = (Integer) lastSessionEvent.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+        if (null != contextId) {
+            Integer userId = (Integer) lastSessionEvent.getProperty(SessiondEventConstants.PROP_USER_ID);
+            if (null != userId) {
+                distributor.stopCleanerTaskFor(userId.intValue(), contextId.intValue());
+            }
+        }
     }
 
 }

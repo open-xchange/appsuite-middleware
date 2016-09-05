@@ -47,48 +47,72 @@
  *
  */
 
-package com.openexchange.push.osgi;
+package com.openexchange.socketio.monitoring.impl;
 
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.event.EventFactoryService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.push.PushUtility;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import javax.management.MBeanException;
+import javax.management.NotCompliantMBeanException;
+import com.openexchange.management.AnnotatedStandardMBean;
+import com.openexchange.socketio.monitoring.SocketIOMBean;
+import com.openexchange.socketio.server.SocketIOManager;
+import com.openexchange.socketio.websocket.WsTransportConnectionRegistry;
+
 
 /**
- * {@link PushActivator} - The activator for push bundle.
+ * {@link SocketIOMBeanImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class PushActivator extends HousekeepingActivator {
+public class SocketIOMBeanImpl extends AnnotatedStandardMBean implements SocketIOMBean {
+
+    private final SocketIOManager socketIOManager;
+    private final WsTransportConnectionRegistry connectionRegistry;
 
     /**
-     * Initializes a new {@link PushActivator}.
+     * Initializes a new {@link SocketIOMBeanImpl}.
+     *
+     * @param socketIOManager The Socket.IO manager
+     * @param connectionRegistry The Web Socket connection registry
+     * @throws NotCompliantMBeanException
      */
-    public PushActivator() {
-        super();
+    public SocketIOMBeanImpl(SocketIOManager socketIOManager, WsTransportConnectionRegistry connectionRegistry) throws NotCompliantMBeanException {
+        super("Management Bean for Socket.IO", SocketIOMBean.class);
+        this.socketIOManager = socketIOManager;
+        this.connectionRegistry = connectionRegistry;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { EventAdmin.class, EventFactoryService.class };
+    public long getNumberOfSessions() throws MBeanException {
+        return socketIOManager.getNumberOfSessions();
     }
 
     @Override
-    public void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        PushClientCheckerTracker checkerListing = new PushClientCheckerTracker(context);
-        rememberTracker(checkerListing);
-        openTrackers();
-
-        PushUtility.setPushClientCheckerListing(checkerListing);
+    public List<String> listSessionIds() throws MBeanException {
+        return new ArrayList<>(socketIOManager.getSessionIds());
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        PushUtility.setPushClientCheckerListing(null);
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    public List<String> getNamespaceNames(String sessionId) throws MBeanException {
+        if (null == sessionId) {
+            Exception e = new Exception("Invalid session identifier");
+            throw new MBeanException(e, e.getMessage());
+        }
+
+        Set<String> names = socketIOManager.getNamespaceNames(sessionId);
+        if (null == names) {
+            Exception e = new Exception("No such session for identifier " + sessionId);
+            throw new MBeanException(e, e.getMessage());
+        }
+
+        return new ArrayList<>(names);
+    }
+
+    @Override
+    public long getNumberOfRegisteredWebSocketConnections() throws MBeanException {
+        return connectionRegistry.getNumberOfRegisteredConnections();
     }
 
 }

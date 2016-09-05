@@ -135,6 +135,15 @@ public class WsTransportConnectionRegistry implements WebSocketListener {
         return null != registeredConnections.remove(connection.getSession().getSessionId());
     }
 
+    /**
+     * Gets the number of registered connections.
+     *
+     * @return The number of registered connections
+     */
+    public long getNumberOfRegisteredConnections() {
+        return registeredConnections.size();
+    }
+
     // ------------------------------------------------------ WebSocketListener stuff ---------------------------------------
 
     private boolean isAppropriateWebSocket(WebSocket socket) {

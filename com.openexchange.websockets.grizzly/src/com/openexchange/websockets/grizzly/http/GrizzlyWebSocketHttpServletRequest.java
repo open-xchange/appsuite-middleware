@@ -102,13 +102,12 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
      * Initializes a new {@link GrizzlyWebSocketHttpServletRequest}.
      *
      * @param requestPacket The associated HTTP request packet
+     * @param cookies The cookies
      * @param parameters The parsed parameters
      */
-    public GrizzlyWebSocketHttpServletRequest(HttpRequestPacket requestPacket, Parameters parameters) {
+    public GrizzlyWebSocketHttpServletRequest(HttpRequestPacket requestPacket, Cookies cookies, Parameters parameters) {
         super();
         this.requestPacket = requestPacket;
-        Cookies cookies = new Cookies();
-        cookies.setHeaders(requestPacket.getHeaders());
         this.cookies = cookies;
         this.parameters = parameters;
     }

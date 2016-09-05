@@ -57,11 +57,13 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.pns.DefaultPushSubscription;
 import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -86,7 +88,16 @@ public class SubscribeAction extends AbstractPushJsonAction {
 
         PushSubscriptionRegistry subscriptionRegistry = services.getOptionalService(PushSubscriptionRegistry.class);
 
-        String client = requireStringField("client", jRequestBody);
+        String client = jRequestBody.optString("client", null);
+        if (null == client) {
+            client = session.getClient();
+        } else if (null != session.getClient() && !client.equals(session.getClient())) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("client", client);
+        }
+        if (Strings.isEmpty(client)) {
+            throw AjaxExceptionCodes.MISSING_FIELD.create("client");
+        }
+
         String token = requireStringField("token", jRequestBody);
         String transportId = requireStringField("transport", jRequestBody);
         JSONArray jTopics = requireArrayField("topics", jRequestBody);

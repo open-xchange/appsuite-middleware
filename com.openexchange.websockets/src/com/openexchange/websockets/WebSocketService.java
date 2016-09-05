@@ -206,6 +206,17 @@ public interface WebSocketService {
     List<WebSocket> listLocalWebSockets() throws OXException;
 
     /**
+     * Lists all available Web Socket information from whole cluster.
+     * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;"><b>Expensive operation!</b></div>
+     * <p>
+     *
+     * @return All available Web Socket information
+     * @throws OXException If Web Socket information cannot be returned
+     */
+    List<WebSocketInfo> listClusterWebSocketInfo() throws OXException;
+
+    /**
      * Closes all locally available Web Sockets matching specified path filter expression (if any).
      * <p>
      * In case no path filter expression is given (<code>pathFilter == null</code>), all user-associated Web Sockets are closed.
