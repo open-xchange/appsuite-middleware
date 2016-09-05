@@ -107,11 +107,6 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
     }
 
     @Override
-    public void revoke() throws OXException {
-        // No revoke
-    }
-
-    @Override
     public boolean ping() throws OXException {
         try {
             Drive drive = this.<Drive> getClient().client;
