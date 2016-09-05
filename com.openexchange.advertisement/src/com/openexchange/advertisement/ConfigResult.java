@@ -49,33 +49,61 @@
 
 package com.openexchange.advertisement;
 
+import com.openexchange.advertisement.AdvertisementConfigService.ConfigResultType;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ConfigResult}
+ * {@link ConfigResult} wraps the result of a configuration attempt
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.3
  */
 public class ConfigResult {
 
-    private final Throwable exception;
+    private final OXException exception;
     private final String message;
+    private ConfigResultType type;
 
-    public ConfigResult(String message, Throwable exception) {
-        this.message = message;
+    public ConfigResult(ConfigResultType type, OXException exception) {
+        this.message = type.name();
         this.exception = exception;
+        this.type = type;
     }
 
+    /**
+     * Checks if the result contains an error
+     * 
+     * @return true if the result contains an error, false otherwise
+     */
     public boolean hasError() {
         return this.exception != null;
     }
 
+    /**
+     * Returns the message
+     * 
+     * @return The message
+     */
     public String getMessage() {
         return message;
     }
 
-    public Throwable getError() {
+    /**
+     * Return the {@link OXException} or null
+     * 
+     * @return
+     */
+    public OXException getError() {
         return exception;
+    }
+
+    /**
+     * Return the type of the result.
+     * 
+     * @return the {@link ConfigResultType}
+     */
+    public ConfigResultType getConfigResultType() {
+        return type;
     }
 
 }

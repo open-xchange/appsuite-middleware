@@ -62,6 +62,10 @@ import com.openexchange.session.Session;
  */
 public interface AdvertisementConfigService {
 
+    public enum ConfigResultType {
+        CREATED, UPDATED, DELETED, IGNORED, ERROR
+    }
+
     public static final String CONFIG_PREFIX = "com.openexchange.advertisement.";
 
     /**
@@ -89,9 +93,9 @@ public interface AdvertisementConfigService {
      * @param name The login name of the user
      * @param ctxId The context identifier
      * @param config The advertisement configuration
-     * @throws OXException If advertisement configuration cannot be set
+     * @return The {@link ConfigResult}
      */
-    public void setConfigByName(String name, int ctxId, String config) throws OXException;
+    public ConfigResult setConfigByName(String name, int ctxId, String config);
 
     /**
      * Sets an advertisement configuration for a given user. This is for testing purpose only.
@@ -101,9 +105,9 @@ public interface AdvertisementConfigService {
      * @param userId The user identifier
      * @param ctxId The context identifier
      * @param config The advertisement configuration
-     * @throws OXException If advertisement configuration cannot be set
+     * @return The {@link ConfigResult}
      */
-    public void setConfig(int userId, int ctxId, String config) throws OXException;
+    public ConfigResult setConfig(int userId, int ctxId, String config);
 
     /**
      * Sets an advertisement configuration for a given package of a given reseller.
@@ -113,9 +117,9 @@ public interface AdvertisementConfigService {
      * @param reseller The reseller name
      * @param pack The package name
      * @param config The advertisement configuration
-     * @throws OXException If advertisement configuration cannot be set
+     * @return The {@link ConfigResult}
      */
-    public void setConfig(String reseller, String pack, String config) throws OXException;
+    public ConfigResult setConfig(String reseller, String pack, String config);
 
     /**
      * Sets all advertisement configurations for a given reseller.
@@ -131,8 +135,9 @@ public interface AdvertisementConfigService {
      * Setting the configuration parameter to <code>null</code> will delete the current configuration for the reseller.
      *
      * @param reseller The reseller name
-     * @param config An array of package informations and advertisement configurations
-     * @throws OXException If advertisement configuration cannot be set
+     * @param configs An array of package informations and advertisement configurations
+     * @return A list of {@link ConfigResult}
+     * @throws OXException in case configs couldn't be parsed
      */
     public List<ConfigResult> setConfig(String reseller, String configs) throws OXException;
 
