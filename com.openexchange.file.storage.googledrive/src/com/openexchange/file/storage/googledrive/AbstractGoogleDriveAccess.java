@@ -153,7 +153,7 @@ public abstract class AbstractGoogleDriveAccess {
                 return FileStorageExceptionCodes.STORAGE_RATE_LIMIT.create(e, new Object[0]);
             }
             if (e.getMessage().indexOf("insufficientPermissions") > 0) {
-                return OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(e, API.GOOGLE.getShortName(), Module.drive);
+                return OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(e, API.GOOGLE.getShortName(), Module.drive.getDisplayName());
             }
         }
 
