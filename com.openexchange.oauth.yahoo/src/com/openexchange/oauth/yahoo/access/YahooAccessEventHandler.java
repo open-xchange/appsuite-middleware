@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oauth.yahoo.internal;
+package com.openexchange.oauth.yahoo.access;
 
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
