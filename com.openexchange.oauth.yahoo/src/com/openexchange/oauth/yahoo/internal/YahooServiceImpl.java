@@ -75,9 +75,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.yahoo.YahooService;
+import com.openexchange.oauth.yahoo.osgi.Services;
 import com.openexchange.oauth.yahoo.osgi.YahooOAuthActivator;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.BoundedCompletionService;
@@ -107,20 +112,27 @@ public class YahooServiceImpl implements YahooService {
 
     @Override
     public List<Contact> getContacts(final Session session, final int user, final int contextId, final int accountId) throws OXException {
-        List<Contact> contacts = new ArrayList<Contact>();
-        OAuthAccount account = null;
+        OAuthAccess yahooAccess = getOAuthAccess(session, accountId);
+        OAuthAccount account = yahooAccess.getOAuthAccount();
 
-        final com.openexchange.oauth.OAuthService oAuthService = activator.getOauthService();
-        try {
-            account = oAuthService.getAccount(accountId, session, user, contextId);
-        } catch (final OXException e) {
-            LOG.error("", e);
-            return Collections.emptyList();
-        }
         final Token accessToken = new Token(account.getToken(), account.getSecret());
-        contacts = useAccessTokenToAccessData(accessToken, session);
+        return useAccessTokenToAccessData(accessToken, session);
+    }
 
-        return contacts;
+    private OAuthAccess getOAuthAccess(Session session, int accountId) throws OXException {
+        OAuthAccessRegistryService service = Services.getService(OAuthAccessRegistryService.class);
+        OAuthAccessRegistry oAuthAccessRegistry = service.get(API.YAHOO.getFullName());
+        OAuthAccess oAuthAccess = oAuthAccessRegistry.get(session.getContextId(), session.getUserId());
+        if (oAuthAccess == null) {
+            OAuthAccess access = new YahooOAuthAccess(session, accountId);
+
+            oAuthAccess = oAuthAccessRegistry.addIfAbsent(session.getContextId(), session.getUserId(), access);
+            if (oAuthAccess == null) {
+                access.initialize();
+                oAuthAccess = access;
+            }
+        }
+        return oAuthAccess;
     }
 
     private List<Contact> useAccessTokenToAccessData(final Token accessToken, Session session) throws OXException {
