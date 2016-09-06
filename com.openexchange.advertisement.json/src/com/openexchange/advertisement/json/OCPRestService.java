@@ -49,7 +49,10 @@
 
 package com.openexchange.advertisement.json;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.PUT;
@@ -62,6 +65,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.advertisement.AdvertisementConfigService;
+import com.openexchange.advertisement.AdvertisementExceptionCodes;
 import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.ConfigResult;
 import com.openexchange.advertisement.json.osgi.Services;
@@ -101,6 +105,7 @@ public class OCPRestService {
             case ERROR:
                 throw result.getError();
             case DELETED:
+                return Response.status(204).build();
             case IGNORED:
             case UPDATED:
             default:
@@ -124,13 +129,38 @@ public class OCPRestService {
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     @Path("/config/reseller")
-    public Response putConfig(@QueryParam("reseller") String reseller, JSONArray body) throws OXException {
+    public Response putConfig(@QueryParam("reseller") String reseller, JSONArray array) throws OXException {
         AdvertisementPackageService packageService = Services.getService(AdvertisementPackageService.class);
         AdvertisementConfigService configService = packageService.getDefaultScheme();
         if (configService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AdvertisementConfigService.class.getSimpleName());
         }
-        List<ConfigResult> results = configService.setConfig(reseller, body.toString());
+
+        Map<String, String> data;
+        //Parse configs String
+        try {
+            if (array.isEmpty()) {
+                ResponseBuilder builder = Response.status(200);
+                builder.entity(new JSONArray(0));
+                return builder.build();
+            }
+            data = new LinkedHashMap<>(array.length());
+
+            for (Object value : array.asList()) {
+                if (!(value instanceof HashMap)) {
+                    throw new JSONException("Child is not a JSONObject.");
+                }
+                @SuppressWarnings("unchecked") HashMap<String, String> obj = (HashMap<String, String>) value;
+                String pack = obj.get("package");
+                String config = obj.get("config");
+                config = config == JSONObject.NULL ? null : config;
+                data.put(pack, config);
+            }
+        } catch (JSONException e) {
+            throw AdvertisementExceptionCodes.PARSING_ERROR.create(e.getMessage());
+        }
+
+        List<ConfigResult> results = configService.setConfig(reseller, data);
         // convert results to json
         JSONArray resultJSON = new JSONArray(results.size());
         for (ConfigResult result : results) {

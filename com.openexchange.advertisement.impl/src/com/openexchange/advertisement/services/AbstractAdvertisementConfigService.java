@@ -55,13 +55,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.json.ImmutableJSONObject;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -315,9 +311,11 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
             Connection con = dbService.getWritable();
             PreparedStatement stmt = null;
             ResultSet result = null;
+            boolean setProperty = false;
+            String newPropertyValue = null;
 
+            ConfigResult configResult = null;
             try {
-                ConfigResult configResult = null;
                 if (property.isDefined()) {
                     String value = property.get();
                     int configId = Integer.parseInt(value);
@@ -325,7 +323,7 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                         stmt = con.prepareStatement(SQL_DELETE_CONFIG);
                         stmt.setInt(1, configId);
                         stmt.execute();
-                        property.set(null);
+                        setProperty = true;
                         configResult = new ConfigResult(ConfigResultType.DELETED, null);
                     } else {
                         stmt = con.prepareStatement(SQL_UPDATE_CONFIG);
@@ -352,7 +350,8 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                                 throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create("Insert operation failed to retrieve generated key.");
                             }
                             int resultConfigId = result.getInt(1);
-                            property.set(String.valueOf(resultConfigId));
+                            setProperty = true;
+                            newPropertyValue = String.valueOf(resultConfigId);
                             configResult = new ConfigResult(ConfigResultType.CREATED, null);
                         } else {
                             configResult = new ConfigResult(ConfigResultType.UPDATED, null);
@@ -380,22 +379,27 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
                         throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create("Insert operation failed to retrieve generated key.");
                     }
                     int resultConfigId = result.getInt(1);
-                    property.set(String.valueOf(resultConfigId));
+                    setProperty = true;
+                    newPropertyValue = String.valueOf(resultConfigId);
                     configResult = new ConfigResult(ConfigResultType.CREATED, null);
                 }
-                //remove entry from cache
-                CacheService cacheService = Services.getService(CacheService.class);
-                if (cacheService != null) {
-                    Cache cache = cacheService.getCache(CACHING_REGION);
-                    cache.remove(cache.newCacheKey(ctxId, userId));
-                }
-                return configResult;
             } catch (SQLException e) {
                 return new ConfigResult(ConfigResultType.ERROR, AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage()));
             } finally {
                 DBUtils.closeSQLStuff(result, stmt);
                 dbService.backWritable(con);
             }
+
+            if (setProperty) {
+                property.set(newPropertyValue);
+            }
+            //remove entry from cache
+            CacheService cacheService = Services.getService(CacheService.class);
+            if (cacheService != null) {
+                Cache cache = cacheService.getCache(CACHING_REGION);
+                cache.remove(cache.newCacheKey(ctxId, userId));
+            }
+            return configResult;
         } catch (OXException e) {
             return new ConfigResult(ConfigResultType.ERROR, e);
         }
@@ -518,36 +522,11 @@ public abstract class AbstractAdvertisementConfigService implements Advertisemen
     }
 
     @Override
-    public List<ConfigResult> setConfig(String reseller, String configs) throws OXException {
-        Map<String, String> data;
-        //Parse configs String
-        try {
-            JSONArray array = new JSONArray(configs);
-            if (array.isEmpty()) {
-                return Collections.emptyList();
-            }
-            data = new LinkedHashMap<>(array.length());
-
-            for (Object value : array.asList()) {
-                if (!(value instanceof HashMap)) {
-                    throw new JSONException("Child is not a JSONObject.");
-                }
-                @SuppressWarnings("unchecked") 
-                HashMap<String, String> obj = (HashMap<String, String>) value;
-                String pack = obj.get("package");
-                String config = obj.get("config");
-                config = config == JSONObject.NULL ? null : config;
-                data.put(pack, config);
-            }
-        } catch (JSONException e) {
-            throw AdvertisementExceptionCodes.PARSING_ERROR.create(e.getMessage());
-        }
-        
-        
+    public List<ConfigResult> setConfig(String reseller, Map<String, String> configs) throws OXException {
         List<ConfigResult> resultList = new ArrayList<>();
-        for (String pack : data.keySet()) {
+        for (String pack : configs.keySet()) {
             try {
-                ConfigResultType status = setConfigInternal(reseller, pack, data.get(pack));
+                ConfigResultType status = setConfigInternal(reseller, pack, configs.get(pack));
                 resultList.add(new ConfigResult(status, null));
             } catch (OXException e) {
                 resultList.add(new ConfigResult(ConfigResultType.ERROR, e));
