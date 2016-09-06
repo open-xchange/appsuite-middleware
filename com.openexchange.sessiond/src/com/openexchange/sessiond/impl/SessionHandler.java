@@ -114,7 +114,7 @@ public final class SessionHandler {
 
         @Override
         public int getNumberOfSessions(int userId, final int contextId) {
-            return SESSION_DATA_REF.get().getNumOfUserSessions(userId, contextId);
+            return SESSION_DATA_REF.get().getNumOfUserSessions(userId, contextId, true);
         }
     };
 
@@ -660,6 +660,24 @@ public final class SessionHandler {
     }
 
     /**
+     * Gets the number of <b>local-only</b> sessions associated with specified user in given context.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param considerLongTerm <code>true</code> to also consider long-term sessions; otherwise <code>false</code>
+     * @return The number of sessions
+     */
+    public static int getNumOfUserSessions(int userId, int contextId, boolean considerLongTerm) {
+        SessionData sessionData = SESSION_DATA_REF.get();
+        if (null == sessionData) {
+            LOG.warn("\tSessionData instance is null.");
+            return 0;
+        }
+
+        return sessionData.getNumOfUserSessions(userId, contextId, considerLongTerm);
+    }
+
+    /**
      * Gets an active session of an user if available.
      *
      * @param userId The user ID
@@ -973,7 +991,7 @@ public final class SessionHandler {
         }
         int maxSessPerUser = config.getMaxSessionsPerUser();
         if (maxSessPerUser > 0) {
-            int count = sessionData.getNumOfUserSessions(userId, contextId);
+            int count = sessionData.getNumOfUserSessions(userId, contextId, true);
             if (count >= maxSessPerUser) {
                 throw SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.create(I(userId), I(contextId));
             }
