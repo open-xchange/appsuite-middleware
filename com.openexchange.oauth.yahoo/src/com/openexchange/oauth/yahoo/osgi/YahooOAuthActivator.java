@@ -49,18 +49,24 @@
 
 package com.openexchange.oauth.yahoo.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.oauth.yahoo.YahooOAuthScope;
 import com.openexchange.oauth.yahoo.YahooService;
 import com.openexchange.oauth.yahoo.internal.OAuthServiceMetaDataYahooImpl;
+import com.openexchange.oauth.yahoo.internal.YahooAccessEventHandler;
 import com.openexchange.oauth.yahoo.internal.YahooServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
 
 /**
@@ -98,11 +104,12 @@ public class YahooOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, OAuthService.class, DeferringURLService.class, ThreadPoolService.class, OAuthScopeRegistry.class };
+        return new Class<?>[] { ConfigurationService.class, OAuthService.class, DeferringURLService.class, ThreadPoolService.class, OAuthScopeRegistry.class, OAuthAccessRegistryService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServices(this);
         oauthService = getService(OAuthService.class);
         oAuthMetaData = new OAuthServiceMetaDataYahooImpl(this);
         registerService(OAuthServiceMetaData.class, oAuthMetaData);
@@ -115,6 +122,12 @@ public class YahooOAuthActivator extends HousekeepingActivator {
         // Register the scope
         OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
         scopeRegistry.registerScopes(oAuthMetaData.getAPI(), YahooOAuthScope.values());
+        /*
+         * Register event handler
+         */
+        final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
+        registerService(EventHandler.class, new YahooAccessEventHandler(), serviceProperties);
 
         // Register the update task
         // track(DatabaseService.class, new DatabaseUpdateTaskServiceTracker(context));
