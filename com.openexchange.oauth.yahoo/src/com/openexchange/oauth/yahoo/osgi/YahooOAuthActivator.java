@@ -56,6 +56,7 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.http.deferrer.DeferringURLService;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
@@ -118,10 +119,13 @@ public class YahooOAuthActivator extends HousekeepingActivator {
 
         final YahooService yahooService = new YahooServiceImpl(this);
         registerService(YahooService.class, yahooService);
+        // Register the delete listener
+        registerService(OAuthAccountDeleteListener.class, (OAuthAccountDeleteListener) yahooService);
 
         // Register the scope
         OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
         scopeRegistry.registerScopes(oAuthMetaData.getAPI(), YahooOAuthScope.values());
+
         /*
          * Register event handler
          */

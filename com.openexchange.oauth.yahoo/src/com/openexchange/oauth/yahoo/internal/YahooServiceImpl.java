@@ -118,8 +118,10 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
      */
     @Override
     public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        // TODO Auto-generated method stub
-
+        OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
+        OAuthAccessRegistry registry = registryService.get(API.YAHOO.getFullName());
+        registry.purgeUserAccess(cid, user);
+        LOGGER.info("Deleted Yahoo! OAuth account with ID {} for user {} in context {}", id, user, cid);
     }
 
     /*
