@@ -321,10 +321,10 @@ public final class WebSocketInfo implements Comparable<WebSocketInfo> {
             builder2.append("address=").append(address).append(", ");
         }
         if (path != null) {
-            builder2.append("path=").append(path);
+            builder2.append("path=").append(path).append(", ");
         }
         if (connectionId != null) {
-            builder2.append("connectionId=").append(connectionId).append(", ");
+            builder2.append("connectionId=").append(connectionId);
         }
         builder2.append("}");
         return builder2.toString();

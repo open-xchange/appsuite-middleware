@@ -131,13 +131,33 @@ public class WebSocketMBeanImpl extends AnnotatedStandardMBean implements WebSoc
     @Override
     public List<List<String>> listWebSockets() throws MBeanException {
         try {
-            List<WebSocket> webSockets = webSocketService.listLocalWebSockets();
+            List<WebSocketInfo> infos;
+            {
+                List<WebSocket> webSockets = webSocketService.listLocalWebSockets();
+                if (webSockets.isEmpty()) {
+                    return Collections.emptyList();
+                }
 
-            List<List<String>> list = new ArrayList<List<String>>(webSockets.size());
-            for (WebSocket webSocket : webSockets) {
-                if (null != webSocket) {
-                    String path = webSocket.getPath();
-                    list.add(Arrays.asList(Integer.toString(webSocket.getContextId()), Integer.toString(webSocket.getUserId()), null == path ? "<none>" : path, webSocket.getConnectionId().getId()));
+                infos = new ArrayList<>(webSockets.size());
+                String address = "localhost";
+                for (WebSocket webSocket : webSockets) {
+                    WebSocketInfo info = WebSocketInfo.builder()
+                        .address(address)
+                        .connectionId(webSocket.getConnectionId())
+                        .contextId(webSocket.getContextId())
+                        .path(webSocket.getPath())
+                        .userId(webSocket.getUserId())
+                        .build();
+                    infos.add(info);
+                }
+                Collections.sort(infos);
+            }
+
+            List<List<String>> list = new ArrayList<List<String>>(infos.size());
+            for (WebSocketInfo info : infos) {
+                if (null != info) {
+                    String path = info.getPath();
+                    list.add(Arrays.asList(Integer.toString(info.getContextId()), Integer.toString(info.getUserId()), null == path ? "<none>" : path, info.getConnectionId().getId()));
                 }
             }
 
