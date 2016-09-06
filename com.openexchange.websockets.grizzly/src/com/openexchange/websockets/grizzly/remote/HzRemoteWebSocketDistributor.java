@@ -557,7 +557,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                 // Timeout while awaiting remote result
                 if (retryCount <= 0) {
                     // No further retry
-                    LOG.warn("Repeatedly failed submitting message(s) to remote Web Socket(s) connected to member \"{}\" using path filter \"{}\" to user {} in context {}", member, pathFilter, I(userId), I(contextId));
+                    LOG.warn("Repeatedly failed transmitting message(s) to remote Web Socket(s) connected to member \"{}\" using path filter \"{}\" to user {} in context {}", member, pathFilter, I(userId), I(contextId));
                     cancelFutureSafe(future);
                 }
             }
