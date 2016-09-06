@@ -85,18 +85,6 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
     }
 
     @Override
-    public String getScope() {
-        // Overview: https://developers.google.com/oauthplayground/
-        //
-        // https://www.googleapis.com/auth/calendar -> Manage calendar
-        // https://www.googleapis.com/auth/plus.login -> Know your basic profile info and list of people in your circles
-        // https://www.googleapis.com/auth/plus.me -> Know who you are on Google
-        // https://www.googleapis.com/auth/userinfo.email -> View your email address
-        // https://www.googleapis.com/auth/userinfo.profile -> View basic information about your account"
-        return "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/drive https://mail.google.com/";
-    }
-
-    @Override
     public Class<? extends Api> getScribeService() {
         return Google2Api.class;
     }

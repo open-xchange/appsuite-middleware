@@ -103,9 +103,4 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractExtendedScribeAwareOA
     protected Collection<OAuthPropertyID> getExtraPropertyNames() {
         return Collections.singletonList(OAuthPropertyID.redirectUrl);
     }
-
-    @Override
-    public String getScope() {
-        return "mail-x";
-    }
 }

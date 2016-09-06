@@ -85,11 +85,6 @@ public final class MsLiveConnectOAuthServiceMetaData extends AbstractExtendedScr
     }
 
     @Override
-    public String getScope() {
-        return "wl.offline_access wl.signin wl.basic wl.skydrive wl.skydrive_update wl.contacts_birthday wl.contacts_photos wl.contacts_skydrive wl.contacts_emails wl.photos wl.postal_addresses";
-    }
-
-    @Override
     public Class<? extends Api> getScribeService() {
         return MsLiveConnectApi.class;
     }

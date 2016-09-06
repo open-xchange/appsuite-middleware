@@ -148,16 +148,6 @@ public interface OAuthServiceMetaData {
     boolean needsRequestToken();
 
     /**
-     * Gets the optional scope; a comma-separated list of scope items.
-     * 
-     * <p><u><b>NOTE</b></u>:This method is <b>deprecated</b> and it will be removed in a future release.</p>
-     *
-     * @return The scope or <code>null</code>
-     * @deprecated Use {@link #getAvailableScopes()} instead.
-     */
-    String getScope();
-
-    /**
      * Processes specified authorization URL.
      *
      * @return The processed authorization URL

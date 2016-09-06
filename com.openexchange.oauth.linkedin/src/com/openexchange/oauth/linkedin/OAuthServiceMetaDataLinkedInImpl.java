@@ -91,11 +91,6 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractScribeAwareOAuthSe
     }
 
     @Override
-    public String getScope() {
-        return "r_basicprofile,r_emailaddress";
-    }
-
-    @Override
     public Class<? extends Api> getScribeService() {
         return LinkedInApi.class;
     }

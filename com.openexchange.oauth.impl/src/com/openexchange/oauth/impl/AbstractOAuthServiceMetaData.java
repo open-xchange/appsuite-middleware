@@ -264,11 +264,6 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public String getScope() {
-        return null;
-    }
-
-    @Override
     public String processAuthorizationURL(final String authUrl) {
         return authUrl;
     }

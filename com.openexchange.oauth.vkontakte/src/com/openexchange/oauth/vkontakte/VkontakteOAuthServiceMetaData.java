@@ -80,11 +80,6 @@ public final class VkontakteOAuthServiceMetaData extends AbstractScribeAwareOAut
     }
 
     @Override
-    public String getScope() {
-        return "friends,wall,offline";
-    }
-
-    @Override
     protected String getPropertyId() {
         return "vkontakte";
     }

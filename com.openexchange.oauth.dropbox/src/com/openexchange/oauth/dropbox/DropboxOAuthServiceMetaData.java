@@ -109,7 +109,7 @@ public final class DropboxOAuthServiceMetaData extends AbstractScribeAwareOAuthS
     @Override
     public OAuthInteraction initOAuth(final String callbackUrl, final Session session) throws OXException {
         try {
-            final AppKeyPair appKeys = new AppKeyPair(getAPIKey(), getAPISecret());
+            final AppKeyPair appKeys = new AppKeyPair(getAPIKey(session), getAPISecret(session));
             final DropboxAPI<WebAuthSession> dropboxAPI =
                 new DropboxAPI<WebAuthSession>(new TrustAllWebAuthSession(appKeys, AccessType.DROPBOX));
             final StringBuilder authUrl = new StringBuilder(dropboxAPI.getSession().getAuthInfo().url);
