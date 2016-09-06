@@ -1,13 +1,20 @@
 <#include "notify.common.button.tmpl">
+
 <p>
   ${intro}
-  <ul>
-    <#list filenames as filename>
-    <li>${filename}</li>
+  <#-- unstyled unordered list using flexbox -->
+  <ul style="list-style:none; padding:0; margin:0; display:flex; flex-wrap: wrap; padding-top: 16px">
+    <#list previews?keys as key>
+      <li style="padding: 0 16px 16px 0">
+        ${previews[key]}<br/>
+        ${filenames[key]}
+      </li>
     </#list>
   </ul>
+  <#if more?has_content><br/ >${more}</#if>
 </p>
-<p id="view_items" style="padding:10px 0;margin:20px 0;">
+
+<p>
   <@styledButton link=link>${link_text}</@styledButton>
 </p>
 <#if expiration?has_content || password?has_content>
@@ -16,3 +23,4 @@
     <#if password?has_content>${password}</#if>
   </p>
 </#if>
+<hr>

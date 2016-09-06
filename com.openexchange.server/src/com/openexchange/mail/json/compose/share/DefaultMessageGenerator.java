@@ -58,6 +58,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -224,10 +225,10 @@ public class DefaultMessageGenerator implements MessageGenerator {
     }
 
     @Override
-    public List<ComposedMailMessage> generateTransportMessagesFor(ShareComposeMessageInfo info, ShareReference shareReference) throws OXException {
+    public List<ComposedMailMessage> generateTransportMessagesFor(ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> cidMapping, int moreFiles) throws OXException {
         ShareComposeLink shareLink = info.getShareLink();
         Map<String, String> headers = mapFor(HEADER_SHARE_TYPE, shareLink.getType(), HEADER_SHARE_URL, shareLink.getLink());
-        return equalMessagesByLocale() ? generateEqualMessagesByLocale(info, shareReference, headers) : generateIndividualMessages(info, shareReference, headers);
+        return equalMessagesByLocale() ? generateEqualMessagesByLocale(info, shareReference, headers, cidMapping, moreFiles) : generateIndividualMessages(info, shareReference, headers, cidMapping, moreFiles);
     }
 
     /**
@@ -239,11 +240,11 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * @return The generated messages
      * @throws OXException If messages cannot be generated
      */
-    protected List<ComposedMailMessage> generateEqualMessagesByLocale(ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> headers) throws OXException {
+    protected List<ComposedMailMessage> generateEqualMessagesByLocale(ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> headers, Map<String, String> cidMapping, int moreFiles) throws OXException {
         Collection<Recipient> recipients = info.getRecipients();
 
-        Map<Locale, ComposedMailMessage> internalMessages = new LinkedHashMap<Locale, ComposedMailMessage>(recipients.size());
-        Map<Locale, ComposedMailMessage> externalMessages = new LinkedHashMap<Locale, ComposedMailMessage>(recipients.size());
+        Map<Locale, ComposedMailMessage> internalMessages = new LinkedHashMap<>(recipients.size());
+        Map<Locale, ComposedMailMessage> externalMessages = new LinkedHashMap<>(recipients.size());
 
         Locale localeForExternalRecipients = null;
         for (Recipient recipient : recipients) {
@@ -251,7 +252,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
                 Locale locale = recipient.getUser().getLocale();
                 ComposedMailMessage composedMessage = internalMessages.get(locale);
                 if (null == composedMessage) {
-                    composedMessage = generateInternalVersion(recipient, info, shareReference, headers);
+                    composedMessage = generateInternalVersion(recipient, info, shareReference, headers, cidMapping, moreFiles);
                     internalMessages.put(locale, composedMessage);
                 } else {
                     // Adds specified recipient
@@ -263,7 +264,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
                 }
                 ComposedMailMessage composedMessage = externalMessages.get(localeForExternalRecipients);
                 if (null == composedMessage) {
-                    composedMessage = generateExternalVersion(localeForExternalRecipients, recipient, info, shareReference, headers);
+                    composedMessage = generateExternalVersion(localeForExternalRecipients, recipient, info, shareReference, headers, cidMapping, moreFiles);
                     externalMessages.put(localeForExternalRecipients, composedMessage);
                 } else {
                     // Adds specified recipient
@@ -271,7 +272,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
                 }
             }
         }
-        List<ComposedMailMessage> messages = new ArrayList<ComposedMailMessage>(internalMessages.size() + externalMessages.size());
+        List<ComposedMailMessage> messages = new ArrayList<>(internalMessages.size() + externalMessages.size());
         messages.addAll(internalMessages.values());
         messages.addAll(externalMessages.values());
         return messages;
@@ -286,30 +287,30 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * @return The individually generated messages
      * @throws OXException If messages cannot be generated
      */
-    protected List<ComposedMailMessage> generateIndividualMessages(ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> headers) throws OXException {
+    protected List<ComposedMailMessage> generateIndividualMessages(ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> headers, Map<String, String> cidMapping, int moreFiles) throws OXException {
         Collection<Recipient> recipients = info.getRecipients();
 
-        List<ComposedMailMessage> messages = new ArrayList<ComposedMailMessage>(recipients.size());
+        List<ComposedMailMessage> messages = new ArrayList<>(recipients.size());
 
         Locale localeForExternalRecipients = null;
         for (Recipient recipient : recipients) {
             if (recipient.isUser()) {
-                messages.add(generateInternalVersion(recipient, info, shareReference, headers));
+                messages.add(generateInternalVersion(recipient, info, shareReference, headers, cidMapping, moreFiles));
             } else {
                 if (null == localeForExternalRecipients) {
                     localeForExternalRecipients = determineLocaleForExternalRecipients(info.getComposeContext());
                 }
-                messages.add(generateExternalVersion(localeForExternalRecipients, recipient, info, shareReference, headers));
+                messages.add(generateExternalVersion(localeForExternalRecipients, recipient, info, shareReference, headers, cidMapping, moreFiles));
             }
         }
         return messages;
     }
 
     @Override
-    public ComposedMailMessage generateSentMessageFor(ShareComposeMessageInfo info, ShareReference shareReference) throws OXException {
+    public ComposedMailMessage generateSentMessageFor(ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> cidMapping, int moreFiles) throws OXException {
         ShareComposeLink shareLink = info.getShareLink();
         Map<String, String> headers = mapFor(HEADER_SHARE_TYPE, shareLink.getType(), HEADER_SHARE_URL, shareLink.getLink(), HEADER_SHARE_REFERENCE, ShareReference.generateStringForMime(shareReference));
-        ComposedMailMessage sentMessage = generateInternalVersion(info.getRecipients().get(0), info, shareReference, headers);
+        ComposedMailMessage sentMessage = generateInternalVersion(info.getRecipients().get(0), info, shareReference, headers, cidMapping, moreFiles);
         sentMessage.addUserFlag(USER_SHARE_REFERENCE);
         return sentMessage;
     }
@@ -324,10 +325,10 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * @return The compose message
      * @throws OXException If compose message cannot be returned
      */
-    protected ComposedMailMessage generateInternalVersion(Recipient recipient, ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> shareHeaders) throws OXException {
+    protected ComposedMailMessage generateInternalVersion(Recipient recipient, ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> shareHeaders, Map<String, String> cidMapping, int moreFiles) throws OXException {
         // Generate locale-specific version using user's locale
         Locale locale = recipient.getUser().getLocale();
-        return generateLocaleSpecificVersion(locale, recipient, info, shareReference, shareHeaders);
+        return generateLocaleSpecificVersion(locale, recipient, info, shareReference, shareHeaders, cidMapping, moreFiles);
     }
 
     /**
@@ -341,9 +342,9 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * @return The compose message
      * @throws OXException If compose message cannot be returned
      */
-    protected ComposedMailMessage generateExternalVersion(Locale localeForExternalRecipients, Recipient recipient, ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> shareHeaders) throws OXException {
+    protected ComposedMailMessage generateExternalVersion(Locale localeForExternalRecipients, Recipient recipient, ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> shareHeaders, Map<String, String> cidMapping, int moreFiles) throws OXException {
         // Generate locale-specific version using the configured locale for external recipients
-        return generateLocaleSpecificVersion(localeForExternalRecipients, recipient, info, shareReference, shareHeaders);
+        return generateLocaleSpecificVersion(localeForExternalRecipients, recipient, info, shareReference, shareHeaders, cidMapping, moreFiles);
     }
 
     /**
@@ -357,7 +358,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * @return The generated message for specified locale
      * @throws OXException If message cannot be generated
      */
-    protected ComposedMailMessage generateLocaleSpecificVersion(Locale locale, Recipient recipient, ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> shareHeaders) throws OXException {
+    protected ComposedMailMessage generateLocaleSpecificVersion(Locale locale, Recipient recipient, ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> shareHeaders, Map<String, String> cidMapping, int moreFiles) throws OXException {
         ShareTransportComposeContext composeContext = info.getComposeContext();
         ComposedMailMessage composedMessage = Utilities.copyOfSourceMessage(composeContext);
 
@@ -370,7 +371,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
             StringBuilder textBuilder = new StringBuilder(text.length() + 512);
 
             // Append the prefix that notifies about to access the message's attachment via provided share link
-            textBuilder.append(generatePrefix(locale, info, shareReference, loadPrefixFromTemplate()));
+            textBuilder.append(generatePrefix(locale, info, shareReference, loadPrefixFromTemplate(), cidMapping, moreFiles));
 
             // Append actual text
             textBuilder.append(text);
@@ -423,8 +424,8 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * @return The generated prefix
      * @throws OXException If generating prefix from template fails
      */
-    protected String generatePrefix(Locale locale, ShareComposeMessageInfo info, ShareReference shareReference, boolean fromTemplate) throws OXException {
-        return fromTemplate ? loadPrefixFromTemplate(locale, info, shareReference) : generatePrefixPlain(locale, info, shareReference);
+    protected String generatePrefix(Locale locale, ShareComposeMessageInfo info, ShareReference shareReference, boolean fromTemplate, Map<String, String> previews, int moreFiles) throws OXException {
+        return fromTemplate ? loadPrefixFromTemplate(locale, info, shareReference, previews, moreFiles) : generatePrefixPlain(locale, info, shareReference);
     }
 
     /**
@@ -459,7 +460,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
         // Files
         {
             textBuilder.append("<ul>");
-            List<String> fileNames = new ArrayList<String>(items.size());
+            List<String> fileNames = new ArrayList<>(items.size());
             for (Item item : items) {
                 textBuilder.append("<li>");
                 String fileName = item.getName();
@@ -512,6 +513,10 @@ public class DefaultMessageGenerator implements MessageGenerator {
 
     /** The template place-holder for the listing of file names */
     protected static final String VARIABLE_FILE_NAMES = "filenames";
+    
+    protected static final String VARIABLE_PREVIEW = "previews";
+    
+    protected static final String VARIABLE_MORE_FILES = "more";
 
     /**
      * Loads the prefix to insert from a template.
@@ -522,7 +527,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
      * @return The loaded prefix
      * @throws OXException If loading prefix from template fails
      */
-    protected String loadPrefixFromTemplate(Locale locale, ShareComposeMessageInfo info, ShareReference shareReference) throws OXException {
+    protected String loadPrefixFromTemplate(Locale locale, ShareComposeMessageInfo info, ShareReference shareReference, Map<String, String> cidMapping, int moreFiles) throws OXException {
         TemplateService templateService = MessageGenerators.getTemplateService();
         if (null == templateService) {
             throw ServiceExceptionCode.absentService(TemplateService.class);
@@ -534,7 +539,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
         }
 
         Translator translator = translatorFactory.translatorFor(locale);
-        Map<String, Object> vars = new HashMap<String, Object>(4);
+        Map<String, Object> vars = new HashMap<>(4);
 
         List<Item> items = shareReference.getItems();
 
@@ -547,14 +552,18 @@ public class DefaultMessageGenerator implements MessageGenerator {
             vars.put(VARIABLE_INTRO, translated);
         }
 
-        // Files
+        // Filenames and previews
         {
-            List<String> fileNames = new ArrayList<String>(items.size());
-            for (Item item : items) {
-                String fileName = item.getName();
-                fileNames.add(Strings.isEmpty(fileName) ? translator.translate(ShareComposeStrings.DEFAULT_FILE_NAME) : StringEscapeUtils.escapeHtml(fileName));
+            Map<String, String> filenameMapping = generateFilenameMapping(items, translator);
+            Map<String, String> previewImages = new HashMap<>(cidMapping.size());
+            for (String preview : cidMapping.keySet()) {
+                previewImages.put(preview, "<img src=\"cid:" + cidMapping.get(preview) + "\" heigth=200 width=150 />");
             }
-            vars.put(VARIABLE_FILE_NAMES, fileNames);
+            vars.put(VARIABLE_PREVIEW, previewImages);
+            vars.put(VARIABLE_FILE_NAMES, filenameMapping);
+            if (moreFiles > 0) {
+                vars.put(VARIABLE_MORE_FILES, moreFiles == 1 ? translator.translate(NotificationStrings.DRIVE_MAIL_ONE_MORE_FILE) : String.format(translator.translate(NotificationStrings.DRIVE_MAIL_MORE_FILES), moreFiles));
+            }
         }
 
         // Link
@@ -642,11 +651,23 @@ public class DefaultMessageGenerator implements MessageGenerator {
             return null;
         }
 
-        Map<String, String> map = new LinkedHashMap<String, String>(length >> 1);
+        Map<String, String> map = new LinkedHashMap<>(length >> 1);
         for (int i = 0; i < length; i+=2) {
             map.put(args[i], args[i+1]);
         }
         return map;
+    }
+    
+    private Map<String, String> generateFilenameMapping(List<Item> items, Translator translator) {
+        if (null == items || items.size() == 0) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> mapping = new HashMap<>();
+        for (Item i : items) {
+            String name = i.getName();
+            mapping.put(i.getId(), Strings.isNotEmpty(name) ? StringEscapeUtils.escapeHtml(name) : translator.translate(ShareComposeStrings.DEFAULT_FILE_NAME));
+        }
+        return mapping;
     }
 
 }

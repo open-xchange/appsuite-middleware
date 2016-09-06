@@ -61,7 +61,7 @@ A valid json object containing the configuration.
 
 **Response:**
 
-Empty response with HTTP status code 200.
+Empty response with HTTP status code 200 or 201 in case a new configuration is created.
 
 
 ### Set configuration by user name and context id
@@ -82,7 +82,7 @@ A valid json object containing the configuration.
 
 **Response:**
 
-Empty response with HTTP status code 200.
+Empty response with HTTP status code 200 or 201 in case a new configuration is created.
 
 
 ### Set configuration by reseller and package
@@ -103,7 +103,7 @@ A valid json object containing the configuration.
 
 **Response:**
 
-Empty response with HTTP status code 200.
+Empty response with HTTP status code 200 or 201 in case a new configuration is created.
 
 
 ### Set multiple configurations by reseller

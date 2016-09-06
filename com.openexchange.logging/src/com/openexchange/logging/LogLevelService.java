@@ -63,17 +63,18 @@ public interface LogLevelService {
 
     /**
      * Sets the log level for the defined class
-     * 
+     *
      * @param className Fully qualified name of the class the log level should be changed for
      * @param logLevel The new level for the class
+     * @return <code>true</code> if log level could be successfully set; otherwise <code>false</code>
      */
-    void set(String className, Level logLevel);
+    boolean set(String className, Level logLevel);
 
     /**
      * Resets the (previously changed) log level for defined class to the origin definition (valid before calling {@link LogLevelService#set(String, Level)}).
      * <p>
      * If {@link LogLevelService#set(String, Level)} hasn't been executed before for provided class name nothing will be done.
-     * 
+     *
      * @param className Fully qualified name of the class the log level should be reset for
      */
     void reset(String className);

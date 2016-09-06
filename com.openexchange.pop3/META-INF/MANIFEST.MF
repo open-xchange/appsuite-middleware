@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange POP3
 Bundle-SymbolicName: com.openexchange.pop3
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Import-Package: com.openexchange.api2,
  com.openexchange.caching,

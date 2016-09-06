@@ -15,7 +15,7 @@ use JSON;
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 {
-    if (-x $showruntimestats) {
+    if (-e "/opt/open-xchange/bundles/com.openexchange.websockets.grizzly.jar") {
         print "yes\n";
         exit 0;
     }
@@ -33,12 +33,12 @@ if ( $ARGV[0] and $ARGV[0] eq "config") {
     
     print "count.label count\n";
     print "count.draw LINE1\n";
-    print "count.type DERIVE\n";
+    print "count.type GAUGE\n";
     print "count.min 0\n";
     
     print "buffered-message.label buffered-message\n";
     print "buffered-message.draw LINE1\n";
-    print "buffered-message.type DERIVE\n";
+    print "buffered-message.type GAUGE\n";
     print "buffered-message.min 0\n";
 
     exit 0
@@ -48,8 +48,8 @@ my $url = $ENV{oxJolokiaUrl};
 my $username = $ENV{oxJolokiaUser};
 my $password = $ENV{oxJolokiaPassword};
 
-callUrl("count","/read/com.openexchange.websockets:type=WebSocketMBean/NumberOfWebSockets");
-callUrl("buffered-message","/read/com.openexchange.websockets:type=WebSocketMBean/NumberOfBufferedMessages");
+callUrl("count","/read/com.openexchange.websockets:name=WebSocketMBean/NumberOfWebSockets");
+callUrl("buffered-message","/read/com.openexchange.websockets:name=WebSocketMBean/NumberOfBufferedMessages");
 
 sub callUrl {
 	my $ua = LWP::UserAgent->new();
