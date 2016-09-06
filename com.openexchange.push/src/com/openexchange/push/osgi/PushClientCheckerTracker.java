@@ -47,34 +47,27 @@
  *
  */
 
-package com.openexchange.file.storage.boxcom.access;
+package com.openexchange.push.osgi;
 
-import com.box.boxjavalibv2.authorization.OAuthAuthorization;
-import com.box.boxjavalibv2.authorization.OAuthDataController;
-import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
-
+import org.osgi.framework.BundleContext;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.push.PushClientChecker;
 
 /**
- * {@link NonRefreshingOAuthAuthorization} - The non-refreshing Box.com OAuth authorization.
+ * {@link PushClientCheckerTracker} - Tracks {@link PushClientChecker} instances.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
+ * @since v7.8.3
  */
-public class NonRefreshingOAuthAuthorization extends OAuthAuthorization {
+public class PushClientCheckerTracker extends RankingAwareNearRegistryServiceTracker<PushClientChecker> {
 
     /**
-     * Initializes a new {@link NonRefreshingOAuthAuthorization}.
+     * Initializes a new {@link PushClientCheckerTracker}.
      *
-     * @param oAuth The OAuth data controller
+     * @param context The bundle context
      */
-    public NonRefreshingOAuthAuthorization(OAuthDataController oAuth) {
-        super(oAuth);
-    }
-
-    @Override
-    public void refresh() throws AuthFatalFailureException {
-        // {"error":"invalid_grant","error_description":"Refresh token has expired"}
-        throw new AuthFatalFailureException("Invalid grant. Refresh token has expired");
+    public PushClientCheckerTracker(BundleContext context) {
+        super(context, PushClientChecker.class);
     }
 
 }

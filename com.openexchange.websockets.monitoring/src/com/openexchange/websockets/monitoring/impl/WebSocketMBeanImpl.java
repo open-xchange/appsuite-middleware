@@ -51,12 +51,14 @@ package com.openexchange.websockets.monitoring.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import com.openexchange.java.Strings;
 import com.openexchange.management.AnnotatedStandardMBean;
 import com.openexchange.websockets.WebSocket;
+import com.openexchange.websockets.WebSocketInfo;
 import com.openexchange.websockets.WebSocketService;
 import com.openexchange.websockets.monitoring.WebSocketMBean;
 
@@ -104,15 +106,58 @@ public class WebSocketMBeanImpl extends AnnotatedStandardMBean implements WebSoc
     }
 
     @Override
+    public List<List<String>> listClusterWebSocketInfo() throws MBeanException {
+        try {
+            List<WebSocketInfo> infos = webSocketService.listClusterWebSocketInfo();
+            Collections.sort(infos);
+
+            List<List<String>> list = new ArrayList<List<String>>(infos.size());
+            for (WebSocketInfo info : infos) {
+                if (null != info) {
+                    String path = info.getPath();
+                    list.add(Arrays.asList(Integer.toString(info.getContextId()), Integer.toString(info.getUserId()), info.getAddress(), null == path ? "<none>" : path, info.getConnectionId().getId()));
+                }
+            }
+
+            return list;
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(WebSocketMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    @Override
     public List<List<String>> listWebSockets() throws MBeanException {
         try {
-            List<WebSocket> webSockets = webSocketService.listLocalWebSockets();
+            List<WebSocketInfo> infos;
+            {
+                List<WebSocket> webSockets = webSocketService.listLocalWebSockets();
+                if (webSockets.isEmpty()) {
+                    return Collections.emptyList();
+                }
 
-            List<List<String>> list = new ArrayList<List<String>>(webSockets.size());
-            for (WebSocket webSocket : webSockets) {
-                if (null != webSocket) {
-                    String path = webSocket.getPath();
-                    list.add(Arrays.asList(Integer.toString(webSocket.getContextId()), Integer.toString(webSocket.getUserId()), null == path ? "<none>" : path, webSocket.getConnectionId().getId()));
+                infos = new ArrayList<>(webSockets.size());
+                String address = "localhost";
+                for (WebSocket webSocket : webSockets) {
+                    WebSocketInfo info = WebSocketInfo.builder()
+                        .address(address)
+                        .connectionId(webSocket.getConnectionId())
+                        .contextId(webSocket.getContextId())
+                        .path(webSocket.getPath())
+                        .userId(webSocket.getUserId())
+                        .build();
+                    infos.add(info);
+                }
+                Collections.sort(infos);
+            }
+
+            List<List<String>> list = new ArrayList<List<String>>(infos.size());
+            for (WebSocketInfo info : infos) {
+                if (null != info) {
+                    String path = info.getPath();
+                    list.add(Arrays.asList(Integer.toString(info.getContextId()), Integer.toString(info.getUserId()), null == path ? "<none>" : path, info.getConnectionId().getId()));
                 }
             }
 

@@ -179,5 +179,4 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
             throw new IllegalArgumentException("The account identifier '" + accountId.toString() + "' cannot be parsed as an integer.", e);
         }
     }
-
 }

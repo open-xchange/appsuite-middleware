@@ -435,7 +435,7 @@ public final class MailNotifyPushListenerRegistry {
                 // Query local ones first
                 Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
                 for (Session session : sessions) {
-                    if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient())) {
+                    if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
                         MailNotifyPushListener newListener = MailNotifyPushListener.newInstance(session, false);
                         mboxId2Listener.put(mboxId, newListener);
                         return newListener;
@@ -446,7 +446,7 @@ public final class MailNotifyPushListenerRegistry {
                 if (sessiondService instanceof SessiondServiceExtended) {
                     sessions = ((SessiondServiceExtended) sessiondService).getSessions(userId, contextId, true);
                     for (Session session : sessions) {
-                        if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient())) {
+                        if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient(), session, true)) {
                             MailNotifyPushListener newListener = MailNotifyPushListener.newInstance(session, false);
                             mboxId2Listener.put(mboxId, newListener);
                             return newListener;

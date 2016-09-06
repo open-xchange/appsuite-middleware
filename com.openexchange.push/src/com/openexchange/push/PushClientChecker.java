@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,33 +47,27 @@
  *
  */
 
-package com.openexchange.file.storage.boxcom.access.extended.requests.requestobjects;
+package com.openexchange.push;
 
-import com.box.boxjavalibv2.dao.BoxFile;
-import com.box.boxjavalibv2.jsonentities.MapJSONStringEntity;
-import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link LockRequestObject}
+ * {@link PushClientChecker} - Checks if a certain client is allowed to receive push events.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class LockRequestObject extends BoxDefaultRequestObject {
+public interface PushClientChecker {
 
     /**
-     * Initializes a new {@link LockRequestObject}.
-     * 
-     * @param lock true to lock the object, false to unlock
+     * Checks if given client is allowed to receive push events.
+     *
+     * @param clientId The identifier of the client to check
+     * @param session The optional client-associated session or <code>null</code>
+     * @return <code>true</code> if allowed; otherwise <code>false</code>
+     * @throws OXException If check fails
      */
-    public LockRequestObject(boolean lock) {
-        final MapJSONStringEntity entity;
-        if (lock) {
-            entity = new MapJSONStringEntity();
-            entity.put(BoxFile.FIELD_TYPE, "lock");
-            entity.put("is_download_prevented", true);
-        } else {
-            entity = null;
-        }
-        put(BoxFile.FIELD_LOCK, entity);
-    }
+    boolean isAllowed(String clientId, Session session) throws OXException;
+
 }

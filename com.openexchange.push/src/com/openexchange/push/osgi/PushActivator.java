@@ -52,6 +52,7 @@ package com.openexchange.push.osgi;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.push.PushUtility;
 
 /**
  * {@link PushActivator} - The activator for push bundle.
@@ -75,10 +76,17 @@ public final class PushActivator extends HousekeepingActivator {
     @Override
     public void startBundle() throws Exception {
         Services.setServiceLookup(this);
+
+        PushClientCheckerTracker checkerListing = new PushClientCheckerTracker(context);
+        rememberTracker(checkerListing);
+        openTrackers();
+
+        PushUtility.setPushClientCheckerListing(checkerListing);
     }
 
     @Override
     public void stopBundle() throws Exception {
+        PushUtility.setPushClientCheckerListing(null);
         Services.setServiceLookup(null);
         super.stopBundle();
     }

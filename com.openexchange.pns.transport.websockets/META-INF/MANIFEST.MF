@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Web Socket transport for push notifications
 Bundle-SymbolicName: com.openexchange.pns.transport.websockets
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: 
@@ -13,11 +13,9 @@ Import-Package:
  com.openexchange.osgi,
  com.openexchange.osgi.util,
  com.openexchange.pns,
+ com.openexchange.push,
  com.openexchange.server,
  com.openexchange.session,
- com.openexchange.threadpool,
- com.openexchange.threadpool.behavior,
- com.openexchange.timer,
  com.openexchange.websockets,
  javax.crypto,
  javax.crypto.interfaces,

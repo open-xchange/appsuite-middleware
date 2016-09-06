@@ -137,6 +137,8 @@ tags:
     description: The file storage module provides access to file storage backends, e.g. Drive, Dropbox, etc.
   - name: mail_categories
     description: The module mail_categories allows to manage mail categories.
+  - name: advertisement
+    description: Via the advertisement module the client can retrieve the advertisement configuration
 # References to the definitions, "global" parameters and paths
 definitions:
   $ref: ./definitions/index.yaml

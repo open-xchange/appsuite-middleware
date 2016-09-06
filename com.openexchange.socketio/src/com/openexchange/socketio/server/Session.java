@@ -28,8 +28,10 @@ package com.openexchange.socketio.server;
 
 import java.io.InputStream;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -94,6 +96,15 @@ public class Session implements DisconnectListener {
         assert (socketIOManager != null);
         this.socketIOManager = socketIOManager;
         this.sessionId = sessionId;
+    }
+
+    /**
+     * Gets the names of such namespaces that are in use by this session
+     *
+     * @return The namespace names
+     */
+    public synchronized Set<String> getNamespaceNames() {
+        return new LinkedHashSet<>(sockets.keySet());
     }
 
     /**

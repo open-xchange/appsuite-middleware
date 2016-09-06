@@ -14,7 +14,7 @@ array:
       Related: 
       File: advertisement.properties
   - data:
-      Key: com.openexchange.advertisement.taxonomy.types
+      Key: com.openexchange.advertisement.<reseller>.taxonomy.types
       Description: >
         Defines a comma separated list of taxonomy types which are used as package identifiers. 
         This list is used by the 'TaxonomyTypes' package scheme to identify the package.

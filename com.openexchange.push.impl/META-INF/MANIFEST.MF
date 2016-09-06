@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Mail Push Implementation Bundle
 Bundle-SymbolicName: com.openexchange.push.impl
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.hazelcast.config,
@@ -20,6 +20,7 @@ Import-Package: com.hazelcast.config,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.delete,
  com.openexchange.groupware.update,
+ com.openexchange.groupware.userconfiguration,
  com.openexchange.hazelcast.configuration,
  com.openexchange.hazelcast.serialization,
  com.openexchange.i18n,
@@ -44,6 +45,7 @@ Import-Package: com.hazelcast.config,
  com.openexchange.threadpool.behavior,
  com.openexchange.timer,
  com.openexchange.tools.net,
+ com.openexchange.tools.session,
  com.openexchange.tools.sql,
  com.openexchange.tools.update,
  gnu.trove,

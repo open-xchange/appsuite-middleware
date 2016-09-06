@@ -280,6 +280,10 @@ public final class ThreadSorts {
         int length = threadList.length();
         int off = threadList.indexOf('(');
 
+        if (length == 0 || off == -1) {
+            return conversations;
+        }
+
         while (off < length) {
             char c = threadList.charAt(off);
             if (c != '(') {

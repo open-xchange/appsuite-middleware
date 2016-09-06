@@ -56,7 +56,7 @@ package com.openexchange.websockets;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class ConnectionId {
+public class ConnectionId implements Comparable<ConnectionId> {
 
     /**
      * Creates a new instance.
@@ -118,6 +118,11 @@ public class ConnectionId {
     @Override
     public String toString() {
         return id;
+    }
+
+    @Override
+    public int compareTo(ConnectionId o) {
+        return o == null ? -1 : id.compareTo(o.id);
     }
 
 }

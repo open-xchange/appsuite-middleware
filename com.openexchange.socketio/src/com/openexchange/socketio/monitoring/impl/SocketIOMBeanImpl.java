@@ -47,60 +47,72 @@
  *
  */
 
-package com.openexchange.sessiond;
+package com.openexchange.socketio.monitoring.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import javax.management.MBeanException;
+import javax.management.NotCompliantMBeanException;
+import com.openexchange.management.AnnotatedStandardMBean;
+import com.openexchange.socketio.monitoring.SocketIOMBean;
+import com.openexchange.socketio.server.SocketIOManager;
+import com.openexchange.socketio.websocket.WsTransportConnectionRegistry;
+
 
 /**
- * {@link SessiondMBean} - The MBean for sessiond
+ * {@link SocketIOMBeanImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public interface SessiondMBean {
+public class SocketIOMBeanImpl extends AnnotatedStandardMBean implements SocketIOMBean {
 
-    public static final String SESSIOND_DOMAIN = "com.openexchange.sessiond";
+    private final SocketIOManager socketIOManager;
+    private final WsTransportConnectionRegistry connectionRegistry;
 
     /**
-     * Clears all sessions belonging to the user identified by given user ID in specified context
+     * Initializes a new {@link SocketIOMBeanImpl}.
      *
-     * @param userId The user ID
-     * @param contextId The context ID
-     * @return The number of removed sessions belonging to the user or <code>-1</code> if an error occurred
+     * @param socketIOManager The Socket.IO manager
+     * @param connectionRegistry The Web Socket connection registry
+     * @throws NotCompliantMBeanException
      */
-    public int clearUserSessions(int userId, int contextId);
+    public SocketIOMBeanImpl(SocketIOManager socketIOManager, WsTransportConnectionRegistry connectionRegistry) throws NotCompliantMBeanException {
+        super("Management Bean for Socket.IO", SocketIOMBean.class);
+        this.socketIOManager = socketIOManager;
+        this.connectionRegistry = connectionRegistry;
+    }
 
-    /**
-     * Clears all sessions belonging to specified context
-     *
-     * @param contextId The context ID
-     */
-    public void clearContextSessions(int contextId);
+    @Override
+    public long getNumberOfSessions() throws MBeanException {
+        return socketIOManager.getNumberOfSessions();
+    }
 
-    /**
-     * Clears all sessions belonging to given contexts.
-     *
-     * @param contextId The context identifiers to remove sessions for
-     */
-    public void clearContextSessionsGlobal(Set<Integer> contextIds) throws MBeanException;
+    @Override
+    public List<String> listSessionIds() throws MBeanException {
+        return new ArrayList<>(socketIOManager.getSessionIds());
+    }
 
-    /**
-     * Gets the number of short-term sessions.
-     *
-     * @return The number of short-term sessions
-     */
-    int[] getNumberOfShortTermSessions();
+    @Override
+    public List<String> getNamespaceNames(String sessionId) throws MBeanException {
+        if (null == sessionId) {
+            Exception e = new Exception("Invalid session identifier");
+            throw new MBeanException(e, e.getMessage());
+        }
 
-    /**
-     * Gets the number of long-term sessions.
-     *
-     * @return The number of long-term sessions
-     */
-    int[] getNumberOfLongTermSessions();
+        Set<String> names = socketIOManager.getNamespaceNames(sessionId);
+        if (null == names) {
+            Exception e = new Exception("No such session for identifier " + sessionId);
+            throw new MBeanException(e, e.getMessage());
+        }
 
-    /**
-     * Clear all sessions in central session storage. This does not affect the local short term session container.
-     */
-    public void clearSessionStorage() throws MBeanException;
+        return new ArrayList<>(names);
+    }
+
+    @Override
+    public long getNumberOfRegisteredWebSocketConnections() throws MBeanException {
+        return connectionRegistry.getNumberOfRegisteredConnections();
+    }
 
 }

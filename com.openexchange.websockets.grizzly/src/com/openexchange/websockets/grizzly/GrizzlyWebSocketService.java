@@ -55,6 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.websockets.SendControl;
 import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketExceptionCodes;
+import com.openexchange.websockets.WebSocketInfo;
 import com.openexchange.websockets.WebSocketService;
 import com.openexchange.websockets.WebSockets;
 import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
@@ -133,6 +134,16 @@ public class GrizzlyWebSocketService implements WebSocketService {
     }
 
     // -------------------------------------------------------------------------------------------------------------
+
+    @Override
+    public List<WebSocketInfo> listClusterWebSocketInfo() throws OXException {
+        List<WebSocketInfo> infos = remoteDistributor.listClusterWebSocketInfo();
+        if (null == infos) {
+            // Only locally available...
+            infos = localApp.listWebSocketInfo();
+        }
+        return infos;
+    }
 
     @Override
     public List<WebSocket> listLocalWebSockets() throws OXException {

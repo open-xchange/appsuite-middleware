@@ -68,7 +68,7 @@ final class WebSocketHits implements Hits {
     private final Set<WebSocketClient> clients;
 
     /**
-     * Initializes a new {@link HitsImplementation}.
+     * Initializes a new {@link WebSocketHits}.
      *
      * @param clients The set of clients having an open Web Socket
      * @param userId The user identifier
@@ -83,7 +83,7 @@ final class WebSocketHits implements Hits {
 
     @Override
     public Iterator<Hit> iterator() {
-        return new IteratorImpl(clients.iterator(), userId, contextId);
+        return new Iter(clients.iterator(), userId, contextId);
     }
 
     @Override
@@ -93,7 +93,7 @@ final class WebSocketHits implements Hits {
 
     // ------------------------------------------------------------------------------
 
-    private static final class IteratorImpl implements Iterator<Hit> {
+    private static final class Iter implements Iterator<Hit> {
 
         private final Iterator<WebSocketClient> iterator;
         private final int userId;
@@ -102,7 +102,7 @@ final class WebSocketHits implements Hits {
         /**
          * Initializes a new {@link IteratorImplementation}.
          */
-        IteratorImpl(Iterator<WebSocketClient> iterator, int userId, int contextId) {
+        Iter(Iterator<WebSocketClient> iterator, int userId, int contextId) {
             super();
             this.iterator = iterator;
             this.userId = userId;

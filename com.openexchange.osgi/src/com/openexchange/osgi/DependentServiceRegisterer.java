@@ -84,6 +84,15 @@ public class DependentServiceRegisterer<S> implements ServiceTrackerCustomizer<O
     protected S registeredService;
     private ServiceRegistration<?> registration;
 
+    /**
+     * Initializes a new {@link DependentServiceRegisterer}.
+     *
+     * @param context The bundle context
+     * @param serviceType The type of the service
+     * @param serviceClass The class of the concrete service instance
+     * @param properties The accompanying service properties
+     * @param neededServices The needed services
+     */
     public DependentServiceRegisterer(BundleContext context, Class<S> serviceType, Class<? extends S> serviceClass, Dictionary<String, ?> properties, Class<?>... neededServices) {
         super();
         this.context = context;
@@ -112,13 +121,13 @@ public class DependentServiceRegisterer<S> implements ServiceTrackerCustomizer<O
                 needsRegistration &= null != foundServices[i];
             }
             needsRegistration &= null == registration;
+            if (needsRegistration) {
+                register();
+            }
+            setState();
         } finally {
             lock.unlock();
         }
-        if (needsRegistration) {
-            register();
-        }
-        setState();
         return obj;
     }
 
@@ -129,7 +138,8 @@ public class DependentServiceRegisterer<S> implements ServiceTrackerCustomizer<O
     protected void register() {
         try {
             Constructor<? extends S> constructor = serviceClass.getConstructor(neededServices);
-            registeredService = constructor.newInstance(foundServices);
+            S registeredService = constructor.newInstance(foundServices);
+            this.registeredService = registeredService;
             LOG.trace("Registering service {}", serviceClass.getName());
             registration = context.registerService(serviceType, registeredService, properties);
         } catch (Throwable t) {
@@ -159,13 +169,13 @@ public class DependentServiceRegisterer<S> implements ServiceTrackerCustomizer<O
                 unregister = registration;
                 registration = null;
             }
+            if (null != unregister) {
+                unregister(unregister, service);
+            }
+            setState();
         } finally {
             lock.unlock();
         }
-        if (null != unregister) {
-            unregister(unregister, service);
-        }
-        setState();
         context.ungetService(reference);
     }
 

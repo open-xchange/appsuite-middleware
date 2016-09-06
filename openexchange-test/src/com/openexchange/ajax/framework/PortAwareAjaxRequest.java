@@ -47,35 +47,23 @@
  *
  */
 
-package com.openexchange.file.storage.boxcom.access.extended.requests;
-
-import org.apache.http.HttpStatus;
-import com.box.boxjavalibv2.IBoxConfig;
-import com.box.boxjavalibv2.jsonparsing.IBoxJSONParser;
-import com.box.restclientv2.RestMethod;
-import com.box.restclientv2.exceptions.BoxRestException;
-import com.box.restclientv2.requestsbase.DefaultBoxRequest;
+package com.openexchange.ajax.framework;
 
 /**
- * {@link DeleteFileVersionRequest}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * {@link PortAwareAjaxRequest}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.3
+ * @param <T>
  */
-public class DeleteFileVersionRequest extends DefaultBoxRequest {
-
-    public static final String URI = "/files/%s/versions/%s";
+public interface PortAwareAjaxRequest<T extends AbstractAJAXResponse> extends AJAXRequest<T> {
 
     /**
-     * Initializes a new {@link DeleteFileVersionRequest}.
-     * 
-     * @param config The IBoxConfig
-     * @param parser The parser
-     * @param fileId the file identifier
-     * @param version the version identifier
-     * @throws BoxRestException
+     * Retrieves the port to be used for this request
+     *
+     * @return The port
      */
-    public DeleteFileVersionRequest(IBoxConfig config, IBoxJSONParser parser, String fileId, String version) throws BoxRestException {
-        super(config, parser, String.format(URI, fileId, version), RestMethod.DELETE, null);
-        setExpectedResponseCode(HttpStatus.SC_NO_CONTENT);
-    }
+    public String getPort();
+
 }

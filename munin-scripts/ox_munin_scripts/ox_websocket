@@ -32,12 +32,12 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
     
     print "count.label count\n";
     print "count.draw LINE1\n";
-    print "count.type DERIVE\n";
+    print "count.type GAUGE\n";
     print "count.min 0\n";
     
     print "buffered-message.label buffered-message\n";
     print "buffered-message.draw LINE1\n";
-    print "buffered-message.type DERIVE\n";
+    print "buffered-message.type GAUGE\n";
     print "buffered-message.min 0\n";
 
     exit 0

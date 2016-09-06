@@ -47,63 +47,56 @@
  *
  */
 
-package com.openexchange.file.storage.boxcom.access.extended.requests.requestobjects;
+package com.openexchange.pns.impl;
 
-import com.box.boxjavalibv2.dao.BoxFile;
-import com.box.boxjavalibv2.dao.BoxFolder;
-import com.box.boxjavalibv2.dao.BoxItem;
-import com.box.boxjavalibv2.jsonentities.MapJSONStringEntity;
-import com.box.restclientv2.requestsbase.BoxDefaultRequestObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.pns.KnownTopic;
+import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.push.PushClientChecker;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link PreflightCheckRequestObject}
+ * {@link SubscriptionAwarePushClientChecker}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class PreflightCheckRequestObject extends BoxDefaultRequestObject {
+public class SubscriptionAwarePushClientChecker implements PushClientChecker {
+
+    private final PushSubscriptionRegistry registry;
 
     /**
-     * Initializes a new {@link PreflightCheckRequestObject}.
+     * Initializes a new {@link SubscriptionAwarePushClientChecker}.
      */
-    public PreflightCheckRequestObject(String name, String parentId, long size) {
+    public SubscriptionAwarePushClientChecker(PushSubscriptionRegistry subscriptionRegistry) {
         super();
-        setName(name);
-        setParent(parentId);
-        setSize(size);
+        this.registry = subscriptionRegistry;
+
     }
 
-    /**
-     * Set the name of the file
-     * 
-     * @param name the name of the file
-     * @return
-     */
-    private PreflightCheckRequestObject setName(String name) {
-        put(BoxFile.FIELD_NAME, name);
-        return this;
+    @Override
+    public boolean isAllowed(String clientId, Session session) throws OXException {
+        if (null == session || Strings.isEmpty(clientId)) {
+            // Unable to check
+            return false;
+        }
+
+        return registry.hasInterestedSubscriptions(clientId, session.getUserId(), session.getContextId(), KnownTopic.MAIL_NEW.getName());
+
+        /*-
+         * Apparently PNS service has been registered.
+         *
+         * Thus simply signal to allow as potentially every client may subscribe to "ox:mail:new" event, since:
+         * Conditions/dependencies like:
+         *  - Exists such a subscription?
+         *  - Or is there a Web Socket?
+         *  - Will a Web Socket be opened later on?
+         *  - Will there be subscription later on?
+         *  - Is it safe to drop listener because Web Socket teared down?
+         * are too complex to handle robustly
+         */
     }
 
-    /**
-     * Set the parent folder of the file.
-     * 
-     * @param parentId the identifier of the parent folder
-     * @return
-     */
-    private PreflightCheckRequestObject setParent(String parentId) {
-        MapJSONStringEntity entity = new MapJSONStringEntity();
-        entity.put(BoxFolder.FIELD_ID, parentId);
-        put(BoxItem.FIELD_PARENT, entity);
-        return this;
-    }
-
-    /**
-     * Set the size of the file in bytes
-     * 
-     * @param size the size of the file in bytes
-     * @return
-     */
-    private PreflightCheckRequestObject setSize(long size) {
-        put(BoxFile.FIELD_SIZE, size);
-        return this;
-    }
 }

@@ -52,7 +52,7 @@ package com.openexchange.pns.transport.websocket.osgi;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
@@ -69,7 +69,7 @@ import com.openexchange.pns.transport.websocket.internal.WebSocketToClientResolv
  */
 public class WebSocketToClientResolverTracker extends RankingAwareNearRegistryServiceTracker<WebSocketToClientResolver> implements WebSocketToClientResolverRegistry {
 
-    private final ConcurrentMap<WebSocketClient, Boolean> supportedClients;
+    private final ConcurrentMap<String, WebSocketClient> supportedClients;
 
     /**
      * Initializes a new {@link WebSocketToClientResolverTracker}.
@@ -84,9 +84,9 @@ public class WebSocketToClientResolverTracker extends RankingAwareNearRegistrySe
         List<String> toRemove = new LinkedList<>();
         boolean invalid = true;
         try {
-            Set<WebSocketClient> clients = resolver.getSupportedClients();
-            for (WebSocketClient clientToAdd : clients) {
-                if (null != supportedClients.putIfAbsent(clientToAdd, Boolean.TRUE)) {
+            Map<String, WebSocketClient> clients = resolver.getSupportedClients();
+            for (Map.Entry<String, WebSocketClient> clientToAdd : clients.entrySet()) {
+                if (null != supportedClients.putIfAbsent(clientToAdd.getKey(), clientToAdd.getValue())) {
                     // There is already such a client...
                     return false;
                 }
@@ -104,20 +104,20 @@ public class WebSocketToClientResolverTracker extends RankingAwareNearRegistrySe
 
     @Override
     protected void onServiceRemoved(WebSocketToClientResolver resolver) {
-        Set<WebSocketClient> clients = resolver.getSupportedClients();
-        for (WebSocketClient clientToRemove : clients) {
+        Map<String, WebSocketClient> clients = resolver.getSupportedClients();
+        for (String clientToRemove : clients.keySet()) {
             supportedClients.remove(clientToRemove);
         }
     }
 
     @Override
-    public Set<WebSocketClient> getAllSupportedClients() {
-        return Collections.unmodifiableSet(supportedClients.keySet());
+    public Map<String, WebSocketClient> getAllSupportedClients() {
+        return Collections.unmodifiableMap(supportedClients);
     }
 
     @Override
     public boolean containsClient(String client) {
-        return null != client && supportedClients.containsKey(new WebSocketClient(client, null));
+        return null != client && supportedClients.containsKey(client);
     }
 
 }

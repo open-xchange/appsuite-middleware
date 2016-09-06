@@ -50,20 +50,20 @@
 package com.openexchange.websockets.grizzly.remote;
 
 /**
- * {@link WebSocketInfo}
+ * {@link MapValue} - The value for Hazelcast map.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class WebSocketInfo {
+class MapValue {
 
     /**
-     * Parses the Web Socket information from specified string.
+     * Parses the map value information from specified string.
      *
      * @param socketInfo The socket information as string
-     * @return The parsed socket information
+     * @return The parsed value
      */
-    public static WebSocketInfo parseFrom(String socketInfo) {
+    static MapValue parseFrom(String socketInfo) {
         if (null == socketInfo) {
             return null;
         }
@@ -73,7 +73,7 @@ public class WebSocketInfo {
             throw new IllegalArgumentException("Illegal socket info: " + socketInfo);
         }
 
-        return new WebSocketInfo(socketInfo.substring(0, pos), ++pos == socketInfo.length() ? null : socketInfo.substring(pos));
+        return new MapValue(socketInfo.substring(0, pos), ++pos == socketInfo.length() ? null : socketInfo.substring(pos));
     }
 
     /**
@@ -82,7 +82,7 @@ public class WebSocketInfo {
      * @param socketInfo The socket information as string
      * @return The parsed path
      */
-    public static String parsePathFrom(String socketInfo) {
+    static String parsePathFrom(String socketInfo) {
         if (null == socketInfo) {
             return null;
         }
@@ -103,12 +103,12 @@ public class WebSocketInfo {
     private int hash;
 
     /**
-     * Initializes a new {@link WebSocketInfo}.
+     * Initializes a new {@link MapValue}.
      *
      * @param connectionId The connection identifier
      * @param path The path
      */
-    public WebSocketInfo(String connectionId, String path) {
+    MapValue(String connectionId, String path) {
         super();
         this.connectionId = connectionId;
         this.path = path;
@@ -119,7 +119,7 @@ public class WebSocketInfo {
      *
      * @return The connection identifier
      */
-    public String getConnectionId() {
+    String getConnectionId() {
         return connectionId;
     }
 
@@ -128,7 +128,7 @@ public class WebSocketInfo {
      *
      * @return The path
      */
-    public String getPath() {
+    String getPath() {
         return path;
     }
 
@@ -149,10 +149,10 @@ public class WebSocketInfo {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof WebSocketInfo)) {
+        if (!(obj instanceof MapValue)) {
             return false;
         }
-        WebSocketInfo other = (WebSocketInfo) obj;
+        MapValue other = (MapValue) obj;
         if (connectionId == null) {
             if (other.connectionId != null) {
                 return false;
@@ -170,5 +170,18 @@ public class WebSocketInfo {
         return true;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(48);
+        builder.append("{");
+        if (connectionId != null) {
+            builder.append("connectionId=").append(connectionId).append(", ");
+        }
+        if (path != null) {
+            builder.append("path=").append(path);
+        }
+        builder.append("}");
+        return builder.toString();
+    }
 
 }

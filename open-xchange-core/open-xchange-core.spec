@@ -17,7 +17,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1356,45 +1356,13 @@ ox_add_property com.openexchange.ajax.login.checkPunyCodeLoginString false /opt/
 ox_add_property com.openexchange.ical.updateTimezones true /opt/open-xchange/etc/server.properties
 
 # SoftwareChange_Request-3406
-TMPFILE=$(mktemp)
-rm -f $TMPFILE
-cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/appender[@name=\'FILE\']/encoder/pattern -r -
-<configuration>
-    <appender name="FILE">
-        <encoder>
-            <pattern>%date{"yyyy-MM-dd'T'HH:mm:ss,SSSZ"} %-5level [%thread] %class.%method\(%class{0}.java:%line\)%n%sanitisedMessage%n%lmdc%exception{full}</pattern>
-        </encoder>
-    </appender>
-</configuration>
-EOF
-if [ -e $TMPFILE ]; then
-    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
-    rm -f $TMPFILE
-fi
-cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/appender[@name=\'FILE_COMPAT\']/encoder/pattern -r -
-<configuration>
-    <appender name="FILE_COMPAT">
-        <encoder>
-            <pattern>%d{"MMM dd, yyyy H:mm:ss a"} %class.%method\(%class{0}.java:%line\)%n%level: %sanitisedMessage%n%lmdc%exception{full}</pattern>
-        </encoder>
-    </appender>
-</configuration>
-EOF
-if [ -e $TMPFILE ]; then
-    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
-    rm -f $TMPFILE
-fi
-cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/appender[@name=\'SYSLOG\']/suffixPattern -r -
-<configuration>
-    <appender name="SYSLOG">
-        <suffixPattern>%date open-xchange %-5level [%logger][%thread]: %class.%method\(%class{0}.java:%line\)%n%lmdc %n %sanitisedMessage%n</suffixPattern>
-    </appender>
-</configuration>
-EOF
-if [ -e $TMPFILE ]; then
-    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
-    rm -f $TMPFILE
-fi
+# search from the named appender up to the next closing pattern or
+# suffixPattern and replace only %message with %sanitisedMessage in that
+# context
+logconfig=/opt/open-xchange/etc/logback.xml
+sed -r -i '/<appender .*name="FILE".*>/,/<\/pattern>/ s/%message/%sanitisedMessage/g' $logconfig
+sed -r -i '/<appender .*name="FILE_COMPAT".*>/,/<\/pattern>/ s/%message/%sanitisedMessage/g' $logconfig
+sed -r -i '/<appender .*name="SYSLOG".*>/,/<\/suffixPattern>/ s/%message/%sanitisedMessage/g' $logconfig
 
 # SoftwareChange_Request-3421
 ox_remove_property com.openexchange.mail.transport.enablePublishOnExceededQuota /opt/open-xchange/etc/transport.properties
@@ -1449,6 +1417,8 @@ exit 0
 %doc com.openexchange.server/doc/examples
 
 %changelog
+* Tue Sep 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.3 release
 * Tue Jul 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.8.2 release
 * Wed Jul 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
