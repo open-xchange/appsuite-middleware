@@ -231,7 +231,9 @@ public final class SessionHandler {
         SessionControl[] control = sessionData.removeUserSessions(userId, contextId);
         Session[] retval = new Session[control.length];
         for (int i = 0; i < retval.length; i++) {
-            retval[i] = control[i].getSession();
+            SessionImpl removedSession = control[i].getSession();
+            retval[i] = removedSession;
+            postSessionRemoval(removedSession);
         }
         /*
          * remove local sessions from storage (if available), too
