@@ -55,7 +55,7 @@ package com.openexchange.websockets;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class WebSocketInfo {
+public final class WebSocketInfo implements Comparable<WebSocketInfo> {
 
     /**
      * Creates a new builder.
@@ -146,12 +146,14 @@ public class WebSocketInfo {
     private final String address;
     private final ConnectionId connectionId;
     private final String path;
+    private int hash;
 
     /**
      * Initializes a new {@link WebSocketInfo}.
      */
     WebSocketInfo(int userId, int contextId, String address, ConnectionId connectionId, String path) {
         super();
+        hash = 0;
         this.userId = userId;
         this.contextId = contextId;
         this.address = address;
@@ -202,6 +204,130 @@ public class WebSocketInfo {
      */
     public String getPath() {
         return path;
+    }
+
+    @Override
+    public int compareTo(WebSocketInfo other) {
+        int result = Integer.compare(contextId, other.contextId);
+        if (result != 0) {
+            return result;
+        }
+
+        result = Integer.compare(userId, other.userId);
+        if (result != 0) {
+            return result;
+        }
+
+        if (address == null) {
+            if (other.address != null) {
+                return -1;
+            }
+        } else {
+            result = null == other.address ? 1 : address.compareTo(other.address);
+            if (result != 0) {
+                return result;
+            }
+        }
+
+        if (connectionId == null) {
+            if (other.connectionId != null) {
+                return -1;
+            }
+        } else {
+            result = null == other.connectionId ? 1 : connectionId.compareTo(other.connectionId);
+            if (result != 0) {
+                return result;
+            }
+        }
+
+        if (path == null) {
+            if (other.path != null) {
+                return -1;
+            }
+        } else {
+            result = null == other.path ? 1 : path.compareTo(other.path);
+            if (result != 0) {
+                return result;
+            }
+        }
+
+        return 0;
+    }
+
+
+    @Override
+    public int hashCode() {
+        int result = hash; // No need to synchronize...
+        if (result == 0) {
+            int prime = 31;
+            result = 1;
+            result = prime * result + contextId;
+            result = prime * result + userId;
+            result = prime * result + ((address == null) ? 0 : address.hashCode());
+            result = prime * result + ((connectionId == null) ? 0 : connectionId.hashCode());
+            result = prime * result + ((path == null) ? 0 : path.hashCode());
+            hash = result;
+        }
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (obj.getClass() != WebSocketInfo.class) {
+            return false;
+        }
+        WebSocketInfo other = (WebSocketInfo) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        if (address == null) {
+            if (other.address != null) {
+                return false;
+            }
+        } else if (!address.equals(other.address)) {
+            return false;
+        }
+        if (connectionId == null) {
+            if (other.connectionId != null) {
+                return false;
+            }
+        } else if (!connectionId.equals(other.connectionId)) {
+            return false;
+        }
+        if (path == null) {
+            if (other.path != null) {
+                return false;
+            }
+        } else if (!path.equals(other.path)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder2 = new StringBuilder();
+        builder2.append("{userId=").append(userId).append(", contextId=").append(contextId).append(", ");
+        if (address != null) {
+            builder2.append("address=").append(address).append(", ");
+        }
+        if (path != null) {
+            builder2.append("path=").append(path);
+        }
+        if (connectionId != null) {
+            builder2.append("connectionId=").append(connectionId).append(", ");
+        }
+        builder2.append("}");
+        return builder2.toString();
     }
 
 }

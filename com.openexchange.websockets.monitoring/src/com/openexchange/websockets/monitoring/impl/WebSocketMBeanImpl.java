@@ -51,6 +51,7 @@ package com.openexchange.websockets.monitoring.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
@@ -108,6 +109,7 @@ public class WebSocketMBeanImpl extends AnnotatedStandardMBean implements WebSoc
     public List<List<String>> listClusterWebSocketInfo() throws MBeanException {
         try {
             List<WebSocketInfo> infos = webSocketService.listClusterWebSocketInfo();
+            Collections.sort(infos);
 
             List<List<String>> list = new ArrayList<List<String>>(infos.size());
             for (WebSocketInfo info : infos) {
