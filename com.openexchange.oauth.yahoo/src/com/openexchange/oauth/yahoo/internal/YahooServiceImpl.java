@@ -67,9 +67,7 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
@@ -196,12 +194,13 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
     public String getAccountDisplayName(Session session, int user, int contextId, int accountId) {
         String displayName = "";
         try {
-            final OAuthService oAuthService = services.getService(OAuthService.class);
-            final OAuthAccount account = oAuthService.getAccount(accountId, session, user, contextId);
-            displayName = account.getDisplayName();
+            OAuthAccess yahooAccess = getOAuthAccess(session, accountId);
+            YahooClient yc = (YahooClient) yahooAccess.getClient().client;
+            displayName = yc.getDisplayName();
         } catch (final OXException e) {
             LOGGER.error("", e);
         }
+
         return displayName;
     }
 

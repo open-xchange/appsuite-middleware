@@ -182,6 +182,14 @@ public class YahooClient {
         final Response singleContactResponse = singleContactRequest.send(YahooRequestTuner.getInstance());
         return extractJson(singleContactResponse);
     }
+    
+    /**
+     * Get the account's display name
+     * @return the account's display name
+     */
+    public String getDisplayName() {
+        return oauthAccount.getDisplayName();
+    }
 
     /**
      * Extracts JSON out of given response
