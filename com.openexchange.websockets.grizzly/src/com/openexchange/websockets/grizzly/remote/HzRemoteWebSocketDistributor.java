@@ -512,25 +512,26 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             for (List<String> partition : Lists.partition(payloads, 5)) {
                 Map<Member, Future<Void>> futureMap = executor.submitToMembers(new PortableMessageDistributor(partition, pathFilter, userId, contextId, async), effectiveOtherMembers);
                 if (async) {
-                    LOG.info("Submitted message(s) to remote Web Socket(s) connected to member(s) \"{}\" using path filter \"{}\" to user {} in context {}", effectiveOtherMembers, pathFilter, I(userId), I(contextId));
+                    LOG.info("Submitted {} message(s) to remote Web Socket(s) connected to member(s) \"{}\" using path filter \"{}\" to user {} in context {}", I(partition.size()), effectiveOtherMembers, pathFilter, I(userId), I(contextId));
                 } else {
                     // Wait for completion of each submitted task
+                    int numOfPayloads = partition.size();
                     for (Map.Entry<Member, Future<Void>> element : futureMap.entrySet()) {
-                        handleSubmittedFuture(element.getValue(), pathFilter, element.getKey(), userId, contextId);
+                        handleSubmittedFuture(element.getValue(), numOfPayloads, pathFilter, element.getKey(), userId, contextId);
                     }
                 }
             }
         }
     }
 
-    private void handleSubmittedFuture(Future<Void> future, String pathFilter, Member member, int userId, int contextId) throws Error {
+    private void handleSubmittedFuture(Future<Void> future, int numOfPayloads, String pathFilter, Member member, int userId, int contextId) throws Error {
         // Check Future's return value
         int retryCount = 3;
         while (retryCount-- > 0) {
             try {
                 future.get();
                 retryCount = 0;
-                LOG.info("Transmitted message(s) to remote Web Socket(s) connected to member \"{}\" using path filter \"{}\" to user {} in context {}", member, pathFilter, I(userId), I(contextId));
+                LOG.info("Transmitted {} message(s) to remote Web Socket(s) connected to member \"{}\" using path filter \"{}\" to user {} in context {}", I(numOfPayloads), member, pathFilter, I(userId), I(contextId));
             } catch (InterruptedException e) {
                 // Interrupted - Keep interrupted state
                 LOG.debug("Interrupted while waiting for {} to complete on member \"{}\" using path filter \"{}\" for user {} in context {}", PortableMessageDistributor.class.getSimpleName(), member, pathFilter, I(userId), I(contextId), e);
