@@ -147,11 +147,6 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     }
 
     @Override
-    public String getAPIKey() {
-        return getOAuthProperty(OAuthPropertyID.apiKey).getValue();
-    }
-
-    @Override
     public boolean isEnabled(final int userId, final int contextId) throws OXException {
         /*
          * disable for guests
@@ -203,11 +198,6 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     @Override
     public String getAPIKey(final Session session) throws OXException {
         return getFromConfigViewFactory(session, OAuthPropertyID.apiKey);
-    }
-
-    @Override
-    public String getAPISecret() {
-        return getOAuthProperty(OAuthPropertyID.apiSecret).getValue();
     }
 
     @Override

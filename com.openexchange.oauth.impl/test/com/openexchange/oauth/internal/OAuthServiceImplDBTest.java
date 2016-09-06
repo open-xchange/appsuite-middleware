@@ -91,16 +91,6 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
         registry.addService(new AbstractOAuthServiceMetaData() {
 
             @Override
-            public String getAPIKey() {
-                return "apiKey";
-            }
-
-            @Override
-            public String getAPISecret() {
-                return "apiSecret";
-            }
-
-            @Override
             public String getDisplayName() {
                 return "The cool oauthService";
             }

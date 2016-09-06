@@ -110,8 +110,7 @@ public final class DropboxOAuthServiceMetaData extends AbstractScribeAwareOAuthS
     public OAuthInteraction initOAuth(final String callbackUrl, final Session session) throws OXException {
         try {
             final AppKeyPair appKeys = new AppKeyPair(getAPIKey(session), getAPISecret(session));
-            final DropboxAPI<WebAuthSession> dropboxAPI =
-                new DropboxAPI<WebAuthSession>(new TrustAllWebAuthSession(appKeys, AccessType.DROPBOX));
+            final DropboxAPI<WebAuthSession> dropboxAPI = new DropboxAPI<WebAuthSession>(new TrustAllWebAuthSession(appKeys, AccessType.DROPBOX));
             final StringBuilder authUrl = new StringBuilder(dropboxAPI.getSession().getAuthInfo().url);
             if (!Strings.isEmpty(callbackUrl)) {
                 authUrl.append('&').append(OAuthConstants.URLPARAM_OAUTH_CALLBACK).append('=').append(urlEncode(callbackUrl)).toString();
@@ -176,9 +175,10 @@ public final class DropboxOAuthServiceMetaData extends AbstractScribeAwareOAuthS
             arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, token);
             // Check
             {
-                final AppKeyPair appKeys = new AppKeyPair(getAPIKey(), getAPISecret());
-                final WebAuthSession session = new TrustAllWebAuthSession(appKeys, AccessType.APP_FOLDER);
-                final DropboxAPI<WebAuthSession> mDBApi = new DropboxAPI<WebAuthSession>(session);
+                Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
+                final AppKeyPair appKeys = new AppKeyPair(getAPIKey(session), getAPISecret(session));
+                final WebAuthSession dbxSession = new TrustAllWebAuthSession(appKeys, AccessType.APP_FOLDER);
+                final DropboxAPI<WebAuthSession> mDBApi = new DropboxAPI<WebAuthSession>(dbxSession);
                 // Re-auth specific stuff
                 final AccessTokenPair reAuthTokens = new AccessTokenPair(tokenKey, tokenSecret);
                 mDBApi.getSession().setAccessTokenPair(reAuthTokens);

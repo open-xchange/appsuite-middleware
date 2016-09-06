@@ -88,16 +88,6 @@ public interface OAuthServiceMetaData {
     boolean isEnabled(int userId, int contextId) throws OXException;
 
     /**
-     * Use {@link #getAPIKey(Session)} and also please implement {@link #getAPIKey(Session)}
-     *
-     * <p><u><b>NOTE</b></u>:This method is <b>deprecated</b> and it will be removed in a future release.</p>
-     *
-     * @return The API key
-     */
-    @Deprecated
-    String getAPIKey();
-
-    /**
      * Gets the API key that belongs to a given session
      * 
      * @param session
@@ -105,16 +95,6 @@ public interface OAuthServiceMetaData {
      * @throws OXException
      */
     String getAPIKey(Session session) throws OXException;
-
-    /**
-     * Use {@link #getAPISecret(Session)} and also implement {@link #getAPISecret(Session)}
-     * 
-     * <p><u><b>NOTE</b></u>:This method is <b>deprecated</b> and it will be removed in a future release.</p>
-     * 
-     * @return The API secret
-     */
-    @Deprecated
-    String getAPISecret();
 
     /**
      * Gets the API secret that belongs to a given session
