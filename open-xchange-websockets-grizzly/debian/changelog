@@ -1,3 +1,9 @@
+open-xchange-websockets-grizzly (7.8.3-0) unstable; urgency=medium
+
+  * prepare for 7.8.3 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 06 Sep 2016 11:27:06 +0200
+
 open-xchange-websockets-grizzly (7.8.2-0) unstable; urgency=medium
 
   * Initial release

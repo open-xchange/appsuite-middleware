@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange sessionstorage hazelcast bundle
 Bundle-SymbolicName: com.openexchange.sessionstorage.hazelcast
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Activator: com.openexchange.sessionstorage.hazelcast.osgi.HazelcastSessionStorageActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

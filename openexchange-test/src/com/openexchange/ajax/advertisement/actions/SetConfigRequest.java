@@ -52,9 +52,14 @@ package com.openexchange.ajax.advertisement.actions;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.ParseException;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.CustomizedParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.PortAwareAjaxRequest;
 import com.openexchange.tools.encoding.Base64;
@@ -174,7 +179,23 @@ public class SetConfigRequest implements PortAwareAjaxRequest<SetConfigResponse>
 
     @Override
     public AbstractAJAXParser<? extends SetConfigResponse> getParser() {
-        return new Parser(false);
+        return new CustomizedParser<SetConfigResponse>(new Parser(false)) {
+
+            @Override
+            protected String checkCustom(HttpResponse resp) throws ParseException, IOException {
+
+                if (resp.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
+                    return "";
+                }
+
+                if (resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK && resp.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
+                    fail("Wrong status code: " + resp.getStatusLine().getStatusCode());
+                }
+
+                return EntityUtils.toString(resp.getEntity());
+            }
+
+        };
     }
 
     @Override

@@ -50,10 +50,13 @@
 package com.openexchange.mail.json.compose.share;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -61,15 +64,40 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import javax.activation.DataHandler;
+import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.idn.IDNA;
 import org.json.JSONObject;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor;
+import com.openexchange.ajax.requesthandler.converters.preview.PreviewConst;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.conversion.DataProperties;
+import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.imagetransformation.ImageTransformationService;
+import com.openexchange.imagetransformation.ImageTransformations;
+import com.openexchange.imagetransformation.ScaleType;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.DelegatingComposedMailMessage;
 import com.openexchange.mail.json.compose.AbstractComposeHandler;
@@ -86,6 +114,13 @@ import com.openexchange.mail.json.compose.share.internal.ShareComposeLinkGenerat
 import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
 import com.openexchange.mail.json.compose.share.spi.EnabledChecker;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
+import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.dataobjects.MimeMailPart;
+import com.openexchange.mail.mime.datasource.FileHolderDataSource;
+import com.openexchange.preview.PreviewDocument;
+import com.openexchange.preview.PreviewOutput;
+import com.openexchange.preview.PreviewService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -93,6 +128,8 @@ import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareLink;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -260,7 +297,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         // Collect recipients
         Set<Recipient> recipients;
         {
-            Set<InternetAddress> addresses = new HashSet<InternetAddress>();
+            Set<InternetAddress> addresses = new HashSet<>();
             addresses.addAll(Arrays.asList(source.getTo()));
             addresses.addAll(Arrays.asList(source.getCc()));
             addresses.addAll(Arrays.asList(source.getBcc()));
@@ -307,6 +344,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         // Some state variables
         StoredAttachmentsControl attachmentsControl = null;
         boolean rollback = true;
+        Map<String, ThresholdFileHolder> previewImages = null;
         try {
             // Store attachments associated with compose context
             attachmentsControl = attachmentStorage.storeAttachments(source, password, expirationDate, autoDelete, context);
@@ -353,6 +391,11 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 personalLink = ShareComposeLinkGenerator.getInstance().createPersonalShareLink(folderTarget, null, composeRequest);
             }
 
+            // Generate preview images
+            previewImages = generatePreviewImages(session, shareReference);
+            Map<String, String> cidMapping = getCidMapping(previewImages);
+            List<MailPart> imageParts = createPreviewPart(cidMapping, previewImages);
+
             // Generate messages from links
             List<ComposedMailMessage> transportMessages = new LinkedList<>();
             ComposedMailMessage sentMessage;
@@ -363,10 +406,13 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 }
                 MessageGenerator messageGenerator = generatorRegistry.getMessageGeneratorFor(composeRequest);
                 for (Map.Entry<ShareComposeLink, Set<Recipient>> entry : links.entrySet()) {
-                    ShareComposeMessageInfo messageInfo = new ShareComposeMessageInfo(entry.getKey(), new ArrayList<Recipient>(entry.getValue()), password, expirationDate, source, context, composeRequest);
-                    List<ComposedMailMessage> generatedTransportMessages = messageGenerator.generateTransportMessagesFor(messageInfo, shareReference);
+                    ShareComposeMessageInfo messageInfo = new ShareComposeMessageInfo(entry.getKey(), new ArrayList<>(entry.getValue()), password, expirationDate, source, context, composeRequest);
+                    List<ComposedMailMessage> generatedTransportMessages = messageGenerator.generateTransportMessagesFor(messageInfo, shareReference, cidMapping, shareReference.getItems().size() - 6);
                     for (ComposedMailMessage generatedTransportMessage : generatedTransportMessages) {
                         generatedTransportMessage.setAppendToSentFolder(false);
+                        for (MailPart imagePart : imageParts) {
+                            generatedTransportMessage.addEnclosedPart(imagePart);
+                        }
                         transportMessages.add(generatedTransportMessage);
                     }
                 }
@@ -374,7 +420,10 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 String sendAddr = session.getUserSettingMail().getSendAddr();
                 User user = composeRequest.getUser();
                 Recipient userRecipient = Recipient.createInternalRecipient(user.getDisplayName(), sendAddr, user);
-                sentMessage = messageGenerator.generateSentMessageFor(new ShareComposeMessageInfo(personalLink, Collections.singletonList(userRecipient), password, expirationDate, source, context, composeRequest), shareReference);
+                sentMessage = messageGenerator.generateSentMessageFor(new ShareComposeMessageInfo(personalLink, Collections.singletonList(userRecipient), password, expirationDate, source, context, composeRequest), shareReference, cidMapping, shareReference.getItems().size() - 6);
+                for (MailPart imagePart : imageParts) {
+                    sentMessage.addEnclosedPart(imagePart);
+                }
             }
 
             // Commit attachment storage
@@ -388,6 +437,13 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                     attachmentsControl.rollback();
                 }
                 attachmentsControl.finish();
+            }
+            if (null != previewImages) {
+                if (rollback) {
+                    for (ThresholdFileHolder tfh : previewImages.values()) {
+                        tfh.close();
+                    }
+                }
             }
         }
     }
@@ -407,6 +463,204 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             user = null;
         }
         return user;
+    }
+
+    private Map<String, ThresholdFileHolder> generatePreviewImages(Session session, ShareReference reference) throws OXException {
+        List<Item> items = reference.getItems();
+        PreviewService previewService = ServerServiceRegistry.getInstance().getService(PreviewService.class);
+        ImageTransformationService transformationService = ServerServiceRegistry.getInstance().getService(ImageTransformationService.class);
+        IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class);
+        ThreadPoolService threadPoolService = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+        ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        boolean documentPreviewEnabled = false;
+        if (null != configurationService) {
+            documentPreviewEnabled = configurationService.getBoolProperty("com.openexchange.mail.compose.share.documentPreviewEnabled", false);
+        }
+        if (null == items || items.isEmpty() || null == previewService || null == transformationService || null == fileAccessFactory || null == threadPoolService) {
+            return java.util.Collections.emptyMap();
+        }
+        List<PreviewTask> previewTasks = new ArrayList<>(6);
+        Map<String, ThresholdFileHolder> previews = new HashMap<>(6);
+        boolean error = true;
+        try {
+            for (int k = Math.min(items.size(), 6), i = 0; k-- > 0; i++) {
+                String id = items.get(i).getId();
+                PreviewTask previewTask = new PreviewTask(id, fileAccessFactory, transformationService, previewService, session, documentPreviewEnabled);
+                previewTasks.add(previewTask);
+            }
+            List<Future<Pair<String, ThresholdFileHolder>>> previewImages = threadPoolService.invokeAll(previewTasks);
+            for (Future<Pair<String, ThresholdFileHolder>> preview : previewImages) {
+                Pair<String, ThresholdFileHolder> encodedThumbnail = preview.get(500, TimeUnit.MILLISECONDS);
+                String id = encodedThumbnail.getFirst();
+                ThresholdFileHolder thumbnail = encodedThumbnail.getSecond();
+                previews.put(id, thumbnail);
+            }
+            error = false;
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            return java.util.Collections.emptyMap();
+        } finally {
+            if (error) {
+                for (ThresholdFileHolder tfh : previews.values()) {
+                    tfh.close();
+                }
+            }
+        }
+        return previews;
+    }
+
+    private Map<String, String> getCidMapping(Map<String, ThresholdFileHolder> previewImages) {
+        if (null == previewImages || previewImages.size() == 0) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, String> cidMapping = new HashMap<>();
+        for (String id : previewImages.keySet()) {
+            cidMapping.put(id, UUID.randomUUID().toString());
+        }
+        return cidMapping;
+    }
+
+    private List<MailPart> createPreviewPart(Map<String, String> cidMapping, Map<String, ThresholdFileHolder> previews) throws OXException {
+        try {
+            List<MailPart> parts = new ArrayList<>(cidMapping.size());
+            for (String id : cidMapping.keySet()) {
+                String contentId = cidMapping.get(id);
+                MimeBodyPart imagePart = new MimeBodyPart();
+                imagePart.setDisposition("inline");
+                imagePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "image/jpeg");
+                imagePart.setContentID("<" + contentId + ">");
+                imagePart.setHeader("X-Attachment-Id", contentId);
+                imagePart.setDataHandler(new DataHandler(new FileHolderDataSource(previews.get(id), "image/jpeg")));
+                MimeMailPart mimeMailPart = new MimeMailPart(imagePart);
+                mimeMailPart.setContentDisposition("inline");
+                mimeMailPart.setContentId("<" + contentId + ">");
+                mimeMailPart.setContentType("image/jpeg");
+                mimeMailPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, "image/jpeg");
+                mimeMailPart.setHeader(MessageHeaders.HDR_CONTENT_ID, "<" + contentId + ">");
+                mimeMailPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, "inline");
+                mimeMailPart.setHeader("X-Attachment-Id", contentId);
+                parts.add(mimeMailPart);
+            }
+            return parts;
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    private static class PreviewTask extends AbstractTask<Pair<String, ThresholdFileHolder>> {
+
+        private final String id;
+        private final IDBasedFileAccessFactory fileAccess;
+        private final ImageTransformationService transformationService;
+        private final PreviewService previewService;
+        private final Session session;
+        private final boolean documentPreviewEnabled;
+
+        public PreviewTask(String id, IDBasedFileAccessFactory fileAccess, ImageTransformationService transformationService, PreviewService previewService, Session session, boolean documentPreviewEnabled) {
+            super();
+            this.id = id;
+            this.fileAccess = fileAccess;
+            this.transformationService = transformationService;
+            this.previewService = previewService;
+            this.session = session;
+            this.documentPreviewEnabled = documentPreviewEnabled;
+        }
+
+        @Override
+        public Pair<String, ThresholdFileHolder> call() throws Exception {
+            IDBasedFileAccess access = fileAccess.createAccess(session);
+            File file = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+            String mimeType = file.getFileMIMEType();
+            InputStream document = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
+            ThresholdFileHolder encodedThumbnail = null;
+            try {
+
+                // Document is an image
+                if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("image")) {
+                    encodedThumbnail = transformImage(document, mimeType);
+                }
+
+                // Document is an audio file
+                else if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("audio/mpeg")) {
+                    if (Mp3CoverExtractor.isSupported(mimeType)) {
+                        IFileHolder mp3Cover = null;
+                        try {
+                            mp3Cover = getCoverImage(document);
+                            encodedThumbnail = transformImage(mp3Cover.getStream(), "image/jpeg");
+                        } finally {
+                            if (null != mp3Cover) {
+                                mp3Cover.close();
+                            }
+                        }
+                    }
+                }
+
+                // Document is something else, try to get preview image with document converter
+                else {
+                    if (documentPreviewEnabled) {
+                        PreviewDocument preview = getDocumentPreview(document, mimeType, session);
+                        InputStream in = null;
+                        try {
+                            in = preview.getThumbnail();
+                            encodedThumbnail = new ThresholdFileHolder();
+                            encodedThumbnail.write(in);
+                        } finally {
+                            Streams.close(in);
+                        }
+                    }
+                }
+            } catch (OXException e) {
+                if (!"PREVIEW".equals(e.getPrefix())) {
+                    throw e;
+                }
+            } finally {
+                Streams.close(document);
+            }
+            if (null == encodedThumbnail) {
+                encodedThumbnail = new ThresholdFileHolder();
+                encodedThumbnail.write(PreviewConst.DEFAULT_THUMBNAIL);
+            }
+            return new Pair<>(id, encodedThumbnail);
+        }
+
+        private ThresholdFileHolder transformImage(InputStream image, String mimeType) throws OXException {
+            try {
+                ImageTransformations transformed = transformationService.transfom(image).scale(200, 150, ScaleType.COVER, true).compress();
+                ThresholdFileHolder transformedImage = new ThresholdFileHolder();
+                transformedImage.write(transformed.getTransformedImage(mimeType).getImageStream());
+                return transformedImage;
+            } catch (IOException e) {
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
+        }
+
+        private IFileHolder getCoverImage(InputStream audioFile) throws OXException {
+            Mp3CoverExtractor mp3CoverExtractor = new Mp3CoverExtractor();
+            ThresholdFileHolder fileHolder = null;
+            try {
+                fileHolder = new ThresholdFileHolder();
+                fileHolder.write(audioFile);
+                fileHolder.setContentType("audio/mpeg");
+                fileHolder.setName(id + ".mp3");
+                return mp3CoverExtractor.extractCover(fileHolder);
+            } finally {
+                if (null != fileHolder) {
+                    fileHolder.close();
+                }
+            }
+        }
+
+        private PreviewDocument getDocumentPreview(InputStream document, String mimeType, Session session) throws OXException {
+            DataProperties dataProperties = new DataProperties(5);
+            dataProperties.put("PreviewWidth", "200");
+            dataProperties.put("PreviewHeight", "150");
+            dataProperties.put("PreviewScaleType", "cover");
+            dataProperties.put(DataProperties.PROPERTY_NAME, id);
+            dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, mimeType);
+            SimpleData<InputStream> data = new SimpleData<>(document, dataProperties);
+            return previewService.getPreviewFor(data, PreviewOutput.IMAGE, session, 0);
+        }
+
     }
 
 }

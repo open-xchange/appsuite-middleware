@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Report Generation Framework
 Bundle-SymbolicName: com.openexchange.report.appsuite
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Activator: com.openexchange.report.appsuite.osgi.ReportActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

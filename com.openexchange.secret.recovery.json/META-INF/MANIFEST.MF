@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: JSON Interface for secret recovery
 Bundle-SymbolicName: com.openexchange.secret.recovery.json
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Activator: com.openexchange.secret.recovery.json.osgi.SecretRecoveryJSONActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

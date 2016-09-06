@@ -31,6 +31,11 @@ And then either of:
  - After failed authentication
  - After redirected authentication (neither failed nor succeeded, but authentication is supposed to happen at another service). Not used by OXWF.
 
+**NOTE**
+Login listeners are also called for password-protected guest and share logins. The latter one (password-protected share) always advertises `anonymous` as login name.
+Hence, the utilized Weakforced policy should not operate solely on login name, but also take IP addresses into consideration. Otherwise all `anonymous` login attempts
+might be temporarily back-listed.
+
 The OXWF itself registers such a login listener, which triggers the HTTP calls to Weakforced service. Currently used:
 
  - `allow`
