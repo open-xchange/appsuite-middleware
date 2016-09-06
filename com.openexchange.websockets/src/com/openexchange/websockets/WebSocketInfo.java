@@ -315,7 +315,7 @@ public final class WebSocketInfo implements Comparable<WebSocketInfo> {
 
     @Override
     public String toString() {
-        StringBuilder builder2 = new StringBuilder();
+        StringBuilder builder2 = new StringBuilder(64);
         builder2.append("{userId=").append(userId).append(", contextId=").append(contextId).append(", ");
         if (address != null) {
             builder2.append("address=").append(address).append(", ");
