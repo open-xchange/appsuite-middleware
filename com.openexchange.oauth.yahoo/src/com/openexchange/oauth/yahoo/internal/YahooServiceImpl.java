@@ -84,6 +84,7 @@ import com.openexchange.threadpool.ThreadPools;
 /**
  * {@link YahooServiceImpl}
  *
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListener {
