@@ -60,21 +60,23 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum Module {
-    mail(false),
-    calendar_ro(true),
-    contacts_ro(true),
-    calendar_rw(false),
-    contacts_rw(false),
-    drive(true),
-    generic(true);
+    mail("Mail", false),
+    calendar_ro("Calendars (Read Only)", true),
+    contacts_ro("Contacts (Read Only)", true),
+    calendar_rw("Calendars (Read/Write)", false),
+    contacts_rw("Contacts (Read/Write)", false),
+    drive("Drive", true),
+    generic("", true);
 
     private static final String modules = Strings.concat(", ", (Object[]) Module.values());
     private final boolean isLegacy;
+    private final String displayName;
 
     /**
      * Initialises a new {@link Module}.
      */
-    private Module(boolean isLegacy) {
+    private Module(String displayName, boolean isLegacy) {
+        this.displayName = displayName;
         this.isLegacy = isLegacy;
     }
 
@@ -106,5 +108,14 @@ public enum Module {
      */
     public boolean isLegacy() {
         return isLegacy;
+    }
+
+    /**
+     * Gets the displayName
+     *
+     * @return The displayName
+     */
+    public String getDisplayName() {
+        return displayName;
     }
 }

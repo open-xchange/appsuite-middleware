@@ -66,8 +66,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.scope.Module;
 import com.openexchange.oauth.yahoo.internal.YahooApi2;
 import com.openexchange.oauth.yahoo.internal.YahooRequestTuner;
 import com.openexchange.session.Session;
@@ -154,6 +156,9 @@ public class YahooClient {
         OAuthRequest request = new OAuthRequest(Verb.GET, ALL_CONTACT_IDS_URL.replace("GUID", guid));
         service.signRequest(accessToken, request);
         final Response response = request.send(YahooRequestTuner.getInstance());
+        if (response.getCode() == 403) {
+            throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.YAHOO.getShortName(), Module.calendar_ro.getDisplayName());
+        }
         final String contentType = response.getHeader("Content-Type");
         if (null == contentType || false == contentType.toLowerCase().contains("application/json")) {
             throw OAuthExceptionCodes.NOT_A_VALID_RESPONSE.create();

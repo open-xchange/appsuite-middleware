@@ -143,7 +143,7 @@ public class ContactsMSLiveSubscribeService extends AbstractMSLiveSubscribeServi
                 JSONObject error = wholeResponse.getJSONObject("error");
                 String code = error.getString("code");
                 if (code.equals("request_token_unauthorized")) {
-                    throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.MS_LIVE_CONNECT.getShortName(), Module.contacts_ro);
+                    throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.MS_LIVE_CONNECT.getShortName(), Module.contacts_ro.getDisplayName());
                 }
                 throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(error.getString("message"));
             }

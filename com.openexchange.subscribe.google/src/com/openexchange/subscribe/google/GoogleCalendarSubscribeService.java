@@ -147,7 +147,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                     GoogleJsonError details = ex.getDetails();
                     String message = details.getMessage();
                     if (message.toLowerCase().equals("insufficient permission")) {
-                        throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), Module.calendar_ro);
+                        throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), Module.calendar_ro.getDisplayName());
                     }
                     throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(message);
                 }
