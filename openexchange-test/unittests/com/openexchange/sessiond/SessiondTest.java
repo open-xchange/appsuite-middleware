@@ -52,7 +52,6 @@ package com.openexchange.sessiond;
 import java.io.FileInputStream;
 import java.util.Properties;
 import java.util.UUID;
-import junit.framework.TestCase;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
@@ -62,7 +61,9 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.TestInit;
+import junit.framework.TestCase;
 
 public class SessiondTest extends TestCase {
 
@@ -74,7 +75,7 @@ public class SessiondTest extends TestCase {
 
     protected static String testUser3 = "test03";
 
-    protected static String defaultContext = "defaultcontext";
+    protected static String defaultContext = null;
 
     protected static String notExistingUser = "notexistinguser";
 
@@ -93,9 +94,10 @@ public class SessiondTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        defaultContext = new TestConfig().getContextName();
 
         if (isInit) {
-            return ;
+            return;
         }
 
         Init.startServer();
@@ -146,53 +148,64 @@ public class SessiondTest extends TestCase {
         final int contextId = ContextStorage.getInstance().getContextId(defaultContext);
         final Context context = ContextStorage.getInstance().getContext(contextId);
         final int userId = UserStorage.getInstance().getUserId(testUser1, context);
-        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
-                SessiondService.class);
+        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         sessiondCon.addSession(new AddSessionParameter() {
+
             @Override
             public String getClientIP() {
                 return "localhost";
             }
+
             @Override
             public Context getContext() {
                 return context;
             }
+
             @Override
             public String getFullLogin() {
                 return testUser1 + '@' + context.getContextId();
             }
+
             @Override
             public String getPassword() {
                 return "secret";
             }
+
             @Override
             public int getUserId() {
                 return userId;
             }
+
             @Override
             public String getUserLoginInfo() {
                 return testUser1;
             }
+
             @Override
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+
             @Override
             public String getHash() {
                 return "123";
             }
+
             @Override
             public String getClient() {
                 return "test";
             }
+
             @Override
             public String getClientToken() {
                 return "testToken";
             }
+
             @Override
             public boolean isTransient() {
                 return false;
             }
+
             @Override
             public SessionEnhancement getEnhancement() {
                 return null;
@@ -204,53 +217,64 @@ public class SessiondTest extends TestCase {
         final int contextId = ContextStorage.getInstance().getContextId(defaultContext);
         final Context context = ContextStorage.getInstance().getContext(contextId);
         final int userId = UserStorage.getInstance().getUserId(testUser1, context);
-        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
-                SessiondService.class);
+        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         final Session session = sessiondCon.addSession(new AddSessionParameter() {
+
             @Override
             public String getClientIP() {
                 return "localhost";
             }
+
             @Override
             public Context getContext() {
                 return context;
             }
+
             @Override
             public String getFullLogin() {
                 return testUser1 + '@' + context.getContextId();
             }
+
             @Override
             public String getPassword() {
                 return "secret";
             }
+
             @Override
             public int getUserId() {
                 return userId;
             }
+
             @Override
             public String getUserLoginInfo() {
                 return testUser1;
             }
+
             @Override
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+
             @Override
             public String getHash() {
                 return "123";
             }
+
             @Override
             public String getClient() {
                 return "test";
             }
+
             @Override
             public String getClientToken() {
                 return "testToken";
             }
+
             @Override
             public boolean isTransient() {
                 return false;
             }
+
             @Override
             public SessionEnhancement getEnhancement() {
                 return null;
@@ -263,53 +287,64 @@ public class SessiondTest extends TestCase {
         final int contextId = ContextStorage.getInstance().getContextId(defaultContext);
         final Context context = ContextStorage.getInstance().getContext(contextId);
         final int userId = UserStorage.getInstance().getUserId(testUser1, context);
-        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
-                SessiondService.class);
+        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         final Session session = sessiondCon.addSession(new AddSessionParameter() {
+
             @Override
             public String getClientIP() {
                 return "localhost";
             }
+
             @Override
             public Context getContext() {
                 return context;
             }
+
             @Override
             public String getFullLogin() {
                 return testUser1 + '@' + context.getContextId();
             }
+
             @Override
             public String getPassword() {
                 return "secret";
             }
+
             @Override
             public int getUserId() {
                 return userId;
             }
+
             @Override
             public String getUserLoginInfo() {
                 return testUser1;
             }
+
             @Override
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+
             @Override
             public String getHash() {
                 return "123";
             }
+
             @Override
             public String getClient() {
                 return "test";
             }
+
             @Override
             public String getClientToken() {
                 return "testToken";
             }
+
             @Override
             public boolean isTransient() {
                 return false;
             }
+
             @Override
             public SessionEnhancement getEnhancement() {
                 return null;
@@ -322,53 +357,64 @@ public class SessiondTest extends TestCase {
         final int contextId = ContextStorage.getInstance().getContextId(defaultContext);
         final Context context = ContextStorage.getInstance().getContext(contextId);
         final int userId = UserStorage.getInstance().getUserId(testUser1, context);
-        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(
-                SessiondService.class);
+        final SessiondService sessiondCon = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         final Session session = sessiondCon.addSession(new AddSessionParameter() {
+
             @Override
             public String getClientIP() {
                 return "localhost";
             }
+
             @Override
             public Context getContext() {
                 return context;
             }
+
             @Override
             public String getFullLogin() {
                 return testUser1 + '@' + context.getContextId();
             }
+
             @Override
             public String getPassword() {
                 return "secret";
             }
+
             @Override
             public int getUserId() {
                 return userId;
             }
+
             @Override
             public String getUserLoginInfo() {
                 return testUser1;
             }
+
             @Override
             public String getAuthId() {
                 return UUIDs.getUnformattedString(UUID.randomUUID());
             }
+
             @Override
             public String getHash() {
                 return "123";
             }
+
             @Override
             public String getClient() {
                 return "test";
             }
+
             @Override
             public String getClientToken() {
                 return "testToken";
             }
+
             @Override
             public boolean isTransient() {
                 return false;
             }
+
             @Override
             public SessionEnhancement getEnhancement() {
                 return null;

@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.SortedSet;
-import junit.framework.TestCase;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -19,8 +18,10 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
+import junit.framework.TestCase;
 
 public abstract class UpdateTest extends TestCase {
 
@@ -42,7 +43,8 @@ public abstract class UpdateTest extends TestCase {
     public void setUp() throws Exception {
         Init.startServer();
 
-        existing_ctx_id = ContextStorage.getInstance().getContextId("defaultcontext");
+        final TestConfig config = new TestConfig();
+        existing_ctx_id = ContextStorage.getInstance().getContextId(config.getContextName());
         ctx = ContextStorage.getInstance().getContext(existing_ctx_id);
 
         schema = SchemaStore.getInstance().getSchema(ctx);

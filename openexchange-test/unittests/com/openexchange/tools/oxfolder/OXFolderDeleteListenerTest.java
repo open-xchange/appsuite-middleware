@@ -1,13 +1,10 @@
 package com.openexchange.tools.oxfolder;
 
-import com.openexchange.exception.OXException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
-
-import junit.framework.TestCase;
-
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -18,6 +15,8 @@ import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.setuptools.TestConfig;
+import junit.framework.TestCase;
 
 public class OXFolderDeleteListenerTest extends TestCase {
 	SessionObject session = null;
@@ -36,8 +35,9 @@ public class OXFolderDeleteListenerTest extends TestCase {
 	public void setUp() throws Exception {
 		Init.startServer();
 		final Context ctx = ContextStorage.getInstance().getContext(1);
-		userWhichWillBeDeletedId = UserStorage.getInstance().getUserId("francisco", ctx);
-		userWhichWillRemainId = UserStorage.getInstance().getUserId("thorben", ctx);
+        final TestConfig config = new TestConfig();
+		userWhichWillBeDeletedId = UserStorage.getInstance().getUserId(config.getSecondUser(), ctx);
+		userWhichWillRemainId = UserStorage.getInstance().getUserId(config.getUser(), ctx);
 		contextAdminId = ctx.getMailadmin(); // TODO
 
 		session = SessionObjectWrapper.createSessionObject(userWhichWillBeDeletedId, ctx, "Blubb");
