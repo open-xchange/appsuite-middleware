@@ -51,6 +51,7 @@ package com.openexchange.oauth.yahoo.internal;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -323,7 +324,9 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
                                     year = Integer.parseInt(value.getString("year")) - 1900;
                                 }
                                 if (date != 0 && month != 0) {
-                                    oxContact.setBirthday(new Date(year, month, date));
+                                    Calendar c = Calendar.getInstance();
+                                    c.set(year, month, date);
+                                    oxContact.setBirthday(new Date(c.getTimeInMillis()));
                                 }
                             }
                         }
