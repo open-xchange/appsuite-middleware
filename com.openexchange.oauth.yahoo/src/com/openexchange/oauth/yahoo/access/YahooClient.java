@@ -49,8 +49,13 @@
 
 package com.openexchange.oauth.yahoo.access;
 
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONValue;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
@@ -58,6 +63,9 @@ import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.yahoo.internal.YahooApi2;
@@ -72,6 +80,9 @@ import com.openexchange.session.Session;
 public class YahooClient {
 
     private static final Pattern PATTERN_GUID = Pattern.compile("<value>([^<]*)<");
+
+    private static final String ALL_CONTACT_IDS_URL = "https://social.yahooapis.com/v1/user/GUID/contacts?format=json";
+    private static final String SINGLE_CONTACT_URL = "https://social.yahooapis.com/v1/user/GUID/contact/CONTACT_ID?format=json";
 
     private final OAuthService service;
     private final OAuthAccount oauthAccount;
@@ -94,6 +105,16 @@ public class YahooClient {
      * @throws OXException if a connection error is occurred
      */
     public boolean ping() throws OXException {
+        return !Strings.isEmpty(getGUID());
+    }
+
+    /**
+     * Retrieves the GUID for the account
+     * 
+     * @return The GUID of the account or an empty string if no GUID was returned from the provider
+     * @throws OXException if a connection error is occurred
+     */
+    public String getGUID() throws OXException {
         OAuthRequest guidRequest = new OAuthRequest(Verb.GET, "https://social.yahooapis.com/v1/me/guid?format=xml");
         service.signRequest(new Token(oauthAccount.getToken(), oauthAccount.getSecret()), guidRequest);
         Response guidResponse;
@@ -113,7 +134,70 @@ public class YahooClient {
         if (null == contentType || false == contentType.toLowerCase().contains("application/xml")) {
             throw OAuthExceptionCodes.NOT_A_VALID_RESPONSE.create();
         }
+
         final Matcher matcher = PATTERN_GUID.matcher(guidResponse.getBody());
-        return matcher.find();
+        return matcher.find() ? matcher.group(1) : "";
+    }
+
+    /**
+     * Gets all contacts in a single request
+     * 
+     * @return
+     * @throws OXException
+     */
+    public JSONObject getContacts() throws OXException {
+        String guid = getGUID();
+
+        Token accessToken = new Token(oauthAccount.getToken(), oauthAccount.getSecret());
+
+        // Now get the ids of all the users contacts
+        OAuthRequest request = new OAuthRequest(Verb.GET, ALL_CONTACT_IDS_URL.replace("GUID", guid));
+        service.signRequest(accessToken, request);
+        final Response response = request.send(YahooRequestTuner.getInstance());
+        final String contentType = response.getHeader("Content-Type");
+        if (null == contentType || false == contentType.toLowerCase().contains("application/json")) {
+            throw OAuthExceptionCodes.NOT_A_VALID_RESPONSE.create();
+        }
+        return extractJson(response);
+    }
+
+    /**
+     * Gets the contact with the specified identifier
+     * 
+     * @param contactId The contact identifier
+     * @return
+     * @throws OXException
+     */
+    public JSONObject getContact(String contactId) throws OXException {
+        Token accessToken = new Token(oauthAccount.getToken(), oauthAccount.getSecret());
+        final String singleContactUrl = SINGLE_CONTACT_URL.replace("GUID", getGUID()).replace("CONTACT_ID", contactId);
+        // Request
+        final OAuthRequest singleContactRequest = new OAuthRequest(Verb.GET, singleContactUrl);
+        service.signRequest(accessToken, singleContactRequest);
+        final Response singleContactResponse = singleContactRequest.send(YahooRequestTuner.getInstance());
+        return extractJson(singleContactResponse);
+    }
+
+    /**
+     * Extracts JSON out of given response
+     * 
+     * @param response
+     * @return
+     * @throws OXException
+     */
+    private JSONObject extractJson(final Response response) throws OXException {
+        Reader reader = null;
+        try {
+            reader = new InputStreamReader(response.getStream(), Charsets.UTF_8);
+            final JSONValue value = JSONObject.parse(reader);
+            if (value.isObject()) {
+                return value.toObject();
+            }
+            throw OAuthExceptionCodes.JSON_ERROR.create("Not a JSON object, but " + value.getClass().getName());
+        } catch (final JSONException e) {
+            throw OAuthExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(reader);
+        }
     }
 }
