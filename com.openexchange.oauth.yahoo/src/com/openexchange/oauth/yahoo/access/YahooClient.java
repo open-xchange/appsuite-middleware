@@ -86,7 +86,7 @@ public class YahooClient {
     private static final String ALL_CONTACT_IDS_URL = "https://social.yahooapis.com/v1/user/GUID/contacts?format=json";
     private static final String SINGLE_CONTACT_URL = "https://social.yahooapis.com/v1/user/GUID/contact/CONTACT_ID?format=json";
 
-    private final OAuthService service;
+    private final OAuthService scribeService;
     private final OAuthAccount oauthAccount;
 
     /**
@@ -97,7 +97,7 @@ public class YahooClient {
     public YahooClient(OAuthAccount oauthAccount, Session session) throws OXException {
         super();
         this.oauthAccount = oauthAccount;
-        service = new ServiceBuilder().provider(YahooApi2.class).apiKey(oauthAccount.getMetaData().getAPIKey(session)).apiSecret(oauthAccount.getMetaData().getAPISecret(session)).build();
+        scribeService = new ServiceBuilder().provider(YahooApi2.class).apiKey(oauthAccount.getMetaData().getAPIKey(session)).apiSecret(oauthAccount.getMetaData().getAPISecret(session)).build();
     }
 
     /**
@@ -118,7 +118,7 @@ public class YahooClient {
      */
     public String getGUID() throws OXException {
         OAuthRequest guidRequest = new OAuthRequest(Verb.GET, "https://social.yahooapis.com/v1/me/guid?format=xml");
-        service.signRequest(new Token(oauthAccount.getToken(), oauthAccount.getSecret()), guidRequest);
+        scribeService.signRequest(new Token(oauthAccount.getToken(), oauthAccount.getSecret()), guidRequest);
         Response guidResponse;
         try {
             guidResponse = guidRequest.send(YahooRequestTuner.getInstance());
@@ -154,7 +154,7 @@ public class YahooClient {
 
         // Now get the ids of all the users contacts
         OAuthRequest request = new OAuthRequest(Verb.GET, ALL_CONTACT_IDS_URL.replace("GUID", guid));
-        service.signRequest(accessToken, request);
+        scribeService.signRequest(accessToken, request);
         final Response response = request.send(YahooRequestTuner.getInstance());
         if (response.getCode() == 403) {
             throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.YAHOO.getShortName(), Module.contacts_ro.getDisplayName());
@@ -178,7 +178,7 @@ public class YahooClient {
         final String singleContactUrl = SINGLE_CONTACT_URL.replace("GUID", getGUID()).replace("CONTACT_ID", contactId);
         // Request
         final OAuthRequest singleContactRequest = new OAuthRequest(Verb.GET, singleContactUrl);
-        service.signRequest(accessToken, singleContactRequest);
+        scribeService.signRequest(accessToken, singleContactRequest);
         final Response singleContactResponse = singleContactRequest.send(YahooRequestTuner.getInstance());
         return extractJson(singleContactResponse);
     }
