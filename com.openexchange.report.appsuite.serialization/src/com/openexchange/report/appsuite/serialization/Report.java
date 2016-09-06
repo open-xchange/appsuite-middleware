@@ -564,7 +564,7 @@ public class Report implements Serializable {
 
     public int getMaxChunkSize() {
         if (this.maxChunkSize == 0) {
-            this.maxChunkSize = Integer.parseInt(Services.getService(ConfigurationService.class).getProperty("com.openexchange.report.serialization.maxChunkSize", "100"));
+            this.maxChunkSize = Integer.parseInt(Services.getService(ConfigurationService.class).getProperty("com.openexchange.report.serialization.maxChunkSize", "200"));
         }
         return maxChunkSize;
     }

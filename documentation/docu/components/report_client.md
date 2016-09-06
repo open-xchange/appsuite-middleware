@@ -280,22 +280,22 @@ displayed after the report has been sent to activation.open-xchange.com.
 ## Report performance and storage
 With version 7.8.3 two new properties are introduced.
 
-	com.openexchange.report.client.fileStorage=/report_storage
+	com.openexchange.report.client.fileStorage=/tmp
 
 Describes the storage path for all report relevant data. Saving a report will place a JSON-Version of the report in that folder.
 
-	com.openexchange.report.client.maxChunkSize=1000
+	com.openexchange.report.client.maxChunkSize=200
 	
 This property enables the client to store parts of the report on hard drive to keep memory usage small. A chunk is either a CapabilitySet for the default report (Core) or a user for the OXaaS report types (Cloudplugins).
 
 The stored parts are combined into a single .report file and then deleted when the report is finished. The .report file is not deleted automatically.
 
 
-	com.openexchange.report.client.maxThreadPoolSize
+	com.openexchange.report.client.maxThreadPoolSize=20
 	
 The report will use multithreading for faster processing. Therefore the user can edit the threadpoolsize by editing this property value. Each thread is processing the needed values from a schema. If the threadpool is smaller then the schemas in the database, the threads are queued.
 
-	com.openexchange.report.client.threadPriority
+	com.openexchange.report.client.threadPriority=1
 	
 This property determines the used threads priotity. It can range from 1 (lowest) to 10 (highest).
 

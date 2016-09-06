@@ -1,0 +1,42 @@
+array:
+  - data:
+      Key: com.openexchange.report.serialization.fileStorage
+      Description: >
+Reports filestorage directory for storage of report parts and composed data.
+      Default: /tmp
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: false
+      Related: 
+      File: reportserialization.properties
+  - data:
+      Key: com.openexchange.report.serialization.maxChunkSize
+      Description: >
+Determines how many chunks of data can be kept in the report before saving them in the folder described in the 
+com.openexchange.report.client.fileStorage property
+      Default: 200
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: false
+      Related: 
+      File: reportserialization.properties
+- data:
+      Key: com.openexchange.report.serialization.maxThreadPoolSize
+      Description: >
+Number of threads allowed to work on the report at the same time.
+      Default: 20
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: false
+      Related: 
+      File: reportserialization.properties
+- data:
+      Key: com.openexchange.report.serialization.threadPriority
+      Description: >
+The priority that threads, working on the report have. Allowed value range is 1-10. 1 is the lowest, 10 the highest priority.
+      Default: 1
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: false
+      Related: 
+      File: reportserialization.properties                
