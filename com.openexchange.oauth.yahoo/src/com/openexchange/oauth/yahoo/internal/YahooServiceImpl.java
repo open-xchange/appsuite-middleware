@@ -107,8 +107,7 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
      */
     @Override
     public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        // TODO Auto-generated method stub
-
+        // Nothing
     }
 
     /*
