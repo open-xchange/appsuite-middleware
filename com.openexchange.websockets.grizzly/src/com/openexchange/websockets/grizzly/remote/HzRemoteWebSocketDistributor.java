@@ -511,7 +511,9 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
 
             for (List<String> partition : Lists.partition(payloads, 5)) {
                 Map<Member, Future<Void>> futureMap = executor.submitToMembers(new PortableMessageDistributor(partition, pathFilter, userId, contextId, async), effectiveOtherMembers);
-                if (false == async) {
+                if (async) {
+                    LOG.info("Submitted message(s) to remote Web Socket(s) connected to member(s) \"{}\" using path filter \"{}\" to user {} in context {}", effectiveOtherMembers, pathFilter, I(userId), I(contextId));
+                } else {
                     // Wait for completion of each submitted task
                     for (Map.Entry<Member, Future<Void>> element : futureMap.entrySet()) {
                         handleSubmittedFuture(element.getValue(), pathFilter, element.getKey(), userId, contextId);
@@ -528,7 +530,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             try {
                 future.get();
                 retryCount = 0;
-                LOG.info("Submitted message(s) to remote Web Socket(s) connected to member \"{}\" using path filter \"{}\" to user {} in context {}", member, pathFilter, I(userId), I(contextId));
+                LOG.info("Transmitted message(s) to remote Web Socket(s) connected to member \"{}\" using path filter \"{}\" to user {} in context {}", member, pathFilter, I(userId), I(contextId));
             } catch (InterruptedException e) {
                 // Interrupted - Keep interrupted state
                 LOG.debug("Interrupted while waiting for {} to complete on member \"{}\" using path filter \"{}\" for user {} in context {}", PortableMessageDistributor.class.getSimpleName(), member, pathFilter, I(userId), I(contextId), e);
