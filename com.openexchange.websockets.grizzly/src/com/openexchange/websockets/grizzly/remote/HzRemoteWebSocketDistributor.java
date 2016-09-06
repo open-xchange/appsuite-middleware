@@ -730,19 +730,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     @Override
     public void addWebSocket(WebSocket socket) {
         addToHzMultiMap(socket);
-
-        UserAndContext key = UserAndContext.newInstance(socket.getUserId(), socket.getContextId());
-        ScheduledTimerTask cleanerTask = cleanerTasks.get(key);
-        if (null == cleanerTask) {
-            Runnable r = new CleanerRunnable(socket.getUserId(), socket.getContextId());
-            ScheduledTimerTask newTask = timerService.scheduleAtFixedRate(r, 5, 5, TimeUnit.MINUTES);
-            cleanerTask = cleanerTasks.putIfAbsent(key, newTask);
-            if (null != cleanerTask) {
-                // Another thread scheduled a timer task in the meantime
-                newTask.cancel();
-                timerService.purge();
-            }
-        }
+        startCleanerTaskFor(socket.getUserId(), socket.getContextId());
     }
 
     @Override
@@ -753,6 +741,24 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     @Override
     public void removeWebSocket(WebSocket socket) {
         removeFromHzMultiMap(socket);
+    }
+
+    @Override
+    public void startCleanerTaskFor(int userId, int contextId) {
+        UserAndContext key = UserAndContext.newInstance(userId, contextId);
+        ScheduledTimerTask cleanerTask = cleanerTasks.get(key);
+        if (null == cleanerTask) {
+            Runnable r = new CleanerRunnable(userId, contextId);
+            ScheduledTimerTask newTask = timerService.scheduleAtFixedRate(r, 5, 5, TimeUnit.MINUTES);
+            cleanerTask = cleanerTasks.putIfAbsent(key, newTask);
+            if (null != cleanerTask) {
+                // Another thread scheduled a timer task in the meantime
+                newTask.cancel();
+                timerService.purge();
+            } else {
+                LOG.info("Started cleaner task for user {} in context {}", I(userId), I(contextId));
+            }
+        }
     }
 
     @Override
