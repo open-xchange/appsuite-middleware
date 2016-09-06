@@ -47,13 +47,14 @@
  *
  */
 
-package com.openexchange.oauth.yahoo.internal;
+package com.openexchange.oauth.yahoo.access;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.oauth.yahoo.osgi.Services;
 import com.openexchange.session.Session;
 
@@ -81,11 +82,12 @@ public class YahooOAuthAccess extends AbstractOAuthAccess {
      */
     @Override
     public void initialize() throws OXException {
-        synchronized(this) {
+        synchronized (this) {
             OAuthService oauthService = Services.getService(OAuthService.class);
             OAuthAccount oauthAccount = oauthService.getAccount(accountId, getSession(), getSession().getUserId(), getSession().getContextId());
             verifyAccount(oauthAccount);
             setOAuthAccount(oauthAccount);
+            setOAuthClient(new OAuthClient<YahooClient>(new YahooClient(oauthAccount, getSession()), oauthAccount.getToken()));
         }
     }
 
@@ -116,8 +118,8 @@ public class YahooOAuthAccess extends AbstractOAuthAccess {
      */
     @Override
     public boolean ping() throws OXException {
-        // TODO Auto-generated method stub
-        return false;
+        YahooClient yc = (YahooClient) getOAuthClient().getClient();
+        return yc.ping();
     }
 
     /*

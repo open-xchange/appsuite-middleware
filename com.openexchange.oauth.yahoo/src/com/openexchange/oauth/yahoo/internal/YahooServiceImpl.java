@@ -82,6 +82,7 @@ import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.yahoo.YahooService;
+import com.openexchange.oauth.yahoo.access.YahooOAuthAccess;
 import com.openexchange.oauth.yahoo.osgi.Services;
 import com.openexchange.oauth.yahoo.osgi.YahooOAuthActivator;
 import com.openexchange.session.Session;
