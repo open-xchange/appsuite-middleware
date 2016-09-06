@@ -157,7 +157,7 @@ public class YahooClient {
         service.signRequest(accessToken, request);
         final Response response = request.send(YahooRequestTuner.getInstance());
         if (response.getCode() == 403) {
-            throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.YAHOO.getShortName(), Module.calendar_ro.getDisplayName());
+            throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.YAHOO.getShortName(), Module.contacts_ro.getDisplayName());
         }
         final String contentType = response.getHeader("Content-Type");
         if (null == contentType || false == contentType.toLowerCase().contains("application/json")) {
