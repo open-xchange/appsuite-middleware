@@ -466,9 +466,11 @@ ox_comment(){
     test -z "$propfile" && die "ox_comment: missing propfile argument (arg 3)"
     test -e "$propfile" || die "ox_comment: $propfile does not exist"
     local tmp=${propfile}.tmp$$
+    local prop_in=$(quote_s_in $prop)
+    local prop_re=$(quote_s_re $prop)
     cp -a --remove-destination $propfile $tmp
     if [ "$action" == "add" ]; then
-        sed "s/^$prop/# $prop/" < $propfile > $tmp;
+        sed "s/^$prop_in/# $prop_re/" < $propfile > $tmp;
         if [ $? -gt 0 ]; then
             rm -f $tmp
             die "ox_comment: FATAL: could not add comment in file $propfile to $prop"
@@ -476,7 +478,7 @@ ox_comment(){
             mv $tmp $propfile
         fi
     elif [ "$action" == "remove" ];then
-      sed "s/^#[ ]*\($prop[ ]*=\)/\1/" < $propfile > $tmp;
+      sed "s/^#[ ]*\($prop_in[ ]*=\)/\1/" < $propfile > $tmp;
         if [ $? -gt 0 ]; then
             rm -f $tmp
             die "ox_comment: FATAL: could not remove comment in file $propfile for $prop"
@@ -602,3 +604,18 @@ ox_add_property() {
         ox_set_property "$property" "$value" "$propfile"
     fi
 }
+
+# quote for sed s-command input as in: s/input/replacement/
+# by prefixing each character of the character set "]\/$*.^|[" with a "\"
+# and thus escaping them
+quote_s_in () {
+  sed -e 's/[]\/$*.^|[]/\\&/g' <<< "$1"
+}
+
+# quote for sed s-command replacement as in: s/input/replacement/
+# by prefixing "\", "/" and "&" with a "\" and thus escaping 
+#the backslash itself, the default s-command separator and the matched string
+quote_s_re () {
+  sed -e 's/[\/&]/\\&/g' <<< "$1"
+}
+
