@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,43 +47,32 @@
  *
  */
 
-package com.openexchange.antiabuse;
+package com.openexchange.dovecot.doveadm.client.internal;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import org.apache.http.impl.client.DefaultHttpClient;
+import com.openexchange.rest.client.endpointpool.Endpoint;
 
 /**
- * {@link AntiAbuseService} - The service for anti-abuse checking and reporting.
+ * {@link HttpClientAndEndpoint} - Provides the HTTP client and base URI for a certain DoveAdm call.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v1.0.0
  */
-@SingletonService
-public interface AntiAbuseService {
+public class HttpClientAndEndpoint {
+
+    /** The HTTP client to use */
+    final DefaultHttpClient httpClient;
+
+    /** The associated available end-point to call */
+    final Endpoint endpoint;
 
     /**
-     * Performs the <code>"allow"</code> request.
-     *
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @param attributes The optional attributes
-     * @return The status response
-     * @throws OXException If allow request fails
+     * Initializes a new {@link HttpClientAndEndpoint}.
      */
-    Status allow(String login, String password, String remoteAddress, Map<String, String> attributes) throws OXException;
-
-    /**
-     * Performs the <code>"report"</code> request.
-     *
-     * @param reportValue The report value to advertise to Anti-Abuse service
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @return The status response
-     * @throws OXException If report request fails
-     */
-    void report(ReportValue reportValue, String login, String password, String remoteAddress) throws OXException;
+    public HttpClientAndEndpoint(DefaultHttpClient httpClient, Endpoint endpoint) {
+        super();
+        this.httpClient = httpClient;
+        this.endpoint = endpoint;
+    }
 
 }

@@ -47,43 +47,60 @@
  *
  */
 
-package com.openexchange.antiabuse;
+package com.openexchange.dovecot.doveadm.client.internal;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.dovecot.doveadm.client.DoveAdmErrorResponse;
+
 
 /**
- * {@link AntiAbuseService} - The service for anti-abuse checking and reporting.
+ * {@link DoveAdmErrorResponseImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.8.3
  */
-@SingletonService
-public interface AntiAbuseService {
+public class DoveAdmErrorResponseImpl extends AbstractDoveAdmResponse implements DoveAdmErrorResponse {
+
+    private final String type;
+    private final int exitCode;
 
     /**
-     * Performs the <code>"allow"</code> request.
-     *
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @param attributes The optional attributes
-     * @return The status response
-     * @throws OXException If allow request fails
+     * Initializes a new {@link DoveAdmErrorResponseImpl}.
      */
-    Status allow(String login, String password, String remoteAddress, Map<String, String> attributes) throws OXException;
+    DoveAdmErrorResponseImpl(String type, int exitCode, String optionalIdentifier) {
+        super(COMMAND_ERROR_RESPONSE, optionalIdentifier, true);
+        this.type = type;
+        this.exitCode = exitCode;
+    }
 
-    /**
-     * Performs the <code>"report"</code> request.
-     *
-     * @param reportValue The report value to advertise to Anti-Abuse service
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @return The status response
-     * @throws OXException If report request fails
-     */
-    void report(ReportValue reportValue, String login, String password, String remoteAddress) throws OXException;
+    @Override
+    public DoveAdmErrorResponse asErrorResponse() {
+        return this;
+    }
 
+    @Override
+    public String getType() {
+        return type;
+    }
+
+    @Override
+    public int getExitCode() {
+        return exitCode;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(96);
+        builder.append("{");
+        builder.append("command=").append(COMMAND_ERROR_RESPONSE).append(", ");
+        if (type != null) {
+            builder.append("type=").append(type).append(", ");
+        }
+        builder.append("exitCode=").append(exitCode).append(", ");
+        String optionalIdentifier = getOptionalIdentifier();
+        if (optionalIdentifier != null) {
+            builder.append("optionalIdentifier=").append(optionalIdentifier);
+        }
+        builder.append("}");
+        return builder.toString();
+    }
 }

@@ -47,43 +47,36 @@
  *
  */
 
-package com.openexchange.antiabuse;
-
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+package com.openexchange.dovecot.doveadm.client;
 
 /**
- * {@link AntiAbuseService} - The service for anti-abuse checking and reporting.
+ * {@link DoveAdmResponse} - Represents a response from the Dovecot DoveAdm REST interface.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.8.3
  */
-@SingletonService
-public interface AntiAbuseService {
+public interface DoveAdmResponse extends DoveAdmEntity {
+
+    /** The command identifier to signal a regular DoveAdm data response */
+    public static final String COMMAND_DATA_RESPONSE = "doveadmResponse";
+
+    /** The command identifier to signal a DoveAdm error response */
+    public static final String COMMAND_ERROR_RESPONSE = "error";
 
     /**
-     * Performs the <code>"allow"</code> request.
+     * Checks if this DoveAdm response is an error.
      *
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @param attributes The optional attributes
-     * @return The status response
-     * @throws OXException If allow request fails
+     * @return <code>true</code> if this DoveAdm response is an error; otherwise <code>false</code>
      */
-    Status allow(String login, String password, String remoteAddress, Map<String, String> attributes) throws OXException;
+    boolean isError();
 
     /**
-     * Performs the <code>"report"</code> request.
+     * Gets the error response representation from this response.
+     * <p>
+     * Only makes sense in case {@link #isError()} returns <code>true</code>.
      *
-     * @param reportValue The report value to advertise to Anti-Abuse service
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @return The status response
-     * @throws OXException If report request fails
+     * @return The error response representation or <code>null</code> if not applicable
      */
-    void report(ReportValue reportValue, String login, String password, String remoteAddress) throws OXException;
+    DoveAdmErrorResponse asErrorResponse();
 
 }

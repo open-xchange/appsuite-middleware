@@ -47,43 +47,30 @@
  *
  */
 
-package com.openexchange.antiabuse;
-
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+package com.openexchange.dovecot.doveadm.client;
 
 /**
- * {@link AntiAbuseService} - The service for anti-abuse checking and reporting.
+ * {@link DoveAdmErrorResponse} - Represents an error response from the Dovecot DoveAdm REST interface.
+ * <pre>
+ *   ["error",{"type":"unknownMethod", "exitCode":0}, "optional identifier"]
+ * </pre>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.8.3
  */
-@SingletonService
-public interface AntiAbuseService {
+public interface DoveAdmErrorResponse extends DoveAdmResponse {
 
     /**
-     * Performs the <code>"allow"</code> request.
+     * Gets the error type.
      *
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @param attributes The optional attributes
-     * @return The status response
-     * @throws OXException If allow request fails
+     * @return The error type
      */
-    Status allow(String login, String password, String remoteAddress, Map<String, String> attributes) throws OXException;
+    String getType();
 
     /**
-     * Performs the <code>"report"</code> request.
+     * Gets the exit code
      *
-     * @param reportValue The report value to advertise to Anti-Abuse service
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @return The status response
-     * @throws OXException If report request fails
+     * @return The exit code
      */
-    void report(ReportValue reportValue, String login, String password, String remoteAddress) throws OXException;
-
+    int getExitCode();
 }

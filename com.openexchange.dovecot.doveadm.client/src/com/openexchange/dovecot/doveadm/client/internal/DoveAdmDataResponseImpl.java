@@ -47,43 +47,49 @@
  *
  */
 
-package com.openexchange.antiabuse;
+package com.openexchange.dovecot.doveadm.client.internal;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import java.util.List;
+import com.openexchange.dovecot.doveadm.client.DoveAdmDataResponse;
+import com.openexchange.dovecot.doveadm.client.Result;
+
 
 /**
- * {@link AntiAbuseService} - The service for anti-abuse checking and reporting.
+ * {@link DoveAdmDataResponseImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.8.3
  */
-@SingletonService
-public interface AntiAbuseService {
+public class DoveAdmDataResponseImpl extends AbstractDoveAdmResponse implements DoveAdmDataResponse {
+
+    private final List<Result> results;
 
     /**
-     * Performs the <code>"allow"</code> request.
-     *
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @param attributes The optional attributes
-     * @return The status response
-     * @throws OXException If allow request fails
+     * Initializes a new {@link DoveAdmDataResponseImpl}.
      */
-    Status allow(String login, String password, String remoteAddress, Map<String, String> attributes) throws OXException;
+    DoveAdmDataResponseImpl(List<Result> results, String optionalIdentifier) {
+        super(COMMAND_DATA_RESPONSE, optionalIdentifier, false);
+        this.results = results;
+    }
 
-    /**
-     * Performs the <code>"report"</code> request.
-     *
-     * @param reportValue The report value to advertise to Anti-Abuse service
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @return The status response
-     * @throws OXException If report request fails
-     */
-    void report(ReportValue reportValue, String login, String password, String remoteAddress) throws OXException;
+    @Override
+    public List<Result> getResults() {
+        return results;
+    }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(96);
+        builder.append("{");
+        builder.append("command=").append(getCommand()).append(", ");
+        if (results != null) {
+            builder.append("results=").append(results).append(", ");
+        }
+        String optionalIdentifier = getOptionalIdentifier();
+        if (optionalIdentifier != null) {
+            builder.append("optionalIdentifier=").append(getOptionalIdentifier());
+        }
+        builder.append("}");
+        return builder.toString();
+    }
 }

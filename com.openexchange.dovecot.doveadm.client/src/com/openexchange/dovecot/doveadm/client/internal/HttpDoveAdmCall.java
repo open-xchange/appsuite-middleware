@@ -47,43 +47,19 @@
  *
  */
 
-package com.openexchange.antiabuse;
+package com.openexchange.dovecot.doveadm.client.internal;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link AntiAbuseService} - The service for anti-abuse checking and reporting.
+ * {@link HttpDoveAdmCall} - An enumeration of known calls which are sensitive to certain end-point listings.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v1.0.0
  */
-@SingletonService
-public interface AntiAbuseService {
+public enum HttpDoveAdmCall {
 
-    /**
-     * Performs the <code>"allow"</code> request.
-     *
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @param attributes The optional attributes
-     * @return The status response
-     * @throws OXException If allow request fails
-     */
-    Status allow(String login, String password, String remoteAddress, Map<String, String> attributes) throws OXException;
+    /** The default end-point listing */
+    DEFAULT,
 
-    /**
-     * Performs the <code>"report"</code> request.
-     *
-     * @param reportValue The report value to advertise to Anti-Abuse service
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @return The status response
-     * @throws OXException If report request fails
-     */
-    void report(ReportValue reportValue, String login, String password, String remoteAddress) throws OXException;
-
+    ;
 }

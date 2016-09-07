@@ -47,43 +47,28 @@
  *
  */
 
-package com.openexchange.antiabuse;
-
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+package com.openexchange.dovecot.doveadm.client;
 
 /**
- * {@link AntiAbuseService} - The service for anti-abuse checking and reporting.
+ * {@link DoveAdmEntity} - Represents an entity for the Dovecot DoveAdm REST interface.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.8.3
  */
-@SingletonService
-public interface AntiAbuseService {
+public interface DoveAdmEntity {
 
     /**
-     * Performs the <code>"allow"</code> request.
+     * Gets the command identifier
      *
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @param attributes The optional attributes
-     * @return The status response
-     * @throws OXException If allow request fails
+     * @return The command identifier
      */
-    Status allow(String login, String password, String remoteAddress, Map<String, String> attributes) throws OXException;
+    String getCommand();
 
     /**
-     * Performs the <code>"report"</code> request.
+     * Gets the optional identifier. Default is <code>"1"</code>.
      *
-     * @param reportValue The report value to advertise to Anti-Abuse service
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @return The status response
-     * @throws OXException If report request fails
+     * @return The optional identifier
      */
-    void report(ReportValue reportValue, String login, String password, String remoteAddress) throws OXException;
+    String getOptionalIdentifier();
 
 }

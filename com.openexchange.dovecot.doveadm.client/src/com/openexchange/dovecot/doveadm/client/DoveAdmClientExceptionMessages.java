@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,43 +47,43 @@
  *
  */
 
-package com.openexchange.antiabuse;
+package com.openexchange.dovecot.doveadm.client;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link AntiAbuseService} - The service for anti-abuse checking and reporting.
+ * {@link DoveAdmClientExceptionMessages} - Exception messages for errors that needs to be translated.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
  */
-@SingletonService
-public interface AntiAbuseService {
+public final class DoveAdmClientExceptionMessages implements LocalizableStrings {
+
+    // A DoveAdm error occurred: %1$s
+    public static final String DOVECOT_ERROR_MSG = "A DoveAdm error occurred: %1$s";
+
+    // A DoveAdm error occurred: %1$s
+    public static final String DOVECOT_SERVER_ERROR_MSG = "A DoveAdm server error occurred with HTTP status code %1$s. Error message: %2$s";
+
+    // Invalid DoveAdm URL: %1$s
+    public static final String INVALID_DOVECOT_URL_MSG = "The provided DoveAdm URL: %1$s is invalid";
+
+    // The DoveAdm resource does not exist: %1$s
+    public static final String NOT_FOUND_MSG = "The provided DoveAdm resource does not exist: %1$s";
+
+    // An I/O error occurred: %1$s
+    public static final String IO_ERROR_MSG = "An I/O error occurred: %1$s";
+
+    // Authentication failed: %1$s
+    public static final String AUTH_ERROR_MSG = "Authentication failed: %1$s";
+
+    // The DoveAdm resource does not exist
+    public static final String NOT_FOUND_SIMPLE_MSG = "The DoveAdm resource does not exist";
 
     /**
-     * Performs the <code>"allow"</code> request.
-     *
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @param attributes The optional attributes
-     * @return The status response
-     * @throws OXException If allow request fails
+     * Initializes a new {@link DoveAdmClientExceptionMessages}.
      */
-    Status allow(String login, String password, String remoteAddress, Map<String, String> attributes) throws OXException;
-
-    /**
-     * Performs the <code>"report"</code> request.
-     *
-     * @param reportValue The report value to advertise to Anti-Abuse service
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @return The status response
-     * @throws OXException If report request fails
-     */
-    void report(ReportValue reportValue, String login, String password, String remoteAddress) throws OXException;
+    private DoveAdmClientExceptionMessages() {
+        super();
+    }
 
 }

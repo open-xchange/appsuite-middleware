@@ -47,43 +47,52 @@
  *
  */
 
-package com.openexchange.antiabuse;
+package com.openexchange.dovecot.doveadm.client.internal;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.dovecot.doveadm.client.DoveAdmErrorResponse;
+import com.openexchange.dovecot.doveadm.client.DoveAdmResponse;
+
 
 /**
- * {@link AntiAbuseService} - The service for anti-abuse checking and reporting.
+ * {@link AbstractDoveAdmResponse}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.8.3
  */
-@SingletonService
-public interface AntiAbuseService {
+public abstract class AbstractDoveAdmResponse implements DoveAdmResponse {
+
+    private final String command;
+    private final String optionalIdentifier;
+    private final boolean error;
 
     /**
-     * Performs the <code>"allow"</code> request.
-     *
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @param attributes The optional attributes
-     * @return The status response
-     * @throws OXException If allow request fails
+     * Initializes a new {@link AbstractDoveAdmResponse}.
      */
-    Status allow(String login, String password, String remoteAddress, Map<String, String> attributes) throws OXException;
+    protected AbstractDoveAdmResponse(String command, String optionalIdentifier, boolean error) {
+        super();
+        this.command = command;
+        this.optionalIdentifier = optionalIdentifier;
+        this.error = error;
+    }
 
-    /**
-     * Performs the <code>"report"</code> request.
-     *
-     * @param reportValue The report value to advertise to Anti-Abuse service
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @return The status response
-     * @throws OXException If report request fails
-     */
-    void report(ReportValue reportValue, String login, String password, String remoteAddress) throws OXException;
+    @Override
+    public boolean isError() {
+        return error;
+    }
+
+    @Override
+    public DoveAdmErrorResponse asErrorResponse() {
+        return error ? (DoveAdmErrorResponse) this : null;
+    }
+
+    @Override
+    public String getCommand() {
+        return command;
+    }
+
+    @Override
+    public String getOptionalIdentifier() {
+        return optionalIdentifier;
+    }
 
 }

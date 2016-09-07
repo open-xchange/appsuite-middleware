@@ -47,43 +47,26 @@
  *
  */
 
-package com.openexchange.antiabuse;
+package com.openexchange.dovecot.doveadm.client;
 
 import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link AntiAbuseService} - The service for anti-abuse checking and reporting.
+ * {@link DoveAdmCommand} - Represents a command for the Dovecot DoveAdm REST interface.
+ * <pre>
+ *   ["command", {"parameter":"value"}, "optional identifier"]
+ * </pre>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.8.3
  */
-@SingletonService
-public interface AntiAbuseService {
+public interface DoveAdmCommand extends DoveAdmEntity {
 
     /**
-     * Performs the <code>"allow"</code> request.
+     * Gets the parameters
      *
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @param attributes The optional attributes
-     * @return The status response
-     * @throws OXException If allow request fails
+     * @return The parameters
      */
-    Status allow(String login, String password, String remoteAddress, Map<String, String> attributes) throws OXException;
-
-    /**
-     * Performs the <code>"report"</code> request.
-     *
-     * @param reportValue The report value to advertise to Anti-Abuse service
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @return The status response
-     * @throws OXException If report request fails
-     */
-    void report(ReportValue reportValue, String login, String password, String remoteAddress) throws OXException;
+    Map<String, String> getParameters();
 
 }

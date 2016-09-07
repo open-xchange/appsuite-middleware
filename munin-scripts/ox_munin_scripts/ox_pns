@@ -14,7 +14,7 @@ $showexec="$showruntimestats --pnsstats";
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 {
-    if (-x $showruntimestats) {
+    if (-e "/opt/open-xchange/bundles/com.openexchange.pns.impl.jar") {
         print "yes\n";
         exit 0;
     }
@@ -33,17 +33,17 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
     
     print "buffered-count.label count\n";
     print "buffered-count.draw LINE1\n";
-    print "buffered-count.type DERIVE\n";
+    print "buffered-count.type GAUGE\n";
     print "buffered-count.min 0\n";
     
     print "submitted-message.label buffered-message\n";
     print "submitted-message.draw LINE1\n";
-    print "submitted-message.type DERIVE\n";
+    print "submitted-message.type GAUGE\n";
     print "submitted-message.min 0\n";
     
     print "processing-message.label buffered-message\n";
     print "processing-message.draw LINE1\n";
-    print "processing-message.type DERIVE\n";
+    print "processing-message.type GAUGE\n";
     print "processing-message.min 0\n";
 
     exit 0

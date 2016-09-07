@@ -47,43 +47,52 @@
  *
  */
 
-package com.openexchange.antiabuse;
+package com.openexchange.dovecot.doveadm.client.internal;
 
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import java.io.InputStream;
+import org.json.JSONValue;
 
 /**
- * {@link AntiAbuseService} - The service for anti-abuse checking and reporting.
+ * {@link ResultType} - Specifies the expected type of the returned result.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v1.0.0
  */
-@SingletonService
-public interface AntiAbuseService {
+public interface ResultType<R> {
 
     /**
-     * Performs the <code>"allow"</code> request.
+     * Gets the class of the result type
      *
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @param attributes The optional attributes
-     * @return The status response
-     * @throws OXException If allow request fails
+     * @return The class
      */
-    Status allow(String login, String password, String remoteAddress, Map<String, String> attributes) throws OXException;
+    Class<? extends R> getType();
 
-    /**
-     * Performs the <code>"report"</code> request.
-     *
-     * @param reportValue The report value to advertise to Anti-Abuse service
-     * @param login The login string
-     * @param password The password
-     * @param remoteAddress The remote address
-     * @return The status response
-     * @throws OXException If report request fails
-     */
-    void report(ReportValue reportValue, String login, String password, String remoteAddress) throws OXException;
+    // -----------------------------------------------------------------------------------------------------------
 
+    /** No expected result */
+    public static final ResultType<Void> VOID = new ResultType<Void>() {
+
+        @Override
+        public Class<? extends Void> getType() {
+            return null;
+        }
+    };
+
+    /** An input stream is the expected result */
+    public static final ResultType<InputStream> INPUT_STREAM = new ResultType<InputStream>() {
+
+        @Override
+        public Class<? extends InputStream> getType() {
+            return InputStream.class;
+        }
+    };
+
+    /** A JSON array is the expected result */
+    public static final ResultType<JSONValue> JSON = new ResultType<JSONValue>() {
+
+        @Override
+        public Class<? extends JSONValue> getType() {
+            return JSONValue.class;
+        }
+    };
 }
