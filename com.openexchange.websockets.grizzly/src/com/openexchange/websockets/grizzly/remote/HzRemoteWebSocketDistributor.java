@@ -166,27 +166,6 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
      * Shuts-down this remote distributor.
      */
     public void shutDown() {
-        synchronized (myValues) {
-            if (!myValues.isEmpty()) {
-                HazelcastInstance hzInstance = this.hzInstance;
-                if (null != hzInstance) {
-                    String mapName = this.mapName;
-                    if (null != mapName) {
-                        try {
-                            // Get the Hazelcast map reference
-                            MultiMap<String, String> hzMap = map(mapName, hzInstance);
-
-                            for (Entry<String, String> entry : myValues.entries()) {
-                                hzMap.remove(entry.getKey(), entry.getValue());
-                            }
-                        } catch (Exception e) {
-                            LOG.warn("Failed to remove keys from Hazelcast map.", e);
-                        }
-                    }
-                }
-            }
-        }
-
         unsetHazelcastResources();
         lock.lock();
         try {
@@ -269,6 +248,28 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
      * Unsets the previously set Hazelcast resources (if any).
      */
     public void unsetHazelcastResources() {
+        synchronized (myValues) {
+            if (!myValues.isEmpty()) {
+                HazelcastInstance hzInstance = this.hzInstance;
+                if (null != hzInstance) {
+                    String mapName = this.mapName;
+                    if (null != mapName) {
+                        try {
+                            // Get the Hazelcast map reference
+                            MultiMap<String, String> hzMap = map(mapName, hzInstance);
+
+                            for (Entry<String, String> entry : myValues.entries()) {
+                                hzMap.remove(entry.getKey(), entry.getValue());
+                            }
+                        } catch (Exception e) {
+                            LOG.warn("Failed to remove keys from Hazelcast map.", e);
+                        }
+                    }
+                }
+                myValues.clear();
+            }
+        }
+
         this.hzInstance = null;
         this.mapName = null;
     }
@@ -730,19 +731,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     @Override
     public void addWebSocket(WebSocket socket) {
         addToHzMultiMap(socket);
-
-        UserAndContext key = UserAndContext.newInstance(socket.getUserId(), socket.getContextId());
-        ScheduledTimerTask cleanerTask = cleanerTasks.get(key);
-        if (null == cleanerTask) {
-            Runnable r = new CleanerRunnable(socket.getUserId(), socket.getContextId());
-            ScheduledTimerTask newTask = timerService.scheduleAtFixedRate(r, 5, 5, TimeUnit.MINUTES);
-            cleanerTask = cleanerTasks.putIfAbsent(key, newTask);
-            if (null != cleanerTask) {
-                // Another thread scheduled a timer task in the meantime
-                newTask.cancel();
-                timerService.purge();
-            }
-        }
+        startCleanerTaskFor(socket.getUserId(), socket.getContextId());
     }
 
     @Override
@@ -753,6 +742,24 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     @Override
     public void removeWebSocket(WebSocket socket) {
         removeFromHzMultiMap(socket);
+    }
+
+    @Override
+    public void startCleanerTaskFor(int userId, int contextId) {
+        UserAndContext key = UserAndContext.newInstance(userId, contextId);
+        ScheduledTimerTask cleanerTask = cleanerTasks.get(key);
+        if (null == cleanerTask) {
+            Runnable r = new CleanerRunnable(userId, contextId);
+            ScheduledTimerTask newTask = timerService.scheduleAtFixedRate(r, 5, 5, TimeUnit.MINUTES);
+            cleanerTask = cleanerTasks.putIfAbsent(key, newTask);
+            if (null != cleanerTask) {
+                // Another thread scheduled a timer task in the meantime
+                newTask.cancel();
+                timerService.purge();
+            } else {
+                LOG.info("Started cleaner task for user {} in context {}", I(userId), I(contextId));
+            }
+        }
     }
 
     @Override

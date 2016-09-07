@@ -51,7 +51,6 @@ package com.openexchange.groupware.infostore;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import junit.framework.TestCase;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -65,12 +64,14 @@ import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.TestInit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
+import junit.framework.TestCase;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -92,9 +93,10 @@ public class SearchEngineTest extends TestCase {
         TestInit.loadTestProperties();
         Init.startServer();
         final ContextStorage ctxstor = ContextStorage.getInstance();
-        final int contextId = ctxstor.getContextId("defaultcontext");
+        final TestConfig config = new TestConfig();
+        final int contextId = ctxstor.getContextId(config.getContextName());
         ctx = ctxstor.getContext(contextId);
-        user = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId("thorben", ctx), ctx); //FIXME
+        user = UserStorage.getInstance().getUser(UserStorage.getInstance().getUserId(config.getUser(), ctx), ctx); //FIXME
         session = ServerSessionFactory.createServerSession(user.getId(), ctx, "blupp");
         folderId = _getPrivateInfostoreFolder(ctx,user,session);
         provider = new DBPoolProvider();

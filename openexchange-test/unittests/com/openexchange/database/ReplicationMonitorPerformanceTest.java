@@ -78,6 +78,7 @@ import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.TestInit;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -116,7 +117,9 @@ public class ReplicationMonitorPerformanceTest {
     @Before
     public void setUp() throws Exception {
         ContextStorage contextStorage = ContextStorage.getInstance();
-        int contextId = contextStorage.getContextId("defaultcontext");
+        final TestConfig config = new TestConfig();
+
+        int contextId = contextStorage.getContextId(config.getContextName());
         context = contextStorage.getContext(contextId);
         db = new DBPoolProvider();
 

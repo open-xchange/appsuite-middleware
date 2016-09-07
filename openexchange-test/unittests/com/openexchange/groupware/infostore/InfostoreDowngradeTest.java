@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import junit.framework.TestCase;
 import org.osgi.service.event.Event;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.database.provider.DBPoolProvider;
@@ -73,10 +72,12 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.impl.DBPool;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.events.TestEventAdmin;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionFactory;
+import junit.framework.TestCase;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -97,7 +98,8 @@ public class InfostoreDowngradeTest extends TestCase {
         Init.startServer();
         AJAXConfig.init();
 
-        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
+        final TestConfig config = new TestConfig();
+        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(config.getContextName()));
         userId = UserStorage.getInstance().getUserId(AJAXConfig.getProperty(AJAXConfig.Property.LOGIN), ctx);
         userConfig = UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, ctx);
 

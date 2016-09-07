@@ -61,7 +61,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import junit.framework.TestCase;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -69,7 +68,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.AjaxInit;
+import junit.framework.TestCase;
 
 /**
  *
@@ -97,7 +98,8 @@ public class CalendarPerformanceTests extends TestCase {
         //com.openexchange.groupware.Init.initContext();
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);
-        contextid = ContextStorage.getInstance().getContextId("defaultcontext");
+        final TestConfig config = new TestConfig();
+        contextid = ContextStorage.getInstance().getContextId(config.getContextName());
         userid = getUserId();
         ContextStorage.start();
     }
