@@ -89,8 +89,6 @@ public class ClusterLockActivator extends HousekeepingActivator implements Unreg
     protected void startBundle() throws Exception {
         final Logger LOG = LoggerFactory.getLogger(ClusterLockActivator.class);
 
-        Services.setServiceLookup(this);
-
         final HazelcastConfigurationService hzConfigService = getService(HazelcastConfigurationService.class);
         final boolean enabled = hzConfigService.isEnabled();
 
@@ -103,7 +101,7 @@ public class ClusterLockActivator extends HousekeepingActivator implements Unreg
                 @Override
                 public HazelcastInstance addingService(ServiceReference<HazelcastInstance> ref) {
                     HazelcastInstance hzInstance = context.getService(ref);
-                    registerService(ClusterLockService.class, new ClusterLockServiceImpl(hzInstance, ClusterLockActivator.this));
+                    registerService(ClusterLockService.class, new ClusterLockServiceImpl(ClusterLockActivator.this, ClusterLockActivator.this));
                     return hzInstance;
                 }
 
@@ -139,7 +137,6 @@ public class ClusterLockActivator extends HousekeepingActivator implements Unreg
             tracker.close();
             this.tracker = null;
         }
-        Services.setServiceLookup(null);
     }
 
     @Override
