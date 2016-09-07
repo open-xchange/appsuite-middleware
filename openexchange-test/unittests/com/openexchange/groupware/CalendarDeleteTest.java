@@ -53,9 +53,8 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Properties;
-import junit.framework.TestCase;
-import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.calendar.CalendarAdministration;
+import com.openexchange.event.impl.EventConfigImpl;
 import com.openexchange.groupware.configuration.AbstractConfigWrapper;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.contexts.Context;
@@ -66,7 +65,9 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.sessiond.impl.SessionObject;
 import com.openexchange.sessiond.impl.SessionObjectWrapper;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.test.AjaxInit;
+import junit.framework.TestCase;
 
 
 public class CalendarDeleteTest extends TestCase {
@@ -85,7 +86,8 @@ public class CalendarDeleteTest extends TestCase {
         super.setUp();
         Init.startServer();
 
-        contextid = ContextStorage.getInstance().getContextId("defaultcontext");
+        final TestConfig config = new TestConfig();
+        contextid = ContextStorage.getInstance().getContextId(config.getContextName());
 
         final EventConfigImpl event = new EventConfigImpl();
         event.setEventQueueEnabled(false);

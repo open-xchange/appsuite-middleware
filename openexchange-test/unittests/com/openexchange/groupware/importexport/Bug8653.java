@@ -49,69 +49,45 @@
 
 package com.openexchange.groupware.importexport;
 
-import com.openexchange.exception.OXException;
 import static org.junit.Assert.assertEquals;
-
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import junit.framework.JUnit4TestAdapter;
-
 import org.junit.Test;
-
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.CalendarSql;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.setuptools.TestConfig;
+import junit.framework.JUnit4TestAdapter;
 
 public class Bug8653 extends AbstractICalImportTest {
 
-	//workaround for JUnit 3 runner
-	public static junit.framework.Test suite() {
-		return new JUnit4TestAdapter(Bug8653.class);
-	}
+    //workaround for JUnit 3 runner
+    public static junit.framework.Test suite() {
+        return new JUnit4TestAdapter(Bug8653.class);
+    }
 
-	@Test public void testImportIntoCorrectFolder() throws OXException, UnsupportedEncodingException, SQLException, OXException, OXException, OXException, OXException {
-		final String ical =
-			"BEGIN:VCALENDAR\n" +
-			"BEGIN:VEVENT\n" +
-			"UID:irgendeinschrott\n" +
-			"SUMMARY:testtermin-\u00dcberschrift\n" +
-			"DESCRIPTION:Bla\n" +
-			"LOCATION:Besprechungszimmer\n" +
-			"CATEGORIES:ImportTerminGroupwise\n" +
-			"STATUS:CONFIRMED\n" +
-			"DTSTART;VALUE=DATE;TZID=/Mozilla.org/BasicTimezones/GMT:20070830\n" +
-			"DTEND;VALUE=DATE;TZID=/Mozilla.org/BasicTimezones/GMT:20070831\n" +
-			"DTSTAMP:20070731T110038Z\n" +
-			"END:VEVENT\n" +
-			"END:VCALENDAR";
-		final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext")) ;
-		final ImportResult res = performOneEntryCheck( ical, Format.ICAL, FolderObject.CALENDAR, "8475", ctx, false);
-		final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
-		final int oid = Integer.valueOf( res.getObjectId() );
-		final Appointment appointmentObj = appointmentSql.getObjectById(oid, folderId);
-		assertEquals("Title is correct?","testtermin-\u00dcberschrift",appointmentObj.getTitle());
-	}
+    @Test
+    public void testImportIntoCorrectFolder() throws OXException, SQLException, UnsupportedEncodingException {
+        final String ical = "BEGIN:VCALENDAR\n" + "BEGIN:VEVENT\n" + "UID:irgendeinschrott\n" + "SUMMARY:testtermin-\u00dcberschrift\n" + "DESCRIPTION:Bla\n" + "LOCATION:Besprechungszimmer\n" + "CATEGORIES:ImportTerminGroupwise\n" + "STATUS:CONFIRMED\n" + "DTSTART;VALUE=DATE;TZID=/Mozilla.org/BasicTimezones/GMT:20070830\n" + "DTEND;VALUE=DATE;TZID=/Mozilla.org/BasicTimezones/GMT:20070831\n" + "DTSTAMP:20070731T110038Z\n" + "END:VEVENT\n" + "END:VCALENDAR";
+        final TestConfig config = new TestConfig();
+        final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(config.getContextName()));
+        final ImportResult res = performOneEntryCheck(ical, Format.ICAL, FolderObject.CALENDAR, "8475", ctx, false);
+        final AppointmentSQLInterface appointmentSql = new CalendarSql(sessObj);
+        final int oid = Integer.valueOf(res.getObjectId());
+        final Appointment appointmentObj = appointmentSql.getObjectById(oid, folderId);
+        assertEquals("Title is correct?", "testtermin-\u00dcberschrift", appointmentObj.getTitle());
+    }
 
-	@Test public void testImportIntoWrongFolder() throws OXException, UnsupportedEncodingException, SQLException, OXException, OXException, OXException, OXException {
-		final String ical =
-			"BEGIN:VCALENDAR\n" +
-			"BEGIN:VEVENT\n" +
-			"UID:irgendeinschrott\n" +
-			"SUMMARY:testtermin-\u00dcberschrift\n" +
-			"DESCRIPTION:Bla\n" +
-			"LOCATION:Besprechungszimmer\n" +
-			"CATEGORIES:ImportTerminGroupwise\n" +
-			"STATUS:CONFIRMED\n" +
-			"DTSTART;VALUE=DATE;TZID=/Mozilla.org/BasicTimezones/GMT:20070830\n" +
-			"DTEND;VALUE=DATE;TZID=/Mozilla.org/BasicTimezones/GMT:20070831\n" +
-			"DTSTAMP:20070731T110038Z\n" +
-			"END:VEVENT\n" +
-			"END:VCALENDAR";
-		final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext")) ;
-		performMultipleEntryImport( ical, Format.ICAL, FolderObject.TASK, "8475", ctx);
-	}
+    @Test
+    public void testImportIntoWrongFolder() throws OXException, UnsupportedEncodingException {
+        final String ical = "BEGIN:VCALENDAR\n" + "BEGIN:VEVENT\n" + "UID:irgendeinschrott\n" + "SUMMARY:testtermin-\u00dcberschrift\n" + "DESCRIPTION:Bla\n" + "LOCATION:Besprechungszimmer\n" + "CATEGORIES:ImportTerminGroupwise\n" + "STATUS:CONFIRMED\n" + "DTSTART;VALUE=DATE;TZID=/Mozilla.org/BasicTimezones/GMT:20070830\n" + "DTEND;VALUE=DATE;TZID=/Mozilla.org/BasicTimezones/GMT:20070831\n" + "DTSTAMP:20070731T110038Z\n" + "END:VEVENT\n" + "END:VCALENDAR";
+        final TestConfig config = new TestConfig();
+        final Context ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(config.getContextName()));
+        performMultipleEntryImport(ical, Format.ICAL, FolderObject.TASK, "8475", ctx);
+    }
 }

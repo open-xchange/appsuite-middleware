@@ -151,7 +151,7 @@ DELETE /advertisement/v1/config/user
 
 **Response:**
 
-Empty response with HTTP status code 200.
+Empty response with HTTP status code 204.
 
 ### Delete configuration by user name and context id
 
@@ -166,7 +166,7 @@ DELETE /advertisement/v1/config/name
 
 **Response:**
 
-Empty response with HTTP status code 200.
+Empty response with HTTP status code 204.
 
 ### Delete configuration by reseller and package
 
@@ -181,7 +181,7 @@ DELETE /advertisement/v1/config/package1
 
 **Response:**
 
-Empty response with HTTP status code 200.
+Empty response with HTTP status code 204.
 
 
 # Command-Line Tools
