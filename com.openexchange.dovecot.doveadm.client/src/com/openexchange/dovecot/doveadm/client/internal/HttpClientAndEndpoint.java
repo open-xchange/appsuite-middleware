@@ -53,7 +53,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import com.openexchange.rest.client.endpointpool.Endpoint;
 
 /**
- * {@link HttpClientAndEndpoint} - Provides the HTTP client and base URI for a certain Weakforced call.
+ * {@link HttpClientAndEndpoint} - Provides the HTTP client and base URI for a certain DoveAdm call.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v1.0.0
