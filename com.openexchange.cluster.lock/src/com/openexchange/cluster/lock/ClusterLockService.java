@@ -49,7 +49,6 @@
 
 package com.openexchange.cluster.lock;
 
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import com.openexchange.exception.OXException;
 
@@ -66,9 +65,8 @@ public interface ClusterLockService {
      * @param node The action that is going to be performed cluster-wise
      * @return The lock
      * @throws OXException if the cluster is already locked for that action
-     * @deprecated Use {@link #runClusterTask(ClusterTask, long)}
      */
-    Lock acquireClusterLock(String action) throws OXException;
+    public Lock acquireClusterLock(String action) throws OXException;
 
     /**
      * Release a cluster lock previously acquired via {@link ClusterLockService.acquireClusterLock}.
@@ -76,34 +74,8 @@ public interface ClusterLockService {
      * @param action the action that was performed cluster-wise
      * @param lock The lock
      * @throws OXException
-     * @deprecated Use {@link #runClusterTask(ClusterTask, long)}
      */
-    void releaseClusterLock(String action, Lock lock) throws OXException;
-
-    /**
-     * Runs the specified cluster task while previously acquiring a lock on the entire cluster
-     * for this specific task. The current thread will wait for the specified amount of seconds
-     * to acquire a lock. If the time expires an {@link OXException} will be thrown.
-     * 
-     * @param clusterTask The {@link ClusterTask} to perform
-     * @param waitTime The amount of time to wait in order to acquire a lock
-     * @return {@link T}
-     * @throws OXException if the an error is occurred during the execution
-     */
-    <T> T runClusterTask(ClusterTask<T> clusterTask, long waitTime) throws OXException;
-
-    /**
-     * Runs the specified cluster task while previously acquiring a lock on the entire cluster
-     * for this specific task. The current thread will wait for the specified amount of time units
-     * to acquire a lock. If the time expires an {@link OXException} will be thrown.
-     * 
-     * @param clusterTask The {@link ClusterTask} to perform
-     * @param waitTime The amount of time to wait in order to acquire a lock
-     * @param timeUnit The {@link TimeUnit}
-     * @return {@link T}
-     * @throws OXException if the an error is occurred during the execution
-     */
-    <T> T runClusterTask(ClusterTask<T> clusterTask, long waitTime, TimeUnit timeUnit) throws OXException;
+    public void releaseClusterLock(String action, Lock lock) throws OXException;
 
     /**
      * Acquire a periodic cluster lock.
@@ -112,16 +84,14 @@ public interface ClusterLockService {
      * @param period
      * @return The lock
      * @throws OXException
-     * @deprecated Use {@link ClusterTimerService#scheduleAtFixedRate}
      */
-    Lock acquirePeriodicClusterLock(String action, long period) throws OXException;
+    public Lock acquirePeriodicClusterLock(String action, long period) throws OXException;
 
     /**
      * Release a periodic cluster lock.
      * 
      * @param action
      * @throws OXException
-     * @deprecated Use {@link ClusterTimerService#scheduleAtFixedRate}
      */
-    void releasePeriodicClusterLock(String action) throws OXException;
+    public void releasePeriodicClusterLock(String action) throws OXException;
 }

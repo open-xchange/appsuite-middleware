@@ -56,13 +56,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
-import com.hazelcast.core.ILock;
 import com.hazelcast.core.IMap;
 import com.openexchange.cluster.lock.ClusterLockService;
-import com.openexchange.cluster.lock.ClusterTask;
+import com.openexchange.cluster.lock.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -72,34 +70,51 @@ import com.openexchange.timer.TimerService;
  */
 public class ClusterLockServiceImpl implements ClusterLockService {
 
-    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ClusterLockServiceImpl.class);
+    private final HazelcastInstance hazelcastInstance;
 
     private final Unregisterer unregisterer;
-    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link ClusterLockServiceImpl}.
      */
-    public ClusterLockServiceImpl(ServiceLookup services, Unregisterer unregisterer) {
+    public ClusterLockServiceImpl(HazelcastInstance hazelcastInstance, Unregisterer unregisterer) {
         super();
-        this.services = services;
+        this.hazelcastInstance = hazelcastInstance;
         this.unregisterer = unregisterer;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.ClusterLockService#acquireClusterLock(java.lang.String)
-     */
+    private OXException handleNotActiveException(HazelcastInstanceNotActiveException e) {
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(ClusterLockServiceImpl.class);
+        logger.warn(
+            "Encountered a {} error. {} will be shut-down!",
+            HazelcastInstanceNotActiveException.class.getSimpleName(),
+            ClusterLockServiceImpl.class);
+        unregisterer.propagateNotActive(e);
+        unregisterer.unregister();
+        return ServiceExceptionCode.absentService(HazelcastInstance.class);
+    }
+
+    private IMap<String, Lock> getHzMap() throws OXException {
+        try {
+            return hazelcastInstance.getMap("SingleNodeClusterLocks");
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
+    }
+
+    private IMap<String, Long> getPeriodicHzMap() throws OXException {
+        try {
+            return hazelcastInstance.getMap("PeriodicClusterLocks");
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
+    }
+
     @Override
     public Lock acquireClusterLock(final String action) throws OXException {
         final ConcurrentMap<String, Lock> map = getHzMap();
         if (map.get(action) != null) {
             throw ClusterLockExceptionCodes.CLUSTER_LOCKED.create(action);
-        }
-        HazelcastInstance hazelcastInstance = getHazelcastInstance();
-        if (hazelcastInstance == null) {
-            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
         final Lock lock = hazelcastInstance.getLock(action);
         if (map.putIfAbsent(action, lock) != null) {
@@ -108,63 +123,12 @@ public class ClusterLockServiceImpl implements ClusterLockService {
         return lock;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.ClusterLockService#releaseClusterLock(java.lang.String, java.util.concurrent.locks.Lock)
-     */
     @Override
     public void releaseClusterLock(final String action, final Lock lock) throws OXException {
         final ConcurrentMap<String, Lock> map = getHzMap();
         map.remove(action, lock);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.ClusterLockService#runTask(com.openexchange.cluster.lock.ClusterTask)
-     */
-    @Override
-    public <T> T runClusterTask(ClusterTask<T> clusterTask, long waitTime) throws OXException {
-        return runClusterTask(clusterTask, waitTime, TimeUnit.SECONDS);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.ClusterLockService#runClusterTask(com.openexchange.cluster.lock.ClusterTask, long, java.util.concurrent.TimeUnit)
-     */
-    @Override
-    public <T> T runClusterTask(ClusterTask<T> clusterTask, long waitTime, TimeUnit timeUnit) throws OXException {
-        HazelcastInstance hzInstance = getHazelcastInstance();
-        if (hzInstance == null) {
-            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
-        }
-
-        // Acquire the lock
-        ILock lock = hzInstance.getLock(clusterTask.getTaskName());
-        try {
-            if (lock.tryLock(waitTime, timeUnit)) {
-                try {
-                    LOGGER.debug("Cluster lock for cluster task '{}' acquired. Performing...", clusterTask.getTaskName());
-                    return clusterTask.perform();
-                } finally {
-                    LOGGER.debug("Cluster task '{}' completed. Releasing cluster lock.", clusterTask.getTaskName());
-                    lock.unlock();
-                }
-            } else {
-                throw ClusterLockExceptionCodes.UNABLE_TO_ACQUIRE_CLUSTER_LOCK.create(clusterTask.getTaskName(), waitTime, timeUnit.name().toLowerCase());
-            }
-        } catch (InterruptedException e) {
-            throw ClusterLockExceptionCodes.INTERRUPTED.create(e, clusterTask.getTaskName());
-        }
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.ClusterLockService#acquirePeriodicClusterLock(java.lang.String, long)
-     */
     @Override
     public Lock acquirePeriodicClusterLock(final String action, final long period) throws OXException {
         final long now = System.currentTimeMillis();
@@ -175,79 +139,22 @@ public class ClusterLockServiceImpl implements ClusterLockService {
                 throw ClusterLockExceptionCodes.CLUSTER_PERIODIC_LOCKED.create(period, action, period - (now - timestamp));
             }
         }
-        HazelcastInstance hazelcastInstance = getHazelcastInstance();
-        if (hazelcastInstance == null) {
-            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
-        }
         final Lock lock = hazelcastInstance.getLock(action);
         final Long futureTS = map.putIfAbsent(action, Long.valueOf(now));
         if (futureTS != null) {
             throw ClusterLockExceptionCodes.CLUSTER_PERIODIC_LOCKED.create(period, action, period - (now - futureTS));
         }
 
-        final TimerService timerService = services.getService(TimerService.class);
+        final TimerService timerService = Services.getService(TimerService.class);
         timerService.schedule(new ReleasePeriodicClusterLock(action), period, TimeUnit.MILLISECONDS);
 
         return lock;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.ClusterLockService#releasePeriodicClusterLock(java.lang.String)
-     */
     @Override
     public void releasePeriodicClusterLock(String action) throws OXException {
         final ConcurrentMap<String, Long> map = getPeriodicHzMap();
         map.remove(action);
-    }
-
-    ///////////////////////////////////// HELPERS ///////////////////////////////////////
-
-    private HazelcastInstance getHazelcastInstance() {
-        HazelcastInstance hazelcastInstance = services.getOptionalService(HazelcastInstance.class);
-        if (hazelcastInstance == null) {
-            LOGGER.warn("The Hazelcast service is not available on this node.");
-        }
-        return hazelcastInstance;
-    }
-
-    private IMap<String, Lock> getHzMap() throws OXException {
-        try {
-            HazelcastInstance hazelcastInstance = getHazelcastInstance();
-            if (hazelcastInstance == null) {
-                throw ServiceExceptionCode.absentService(HazelcastInstance.class);
-            }
-            return hazelcastInstance.getMap("SingleNodeClusterLocks");
-        } catch (HazelcastInstanceNotActiveException e) {
-            throw handleNotActiveException(e);
-        }
-    }
-
-    private IMap<String, Long> getPeriodicHzMap() throws OXException {
-        try {
-            HazelcastInstance hazelcastInstance = getHazelcastInstance();
-            if (hazelcastInstance == null) {
-                throw ServiceExceptionCode.absentService(HazelcastInstance.class);
-            }
-            return hazelcastInstance.getMap("PeriodicClusterLocks");
-        } catch (HazelcastInstanceNotActiveException e) {
-            throw handleNotActiveException(e);
-        }
-    }
-
-    /**
-     * Handles the {@link HazelcastInstanceNotActiveException}
-     * 
-     * @param e The {@link HazelcastInstanceNotActiveException} to handle
-     * @return A 'SERVICE_UNAVAILABLE' {@link OXException}
-     */
-    private OXException handleNotActiveException(HazelcastInstanceNotActiveException e) {
-        final Logger logger = org.slf4j.LoggerFactory.getLogger(ClusterLockServiceImpl.class);
-        logger.warn("Encountered a {} error. {} will be shut-down!", HazelcastInstanceNotActiveException.class.getSimpleName(), ClusterLockServiceImpl.class);
-        unregisterer.propagateNotActive(e);
-        unregisterer.unregister();
-        return ServiceExceptionCode.absentService(HazelcastInstance.class);
     }
 
     private class ReleasePeriodicClusterLock implements Runnable {
