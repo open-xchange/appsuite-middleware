@@ -69,11 +69,11 @@ public class SessiondTest extends TestCase {
 
     protected static final String sessiondPropertiesFile = "sessiondPropertiesFile";
 
-    protected static String testUser1 = "test01";
+    protected static String testUser1 = null;
 
-    protected static String testUser2 = "test02";
+    protected static String testUser2 = null;
 
-    protected static String testUser3 = "test03";
+    protected static String testUser3 = null;
 
     protected static String defaultContext = null;
 
@@ -85,8 +85,6 @@ public class SessiondTest extends TestCase {
 
     protected static String userWithoutContext = "user@withoutcontext.de";
 
-    protected static String password = "netline";
-
     protected static String invalidPassword = "qwertz";
 
     private static boolean isInit = false;
@@ -94,11 +92,15 @@ public class SessiondTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        defaultContext = new TestConfig().getContextName();
-
+        
         if (isInit) {
             return;
         }
+        TestConfig config = new TestConfig();
+        defaultContext = config.getContextName();
+        testUser1 = config.getUser();
+        testUser2 = config.getSecondUser();
+        testUser3 = config.getThirdUser();
 
         Init.startServer();
 
@@ -113,12 +115,6 @@ public class SessiondTest extends TestCase {
         final Properties p = new Properties();
 
         p.load(new FileInputStream(propfile));
-
-        testUser1 = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.testUser1", testUser1);
-        testUser2 = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.testUser2", testUser2);
-        testUser3 = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.testUser3", testUser3);
-
-        defaultContext = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.defaultContext", defaultContext);
 
         notExistingUser = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.notExistingUser", notExistingUser);
         notActiveUser = AbstractConfigWrapper.parseProperty(p, "com.openexchange.session.notActiveUser", notActiveUser);
