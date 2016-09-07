@@ -51,6 +51,7 @@ package com.openexchange.dovecot.doveadm.client;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link DoveAdmClient} - The client for DoveAdm REST API.
@@ -58,6 +59,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
+@SingletonService
 public interface DoveAdmClient {
 
     /**
