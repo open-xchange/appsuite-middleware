@@ -166,27 +166,6 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
      * Shuts-down this remote distributor.
      */
     public void shutDown() {
-        synchronized (myValues) {
-            if (!myValues.isEmpty()) {
-                HazelcastInstance hzInstance = this.hzInstance;
-                if (null != hzInstance) {
-                    String mapName = this.mapName;
-                    if (null != mapName) {
-                        try {
-                            // Get the Hazelcast map reference
-                            MultiMap<String, String> hzMap = map(mapName, hzInstance);
-
-                            for (Entry<String, String> entry : myValues.entries()) {
-                                hzMap.remove(entry.getKey(), entry.getValue());
-                            }
-                        } catch (Exception e) {
-                            LOG.warn("Failed to remove keys from Hazelcast map.", e);
-                        }
-                    }
-                }
-            }
-        }
-
         unsetHazelcastResources();
         lock.lock();
         try {
@@ -269,6 +248,28 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
      * Unsets the previously set Hazelcast resources (if any).
      */
     public void unsetHazelcastResources() {
+        synchronized (myValues) {
+            if (!myValues.isEmpty()) {
+                HazelcastInstance hzInstance = this.hzInstance;
+                if (null != hzInstance) {
+                    String mapName = this.mapName;
+                    if (null != mapName) {
+                        try {
+                            // Get the Hazelcast map reference
+                            MultiMap<String, String> hzMap = map(mapName, hzInstance);
+
+                            for (Entry<String, String> entry : myValues.entries()) {
+                                hzMap.remove(entry.getKey(), entry.getValue());
+                            }
+                        } catch (Exception e) {
+                            LOG.warn("Failed to remove keys from Hazelcast map.", e);
+                        }
+                    }
+                }
+                myValues.clear();
+            }
+        }
+
         this.hzInstance = null;
         this.mapName = null;
     }
