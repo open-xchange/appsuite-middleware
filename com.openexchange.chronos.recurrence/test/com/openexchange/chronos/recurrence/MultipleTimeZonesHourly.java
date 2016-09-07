@@ -59,19 +59,19 @@ import org.junit.runners.Parameterized;
 import com.openexchange.chronos.Event;
 
 /**
- * {@link HourlyTest}
+ * {@link MultipleTimeZonesHourly}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
 @RunWith(Parameterized.class)
-public class HourlyTest extends AbstractSingleTimeZoneTest {
+public class MultipleTimeZonesHourly extends AbstractMultipleTimeZoneTest {
+
+    public MultipleTimeZonesHourly(String startTimeZone, String endTimeZone) {
+        super(startTimeZone, endTimeZone);
+    }
 
     private static final int YEAR = 2016;
-
-    public HourlyTest(String timeZone) {
-        super(timeZone);
-    }
 
     @Test
     public void _00() {
@@ -207,7 +207,8 @@ public class HourlyTest extends AbstractSingleTimeZoneTest {
         master.setStartDate(s.getTime());
         master.setEndDate(e.getTime());
         master.setAllDay(true);
-        master.setTimeZone(timeZone);
+        master.setStartTimeZone(startTimeZone);
+        master.setEndTimeZone(endTimeZone);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
 
@@ -241,22 +242,24 @@ public class HourlyTest extends AbstractSingleTimeZoneTest {
     private void moreThanOneDay(int hourOfDay) {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
-        TimeZone tz = TimeZone.getTimeZone(timeZone);
-        Calendar s = GregorianCalendar.getInstance(tz);
+        TimeZone startTz = TimeZone.getTimeZone(startTimeZone);
+        TimeZone endTz = TimeZone.getTimeZone(endTimeZone);
+        Calendar s = GregorianCalendar.getInstance(startTz);
         s.set(YEAR, Calendar.OCTOBER, 1, hourOfDay, 0, 0);
         s.set(Calendar.MILLISECOND, 0);
-        Calendar e = GregorianCalendar.getInstance(tz);
+        Calendar e = GregorianCalendar.getInstance(endTz);
         e.setTimeInMillis(s.getTimeInMillis() + 3600000L * 36);
         master.setStartDate(s.getTime());
         master.setEndDate(e.getTime());
-        master.setTimeZone(timeZone);
+        master.setStartTimeZone(startTimeZone);
+        master.setEndTimeZone(endTimeZone);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
 
-        Calendar start = GregorianCalendar.getInstance(tz);
+        Calendar start = GregorianCalendar.getInstance(startTz);
         start.set(YEAR, Calendar.OCTOBER, 1, hourOfDay, 0, 0);
         start.set(Calendar.MILLISECOND, 0);
-        Calendar end = GregorianCalendar.getInstance(tz);
+        Calendar end = GregorianCalendar.getInstance(endTz);
         end.setTimeInMillis(start.getTimeInMillis() + 3600000L * 36);
 
         int count = 0;
@@ -276,22 +279,24 @@ public class HourlyTest extends AbstractSingleTimeZoneTest {
     private void oneHourLong(int hourOfDay) {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
-        TimeZone tz = TimeZone.getTimeZone(timeZone);
-        Calendar s = GregorianCalendar.getInstance(tz);
+        TimeZone startTz = TimeZone.getTimeZone(startTimeZone);
+        TimeZone endTz = TimeZone.getTimeZone(endTimeZone);
+        Calendar s = GregorianCalendar.getInstance(startTz);
         s.set(YEAR, Calendar.OCTOBER, 1, hourOfDay, 0, 0);
         s.set(Calendar.MILLISECOND, 0);
-        Calendar e = GregorianCalendar.getInstance(tz);
+        Calendar e = GregorianCalendar.getInstance(endTz);
         e.setTimeInMillis(s.getTimeInMillis() + 3600000L);
         master.setStartDate(s.getTime());
         master.setEndDate(e.getTime());
-        master.setTimeZone(timeZone);
+        master.setStartTimeZone(startTimeZone);
+        master.setEndTimeZone(endTimeZone);
 
         Iterator<Event> instances = service.calculateInstances(master, null, null, null);
 
-        Calendar start = GregorianCalendar.getInstance(tz);
+        Calendar start = GregorianCalendar.getInstance(startTz);
         start.set(YEAR, Calendar.OCTOBER, 1, hourOfDay, 0, 0);
         start.set(Calendar.MILLISECOND, 0);
-        Calendar end = GregorianCalendar.getInstance(tz);
+        Calendar end = GregorianCalendar.getInstance(endTz);
         end.setTimeInMillis(start.getTimeInMillis() + 3600000L);
 
         int count = 0;

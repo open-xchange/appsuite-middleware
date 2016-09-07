@@ -64,7 +64,7 @@ import com.openexchange.time.TimeTools;
  * @since v7.10.0
  */
 @RunWith(Parameterized.class)
-public class RecurrencePositionTest extends RecurrenceServiceTest {
+public class RecurrencePositionTest extends AbstractSingleTimeZoneTest {
 
     public RecurrencePositionTest(String timeZone) {
         super(timeZone);

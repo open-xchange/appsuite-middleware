@@ -90,11 +90,11 @@ public class RecurrenceServiceImpl implements RecurrenceService {
         }
 
         int counter = 1;
-        RecurrenceRuleIterator iterator = rrule.iterator(new DateTime(TimeZone.getTimeZone(master.getStartTimezone()), master.getStartDate().getTime()));
+        RecurrenceRuleIterator iterator = rrule.iterator(new DateTime(TimeZone.getTimeZone(master.getStartTimeZone()), master.getStartDate().getTime()));
         while (iterator.hasNext()) {
             long nextMillis = iterator.nextMillis();
             if (counter++ == position) {
-                Calendar retval = GregorianCalendar.getInstance(TimeZone.getTimeZone(master.getStartTimezone()));
+                Calendar retval = GregorianCalendar.getInstance(TimeZone.getTimeZone(master.getStartTimeZone()));
                 retval.setTimeInMillis(nextMillis);
                 return retval;
             }
@@ -120,7 +120,7 @@ public class RecurrenceServiceImpl implements RecurrenceService {
         }
 
         int position = 1;
-        RecurrenceRuleIterator iterator = rrule.iterator(new DateTime(TimeZone.getTimeZone(master.getStartTimezone()), master.getStartDate().getTime()));
+        RecurrenceRuleIterator iterator = rrule.iterator(new DateTime(TimeZone.getTimeZone(master.getStartTimeZone()), master.getStartDate().getTime()));
         while (iterator.hasNext()) {
             long nextMillis = iterator.nextMillis();
             if (nextMillis > datePosition.getTimeInMillis()) {

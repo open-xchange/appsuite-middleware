@@ -81,7 +81,7 @@ public class DtStartMapping extends ICalDateMapping<VEvent, Event> {
 
 	@Override
 	protected String getTimezone(Event object) {
-		return object.getStartTimezone();
+		return object.getStartTimeZone();
 	}
 
 	@Override
@@ -92,7 +92,7 @@ public class DtStartMapping extends ICalDateMapping<VEvent, Event> {
 	@Override
 	protected void setValue(Event object, Date value, String timezone, boolean hasTime) {
 		object.setStartDate(value);
-		object.setStartTimezone(timezone);
+		object.setStartTimeZone(timezone);
 		object.setAllDay(false == hasTime);
 	}
 

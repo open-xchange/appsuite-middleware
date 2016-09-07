@@ -159,8 +159,8 @@ public class BasicTest extends ICalTest {
         assertEquals("XYZ Project Review", event.getSummary());
         assertEquals(D("1998-03-12 08:30:00", "America/New_York"), event.getStartDate());
         assertEquals(D("1998-03-12 09:30:00", "America/New_York"), event.getEndDate());
-        assertEquals("America/New_York", event.getStartTimezone());
-        assertEquals("America/New_York", event.getEndTimezone());
+        assertEquals("America/New_York", event.getStartTimeZone());
+        assertEquals("America/New_York", event.getEndTimeZone());
         assertEquals("1CP Conference Room 4350", event.getLocation());
     }
 
@@ -347,8 +347,8 @@ public class BasicTest extends ICalTest {
         assertEquals("2 Tage vorher", event.getSummary());
         assertEquals(D("2030-06-28 17:00:00", "Europe/Berlin"), event.getStartDate());
         assertEquals(D("2030-06-28 18:00:00", "Europe/Berlin"), event.getEndDate());
-        assertEquals("Europe/Berlin", event.getStartTimezone());
-        assertEquals("Europe/Berlin", event.getEndTimezone());
+        assertEquals("Europe/Berlin", event.getStartTimeZone());
+        assertEquals("Europe/Berlin", event.getEndTimeZone());
     }
 
     @Test
@@ -394,8 +394,8 @@ public class BasicTest extends ICalTest {
         assertEquals("NewYork Event", event.getSummary());
         assertEquals(D("2012-08-08 02:00:00", "America/New_York"), event.getStartDate());
         assertEquals(D("2012-08-08 18:00:00", "America/New_York"), event.getEndDate());
-        assertEquals("America/New_York", event.getStartTimezone());
-        assertEquals("America/New_York", event.getEndTimezone());
+        assertEquals("America/New_York", event.getStartTimeZone());
+        assertEquals("America/New_York", event.getEndTimeZone());
     }
 
 }

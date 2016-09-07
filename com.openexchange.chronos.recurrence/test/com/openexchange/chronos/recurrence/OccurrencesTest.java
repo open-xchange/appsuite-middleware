@@ -66,7 +66,7 @@ import com.openexchange.time.TimeTools;
  * @since v7.10.0
  */
 @RunWith(Parameterized.class)
-public class OccurrencesTest extends RecurrenceServiceTest {
+public class OccurrencesTest extends AbstractSingleTimeZoneTest {
 
     public OccurrencesTest(String timeZone) {
         super(timeZone);

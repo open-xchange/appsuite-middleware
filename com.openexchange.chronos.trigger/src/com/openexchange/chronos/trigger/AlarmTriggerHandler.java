@@ -331,7 +331,7 @@ public class AlarmTriggerHandler implements CalendarHandler {
             /*
              * collect triggers for next occurrence of event in common timezone
              */
-            TimeZone timeZone = null != event.getStartTimezone() ? TimeZone.getTimeZone(event.getStartTimezone()) : session.getEntityResolver().getTimeZone(event.getCreatedBy());
+            TimeZone timeZone = null != event.getStartTimeZone() ? TimeZone.getTimeZone(event.getStartTimeZone()) : session.getEntityResolver().getTimeZone(event.getCreatedBy());
             Event occurrence = getNextOccurrence(event, timeZone);
             if (null == occurrence) {
                 return triggersPerUser;

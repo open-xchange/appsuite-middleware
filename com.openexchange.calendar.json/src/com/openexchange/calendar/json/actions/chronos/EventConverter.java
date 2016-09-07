@@ -307,7 +307,7 @@ public class EventConverter {
             event.setTransp(Appointment2Event.getTransparency(appointment.getShownAs()));
         }
         if (appointment.containsTimezone()) {
-            event.setStartTimezone(appointment.getTimezone());
+            event.setStartTimeZone(appointment.getTimezone());
         }
 
         UserizedEvent userizedEvent = new UserizedEvent(session.getSession(), event);
@@ -402,7 +402,7 @@ public class EventConverter {
             appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceRule(), event.getRecurrenceId()));
             appointment.setRecurrencePosition(Event2Appointment.getRecurrencePosition(event.getRecurrenceRule(), event.getRecurrenceId()));
         }
-        SeriesPattern pattern = Event2Appointment.getSeriesPattern(event.getRecurrenceRule(), event.getStartDate(), event.getStartTimezone(), event.isAllDay());
+        SeriesPattern pattern = Event2Appointment.getSeriesPattern(event.getRecurrenceRule(), event.getStartDate(), event.getStartTimeZone(), event.isAllDay());
         if (null != pattern) {
             if (SeriesPattern.MONTHLY_2.equals(pattern.getType())) {
                 appointment.setRecurrenceType(SeriesPattern.MONTHLY_1.intValue());
@@ -485,8 +485,8 @@ public class EventConverter {
         if (event.containsTransp()) {
             appointment.setShownAs(Event2Appointment.getShownAs(event.getTransp()));
         }
-        if (event.containsStartTimezone()) {
-            appointment.setTimezone(event.getStartTimezone());
+        if (event.containsStartTimeZone()) {
+            appointment.setTimezone(event.getStartTimeZone());
         }
         return appointment;
     }
@@ -700,7 +700,7 @@ public class EventConverter {
             EventField.END_DATE, EventField.END_TIMEZONE
         };
         Event event = getEvent(session, eventID, recurrenceFields);
-        return Event2Appointment.getSeriesPattern(event.getRecurrenceRule(), event.getStartDate(), event.getStartTimezone(), event.isAllDay());
+        return Event2Appointment.getSeriesPattern(event.getRecurrenceRule(), event.getStartDate(), event.getStartTimeZone(), event.isAllDay());
     }
 
     /**

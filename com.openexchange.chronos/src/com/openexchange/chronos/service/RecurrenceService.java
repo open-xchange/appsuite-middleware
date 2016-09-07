@@ -66,9 +66,10 @@ public interface RecurrenceService {
      * If no limit is given an internal limit kicks in avoiding an endless calculation.
      * If no boundaries are given the calculation starts with the first occurrence and lasts until the end of the series.
      * 
-     * @param master
-     * @param start
-     * @param limit
+     * @param master The master event containing all necessary information like recurrence rule, star and end date, timezones etc.
+     * @param start The left side boundary for the calculation. Optional, can be null.
+     * @param end The right side boundary for the calculation. Optional, can be null.
+     * @param limit The maximum number of calculated instances. Optional, can be null.
      * @return
      */
     public Iterator<Event> calculateInstances(Event master, Calendar start, Calendar end, Integer limit);
@@ -76,8 +77,8 @@ public interface RecurrenceService {
     /**
      * Calculates a reccurrence date position for a given 1-based position of a recurring event.
      *
-     * @param master
-     * @param position
+     * @param master The master event containing all necessary information like recurrence rule, star and end date, timezones etc.
+     * @param position The 1-based position.
      * @return The date position of a given 1-based position. Null if the position is out of boundaries.
      */
     public Calendar calculateRecurrenceDatePosition(Event master, int position);
@@ -85,8 +86,8 @@ public interface RecurrenceService {
     /**
      * Calculates a 1-based recurrence position for a given reccurence date position of a recurring event.
      * 
-     * @param master
-     * @param datePosition
+     * @param master The master event containing all necessary information like recurrence rule, star and end date, timezones etc.
+     * @param datePosition The date position. Must match a start date.
      * @return The Position of the given datePosition. 1-based. 0 if not found or out of boundaries.
      */
     public int calculateRecurrencePosition(Event master, Calendar datePosition);

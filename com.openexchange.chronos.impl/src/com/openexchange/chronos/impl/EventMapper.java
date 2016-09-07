@@ -519,22 +519,22 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
 
             @Override
             public boolean isSet(Event object) {
-                return object.containsStartTimezone();
+                return object.containsStartTimeZone();
             }
 
             @Override
             public void set(Event object, String value) throws OXException {
-                object.setStartTimezone(value);
+                object.setStartTimeZone(value);
             }
 
             @Override
             public String get(Event object) {
-                return object.getStartTimezone();
+                return object.getStartTimeZone();
             }
 
             @Override
             public void remove(Event object) {
-                object.removeStartTimezone();
+                object.removeStartTimeZone();
             }
         });
         mappings.put(EventField.END_DATE, new DefaultMapping<Date, Event>() {
@@ -563,22 +563,22 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
 
             @Override
             public boolean isSet(Event object) {
-                return object.containsEndTimezone();
+                return object.containsEndTimeZone();
             }
 
             @Override
             public void set(Event object, String value) throws OXException {
-                object.setEndTimezone(value);
+                object.setEndTimeZone(value);
             }
 
             @Override
             public String get(Event object) {
-                return object.getEndTimezone();
+                return object.getEndTimeZone();
             }
 
             @Override
             public void remove(Event object) {
-                object.removeEndTimezone();
+                object.removeEndTimeZone();
             }
         });
         mappings.put(EventField.ALL_DAY, new DefaultMapping<Boolean, Event>() {

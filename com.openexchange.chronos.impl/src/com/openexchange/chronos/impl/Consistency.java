@@ -132,15 +132,15 @@ public class Consistency {
      * @param user The user to get the fallback timezone from
      */
     public static void setTimeZone(Event event, User user) {
-        String startTimezone = event.getStartTimezone();
+        String startTimezone = event.getStartTimeZone();
         if (null == startTimezone) {
-            event.setStartTimezone(user.getTimeZone());
+            event.setStartTimeZone(user.getTimeZone());
         } else {
             //TODO: validate timezone?
         }
-        String endTimezone = event.getEndTimezone();
+        String endTimezone = event.getEndTimeZone();
         if (null == endTimezone) {
-            event.setEndTimezone(event.getStartTimezone());
+            event.setEndTimeZone(event.getStartTimeZone());
         } else {
             //TODO: validate timezone?
         }

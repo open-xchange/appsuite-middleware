@@ -76,6 +76,14 @@ public class RecurrenceIterator implements Iterator<Event> {
     private int count;
     private RecurrenceRuleIterator inner;
 
+    /**
+     * Initializes a new {@link RecurrenceIterator}.
+     * 
+     * @param master The master event containing all necessary information like recurrence rule, star and end date, timezones etc.
+     * @param start The left side boundary for the calculation. Optional, can be null.
+     * @param end The right side boundary for the calculation. Optional, can be null.
+     * @param limit The maximum number of calculated instances. Optional, can be null.
+     */
     public RecurrenceIterator(Event master, Calendar start, Calendar end, Integer limit) {
         this.master = master;
         this.start = start;
@@ -110,6 +118,22 @@ public class RecurrenceIterator implements Iterator<Event> {
         innerNext();
     }
 
+    @Override
+    public boolean hasNext() {
+        return next != null;
+    }
+
+    @Override
+    public Event next() {
+        if (next == null) {
+            throw new NoSuchElementException();
+        }
+
+        Event retval = getInstance();
+        innerNext();
+        return retval;
+    }
+
     private void innerNext() {
         if (count >= MAX) {
             return;
@@ -134,23 +158,7 @@ public class RecurrenceIterator implements Iterator<Event> {
         next = inner.nextMillis();
     }
 
-    private Date calculateEnd(Event master, Date start) {
-        long startMillis = master.getStartDate().getTime();
-        long endMillis = master.getEndDate().getTime();
-        long duration = endMillis - startMillis;
-        return new Date(start.getTime() + duration);
-    }
-
-    @Override
-    public boolean hasNext() {
-        return next != null;
-    }
-
-    @Override
-    public Event next() {
-        if (next == null) {
-            throw new NoSuchElementException();
-        }
+    private Event getInstance() {
         Event retval = master.clone();
         retval.removeId();
         retval.removeRecurrenceRule();
@@ -158,8 +166,14 @@ public class RecurrenceIterator implements Iterator<Event> {
         retval.removeChangeExceptionDates();
         retval.setStartDate(new Date(next));
         retval.setEndDate(calculateEnd(master, retval.getStartDate()));
-        innerNext();
         return retval;
+    }
+
+    private Date calculateEnd(Event master, Date start) {
+        long startMillis = master.getStartDate().getTime();
+        long endMillis = master.getEndDate().getTime();
+        long duration = endMillis - startMillis;
+        return new Date(start.getTime() + duration);
     }
 
 }

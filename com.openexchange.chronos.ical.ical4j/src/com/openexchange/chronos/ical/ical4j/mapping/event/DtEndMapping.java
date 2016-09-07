@@ -81,7 +81,7 @@ public class DtEndMapping extends ICalDateMapping<VEvent, Event> {
 
 	@Override
 	protected String getTimezone(Event object) {
-		return object.getEndTimezone();
+		return object.getEndTimeZone();
 	}
 
 	@Override
@@ -92,7 +92,7 @@ public class DtEndMapping extends ICalDateMapping<VEvent, Event> {
 	@Override
 	protected void setValue(Event object, Date value, String timezone, boolean hasTime) {
 		object.setEndDate(value);
-		object.setEndTimezone(timezone);
+		object.setEndTimeZone(timezone);
 		object.setAllDay(false == hasTime);
 	}
 

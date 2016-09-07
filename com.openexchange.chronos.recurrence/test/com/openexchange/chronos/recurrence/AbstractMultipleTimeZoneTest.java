@@ -49,32 +49,36 @@
 
 package com.openexchange.chronos.recurrence;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.runners.Parameterized.Parameters;
 
 /**
- * {@link UnitTests}
+ * {@link AbstractMultipleTimeZoneTest}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    RecurrencePositionTest.class,
-    RecurrenceDatePositionTest.class,
-    OccurrencesTest.class,
-    DSTShiftTest.class,
-    HourlyTest.class,
-    MultipleTimeZonesHourly.class
-})
-public class UnitTests {
+public class AbstractMultipleTimeZoneTest extends RecurrenceServiceTest {
 
-    /**
-     * Initializes a new {@link UnitTests}.
-     */
-    public UnitTests() {
-        super();
+    protected String startTimeZone;
+    protected String endTimeZone;
+
+    public AbstractMultipleTimeZoneTest(String startTimeZone, String endTimeZone) {
+        this.startTimeZone = startTimeZone;
+        this.endTimeZone = endTimeZone;
+    }
+
+    @Parameters(name = "{0} -> {1}")
+    public static List<Object[]> data() {
+        List<Object[]> retval = new ArrayList<Object[]>();
+        retval.add(new Object[] { "Europe/Berlin", "UTC" });
+        retval.add(new Object[] { "UTC", "Europe/Berlin" });
+        retval.add(new Object[] { "America/New_York", "UTC" });
+        retval.add(new Object[] { "UTC", "America/New_York" });
+        retval.add(new Object[] { "America/New_York", "Europe/Berlin" });
+        retval.add(new Object[] { "Europe/Berlin", "America/New_York" });
+        return retval;
     }
 
 }

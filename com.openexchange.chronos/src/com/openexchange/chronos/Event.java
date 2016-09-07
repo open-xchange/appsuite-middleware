@@ -84,9 +84,9 @@ public class Event {
     private String color;
 
     private Date startDate;
-    private String startTimezone;
+    private String startTimeZone;
     private Date endDate;
-    private String endTimezone;
+    private String endTimeZone;
     private boolean allDay;
     private Transp transp;
 
@@ -669,8 +669,8 @@ public class Event {
      *
      * @return The start timezone
      */
-    public String getStartTimezone() {
-        return startTimezone;
+    public String getStartTimeZone() {
+        return startTimeZone;
     }
 
     /**
@@ -678,16 +678,16 @@ public class Event {
      *
      * @param value The start timezone to set
      */
-    public void setStartTimezone(String value) {
-        startTimezone = value;
+    public void setStartTimeZone(String value) {
+        startTimeZone = value;
         setFields.add(EventField.START_TIMEZONE);
     }
 
     /**
      * Removes the start timezone of the event.
      */
-    public void removeStartTimezone() {
-        startTimezone = null;
+    public void removeStartTimeZone() {
+        startTimeZone = null;
         setFields.remove(EventField.START_TIMEZONE);
     }
 
@@ -696,7 +696,7 @@ public class Event {
      *
      * @return <code>true</code> if the start timezone is set, <code>false</code>, otherwise
      */
-    public boolean containsStartTimezone() {
+    public boolean containsStartTimeZone() {
         return setFields.contains(EventField.START_TIMEZONE);
     }
 
@@ -741,8 +741,8 @@ public class Event {
      *
      * @return The end timezone
      */
-    public String getEndTimezone() {
-        return endTimezone;
+    public String getEndTimeZone() {
+        return endTimeZone;
     }
 
     /**
@@ -750,16 +750,16 @@ public class Event {
      *
      * @param value The end timezone to set
      */
-    public void setEndTimezone(String value) {
-        endTimezone = value;
+    public void setEndTimeZone(String value) {
+        endTimeZone = value;
         setFields.add(EventField.END_TIMEZONE);
     }
 
     /**
      * Removes the end timezone of the event.
      */
-    public void removeEndTimezone() {
-        endTimezone = null;
+    public void removeEndTimeZone() {
+        endTimeZone = null;
         setFields.remove(EventField.END_TIMEZONE);
     }
 
@@ -768,7 +768,7 @@ public class Event {
      *
      * @return <code>true</code> if the end timezone is set, <code>false</code>, otherwise
      */
-    public boolean containsEndTimezone() {
+    public boolean containsEndTimeZone() {
         return setFields.contains(EventField.END_TIMEZONE);
     }
 
@@ -1183,7 +1183,7 @@ public class Event {
      * @return The Start of the event
      */
     public Calendar getStart() {
-        Calendar retval = GregorianCalendar.getInstance(TimeZone.getTimeZone(getStartTimezone()));
+        Calendar retval = GregorianCalendar.getInstance(TimeZone.getTimeZone(getStartTimeZone()));
         retval.setTime(getStartDate());
         return retval;
     }
@@ -1194,7 +1194,7 @@ public class Event {
      * @return The End of the event
      */
     public Calendar getEnd() {
-        Calendar retval = GregorianCalendar.getInstance(TimeZone.getTimeZone(getStartTimezone()));
+        Calendar retval = GregorianCalendar.getInstance(TimeZone.getTimeZone(getStartTimeZone()));
         retval.setTime(getEndDate());
         return retval;
     }
@@ -1205,8 +1205,8 @@ public class Event {
      * @param timeZone The timezone
      */
     public void setTimeZone(String timeZone) {
-        setStartTimezone(timeZone);
-        setEndTimezone(timeZone);
+        setStartTimeZone(timeZone);
+        setEndTimeZone(timeZone);
     }
 
     /**
@@ -1215,15 +1215,15 @@ public class Event {
      * @return The start timezon
      */
     public String getTimeZone() {
-        return getStartTimezone();
+        return getStartTimeZone();
     }
 
     /**
      * Removes the start and end timezone.
      */
     public void removeTimeZone() {
-        removeStartTimezone();
-        removeEndTimezone();
+        removeStartTimeZone();
+        removeEndTimeZone();
     }
 
     /**
@@ -1232,7 +1232,7 @@ public class Event {
      * @return
      */
     public boolean containsTimeZone() {
-        return containsStartTimezone() && containsEndTimezone();
+        return containsStartTimeZone() && containsEndTimeZone();
     }
 
     @Override
@@ -1279,8 +1279,8 @@ public class Event {
         if (containsEndDate()) {
             clone.setEndDate(getEndDate());
         }
-        if (containsEndTimezone()) {
-            clone.setEndTimezone(getEndTimezone());
+        if (containsEndTimeZone()) {
+            clone.setEndTimeZone(getEndTimeZone());
         }
         if (containsId()) {
             clone.setId(getId());
@@ -1312,8 +1312,8 @@ public class Event {
         if (containsStartDate()) {
             clone.setStartDate(getStartDate());
         }
-        if (containsStartTimezone()) {
-            clone.setStartTimezone(getStartTimezone());
+        if (containsStartTimeZone()) {
+            clone.setStartTimeZone(getStartTimeZone());
         }
         if (containsStatus()) {
             clone.setStatus(getStatus());
@@ -1352,7 +1352,7 @@ public class Event {
         result = prime * result + ((deleteExceptionDates == null) ? 0 : deleteExceptionDates.hashCode());
         result = prime * result + ((description == null) ? 0 : description.hashCode());
         result = prime * result + ((endDate == null) ? 0 : endDate.hashCode());
-        result = prime * result + ((endTimezone == null) ? 0 : endTimezone.hashCode());
+        result = prime * result + ((endTimeZone == null) ? 0 : endTimeZone.hashCode());
         result = prime * result + id;
         result = prime * result + ((lastModified == null) ? 0 : lastModified.hashCode());
         result = prime * result + ((location == null) ? 0 : location.hashCode());
@@ -1365,7 +1365,7 @@ public class Event {
         result = prime * result + seriesId;
         result = prime * result + ((setFields == null) ? 0 : setFields.hashCode());
         result = prime * result + ((startDate == null) ? 0 : startDate.hashCode());
-        result = prime * result + ((startTimezone == null) ? 0 : startTimezone.hashCode());
+        result = prime * result + ((startTimeZone == null) ? 0 : startTimeZone.hashCode());
         result = prime * result + ((status == null) ? 0 : status.hashCode());
         result = prime * result + ((summary == null) ? 0 : summary.hashCode());
         result = prime * result + ((transp == null) ? 0 : transp.hashCode());
@@ -1433,10 +1433,10 @@ public class Event {
                 return false;
         } else if (!endDate.equals(other.endDate))
             return false;
-        if (endTimezone == null) {
-            if (other.endTimezone != null)
+        if (endTimeZone == null) {
+            if (other.endTimeZone != null)
                 return false;
-        } else if (!endTimezone.equals(other.endTimezone))
+        } else if (!endTimeZone.equals(other.endTimeZone))
             return false;
         if (id != other.id)
             return false;
@@ -1483,10 +1483,10 @@ public class Event {
                 return false;
         } else if (!startDate.equals(other.startDate))
             return false;
-        if (startTimezone == null) {
-            if (other.startTimezone != null)
+        if (startTimeZone == null) {
+            if (other.startTimeZone != null)
                 return false;
-        } else if (!startTimezone.equals(other.startTimezone))
+        } else if (!startTimeZone.equals(other.startTimeZone))
             return false;
         if (status != other.status)
             return false;

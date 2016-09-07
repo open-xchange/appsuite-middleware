@@ -51,19 +51,14 @@ package com.openexchange.chronos.recurrence;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.runners.Parameterized.Parameters;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.recurrence.service.RecurrenceServiceImpl;
 import com.openexchange.chronos.service.RecurrenceService;
-import com.openexchange.time.TimeTools;
 
 /**
  * {@link RecurrenceServiceTest}
@@ -74,20 +69,9 @@ import com.openexchange.time.TimeTools;
 public abstract class RecurrenceServiceTest {
 
     protected RecurrenceService service;
-    protected String timeZone;
 
-    public RecurrenceServiceTest(String timeZone) {
-        this.timeZone = timeZone;
-    }
+    public RecurrenceServiceTest() {
 
-    @Parameters(name = "{0}")
-    public static List<Object[]> data() {
-        List<Object[]> retval = new ArrayList<Object[]>();
-        for (String tzId : TimeZone.getAvailableIDs()) {
-            //for (String tzId : new String[] { "Europe/Berlin", "UTC" }) {
-            retval.add(new Object[] { tzId });
-        }
-        return retval;
     }
 
     @Before
@@ -112,12 +96,6 @@ public abstract class RecurrenceServiceTest {
 
         boolean equals = clone.equals(instance);
         assertTrue("Not equal.", equals);
-    }
-
-    protected Calendar getCal(String date) {
-        Calendar retval = GregorianCalendar.getInstance(TimeZone.getTimeZone(timeZone));
-        retval.setTime(TimeTools.D(date, TimeZone.getTimeZone(timeZone)));
-        return retval;
     }
 
     protected String getUntilZulu(Calendar c) {

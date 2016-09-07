@@ -497,22 +497,22 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public void set(Event event, String value) {
-                event.setStartTimezone(value);
+                event.setStartTimeZone(value);
             }
 
             @Override
             public boolean isSet(Event event) {
-                return event.containsStartTimezone();
+                return event.containsStartTimeZone();
             }
 
             @Override
             public String get(Event event) {
-                return event.getStartTimezone();
+                return event.getStartTimeZone();
             }
 
             @Override
             public void remove(Event event) {
-                event.removeStartTimezone();
+                event.removeStartTimeZone();
             }
         });
         mappings.put(EventField.END_DATE, new DateMapping<Event>("timestampfield02", "End date") {

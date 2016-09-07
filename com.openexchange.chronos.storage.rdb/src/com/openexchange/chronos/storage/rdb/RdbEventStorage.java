@@ -368,7 +368,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                 int idx = value.indexOf('~');
                 int absoluteDuration = Integer.parseInt(value.substring(0, idx));
                 String databasePattern = value.substring(idx + 1);
-                String timeZone = null != event.getStartTimezone() ? event.getStartTimezone() : "UTC";
+                String timeZone = null != event.getStartTimeZone() ? event.getStartTimeZone() : "UTC";
                 boolean allDay = event.isAllDay();
                 /*
                  * convert legacy series pattern into proper recurrence rule
@@ -402,7 +402,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
             String recurrenceRule = event.getRecurrenceRule();
             long absoluteDuration = new Period(event).getTotalDays();
-            TimeZone timeZone = event.containsStartTimezone() && null != event.getStartTimezone() ? TimeZone.getTimeZone(event.getStartTimezone()) : null;
+            TimeZone timeZone = event.containsStartTimeZone() && null != event.getStartTimeZone() ? TimeZone.getTimeZone(event.getStartTimeZone()) : null;
             Calendar calendar = null != timeZone ? GregorianCalendar.getInstance(timeZone) : GregorianCalendar.getInstance();
             calendar.setTime(event.getStartDate());
             SeriesPattern seriesPattern = Recurrence.generatePattern(event.getRecurrenceRule(), calendar);
@@ -413,7 +413,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
              */
             if (event.getId() == event.getSeriesId()) {
                 Period masterPeriod = new Period(event);
-                TimeZone tz = TimeZone.getTimeZone(event.isAllDay() || null == event.getStartTimezone() ? "UTC" : event.getStartTimezone());
+                TimeZone tz = TimeZone.getTimeZone(event.isAllDay() || null == event.getStartTimeZone() ? "UTC" : event.getStartTimeZone());
                 Period seriesPeriod = Recurrence.getImplicitSeriesPeriod(masterPeriod, tz, recurrenceRule);
                 event.setStartDate(seriesPeriod.getStartDate());
                 event.setEndDate(seriesPeriod.getEndDate());

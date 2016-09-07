@@ -49,32 +49,42 @@
 
 package com.openexchange.chronos.recurrence;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.TimeZone;
+import org.junit.runners.Parameterized.Parameters;
+import com.openexchange.time.TimeTools;
 
 /**
- * {@link UnitTests}
+ * {@link AbstractSingleTimeZoneTest}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    RecurrencePositionTest.class,
-    RecurrenceDatePositionTest.class,
-    OccurrencesTest.class,
-    DSTShiftTest.class,
-    HourlyTest.class,
-    MultipleTimeZonesHourly.class
-})
-public class UnitTests {
+public abstract class AbstractSingleTimeZoneTest extends RecurrenceServiceTest {
 
-    /**
-     * Initializes a new {@link UnitTests}.
-     */
-    public UnitTests() {
-        super();
+    protected String timeZone;
+
+    public AbstractSingleTimeZoneTest(String timeZone) {
+        this.timeZone = timeZone;
+    }
+
+    @Parameters(name = "{0}")
+    public static List<Object[]> data() {
+        List<Object[]> retval = new ArrayList<Object[]>();
+        for (String tzId : TimeZone.getAvailableIDs()) {
+            //for (String tzId : new String[] { "Europe/Berlin", "UTC" }) {
+            retval.add(new Object[] { tzId });
+        }
+        return retval;
+    }
+
+    protected Calendar getCal(String date) {
+        Calendar retval = GregorianCalendar.getInstance(TimeZone.getTimeZone(timeZone));
+        retval.setTime(TimeTools.D(date, TimeZone.getTimeZone(timeZone)));
+        return retval;
     }
 
 }

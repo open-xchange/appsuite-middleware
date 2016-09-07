@@ -127,8 +127,8 @@ public class TestXProperties extends ICalTest {
         assertEquals("mailto:otto@example.com", event.getOrganizer().getUri());
         assertEquals(D("2011-12-08 12:00:00", "CET"), event.getStartDate());
         assertEquals(D("2011-12-08 12:30:00", "CET"), event.getEndDate());
-        assertEquals("CET", event.getStartTimezone());
-        assertEquals("CET", event.getEndTimezone());
+        assertEquals("CET", event.getStartTimeZone());
+        assertEquals("CET", event.getEndTimeZone());
 
         String originalICal = Streams.stream2string(eventData.getComponent().getStream(), "UTF-8");
         assertTrue(originalICal.contains("X-MICROSOFT-CDO-APPT-SEQUENCE:1"));
