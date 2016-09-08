@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange Oauth Implementation Bundle
+Bundle-Name: Open-Xchange OAuth Implementation Bundle
 Bundle-SymbolicName: com.openexchange.oauth.impl
 Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
