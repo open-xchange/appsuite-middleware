@@ -1378,6 +1378,25 @@ ox_add_property com.openexchange.secret.recovery.fast.enabled true /opt/open-xch
 # SoftwareChange_Request-3528
 ox_add_property html.tag.code '""' /opt/open-xchange/etc/whitelist.properties
 
+# Bug #45347
+old_key=io.ox.calendar//participantBlacklist
+new_key=io.ox/calendar//participantBlacklist
+propfile=/opt/open-xchange/etc/settings/participant-blacklist.properties
+
+if ! ox_exists_property ${new_key} ${propfile}
+then
+    if ox_exists_property ${old_key} ${propfile}
+    then
+        value=$(ox_read_property ${old_key} ${propfile})
+        ox_remove_property ${old_key} ${propfile}
+        ox_add_property ${new_key} "${value}" ${propfile}
+    else
+        ox_comment ${old_key} remove ${propfile}
+        ox_remove_property ${old_key} ${propfile}
+        ox_add_property ${new_key} "" ${propfile}
+    fi
+fi
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
