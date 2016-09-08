@@ -122,6 +122,29 @@ public class ClusterLockServiceImpl implements ClusterLockService {
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.cluster.lock.ClusterLockService#runClusterTask(com.openexchange.cluster.lock.ClusterTask)
+     */
+    @Override
+    public <T> T runClusterTask(ClusterTask<T> clusterTask) throws OXException {
+        HazelcastInstance hzInstance = getHazelcastInstance();
+        if (hzInstance == null) {
+            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
+        }
+
+        // Acquire the lock
+        ILock lock = hzInstance.getLock(clusterTask.getTaskName());
+        lock.lock();
+        try {
+            return clusterTask.perform();
+        } finally {
+            LOGGER.debug("Cluster task '{}' completed. Releasing cluster lock.", clusterTask.getTaskName());
+            lock.unlock();
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.cluster.lock.ClusterLockService#runTask(com.openexchange.cluster.lock.ClusterTask)
      */
     @Override
