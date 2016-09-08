@@ -123,4 +123,10 @@ public class SAMLProperties {
      */
     public static final String ENABLE_AUTO_LOGIN = "com.openexchange.saml.enableAutoLogin";
 
+    /**
+     * Whether SAML unsolicited responses are enabled.
+     */
+    public static final String ALLOW_UNSOLICITED_RESPONSES = "com.openexchange.saml.allowUnsolicitedResponses";
+
+
 }

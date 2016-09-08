@@ -422,12 +422,19 @@ public class StrictValidationStrategy implements ValidationStrategy {
         }
 
         String inResponseTo = confirmationData.getInResponseTo();
-        if (inResponseTo == null) {
-            throw new ValidationException(ValidationFailedReason.MISSING_ATTRIBUTE, "SubjectConfirmationData contains no 'InResponseTo' attribute");
-        }
-
-        if (!inResponseTo.equals(requestInfo.getRequestId())) {
-            throw new ValidationException(ValidationFailedReason.INVALID_ATTRIBUTE, "SubjectConfirmationData contains invalid 'InResponseTo' attribute: " + inResponseTo);
+        if (config.isAllowUnsolicitedResponses()){
+            if (inResponseTo == null) {
+                LOG.debug("SubjectConfirmationData contains no 'InResponseTo' attribute, but unsolicitedResponses are allowed");
+            } else if (!inResponseTo.equals(requestInfo.getRequestId())) {
+                throw new ValidationException(ValidationFailedReason.INVALID_ATTRIBUTE, "SubjectConfirmationData contains invalid 'InResponseTo' attribute: " + inResponseTo);
+            }
+        } else {
+            if (inResponseTo == null) {
+                throw new ValidationException(ValidationFailedReason.MISSING_ATTRIBUTE, "SubjectConfirmationData contains no 'InResponseTo' attribute");
+            }
+            if (!inResponseTo.equals(requestInfo.getRequestId())) {
+                throw new ValidationException(ValidationFailedReason.INVALID_ATTRIBUTE, "SubjectConfirmationData contains invalid 'InResponseTo' attribute: " + inResponseTo);
+            }
         }
 
         /*
@@ -501,10 +508,8 @@ public class StrictValidationStrategy implements ValidationStrategy {
          * Otherwise, it MUST be present and its value MUST match the value of the corresponding request's ID
          * attribute.
          * [core 06 - 3.2.2p38]
-         *
-         * We don't support unsolicited responses, so InResponseTo must be set
          */
-        responseValidators.add(new ResponseValidators.InResponseToValidator(requestInfo.getRequestId(), false));
+        responseValidators.add(new ResponseValidators.InResponseToValidator(requestInfo.getRequestId(), config.isAllowUnsolicitedResponses()));
 
         return responseValidators;
     }

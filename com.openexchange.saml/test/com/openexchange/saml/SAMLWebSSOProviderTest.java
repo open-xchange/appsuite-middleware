@@ -459,6 +459,121 @@ public class SAMLWebSSOProviderTest {
     }
 
     @Test
+    public void testIdPInitiatedLogin() throws Exception {
+        AuthnRequest authnRequest = prepareAuthnRequest();
+
+        /*
+         * Build response and process it
+         */
+        Response response = buildResponseWithoutInResponseTo();
+        SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
+            .setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes()))
+            .build());
+
+        SimHttpServletResponse httpResponse = new SimHttpServletResponse();
+        provider.handleAuthnResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
+        assertCachingDisabledHeaders(httpResponse);
+
+        /*
+         * Assert final login redirect
+         */
+        Assert.assertEquals(HttpServletResponse.SC_FOUND, httpResponse.getStatus());
+        String location = httpResponse.getHeader("Location");
+        Assert.assertNotNull(location);
+        URI locationURI = new URIBuilder(location).build();
+        Assert.assertEquals("webmail.example.com", locationURI.getHost());
+        Map<String, String> redirectParams = parseURIQuery(locationURI);
+        Assert.assertEquals(SAMLLoginTools.ACTION_SAML_LOGIN, redirectParams.get("action"));
+        String reservationToken = redirectParams.get(SAMLLoginTools.PARAM_TOKEN);
+        Assert.assertNotNull(reservationToken);
+        Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
+    }
+
+    @Test
+    public void testIdPInitiatedLoginWithRelayState() throws Exception {
+        AuthnRequest authnRequest = prepareAuthnRequest();
+
+        String requestHost = "webmail2.example.com";
+        String requestedLoginPath = "/fancyclient/login.html";
+        String requestClient = "test-client";
+        String split = ":";
+
+        StringBuilder relayStateBuilder = new StringBuilder();
+        relayStateBuilder.append("domain=").append(requestHost).append(split);
+        relayStateBuilder.append("loginpath=").append(requestedLoginPath).append(split);
+        relayStateBuilder.append("client=").append(requestClient);
+        String encodedRelayState = Base64.encodeBytes(relayStateBuilder.toString().getBytes());
+
+        /*
+         * Build response and process it
+         */
+        Response response = buildResponseWithoutInResponseTo();
+        SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
+            .setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes()))
+            .setParameter("RelayState", encodedRelayState)
+            .build());
+
+        SimHttpServletResponse httpResponse = new SimHttpServletResponse();
+        provider.handleAuthnResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
+        assertCachingDisabledHeaders(httpResponse);
+
+        /*
+         * Assert final login redirect
+         */
+        Assert.assertEquals(HttpServletResponse.SC_FOUND, httpResponse.getStatus());
+        String location = httpResponse.getHeader("Location");
+        Assert.assertNotNull(location);
+        URI locationURI = new URIBuilder(location).build();
+        Assert.assertEquals(requestHost, locationURI.getHost());
+        Map<String, String> redirectParams = parseURIQuery(locationURI);
+        Assert.assertEquals(requestedLoginPath, redirectParams.get(SAMLLoginTools.PARAM_LOGIN_PATH));
+        Assert.assertEquals(requestClient, redirectParams.get(LoginFields.CLIENT_PARAM));
+        Assert.assertEquals(SAMLLoginTools.ACTION_SAML_LOGIN, redirectParams.get("action"));
+        String reservationToken = redirectParams.get(SAMLLoginTools.PARAM_TOKEN);
+        Assert.assertNotNull(reservationToken);
+        Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
+    }
+
+    @Test
+    public void testIdPInitiatedLoginWithPartlyRelayState() throws Exception {
+        AuthnRequest authnRequest = prepareAuthnRequest();
+
+        String requestHost = "webmail2.example.com";
+        String split = ":";
+
+        StringBuilder relayStateBuilder = new StringBuilder();
+        relayStateBuilder.append("domain=").append(requestHost).append(split);
+        String encodedRelayState = Base64.encodeBytes(relayStateBuilder.toString().getBytes());
+
+        /*
+         * Build response and process it
+         */
+        Response response = buildResponseWithoutInResponseTo();
+        SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("POST", new URIBuilder(authnRequest.getAssertionConsumerServiceURL())
+            .setParameter("SAMLResponse", Base64.encodeBytes(marshall(response).getBytes()))
+            .setParameter("RelayState", encodedRelayState)
+            .build());
+
+        SimHttpServletResponse httpResponse = new SimHttpServletResponse();
+        provider.handleAuthnResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
+        assertCachingDisabledHeaders(httpResponse);
+
+        /*
+         * Assert final login redirect
+         */
+        Assert.assertEquals(HttpServletResponse.SC_FOUND, httpResponse.getStatus());
+        String location = httpResponse.getHeader("Location");
+        Assert.assertNotNull(location);
+        URI locationURI = new URIBuilder(location).build();
+        Assert.assertEquals(requestHost, locationURI.getHost());
+        Map<String, String> redirectParams = parseURIQuery(locationURI);
+        Assert.assertEquals(SAMLLoginTools.ACTION_SAML_LOGIN, redirectParams.get("action"));
+        String reservationToken = redirectParams.get(SAMLLoginTools.PARAM_TOKEN);
+        Assert.assertNotNull(reservationToken);
+        Assert.assertNotNull(sessionReservationService.removeReservation(reservationToken));
+    }
+
+    @Test
     public void testCachingHeadersOnInit() throws Exception {
         InitService initService = new InitService(config, provider, new DefaultExceptionHandler(), new TestLoginConfigurationLookup(), services);
         /*
@@ -685,6 +800,29 @@ public class SAMLWebSSOProviderTest {
         return (AuthnRequest) context.getInboundSAMLMessage();
     }
 
+    private AuthnRequest prepareAuthnRequest() {
+        AuthnRequest authnRequest = openSAML.buildSAMLObject(AuthnRequest.class);
+
+        /*
+         * The <Issuer> element MUST be present and MUST contain the unique identifier of the requesting service provider; the Format
+         * attribute MUST be omitted or have a value of urn:oasis:names:tc:SAML:2.0:nameid-format:entity. [profiles 06 - 4.1.4.1p19]
+         */
+        Issuer issuer = openSAML.buildSAMLObject(Issuer.class);
+        issuer.setValue(config.getEntityID());
+        authnRequest.setIssuer(issuer);
+
+        authnRequest.setProviderName(config.getProviderName());
+        authnRequest.setVersion(SAMLVersion.VERSION_20);
+        authnRequest.setProtocolBinding(SAMLConstants.SAML2_POST_BINDING_URI);
+        authnRequest.setAssertionConsumerServiceURL(config.getAssertionConsumerServiceURL());
+        authnRequest.setDestination(config.getIdentityProviderAuthnURL());
+        authnRequest.setIsPassive(Boolean.FALSE);
+        authnRequest.setForceAuthn(Boolean.FALSE);
+        authnRequest.setID(UUIDs.getUnformattedString(UUID.randomUUID()));
+        authnRequest.setIssueInstant(new DateTime());
+        return authnRequest;
+    }
+
     private LogoutRequest parseLogoutRequest(HttpServletRequest httpRequest) throws Exception {
         HttpServletRequestAdapter inTransport = new HttpServletRequestAdapter(httpRequest);
         BasicSAMLMessageContext<SAMLObject, LogoutRequest, SAMLObject> context = new BasicSAMLMessageContext<SAMLObject, LogoutRequest, SAMLObject>();
@@ -767,6 +905,99 @@ public class SAMLWebSSOProviderTest {
         SubjectConfirmationData subjectConfirmationData = openSAML.buildSAMLObject(SubjectConfirmationData.class);
         subjectConfirmationData.setAddress("10.20.30.1");
         subjectConfirmationData.setInResponseTo(requestID);
+        subjectConfirmationData.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 *60 * 1000));
+        subjectConfirmationData.setRecipient(config.getAssertionConsumerServiceURL());
+        subjectConfirmation.setSubjectConfirmationData(subjectConfirmationData);
+        subject.getSubjectConfirmations().add(subjectConfirmation);
+        assertion.setSubject(subject);
+
+        Conditions conditions = openSAML.buildSAMLObject(Conditions.class);
+        conditions.setNotBefore(new DateTime(System.currentTimeMillis() - 60 * 1000));
+        conditions.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 *60 * 1000));
+        AudienceRestriction audienceRestriction = openSAML.buildSAMLObject(AudienceRestriction.class);
+        Audience audience = openSAML.buildSAMLObject(Audience.class);
+        audience.setAudienceURI(config.getEntityID());
+        audienceRestriction.getAudiences().add(audience);
+        conditions.getAudienceRestrictions().add(audienceRestriction);
+        assertion.setConditions(conditions);
+
+        AuthnStatement authnStatement = openSAML.buildSAMLObject(AuthnStatement.class);
+        authnStatement.setAuthnInstant(new DateTime(System.currentTimeMillis() - 60 * 1000));
+        authnStatement.setSessionIndex(UUIDs.getUnformattedString(UUID.randomUUID()));
+        AuthnContext authnContext = openSAML.buildSAMLObject(AuthnContext.class);
+        AuthnContextClassRef authnContextClassRef = openSAML.buildSAMLObject(AuthnContextClassRef.class);
+        authnContextClassRef.setAuthnContextClassRef("urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport");
+        authnContext.setAuthnContextClassRef(authnContextClassRef);
+        authnStatement.setAuthnContext(authnContext);
+        assertion.getAuthnStatements().add(authnStatement);
+
+        AttributeStatement attributeStatement = openSAML.buildSAMLObject(AttributeStatement.class);
+        Attribute attribute = openSAML.buildSAMLObject(Attribute.class);
+        attribute.setFriendlyName("userID");
+        attribute.setName("urn:open-xchange:saml:userID");
+        XSString attributeValue = (XSString) openSAML.getBuilderFactory().getBuilder(XSString.TYPE_NAME).buildObject(AttributeValue.DEFAULT_ELEMENT_NAME, XSString.TYPE_NAME);
+        attributeValue.setValue("oxuser1");
+        attribute.getAttributeValues().add(attributeValue);
+        attributeStatement.getAttributes().add(attribute);
+        assertion.getAttributeStatements().add(attributeStatement);
+
+        Credential signingCredential = testCredentials.getIDPSigningCredential();
+        Signature assertionSignature = openSAML.buildSAMLObject(Signature.class);
+        assertionSignature.setSigningCredential(signingCredential);
+        SecurityHelper.prepareSignatureParams(assertionSignature, signingCredential, null, null);
+        assertion.setSignature(assertionSignature);
+        openSAML.marshall(assertion); // marshalling is necessary for subsequent signing
+        Signer.signObject(assertionSignature);
+
+        EncryptedAssertion encryptedAssertion = getEncrypter().encrypt(assertion);
+        response.getEncryptedAssertions().add(encryptedAssertion);
+
+        Signature responseSignature = openSAML.buildSAMLObject(Signature.class);
+        responseSignature.setSigningCredential(signingCredential);
+        SecurityHelper.prepareSignatureParams(responseSignature, signingCredential, null, null);
+        response.setSignature(responseSignature);
+        openSAML.marshall(response); // marshalling is necessary for subsequent signing
+        Signer.signObject(responseSignature);
+
+        return response;
+    }
+
+    private Response buildResponseWithoutInResponseTo() throws Exception {
+//        String requestID = request.getID();
+        Response response = openSAML.buildSAMLObject(Response.class);
+        response.setDestination(config.getAssertionConsumerServiceURL());
+        response.setID(UUIDs.getUnformattedString(UUID.randomUUID()));
+        response.setIssueInstant(new DateTime());
+        response.setVersion(SAMLVersion.VERSION_20);
+
+        Issuer responseIssuer = openSAML.buildSAMLObject(Issuer.class);
+        responseIssuer.setValue(config.getIdentityProviderEntityID());
+        response.setIssuer(responseIssuer);
+
+        Status status = openSAML.buildSAMLObject(Status.class);
+        StatusCode statusCode = openSAML.buildSAMLObject(StatusCode.class);
+        statusCode.setValue(StatusCode.SUCCESS_URI);
+        status.setStatusCode(statusCode);
+        response.setStatus(status);
+
+        Assertion assertion = openSAML.buildSAMLObject(Assertion.class);
+        assertion.setID(UUIDs.getUnformattedString(UUID.randomUUID()));
+        assertion.setIssueInstant(new DateTime());
+
+        Issuer assertionIssuer = openSAML.buildSAMLObject(Issuer.class);
+        assertionIssuer.setValue(config.getIdentityProviderEntityID());
+        assertion.setIssuer(assertionIssuer);
+
+        Subject subject = openSAML.buildSAMLObject(Subject.class);
+        NameID nameID = openSAML.buildSAMLObject(NameID.class);
+        nameID.setFormat(NameIDType.TRANSIENT);
+        nameID.setValue(UUIDs.getUnformattedString(UUID.randomUUID()));
+        subject.setNameID(nameID);
+
+        SubjectConfirmation subjectConfirmation = openSAML.buildSAMLObject(SubjectConfirmation.class);
+        subjectConfirmation.setMethod("urn:oasis:names:tc:SAML:2.0:cm:bearer");
+        SubjectConfirmationData subjectConfirmationData = openSAML.buildSAMLObject(SubjectConfirmationData.class);
+        subjectConfirmationData.setAddress("10.20.30.1");
         subjectConfirmationData.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + 60 *60 * 1000));
         subjectConfirmationData.setRecipient(config.getAssertionConsumerServiceURL());
         subjectConfirmation.setSubjectConfirmationData(subjectConfirmationData);
