@@ -65,6 +65,8 @@ import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.MsLiveConnectApi;
 import org.scribe.model.Token;
 import org.slf4j.Logger;
+import com.openexchange.cluster.lock.ClusterLockService;
+import com.openexchange.cluster.lock.ClusterTask;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -204,29 +206,84 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         // Check expiration
         if (considerExpired || scribeOAuthService.isExpired(liveconnectOAuthAccount.getToken())) {
             // Expired...
-            String refreshToken = liveconnectOAuthAccount.getSecret();
-            Token accessToken;
-            try {
-                accessToken = scribeOAuthService.getAccessToken(new Token(liveconnectOAuthAccount.getToken(), liveconnectOAuthAccount.getSecret()), null);
-            } catch (org.scribe.exceptions.OAuthException e) {
-                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, liveconnectOAuthAccount.getDisplayName(), Integer.valueOf(liveconnectOAuthAccount.getId()));
-            }
-            if (Strings.isEmpty(accessToken.getSecret())) {
-                LOGGER.warn("Received invalid request_token from Live Connect: {}. Response:{}{}", null == accessToken.getSecret() ? "null" : accessToken.getSecret(), Strings.getLineSeparator(), accessToken.getRawResponse());
-            } else {
-                refreshToken = accessToken.getSecret();
-            }
-            // Update account
-            OAuthService oAuthService = Services.getService(OAuthService.class);
-            int accountId = liveconnectOAuthAccount.getId();
-            Map<String, Object> arguments = new HashMap<String, Object>(3);
-            arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
-            arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
-            oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId(), liveconnectOAuthAccount.getEnabledScopes());
-
-            // Reload
-            return oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+            ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
+            return clusterLockService.runClusterTask(new OneDriveReauthorizeClusterTask(session, liveconnectOAuthAccount));
         }
         return null;
+    }
+
+    private class OneDriveReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
+
+        private Session session;
+        private OAuthAccount cachedAccount;
+        private String taskName;
+
+        /**
+         * Initialises a new {@link OneDriveOAuthAccess.OneDriveReauthorizeClusterTask}.
+         */
+        public OneDriveReauthorizeClusterTask(Session session, OAuthAccount cachedAccount) {
+            super();
+            this.session = session;
+            this.cachedAccount = cachedAccount;
+            
+            StringBuilder builder = new StringBuilder("OAuth reauthorize cluster task for: ");
+            builder.append("userId: ").append(session.getUserId());
+            builder.append(", contextId: ").append(session.getContextId());
+            builder.append(", accountId: ").append(cachedAccount.getId());
+            builder.append(", serviceId: ").append(cachedAccount.getAPI().getFullName());
+            
+            taskName = builder.toString();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.openexchange.cluster.lock.ClusterTask#getTaskName()
+         */
+        @Override
+        public String getTaskName() {
+            return taskName;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.openexchange.cluster.lock.ClusterTask#perform()
+         */
+        @Override
+        public OAuthAccount perform() throws OXException {
+            OAuthService oAuthService = Services.getService(OAuthService.class);
+            OAuthAccount dbAccount = oAuthService.getAccount(cachedAccount.getId(), session, session.getUserId(), session.getContextId());
+
+            if (dbAccount.getToken().equals(cachedAccount.getToken()) && dbAccount.getSecret().equals(cachedAccount.getSecret())) {
+                final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MsLiveConnectApi.class);
+                serviceBuilder.apiKey(cachedAccount.getMetaData().getAPIKey(session)).apiSecret(cachedAccount.getMetaData().getAPISecret(session));
+                MsLiveConnectApi.MsLiveConnectService scribeOAuthService = (MsLiveConnectApi.MsLiveConnectService) serviceBuilder.build();
+
+                String refreshToken = cachedAccount.getSecret();
+                Token accessToken;
+                try {
+                    accessToken = scribeOAuthService.getAccessToken(new Token(cachedAccount.getToken(), cachedAccount.getSecret()), null);
+                } catch (org.scribe.exceptions.OAuthException e) {
+                    throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, cachedAccount.getDisplayName(), Integer.valueOf(cachedAccount.getId()));
+                }
+                if (Strings.isEmpty(accessToken.getSecret())) {
+                    LOGGER.warn("Received invalid request_token from Live Connect: {}. Response:{}{}", null == accessToken.getSecret() ? "null" : accessToken.getSecret(), Strings.getLineSeparator(), accessToken.getRawResponse());
+                } else {
+                    refreshToken = accessToken.getSecret();
+                }
+                // Update account
+                int accountId = cachedAccount.getId();
+                Map<String, Object> arguments = new HashMap<String, Object>(3);
+                arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
+                arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
+                oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId(), cachedAccount.getEnabledScopes());
+
+                // Reload
+                return oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+            } else {
+                return dbAccount;
+            }
+        }
     }
 }
