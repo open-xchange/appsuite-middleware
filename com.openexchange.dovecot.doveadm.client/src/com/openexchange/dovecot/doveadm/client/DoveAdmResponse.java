@@ -79,4 +79,13 @@ public interface DoveAdmResponse extends DoveAdmEntity {
      */
     DoveAdmErrorResponse asErrorResponse();
 
+    /**
+     * Gets the data response representation from this response.
+     * <p>
+     * Only makes sense in case {@link #isError()} returns <code>false</code>.
+     *
+     * @return The data response representation or <code>null</code> if not applicable
+     */
+    DoveAdmDataResponse asDataResponse();
+
 }

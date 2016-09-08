@@ -73,6 +73,11 @@ public class DoveAdmDataResponseImpl extends AbstractDoveAdmResponse implements 
     }
 
     @Override
+    public DoveAdmDataResponse asDataResponse() {
+        return this;
+    }
+
+    @Override
     public List<Result> getResults() {
         return results;
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.dovecot.doveadm.client.internal;
 
+import com.openexchange.dovecot.doveadm.client.DoveAdmDataResponse;
 import com.openexchange.dovecot.doveadm.client.DoveAdmErrorResponse;
 import com.openexchange.dovecot.doveadm.client.DoveAdmResponse;
 
@@ -83,6 +84,11 @@ public abstract class AbstractDoveAdmResponse implements DoveAdmResponse {
     @Override
     public DoveAdmErrorResponse asErrorResponse() {
         return error ? (DoveAdmErrorResponse) this : null;
+    }
+
+    @Override
+    public DoveAdmDataResponse asDataResponse() {
+        return error ? null : (DoveAdmDataResponse) this;
     }
 
     @Override
