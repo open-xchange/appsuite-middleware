@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -223,9 +224,15 @@ public class DovecotPushRESTService {
             String from = data.optString("from", null);
             if (null != from) {
                 try {
-                    messageData.put(PushNotificationField.MAIL_SENDER.getId(), QuotedInternetAddress.parseHeader(from, true)[0].toUnicodeString());
+                    InternetAddress fromAddress = QuotedInternetAddress.parseHeader(from, true)[0];
+                    messageData.put(PushNotificationField.MAIL_SENDER_EMAIL.getId(), fromAddress.getAddress());
+                    String personal = fromAddress.getPersonal();
+                    if (Strings.isNotEmpty(personal)) {
+                        messageData.put(PushNotificationField.MAIL_SENDER_PERSONAL.getId(), personal);
+                    }
                 } catch (AddressException e) {
-                    messageData.put(PushNotificationField.MAIL_SENDER.getId(),  MimeMessageUtility.decodeEnvelopeSubject(from));
+                    LOGGER.warn("Failed to parse \"from\" address: {}", from, e);
+                    messageData.put(PushNotificationField.MAIL_SENDER_EMAIL.getId(),  MimeMessageUtility.decodeEnvelopeSubject(from));
                 }
             }
         }
