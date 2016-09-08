@@ -133,11 +133,12 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
             this.accountId = accountId;
             this.serviceId = serviceId;
 
-            StringBuilder builder = new StringBuilder();
-            builder.append("Reauthorise for user '").append(session.getUserId()).append("'");
-            builder.append(" in context '").append(session.getContextId()).append("'");
-            builder.append(" for account '").append(accountId).append("'");
-            builder.append(" for OAuth provider '").append(serviceId).append("'");
+            StringBuilder builder = new StringBuilder("OAuth reauthorize cluster task for: ");
+            builder.append("userId: ").append(session.getUserId());
+            builder.append(", contextId: ").append(session.getContextId());
+            builder.append(", accountId: ").append(accountId);
+            builder.append(", serviceId: ").append(serviceId);
+            
             taskName = builder.toString();
         }
 
