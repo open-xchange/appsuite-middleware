@@ -12,6 +12,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -29,6 +30,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.pns.DefaultPushNotification;
@@ -220,13 +222,17 @@ public class DovecotPushRESTService {
         {
             String from = data.optString("from", null);
             if (null != from) {
-                messageData.put(PushNotificationField.MAIL_SENDER.getId(), from);
+                try {
+                    messageData.put(PushNotificationField.MAIL_SENDER.getId(), QuotedInternetAddress.parseHeader(from, true)[0].toUnicodeString());
+                } catch (AddressException e) {
+                    messageData.put(PushNotificationField.MAIL_SENDER.getId(),  MimeMessageUtility.decodeEnvelopeSubject(from));
+                }
             }
         }
         {
             String subject = data.optString("subject", null);
             if (null != subject) {
-                messageData.put(PushNotificationField.MAIL_SUBJECT.getId(), subject);
+                messageData.put(PushNotificationField.MAIL_SUBJECT.getId(), MimeMessageUtility.decodeEnvelopeSubject(subject));
             }
         }
         {
@@ -260,7 +266,7 @@ public class DovecotPushRESTService {
     private MailMessage asMessage(long uid, String fullName, String from, String subject, int unread) throws MessagingException {
         MailMessage mailMessage = new IDMailMessage(Long.toString(uid), fullName);
         mailMessage.addFrom(QuotedInternetAddress.parseHeader(from, true));
-        mailMessage.setSubject(subject);
+        mailMessage.setSubject(null == subject ? null : MimeMessageUtility.decodeEnvelopeSubject(subject));
         if (unread >= 0) {
             mailMessage.setUnreadMessages(unread);
         }
