@@ -1132,6 +1132,18 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         return retval;
     }
 
+    @Override
+    public String getDefaultFolderPrefix(Session session) throws OXException {
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            mailAccess = MailAccess.getInstance(session);
+            mailAccess.connect(false);
+            return mailAccess.getFolderStorage().getDefaultFolderPrefix();
+        } finally {
+            MailAccess.closeInstance(mailAccess, false);
+        }
+    }
+
     public MailAccount getDefaultMailAccount(final int userId, final int contextId, final Connection con) throws OXException {
         return getMailAccount(MailAccount.DEFAULT_ID, userId, contextId, con);
     }
@@ -2671,6 +2683,48 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             if (blacklisted) {
                 throw MailAccountExceptionCodes.BLACKLISTED_SERVER.create(host);
             }
+        }
+    }
+
+    @Override
+    public int acquireId(int userId, Context context) throws OXException {
+        final int contextId = context.getContextId();
+        final Connection con = Database.get(contextId, true);
+        final int retval;
+        try {
+            con.setAutoCommit(false);
+            retval = acquireId(userId, context, con);
+            con.commit();
+        } catch (final SQLException e) {
+            rollback(con);
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
+            rollback(con);
+            throw e;
+        } catch (final Exception e) {
+            rollback(con);
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            autocommit(con);
+            Database.back(contextId, true, con);
+        }
+        return retval;
+    }
+
+    /**
+     * Acquires the next available identifier.
+     *
+     * @param userId The user identifier
+     * @param context The context
+     * @param con The connection to use
+     * @return The reserved identifier
+     * @throws OXException If next available identifier cannot be returned
+     */
+    public int acquireId(int userId, Context context, Connection con) throws OXException {
+        try {
+            return IDGenerator.getId(context, com.openexchange.groupware.Types.MAIL_SERVICE, con);
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }
     }
 
