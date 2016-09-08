@@ -59,6 +59,8 @@ import com.box.sdk.BoxAPIException;
 import com.box.sdk.BoxAPIRequest;
 import com.box.sdk.BoxAPIResponse;
 import com.box.sdk.BoxUser;
+import com.openexchange.cluster.lock.ClusterLockService;
+import com.openexchange.cluster.lock.ClusterTask;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -166,16 +168,8 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
 
         // Box SDK performs an automatic access token refresh, so we need to see if the tokens were renewed
         if (!oAuthAccount.getToken().equals(apiConnection.getAccessToken()) || !oAuthAccount.getSecret().equals(apiConnection.getRefreshToken())) {
-            OAuthService oauthService = Services.getService(OAuthService.class);
-
-            Map<String, Object> arguments = new HashMap<>();
-            arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(apiConnection.getAccessToken(), apiConnection.getRefreshToken()));
-            arguments.put(OAuthConstants.ARGUMENT_SESSION, getSession());
-
-            int userId = getSession().getUserId();
-            int contextId = getSession().getContextId();
-            oauthService.updateAccount(oAuthAccount.getId(), arguments, userId, contextId, oAuthAccount.getEnabledScopes());
-            setOAuthAccount(oauthService.getAccount(oAuthAccount.getId(), getSession(), userId, contextId));
+            ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
+            clusterLockService.runClusterTask(new BoxReauthorizeClusterTask(getSession(), oAuthAccount));
         }
         return this;
     }
@@ -187,5 +181,66 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         BoxAPIConnection boxAPI = new BoxAPIConnection(boxMetaData.getAPIKey(getSession()), boxMetaData.getAPISecret(getSession()), account.getToken(), account.getSecret());
         OAuthClient<BoxAPIConnection> oAuthClient = new OAuthClient<>(boxAPI, account.getToken());
         setOAuthClient(oAuthClient);
+    }
+
+    private class BoxReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
+
+        private String taskName;
+        private Session session;
+        private OAuthAccount cachedAccount;
+
+        /**
+         * Initialises a new {@link BoxOAuthAccess.BoxReauthorizeClusterTask}.
+         */
+        public BoxReauthorizeClusterTask(Session session, OAuthAccount cachedAccount) {
+            super();
+            this.session = session;
+            this.cachedAccount = cachedAccount;
+
+            StringBuilder builder = new StringBuilder("OAuth reauthorize cluster task for: ");
+            builder.append("userId: ").append(session.getUserId());
+            builder.append(", contextId: ").append(session.getContextId());
+            builder.append(", accountId: ").append(cachedAccount.getId());
+            builder.append(", serviceId: ").append(cachedAccount.getAPI().getFullName());
+
+            taskName = builder.toString();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.openexchange.cluster.lock.ClusterTask#getTaskName()
+         */
+        @Override
+        public String getTaskName() {
+            return taskName;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.openexchange.cluster.lock.ClusterTask#perform()
+         */
+        @Override
+        public OAuthAccount perform() throws OXException {
+            OAuthService oauthService = Services.getService(OAuthService.class);
+            OAuthAccount dbAccount = oauthService.getAccount(cachedAccount.getId(), session, session.getUserId(), session.getContextId());
+
+            if (dbAccount.getToken().equals(cachedAccount.getToken()) && dbAccount.getSecret().equals(cachedAccount.getSecret())) {
+                BoxAPIConnection apiConnection = (BoxAPIConnection) getClient().client;
+                Map<String, Object> arguments = new HashMap<>();
+                arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(apiConnection.getAccessToken(), apiConnection.getRefreshToken()));
+                arguments.put(OAuthConstants.ARGUMENT_SESSION, getSession());
+
+                int userId = getSession().getUserId();
+                int contextId = getSession().getContextId();
+                oauthService.updateAccount(dbAccount.getId(), arguments, userId, contextId, dbAccount.getEnabledScopes());
+                setOAuthAccount(oauthService.getAccount(dbAccount.getId(), getSession(), userId, contextId));
+                return getOAuthAccount();
+            } else {
+                return dbAccount;
+            }
+        }
+
     }
 }
