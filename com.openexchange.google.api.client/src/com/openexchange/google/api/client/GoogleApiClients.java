@@ -59,6 +59,8 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.openexchange.cluster.lock.ClusterLockService;
+import com.openexchange.cluster.lock.ClusterTask;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.services.Services;
@@ -71,7 +73,6 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link GoogleApiClients} - Utility class for Google API client.
@@ -134,20 +135,8 @@ public class GoogleApiClients {
                 int expiry = scribeOAuthService.getExpiry(defaultAccount.getToken());
                 if (expiry < 300) {
                     // Less than 5 minutes to live -> refresh token!
-                    String refreshToken = defaultAccount.getSecret();
-                    Token accessToken = scribeOAuthService.getAccessToken(new Token(defaultAccount.getToken(), defaultAccount.getSecret()), null);
-                    if (!Strings.isEmpty(accessToken.getSecret())) {
-                        refreshToken = accessToken.getSecret();
-                    }
-                    // Update account
-                    int accountId = defaultAccount.getId();
-                    Map<String, Object> arguments = new HashMap<String, Object>(3);
-                    arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
-                    arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
-                    oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId(), defaultAccount.getEnabledScopes());
-
-                    // Reload
-                    defaultAccount = oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+                    ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
+                    defaultAccount =  clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, defaultAccount));
                 }
             } catch (org.scribe.exceptions.OAuthException e) {
                 // Failed to request new access token
@@ -206,19 +195,8 @@ public class GoogleApiClients {
             int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
             if (expiry < 300) {
                 // Less than 5 minutes to live -> refresh token!
-                String refreshToken = googleAccount.getSecret();
-                Token accessToken = scribeOAuthService.getAccessToken(new Token(googleAccount.getToken(), googleAccount.getSecret()), null);
-                if (!Strings.isEmpty(accessToken.getSecret())) {
-                    refreshToken = accessToken.getSecret();
-                }
-                // Update account
-                Map<String, Object> arguments = new HashMap<String, Object>(3);
-                arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
-                arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
-                oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId(), googleAccount.getEnabledScopes());
-
-                // Reload
-                googleAccount = oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+                ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
+                googleAccount =  clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount));
             }
         }
 
@@ -256,7 +234,7 @@ public class GoogleApiClients {
      * @return The non-expired candidate or <code>null</code> if given account appears to have enough time left
      * @throws OXException If a non-expired candidate cannot be returned
      */
-    public static OAuthAccount ensureNonExpiredGoogleAccount(OAuthAccount googleAccount, Session session) throws OXException {
+    public static OAuthAccount ensureNonExpiredGoogleAccount(final OAuthAccount googleAccount, final Session session) throws OXException {
         if (null == googleAccount) {
             return googleAccount;
         }
@@ -270,7 +248,7 @@ public class GoogleApiClients {
         // Create Scribe Google OAuth service
         final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
         serviceBuilder.apiKey(googleAccount.getMetaData().getAPIKey(session)).apiSecret(googleAccount.getMetaData().getAPISecret(session));
-        Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
+        final Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
 
         // Check expiry
         int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
@@ -279,21 +257,8 @@ public class GoogleApiClients {
             return null;
         }
 
-        // Less than 5 minutes to live -> refresh token!
-        String refreshToken = googleAccount.getSecret();
-        Token accessToken = scribeOAuthService.getAccessToken(new Token(googleAccount.getToken(), googleAccount.getSecret()), null);
-        if (!Strings.isEmpty(accessToken.getSecret())) {
-            refreshToken = accessToken.getSecret();
-        }
-        // Update account
-        int accountId = googleAccount.getId();
-        Map<String, Object> arguments = new HashMap<String, Object>(3);
-        arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
-        arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
-        oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId(), googleAccount.getEnabledScopes());
-
-        // Reload
-        return oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+        ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
+        return clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount));
     }
 
     /**
@@ -322,10 +287,7 @@ public class GoogleApiClients {
             NetHttpTransport transport = new NetHttpTransport.Builder().doNotValidateCertificate().build();
 
             // Build credentials
-            return new GoogleCredential.Builder()
-            .setClientSecrets(googleOAuthAccount.getMetaData().getAPIKey(session), googleOAuthAccount.getMetaData().getAPISecret(session))
-            .setJsonFactory(JSON_FACTORY).setTransport(transport).build()
-            .setRefreshToken(googleOAuthAccount.getSecret()).setAccessToken(googleOAuthAccount.getToken());
+            return new GoogleCredential.Builder().setClientSecrets(googleOAuthAccount.getMetaData().getAPIKey(session), googleOAuthAccount.getMetaData().getAPISecret(session)).setJsonFactory(JSON_FACTORY).setTransport(transport).build().setRefreshToken(googleOAuthAccount.getSecret()).setAccessToken(googleOAuthAccount.getToken());
         } catch (GeneralSecurityException e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -339,6 +301,81 @@ public class GoogleApiClients {
     public static String getGoogleProductName() {
         ConfigurationService configService = Services.getService(ConfigurationService.class);
         return null == configService ? "" : configService.getProperty("com.openexchange.oauth.google.productName", "");
+    }
+
+    //////////////////////// HELPERS /////////////////////////////
+
+    /**
+     * {@link GoogleReauthorizeClusterTask}
+     */
+    private static class GoogleReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
+
+        private Session session;
+        private OAuthAccount cachedAccount;
+        private String taskName;
+
+        /**
+         * Initialises a new {@link GoogleApiClients.GoogleReauthorizeClusterTask}.
+         */
+        public GoogleReauthorizeClusterTask(Session session, OAuthAccount cachedAccount) {
+            super();
+            this.session = session;
+            this.cachedAccount = cachedAccount;
+            
+            StringBuilder builder = new StringBuilder("OAuth reauthorize cluster task for: ");
+            builder.append("userId: ").append(session.getUserId());
+            builder.append(", contextId: ").append(session.getContextId());
+            builder.append(", accountId: ").append(cachedAccount.getId());
+            builder.append(", serviceId: ").append(cachedAccount.getAPI().getFullName());
+            
+            taskName = builder.toString();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.openexchange.cluster.lock.ClusterTask#getTaskName()
+         */
+        @Override
+        public String getTaskName() {
+            return taskName;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.openexchange.cluster.lock.ClusterTask#perform()
+         */
+        @Override
+        public OAuthAccount perform() throws OXException {
+            OAuthService oAuthService = Services.getService(OAuthService.class);
+            OAuthAccount dbAccount = oAuthService.getAccount(cachedAccount.getId(), session, session.getUserId(), session.getContextId());
+
+            if (dbAccount.getToken().equals(cachedAccount.getToken()) && dbAccount.getSecret().equals(cachedAccount.getSecret())) {
+                final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
+                serviceBuilder.apiKey(cachedAccount.getMetaData().getAPIKey(session)).apiSecret(cachedAccount.getMetaData().getAPISecret(session));
+                Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
+
+                // Less than 5 minutes to live -> refresh token!
+                String refreshToken = cachedAccount.getSecret();
+                Token accessToken = scribeOAuthService.getAccessToken(new Token(cachedAccount.getToken(), cachedAccount.getSecret()), null);
+                if (!Strings.isEmpty(accessToken.getSecret())) {
+                    refreshToken = accessToken.getSecret();
+                }
+                // Update account
+                int accountId = cachedAccount.getId();
+                Map<String, Object> arguments = new HashMap<String, Object>(3);
+                arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
+                arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
+                oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId(), cachedAccount.getEnabledScopes());
+
+                // Reload
+                return oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+            } else {
+                return dbAccount;
+            }
+        }
+
     }
 
 }
