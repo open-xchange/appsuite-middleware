@@ -78,6 +78,9 @@ postFix() {
     if dpkg --compare-versions "7.8.0" gt-nl "$1"; then
         ox_set_property com.openexchange.oauth.google.redirectUrl "$VALUE" /opt/open-xchange/etc/googleoauth.properties
     fi
+
+    # SoftwareChange_Request-3506
+    ox_add_property com.openexchange.oauth.dropbox.redirectUrl REPLACE_WITH_REDIRECT_URL /opt/open-xchange/etc/dropboxoauth.properties
 }
 
 setConfigFilePermissions() {
