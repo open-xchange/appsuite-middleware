@@ -131,6 +131,7 @@ import com.openexchange.mail.dataobjects.MailFolderInfo;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.permission.DefaultMailPermission;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -488,13 +489,36 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
             // Determine standard folders
             {
-                final StringHelper stringHelper = StringHelper.valueOf(locale);
-                for (int index = 0; index < 7; index++) {
-                    final String fn = getChecker().getDefaultFolder(index);
+                StringHelper stringHelper = StringHelper.valueOf(locale);
+
+                {
+                    MailFolderInfo mfi = map.get("INBOX");
+                    if (null != mfi) {
+                        mfi.setDefaultFolder(true);
+                        mfi.setDefaultFolderType(DefaultFolderType.INBOX);
+                        mfi.setDisplayName(stringHelper.getString(MailStrings.INBOX));
+                    }
+                }
+
+                int len;
+                {
+                    // Detect if spam option is enabled
+                    UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
+                    len = usm.isSpamOptionEnabled() ? 6 : 4;
+                }
+                for (int index = 0; index < len; index++) {
+                    String fn;
+                    try {
+                        fn = getChecker().getDefaultFolder(index);
+                    } catch (Exception e) {
+                        LOG.warn("Failed to get standard folder full name for {}", IMAPDefaultFolderChecker.getFallbackName(index), e);
+                        fn = null;
+                    }
                     if (null != fn) {
-                        final MailFolderInfo mfi = map.get(fn);
+                        MailFolderInfo mfi = map.get(fn);
                         if (null != mfi) {
                             mfi.setDefaultFolder(true);
+
                             switch (index) {
                             case StorageUtility.INDEX_CONFIRMED_HAM:
                                 mfi.setDefaultFolderType(DefaultFolderType.CONFIRMED_HAM);
@@ -520,13 +544,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                 mfi.setDefaultFolderType(DefaultFolderType.TRASH);
                                 mfi.setDisplayName(stringHelper.getString(MailStrings.TRASH));
                                 break;
-                            case StorageUtility.INDEX_INBOX:
-                                mfi.setDefaultFolderType(DefaultFolderType.INBOX);
-                                mfi.setDisplayName(stringHelper.getString(MailStrings.INBOX));
-                                break;
                             default:
                                 break;
                             }
+
                         }
                     }
                 }
