@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.imageserver.logback.configuration overrides" basedir=".">
+
+    <description>
+        Special build for the com.openexchange.imageserver.logback.configuration fragment. Configuration file needs to be part of the bundle resources.
+    </description>
+
+    <!-- service name -->
+    <property name="serviceName" value="imageserver"/>
+
+    <import file="build-project.xml"/>
+
+    <target name="testFor3rdPartyLib" description="We need a directory for this bundle to be able to link logback.xml into configuration directory">
+        <property name="3rdPartyLib" value="true"/>
+    </target>
+
+    <target name="postInstall">
+        <symlink link="${destDir}/${bundlesDir}/${bundleIdentifier}/logback.xml" resource="${confInstallDir}/logback.xml" overwrite="true"/>
+    </target>
+
+    <target name="rewriteBundleClassPath">
+        <!--
+        We have to avoid rewriting the bundle class path from '.' to org.apache.log4j.configuration.jar.
+        That file doesn't exist and we have to make sure, that logback.xml can be found via the bundle class path.
+        -->
+    </target>
+
+</project>

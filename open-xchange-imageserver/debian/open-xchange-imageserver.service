@@ -1,0 +1,13 @@
+[Unit]
+After=remote-fs.target
+After=time-sync.target ypbind.service
+
+[Service]
+User=open-xchange
+PermissionsStartOnly=true
+TimeoutStartSec=0
+ExecStart=/opt/open-xchange/imageserver/sbin/open-xchange-imageserver
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,4 @@
+opt/open-xchange/imageserver/etc/imageserver.properties
+opt/open-xchange/imageserver/etc/logback.xml
+opt/open-xchange/imageserver/etc/overwrite.properties
+opt/open-xchange/imageserver/etc/process-conf.sh
