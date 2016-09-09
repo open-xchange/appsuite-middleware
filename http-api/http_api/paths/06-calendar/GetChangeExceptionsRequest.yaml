@@ -19,6 +19,6 @@
           A JSON object containing an array with appointment data. Each array element describes one appointment and
           is itself an array. The elements of each array contain the information specified by the corresponding
           identifiers in the `columns` parameter. In case of errors the responsible fields in the response are filled
-          (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/AppointmentsResponse"

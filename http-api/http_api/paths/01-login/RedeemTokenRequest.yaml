@@ -40,6 +40,6 @@
           A JSON object containing the session ID used for all subsequent requests. Additionally a random
           token is contained to be used for the Easy Login method. If configured within tokenlogin-secrets
           configuration file even the user password will be returned. In case of errors the responsible
-          fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/LoginResponse"

@@ -29,6 +29,6 @@
         description: |
           An empty JSON object. Any transport warnings that occurred during sending the
           notifications are available in the warnings array of the response. In case
-          of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/FolderSharingNotificationResponse"

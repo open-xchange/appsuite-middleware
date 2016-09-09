@@ -38,7 +38,7 @@ properties:
     description: true if this folder has subfolders.
   own_rights:
     type: integer
-    description: Permissions which apply to the current user, as described either in [Permission flags](https://documentation.open-xchange.com/latest/middleware/http_api/3_flags_bitmasks.html#permission-flags) or in http://tools.ietf.org/html/rfc2086.
+    description: Permissions which apply to the current user, as described either in [Permission flags](#permission-flags) or in http://tools.ietf.org/html/rfc2086.
   permissions:
     type: array
     items:

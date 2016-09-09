@@ -90,6 +90,6 @@
           sent in the request must be appended by the client creating the session. The final URL must
           have the form redirect_URL&clientToken=token. Both tokens are necessary to use the session and
           both tokens must match. Otherwise the session is terminated. In case of errors the responsible
-          fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/TokenLoginResponse"

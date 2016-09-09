@@ -38,6 +38,6 @@
           identifiers in the `columns` parameter. Appointment sequencies are broken up into individual appointments
           and each occurrence of a sequence in the requested range is returned separately. The appointments are
           sorted in ascending order by the field `start_date`. In case of errors the responsible fields in the
-          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/AppointmentsResponse"

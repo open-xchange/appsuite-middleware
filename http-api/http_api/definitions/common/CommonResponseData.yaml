@@ -29,4 +29,4 @@ category:
 timestamp:
   type: integer
   format: int64
-  description: The latest timestamp of the returned data (see [Updates](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#updates)).
+  description: The latest timestamp of the returned data (see [Updates](#updates)).

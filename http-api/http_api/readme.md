@@ -56,7 +56,7 @@ list.
       200:
         description: |
           A JSON object containing the group data. In case of errors the responsible fields in the
-          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/GroupResponse"
 ```
@@ -113,7 +113,7 @@ After defining the parameter you can use it in a request's `parameters` section 
       200:
         description: |
           A JSON object containing the group data. In case of errors the responsible fields in the
-          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/GroupResponse"
 ```
@@ -215,7 +215,7 @@ that provides detailed information on adding parameters. Responses are specified
 	    description: |
 		  A JSON object containing the value `true` if the group exists, otherwise `false`. In
 		  case of errors the responsible fields in the response are filled (see
-		  [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+		  [Error handling](#error-handling)).
 		schema:
 		  $ref: "#/definitions/GroupExistenceResponse"
 ```
@@ -241,7 +241,7 @@ model inside of the response's schema as seen above (`$ref: "#/definitions/Group
 to learn how to write a response model.
 
 Normally each description of a response of the OX HTTP API ends with the sentence "In case of errors the responsible fields in the
-response are filled (see \[Error handling\](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling))". Please retain this convention when you write the definition of a new request
+response are filled (see \[Error handling\](#error-handling))". Please retain this convention when you write the definition of a new request
 that returns a normal JSON object as defined in the low level protocol and error handling section of the API.
 
 #### Checklist

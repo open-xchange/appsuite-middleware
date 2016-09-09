@@ -35,6 +35,6 @@
       200:
         description: |
           An array of objects identifying the appointments which lie between start and end as described. In
-          case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/AppointmentFreeBusyResponse"
