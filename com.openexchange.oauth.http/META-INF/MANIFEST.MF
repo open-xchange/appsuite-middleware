@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange OAuth HTTP Bundle
+Bundle-SymbolicName: com.openexchange.oauth.http
+Bundle-Version: 7.8.3
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.exception,
+ com.openexchange.framework.request,
+ com.openexchange.groupware.notify.hostname,
+ com.openexchange.http.client,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.log,
+ com.openexchange.oauth,
+ com.openexchange.oauth.access,
+ com.openexchange.osgi.annotation,
+ com.openexchange.session
+Export-Package: com.openexchange.oauth.http
