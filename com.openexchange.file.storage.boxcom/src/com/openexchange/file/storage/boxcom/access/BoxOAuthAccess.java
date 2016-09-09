@@ -67,6 +67,7 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.boxcom.BoxClosure;
 import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.Services;
+import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
@@ -183,37 +184,13 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         setOAuthClient(oAuthClient);
     }
 
-    private class BoxReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
-
-        private String taskName;
-        private Session session;
-        private OAuthAccount cachedAccount;
+    private class BoxReauthorizeClusterTask extends AbstractReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
 
         /**
          * Initialises a new {@link BoxOAuthAccess.BoxReauthorizeClusterTask}.
          */
         public BoxReauthorizeClusterTask(Session session, OAuthAccount cachedAccount) {
-            super();
-            this.session = session;
-            this.cachedAccount = cachedAccount;
-
-            StringBuilder builder = new StringBuilder("OAuth reauthorize cluster task for: ");
-            builder.append("userId: ").append(session.getUserId());
-            builder.append(", contextId: ").append(session.getContextId());
-            builder.append(", accountId: ").append(cachedAccount.getId());
-            builder.append(", serviceId: ").append(cachedAccount.getAPI().getFullName());
-
-            taskName = builder.toString();
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.openexchange.cluster.lock.ClusterTask#getTaskName()
-         */
-        @Override
-        public String getTaskName() {
-            return taskName;
+            super(session, cachedAccount);
         }
 
         /*
@@ -224,9 +201,9 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         @Override
         public OAuthAccount perform() throws OXException {
             OAuthService oauthService = Services.getService(OAuthService.class);
-            OAuthAccount dbAccount = oauthService.getAccount(cachedAccount.getId(), session, session.getUserId(), session.getContextId());
+            OAuthAccount dbAccount = oauthService.getAccount(getCachedAccount().getId(), getSession(), getSession().getUserId(), getSession().getContextId());
 
-            if (dbAccount.getToken().equals(cachedAccount.getToken()) && dbAccount.getSecret().equals(cachedAccount.getSecret())) {
+            if (dbAccount.getToken().equals(getCachedAccount().getToken()) && dbAccount.getSecret().equals(getCachedAccount().getSecret())) {
                 BoxAPIConnection apiConnection = (BoxAPIConnection) getClient().client;
                 Map<String, Object> arguments = new HashMap<>();
                 arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(apiConnection.getAccessToken(), apiConnection.getRefreshToken()));

@@ -66,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.services.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
+import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
@@ -308,37 +309,13 @@ public class GoogleApiClients {
     /**
      * {@link GoogleReauthorizeClusterTask}
      */
-    private static class GoogleReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
-
-        private Session session;
-        private OAuthAccount cachedAccount;
-        private String taskName;
+    private static class GoogleReauthorizeClusterTask extends AbstractReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
 
         /**
          * Initialises a new {@link GoogleApiClients.GoogleReauthorizeClusterTask}.
          */
         public GoogleReauthorizeClusterTask(Session session, OAuthAccount cachedAccount) {
-            super();
-            this.session = session;
-            this.cachedAccount = cachedAccount;
-            
-            StringBuilder builder = new StringBuilder("OAuth reauthorize cluster task for: ");
-            builder.append("userId: ").append(session.getUserId());
-            builder.append(", contextId: ").append(session.getContextId());
-            builder.append(", accountId: ").append(cachedAccount.getId());
-            builder.append(", serviceId: ").append(cachedAccount.getAPI().getFullName());
-            
-            taskName = builder.toString();
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.openexchange.cluster.lock.ClusterTask#getTaskName()
-         */
-        @Override
-        public String getTaskName() {
-            return taskName;
+            super(session, cachedAccount);
         }
 
         /*
@@ -349,28 +326,28 @@ public class GoogleApiClients {
         @Override
         public OAuthAccount perform() throws OXException {
             OAuthService oAuthService = Services.getService(OAuthService.class);
-            OAuthAccount dbAccount = oAuthService.getAccount(cachedAccount.getId(), session, session.getUserId(), session.getContextId());
+            OAuthAccount dbAccount = oAuthService.getAccount(getCachedAccount().getId(), getSession(), getSession().getUserId(), getSession().getContextId());
 
-            if (dbAccount.getToken().equals(cachedAccount.getToken()) && dbAccount.getSecret().equals(cachedAccount.getSecret())) {
+            if (dbAccount.getToken().equals(getCachedAccount().getToken()) && dbAccount.getSecret().equals(getCachedAccount().getSecret())) {
                 final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
-                serviceBuilder.apiKey(cachedAccount.getMetaData().getAPIKey(session)).apiSecret(cachedAccount.getMetaData().getAPISecret(session));
+                serviceBuilder.apiKey(getCachedAccount().getMetaData().getAPIKey(getSession())).apiSecret(getCachedAccount().getMetaData().getAPISecret(getSession()));
                 Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
 
                 // Refresh the token
-                String refreshToken = cachedAccount.getSecret();
-                Token accessToken = scribeOAuthService.getAccessToken(new Token(cachedAccount.getToken(), cachedAccount.getSecret()), null);
+                String refreshToken = getCachedAccount().getSecret();
+                Token accessToken = scribeOAuthService.getAccessToken(new Token(getCachedAccount().getToken(), getCachedAccount().getSecret()), null);
                 if (!Strings.isEmpty(accessToken.getSecret())) {
                     refreshToken = accessToken.getSecret();
                 }
                 // Update account
-                int accountId = cachedAccount.getId();
+                int accountId = getCachedAccount().getId();
                 Map<String, Object> arguments = new HashMap<String, Object>(3);
                 arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
-                arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
-                oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId(), cachedAccount.getEnabledScopes());
+                arguments.put(OAuthConstants.ARGUMENT_SESSION, getSession());
+                oAuthService.updateAccount(accountId, arguments, getSession().getUserId(), getSession().getContextId(), getCachedAccount().getEnabledScopes());
 
                 // Reload
-                return oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+                return oAuthService.getAccount(accountId, getSession(), getSession().getUserId(), getSession().getContextId());
             } else {
                 return dbAccount;
             }

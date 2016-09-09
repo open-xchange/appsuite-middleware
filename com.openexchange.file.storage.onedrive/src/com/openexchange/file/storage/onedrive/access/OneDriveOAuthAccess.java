@@ -75,6 +75,7 @@ import com.openexchange.file.storage.onedrive.OneDriveClosure;
 import com.openexchange.file.storage.onedrive.OneDriveConstants;
 import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
@@ -212,37 +213,13 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         return null;
     }
 
-    private class OneDriveReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
-
-        private Session session;
-        private OAuthAccount cachedAccount;
-        private String taskName;
+    private class OneDriveReauthorizeClusterTask extends AbstractReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
 
         /**
          * Initialises a new {@link OneDriveOAuthAccess.OneDriveReauthorizeClusterTask}.
          */
         public OneDriveReauthorizeClusterTask(Session session, OAuthAccount cachedAccount) {
-            super();
-            this.session = session;
-            this.cachedAccount = cachedAccount;
-            
-            StringBuilder builder = new StringBuilder("OAuth reauthorize cluster task for: ");
-            builder.append("userId: ").append(session.getUserId());
-            builder.append(", contextId: ").append(session.getContextId());
-            builder.append(", accountId: ").append(cachedAccount.getId());
-            builder.append(", serviceId: ").append(cachedAccount.getAPI().getFullName());
-            
-            taskName = builder.toString();
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.openexchange.cluster.lock.ClusterTask#getTaskName()
-         */
-        @Override
-        public String getTaskName() {
-            return taskName;
+            super(session, cachedAccount);
         }
 
         /*
@@ -252,6 +229,9 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
          */
         @Override
         public OAuthAccount perform() throws OXException {
+            Session session = getSession();
+            OAuthAccount cachedAccount = getCachedAccount();
+            
             OAuthService oAuthService = Services.getService(OAuthService.class);
             OAuthAccount dbAccount = oAuthService.getAccount(cachedAccount.getId(), session, session.getUserId(), session.getContextId());
 

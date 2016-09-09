@@ -65,6 +65,7 @@ import com.openexchange.cluster.lock.ClusterTask;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
+import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
@@ -140,37 +141,13 @@ public class MSLiveApiClient {
         }
     }
 
-    private static class MSLiveReauthorizeClusterTask implements ClusterTask<String> {
-
-        private Session session;
-        private OAuthAccount cachedAccount;
-        private String taskName;
+    private static class MSLiveReauthorizeClusterTask extends AbstractReauthorizeClusterTask implements ClusterTask<String> {
 
         /**
          * Initialises a new {@link MSLiveApiClient.MSLiveReauthorizeClusterTask}.
          */
         public MSLiveReauthorizeClusterTask(Session session, OAuthAccount cachedAccount) {
-            super();
-            this.session = session;
-            this.cachedAccount = cachedAccount;
-            
-            StringBuilder builder = new StringBuilder("OAuth reauthorize cluster task for: ");
-            builder.append("userId: ").append(session.getUserId());
-            builder.append(", contextId: ").append(session.getContextId());
-            builder.append(", accountId: ").append(cachedAccount.getId());
-            builder.append(", serviceId: ").append(cachedAccount.getAPI().getFullName());
-            
-            taskName = builder.toString();
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.openexchange.cluster.lock.ClusterTask#getTaskName()
-         */
-        @Override
-        public String getTaskName() {
-            return taskName;
+            super(session, cachedAccount);
         }
 
         /*
@@ -180,6 +157,8 @@ public class MSLiveApiClient {
          */
         @Override
         public String perform() throws OXException {
+            Session session = getSession();
+            OAuthAccount cachedAccount = getCachedAccount();
             OAuthService oauthService = Services.getService(OAuthService.class);
             OAuthAccount dbAccount = oauthService.getAccount(cachedAccount.getId(), session, session.getUserId(), session.getContextId());
 
