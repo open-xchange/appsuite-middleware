@@ -109,11 +109,15 @@ public enum DoveAdmClientExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * DoveAdm not reachable.
      */
-    DOVEADM_NOT_REACHABLE_GENERIC("DoveAdm not reachable", Category.CATEGORY_ERROR, 10),
+    DOVEADM_NOT_REACHABLE_GENERIC("DoveAdm not reachable", Category.CATEGORY_ERROR, 10), // Yepp, same error code
     /**
      * Duplicate optional identifier specified: %1$s
      */
     DUPLICATE_OPTIONAL_IDENTIFIER("Duplicate optional identifier specified: %1$s", Category.CATEGORY_ERROR, 11),
+    /**
+     * Received unknown response type: %1$s
+     */
+    UNKNOWN_RESPONSE_TYPE("Received unknown response type: %1$s", Category.CATEGORY_ERROR, 12),
 
     ;
 

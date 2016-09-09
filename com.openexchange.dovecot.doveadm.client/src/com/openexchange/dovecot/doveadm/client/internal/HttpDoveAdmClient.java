@@ -278,25 +278,21 @@ public class HttpDoveAdmClient implements DoveAdmClient {
             throw DoveAdmClientExceptionCodes.JSON_ERROR.create("Unexpected number of responses: " + jRetval);
         }
 
-        try {
-            ParsedResponses responses = ParsedResponses.valueFor(jResponses);
-            if (responses.isEmpty()) {
-                throw DoveAdmClientExceptionCodes.JSON_ERROR.create("Empty or invalid responses: " + jRetval);
-            }
-
-            if (Strings.isEmpty(command.getOptionalIdentifier())) {
-                // Grab first response
-                return responses.getResponses().get(0);
-            }
-
-            DoveAdmResponse response = responses.getTaggedResponse(command.getOptionalIdentifier());
-            if (null == response) {
-                throw DoveAdmClientExceptionCodes.JSON_ERROR.create("No such response: " + command.getOptionalIdentifier());
-            }
-            return response;
-        } catch (JSONException e) {
-            throw DoveAdmClientExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        ParsedResponses responses = ParsedResponses.valueFor(jResponses);
+        if (responses.isEmpty()) {
+            throw DoveAdmClientExceptionCodes.JSON_ERROR.create("Empty or invalid responses: " + jRetval);
         }
+
+        if (Strings.isEmpty(command.getOptionalIdentifier())) {
+            // Grab first response
+            return responses.getResponses().get(0);
+        }
+
+        DoveAdmResponse response = responses.getTaggedResponse(command.getOptionalIdentifier());
+        if (null == response) {
+            throw DoveAdmClientExceptionCodes.JSON_ERROR.create("No such response: " + command.getOptionalIdentifier());
+        }
+        return response;
     }
 
     @Override
@@ -320,32 +316,28 @@ public class HttpDoveAdmClient implements DoveAdmClient {
             throw DoveAdmClientExceptionCodes.JSON_ERROR.create("Unexpected number of responses: " + jRetval);
         }
 
-        try {
-            ParsedResponses responses = ParsedResponses.valueFor(jResponses);
-            if (responses.isEmpty()) {
-                throw DoveAdmClientExceptionCodes.JSON_ERROR.create("Empty or invalid responses: " + jRetval);
-            }
-
-            List<DoveAdmResponse> doveAdmDataResponses = new ArrayList<>(commands.size());
-            int i = 0;
-            for (DoveAdmCommand command : commands) {
-                if (Strings.isEmpty(command.getOptionalIdentifier())) {
-                    // Grab matching response
-                    doveAdmDataResponses.add(responses.getResponses().get(i));
-                } else {
-                    DoveAdmResponse response = responses.getTaggedResponse(command.getOptionalIdentifier());
-                    if (null == response) {
-                        throw DoveAdmClientExceptionCodes.JSON_ERROR.create("No such response: " + command.getOptionalIdentifier());
-                    }
-                    doveAdmDataResponses.add(response);
-                }
-                i++;
-            }
-
-            return doveAdmDataResponses;
-        } catch (JSONException e) {
-            throw DoveAdmClientExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        ParsedResponses responses = ParsedResponses.valueFor(jResponses);
+        if (responses.isEmpty()) {
+            throw DoveAdmClientExceptionCodes.JSON_ERROR.create("Empty or invalid responses: " + jRetval);
         }
+
+        List<DoveAdmResponse> doveAdmDataResponses = new ArrayList<>(commands.size());
+        int i = 0;
+        for (DoveAdmCommand command : commands) {
+            if (Strings.isEmpty(command.getOptionalIdentifier())) {
+                // Grab matching response
+                doveAdmDataResponses.add(responses.getResponses().get(i));
+            } else {
+                DoveAdmResponse response = responses.getTaggedResponse(command.getOptionalIdentifier());
+                if (null == response) {
+                    throw DoveAdmClientExceptionCodes.JSON_ERROR.create("No such response: " + command.getOptionalIdentifier());
+                }
+                doveAdmDataResponses.add(response);
+            }
+            i++;
+        }
+
+        return doveAdmDataResponses;
     }
 
     private void checkOptionalIdentifiers(List<DoveAdmCommand> commands) throws OXException {
