@@ -1,7 +1,6 @@
----
-title: Advanced Search
-classes: no-affix
----
+
+# Advanced Search
+
 
 This section describes the syntax of the JSON object representing the search term. The search term is embedded
 in a JSON object with the field `filter`, like `{"filter":[search term]}`. In general the structure of a search
@@ -50,22 +49,22 @@ Represents the expression `field_name1 = value1 AND NOT field_name2 > value2`.
 ___
 
 
-# Version information
+## Version information
 *Version* : 7.8.2
 
 
-# Contact information
+## Contact information
 *Contact* : Open-Xchange GmbH  
 *Contact Email* : info@open-xchange.com
 
 
-# URI scheme
+## URI scheme
 *Host* : example.com  
 *BasePath* : /ajax  
 *Schemes* : HTTPS
 
 
-# Tags
+## Tags
 
 * login : The login module is used to obtain a session from the user's login credentials. To understand the details
 of the different login methods, see the article titled "[Login variations](http://oxpedia.org/wiki/index.php?title=Login_variations)".
@@ -153,12 +152,12 @@ Preliminary, available since v7.8.0.
 * mail_categories : The module mail_categories allows to manage mail categories.
 
 
-# Consumes
+## Consumes
 
 * `application/x-www-form-urlencoded`
 
 
-# Produces
+## Produces
 
 * `application/json`
 
