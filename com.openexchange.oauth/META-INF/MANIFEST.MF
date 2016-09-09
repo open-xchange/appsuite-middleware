@@ -8,7 +8,6 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.exception,
  com.openexchange.framework.request,
  com.openexchange.groupware.notify.hostname,
- com.openexchange.http.client,
  com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.log,
