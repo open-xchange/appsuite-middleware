@@ -40,6 +40,9 @@ receive call-backs in case of certain events that happen on the Web Socket conne
  - On Web Socket close
  - On a received text message
 
+Thus a `com.openexchange.websockets.WebSocketListener` is the appropriate choice to communicate with exactly one Web Socket (cache `WebSocket`
+instance on connect, send/receive messages, discard the instance on close. See `com.openexchange.socketio.websocket.WsTransportConnection`.
+
 # Transcoding of received/sent Web Socket messages
 
 An instance of `com.openexchange.websockets.WebSocket` allows to set a `com.openexchange.websockets.MessageTranscoder`. Every in-bound and
