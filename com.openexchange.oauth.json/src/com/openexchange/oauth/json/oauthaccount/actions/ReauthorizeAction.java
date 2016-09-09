@@ -106,7 +106,7 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
         }
 
         ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-        clusterLockService.runClusterTask(new ReauthorizeClusterTask(request, session, accountId, serviceId), 10);
+        clusterLockService.runClusterTask(new ReauthorizeClusterTask(request, session, accountId, serviceId));
 
         /*
          * Return appropriate result
@@ -133,12 +133,12 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
             this.accountId = accountId;
             this.serviceId = serviceId;
 
-            StringBuilder builder = new StringBuilder("OAuth reauthorize cluster task for: ");
-            builder.append("userId: ").append(session.getUserId());
-            builder.append(", contextId: ").append(session.getContextId());
-            builder.append(", accountId: ").append(accountId);
-            builder.append(", serviceId: ").append(serviceId);
-            
+            StringBuilder builder = new StringBuilder();
+            builder.append(session.getUserId()).append("@");
+            builder.append(session.getContextId());
+            builder.append(":").append(accountId);
+            builder.append(":").append(serviceId);
+
             taskName = builder.toString();
         }
 
