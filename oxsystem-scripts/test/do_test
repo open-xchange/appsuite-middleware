@@ -1,3 +1,4 @@
 #!/bin/bash
 
-bats/bin/bats tests
+cd tests
+../bats/bin/bats .

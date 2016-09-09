@@ -69,25 +69,43 @@ ox_set_JAVA_BIN() {
         fi
     fi
     test -x $JAVA_BIN || die "$0: unable to get path to java vm"
-    minor_version=$(detect_minor_java_version)
-    if [ $minor_version -lt 7 ]; then
+    version=$(detect_java_version)
+    if [ $version -lt 7 ]; then
       JAVA_BIN=/opt/open-xchange/sbin/insufficientjava
     fi
 }
 
-# Detect the minor version of the selected JVM
+# Detect the version of the selected JVM
 #
+# Pre JEP 223:
 # JVMs output e.g: java version "1.7.0_80" as part of their version
-# specification. From this line we simply extract the minor version
-# which would be 7 in this case.
+# specification. From this line we simply extract the minor version which would
+# be 7 in this case.
 #
-# Returns the detected minor version or -1 if it can't be detected
-function detect_minor_java_version () {
+# Post JEP 223:
+# JVMs output e.g: java version "9-ea", "9" or "9.0.1" as part of their version
+# specification. From this line we simply extract the major version which would
+# be 9 in this case.
+#
+# Returns the detected version or -1 if it can't be detected
+function detect_java_version () {
     version_line_array=( $($JAVA_BIN -version 2>&1 | grep version) )
     unquoted_version=${version_line_array[2]//\"/}
-    version_components=( ${unquoted_version//./ } )
-    major=${version_components[1]}
-    echo ${major:--1}
+    version=-1
+    if [[ "$unquoted_version" =~ ^1\..* ]]  
+    then
+        version_components=( ${unquoted_version//./ } )
+        version=${version_components[1]}
+    elif [[ "$unquoted_version" =~ ^[1-9]([0-9])*-ea$ ]]  
+    then
+        version_components=( ${unquoted_version//./ } )
+        version=${unquoted_version//-ea/}
+    elif [[ "$unquoted_version" =~ ^[1-9]([0-9])*(\..*)* ]]  
+    then
+        version_components=( ${unquoted_version//./ } )
+        version=${version_components[0]}
+    fi
+    echo $version
 }
 
 DEBIAN=1
