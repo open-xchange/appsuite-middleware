@@ -132,7 +132,7 @@ public class ClusterLockServiceImpl implements ClusterLockService {
         }
 
         IMap<String, Long> map = hzInstance.getMap("ClusterLocks");
-        long timeNow = System.nanoTime();
+        long timeNow = System.currentTimeMillis(); //FIXME: Switch to nanoTime()
         Long timeThen = map.putIfAbsent(clusterTask.getTaskName(), timeNow);
         if (timeThen == null) {
             return true;
@@ -359,6 +359,7 @@ public class ClusterLockServiceImpl implements ClusterLockService {
      * @return <code>true</code> if the lease time was expired; <code>false</code> otherwise
      */
     private boolean leaseExpired(long timeNow, long timeThen) {
-        return (TimeUnit.NANOSECONDS.toMillis(timeNow) - timeThen) <= TimeUnit.SECONDS.toMillis(30);
+        //FIXME: Switch to nano computation
+        return (timeNow - timeThen > TimeUnit.MINUTES.toMillis(1));
     }
 }
