@@ -774,6 +774,8 @@ templates['status_code'] = template({"1":function(container,depth0,helpers,parti
  /* jshint ignore:end */
 'use strict';
 
+var myCounter1234=0;
+
 
 $(function() {
 
@@ -22863,14 +22865,20 @@ SwaggerUi.Views.OperationView = Backbone.View.extend({
         param.schema.title = ' ';
       }
     }
-
-    var paramView = new SwaggerUi.Views.ParameterView({
-      model: param,
-      tagName: 'tr',
-      readOnly: this.model.isReadOnly,
-      swaggerOptions: this.options.swaggerOptions
-    });
-    $('.operation-params', $(this.el)).append(paramView.render().el);
+    if(param.in == 'body'){
+        // console.log(param);
+        console.log("inserting body view");
+        // todo use body view
+        // $('.sandbox', $(this.el)).append(a);
+    } else {
+        var paramView = new SwaggerUi.Views.ParameterView({
+          model: param,
+          tagName: 'tr',
+          readOnly: this.model.isReadOnly,
+          swaggerOptions: this.options.swaggerOptions
+        });
+        $('.operation-params', $(this.el)).append(paramView.render().el);
+    }
   },
 
   addStatusCode: function(statusCode) {
@@ -23578,6 +23586,13 @@ SwaggerUi.Views.ParameterView = Backbone.View.extend({
       }
     }
   }
+});
+
+
+SwaggerUi.Views.BodyView = Backbone.View.extend({
+    render: function() {
+     //todo: render body view    
+    }
 });
 
 'use strict';
