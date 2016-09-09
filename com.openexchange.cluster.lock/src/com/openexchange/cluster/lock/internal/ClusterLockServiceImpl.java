@@ -122,6 +122,52 @@ public class ClusterLockServiceImpl implements ClusterLockService {
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.cluster.lock.ClusterLockService#acquireClusterLock(com.openexchange.cluster.lock.ClusterTask)
+     */
+    @Override
+    public <T> boolean acquireClusterLock(ClusterTask<T> clusterTask) throws OXException {
+        HazelcastInstance hzInstance = getHazelcastInstance();
+        if (hzInstance == null) {
+            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
+        }
+
+        IMap<String, Long> map = hzInstance.getMap("ClusterLocks");
+        long timeNow = System.nanoTime();
+        Long timeThen = map.putIfAbsent(clusterTask.getTaskName(), timeNow);
+        if (timeThen == null) {
+            return true;
+        }
+
+        if (!leaseExpired(timeNow, timeThen)) {
+            return false;
+        }
+
+        return map.replace(clusterTask.getTaskName(), timeThen, timeNow);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cluster.lock.ClusterLockService#releaseClusterLock(com.openexchange.cluster.lock.ClusterTask)
+     */
+    @Override
+    public <T> void releaseClusterLock(ClusterTask<T> clusterTask) throws OXException {
+        HazelcastInstance hzInstance = getHazelcastInstance();
+        if (hzInstance == null) {
+            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
+        }
+
+        IMap<String, Long> map = hzInstance.getMap("ClusterLocks");
+        if (map == null) {
+            return;
+        }
+
+        map.remove(clusterTask.getTaskName());
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.cluster.lock.ClusterLockService#runClusterTask(com.openexchange.cluster.lock.ClusterTask)
      */
     @Override
@@ -132,13 +178,19 @@ public class ClusterLockServiceImpl implements ClusterLockService {
         }
 
         // Acquire the lock
-        ILock lock = hzInstance.getLock(clusterTask.getTaskName());
-        lock.lock();
+        boolean lockAcquired = acquireClusterLock(clusterTask);
         try {
-            return clusterTask.perform();
+            if (lockAcquired) {
+                return clusterTask.perform();
+            } else {
+                throw ClusterLockExceptionCodes.CLUSTER_LOCKED.create(clusterTask.getTaskName());
+            }
+
         } finally {
             LOGGER.debug("Cluster task '{}' completed. Releasing cluster lock.", clusterTask.getTaskName());
-            lock.unlock();
+            if (lockAcquired) {
+                releaseClusterLock(clusterTask);
+            }
         }
     }
 
@@ -297,5 +349,16 @@ public class ClusterLockServiceImpl implements ClusterLockService {
                 log.warn("Unable to release periodic lock for action {}", action, e);
             }
         }
+    }
+
+    /**
+     * Verifies whether the lease time was expired
+     * 
+     * @param timeNow The time now
+     * @param timeThen The time then
+     * @return <code>true</code> if the lease time was expired; <code>false</code> otherwise
+     */
+    private boolean leaseExpired(long timeNow, long timeThen) {
+        return (TimeUnit.NANOSECONDS.toMillis(timeNow) - timeThen) <= TimeUnit.SECONDS.toMillis(30);
     }
 }

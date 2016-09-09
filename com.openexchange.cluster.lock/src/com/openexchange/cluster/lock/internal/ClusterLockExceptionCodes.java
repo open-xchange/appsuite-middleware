@@ -78,7 +78,7 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
      */
     INTERRUPTED("Interrupted while trying to acquire a cluster lock for the cluster task '%1$s'", CATEGORY_ERROR, 4),
     /**
-     * Unable to acquire cluster lock for task '%1$s' on this node. Another node is currently performing the same task. Try again later.
+     * Unable to acquire cluster lock for the cluster task '%1$s' on this node (waiting time of '%2$s' %3$s expired). Another node is currently performing the same task. Try again later.
      */
     UNABLE_TO_ACQUIRE_CLUSTER_LOCK("Unable to acquire cluster lock for the cluster task '%1$s' on this node (waiting time of '%2$s' %3$s expired). Another node is currently performing the same task. Try again later.", Category.CATEGORY_TRY_AGAIN, 5),
 

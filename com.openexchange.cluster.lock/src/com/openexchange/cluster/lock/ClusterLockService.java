@@ -79,7 +79,24 @@ public interface ClusterLockService {
      * @deprecated Use {@link #runClusterTask(ClusterTask, long)}
      */
     void releaseClusterLock(String action, Lock lock) throws OXException;
-    
+
+    /**
+     * Acquires a cluster lock for the specified {@link ClusterTask}
+     * 
+     * @param clusterTask The {@link ClusterTask} for which to acquire the cluster lock
+     * @return <code>true</code> if the cluster lock was successfully acquired, <code>false</code> otherwise
+     * @throws OXException if an error is occurred during the acquisition of the cluster lock
+     */
+    <T> boolean acquireClusterLock(ClusterTask<T> clusterTask) throws OXException;
+
+    /**
+     * Releases the cluster lock that was previously acquired for the specified {@link ClusterTask}
+     * 
+     * @param clusterTask The {@link ClusterTask} for which to release the lock
+     * @throws OXException if an error is occurred during the release of the cluster lock
+     */
+    <T> void releaseClusterLock(ClusterTask<T> clusterTask) throws OXException;
+
     /**
      * Runs the specified cluster task while previously acquiring a lock on the entire cluster
      * for this specific task. The current thread will acquire the lock for an indefinite amount

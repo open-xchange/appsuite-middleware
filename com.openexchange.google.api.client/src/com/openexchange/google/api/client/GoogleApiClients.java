@@ -356,7 +356,7 @@ public class GoogleApiClients {
                 serviceBuilder.apiKey(cachedAccount.getMetaData().getAPIKey(session)).apiSecret(cachedAccount.getMetaData().getAPISecret(session));
                 Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
 
-                // Less than 5 minutes to live -> refresh token!
+                // Refresh the token
                 String refreshToken = cachedAccount.getSecret();
                 Token accessToken = scribeOAuthService.getAccessToken(new Token(cachedAccount.getToken(), cachedAccount.getSecret()), null);
                 if (!Strings.isEmpty(accessToken.getSecret())) {
@@ -377,5 +377,4 @@ public class GoogleApiClients {
         }
 
     }
-
 }
