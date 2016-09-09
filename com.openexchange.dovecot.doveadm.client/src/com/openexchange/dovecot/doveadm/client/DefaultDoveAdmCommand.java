@@ -62,7 +62,7 @@ import com.google.common.collect.ImmutableMap;
 public class DefaultDoveAdmCommand implements DoveAdmCommand {
 
     /**
-     * Creates a new builder instance.
+     * Creates a new builder instance with optional identifier default to <code>"1"</code>.
      *
      * @return The new builder instance
      */
@@ -78,7 +78,7 @@ public class DefaultDoveAdmCommand implements DoveAdmCommand {
         private final ImmutableMap.Builder<String, String> mapBuilder;
 
         /**
-         * Initializes a new {@link DefaultDoveAdmCommand.Builder}.
+         * Initializes a new {@link DefaultDoveAdmCommand.Builder} with optional identifier default to <code>"1"</code>.
          */
         Builder() {
             super();

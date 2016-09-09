@@ -50,7 +50,7 @@
 package com.openexchange.dovecot.doveadm.client;
 
 /**
- * {@link DoveAdmEntity} - Represents an entity for the Dovecot DoveAdm REST interface.
+ * {@link DoveAdmEntity} - Represents an entity (command, response) for the Dovecot DoveAdm REST interface.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
@@ -65,7 +65,7 @@ public interface DoveAdmEntity {
     String getCommand();
 
     /**
-     * Gets the optional identifier. Default is <code>"1"</code>.
+     * Gets the optional identifier.
      *
      * @return The optional identifier
      */

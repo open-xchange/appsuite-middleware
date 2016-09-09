@@ -110,6 +110,10 @@ public enum DoveAdmClientExceptionCodes implements DisplayableOXExceptionCode {
      * DoveAdm not reachable.
      */
     DOVEADM_NOT_REACHABLE_GENERIC("DoveAdm not reachable", Category.CATEGORY_ERROR, 10),
+    /**
+     * Duplicate optional identifier specified: %1$s
+     */
+    DUPLICATE_OPTIONAL_IDENTIFIER("Duplicate optional identifier specified: %1$s", Category.CATEGORY_ERROR, 11),
 
     ;
 

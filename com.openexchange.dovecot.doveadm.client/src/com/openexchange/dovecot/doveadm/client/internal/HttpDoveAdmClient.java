@@ -58,10 +58,12 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
@@ -247,7 +249,12 @@ public class HttpDoveAdmClient implements DoveAdmClient {
     private JSONArray buildRequestBody(Collection<DoveAdmCommand> commands) {
         JSONArray jCommands = new JSONArray(commands.size());
         for (DoveAdmCommand command : commands) {
-            jCommands.put(new JSONArray(3).put(command.getCommand()).put(new JSONObject(command.getParameters())).put(command.getOptionalIdentifier()));
+            String optionalIdentifier = command.getOptionalIdentifier();
+            if (Strings.isEmpty(optionalIdentifier)) {
+                jCommands.put(new JSONArray(2).put(command.getCommand()).put(new JSONObject(command.getParameters())));
+            } else {
+                jCommands.put(new JSONArray(3).put(command.getCommand()).put(new JSONObject(command.getParameters())).put(optionalIdentifier));
+            }
         }
         return jCommands;
     }
@@ -298,6 +305,8 @@ public class HttpDoveAdmClient implements DoveAdmClient {
             return Collections.emptyList();
         }
 
+        checkOptionalIdentifiers(commands);
+
         // Build JSON request body & execute command
         JSONValue jRetval = executePost(HttpDoveAdmCall.DEFAULT, null, null, buildRequestBody(commands), ResultType.JSON);
 
@@ -336,6 +345,17 @@ public class HttpDoveAdmClient implements DoveAdmClient {
             return doveAdmDataResponses;
         } catch (JSONException e) {
             throw DoveAdmClientExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private void checkOptionalIdentifiers(List<DoveAdmCommand> commands) throws OXException {
+        Set<String> oids = new HashSet<>(commands.size());
+        String oid;
+        for (DoveAdmCommand command : commands) {
+            oid = command.getOptionalIdentifier();
+            if (Strings.isNotEmpty(oid) && false == oids.add(oid)) {
+                throw DoveAdmClientExceptionCodes.DUPLICATE_OPTIONAL_IDENTIFIER.create(oid);
+            }
         }
     }
 
