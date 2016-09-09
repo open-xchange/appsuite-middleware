@@ -5,7 +5,7 @@ title: Web Sockets
 # Introduction
 
 Starting with v7.8.3 the Open-Xchange Middleware supports accepting Web Sockets that are opened by authenticated request. Hence, a Web Socket
-representation in the Open-Xchange Middleware always has an association to a certain Open-Xchange session.
+representation in the Open-Xchange Middleware always has an association to a certain Open-Xchange session and is bound to its life-cycle.
 
 
 # How it works
