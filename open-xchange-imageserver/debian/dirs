@@ -1,0 +1,2 @@
+var/log/open-xchange/imageserver
+var/spool/open-xchange/imageserver

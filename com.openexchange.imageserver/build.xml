@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.imageserver">
+
+    <!-- service name -->
+    <property name="serviceName" value="imageserver"/>
+
+    <import file="build-project.xml" />
+
+    <target name="postInstall">
+    </target>
+
+</project>
