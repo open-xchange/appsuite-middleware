@@ -181,7 +181,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
 
     private final HttpDoveAdmEndpointManager endpointManager;
     private final BasicHttpContext localcontext;
-    private final String encodedApiKey;
+    private final String authorizationHeaderValue;
 
     /**
      * Initializes a new {@link HttpDoveAdmClient}.
@@ -195,7 +195,8 @@ public class HttpDoveAdmClient implements DoveAdmClient {
         final BasicScheme basicAuth = new BasicScheme();
         context.setAttribute("preemptive-auth", basicAuth);
         this.localcontext = context;
-        encodedApiKey = BaseEncoding.base64().encode(apiKey.getBytes(Charsets.UTF_8));
+        String encodedApiKey = BaseEncoding.base64().encode(apiKey.getBytes(Charsets.UTF_8));
+        authorizationHeaderValue = "X-Dovecot-API " + encodedApiKey;
     }
 
     private CallProperties getCallProperties(HttpDoveAdmCall call) throws OXException {
@@ -354,7 +355,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     private void setCommonHeaders(HttpRequestBase request) {
-        request.setHeader(HttpHeaders.AUTHORIZATION, "X-Dovecot-API " + encodedApiKey);
+        request.setHeader(HttpHeaders.AUTHORIZATION, authorizationHeaderValue);
         request.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         request.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
     }
