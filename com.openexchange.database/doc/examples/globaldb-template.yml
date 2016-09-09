@@ -1,5 +1,4 @@
 # Configuration file for global, cross-context databases
-# A template (globaldb-template.yml) with up-to-date configuration examples can be found at /usr/share/doc
 
 # Please ensure that the same version of this configuration file is used for 
 # all nodes in the cluster.

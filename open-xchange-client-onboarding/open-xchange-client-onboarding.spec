@@ -102,6 +102,7 @@ fi
 /opt/open-xchange/lib/*
 %dir /opt/open-xchange/sbin/
 /opt/open-xchange/sbin/*
+%doc com.openexchange.client.onboarding/doc/examples
 
 %changelog
 * Tue Sep 06 2016 Thorben Betten <thorben.betten@open-xchange.com>
