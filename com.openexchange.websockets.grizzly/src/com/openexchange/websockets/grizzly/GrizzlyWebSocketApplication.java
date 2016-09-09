@@ -130,6 +130,15 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         LOCAL_HOST = fbHost;
     }
 
+    /**
+     * Gets the address of the local host.
+     *
+     * @return The local host's address
+     */
+    public static String getLocalHost() {
+        return LOCAL_HOST;
+    }
+
     private static final AtomicReference<GrizzlyWebSocketApplication> APPLICATION_REFERENCE = new AtomicReference<GrizzlyWebSocketApplication>();
 
     /**
