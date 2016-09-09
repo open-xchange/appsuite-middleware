@@ -3,6 +3,7 @@ opt/open-xchange/etc/deferrer.properties
 opt/open-xchange/etc/dropboxoauth.properties
 opt/open-xchange/etc/googleoauth.properties
 opt/open-xchange/etc/msliveconnectoauth.properties
+opt/open-xchange/etc/oauth.properties
 opt/open-xchange/etc/twitteroauth.properties
 opt/open-xchange/etc/xingoauth.properties
 opt/open-xchange/etc/yahoooauth.properties
