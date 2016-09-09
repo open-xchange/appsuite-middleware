@@ -183,7 +183,7 @@ public class ClusterLockServiceImpl implements ClusterLockService {
             if (lockAcquired) {
                 return clusterTask.perform();
             } else {
-                throw ClusterLockExceptionCodes.CLUSTER_LOCKED.create(clusterTask.getTaskName());
+                throw ClusterLockExceptionCodes.UNABLE_TO_ACQUIRE_CLUSTER_LOCK.create(clusterTask.getTaskName());
             }
 
         } finally {
@@ -228,7 +228,7 @@ public class ClusterLockServiceImpl implements ClusterLockService {
                     lock.unlock();
                 }
             } else {
-                throw ClusterLockExceptionCodes.UNABLE_TO_ACQUIRE_CLUSTER_LOCK.create(clusterTask.getTaskName(), waitTime, timeUnit.name().toLowerCase());
+                throw ClusterLockExceptionCodes.UNABLE_TO_ACQUIRE_CLUSTER_LOCK_EXPIRED.create(clusterTask.getTaskName(), waitTime, timeUnit.name().toLowerCase());
             }
         } catch (InterruptedException e) {
             throw ClusterLockExceptionCodes.INTERRUPTED.create(e, clusterTask.getTaskName());

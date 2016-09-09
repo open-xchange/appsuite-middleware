@@ -80,7 +80,11 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Unable to acquire cluster lock for the cluster task '%1$s' on this node (waiting time of '%2$s' %3$s expired). Another node is currently performing the same task. Try again later.
      */
-    UNABLE_TO_ACQUIRE_CLUSTER_LOCK("Unable to acquire cluster lock for the cluster task '%1$s' on this node (waiting time of '%2$s' %3$s expired). Another node is currently performing the same task. Try again later.", Category.CATEGORY_TRY_AGAIN, 5),
+    UNABLE_TO_ACQUIRE_CLUSTER_LOCK_EXPIRED("Unable to acquire cluster lock for the cluster task '%1$s' on this node (waiting time of '%2$s' %3$s expired). Another node is currently performing the same task. Try again later.", Category.CATEGORY_TRY_AGAIN, 5),
+    /**
+     * Unable to acquire cluster lock for the cluster task '%1$s' on this node. Another node is currently performing the same task. Try again later.
+     */
+    UNABLE_TO_ACQUIRE_CLUSTER_LOCK("Unable to acquire cluster lock for the cluster task '%1$s' on this node. Another node is currently performing the same task. Try again later.", ClusterLockExceptionMessages.UNABLE_TO_ACQUIRE_CLUSTER_LOCK, CATEGORY_TRY_AGAIN, 6);
 
     ;
 
@@ -96,6 +100,13 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
 
     private ClusterLockExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
+        this.category = category;
+        this.number = detailNumber;
+    }
+    
+    private ClusterLockExceptionCodes(final String message, String displayMessage, final Category category, final int detailNumber) {
+        this.message = message;
+        this.displayMessage = displayMessage;
         this.category = category;
         this.number = detailNumber;
     }
