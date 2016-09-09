@@ -91,7 +91,6 @@ ox_move_config_file /opt/open-xchange/templates /opt/open-xchange/templates prin
 %config(noreplace) /opt/open-xchange/etc/settings/upsell-appsuite.properties
 %dir /opt/open-xchange/templates/
 %config(noreplace) /opt/open-xchange/templates/*
-%doc com.openexchange.apps.manifests.json/doc/examples
 
 %changelog
 * Tue Sep 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
