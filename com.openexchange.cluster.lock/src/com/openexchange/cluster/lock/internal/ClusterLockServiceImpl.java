@@ -131,9 +131,12 @@ public class ClusterLockServiceImpl implements ClusterLockService {
             throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
 
-        IMap<String, Long> map = hzInstance.getMap("ClusterLocks");
+        IMap<String, Long> clusterLocks = hzInstance.getMap(ClusterLockType.ClusterTaskLocks.name());
+        if (clusterLocks == null) {
+            return true;
+        }
         long timeNow = System.currentTimeMillis(); //FIXME: Switch to nanoTime()
-        Long timeThen = map.putIfAbsent(clusterTask.getTaskName(), timeNow);
+        Long timeThen = clusterLocks.putIfAbsent(clusterTask.getTaskName(), timeNow);
         if (timeThen == null) {
             return true;
         }
@@ -142,7 +145,7 @@ public class ClusterLockServiceImpl implements ClusterLockService {
             return false;
         }
 
-        return map.replace(clusterTask.getTaskName(), timeThen, timeNow);
+        return clusterLocks.replace(clusterTask.getTaskName(), timeThen, timeNow);
     }
 
     /*
@@ -157,7 +160,7 @@ public class ClusterLockServiceImpl implements ClusterLockService {
             throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
 
-        IMap<String, Long> map = hzInstance.getMap("ClusterLocks");
+        IMap<String, Long> map = hzInstance.getMap(ClusterLockType.ClusterTaskLocks.name());
         if (map == null) {
             return;
         }
@@ -279,10 +282,11 @@ public class ClusterLockServiceImpl implements ClusterLockService {
 
     ///////////////////////////////////// HELPERS ///////////////////////////////////////
 
-    private HazelcastInstance getHazelcastInstance() {
+    private HazelcastInstance getHazelcastInstance() throws OXException {
         HazelcastInstance hazelcastInstance = services.getOptionalService(HazelcastInstance.class);
         if (hazelcastInstance == null) {
             LOGGER.warn("The Hazelcast service is not available on this node.");
+            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
         return hazelcastInstance;
     }
