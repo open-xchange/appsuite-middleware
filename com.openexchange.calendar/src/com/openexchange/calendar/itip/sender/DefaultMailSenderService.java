@@ -152,6 +152,7 @@ public class DefaultMailSenderService implements MailSenderService {
             final int folderId = mail.getRecipient().getFolderId();
             final String sType = type != null ? type.toString() : null;
             message = new MailObject(session, appointmentId, folderId, Types.APPOINTMENT, sType);
+            message.setAdditionalHeaders(mail.getAdditionalHeaders());
         }
         try {
             message.setInternalRecipient(!mail.getRecipient().isExternal() && !mail.getRecipient().isResource());
