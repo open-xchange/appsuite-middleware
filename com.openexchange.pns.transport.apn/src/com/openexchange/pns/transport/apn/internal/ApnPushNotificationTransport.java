@@ -377,11 +377,12 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
         payload.addSound("beep.wav");
 
         String subject = PushNotifications.getValueFor(PushNotificationField.MAIL_SUBJECT, notification);
-        String sender = PushNotifications.getValueFor(PushNotificationField.MAIL_SENDER, notification);
+        String senderAddr = PushNotifications.getValueFor(PushNotificationField.MAIL_SENDER_EMAIL, notification);
+        String senderPers = PushNotifications.getValueFor(PushNotificationField.MAIL_SENDER_PERSONAL, notification);
         String path = PushNotifications.getValueFor(PushNotificationField.MAIL_PATH, notification);
         Integer unread = PushNotifications.getValueFor(PushNotificationField.MAIL_UNREAD, notification);
 
-        payload.addAlert(new StringBuilder(sender).append("\n").append(subject).toString());
+        payload.addAlert(new StringBuilder(null == senderPers ? senderAddr : senderPers).append("\n").append(subject).toString());
         if (null != unread) {
             payload.addBadge(unread.intValue());
         }

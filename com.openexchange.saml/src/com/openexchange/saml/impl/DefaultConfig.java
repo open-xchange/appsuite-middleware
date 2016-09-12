@@ -50,6 +50,7 @@
 package com.openexchange.saml.impl;
 
 import static com.openexchange.saml.SAMLProperties.ACS_URL;
+import static com.openexchange.saml.SAMLProperties.ALLOW_UNSOLICITED_RESPONSES;
 import static com.openexchange.saml.SAMLProperties.ENABLE_AUTO_LOGIN;
 import static com.openexchange.saml.SAMLProperties.ENABLE_METADATA_SERVICE;
 import static com.openexchange.saml.SAMLProperties.ENABLE_SINGLE_LOGOUT;
@@ -99,6 +100,7 @@ public class DefaultConfig implements SAMLConfig {
 
     private boolean autoLoginEnabled;
 
+    private boolean allowUnsolicitedResponses;
 
     private DefaultConfig() {
         super();
@@ -125,6 +127,7 @@ public class DefaultConfig implements SAMLConfig {
 
         config.setEnableMetadataService(configService.getBoolProperty(ENABLE_METADATA_SERVICE, false));
         config.setAutoLoginEnabled(configService.getBoolProperty(ENABLE_AUTO_LOGIN, false));
+        config.setAllowUnsolicitedResponses(configService.getBoolProperty(ALLOW_UNSOLICITED_RESPONSES, true));
         return config;
     }
 
@@ -254,6 +257,14 @@ public class DefaultConfig implements SAMLConfig {
 
     private void setAutoLoginEnabled(boolean autoLoginEnabled) {
         this.autoLoginEnabled = autoLoginEnabled;;
+    }
+
+    public boolean isAllowUnsolicitedResponses() {
+        return allowUnsolicitedResponses;
+    }
+
+    public void setAllowUnsolicitedResponses(boolean allowUnsolicitedResponses) {
+        this.allowUnsolicitedResponses = allowUnsolicitedResponses;
     }
 
 }

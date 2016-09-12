@@ -67,7 +67,7 @@ public class DoveAdmErrorResponseImpl extends AbstractDoveAdmResponse implements
      * Initializes a new {@link DoveAdmErrorResponseImpl}.
      */
     DoveAdmErrorResponseImpl(String type, int exitCode, String optionalIdentifier) {
-        super(COMMAND_ERROR_RESPONSE, optionalIdentifier, true);
+        super(TYPE_ERROR_RESPONSE, optionalIdentifier, true);
         this.type = type;
         this.exitCode = exitCode;
     }
@@ -91,7 +91,7 @@ public class DoveAdmErrorResponseImpl extends AbstractDoveAdmResponse implements
     public String toString() {
         StringBuilder builder = new StringBuilder(96);
         builder.append("{");
-        builder.append("command=").append(COMMAND_ERROR_RESPONSE).append(", ");
+        builder.append("command=").append(TYPE_ERROR_RESPONSE).append(", ");
         if (type != null) {
             builder.append("type=").append(type).append(", ");
         }

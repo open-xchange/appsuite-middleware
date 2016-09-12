@@ -58,10 +58,12 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
@@ -179,7 +181,7 @@ public class HttpDoveAdmClient implements DoveAdmClient {
 
     private final HttpDoveAdmEndpointManager endpointManager;
     private final BasicHttpContext localcontext;
-    private final String encodedApiKey;
+    private final String authorizationHeaderValue;
 
     /**
      * Initializes a new {@link HttpDoveAdmClient}.
@@ -193,7 +195,8 @@ public class HttpDoveAdmClient implements DoveAdmClient {
         final BasicScheme basicAuth = new BasicScheme();
         context.setAttribute("preemptive-auth", basicAuth);
         this.localcontext = context;
-        encodedApiKey = BaseEncoding.base64().encode(apiKey.getBytes(Charsets.UTF_8));
+        String encodedApiKey = BaseEncoding.base64().encode(apiKey.getBytes(Charsets.UTF_8));
+        authorizationHeaderValue = "X-Dovecot-API " + encodedApiKey;
     }
 
     private CallProperties getCallProperties(HttpDoveAdmCall call) throws OXException {
@@ -247,7 +250,12 @@ public class HttpDoveAdmClient implements DoveAdmClient {
     private JSONArray buildRequestBody(Collection<DoveAdmCommand> commands) {
         JSONArray jCommands = new JSONArray(commands.size());
         for (DoveAdmCommand command : commands) {
-            jCommands.put(new JSONArray(3).put(command.getCommand()).put(new JSONObject(command.getParameters())).put(command.getOptionalIdentifier()));
+            String optionalIdentifier = command.getOptionalIdentifier();
+            if (Strings.isEmpty(optionalIdentifier)) {
+                jCommands.put(new JSONArray(2).put(command.getCommand()).put(new JSONObject(command.getParameters())));
+            } else {
+                jCommands.put(new JSONArray(3).put(command.getCommand()).put(new JSONObject(command.getParameters())).put(optionalIdentifier));
+            }
         }
         return jCommands;
     }
@@ -271,25 +279,21 @@ public class HttpDoveAdmClient implements DoveAdmClient {
             throw DoveAdmClientExceptionCodes.JSON_ERROR.create("Unexpected number of responses: " + jRetval);
         }
 
-        try {
-            ParsedResponses responses = ParsedResponses.valueFor(jResponses);
-            if (responses.isEmpty()) {
-                throw DoveAdmClientExceptionCodes.JSON_ERROR.create("Empty or invalid responses: " + jRetval);
-            }
-
-            if (Strings.isEmpty(command.getOptionalIdentifier())) {
-                // Grab first response
-                return responses.getResponses().get(0);
-            }
-
-            DoveAdmResponse response = responses.getTaggedResponse(command.getOptionalIdentifier());
-            if (null == response) {
-                throw DoveAdmClientExceptionCodes.JSON_ERROR.create("No such response: " + command.getOptionalIdentifier());
-            }
-            return response;
-        } catch (JSONException e) {
-            throw DoveAdmClientExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        ParsedResponses responses = ParsedResponses.valueFor(jResponses);
+        if (responses.isEmpty()) {
+            throw DoveAdmClientExceptionCodes.JSON_ERROR.create("Empty or invalid responses: " + jRetval);
         }
+
+        if (Strings.isEmpty(command.getOptionalIdentifier())) {
+            // Grab first response
+            return responses.getResponses().get(0);
+        }
+
+        DoveAdmResponse response = responses.getTaggedResponse(command.getOptionalIdentifier());
+        if (null == response) {
+            throw DoveAdmClientExceptionCodes.JSON_ERROR.create("No such response: " + command.getOptionalIdentifier());
+        }
+        return response;
     }
 
     @Override
@@ -297,6 +301,8 @@ public class HttpDoveAdmClient implements DoveAdmClient {
         if (null == commands || commands.isEmpty()) {
             return Collections.emptyList();
         }
+
+        checkOptionalIdentifiers(commands);
 
         // Build JSON request body & execute command
         JSONValue jRetval = executePost(HttpDoveAdmCall.DEFAULT, null, null, buildRequestBody(commands), ResultType.JSON);
@@ -311,38 +317,45 @@ public class HttpDoveAdmClient implements DoveAdmClient {
             throw DoveAdmClientExceptionCodes.JSON_ERROR.create("Unexpected number of responses: " + jRetval);
         }
 
-        try {
-            ParsedResponses responses = ParsedResponses.valueFor(jResponses);
-            if (responses.isEmpty()) {
-                throw DoveAdmClientExceptionCodes.JSON_ERROR.create("Empty or invalid responses: " + jRetval);
-            }
+        ParsedResponses responses = ParsedResponses.valueFor(jResponses);
+        if (responses.isEmpty()) {
+            throw DoveAdmClientExceptionCodes.JSON_ERROR.create("Empty or invalid responses: " + jRetval);
+        }
 
-            List<DoveAdmResponse> doveAdmDataResponses = new ArrayList<>(commands.size());
-            int i = 0;
-            for (DoveAdmCommand command : commands) {
-                if (Strings.isEmpty(command.getOptionalIdentifier())) {
-                    // Grab matching response
-                    doveAdmDataResponses.add(responses.getResponses().get(i));
-                } else {
-                    DoveAdmResponse response = responses.getTaggedResponse(command.getOptionalIdentifier());
-                    if (null == response) {
-                        throw DoveAdmClientExceptionCodes.JSON_ERROR.create("No such response: " + command.getOptionalIdentifier());
-                    }
-                    doveAdmDataResponses.add(response);
+        List<DoveAdmResponse> doveAdmDataResponses = new ArrayList<>(commands.size());
+        int i = 0;
+        for (DoveAdmCommand command : commands) {
+            if (Strings.isEmpty(command.getOptionalIdentifier())) {
+                // Grab matching response
+                doveAdmDataResponses.add(responses.getResponses().get(i));
+            } else {
+                DoveAdmResponse response = responses.getTaggedResponse(command.getOptionalIdentifier());
+                if (null == response) {
+                    throw DoveAdmClientExceptionCodes.JSON_ERROR.create("No such response: " + command.getOptionalIdentifier());
                 }
-                i++;
+                doveAdmDataResponses.add(response);
             }
+            i++;
+        }
 
-            return doveAdmDataResponses;
-        } catch (JSONException e) {
-            throw DoveAdmClientExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        return doveAdmDataResponses;
+    }
+
+    private void checkOptionalIdentifiers(List<DoveAdmCommand> commands) throws OXException {
+        Set<String> oids = new HashSet<>(commands.size());
+        String oid;
+        for (DoveAdmCommand command : commands) {
+            oid = command.getOptionalIdentifier();
+            if (Strings.isNotEmpty(oid) && false == oids.add(oid)) {
+                throw DoveAdmClientExceptionCodes.DUPLICATE_OPTIONAL_IDENTIFIER.create(oid);
+            }
         }
     }
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     private void setCommonHeaders(HttpRequestBase request) {
-        request.setHeader(HttpHeaders.AUTHORIZATION, "X-Dovecot-API " + encodedApiKey);
+        request.setHeader(HttpHeaders.AUTHORIZATION, authorizationHeaderValue);
         request.setHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.getMimeType());
         request.setHeader(HttpHeaders.ACCEPT, ContentType.APPLICATION_JSON.getMimeType());
     }

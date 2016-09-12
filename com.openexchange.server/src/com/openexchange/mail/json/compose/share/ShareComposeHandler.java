@@ -63,6 +63,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -75,6 +76,8 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.idn.IDNA;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor;
@@ -95,7 +98,6 @@ import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.Pair;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -135,7 +137,6 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
-
 /**
  * {@link ShareComposeHandler}
  *
@@ -143,6 +144,8 @@ import com.openexchange.user.UserService;
  * @since v7.8.2
  */
 public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportComposeContext, ShareDraftComposeContext> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ShareComposeHandler.class);
 
     /**
      * Initializes a new {@link ShareComposeHandler}.
@@ -361,13 +364,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             ShareReference shareReference;
             {
                 String shareToken = folderLink.getGuest().getBaseToken();
-                shareReference = new ShareReference.Builder(session.getUserId(), session.getContextId())
-                    .expiration(expirationDate)
-                    .password(password)
-                    .folder(attachmentsControl.getFolder())
-                    .items(attachmentsControl.getAttachments())
-                    .shareToken(shareToken)
-                    .build();
+                shareReference = new ShareReference.Builder(session.getUserId(), session.getContextId()).expiration(expirationDate).password(password).folder(attachmentsControl.getFolder()).items(attachmentsControl.getAttachments()).shareToken(shareToken).build();
             }
 
             // Create share link(s) for recipients
@@ -479,31 +476,31 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         if (null == items || items.isEmpty() || null == previewService || null == transformationService || null == fileAccessFactory || null == threadPoolService) {
             return java.util.Collections.emptyMap();
         }
-        List<PreviewTask> previewTasks = new ArrayList<>(6);
         Map<String, ThresholdFileHolder> previews = new HashMap<>(6);
-        boolean error = true;
-        try {
-            for (int k = Math.min(items.size(), 6), i = 0; k-- > 0; i++) {
-                String id = items.get(i).getId();
-                PreviewTask previewTask = new PreviewTask(id, fileAccessFactory, transformationService, previewService, session, documentPreviewEnabled);
-                previewTasks.add(previewTask);
+        Map<String, Future<ThresholdFileHolder>> previewFutures = new HashMap<>(6);
+        for (int k = Math.min(items.size(), 6), i = 0; k-- > 0; i++) {
+            String id = items.get(i).getId();
+            PreviewTask previewTask = new PreviewTask(id, fileAccessFactory, transformationService, previewService, session, documentPreviewEnabled);
+            Future<ThresholdFileHolder> future = threadPoolService.submit(previewTask);
+            previewFutures.put(id, future);
+        }
+        for (Entry<String, Future<ThresholdFileHolder>> entry : previewFutures.entrySet()) {
+            String id = entry.getKey();
+            try {
+                ThresholdFileHolder encodedThumbnail = entry.getValue().get(500, TimeUnit.MILLISECONDS);
+                previews.put(id, encodedThumbnail);
+            } catch (InterruptedException | TimeoutException e) {
+                LOG.debug(e.getMessage(), e);
+                ThresholdFileHolder encodedThumbnail = new ThresholdFileHolder();
+                encodedThumbnail.write(PreviewConst.DEFAULT_THUMBNAIL);
+                previews.put(id, encodedThumbnail);
+            } catch (ExecutionException e) {
+                LOG.error(e.getMessage(), e);
+                ThresholdFileHolder encodedThumbnail = new ThresholdFileHolder();
+                encodedThumbnail.write(PreviewConst.DEFAULT_THUMBNAIL);
+                previews.put(id, encodedThumbnail);
             }
-            List<Future<Pair<String, ThresholdFileHolder>>> previewImages = threadPoolService.invokeAll(previewTasks);
-            for (Future<Pair<String, ThresholdFileHolder>> preview : previewImages) {
-                Pair<String, ThresholdFileHolder> encodedThumbnail = preview.get(500, TimeUnit.MILLISECONDS);
-                String id = encodedThumbnail.getFirst();
-                ThresholdFileHolder thumbnail = encodedThumbnail.getSecond();
-                previews.put(id, thumbnail);
-            }
-            error = false;
-        } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            return java.util.Collections.emptyMap();
-        } finally {
-            if (error) {
-                for (ThresholdFileHolder tfh : previews.values()) {
-                    tfh.close();
-                }
-            }
+            // Close fileholders?
         }
         return previews;
     }
@@ -547,7 +544,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         }
     }
 
-    private static class PreviewTask extends AbstractTask<Pair<String, ThresholdFileHolder>> {
+    private static class PreviewTask extends AbstractTask<ThresholdFileHolder> {
 
         private final String id;
         private final IDBasedFileAccessFactory fileAccess;
@@ -567,7 +564,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         }
 
         @Override
-        public Pair<String, ThresholdFileHolder> call() throws Exception {
+        public ThresholdFileHolder call() throws Exception {
             IDBasedFileAccess access = fileAccess.createAccess(session);
             File file = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
             String mimeType = file.getFileMIMEType();
@@ -620,7 +617,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 encodedThumbnail = new ThresholdFileHolder();
                 encodedThumbnail.write(PreviewConst.DEFAULT_THUMBNAIL);
             }
-            return new Pair<>(id, encodedThumbnail);
+            return encodedThumbnail;
         }
 
         private ThresholdFileHolder transformImage(InputStream image, String mimeType) throws OXException {

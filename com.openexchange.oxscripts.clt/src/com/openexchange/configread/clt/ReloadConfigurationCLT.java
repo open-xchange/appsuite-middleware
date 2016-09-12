@@ -86,12 +86,12 @@ public class ReloadConfigurationCLT extends AbstractMBeanCLI<Void> {
 
     @Override
     protected boolean requiresAdministrativePermission() {
-        return true;
+        return false;
     }
 
     @Override
     protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        authenticator.doAuthentication(login, password);
+        // nothing to do
     }
 
     @Override

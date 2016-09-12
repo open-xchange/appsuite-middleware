@@ -68,8 +68,13 @@ public class DoveAdmDataResponseImpl extends AbstractDoveAdmResponse implements 
      * Initializes a new {@link DoveAdmDataResponseImpl}.
      */
     DoveAdmDataResponseImpl(List<Result> results, String optionalIdentifier) {
-        super(COMMAND_DATA_RESPONSE, optionalIdentifier, false);
+        super(TYPE_DATA_RESPONSE, optionalIdentifier, false);
         this.results = results;
+    }
+
+    @Override
+    public DoveAdmDataResponse asDataResponse() {
+        return this;
     }
 
     @Override

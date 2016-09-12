@@ -65,10 +65,12 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
      * Cluster is locked for action \"%1$s\". Try again later.
      */
     CLUSTER_LOCKED("Cluster is locked for action \"%1$s\". Try again later.", Category.CATEGORY_TRY_AGAIN, 1),
+
     /**
      * Cluster is locked for the period \"%1$s\" for action \"%2$s\". Try again in \"%3$s.
      */
-    CLUSTER_PERIODIC_LOCKED("Cluster is locked for the period \"%1$s\" for action \"%2$s\". Try again in \"%3$s.", Category.CATEGORY_TRY_AGAIN, 2),
+    CLUSTER_PERIODIC_LOCKED("Cluster is locked for the period \"%1$s\" for action \"%2$s\". Try again in \"%3$s.", Category.CATEGORY_TRY_AGAIN, 2), 
+    
     /**
      * Timed-out while waiting to acquire lock. Try again
      */
@@ -130,19 +132,8 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
         return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
     }
 
-    /**
-     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
-     * @param args The message arguments in case of printf-style message
-     * @return The newly created {@link OXException} instance
-     */
-    public OXException create(Throwable t, final Object... args) {
-        return OXExceptionFactory.getInstance().create(this, t, args);
-    }
-
     /*
      * (non-Javadoc)
-     * 
      * @see com.openexchange.exception.OXExceptionCode#equals(com.openexchange.exception.OXException)
      */
     @Override
@@ -152,7 +143,6 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
 
     /*
      * (non-Javadoc)
-     * 
      * @see com.openexchange.exception.OXExceptionCode#getNumber()
      */
     @Override
@@ -162,7 +152,6 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
 
     /*
      * (non-Javadoc)
-     * 
      * @see com.openexchange.exception.OXExceptionCode#getCategory()
      */
     @Override
@@ -172,7 +161,6 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
 
     /*
      * (non-Javadoc)
-     * 
      * @see com.openexchange.exception.OXExceptionCode#getPrefix()
      */
     @Override
@@ -182,7 +170,6 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
 
     /*
      * (non-Javadoc)
-     * 
      * @see com.openexchange.exception.OXExceptionCode#getMessage()
      */
     @Override
@@ -192,7 +179,6 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
 
     /*
      * (non-Javadoc)
-     * 
      * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
      */
     @Override

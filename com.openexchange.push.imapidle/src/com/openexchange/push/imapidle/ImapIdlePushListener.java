@@ -339,7 +339,11 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             {
                 InternetAddress[] from = mailMessage.getFrom();
                 if (null != from && from.length > 0) {
-                    messageData.put(PushNotificationField.MAIL_SENDER.getId(), from[0].getAddress());
+                    messageData.put(PushNotificationField.MAIL_SENDER_EMAIL.getId(), from[0].getAddress());
+                    String personal = from[0].getPersonal();
+                    if (Strings.isNotEmpty(personal)) {
+                        messageData.put(PushNotificationField.MAIL_SENDER_PERSONAL.getId(), personal);
+                    }
                 }
             }
             {

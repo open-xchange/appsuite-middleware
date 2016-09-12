@@ -189,8 +189,6 @@ public interface OAuthService {
      * @throws OXException
      */
     OAuthAccount updateAccount(int accountId, String serviceMetaData, OAuthInteractionType type, Map<String, Object> arguments, int user, int contextId, Set<OAuthScope> scopes) throws OXException;
-    
-    //OAuthAccount reauthorize(Session session, int accountId);
 
     /**
      * Gets the specified account.

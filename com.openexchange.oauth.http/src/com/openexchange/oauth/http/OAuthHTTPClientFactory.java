@@ -1,4 +1,4 @@
-/*
+/*-
  *
  *    OPEN-XCHANGE legal information
  *
@@ -47,72 +47,27 @@
  *
  */
 
-package com.openexchange.cluster.lock.osgi;
+package com.openexchange.oauth.http;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.exception.OXException;
+import com.openexchange.http.client.HTTPClient;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.session.Session;
 
 /**
- * {@link Services} - The static service lookup.
- *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * Creates an appropriate HTTP client for a given OAuth account.
  */
-public final class Services {
+@SingletonService
+public interface OAuthHTTPClientFactory {
 
     /**
-     * Initializes a new {@link Services}.
-     */
-    private Services() {
-        super();
-    }
-
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Sets the service lookup.
+     * Creates an appropriate HTTP client for given OAuth account.
      *
-     * @param serviceLookup The service lookup or <code>null</code>
+     * @param account The OAuth account
+     * @return The HTTP client
+     * @throws OXException If operation fails for any reason
      */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
-    }
-
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.cluster.lock\" not started?");
-        }
-        return serviceLookup.getService(clazz);
-    }
-
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
-    }
+    HTTPClient create(OAuthAccount account, Session session) throws OXException;
 
 }

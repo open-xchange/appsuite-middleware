@@ -130,6 +130,15 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         LOCAL_HOST = fbHost;
     }
 
+    /**
+     * Gets the address of the local host.
+     *
+     * @return The local host's address
+     */
+    public static String getLocalHost() {
+        return LOCAL_HOST;
+    }
+
     private static final AtomicReference<GrizzlyWebSocketApplication> APPLICATION_REFERENCE = new AtomicReference<GrizzlyWebSocketApplication>();
 
     /**
@@ -350,11 +359,12 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
      *
      * @param message The text message to send
      * @param pathFilter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
+     * @param remote Whether the text message was remotely received; otherwise <code>false</code> for local origin
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public Future<Void> sendToUserAsync(String message, String pathFilter, int userId, int contextId) {
-        SendToUserTask task = new SendToUserTask(message, pathFilter, userId, contextId, this);
+    public Future<Void> sendToUserAsync(String message, String pathFilter, boolean remote, int userId, int contextId) {
+        SendToUserTask task = new SendToUserTask(message, pathFilter, remote, userId, contextId, this);
         return ThreadPools.submitElseExecute(task);
     }
 
@@ -363,19 +373,21 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
      *
      * @param message The text message to send
      * @param pathFilter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
+     * @param remote Whether the text message was remotely received; otherwise <code>false</code> for local origin
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public void sendToUser(final String message, String pathFilter, int userId, int contextId) {
+    public void sendToUser(final String message, String pathFilter, boolean remote, int userId, int contextId) {
         ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
         if (null != userSockets) {
+            String info = remote ? "remotely received" : "locally created";
             for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
                 if (WebSockets.matches(pathFilter, sessionBoundSocket.getPath())) {
                     try {
                         sessionBoundSocket.sendMessage(message);
-                        LOG.info("Sent message \"{}\" via Web Socket using path filter \"{}\" to user {} in context {}", new Object() { @Override public String toString(){ return StringUtils.abbreviate(message, 24); }}, pathFilter, userId, contextId);
+                        LOG.info("Sent {} message \"{}\" via Web Socket using path filter \"{}\" to user {} in context {}", info, new Object() { @Override public String toString(){ return StringUtils.abbreviate(message, 24); }}, pathFilter, userId, contextId);
                     } catch (OXException e) {
-                        LOG.error("Failed to send message to Web Socket: {}", sessionBoundSocket, e);
+                        LOG.error("Failed to send {} message to Web Socket: {}", info, sessionBoundSocket, e);
                     }
                 }
             }

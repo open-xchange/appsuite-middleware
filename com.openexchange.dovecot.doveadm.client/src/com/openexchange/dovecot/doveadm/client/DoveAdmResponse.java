@@ -58,10 +58,10 @@ package com.openexchange.dovecot.doveadm.client;
 public interface DoveAdmResponse extends DoveAdmEntity {
 
     /** The command identifier to signal a regular DoveAdm data response */
-    public static final String COMMAND_DATA_RESPONSE = "doveadmResponse";
+    public static final String TYPE_DATA_RESPONSE = "doveadmResponse";
 
     /** The command identifier to signal a DoveAdm error response */
-    public static final String COMMAND_ERROR_RESPONSE = "error";
+    public static final String TYPE_ERROR_RESPONSE = "error";
 
     /**
      * Checks if this DoveAdm response is an error.
@@ -78,5 +78,14 @@ public interface DoveAdmResponse extends DoveAdmEntity {
      * @return The error response representation or <code>null</code> if not applicable
      */
     DoveAdmErrorResponse asErrorResponse();
+
+    /**
+     * Gets the data response representation from this response.
+     * <p>
+     * Only makes sense in case {@link #isError()} returns <code>false</code>.
+     *
+     * @return The data response representation or <code>null</code> if not applicable
+     */
+    DoveAdmDataResponse asDataResponse();
 
 }

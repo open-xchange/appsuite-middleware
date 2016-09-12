@@ -66,9 +66,8 @@ public interface ClusterLockService {
      * @param node The action that is going to be performed cluster-wise
      * @return The lock
      * @throws OXException if the cluster is already locked for that action
-     * @deprecated Use {@link #runClusterTask(ClusterTask, long)}
      */
-    Lock acquireClusterLock(String action) throws OXException;
+    public Lock acquireClusterLock(String action) throws OXException;
 
     /**
      * Release a cluster lock previously acquired via {@link ClusterLockService.acquireClusterLock}.
@@ -76,7 +75,6 @@ public interface ClusterLockService {
      * @param action the action that was performed cluster-wise
      * @param lock The lock
      * @throws OXException
-     * @deprecated Use {@link #runClusterTask(ClusterTask, long)}
      */
     void releaseClusterLock(String action, Lock lock) throws OXException;
 
@@ -140,16 +138,14 @@ public interface ClusterLockService {
      * @param period
      * @return The lock
      * @throws OXException
-     * @deprecated Use {@link ClusterTimerService#scheduleAtFixedRate}
      */
-    Lock acquirePeriodicClusterLock(String action, long period) throws OXException;
+    public Lock acquirePeriodicClusterLock(String action, long period) throws OXException;
 
     /**
      * Release a periodic cluster lock.
      * 
      * @param action
      * @throws OXException
-     * @deprecated Use {@link ClusterTimerService#scheduleAtFixedRate}
      */
-    void releasePeriodicClusterLock(String action) throws OXException;
+    public void releasePeriodicClusterLock(String action) throws OXException;
 }
