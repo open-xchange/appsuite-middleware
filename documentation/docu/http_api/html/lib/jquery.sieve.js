@@ -30,7 +30,6 @@
         itemSelector: "tbody tr",
         textSelector: null,
         toggle: function(item, match) {
-          debugger;
           return item.toggle(match);
         },
         complete: function() {}

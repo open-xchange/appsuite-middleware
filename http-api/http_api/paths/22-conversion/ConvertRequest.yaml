@@ -60,7 +60,7 @@
         }
       }
       ```
-      The response is a JSON array of JSON objects for each appointment/task as described in the [TaskData](#/definitions/TaskData) and [AppointmentData](#/definitions/AppointmentData) model.
+      The response is a JSON array of JSON objects for each appointment/task. See the TaskData model of the [getTask](#tasks/getTask) request and the AppointmentData model of the [getAttachment](#attachment/getAttachment) request for more informations.
       #### Saving a vCard email attachment
       If a vCard file is attached to an email, its content can be saved as contacts into given contact folder.
       ```json

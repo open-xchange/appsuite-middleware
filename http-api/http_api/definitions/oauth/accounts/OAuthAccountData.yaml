@@ -18,6 +18,10 @@ properties:
   enabledScopes:
     type: array
     description: The enabled scopes for this OAuth account
+    items:
+      type: string
   availableScopes:
     type: array
     description: The available scopes for the OAuth provider of this OAuth account
+    items:
+      type: string

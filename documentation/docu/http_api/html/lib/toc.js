@@ -130,3 +130,24 @@ function toggleRequestTOC(){
 		show=true;
 	}
 }
+
+
+function addATagHandler() {
+
+$('a').on('click', function (e) { 
+	var node = $(e.target);
+	var href = node.attr('href');
+	if (href.indexOf('#') !== 0) return;
+
+	debugger;
+	e.preventDefault();
+
+	var target = document.getElementById(href.substr(1));
+
+	var parent = target.closest('.endpoints');
+
+	$(parent).show();
+
+	target.scrollIntoView();});
+
+}
