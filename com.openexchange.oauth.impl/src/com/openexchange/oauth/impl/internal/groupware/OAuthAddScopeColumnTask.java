@@ -96,7 +96,6 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
         } catch (final OXException e) {
             throw e;
         }
-        final PreparedStatement stmt = null;
         try {
             startTransaction(writeCon);
             final List<Column> toCreate = new ArrayList<>();
@@ -117,7 +116,6 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             autocommit(writeCon);
-            closeSQLStuff(stmt);
             dbService.backForUpdateTask(contextId, writeCon);
         }
     }
