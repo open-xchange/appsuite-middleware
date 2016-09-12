@@ -133,7 +133,12 @@ public class SQLStructure {
                     return account.getMetaData().getId();
                 case SCOPE:
                     Set<OAuthScope> enabledScopes = account.getEnabledScopes();
-                    return Strings.concat(" ", enabledScopes.toArray(new Object[enabledScopes.size()]));
+                    String[] scopes = new String[enabledScopes.size()];
+                    int index = 0;
+                    for (OAuthScope s : enabledScopes){ 
+                        scopes[index++] = s.getModule().name();
+                    }
+                    return Strings.concat(" ", scopes);
                 default:
                     break;
             }
