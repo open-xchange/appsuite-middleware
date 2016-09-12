@@ -183,13 +183,12 @@ public class ClusterLockServiceImpl implements ClusterLockService {
 
         // Acquire the lock
         boolean lockAcquired = acquireClusterLock(clusterTask);
+        ScheduledTimerTask timerTask = null;
         try {
             if (lockAcquired) {
                 TimerService service = services.getService(TimerService.class);
-                ScheduledTimerTask timerTask = service.scheduleAtFixedRate(new RefreshLockTask(clusterTask.getTaskName()), TimeUnit.SECONDS.toMillis(30), TimeUnit.SECONDS.toMillis(30));
-                T t = clusterTask.perform();
-                timerTask.cancel();
-                return t;
+                timerTask = service.scheduleAtFixedRate(new RefreshLockTask(clusterTask.getTaskName()), TimeUnit.SECONDS.toMillis(30), TimeUnit.SECONDS.toMillis(30));
+                return clusterTask.perform();
             } else {
                 throw ClusterLockExceptionCodes.UNABLE_TO_ACQUIRE_CLUSTER_LOCK.create(clusterTask.getTaskName());
             }
@@ -198,6 +197,9 @@ public class ClusterLockServiceImpl implements ClusterLockService {
             LOGGER.debug("Cluster task '{}' completed. Releasing cluster lock.", clusterTask.getTaskName());
             if (lockAcquired) {
                 releaseClusterLock(clusterTask);
+                if (timerTask != null) {
+                    timerTask.cancel();
+                }
             }
         }
     }
