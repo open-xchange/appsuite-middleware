@@ -5,7 +5,7 @@
       - find
     summary: Performs the actual search and returns the found items (**available since v7.6.1**).
     description: |
-      Before querying the search you should fetch the search filters (facets) by calling the `/find?action=autocomplete`
+      Before querying the search you should fetch the search filters (facets) by calling the [/find?action=autocomplete](#operation--find-action-autocomplete-put) 
       request.
       #### Active facets
       Every value that has been selected by a user must be remembered and provided with every subsequent request.

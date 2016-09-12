@@ -37,10 +37,10 @@ properties:
     description: Searches contacts where the categories match with the given search pattern.
   orSearch:
     type: boolean
-    description: If set to true, a contact is returned if any specified pattern matches at the start of the corresponding field. Otherwise, a contact is returned if all specified patterns match any substring of the corresponding field.
+    description: 'If set to `true`, a contact is returned if any specified pattern matches at the start of the corresponding field. Otherwise, a contact is returned if all specified patterns match any substring of the corresponding field.'
   emailAutoComplete:
     type: boolean
-    description: If set to true, results are guaranteed to contain at least one email adress and the search is performed as if orSearch were set to true. The actual value of orSearch is ignored.
+    description: 'If set to `true`, results are guaranteed to contain at least one email adress and the search is performed as if orSearch were set to `true`. The actual value of orSearch is ignored.'
   exactMatch:
     type: boolean
-    description: If set to true, contacts are returned where the specified patterns match the corresponding fields exactly. Otherwise, a "startsWith" or "substring" comparison is used based on the "orSearch" parameter. (requires version > 6.22.1)
+    description: 'If set to `true`, contacts are returned where the specified patterns match the corresponding fields exactly. Otherwise, a "startsWith" or "substring" comparison is used based on the "orSearch" parameter. (requires version > 6.22.1)'

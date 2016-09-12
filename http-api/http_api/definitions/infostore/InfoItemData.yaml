@@ -34,7 +34,7 @@ properties:
   locked_until:
     type: integer
     format: int64
-    description: The time until which this item will presumably be locked. Only set if the docment is currently locked, 0 otherwise.
+    description: 'The time until which this item will presumably be locked. Only set if the docment is currently locked, `0` otherwise.'
   file_md5sum:
     type: string
     description: MD5Sum of the document.
@@ -43,7 +43,7 @@ properties:
     description: A version comment is used to file a changelog for the file.
   current_version:
     type: boolean
-    description: '"true" if this version is the current version, "false" otherwise. Note: This is not writeable.'
+    description: '`true` if this version is the current version, `false` otherwise. Note: This is not writeable.'
   number_of_versions:
     type: integer
     description: 'The number of all versions of the item. Note: This is not writeable.'
