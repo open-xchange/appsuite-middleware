@@ -6,7 +6,7 @@
     summary: Sets a user attribute (**available since v6.20**).
     description: |
       Sets a custom user attribute consisting of a name and a value. The attribute can later be
-      retrieved using the `/user?action=getAttribute` request.
+      retrieved using the [/user?action=getAttribute](#operation--user-action-getAttribute-get) request.
     consumes:
       - application/json
     parameters:

@@ -26,19 +26,21 @@
         name: json_0
         type: string
         description: |
-          Contains the rudimentary mail as JSON string (see [SendMailData](#/definitions/SendMailData) model) with just its message body
+          'Contains the rudimentary mail as JSON string (see [SendMailData](#/definitions/SendMailData) model) with just its message body
           (as html content) defined in nested JSON array `attachments` and its header data (from, to,
           subject, etc.). The field "content_type" defines whether the mail ought to be sent as plain text
           ("text/plain"), as html ("text/html") or as multipart/alternative ("ALTERNATIVE"). Sending a mail
           requires some special fields inside JSON mail object. The field "infostore_ids" defines a JSON
           array of infostore document ID(s) that ought to be appended to this mail as attachments. The field
           "msgref" indicates the ID of the referenced original mail. Moreover the field "sendtype" indicates
-          the type of the message: 0 (normal new mail), 1 (a reply mail, field `msgref` must be present),
-          2 (a forward mail, field `msgref` must be present), 3 (draft edit operation, field `msgref` must be
-          present in order to delete previous draft message since e.g. IMAP does not support changing/replacing
-          a message but requires a delete-and-insert sequence), 4 (transport of a draft mail, field `msgref`
-          must be present), 6 (signals that user intends to send out a saved draft message and expects the draft
-          message (referenced by `msgref` field) being deleted after successful transport).
+          the type of the message.' 
+        enum: 
+          - 0 (normal new mail)
+          - 1 (a reply mail, field `msgref` must be present)
+          - 2 (a forward mail, field `msgref` must be present)
+          - 3 (draft edit operation, field `msgref` must be present in order to delete previous draft message since e.g. IMAP does not support changing/replacing a message but requires a delete-and-insert sequence)
+          - 4 (transport of a draft mail, field `msgref` must be present)
+          - 6 (signals that user intends to send out a saved draft message and expects the draft message (referenced by `msgref` field) being deleted after successful transport)
         required: true
     responses:
       200:
@@ -50,7 +52,7 @@
     operationId: sendOrSaveMail
     tags:
       - mail
-    summary: Sends or saves a mail as MIME data block (RFC822) (**available since SP5**).
+    summary: 'Sends or saves a mail as MIME data block ([RFC822](https://tools.ietf.org/html/rfc822)) (**available since SP5**).'
     consumes:
       - text/plain
     parameters:

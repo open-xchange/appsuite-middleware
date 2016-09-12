@@ -11,7 +11,7 @@
       - in: query
         name: recipients
         type: string
-        description: A list of recipients as defined in RFC822, like "Joe Doe <joe@doe.org>". If set the message is sent to the given list of recipients, otherwise this defaults to the "To" header of the message.
+        description: A list of recipients as defined in [RFC822](https://tools.ietf.org/html/rfc822), like "Joe Doe <joe@doe.org>". If set the message is sent to the given list of recipients, otherwise this defaults to the "To" header of the message.
         required: false
       - in: body
         name: body

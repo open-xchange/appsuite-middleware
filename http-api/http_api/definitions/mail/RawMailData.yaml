@@ -57,7 +57,17 @@ received_date:
   description: Date and time as measured by the receiving server.
 flags:
   type: integer
-  description: 'Various system flags. A sum of zero or more of following values (see javax.mail.Flags.Flag for details): 1 (answered), 2 (deleted), 4 (draft), 8 (flagged), 16 (recent), 32 (seen), 64 (user), 128 (spam), 256 (forwarded).'
+  description: Various system flags. A sum of zero or more of following values (see [javax.mail.Flags.Flag](http://docs.oracle.com/javaee/6/api/javax/mail/Flags.Flag.html) for details).
+  enum: 
+    - 1 (answered)
+    - 2 (deleted)
+    - 4 (draft)
+    - 8 (flagged)
+    - 16 (recent)
+    - 32 (seen)
+    - 64 (user)
+    - 128 (spam)
+    - 256 (forwarded)
 level:
   type: integer
   description: Zero-based nesting level in a thread.
@@ -66,7 +76,14 @@ disp_notification_to:
   description: Content of message's header "Disposition-Notification-To".
 priority:
   type: integer
-  description: "Value of message's X-Priority header: 0 (no priority), 5 (very low), 4 (low), 3 (normal), 2 (high), 1 (very high)."
+  description: Value of message's X-Priority header.
+  enum: 
+    - 0 (no priority)
+    - 5 (very low)
+    - 4 (low)
+    - 3 (normal)
+    - 2 (high)
+    - 1 (very high)
 msg_ref:
   type: string
   description: Message reference on reply/forward.
@@ -94,10 +111,10 @@ attachments:
     $ref: "#/definitions/MailAttachment"
 truncated:
   type: boolean
-  description: true/false if the mail content was trimmed. Since v7.6.1
+  description: '`true` / `false` if the mail content was trimmed. Since v7.6.1'
 source:
   type: string
-  description: RFC822 source of the mail. Only present for "?action=get&attach_src=true".
+  description: '[RFC822](https://tools.ietf.org/html/rfc822) source of the mail. Only present for "?action=get&attach_src=true".'
 cid:
   type: string
   description: The value of the "Content-ID" header, if the header is present.

@@ -14,7 +14,7 @@ error_desc:
   description: The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.
 error_stack:
   type: array
-  description: If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.
+  description: 'If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.'
   items:
     type: string
 code:

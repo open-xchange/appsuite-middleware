@@ -17,13 +17,13 @@
     responses:
       200:
         description: |
-          A JSON object containing the id of the newly created appointment if it was created successfully.
+          'A JSON object containing the id of the newly created appointment if it was created successfully.
           If the appointment could not be created due to conflicts, the response body is an object with the
           field `conflicts`, which is an array of appointment objects which caused the conflict. Each appointment
           object which represents a resource conflict contains an additional field `hard_conflict` with the
-          Boolean value true. If the user does not have read access to a conflicting appointment, only the
+          Boolean value `true`. If the user does not have read access to a conflicting appointment, only the
           fields `id`, `start_date`, `end_date`, `shown_as` and `participants` are present and the field `participants`
           contains only the participants which caused the conflict. In case of errors the responsible fields
-          in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).'
         schema:
           $ref: "#/definitions/AppointmentCreationResponse"

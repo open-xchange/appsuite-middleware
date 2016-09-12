@@ -1,12 +1,11 @@
 /mail?action=import:
   post:
     operationId: importMail
-    tags:
       - mail
-    summary: Import of mails as MIME data block (RFC822) (**available since v6.18**).
+    summary: Import of mails as MIME data block ([RFC822](https://tools.ietf.org/html/rfc822)) (**available since v6.18**).
     description: |
       This request can be used to store a single or a lot of mails in the OX mail storage backend. This
-      action should be used instead of `/mail?action=new` because it is faster and tolerant to 8-bit encoded emails.
+      action should be used instead of [/mail?action=new](#operation--mail-action-new-post) because it is faster and tolerant to 8-bit encoded emails.
       
       To import multiple mails add further form-data fields.
     consumes:
@@ -26,12 +25,12 @@
       - in: query
         name: force
         type: boolean
-        description: If this parameter is set to `true`, the server skips checking the valid from address.
+        description: 'If this parameter is set to `true`, the server skips checking the valid from address.'
         required: false
       - in: formData
         name: file
         type: file
-        description: The RFC822 encoded email as binary data.
+        description: 'The [RFC822](https://tools.ietf.org/html/rfc822) encoded email as binary data.'
         required: true
     responses:
       200:

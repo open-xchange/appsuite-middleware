@@ -5,13 +5,13 @@ properties:
     description: For non-mail folders, a number as described in [Permission flags](https://documentation.open-xchange.com/latest/middleware/http_api/3_flags_bitmasks.html#permission-flags).
   rights:
     type: string
-    description: For mail folders, the rights string as defined in http://tools.ietf.org/html/rfc2086.
+    description: 'For mail folders, the rights string as defined in [RFC 2086](http://tools.ietf.org/html/rfc2086).'
   entity:
     type: integer
     description: User ID of the user or group to which this permission applies (ignored for type "anonymous" or "guest").
   group:
     type: boolean
-    description: true if entity refers to a group, false if it refers to a user (ignored for type "anonymous" or "guest").
+    description: 'Set `true` if entity refers to a group, `false` if it refers to a user (ignored for type "anonymous" or "guest").'
   type:
     type: string
     description: The recipient type, i.e. one of "user", "group", "guest", "anonymous" (required if no internal "entity" defined).
