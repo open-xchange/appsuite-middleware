@@ -210,9 +210,9 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
 
         for (final String msg : messages) {
             if (async) {
-                application.sendToUserAsync(msg, filter, userId, contextId);
+                application.sendToUserAsync(msg, filter, true, userId, contextId);
             } else {
-                application.sendToUser(msg, filter, userId, contextId);
+                application.sendToUser(msg, filter, true, userId, contextId);
             }
             LOG.info("Transmitted message \"{}\" to Web Socket application using path filter \"{}\" to user {} in context {}", new Object() { @Override public String toString(){ return StringUtils.abbreviate(msg, 24); }}, filter, I(userId), I(contextId));
         }

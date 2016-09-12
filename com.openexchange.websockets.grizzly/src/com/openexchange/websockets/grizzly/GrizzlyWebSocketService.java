@@ -118,7 +118,7 @@ public class GrizzlyWebSocketService implements WebSocketService {
             throw WebSocketExceptionCodes.INVALID_PATH_FILTER.create(pathFilter);
         }
 
-        localApp.sendToUser(message, pathFilter, userId, contextId);
+        localApp.sendToUser(message, pathFilter, false, userId, contextId);
         remoteDistributor.sendRemote(message, pathFilter, userId, contextId, asyncRemoteDistribution);
     }
 
@@ -128,7 +128,7 @@ public class GrizzlyWebSocketService implements WebSocketService {
             throw WebSocketExceptionCodes.INVALID_PATH_FILTER.create(pathFilter);
         }
 
-        Future<Void> f = localApp.sendToUserAsync(message, pathFilter, userId, contextId);
+        Future<Void> f = localApp.sendToUserAsync(message, pathFilter, false, userId, contextId);
         remoteDistributor.sendRemote(message, pathFilter, userId, contextId, true);
         return new SendControlImpl<Void>(f);
     }
