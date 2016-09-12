@@ -219,10 +219,10 @@ public class HttpDoveAdmEndpointManager {
 
         EnumMap<HttpDoveAdmCall, EndpointListing> endpoints = new EnumMap<HttpDoveAdmCall, EndpointListing>(HttpDoveAdmCall.class);
 
-        String fallBackName = "com.openexchange.mailaccount.dovecot.endpoints";
+        String fallBackName = "com.openexchange.dovecot.doveadm.endpoints";
         EndpointListing fallBackEntry = null;
         for (HttpDoveAdmCall call : HttpDoveAdmCall.values()) {
-            String propName = "com.openexchange.mailaccount.dovecot.endpoints." + call.getName();
+            String propName = "com.openexchange.dovecot.doveadm.endpoints." + call.getName();
             String endPoints = configService.getProperty(propName);
             if (Strings.isEmpty(endPoints)) {
                 if (null == fallBackEntry) {
