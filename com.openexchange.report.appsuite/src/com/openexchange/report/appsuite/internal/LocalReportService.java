@@ -64,12 +64,10 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.report.appsuite.ContextReport;
@@ -250,7 +248,7 @@ public class LocalReportService extends AbstractReportService {
         String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
 
         // Load all contextIds
-        List<Integer> allContextIds = Services.getService(ContextService.class).getAllContextIds();
+        List<Integer> allContextIds = new ArrayList<Integer>();
 
         // Set up an AnalyzeContextBatch instance for every chunk of contextIds
         if (reportConfig.isShowSingleTenant()) {
@@ -265,6 +263,8 @@ public class LocalReportService extends AbstractReportService {
                 LOG.error("No contexts for this brand or the sid is invalid.");
                 return null;
             }
+        } else {
+            allContextIds = Services.getService(ContextService.class).getAllContextIds();
         }
 
         // Set up the report instance
@@ -279,7 +279,6 @@ public class LocalReportService extends AbstractReportService {
 
     //--------------------Private helper methods--------------------
     private void setUpContextAnalyzer(String uuid, List<Integer> allContextIds, Report report) throws OXException {
-        DatabaseService databaseService = Services.getService(DatabaseService.class);
         ExecutorService reportSchemaThreadPool = Executors.newFixedThreadPool(report.getMAxThreadPoolSize(), new ThreadFactory() {
 
             @Override
