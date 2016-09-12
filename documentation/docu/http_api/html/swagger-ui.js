@@ -352,6 +352,7 @@ templates['operation'] = template({"1":function(container,depth0,helpers,partial
     + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.headers : depth0),{"name":"if","hash":{},"fn":container.program(12, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
     + "\n        <form accept-charset='UTF-8' class='sandbox'>\n          <div style='margin:0;padding:0;display:inline'></div>\n"
     + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.parameters : depth0),{"name":"if","hash":{},"fn":container.program(15, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
+    + "\n <div class='body_sandbox'></div>"
     + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.responseMessages : depth0),{"name":"if","hash":{},"fn":container.program(17, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
     + ((stack1 = helpers["if"].call(alias1,(depth0 != null ? depth0.isReadOnly : depth0),{"name":"if","hash":{},"fn":container.program(19, data, 0),"inverse":container.program(21, data, 0),"data":data})) != null ? stack1 : "")
     + "        </form>\n        <div class='response' style='display:none'>\n          <h4 class='curl'>Curl</h4>\n          <div class='block curl'></div>\n          <h4 data-sw-translate>Request URL</h4>\n          <div class='block request_url'></div>\n"
@@ -22879,7 +22880,7 @@ SwaggerUi.Views.OperationView = Backbone.View.extend({
           readOnly: this.model.isReadOnly,
           swaggerOptions: this.options.swaggerOptions
         });
-        $('.sandbox', $(this.el)).append(bodyView.render().el);
+        $('.body_sandbox', $(this.el)).append(bodyView.render().el);
     } else {
         var paramView = new SwaggerUi.Views.ParameterView({
           model: param,

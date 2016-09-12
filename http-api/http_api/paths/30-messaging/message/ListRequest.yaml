@@ -11,7 +11,7 @@
       - in: query
         name: columns
         type: string
-        description: A comma-separated list of column names, like "folder,headers,body". See [Messaging fields](#messaging fields) for valid column names.
+        description: A comma-separated list of column names, like "folder,headers,body". See [Messaging fields](#messaging-message-columns) for valid column names.
         required: true
       - in: body
         name: body
