@@ -32,8 +32,8 @@ for yielding the appropriate message that is transported using specified transpo
 # Explicit subscription
 
 An explicit subscription is created by invoking `com.openexchange.pns.PushSubscriptionRegistry.registerSubscription()`. The subscription is
-permanently stored to database and associated tables are queried on incoming notifications. This is the suitable way for mobile clients that
-are supposed to receive push notifications using a cloud push service using the `/ajax/pns?action=subscribe` HTTP request.
+permanently stored to database and associated tables are queried on incoming notifications. This is the suitable way (using the
+`/ajax/pns?action=subscribe` HTTP request) for mobile clients that are supposed to receive push notifications from a cloud push service.
 
 # Implicit subscription
 
