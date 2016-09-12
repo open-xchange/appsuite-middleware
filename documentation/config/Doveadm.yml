@@ -18,7 +18,6 @@ com.openexchange.mailaccount.dovecot.endpoints.maxConnectionsPerRoute=0 (max. co
 com.openexchange.mailaccount.dovecot.endpoints.readTimeout=2500
 com.openexchange.mailaccount.dovecot.endpoints.connectTimeout=1500
 
-Default is empty
 The values can be configured within a dedicated .properties file; e.g. 'doveadm.properties'.
       Default: 
       Version: 7.8.3
@@ -30,8 +29,6 @@ The values can be configured within a dedicated .properties file; e.g. 'doveadm.
       Key: com.openexchange.dovecot.doveadm.apiSecret
       Description: >
 Specifies the API secret to communicate with the Dovecot DoveAdm REST interface
-
-Default is empty
       Default: 
       Version: 7.8.3
       Reloadable: false
