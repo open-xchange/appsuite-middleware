@@ -770,6 +770,13 @@ templates['status_code'] = template({"1":function(container,depth0,helpers,parti
     + ((stack1 = helpers.each.call(alias1,(depth0 != null ? depth0.headers : depth0),{"name":"each","hash":{},"fn":container.program(1, data, 0),"inverse":container.noop,"data":data})) != null ? stack1 : "")
     + "    </tbody>\n  </table>\n</td>";
 },"useData":true});
+templates['body_tmpl'] = template({"compiler":[7,">= 4.0.0"],"main":function(container,depth0,helpers,partials,data) {
+    var helper;
+
+  return "<div class=\"bodyHeaderDiv\">\n<h4 class=\"bodyH4\"> Body </h4>\n<div class=\"bodyDiv\">\n<div class=\"bodyDescriptionTitle\">Description:</div>\n<div class=\"bodyDescription\">"
+    + container.escapeExpression(((helper = (helper = helpers.description || (depth0 != null ? depth0.description : depth0)) != null ? helper : helpers.helperMissing),(typeof helper === "function" ? helper.call(depth0 != null ? depth0 : {},{"name":"description","hash":{},"data":data}) : helper)))
+    + "</div>\n<br>\n<div class=\"bodyDataTypeTitle\">Data Type:</div>\n<div class=\"model-signature\"></div>\n</div>\n<div>";
+},"useData":true});
 })();} 
  /* jshint ignore:end */
 'use strict';
@@ -22868,8 +22875,14 @@ SwaggerUi.Views.OperationView = Backbone.View.extend({
     if(param.in == 'body'){
         // console.log(param);
         console.log("inserting body view");
+        var bodyView = new SwaggerUi.Views.BodyView({
+          model: param,
+          tagName: 'div',
+          readOnly: this.model.isReadOnly,
+          swaggerOptions: this.options.swaggerOptions
+        });
         // todo use body view
-        // $('.sandbox', $(this.el)).append(a);
+        $('.sandbox', $(this.el)).append(bodyView.render().el);
     } else {
         var paramView = new SwaggerUi.Views.ParameterView({
           model: param,
@@ -23588,10 +23601,56 @@ SwaggerUi.Views.ParameterView = Backbone.View.extend({
   }
 });
 
-
+var once = true;
 SwaggerUi.Views.BodyView = Backbone.View.extend({
     render: function() {
+
+    var sampleJSON, signatureView;
+    var modelType = this.model.modelSignature.type;
+    var modelDefinitions = this.model.modelSignature.definitions;
+    var schema = this.model.schema || {};
+    var consumes = this.model.consumes || [];
+
+    sampleJSON = SwaggerUi.partials.signature.createParameterJSONSample(modelType, modelDefinitions);
+
+    var isXML = this.contains(consumes, 'xml');
+    var isJSON = isXML ? this.contains(consumes, 'json') : true;
+    sampleJSON = SwaggerUi.partials.signature.createParameterJSONSample(modelType, modelDefinitions);
+
+    var signatureModel = {
+      sampleJSON: isJSON ? sampleJSON : false,
+      sampleXML: sampleJSON && isXML ? SwaggerUi.partials.signature.createXMLSample('', schema, modelDefinitions, true) : false,
+      isParam: true,
+      signature: SwaggerUi.partials.signature.getParameterModelSignature(modelType, modelDefinitions),
+      defaultRendering: this.model.defaultRendering
+    };
+
      //todo: render body view    
+     // $(this.el).html("<div>First div ever<div>");
+     if(once){
+            once=false;
+            console.log("printing body model")
+            console.log(this.model);
+        }
+     $(this.el).html(Handlebars.templates.body_tmpl(this.model));
+
+    if (sampleJSON) {
+      signatureView = new SwaggerUi.Views.SignatureView({model: signatureModel, tagName: 'div'});
+      $('.model-signature', $(this.el)).append(signatureView.render().el);
+    }
+    else {
+      $('.model-signature', $(this.el)).html(this.model.signature);
+    } 
+
+     return this;
+    },
+    
+    contains: function (consumes, type) {
+        return consumes.filter(function (val) {
+          if (val.indexOf(type) > -1) {
+            return true;
+          }
+        }).length;
     }
 });
 

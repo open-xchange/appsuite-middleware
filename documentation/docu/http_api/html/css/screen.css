@@ -89,6 +89,22 @@ div.oxShowButtonDiv {
   float: right;
 }
 
+div.bodyHeaderDiv {
+  background-color: #faf5ee;
+  margin-bottom: 25px;
+  width: 100%;
+}
+
+div.bodyDiv {
+  padding: 5px;
+  background-color: #fcf6db;
+}
+
+div.bodyDataTypeTitle, div.bodyDescriptionTitle {
+  padding-bottom: 3px;
+  font-weight: bold;
+}
+
 table {
   border-collapse: collapse;
   margin-top: 15px;
