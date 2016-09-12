@@ -55,6 +55,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
+import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.onedrive.access.OneDriveEventHandler;
@@ -83,7 +84,7 @@ public final class OneDriveActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, OAuthService.class, OAuthAccessRegistryService.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, ClusterLockService.class, OAuthService.class, OAuthAccessRegistryService.class };
     }
 
     @Override
