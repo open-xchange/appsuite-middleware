@@ -7,8 +7,7 @@ properties:
     type: string
     description: The service's display name.
   availableScopes:
-    data:
-      type: array
-      description: The available scopes for the OAuth provider
-      items:
-        type: string
+    type: array
+    description: The available scopes for the OAuth provider
+    items:
+      type: string
