@@ -20,6 +20,8 @@ Furthermore some tests use a comparison field as stated above which specifies ho
 
 ## Possible tests
 
+<div class="mailFilterToc">
+
 | Name | Description |
 |:------|:-------------|
 | [address](#address-test) | This test type applies to addresses only. So it may be used for all header fields which contain addresses. This test returns true if any combination of the header-list and values-list arguments match. |
@@ -32,6 +34,8 @@ Furthermore some tests use a comparison field as stated above which specifies ho
 | [body](#body-test) | Tests against the content of a mail. |
 | [allof](#allof-test) | Defines an AND condition between several tests. |
 | [anyof](#anyof-test) | Defines an OR condition between several tests. |
+
+</div>
 
 ### Possible comparisons
 
@@ -153,18 +157,22 @@ This section describes the structures of tests.
 
 ## Possible action commands
 
+<div class="mailFilterToc">
+
 | Name | Description |
 |:------|:-------------|
-| keep | Keeps a mail non-changed. |
-| discard | Discards a mail without any processing. |
-| redirect | Redirects a mail to a given e-mail address. |
-| move | Moves a mail into a given subfolder (the syntax of the subfolder given here must be the correct syntax of the underlying IMAP-server and is up to the GUI to detect things such as altnamespace or unixhierarchysep). |
-| reject | Rejects the mail with a given text. |
-| stop | Stops any further progressing of a mail. |
-| vacation | Creates a vacation mail. |
-| addflags | Adds flags to a mail. |
-| notify | Adds a notification. |
-| pgp | Encrypts a mail via pgp. |
+| [keep](#keep-command) | Keeps a mail non-changed. |
+| [discard](#discard-command) | Discards a mail without any processing. |
+| [redirect](#redirect-command) | Redirects a mail to a given e-mail address. |
+| [move](#move-command) | Moves a mail into a given subfolder (the syntax of the subfolder given here must be the correct syntax of the underlying IMAP-server and is up to the GUI to detect things such as altnamespace or unixhierarchysep). |
+| [reject](#reject-command) | Rejects the mail with a given text. |
+| [stop](#stop-command) | Stops any further progressing of a mail. |
+| [vacation](#vacation-command) | Creates a vacation mail. |
+| [addflags](#addflags-command) | Adds flags to a mail. |
+| [notify](#notify-command) | Adds a notification. |
+| [pgp](#pgp-command) | Encrypts a mail via pgp. |
+
+</div>
 
 ## Structure of action commands
 

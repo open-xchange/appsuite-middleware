@@ -105,6 +105,16 @@ div.bodyDataTypeTitle, div.bodyDescriptionTitle {
   font-weight: bold;
 }
 
+div.mailFilterToc a{
+  text-decoration: none;
+  color: #0088CC;
+  cursor: auto;
+}
+div.mailFilterToc a:hover{
+  color: #1199DD;
+  text-decoration: underline;
+}
+
 table {
   border-collapse: collapse;
   margin-top: 15px;
