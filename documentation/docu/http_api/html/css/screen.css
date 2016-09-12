@@ -90,14 +90,14 @@ div.oxShowButtonDiv {
 }
 
 div.bodyHeaderDiv {
-  background-color: #faf5ee;
+  background-color: inherit;
   margin-bottom: 25px;
   width: 100%;
 }
 
 div.bodyDiv {
   padding: 5px;
-  background-color: #fcf6db;
+  background-color: inherit;
 }
 
 div.bodyDataTypeTitle, div.bodyDescriptionTitle {
@@ -122,7 +122,7 @@ table {
   max-width: 960px;
 }
 
-thead {
+div.oxNormalDiv thead {
   background-color: #275885;
   color: #FFFFFF;
 }
@@ -131,7 +131,7 @@ th, td {
   padding: 5px;
 }
 
-tr:nth-child(even) {background-color: #DDDDDD;}
+div.oxNormalDiv tr:nth-child(even) {background-color: #DDDDDD;}
 
 .simpleTable td {
   background-color: #FFFFFF;
@@ -423,7 +423,7 @@ a.tocPlusTag:hover {
   font-size: 0.9em;
   color: #666666; 
   border-bottom: 1px solid #999999;
-  background-color:  #fcf6db;
+  background-color:  inherit; /* #fcf6db; */
 }
 .swagger-section .swagger-ui-wrap table tbody tr:last-child td {
   border-bottom: none;
@@ -437,7 +437,7 @@ a.tocPlusTag:hover {
   border-bottom: 1px solid #cccccc;
   vertical-align: top;
   line-height: 1.3em;
-  background-color: #fcf6db;
+  background-color: inherit; /*#fcf6db;*/
 }
 .swagger-section .swagger-ui-wrap ol {
   margin: 0px 0 10px;

@@ -22873,15 +22873,12 @@ SwaggerUi.Views.OperationView = Backbone.View.extend({
       }
     }
     if(param.in == 'body'){
-        // console.log(param);
-        console.log("inserting body view");
         var bodyView = new SwaggerUi.Views.BodyView({
           model: param,
           tagName: 'div',
           readOnly: this.model.isReadOnly,
           swaggerOptions: this.options.swaggerOptions
         });
-        // todo use body view
         $('.sandbox', $(this.el)).append(bodyView.render().el);
     } else {
         var paramView = new SwaggerUi.Views.ParameterView({
@@ -23601,7 +23598,6 @@ SwaggerUi.Views.ParameterView = Backbone.View.extend({
   }
 });
 
-var once = true;
 SwaggerUi.Views.BodyView = Backbone.View.extend({
     render: function() {
 
@@ -23624,15 +23620,7 @@ SwaggerUi.Views.BodyView = Backbone.View.extend({
       signature: SwaggerUi.partials.signature.getParameterModelSignature(modelType, modelDefinitions),
       defaultRendering: this.model.defaultRendering
     };
-
-     //todo: render body view    
-     // $(this.el).html("<div>First div ever<div>");
-     if(once){
-            once=false;
-            console.log("printing body model")
-            console.log(this.model);
-        }
-     $(this.el).html(Handlebars.templates.body_tmpl(this.model));
+    $(this.el).html(Handlebars.templates.body_tmpl(this.model));
 
     if (sampleJSON) {
       signatureView = new SwaggerUi.Views.SignatureView({model: signatureModel, tagName: 'div'});
@@ -23642,7 +23630,7 @@ SwaggerUi.Views.BodyView = Backbone.View.extend({
       $('.model-signature', $(this.el)).html(this.model.signature);
     } 
 
-     return this;
+    return this;
     },
     
     contains: function (consumes, type) {
