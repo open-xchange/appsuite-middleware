@@ -202,19 +202,19 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
 
         String[] messages = splitMessage(message);
         if (messages.length == 0) {
-            LOG.info("Received no messages on cluster member {}", GrizzlyWebSocketApplication.getLocalHost());
+            LOG.info("Received no messages on cluster member {} for user {} in context {}", GrizzlyWebSocketApplication.getLocalHost(), I(userId), I(contextId));
             return null;
         }
 
-        LOG.info("Received {} message(s) on cluster member {}", messages.length, GrizzlyWebSocketApplication.getLocalHost());
+        LOG.info("Received {} message(s) on cluster member {} for user {} in context {}", messages.length, GrizzlyWebSocketApplication.getLocalHost(), I(userId), I(contextId));
 
-        for (String msg : messages) {
+        for (final String msg : messages) {
             if (async) {
                 application.sendToUserAsync(msg, filter, userId, contextId);
             } else {
                 application.sendToUser(msg, filter, userId, contextId);
             }
-            LOG.info("Transmitted message \"{}\" to Web Socket application using path filter \"{}\" to user {} in context {}", new Object() { @Override public String toString(){ return StringUtils.abbreviate(message, 24); }}, filter, I(userId), I(contextId));
+            LOG.info("Transmitted message \"{}\" to Web Socket application using path filter \"{}\" to user {} in context {}", new Object() { @Override public String toString(){ return StringUtils.abbreviate(msg, 24); }}, filter, I(userId), I(contextId));
         }
         return null;
     }
