@@ -1,5 +1,5 @@
 /mail?action=examine:
-  put:
+  get:
     operationId: examine
     tags:
       - mail
