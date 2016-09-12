@@ -79,5 +79,4 @@
           A JSON object containing the folder ID and the object ID of the mail. In case of errors the
           responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
->>>>>>> develop
           $ref: "#/definitions/MailDestinationResponse"
