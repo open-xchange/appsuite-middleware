@@ -102,7 +102,7 @@ public class DoveAdmClientActivator extends HousekeepingActivator {
         HttpDoveAdmEndpointManager endpointManager = new HttpDoveAdmEndpointManager();
         boolean anyAvailable = endpointManager.init(factory, getService(ConfigurationService.class));
         if (false == anyAvailable) {
-            logger.error("Missing ebd-points for Dovecot DoveAdm REST interface. Bundle {} will not start. DoveAdm client will not be initialized.", context.getBundle().getSymbolicName());
+            logger.error("Missing end-points for Dovecot DoveAdm REST interface. Bundle {} will not start. DoveAdm client will not be initialized.", context.getBundle().getSymbolicName());
             return;
         }
 
