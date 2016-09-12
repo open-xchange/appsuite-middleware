@@ -63,6 +63,7 @@ import com.openexchange.cluster.lock.ClusterTask;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -184,7 +185,11 @@ public class ClusterLockServiceImpl implements ClusterLockService {
         boolean lockAcquired = acquireClusterLock(clusterTask);
         try {
             if (lockAcquired) {
-                return clusterTask.perform();
+                TimerService service = services.getService(TimerService.class);
+                ScheduledTimerTask timerTask = service.scheduleAtFixedRate(new RefreshLockTask(clusterTask.getTaskName()), TimeUnit.SECONDS.toMillis(30), TimeUnit.SECONDS.toMillis(30));
+                T t = clusterTask.perform();
+                timerTask.cancel();
+                return t;
             } else {
                 throw ClusterLockExceptionCodes.UNABLE_TO_ACQUIRE_CLUSTER_LOCK.create(clusterTask.getTaskName());
             }
@@ -351,6 +356,47 @@ public class ClusterLockServiceImpl implements ClusterLockService {
             } catch (OXException e) {
                 final Logger log = LoggerFactory.getLogger(ClusterLockServiceImpl.class);
                 log.warn("Unable to release periodic lock for action {}", action, e);
+            }
+        }
+    }
+
+    /**
+     * {@link RefreshLockTask} - Refreshes the lock expiration timestamp for the specified task
+     */
+    private class RefreshLockTask implements Runnable {
+
+        private String taskName;
+
+        /**
+         * Initialises a new {@link ClusterLockServiceImpl.RefreshLockTask}.
+         */
+        public RefreshLockTask(String taskName) {
+            super();
+            this.taskName = taskName;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Runnable#run()
+         */
+        @Override
+        public void run() {
+            try {
+                HazelcastInstance hzInstance = getHazelcastInstance();
+                if (hzInstance == null) {
+                    throw ServiceExceptionCode.absentService(HazelcastInstance.class);
+                }
+
+                IMap<String, Long> clusterLocks = hzInstance.getMap(ClusterLockType.ClusterTaskLocks.name());
+                if (clusterLocks == null) {
+                    return;
+                }
+                long timeNow = System.currentTimeMillis(); //FIXME: Switch to nanoTime()
+                clusterLocks.put(taskName, timeNow);
+            } catch (OXException e) {
+                LOGGER.error("{}", e.getMessage(), e);
+                return;
             }
         }
     }

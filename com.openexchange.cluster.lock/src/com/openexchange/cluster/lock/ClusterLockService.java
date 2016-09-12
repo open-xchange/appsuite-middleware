@@ -97,8 +97,8 @@ public interface ClusterLockService {
 
     /**
      * Runs the specified cluster task while previously acquiring a lock on the entire cluster
-     * for this specific task. The current thread will acquire the lock for an indefinite amount
-     * of time, i.e. until it's done; threads waiting to acquire the same lock will wait indefinitely.
+     * for this specific task. The current thread will acquire the lock for a predefined amount
+     * of time.
      * 
      * @param clusterTask The {@link ClusterTask} to perform
      * @return The result {@link T}
