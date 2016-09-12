@@ -59,7 +59,23 @@ package com.openexchange.dovecot.doveadm.client.internal;
 public enum HttpDoveAdmCall {
 
     /** The default end-point listing */
-    DEFAULT,
+    DEFAULT("default"),
 
     ;
+
+    private final String name;
+
+    private HttpDoveAdmCall(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Gets the name
+     *
+     * @return The name
+     */
+    public String getName() {
+        return name;
+    }
+
 }

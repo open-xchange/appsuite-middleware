@@ -93,14 +93,18 @@ public class DoveAdmClientActivator extends HousekeepingActivator {
         // Check API secret
         String apiSecret = getService(ConfigurationService.class).getProperty("com.openexchange.dovecot-doveadm.apiSecret");
         if (Strings.isEmpty(apiSecret)) {
-            logger.error("Missing API secret from property \"com.openexchange.dovecot-doveadm.apiSecret\". Bundle {} will not start.", context.getBundle().getSymbolicName());
+            logger.error("Missing API secret from property \"com.openexchange.dovecot-doveadm.apiSecret\". DoveAdm client will not be initialized.");
             return;
         }
 
         // Initialize the end-point manager
         EndpointManagerFactory factory = getService(EndpointManagerFactory.class);
         HttpDoveAdmEndpointManager endpointManager = new HttpDoveAdmEndpointManager();
-        endpointManager.init(factory, getService(ConfigurationService.class));
+        boolean anyAvailable = endpointManager.init(factory, getService(ConfigurationService.class));
+        if (false == anyAvailable) {
+            logger.error("Missing ebd-points for Dovecot DoveAdm REST interface. Bundle {} will not start. DoveAdm client will not be initialized.", context.getBundle().getSymbolicName());
+            return;
+        }
 
         // Initialize client to Dovecot REST interface
         HttpDoveAdmClient client = new HttpDoveAdmClient(apiSecret, endpointManager);
