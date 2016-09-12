@@ -158,6 +158,7 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
         VKONTAKTE(API.VKONTAKTE.getFullName(), Module.contacts_ro),
         XING(API.XING.getFullName(), Module.contacts_ro),
         YAHOO(API.YAHOO.getFullName(), Module.contacts_ro),
+        TWITTER(API.TWITTER.getFullName(), Module.generic),
         ;
 
         private String scope;
