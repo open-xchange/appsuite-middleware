@@ -2,7 +2,7 @@
   get:
     operationId: getRange
     tags:
-      - reminder
+      - Reminder
     summary: Gets a reminder range.
     description: Gets all reminders which are scheduled until the specified time (end date).
     parameters:

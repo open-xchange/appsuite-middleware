@@ -2,7 +2,7 @@
   put:
     operationId: updateResource
     tags:
-      - resources
+      - Resources
     summary: Updates a resource.
     consumes:
       - application/json

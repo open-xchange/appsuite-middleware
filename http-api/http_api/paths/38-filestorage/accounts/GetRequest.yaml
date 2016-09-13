@@ -2,7 +2,7 @@
   get:
     operationId: getFileAccount
     tags:
-      - filestorage
+      - Filestorage
     summary: Gets a file storage account.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

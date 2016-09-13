@@ -2,7 +2,7 @@
   put:
     operationId: updateShareLink
     tags:
-      - share/management
+      - Share/Management
     summary: Updates a share link (**available since v7.8.0**).
     consumes:
       - application/json

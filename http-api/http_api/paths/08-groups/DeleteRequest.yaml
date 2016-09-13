@@ -2,7 +2,7 @@
   put:
     operationId: deleteGroup
     tags:
-      - groups
+      - Groups
     summary: Deletes a group (**introduced 2008-06-12**).
     consumes:
       - application/json

@@ -2,7 +2,7 @@
   put:
     operationId: updateUser
     tags:
-      - user
+      - User
     summary: Updates a user (**available since v6.14**).
     consumes:
       - application/json

@@ -2,7 +2,7 @@
   get:
     operationId: getRules
     tags:
-      - mailfilter
+      - Mailfilter
     summary: Gets all mail filter rules.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

@@ -2,7 +2,7 @@
   get:
     operationId: refreshAutoLoginCookie
     tags:
-      - login
+      - Login
     summary: Refreshes the auto-login cookie.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

@@ -2,7 +2,7 @@
   get:
     operationId: getConfigProperty
     tags:
-      - config
+      - Config
     summary: Gets a property of the configuration (**available since v7.6.2**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

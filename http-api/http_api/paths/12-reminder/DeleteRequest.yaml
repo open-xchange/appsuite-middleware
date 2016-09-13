@@ -2,7 +2,7 @@
   put:
     operationId: deleteReminders
     tags:
-      - reminder
+      - Reminder
     summary: Deletes reminders (**available since v6.22**).
     description: Before version 6.22 the request body contained only a JSON object with the field `id`.
     consumes:

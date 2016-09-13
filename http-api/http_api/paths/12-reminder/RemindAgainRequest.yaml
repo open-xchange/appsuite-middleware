@@ -2,7 +2,7 @@
   put:
     operationId: remindAgain
     tags:
-      - reminder
+      - Reminder
     summary: Updates the reminder alarm (**available since v6.18.1**).
     consumes:
       - application/json

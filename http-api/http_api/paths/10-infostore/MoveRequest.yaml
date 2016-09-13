@@ -2,7 +2,7 @@
   put:
     operationId: moveInfoItems
     tags:
-      - infostore
+      - Infostore
     summary: Moves one or more infoitems to another folder.
     consumes:
       - application/json

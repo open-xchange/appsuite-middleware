@@ -2,7 +2,7 @@
   get:
     operationId: checkName
     tags:
-      - infostore
+      - Infostore
     summary: Checks if a given file name is valid (**available since v7.8.1, preliminary**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

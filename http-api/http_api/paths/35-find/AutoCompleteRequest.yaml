@@ -2,7 +2,7 @@
   put:
     operationId: doAutoComplete
     tags:
-      - find
+      - Find
     summary: Suggests possible search filters based on a user's input (**available since v7.6.1**).
     description: |
       Filters are grouped into categories, the so called facets.

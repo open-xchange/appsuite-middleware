@@ -2,7 +2,7 @@
   put:
     operationId: searchUsers
     tags:
-      - user
+      - User
     summary: Search for users (**available since v6.14**).
     consumes:
       - application/json

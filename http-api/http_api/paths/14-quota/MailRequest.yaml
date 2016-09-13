@@ -2,7 +2,7 @@
   get:
     operationId: getMailUsage
     tags:
-      - quota
+      - Quota
     summary: Gets the mail usage data.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

@@ -2,7 +2,7 @@
   put:
     operationId: confirmAppointment
     tags:
-      - calendar
+      - Calendar
     summary: Confirms an appointment.
     consumes:
       - application/json

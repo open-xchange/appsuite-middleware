@@ -2,7 +2,7 @@
   put:
     operationId: searchGroups
     tags:
-      - groups
+      - Groups
     summary: Searches for groups.
     consumes:
       - application/json

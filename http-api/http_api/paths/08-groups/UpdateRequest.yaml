@@ -2,7 +2,7 @@
   put:
     operationId: updateGroup
     tags:
-      - groups
+      - Groups
     summary: Updates a group (**introduced 2008-06-12**).
     consumes:
       - application/json

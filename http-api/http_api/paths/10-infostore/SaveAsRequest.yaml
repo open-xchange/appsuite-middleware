@@ -2,7 +2,7 @@
   put:
     operationId: importAttachment
     tags:
-      - infostore
+      - Infostore
     summary: Saves an attachment in the infostore.
     consumes:
       - application/json

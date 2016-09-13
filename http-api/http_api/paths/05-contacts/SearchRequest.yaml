@@ -2,7 +2,7 @@
   put:
     operationId: searchContacts
     tags:
-      - contacts
+      - Contacts
     summary: Search for contacts.
     consumes:
       - application/json

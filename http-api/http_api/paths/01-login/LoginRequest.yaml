@@ -2,7 +2,7 @@
   post:
     operationId: doLogin
     tags:
-      - login
+      - Login
     summary: Login with user credentials.
     description: |
       The login module is used to obtain a session from the user's login

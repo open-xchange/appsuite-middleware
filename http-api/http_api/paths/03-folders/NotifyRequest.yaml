@@ -2,7 +2,7 @@
   put:
     operationId: notifyAboutSharedFolder
     tags:
-      - folders
+      - Folders
     summary: Notifies users or groups about a shared folder (**available since v7.8.0, priliminary**).
     consumes:
       - application/json

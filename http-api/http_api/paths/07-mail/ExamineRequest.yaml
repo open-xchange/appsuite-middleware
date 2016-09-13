@@ -2,7 +2,7 @@
   put:
     operationId: examine
     tags:
-      - mail
+      - Mail
     summary: Examines a specifed mail folder and provides its basic status information
     consumes:
       - application/json

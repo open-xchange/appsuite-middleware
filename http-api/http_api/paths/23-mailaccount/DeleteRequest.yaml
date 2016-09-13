@@ -2,7 +2,7 @@
   put:
     operationId: deleteAccount
     tags:
-      - mailaccount
+      - Mailaccount
     summary: Deletes a mail account (**available since v6.12**).
     consumes:
       - application/json

@@ -2,7 +2,7 @@
   get:
     operationId: doAutoCompleteContacts
     tags:
-      - contacts
+      - Contacts
     summary: Auto-complete conntacts (**available since v7.6.1, preliminary**).
     description: Finds contacts based on a prefix, usually used to auto-complete e-mail recipients while the user is typing.
     parameters:

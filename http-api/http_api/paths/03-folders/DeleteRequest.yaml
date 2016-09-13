@@ -2,7 +2,7 @@
   put:
     operationId: deleteFolders
     tags:
-      - folders
+      - Folders
     summary: Deletes a list of folders.
     consumes:
       - application/json

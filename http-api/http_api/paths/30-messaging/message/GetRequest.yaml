@@ -2,7 +2,7 @@
   get:
     operationId: getMessagingMessage
     tags:
-      - messaging
+      - Messaging
     summary: Gets a messaging message.
     description: |
       A messaging message consists of some metadata, headers and a content. The content attribute varies

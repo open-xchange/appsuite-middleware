@@ -2,7 +2,7 @@
   put:
     operationId: deleteShareLink
     tags:
-      - share/management
+      - Share/Management
     summary: Deletes a share link (**available since v7.8.0**).
     consumes:
       - application/json

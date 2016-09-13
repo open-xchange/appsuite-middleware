@@ -2,7 +2,7 @@
   get:
     operationId: getAllAttachments
     tags:
-      - attachments
+      - Attachments
     summary: Gets all attachments for an object.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

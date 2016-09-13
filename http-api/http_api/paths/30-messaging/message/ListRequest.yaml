@@ -2,7 +2,7 @@
   put:
     operationId: getMessagingMessageList
     tags:
-      - messaging
+      - Messaging
     summary: Gets a list of messaging messages.
     consumes:
       - application/json

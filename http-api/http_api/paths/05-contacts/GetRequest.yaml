@@ -2,7 +2,7 @@
   get:
     operationId: getContact
     tags:
-      - contacts
+      - Contacts
     summary: Gets a contact.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

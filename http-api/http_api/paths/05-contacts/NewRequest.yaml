@@ -2,7 +2,7 @@
   put:
     operationId: createContact
     tags:
-      - contacts
+      - Contacts
     summary: Creates a contact.
     description: |
       Creates a new contact. This request cannot add contact images. Therefor it
@@ -27,7 +27,7 @@
   post:
     operationId: createContactAdvanced
     tags:
-      - contacts
+      - Contacts
     summary: Creates a contact.
     description: |
       Creates a new contact with contact images. The normal request body must be placed as form-data using the

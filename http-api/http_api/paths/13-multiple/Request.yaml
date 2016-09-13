@@ -5,7 +5,7 @@
   put:
     operationId: process
     tags:
-      - multiple
+      - Multiple
     summary: Processes multiple requests to other modules in a single request.
     description: |
       #### Not supported requests are:

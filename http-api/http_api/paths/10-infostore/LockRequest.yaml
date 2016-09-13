@@ -2,7 +2,7 @@
   get:
     operationId: lockInfoItem
     tags:
-      - infostore
+      - Infostore
     summary: Locks an infoitem.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

@@ -2,7 +2,7 @@
   put:
     operationId: updatePassword
     tags:
-      - passwordchange
+      - Passwordchange
     summary: Updates or changes the password of the current use.
     description: |
       #### Note

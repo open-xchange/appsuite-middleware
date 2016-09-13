@@ -2,7 +2,7 @@
   put:
     operationId: getMailList
     tags:
-      - mail
+      - Mail
     summary: Gets a list of mails.
     consumes:
       - application/json

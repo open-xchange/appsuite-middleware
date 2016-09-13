@@ -2,7 +2,7 @@
   get:
     operationId: getAllAppointments
     tags:
-      - calendar
+      - Calendar
     summary: Gets all appointments.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

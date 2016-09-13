@@ -2,7 +2,7 @@
   get:
     operationId: getConfig
     tags:
-      - mailfilter
+      - Mailfilter
     summary: Gets the configuration of the mail filter backend.
     description: |
       A mail filter can have different rules each containing one command. A command has a test condition and actions

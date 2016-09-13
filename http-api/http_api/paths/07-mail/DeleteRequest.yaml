@@ -2,7 +2,7 @@
   put:
     operationId: deleteMails
     tags:
-      - mail
+      - Mail
     summary: Deletes mails.
     consumes:
       - application/json

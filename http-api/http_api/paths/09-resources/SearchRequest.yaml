@@ -2,7 +2,7 @@
   put:
     operationId: searchResources
     tags:
-      - resources
+      - Resources
     summary: Searches for resources.
     consumes:
       - application/json

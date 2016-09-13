@@ -2,7 +2,7 @@
   put:
     operationId: searchTasks
     tags:
-      - tasks
+      - Tasks
     summary: Search for tasks.
     consumes:
       - application/json

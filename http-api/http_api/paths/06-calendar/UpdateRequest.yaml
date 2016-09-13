@@ -2,7 +2,7 @@
   put:
     operationId: updateAppointment
     tags:
-      - calendar
+      - Calendar
     summary: Updates an appointment.
     consumes:
       - application/json

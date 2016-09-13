@@ -2,7 +2,7 @@
   put:
     operationId: confirmTask
     tags:
-      - tasks
+      - Tasks
     summary: Confirms a task.
     consumes:
       - application/json

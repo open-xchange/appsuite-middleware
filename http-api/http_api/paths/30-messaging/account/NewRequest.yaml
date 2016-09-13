@@ -2,7 +2,7 @@
   put:
     operationId: createMessagingAccount
     tags:
-      - messaging
+      - Messaging
     summary: Creates a messaging account.
     consumes:
       - application/json

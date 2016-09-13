@@ -2,7 +2,7 @@
   get:
     operationId: searchContactsByBirthday
     tags:
-      - contacts
+      - Contacts
     summary: Search for contacts by birthday (**available since v6.22.1, preliminary**).
     description: Finds contacts whose birthday falls into a specified time range.
     parameters:

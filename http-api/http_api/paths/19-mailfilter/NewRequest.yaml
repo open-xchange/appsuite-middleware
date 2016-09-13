@@ -2,7 +2,7 @@
   put:
     operationId: createRule
     tags:
-      - mailfilter
+      - Mailfilter
     summary: Creates a mail filter rule.
     consumes:
       - application/json

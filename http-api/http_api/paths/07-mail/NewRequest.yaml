@@ -2,7 +2,7 @@
   post:
     operationId: sendMail
     tags:
-      - mail
+      - Mail
     summary: Sends a mail.
     description: |
       The request accepts file fields in upload form that denote referenced files that are going to be appended
@@ -56,7 +56,7 @@
   put:
     operationId: sendOrSaveMail
     tags:
-      - mail
+      - Mail
     summary: 'Sends or saves a mail as MIME data block ([RFC822](https://tools.ietf.org/html/rfc822)) (**available since SP5**).'
     consumes:
       - text/plain

@@ -2,7 +2,7 @@
   put:
     operationId: sendMessagingMessage
     tags:
-      - messaging
+      - Messaging
     summary: Sends a messaging message.
     consumes:
       - spplication/json

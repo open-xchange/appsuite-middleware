@@ -2,7 +2,7 @@
   put:
     operationId: getGroupList
     tags:
-      - groups
+      - Groups
     summary: Gets a list of groups.
     consumes:
       - application/json

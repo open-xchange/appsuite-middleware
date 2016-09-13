@@ -2,7 +2,7 @@
   get:
     operationId: getFreeBusy
     tags:
-      - freebusy
+      - Freebusy
     summary: Gets free/busy information (**available since v6.22.1**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

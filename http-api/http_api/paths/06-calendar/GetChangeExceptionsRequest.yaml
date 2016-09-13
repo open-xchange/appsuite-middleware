@@ -2,7 +2,7 @@
   get:
     operationId: getChangeExceptions
     tags:
-      - calendar
+      - Calendar
     summary: Gets all change exceptions (**available since v7.2.0**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

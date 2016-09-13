@@ -2,7 +2,7 @@
   put:
     operationId: clearMailFolders
     tags:
-      - mail
+      - Mail
     summary: Clears the content of mail folders.
     consumes:
       - application/json

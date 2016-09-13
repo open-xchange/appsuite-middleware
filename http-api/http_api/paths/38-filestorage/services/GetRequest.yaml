@@ -2,7 +2,7 @@
   get:
     operationId: getFileService
     tags:
-      - filestorage
+      - Filestorage
     summary: Gets a file storage service.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

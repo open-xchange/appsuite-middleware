@@ -2,7 +2,7 @@
   put:
     operationId: searchMails
     tags:
-      - mail
+      - Mail
     summary: Searches for mails.
     consumes:
       - application/json

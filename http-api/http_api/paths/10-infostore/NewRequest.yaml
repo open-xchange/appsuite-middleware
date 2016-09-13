@@ -2,7 +2,7 @@
   put:
     operationId: createInfoItem
     tags:
-      - infostore
+      - Infostore
     summary: Creates an infoitem.
     description: |
       Creates a new contact. This request cannot add a file to the infoitem. Therefor it
@@ -40,7 +40,7 @@
   post:
     operationId: createInfoItemAdvanced
     tags:
-      - infostore
+      - Infostore
     summary: Creates an infoitem.
     description: |
       Creates a new infoitem with a file. The normal request body must be placed as form-data using the

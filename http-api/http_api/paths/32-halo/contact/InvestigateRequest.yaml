@@ -2,7 +2,7 @@
   get:
     operationId: investigateContactHalo
     tags:
-      - halo
+      - Halo
     summary: Investigates a contact.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

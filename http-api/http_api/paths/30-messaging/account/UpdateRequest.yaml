@@ -2,7 +2,7 @@
   put:
     operationId: updateMessagingAccount
     tags:
-      - messaging
+      - Messaging
     summary: Updates a messaging account.
     consumes:
       - application/json

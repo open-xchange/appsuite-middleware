@@ -2,7 +2,7 @@
   get:
     operationId: forwardMail
     tags:
-      - mail
+      - Mail
     summary: Forwards a mail.
     description: Returns the data for the message that shall be forwarded.
     parameters:

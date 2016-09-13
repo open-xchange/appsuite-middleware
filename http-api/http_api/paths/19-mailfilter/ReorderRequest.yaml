@@ -2,7 +2,7 @@
   put:
     operationId: reorderRules
     tags:
-      - mailfilter
+      - Mailfilter
     summary: Reorders mail filter rules.
     consumes:
       - application/json

@@ -2,7 +2,7 @@
   put:
     operationId: createGroup
     tags:
-      - groups
+      - Groups
     summary: Creates a group (**introduced 2008-06-12**).
     consumes:
       - application/json

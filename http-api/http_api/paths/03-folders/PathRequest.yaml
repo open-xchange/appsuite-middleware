@@ -2,7 +2,7 @@
   get:
     operationId: getPath
     tags:
-      - folders
+      - Folders
     summary: Gets the parent folders above the specified folder.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

@@ -2,7 +2,7 @@
   get:
     operationId: getResourceUpdates
     tags:
-      - resources
+      - Resources
     summary: Gets the new, modified and deleted resources.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

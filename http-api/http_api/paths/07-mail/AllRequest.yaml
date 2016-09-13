@@ -2,7 +2,7 @@
   get:
     operationId: getAllMails
     tags:
-      - mail
+      - Mail
     summary: Gets all mails.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

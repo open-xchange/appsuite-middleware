@@ -2,7 +2,7 @@
   get:
     operationId: getAllTasks
     tags:
-      - tasks
+      - Tasks
     summary: Gets all tasks.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

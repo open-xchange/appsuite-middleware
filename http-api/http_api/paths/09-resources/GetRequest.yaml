@@ -2,7 +2,7 @@
   get:
     operationId: getResource
     tags:
-      - resources
+      - Resources
     summary: Gets a resource.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

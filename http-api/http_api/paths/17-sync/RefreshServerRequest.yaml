@@ -2,7 +2,7 @@
   put:
     operationId: clearFoldersSynced
     tags:
-      - sync
+      - Sync
     summary: Clears a folder's content.
     description: |
       #### Note

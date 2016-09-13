@@ -2,7 +2,7 @@
   put:
     operationId: getContactList
     tags:
-      - contacts
+      - Contacts
     summary: Gets a list of contacts.
     consumes:
       - application/json

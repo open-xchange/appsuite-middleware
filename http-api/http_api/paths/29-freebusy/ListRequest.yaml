@@ -2,7 +2,7 @@
   put:
     operationId: getFreeBusyList
     tags:
-      - freebusy
+      - Freebusy
     summary: Gets a list of free/busy information (**available since v6.22.1**).
     consumes:
       - application/json

@@ -2,7 +2,7 @@
   get:
     operationId: getMailUpdates
     tags:
-      - mail
+      - Mail
     summary: Gets updated mails (not IMAP).
     description: |
       #### Not IMAP

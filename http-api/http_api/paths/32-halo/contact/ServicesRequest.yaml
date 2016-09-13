@@ -2,7 +2,7 @@
   get:
     operationId: getHaloServices
     tags:
-      - halo
+      - Halo
     summary: Gets all halo services.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

@@ -2,7 +2,7 @@
   get:
     operationId: getInfoItem
     tags:
-      - infostore
+      - Infostore
     summary: Gets an infoitem.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

@@ -2,7 +2,7 @@
   put:
     operationId: updateRule
     tags:
-      - mailfilter
+      - Mailfilter
     summary: Updates a mail filter rule.
     consumes:
       - application/json

@@ -2,7 +2,7 @@
   get:
     operationId: getMailConversations
     tags:
-      - mail
+      - Mail
     summary: Gets all mail conversations.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

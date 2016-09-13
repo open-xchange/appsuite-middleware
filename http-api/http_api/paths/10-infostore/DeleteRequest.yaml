@@ -2,7 +2,7 @@
   put:
     operationId: deleteInfoItems
     tags:
-      - infostore
+      - Infostore
     summary: Deletes infoitems.
     consumes:
       - application/json

@@ -2,7 +2,7 @@
   put:
     operationId: getContactListByUsers
     tags:
-      - contacts
+      - Contacts
     summary: Gets a list of users (**available since SP4**).
     consumes:
       - application/json

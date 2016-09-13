@@ -2,7 +2,7 @@
   put:
     operationId: updateContact
     tags:
-      - contacts
+      - Contacts
     summary: Updates a contact.
     description: |
       Updates a contact's data. This request cannot change or add contact images. Therefore it
@@ -39,7 +39,7 @@
   post:
     operationId: updateContactAdvanced
     tags:
-      - contacts
+      - Contacts
     summary: Updates a contact.
     description: |
       Updates a contact's data and images. The normal request body must be placed as form-data using the

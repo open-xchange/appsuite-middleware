@@ -2,7 +2,7 @@
   get:
     operationId: searchContactsByAnniversary
     tags:
-      - contacts
+      - Contacts
     summary: Search for contacts by anniversary (**available since v6.22.1, preliminary**).
     description: Finds contacts whose anniversary falls into a specified time range.
     parameters:

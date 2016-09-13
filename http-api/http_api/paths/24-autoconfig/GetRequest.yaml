@@ -2,7 +2,7 @@
   post:
     operationId: getAutoConfig
     tags:
-      - autoconfig
+      - Autoconfig
     summary: Gets the auto configuration for a mail account (**available since v6.22**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

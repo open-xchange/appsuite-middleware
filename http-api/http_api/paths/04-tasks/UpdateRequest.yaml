@@ -2,7 +2,7 @@
   put:
     operationId: updateTask
     tags:
-      - tasks
+      - Tasks
     summary: Updates a task.
     consumes:
       - application/json

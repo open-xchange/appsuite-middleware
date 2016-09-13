@@ -2,7 +2,7 @@
   put:
     operationId: createSnippet
     tags:
-      - snippet
+      - Snippet
     summary: Creates a snippet (**available since v7.0.0/v6.22.0**).
     consumes:
       - application/json

@@ -2,7 +2,7 @@
   get:
     operationId: getAllMessagingServices
     tags:
-      - messaging
+      - Messaging
     summary: Gets all messaging services.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

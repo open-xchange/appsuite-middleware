@@ -2,7 +2,7 @@
   put:
     operationId: clearFolders
     tags:
-      - folders
+      - Folders
     summary: Clears the content of a list of folders.
     consumes:
       - application/json

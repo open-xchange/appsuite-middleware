@@ -2,7 +2,7 @@
   put:
     operationId: getShareLink
     tags:
-      - share/management
+      - Share/Management
     summary: Creates or gets a share link (**available since v7.8.0**).
     consumes:
       - application/json

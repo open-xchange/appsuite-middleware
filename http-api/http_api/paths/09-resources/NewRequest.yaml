@@ -2,7 +2,7 @@
   put:
     operationId: createResource
     tags:
-      - resources
+      - Resources
     summary: Creates a resource.
     consumes:
       - application/json

@@ -2,7 +2,7 @@
   post:
     operationId: importVCard
     tags:
-      - import
+      - Import
     summary: Imports data from vCard file.
     description: |
       #### Supported vCard formats

@@ -2,7 +2,7 @@
   get:
     operationId: getMailCount
     tags:
-      - mail
+      - Mail
     summary: Gets the mail count.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

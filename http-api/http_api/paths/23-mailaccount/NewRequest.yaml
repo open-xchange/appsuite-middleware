@@ -2,7 +2,7 @@
   put:
     operationId: createAccount
     tags:
-      - mailaccount
+      - Mailaccount
     summary: Creates a new mail account (**available since v6.12**).
     consumes:
       - application/json

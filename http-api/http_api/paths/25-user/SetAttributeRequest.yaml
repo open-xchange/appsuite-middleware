@@ -2,7 +2,7 @@
   put:
     operationId: setUserAttribute
     tags:
-      - user
+      - User
     summary: Sets a user attribute (**available since v6.20**).
     description: |
       Sets a custom user attribute consisting of a name and a value. The attribute can later be

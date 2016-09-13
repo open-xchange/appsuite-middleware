@@ -2,7 +2,7 @@
   get:
     operationId: getConfigNode
     tags:
-      - config
+      - Config
     summary: Gets data of a configuration node.
     description: |
       The configuration is stored in a tree. Each node of the tree has a name and a value.
@@ -21,7 +21,7 @@
   put:
     operationId: putConfigNode
     tags:
-      - config
+      - Config
     summary: Sets the value of a configuration node.
     description: |
         The configuration is stored in a tree. Each node of the tree has a name and a value.

@@ -36,7 +36,7 @@ list.
   get:
     operationId: getGroup
     tags:
-      - groups
+      - Groups
     summary: Gets a group.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -97,7 +97,7 @@ After defining the parameter you can use it in a request's `parameters` section 
   get:
     operationId: getGroup
     tags:
-      - groups
+      - Groups
     summary: Gets a group.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -164,7 +164,7 @@ Look at other request files of the module to find out the correct name (attentio
   get:
     operationId: hasGroup
 	tags:
-	  - groups
+	  - Groups
 ```
 
 Afterwards each request should have a short `summary`. This can be followed by a description that goes into detail.
@@ -187,7 +187,7 @@ e.g. consumes `application/json` and produces `text/html`, you have to override 
   get:
     operationId: hasGroup
 	tags:
-	  - groups
+	  - Groups
 	summary: Indicates whether the given group exists.
 	consumes:
 	  - application/json
@@ -205,7 +205,7 @@ that provides detailed information on adding parameters. Responses are specified
   get:
     operationId: hasGroup
 	tags:
-	  - groups
+	  - Groups
 	summary: Indicates whether the given group exists.
 	parameters:
 	  - $ref: "#/parameters/gblQueryParamSession"

@@ -2,7 +2,7 @@
   put:
     operationId: deleteAllInfoItemVersions
     tags:
-      - infostore
+      - Infostore
     summary: Deletes all versions of an infoitem leaving only the base object.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

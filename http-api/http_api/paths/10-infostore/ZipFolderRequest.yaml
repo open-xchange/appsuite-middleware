@@ -4,7 +4,7 @@
   get:
     operationId: getFolderAsZip
     tags:
-      - infostore
+      - Infostore
     summary: Gets a ZIP archive containing all ifoitems of a denoted folder (**availabel since v7.6.1**).
     description: |
       It is possible to add a filename to the request's URI like `/infostore/{filename}?action=zipfolder`.

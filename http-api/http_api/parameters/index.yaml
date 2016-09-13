@@ -22,7 +22,7 @@ gblPathParamConfigNode:
     - language
     - timezone
     - availableTimeZones
-    - calendarnotification
+    - Calendarnotification
     - tasknotification
     - reloadTimes
     - serverVersion

@@ -2,7 +2,7 @@
   put:
     operationId: notifyAboutSharedInfoItem
     tags:
-      - infostore
+      - Infostore
     summary: Notifies users or groups about a shared infoitem (**available since v7.8.0, preliminary**).
     consumes:
       - application/json

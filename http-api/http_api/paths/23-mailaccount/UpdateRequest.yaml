@@ -2,7 +2,7 @@
   put:
     operationId: updateAccount
     tags:
-      - mailaccount
+      - Mailaccount
     summary: Updates a mail account (**available since v6.12**).
     consumes:
       - application/json

@@ -2,7 +2,7 @@
   put:
     operationId: updateFileAccount
     tags:
-      - filestorage
+      - Filestorage
     summary: Updates a file storage account.
     consumes:
       - application/json

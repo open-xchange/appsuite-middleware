@@ -2,7 +2,7 @@
   post:
     operationId: doTokenLogin
     tags:
-      - login
+      - Login
     summary: Login for a very short living session (**available since v7.0.1**).
     description: |
       This request allows every possible client to create a very short living session. This session can then be transferred to any other client preferably a browser entering then the normal web interface. Then the sessions life time will be extended equally to every other session.

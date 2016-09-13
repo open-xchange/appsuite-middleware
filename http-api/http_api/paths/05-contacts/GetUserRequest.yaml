@@ -2,7 +2,7 @@
   get:
     operationId: getContactByUser
     tags:
-      - contacts
+      - Contacts
     summary: Gets a contact by user ID (**available since SP4**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

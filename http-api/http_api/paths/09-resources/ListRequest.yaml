@@ -2,7 +2,7 @@
   put:
     operationId: getResourceList
     tags:
-      - resources
+      - Resources
     summary: Gets a list of resources.
     consumes:
       - application/json

@@ -2,7 +2,7 @@
   get:
     operationId: getNewAppointments
     tags:
-      - calendar
+      - Calendar
     summary: Gets new appointments.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

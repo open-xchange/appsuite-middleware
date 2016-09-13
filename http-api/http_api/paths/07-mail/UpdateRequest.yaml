@@ -2,7 +2,7 @@
   put:
     operationId: updateMail
     tags:
-      - mail
+      - Mail
     summary: Updates a mail or a folder's messages and/or moves a mail to another folder.
     description: |
       The update request can perform an update of the color label and flags of one mail object. Beside it

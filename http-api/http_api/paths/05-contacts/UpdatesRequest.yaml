@@ -2,7 +2,7 @@
   get:
     operationId: getContactUpdates
     tags:
-      - contacts
+      - Contacts
     summary: Gets updated contacts.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

@@ -2,7 +2,7 @@
   put:
     operationId: getTaskList
     tags:
-      - tasks
+      - Tasks
     summary: Gets a list of tasks.
     consumes:
       - application/json

@@ -2,7 +2,7 @@
   put:
     operationId: setConfigProperty
     tags:
-      - config
+      - Config
     summary: Sets a property of the configuration (**available since v7.6.2**).
     consumes:
       - application/json

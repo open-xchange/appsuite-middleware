@@ -2,7 +2,7 @@
   put:
     operationId: deleteInfoItemVersions
     tags:
-      - infostore
+      - Infostore
     summary: Deletes versions of an infoitem.
     description: |
       #### Note

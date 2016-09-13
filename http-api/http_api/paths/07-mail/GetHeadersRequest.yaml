@@ -4,7 +4,7 @@
   get:
     operationId: getMailHeaders
     tags:
-      - mail
+      - Mail
     summary: Gets the message headers as plain text.
     description: |
       #### Note

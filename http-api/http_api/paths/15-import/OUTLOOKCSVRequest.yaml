@@ -2,7 +2,7 @@
   post:
     operationId: importOutlookCSV
     tags:
-      - import
+      - Import
     summary: Imports contact data from an Outlook CSV file.
     description: |
       #### Example: exported Outlook CSV

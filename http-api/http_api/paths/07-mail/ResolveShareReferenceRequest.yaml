@@ -2,7 +2,7 @@
   put:
     operationId: resolveShareReference
     tags:
-      - mail
+      - Mail
     summary: Resolves a given share reference
     consumes:
       - application/json

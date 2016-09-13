@@ -2,7 +2,7 @@
   put:
     operationId: getAppointmentList
     tags:
-      - calendar
+      - Calendar
     summary: Gets a list of appointments.
     consumes:
       - application/json

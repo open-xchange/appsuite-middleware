@@ -2,7 +2,7 @@
   get:
     operationId: getRootFolders
     tags:
-      - folders
+      - Folders
     summary: Gets the folders at the root level of the folder structure.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

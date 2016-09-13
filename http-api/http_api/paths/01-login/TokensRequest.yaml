@@ -2,7 +2,7 @@
   post:
     operationId: accessSession
     tags:
-      - login
+      - Login
     summary: Accesses a session that was previously created with the token login (**available since v7.0.1**).
     description: |
       This request allows clients to access a session created with the `/login?action=tokenLogin` request.

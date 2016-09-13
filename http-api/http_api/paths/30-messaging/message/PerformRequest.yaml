@@ -2,7 +2,7 @@
   put:
     operationId: performMessagingAction
     tags:
-      - messaging
+      - Messaging
     summary: Performs a certain messaging action on a message.
     description: |
       On actions of type "message" the body should contain the JSON representation of the message the action should be applied to.

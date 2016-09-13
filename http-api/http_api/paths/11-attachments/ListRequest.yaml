@@ -2,7 +2,7 @@
   put:
     operationId: getAttachmentList
     tags:
-      - attachments
+      - Attachments
     summary: Gets a list of attachments.
     consumes:
       - application/json

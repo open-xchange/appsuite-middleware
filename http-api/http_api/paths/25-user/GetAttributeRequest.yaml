@@ -2,7 +2,7 @@
   get:
     operationId: getUserAttribute
     tags:
-      - user
+      - User
     summary: Gets a user attribute (**available since v6.20**).
     description: Gets a custom user attribute that was previously set with the `/user?action=setAttribute` request.
     parameters:

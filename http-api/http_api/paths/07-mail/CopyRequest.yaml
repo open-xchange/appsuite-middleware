@@ -2,7 +2,7 @@
   put:
     operationId: copyMail
     tags:
-      - mail
+      - Mail
     summary: Copies a mail to another folder.
     consumes:
       - application/json

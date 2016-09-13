@@ -2,7 +2,7 @@
   get:
     operationId: exportAsCSV
     tags:
-      - export
+      - Export
     summary: Exports contact data to a CSV file.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

@@ -2,7 +2,7 @@
   put:
     operationId: createFolder
     tags:
-      - folders
+      - Folders
     summary: Creates a new folder.
     consumes:
       - application/json

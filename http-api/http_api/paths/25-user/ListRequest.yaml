@@ -2,7 +2,7 @@
   put:
     operationId: getUserList
     tags:
-      - user
+      - User
     summary: Gets a list of users (**available since v6.14**).
     consumes:
       - application/json

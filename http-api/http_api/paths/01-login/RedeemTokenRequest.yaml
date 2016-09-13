@@ -2,7 +2,7 @@
   post:
     operationId: redeemToken
     tags:
-      - login
+      - Login
     summary: Redeem Token Login (**available since v7.4.0**).
     description: |
       With a valid session it is possible to acquire a secret (see `token?action=acquireToken`). Using this secret another system is able

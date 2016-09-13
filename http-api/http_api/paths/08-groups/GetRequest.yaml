@@ -2,7 +2,7 @@
   get:
     operationId: getGroup
     tags:
-      - groups
+      - Groups
     summary: Gets a group.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

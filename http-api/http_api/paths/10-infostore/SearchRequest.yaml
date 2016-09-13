@@ -2,7 +2,7 @@
   put:
     operationId: searchInfoItems
     tags:
-      - infostore
+      - Infostore
     summary: Search for infoitems.
     consumes:
       - application/json

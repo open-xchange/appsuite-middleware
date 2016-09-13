@@ -2,7 +2,7 @@
   put:
     operationId: deleteRule
     tags:
-      - mailfilter
+      - Mailfilter
     summary: Deletes a mail filter rule.
     consumes:
       - application/json

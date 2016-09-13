@@ -2,7 +2,7 @@
   get:
     operationId: getFilestoreUsage
     tags:
-      - quota
+      - Quota
     summary: Gets the filestore usage data.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

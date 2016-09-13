@@ -2,7 +2,7 @@
   put:
     operationId: getAdvertisementConfig
     tags: 
-      - advertisement
+      - Advertisement
     summary: Retrieves the advertisement configuration
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

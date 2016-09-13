@@ -2,7 +2,7 @@
   get:
     operationId: redirect
     tags:
-      - login
+      - Login
     summary: Refresh auto-login cookie
     description: |
       **SECURITY WARNING!** Utilizing this request is **INSECURE!** This request allows to access a session with a

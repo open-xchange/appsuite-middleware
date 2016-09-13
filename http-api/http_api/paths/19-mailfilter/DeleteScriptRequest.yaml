@@ -2,7 +2,7 @@
   put:
     operationId: deleteScript
     tags:
-      - mailfilter
+      - Mailfilter
     summary: Deletes the whole mail filter script.
     description: This call is only used as workaround for parsing errors in the backend, so that the user is able to kick a whole script if it contains errors in the grammar.
     parameters:

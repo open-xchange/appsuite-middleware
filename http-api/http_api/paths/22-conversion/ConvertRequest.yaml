@@ -2,7 +2,7 @@
   put:
     operationId: convertData
     tags:
-      - conversion
+      - Conversion
     summary: Converts data from source using a specific data handler.
     description: |
       #### Saving an iCal email attachment

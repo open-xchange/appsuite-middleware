@@ -2,7 +2,7 @@
   get:
     operationId: getAccount
     tags:
-      - mailaccount
+      - Mailaccount
     summary: Gets a mail account (**available since v6.12**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

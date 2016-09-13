@@ -2,7 +2,7 @@
   get:
     operationId: getAllVersions
     tags:
-      - infostore
+      - Infostore
     summary: Gets all versions of an infoitem.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

@@ -2,7 +2,7 @@
   put:
     operationId: createTask
     tags:
-      - tasks
+      - Tasks
     summary: Creates a task.
     consumes:
       - application/json

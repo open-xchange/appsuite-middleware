@@ -2,7 +2,7 @@
   put:
     operationId: createFileAccount
     tags:
-      - filestorage
+      - Filestorage
     summary: Creates a file storage account.
     description: |
       #### Example for creating a new OAuth-based file storage account

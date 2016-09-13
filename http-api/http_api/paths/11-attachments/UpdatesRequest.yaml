@@ -2,7 +2,7 @@
   get:
     operationId: getAttachmentUpdates
     tags:
-      - attachments
+      - Attachments
     summary: Gets the new and deleted attachments.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

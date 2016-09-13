@@ -2,7 +2,7 @@
   put:
     operationId: updateInfoItem
     tags:
-      - infostore
+      - Infostore
     summary: Updates an infoitem.
     description: |
       Updates an infoitem's data. This request cannot change or add files. Therefore it
@@ -40,7 +40,7 @@
   post:
     operationId: updateInfoItemAdvanced
     tags:
-      - infostore
+      - Infostore
     summary: Updates an infoitem.
     description: |
       Updates an infoitem's data and file. The normal request body must be placed as form-data using the

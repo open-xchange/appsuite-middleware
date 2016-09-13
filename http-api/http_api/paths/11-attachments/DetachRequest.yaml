@@ -2,7 +2,7 @@
   put:
     operationId: deleteAttachments
     tags:
-      - attachments
+      - Attachments
     summary: Deletes attachments.
     consumes:
       - application/json

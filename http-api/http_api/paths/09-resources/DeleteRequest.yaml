@@ -2,7 +2,7 @@
   put:
     operationId: deleteResources
     tags:
-      - resources
+      - Resources
     summary: Deletes resources.
     consumes:
       - application/json

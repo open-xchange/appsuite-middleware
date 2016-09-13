@@ -2,7 +2,7 @@
   get:
     operationId: deleteFileAccount
     tags:
-      - filestorage
+      - Filestorage
     summary: Deletes a file storage account.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

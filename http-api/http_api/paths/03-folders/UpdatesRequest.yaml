@@ -2,7 +2,7 @@
   get:
     operationId: getFolderUpdates
     tags:
-      - folders
+      - Folders
     summary: Gets the new, modified and deleted folders of a given folder.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

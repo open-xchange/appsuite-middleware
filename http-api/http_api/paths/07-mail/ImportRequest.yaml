@@ -1,7 +1,8 @@
 /mail?action=import:
   post:
     operationId: importMail
-      - mail
+    tags:
+      - Mail
     summary: Import of mails as MIME data block ([RFC822](https://tools.ietf.org/html/rfc822)) (**available since v6.18**).
     description: |
       This request can be used to store a single or a lot of mails in the OX mail storage backend. This
@@ -20,7 +21,7 @@
       - in: query
         name: flags
         type: string
-        description: In case the mail should be stored with status "read" (e.g. mail has been read already in the client inbox), the parameter "flags" has to be included. For information about mail flags see [Mail data](#/definitions/MailData) model.
+        description: In case the mail should be stored with status "read" (e.g. mail has been read already in the client inbox), the parameter "flags" has to be included. For information about mail flags see [Detailed mail data](#detailed-mail-data).
         required: false
       - in: query
         name: force

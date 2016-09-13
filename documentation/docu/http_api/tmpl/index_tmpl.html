@@ -78,107 +78,107 @@
   ],
   "tags": [
     {
-      "name": "login",
+      "name": "Login",
       "description": "The login module is used to obtain a session from the user's login credentials. To understand the details\nof the different login methods, see the article titled [Login variations](http://oxpedia.org/wiki/index.php?title=Login_variations).\n\nBecause of security reasons each login variation will reject requests containing the parameter\n\"password\" within the URL query (starting with 7.8.0). \n"
     },
     {
-      "name": "config",
+      "name": "Config",
       "description": "The config module is used to retrieve and set user-specific configuration. The configuration is\nstored in a tree. Each node of the tree has a name and a value. The values of leaf nodes are strings\nwhich store the actual configuration data. The values of inner nodes are defined recursively as\nobjects with one field for each child node. The name and the value of each field is the name and the\nvalue of the corresponding child node, respectively.\n"
     },
     {
-      "name": "folders",
+      "name": "Folders",
       "description": "The folders module is used to access the OX folder structure.\n\nFolders with some kind of special:\n\n| ID | Type | Description |\n|----|------|-------------|\n| 6 | contacts | System Users |\n"
     },
     {
-      "name": "tasks",
+      "name": "Tasks",
       "description": "The tasks module is used to access task information."
     },
     {
-      "name": "contacts",
+      "name": "Contacts",
       "description": "The contacts module is used to access contact information."
     },
     {
-      "name": "calendar",
+      "name": "Calendar",
       "description": "The calendar module is used to access calendar data."
     },
     {
-      "name": "mail",
+      "name": "Mail",
       "description": "The mail module is used to access mail data. When mails are stored on an IMAP server, some functionality is not available due to restrictions of the IMAP protocol. Such functionality is marked with \"not IMAP\"."
     },
     {
-      "name": "groups",
+      "name": "Groups",
       "description": "The group module allows to query available groups. It is mainly used by the dialog for the selection of participants."
     },
     {
-      "name": "resources",
+      "name": "Resources",
       "description": "The resource module allows to query available resources. It is mainly used by the dialog for the selection of participants."
     },
     {
-      "name": "infostore",
+      "name": "Infostore",
       "description": "The module infostore or filestore or files or drive has been renamed quite often. Whatever its name, it combines the knowledge database, bookmarks and document storage."
     },
     {
-      "name": "attachments",
+      "name": "Attachments",
       "description": "The module attachments allows file attachments to arbitrary objects. An attachment always belongs to an object (called 'attached') in a certain folder of a certain module."
     },
     {
-      "name": "reminder",
+      "name": "Reminder",
       "description": "The reminder module provides the ability to fetch all active reminders for a user between two dates."
     },
     {
-      "name": "multiple",
+      "name": "Multiple",
       "description": "The multiple module allows to bundle multiple requests to most other modules in a single request."
     },
     {
-      "name": "quota",
+      "name": "Quota",
       "description": "The filestore module allows accesssing information about the use and quota of the filestore."
     },
     {
-      "name": "import",
+      "name": "Import",
       "description": "The module import allows to import specific module data (like Contacts, Tasks or Appointments) in several formats (iCal, vCard, CSV) into a folder. Please note: The callback for all actions of this bundle is `callback_import`, not `callback_$actionname` for legacy purposes."
     },
     {
-      "name": "export",
+      "name": "Export",
       "description": "The module export allows to export specific module data (like contacts, tasks or appointments) from a folder in several formats (iCal, vCard, CSV)."
     },
     {
-      "name": "sync",
+      "name": "Sync",
       "description": "The module sync delivers several core API extensions to support common operations used in a mobile synchronization environment."
     },
     {
-      "name": "token",
+      "name": "Token",
       "description": "The module token delivers several core API extensions to support token based logins."
     },
     {
-      "name": "mailfilter",
+      "name": "Mailfilter",
       "description": "The mailfilter module is used to access all mail filter related options.\n\nFirst of all the main structure of a mail filter script is, that it has different rules. Each of them contains one command. This command takes a test condition which executes the actions given in that command if the test condition is true.\nThe test condition consists of a test command and some arguments for this command depending on the command itself. Because the available tests depend on the mail filter server, these tests must be determined at runtime. So that no test field is transferred to the server which it isn't able to handle. Examples for tests are `address`, `allof` and `anyof`.\nEach test has a special comparison. The list of available comparisons depends on the test given and the mail filter server configuration so they have to be determined at runtime too.\n"
     },
     {
-      "name": "file",
+      "name": "File",
       "description": "The ajax file upload module offers to store files in server's dedicated download directory for a configureable amount of time. The files are then accessible for further operations like inline images in (html) mails."
     },
     {
-      "name": "image",
+      "name": "Image",
       "description": "The image module allows to download images from Open-Xchange server without providing a session ID in request's URL parameters."
     },
     {
-      "name": "conversion",
+      "name": "Conversion",
       "description": "The conversion module is a generic module to request data from a data source and to process obtained/submitted data with a data handler. Thus data is converted from a data source by a data handler."
     },
     {
-      "name": "mailaccount",
+      "name": "Mailaccount",
       "description": "The mailaccount module is used to manage multiple mail accounts held by a user (available since v6.12)."
     },
     {
-      "name": "autoconfig",
+      "name": "Autoconfig",
       "description": "The module autoconfig can be used to request the best available settings for an appropriate mail server (available since v6.22)."
     },
     {
-      "name": "user",
+      "name": "User",
       "description": "The user module is used to access user information (available since v6.14)."
     },
     {
-      "name": "user/me",
+      "name": "User/Me",
       "description": "The module user/me is used to access formal information about current user (available since v7.6.2)."
     },
     {
@@ -190,50 +190,50 @@
       "description": "The JSlob module is used to store and retrieve arbitrary JSON-structured configuration for a single user (available since v6.22)."
     },
     {
-      "name": "freebusy",
+      "name": "Freebusy",
       "description": "Provides access to free/busy information (available since v6.22.1)."
     },
     {
-      "name": "messaging",
+      "name": "Messaging",
       "description": "The messaging module is divided into services which represent a messaging backend (they add a new folder module \"messaging\"),\ninto accounts which represent the concrete configuration of accounts for a given messaging service, and into messages which\nrepresent single messages consisting of some metadata, headers and a content.\n"
     },
     {
-      "name": "snippet",
+      "name": "Snippet",
       "description": "Available since v7.0.0/v6.22.0."
     },
     {
-      "name": "halo"
+      "name": "Halo"
     },
     {
-      "name": "capabilities",
+      "name": "Capabilities",
       "description": "Provides access to capabilities, i.e. modules or features that are available on the backend and the user has access to (available since v7.4.2)."
     },
     {
-      "name": "jump",
+      "name": "Jump",
       "description": "The jump module is used to pass an acquired identity token for an authenticated user from one system to another for a single sign-on (available since v7.6.0)."
     },
     {
-      "name": "find",
+      "name": "Find",
       "description": "The find module consists of calls for performing searches within the modules mail, contacts, tasks and drive.\nIt was designed to provide an iterative approach where the search criteria can be refined step-wise until\nthe desired items are found.  The starting point is always an `autocomplete` request, that suggests possible\nsearch filters based on a users input. Those filters are grouped into categories, called \"facets\".\nA facet may provide one or more values with every value being a possible filter. A client is meant to remember\nevery value that was selected by a user and include it within the following `autocomplete` and `query` requests,\nwhile `query` performs the actual search and returns the found items.\n\nSome of the objects returned by the server contain former user input. A client must never interpret strings as HTML\nbut always as plain text to be not vulnerable for CSS attacks!\n\nPreliminary, available since v7.6.1.\n"
     },
     {
-      "name": "share/management",
+      "name": "Share/Management",
       "description": "The share/management module can create and manage share links via different actions. Dedicated actions to list all shares of a\nuser can be found in the corresponding modules, like `/folders?action=shares` of module \"folders\" or `/infostore?action=shares`\nof module \"infostore\".\n\nPreliminary, available since v7.8.0.\n"
     },
     {
-      "name": "passwordchange",
+      "name": "Passwordchange",
       "description": "Via the passwordchange module the users can change their password."
     },
     {
-      "name": "filestorage",
+      "name": "Filestorage",
       "description": "The file storage module provides access to file storage backends, e.g. Drive, Dropbox, etc."
     },
     {
-      "name": "mail_categories",
+      "name": "Mail_categories",
       "description": "The module mail_categories allows to manage mail categories."
     },
     {
-      "name": "advertisement",
+      "name": "Advertisement",
       "description": "Via the advertisement module the client can retrieve the advertisement configuration"
     }
   ],
@@ -13159,7 +13159,7 @@
         "language",
         "timezone",
         "availableTimeZones",
-        "calendarnotification",
+        "Calendarnotification",
         "tasknotification",
         "reloadTimes",
         "serverVersion",
@@ -13458,7 +13458,7 @@
       "post": {
         "operationId": "doLogin",
         "tags": [
-          "login"
+          "Login"
         ],
         "summary": "Login with user credentials.",
         "description": "The login module is used to obtain a session from the user's login\ncredentials. Parameters are normally expected in the POST request body.\n",
@@ -13528,7 +13528,7 @@
       "post": {
         "operationId": "doFormLogin",
         "tags": [
-          "login"
+          "Login"
         ],
         "summary": "Login to the web frontend using a simple HTML form (**available since v6.20**).",
         "description": "This request implements a possible login to the web frontend by only using a simple HTML form.\nThe response contains a redirect link to the Web-UI. See [OXSessionFormLogin](http://oxpedia.org/wiki/index.php?title=OXSessionFormLogin) for details.\nAn example for such a form can be found in the backend's documentation folder\n(/usr/share/doc/open-xchange-core) under examples/login.html.\n",
@@ -13616,7 +13616,7 @@
       "post": {
         "operationId": "doTokenLogin",
         "tags": [
-          "login"
+          "Login"
         ],
         "summary": "Login for a very short living session (**available since v7.0.1**).",
         "description": "This request allows every possible client to create a very short living session. This session can then be transferred to any other client preferably a browser entering then the normal web interface. Then the sessions life time will be extended equally to every other session.\n\nCompared to the login mechanism using the random token, this request is more secure because two tokens are used. One of these tokens is only known to the client and one is generated by the server. Only the combination of both tokens allows to use the session. The combination of both tokens must be done by the client creating the session.\n\n**DISCLAIMER:** This request MUST NOT be used by some server side instance. If some server side instance uses this request to create a session for a browser on some client machine, then you have to transfer the full URL with server and client token over some connection to the client. This creates a **VULNERABILITY** if this is done. The token login method is only secure if this request is already sent from the same machine that later runs the browser using the created session.\n",
@@ -13719,7 +13719,7 @@
       "post": {
         "operationId": "accessSession",
         "tags": [
-          "login"
+          "Login"
         ],
         "summary": "Accesses a session that was previously created with the token login (**available since v7.0.1**).",
         "description": "This request allows clients to access a session created with the `/login?action=tokenLogin` request.\nWhen accessing the session its life time is extended equally to every other session.\n",
@@ -13760,7 +13760,7 @@
       "get": {
         "operationId": "doLogout",
         "tags": [
-          "login"
+          "Login"
         ],
         "summary": "Does the logout.",
         "description": "Does the logout which invalidates the session.",
@@ -13780,7 +13780,7 @@
       "get": {
         "operationId": "refreshSecretCookie",
         "tags": [
-          "login"
+          "Login"
         ],
         "summary": "Refreshes the secret cookie (**available since v6.18.2**)",
         "parameters": [
@@ -13802,7 +13802,7 @@
       "get": {
         "operationId": "refreshAutoLoginCookie",
         "tags": [
-          "login"
+          "Login"
         ],
         "summary": "Refreshes the auto-login cookie.",
         "parameters": [
@@ -13824,7 +13824,7 @@
       "get": {
         "operationId": "redirect",
         "tags": [
-          "login"
+          "Login"
         ],
         "summary": "Refresh auto-login cookie",
         "description": "**SECURITY WARNING!** Utilizing this request is **INSECURE!** This request allows to access a session with a\nsingle one time token. This one time token may be delivered to the wrong client if the protocol has an\nerror or Apache or the load balancer make a mistake. This will cause a wrong user to be in a wrong\nsession. **IMMEDIATELY** consider not to use this request anymore. You have been warned. Use instead the\nFormLogin that does not need to use the redirect request.\n",
@@ -13872,7 +13872,7 @@
       "post": {
         "operationId": "changeIP",
         "tags": [
-          "login"
+          "Login"
         ],
         "summary": "Change IP of client host in a session.",
         "description": "The following request is especially for integration with systems located in the providers\ninfrastructure. If those systems create a session with the following request the client host\nIP address in the session can be changed. The IP check for following requests will be done using\nthis newly set client host IP address.\n",
@@ -13906,7 +13906,7 @@
       "post": {
         "operationId": "redeemToken",
         "tags": [
-          "login"
+          "Login"
         ],
         "summary": "Redeem Token Login (**available since v7.4.0**).",
         "description": "With a valid session it is possible to acquire a secret (see `token?action=acquireToken`). Using this secret another system is able\nto generate a valid session. This session may also contain the users password (configurable).\nThe system in question needs to be registered at the server and has to identify itself with a key\nconfigured at the open-xchange server. This is only for internal communication and by default no keys\nare available.\n",
@@ -13954,7 +13954,7 @@
       "get": {
         "operationId": "getConfigNode",
         "tags": [
-          "config"
+          "Config"
         ],
         "summary": "Gets data of a configuration node.",
         "description": "The configuration is stored in a tree. Each node of the tree has a name and a value.\nThe values of leaf nodes are strings which store the actual configuration data. The\nvalues of inner nodes are defined recursively as objects with one field for each child node.\nThe name and the value of each field is the name and the value of the corresponding child\nnode, respectively.\n",
@@ -13978,7 +13978,7 @@
       "put": {
         "operationId": "putConfigNode",
         "tags": [
-          "config"
+          "Config"
         ],
         "summary": "Sets the value of a configuration node.",
         "description": "The configuration is stored in a tree. Each node of the tree has a name and a value.\nThe values of leaf nodes are strings which store the actual configuration data. The\nvalues of inner nodes are defined recursively as objects with one field for each child node.\nThe name and the value of each field is the name and the value of the corresponding child\nnode, respectively.\n",
@@ -14016,7 +14016,7 @@
       "get": {
         "operationId": "getConfigProperty",
         "tags": [
-          "config"
+          "Config"
         ],
         "summary": "Gets a property of the configuration (**available since v7.6.2**).",
         "parameters": [
@@ -14045,7 +14045,7 @@
       "put": {
         "operationId": "setConfigProperty",
         "tags": [
-          "config"
+          "Config"
         ],
         "summary": "Sets a property of the configuration (**available since v7.6.2**).",
         "consumes": [
@@ -14086,7 +14086,7 @@
       "get": {
         "operationId": "getRootFolders",
         "tags": [
-          "folders"
+          "Folders"
         ],
         "summary": "Gets the folders at the root level of the folder structure.",
         "parameters": [
@@ -14117,7 +14117,7 @@
       "get": {
         "operationId": "getSubFolders",
         "tags": [
-          "folders"
+          "Folders"
         ],
         "summary": "Gets the subfolders of a specified parent folder.",
         "parameters": [
@@ -14168,7 +14168,7 @@
       "get": {
         "operationId": "getPath",
         "tags": [
-          "folders"
+          "Folders"
         ],
         "summary": "Gets the parent folders above the specified folder.",
         "parameters": [
@@ -14206,7 +14206,7 @@
       "get": {
         "operationId": "getFolderUpdates",
         "tags": [
-          "folders"
+          "Folders"
         ],
         "summary": "Gets the new, modified and deleted folders of a given folder.",
         "parameters": [
@@ -14262,7 +14262,7 @@
       "get": {
         "operationId": "getFolder",
         "tags": [
-          "folders"
+          "Folders"
         ],
         "summary": "Gets a folder.",
         "parameters": [
@@ -14297,7 +14297,7 @@
       "put": {
         "operationId": "updateFolder",
         "tags": [
-          "folders"
+          "Folders"
         ],
         "summary": "Updates a folder.",
         "consumes": [
@@ -14360,7 +14360,7 @@
       "put": {
         "operationId": "createFolder",
         "tags": [
-          "folders"
+          "Folders"
         ],
         "summary": "Creates a new folder.",
         "consumes": [
@@ -14407,7 +14407,7 @@
       "put": {
         "operationId": "deleteFolders",
         "tags": [
-          "folders"
+          "Folders"
         ],
         "summary": "Deletes a list of folders.",
         "consumes": [
@@ -14466,7 +14466,7 @@
       "put": {
         "operationId": "clearFolders",
         "tags": [
-          "folders"
+          "Folders"
         ],
         "summary": "Clears the content of a list of folders.",
         "consumes": [
@@ -14509,7 +14509,7 @@
       "get": {
         "operationId": "getVisibleFolders",
         "tags": [
-          "folders"
+          "Folders"
         ],
         "summary": "Gets all visible folders of a certain module (**available since v6.18.2**).",
         "parameters": [
@@ -14544,7 +14544,7 @@
       "get": {
         "operationId": "getSharedFolders",
         "tags": [
-          "folders"
+          "Folders"
         ],
         "summary": "Gets shared folders of a certain module (**available since v7.8.0, preliminary**).",
         "parameters": [
@@ -14586,7 +14586,7 @@
       "put": {
         "operationId": "notifyAboutSharedFolder",
         "tags": [
-          "folders"
+          "Folders"
         ],
         "summary": "Notifies users or groups about a shared folder (**available since v7.8.0, priliminary**).",
         "consumes": [
@@ -14630,7 +14630,7 @@
       "get": {
         "operationId": "getAllTasks",
         "tags": [
-          "tasks"
+          "Tasks"
         ],
         "summary": "Gets all tasks.",
         "parameters": [
@@ -14672,7 +14672,7 @@
       "put": {
         "operationId": "getTaskList",
         "tags": [
-          "tasks"
+          "Tasks"
         ],
         "summary": "Gets a list of tasks.",
         "consumes": [
@@ -14712,7 +14712,7 @@
       "get": {
         "operationId": "getTaskUpdates",
         "tags": [
-          "tasks"
+          "Tasks"
         ],
         "summary": "Gets the new, modified and deleted tasks.",
         "parameters": [
@@ -14772,7 +14772,7 @@
       "get": {
         "operationId": "getTask",
         "tags": [
-          "tasks"
+          "Tasks"
         ],
         "summary": "Gets a task.",
         "parameters": [
@@ -14804,7 +14804,7 @@
       "put": {
         "operationId": "updateTask",
         "tags": [
-          "tasks"
+          "Tasks"
         ],
         "summary": "Updates a task.",
         "consumes": [
@@ -14856,7 +14856,7 @@
       "put": {
         "operationId": "createTask",
         "tags": [
-          "tasks"
+          "Tasks"
         ],
         "summary": "Creates a task.",
         "consumes": [
@@ -14890,7 +14890,7 @@
       "put": {
         "operationId": "deleteTasks",
         "tags": [
-          "tasks"
+          "Tasks"
         ],
         "summary": "Deletes tasks (**available since v6.22**).",
         "description": "Before version 6.22 the request body contained a JSON object with the fields `id` and `folder` and could\nonly delete one task.\n",
@@ -14936,7 +14936,7 @@
       "put": {
         "operationId": "confirmTask",
         "tags": [
-          "tasks"
+          "Tasks"
         ],
         "summary": "Confirms a task.",
         "consumes": [
@@ -14988,7 +14988,7 @@
       "put": {
         "operationId": "searchTasks",
         "tags": [
-          "tasks"
+          "Tasks"
         ],
         "summary": "Search for tasks.",
         "consumes": [
@@ -15039,7 +15039,7 @@
       "get": {
         "operationId": "getAllContacts",
         "tags": [
-          "contacts"
+          "Contacts"
         ],
         "summary": "Gets all contacts.",
         "parameters": [
@@ -15092,7 +15092,7 @@
       "put": {
         "operationId": "getContactList",
         "tags": [
-          "contacts"
+          "Contacts"
         ],
         "summary": "Gets a list of contacts.",
         "consumes": [
@@ -15132,7 +15132,7 @@
       "put": {
         "operationId": "getContactListByUsers",
         "tags": [
-          "contacts"
+          "Contacts"
         ],
         "summary": "Gets a list of users (**available since SP4**).",
         "consumes": [
@@ -15172,7 +15172,7 @@
       "get": {
         "operationId": "getContactUpdates",
         "tags": [
-          "contacts"
+          "Contacts"
         ],
         "summary": "Gets updated contacts.",
         "parameters": [
@@ -15232,7 +15232,7 @@
       "get": {
         "operationId": "getContact",
         "tags": [
-          "contacts"
+          "Contacts"
         ],
         "summary": "Gets a contact.",
         "parameters": [
@@ -15264,7 +15264,7 @@
       "get": {
         "operationId": "getContactByUser",
         "tags": [
-          "contacts"
+          "Contacts"
         ],
         "summary": "Gets a contact by user ID (**available since SP4**).",
         "parameters": [
@@ -15293,7 +15293,7 @@
       "put": {
         "operationId": "updateContact",
         "tags": [
-          "contacts"
+          "Contacts"
         ],
         "summary": "Updates a contact.",
         "description": "Updates a contact's data. This request cannot change or add contact images. Therefore it\nis necessary to use the `POST` method.\n",
@@ -15344,7 +15344,7 @@
       "post": {
         "operationId": "updateContactAdvanced",
         "tags": [
-          "contacts"
+          "Contacts"
         ],
         "summary": "Updates a contact.",
         "description": "Updates a contact's data and images. The normal request body must be placed as form-data using the\ncontent-type `multipart/form-data`. The form field `json` contains the contact's data while the image file\nmust be placed in a file field named `file` (see also [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads)).\n",
@@ -15406,7 +15406,7 @@
       "put": {
         "operationId": "createContact",
         "tags": [
-          "contacts"
+          "Contacts"
         ],
         "summary": "Creates a contact.",
         "description": "Creates a new contact. This request cannot add contact images. Therefor it\nis necessary to use the `POST` method.\n",
@@ -15439,7 +15439,7 @@
       "post": {
         "operationId": "createContactAdvanced",
         "tags": [
-          "contacts"
+          "Contacts"
         ],
         "summary": "Creates a contact.",
         "description": "Creates a new contact with contact images. The normal request body must be placed as form-data using the\ncontent-type `multipart/form-data`. The form field `json` contains the contact's data while the image file\nmust be placed in a file field named `file` (see also [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads)).\n",
@@ -15482,7 +15482,7 @@
       "put": {
         "operationId": "deleteContacts",
         "tags": [
-          "contacts"
+          "Contacts"
         ],
         "summary": "Deletes contacts (**available since v6.22**).",
         "description": "Before version 6.22 the request body contained a JSON object with the fields `id` and `folder` and could\nonly delete one contact.\n",
@@ -15528,7 +15528,7 @@
       "put": {
         "operationId": "searchContacts",
         "tags": [
-          "contacts"
+          "Contacts"
         ],
         "summary": "Search for contacts.",
         "consumes": [
@@ -15590,7 +15590,7 @@
       "put": {
         "operationId": "searchContactsAdvanced",
         "tags": [
-          "contacts"
+          "Contacts"
         ],
         "summary": "Search for contacts by filter (**available since v6.20**).",
         "consumes": [
@@ -15659,7 +15659,7 @@
       "get": {
         "operationId": "searchContactsByAnniversary",
         "tags": [
-          "contacts"
+          "Contacts"
         ],
         "summary": "Search for contacts by anniversary (**available since v6.22.1, preliminary**).",
         "description": "Finds contacts whose anniversary falls into a specified time range.",
@@ -15733,7 +15733,7 @@
       "get": {
         "operationId": "searchContactsByBirthday",
         "tags": [
-          "contacts"
+          "Contacts"
         ],
         "summary": "Search for contacts by birthday (**available since v6.22.1, preliminary**).",
         "description": "Finds contacts whose birthday falls into a specified time range.",
@@ -15807,7 +15807,7 @@
       "get": {
         "operationId": "doAutoCompleteContacts",
         "tags": [
-          "contacts"
+          "Contacts"
         ],
         "summary": "Auto-complete conntacts (**available since v7.6.1, preliminary**).",
         "description": "Finds contacts based on a prefix, usually used to auto-complete e-mail recipients while the user is typing.",
@@ -15894,7 +15894,7 @@
       "get": {
         "operationId": "getAllAppointments",
         "tags": [
-          "calendar"
+          "Calendar"
         ],
         "summary": "Gets all appointments.",
         "parameters": [
@@ -15952,7 +15952,7 @@
       "get": {
         "operationId": "hasAppointmentsOnDays",
         "tags": [
-          "calendar"
+          "Calendar"
         ],
         "summary": "Requests whether there are appointments on days in a specified time range.",
         "parameters": [
@@ -15990,7 +15990,7 @@
       "put": {
         "operationId": "getAppointmentList",
         "tags": [
-          "calendar"
+          "Calendar"
         ],
         "summary": "Gets a list of appointments.",
         "consumes": [
@@ -16033,7 +16033,7 @@
       "get": {
         "operationId": "getAppointmentUpdates",
         "tags": [
-          "calendar"
+          "Calendar"
         ],
         "summary": "Gets updated appointments.",
         "parameters": [
@@ -16109,7 +16109,7 @@
       "get": {
         "operationId": "getAppointment",
         "tags": [
-          "calendar"
+          "Calendar"
         ],
         "summary": "Gets an appointment.",
         "parameters": [
@@ -16148,7 +16148,7 @@
       "put": {
         "operationId": "updateAppointment",
         "tags": [
-          "calendar"
+          "Calendar"
         ],
         "summary": "Updates an appointment.",
         "consumes": [
@@ -16200,7 +16200,7 @@
       "put": {
         "operationId": "createAppointment",
         "tags": [
-          "calendar"
+          "Calendar"
         ],
         "summary": "Creates an appointment.",
         "consumes": [
@@ -16234,7 +16234,7 @@
       "put": {
         "operationId": "deleteAppointment",
         "tags": [
-          "calendar"
+          "Calendar"
         ],
         "summary": "Deletes appointments (**available since v6.22**).",
         "description": "Before version 6.22 the request body contained a JSON object with the fields `id`, `folder` and\noptionally `pos` and could only delete one appointment.\n",
@@ -16280,7 +16280,7 @@
       "put": {
         "operationId": "confirmAppointment",
         "tags": [
-          "calendar"
+          "Calendar"
         ],
         "summary": "Confirms an appointment.",
         "consumes": [
@@ -16340,7 +16340,7 @@
         "operationId": "getFreeAndBusy",
         "summary": "Gets appointments between a specified time range.",
         "tags": [
-          "calendar"
+          "Calendar"
         ],
         "parameters": [
           {
@@ -16395,7 +16395,7 @@
       "put": {
         "operationId": "searchAppointments",
         "tags": [
-          "calendar"
+          "Calendar"
         ],
         "summary": "Searches for appointments.",
         "consumes": [
@@ -16432,7 +16432,7 @@
       "get": {
         "operationId": "getNewAppointments",
         "tags": [
-          "calendar"
+          "Calendar"
         ],
         "summary": "Gets new appointments.",
         "parameters": [
@@ -16494,7 +16494,7 @@
       "get": {
         "operationId": "resolveUID",
         "tags": [
-          "calendar"
+          "Calendar"
         ],
         "summary": "Resolves the UID to an OX object ID.",
         "parameters": [
@@ -16523,7 +16523,7 @@
       "get": {
         "operationId": "getChangeExceptions",
         "tags": [
-          "calendar"
+          "Calendar"
         ],
         "summary": "Gets all change exceptions (**available since v7.2.0**).",
         "parameters": [
@@ -16558,7 +16558,7 @@
       "get": {
         "operationId": "getMailCount",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Gets the mail count.",
         "parameters": [
@@ -16583,7 +16583,7 @@
       "get": {
         "operationId": "getAllMails",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Gets all mails.",
         "parameters": [
@@ -16653,7 +16653,7 @@
       "get": {
         "operationId": "getMailConversations",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Gets all mail conversations.",
         "parameters": [
@@ -16730,7 +16730,7 @@
       "put": {
         "operationId": "searchMails",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Searches for mails.",
         "consumes": [
@@ -16784,7 +16784,7 @@
       "put": {
         "operationId": "getMailList",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Gets a list of mails.",
         "consumes": [
@@ -16831,7 +16831,7 @@
       "put": {
         "operationId": "copyMail",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Copies a mail to another folder.",
         "consumes": [
@@ -16875,7 +16875,7 @@
       "put": {
         "operationId": "updateMail",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Updates a mail or a folder's messages and/or moves a mail to another folder.",
         "description": "The update request can perform an update of the color label and flags of one mail object. Beside it\nis possible to change the mail's folder, meaning move the mail to another folder. Both operations\ncan be performed at once too.\n\nIf neither parameter `id` nor parameter `message_id` is specified, all folder's messages are updated\naccordingly (**available since v6.20).\n",
@@ -16927,7 +16927,7 @@
       "put": {
         "operationId": "markAllMailsAsRead",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Marks all mails of a folder as seen (**available since v7.6.0**).",
         "consumes": [
@@ -16955,7 +16955,7 @@
       "get": {
         "operationId": "getMailUpdates",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Gets updated mails (not IMAP).",
         "description": "#### Not IMAP\n",
@@ -16984,7 +16984,7 @@
       "get": {
         "operationId": "getMail",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Gets a mail.",
         "parameters": [
@@ -17070,7 +17070,7 @@
       "get": {
         "operationId": "getMailHeaders",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Gets the message headers as plain text.",
         "description": "#### Note\nBy setting the query parameter `hdr` to 1 the response type of the request action changes. Then\nit is returned a JSON object with the field `data` containing the (formatted) message headers\nas plain text.\nThe parameters below specify the ones that have an effect on the request.\n",
@@ -17117,7 +17117,7 @@
       "get": {
         "operationId": "getMailSource",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Gets the complete message source as plain text.",
         "description": "#### Note\nBy setting the query parameter `src` to 1 the response type of the request action changes. Then\nit is returned a JSON object with the field `data` containing the complete message source as plain text.\nThe parameters below specify the ones that have an effect on the request.\n",
@@ -17171,7 +17171,7 @@
       "get": {
         "operationId": "getMailsAsZip",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Gets multiple mails as a ZIP file.",
         "produces": [
@@ -17207,7 +17207,7 @@
       "get": {
         "operationId": "getMailAttachment",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Gets a mail attachment.",
         "parameters": [
@@ -17286,7 +17286,7 @@
       "get": {
         "operationId": "getAttachmentsAsZip",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Gets multiple mail attachments as a ZIP file.",
         "produces": [
@@ -17329,7 +17329,7 @@
       "post": {
         "operationId": "sendMail",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Sends a mail.",
         "description": "The request accepts file fields in upload form that denote referenced files that are going to be appended\nas attachments.\nFor \"text/plain\" mail bodies, the JSON boolean field \"raw\" may be specified inside the body's JSON\nrepresentation to signal that the text content shall be kept as-is; meaning to keep all formatting\nintact.\n",
@@ -17379,7 +17379,7 @@
       "put": {
         "operationId": "sendOrSaveMail",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Sends or saves a mail as MIME data block ([RFC822](https://tools.ietf.org/html/rfc822)) (**available since SP5**).",
         "consumes": [
@@ -17416,7 +17416,10 @@
     },
     "/mail?action=import": {
       "post": {
-        "operationId": "importMail - mail",
+        "operationId": "importMail",
+        "tags": [
+          "Mail"
+        ],
         "summary": "Import of mails as MIME data block ([RFC822](https://tools.ietf.org/html/rfc822)) (**available since v6.18**).",
         "description": "This request can be used to store a single or a lot of mails in the OX mail storage backend. This\naction should be used instead of [/mail?action=new](#operation--mail-action-new-post) because it is faster and tolerant to 8-bit encoded emails.\n\nTo import multiple mails add further form-data fields.\n",
         "consumes": [
@@ -17437,7 +17440,7 @@
             "in": "query",
             "name": "flags",
             "type": "string",
-            "description": "In case the mail should be stored with status \"read\" (e.g. mail has been read already in the client inbox), the parameter \"flags\" has to be included. For information about mail flags see [Mail data](#/definitions/MailData) model.",
+            "description": "In case the mail should be stored with status \"read\" (e.g. mail has been read already in the client inbox), the parameter \"flags\" has to be included. For information about mail flags see [Detailed mail data](#detailed-mail-data).",
             "required": false
           },
           {
@@ -17469,7 +17472,7 @@
       "get": {
         "operationId": "replyMail",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Replies a mail.",
         "description": "Returns the data for the message that shall be replied.",
@@ -17528,7 +17531,7 @@
       "get": {
         "operationId": "replyAllMail",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Replies a mail to all.",
         "description": "Returns the data for the message that shall be replied.",
@@ -17587,7 +17590,7 @@
       "get": {
         "operationId": "forwardMail",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Forwards a mail.",
         "description": "Returns the data for the message that shall be forwarded.",
@@ -17639,7 +17642,7 @@
       "put": {
         "operationId": "deleteMails",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Deletes mails.",
         "consumes": [
@@ -17684,7 +17687,7 @@
       "put": {
         "operationId": "clearMailFolders",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Clears the content of mail folders.",
         "consumes": [
@@ -17729,7 +17732,7 @@
       "put": {
         "operationId": "receiptMailAck",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Requests a delivery receipt for a priviously sent mail.",
         "description": "This delivery receipt only acknowledges that the message could be receipted on the recipients computer.",
@@ -17764,7 +17767,7 @@
       "put": {
         "operationId": "resolveShareReference",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Resolves a given share reference",
         "consumes": [
@@ -17801,7 +17804,7 @@
       "put": {
         "operationId": "examine",
         "tags": [
-          "mail"
+          "Mail"
         ],
         "summary": "Examines a specifed mail folder and provides its basic status information",
         "consumes": [
@@ -17836,7 +17839,7 @@
       "get": {
         "operationId": "getGroup",
         "tags": [
-          "groups"
+          "Groups"
         ],
         "summary": "Gets a group.",
         "parameters": [
@@ -17865,7 +17868,7 @@
       "put": {
         "operationId": "getGroupList",
         "tags": [
-          "groups"
+          "Groups"
         ],
         "summary": "Gets a list of groups.",
         "consumes": [
@@ -17902,7 +17905,7 @@
       "put": {
         "operationId": "searchGroups",
         "tags": [
-          "groups"
+          "Groups"
         ],
         "summary": "Searches for groups.",
         "consumes": [
@@ -17936,7 +17939,7 @@
       "put": {
         "operationId": "createGroup",
         "tags": [
-          "groups"
+          "Groups"
         ],
         "summary": "Creates a group (**introduced 2008-06-12**).",
         "consumes": [
@@ -17970,7 +17973,7 @@
       "put": {
         "operationId": "deleteGroup",
         "tags": [
-          "groups"
+          "Groups"
         ],
         "summary": "Deletes a group (**introduced 2008-06-12**).",
         "consumes": [
@@ -18012,7 +18015,7 @@
       "put": {
         "operationId": "updateGroup",
         "tags": [
-          "groups"
+          "Groups"
         ],
         "summary": "Updates a group (**introduced 2008-06-12**).",
         "consumes": [
@@ -18061,7 +18064,7 @@
       "get": {
         "operationId": "getGroupUpdates",
         "tags": [
-          "groups"
+          "Groups"
         ],
         "summary": "Gets the new, modified and deleted groups (**available since v6.18.1, introduced 2010-09-13**).",
         "parameters": [
@@ -18091,7 +18094,7 @@
       "get": {
         "operationId": "getAllResources",
         "tags": [
-          "resources"
+          "Resources"
         ],
         "summary": "Gets all resources.",
         "parameters": [
@@ -18113,7 +18116,7 @@
       "get": {
         "operationId": "getResource",
         "tags": [
-          "resources"
+          "Resources"
         ],
         "summary": "Gets a resource.",
         "parameters": [
@@ -18142,7 +18145,7 @@
       "put": {
         "operationId": "getResourceList",
         "tags": [
-          "resources"
+          "Resources"
         ],
         "summary": "Gets a list of resources.",
         "consumes": [
@@ -18179,7 +18182,7 @@
       "put": {
         "operationId": "searchResources",
         "tags": [
-          "resources"
+          "Resources"
         ],
         "summary": "Searches for resources.",
         "consumes": [
@@ -18213,7 +18216,7 @@
       "put": {
         "operationId": "createResource",
         "tags": [
-          "resources"
+          "Resources"
         ],
         "summary": "Creates a resource.",
         "consumes": [
@@ -18247,7 +18250,7 @@
       "put": {
         "operationId": "deleteResources",
         "tags": [
-          "resources"
+          "Resources"
         ],
         "summary": "Deletes resources.",
         "consumes": [
@@ -18292,7 +18295,7 @@
       "put": {
         "operationId": "updateResource",
         "tags": [
-          "resources"
+          "Resources"
         ],
         "summary": "Updates a resource.",
         "consumes": [
@@ -18341,7 +18344,7 @@
       "get": {
         "operationId": "getResourceUpdates",
         "tags": [
-          "resources"
+          "Resources"
         ],
         "summary": "Gets the new, modified and deleted resources.",
         "parameters": [
@@ -18371,7 +18374,7 @@
       "get": {
         "operationId": "getAllInfoItems",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Gets all infoitems.",
         "parameters": [
@@ -18413,7 +18416,7 @@
       "put": {
         "operationId": "getInfoItemList",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Gets a list of infoitems.",
         "consumes": [
@@ -18453,7 +18456,7 @@
       "get": {
         "operationId": "getInfoItemUpdates",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Gets the new, modified and deleted infoitems.",
         "parameters": [
@@ -18513,7 +18516,7 @@
       "get": {
         "operationId": "getInfoItem",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Gets an infoitem.",
         "parameters": [
@@ -18545,7 +18548,7 @@
       "put": {
         "operationId": "searchInfoItems",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Search for infoitems.",
         "consumes": [
@@ -18624,7 +18627,7 @@
       "get": {
         "operationId": "getInfoItemDocument",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Gets an infoitem document.",
         "description": "It is possible to add a filename to the request's URI like `/infostore/{filename}?action=document`.\nThe filename may be added to the customary infostore path to suggest a filename to a Save-As dialog.\n",
@@ -18675,7 +18678,7 @@
       "get": {
         "operationId": "getFolderAsZip",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Gets a ZIP archive containing all ifoitems of a denoted folder (**availabel since v7.6.1**).",
         "description": "It is possible to add a filename to the request's URI like `/infostore/{filename}?action=zipfolder`.\nThe filename may be added to the customary infostore path to suggest a filename to a Save-As dialog.\n",
@@ -18712,7 +18715,7 @@
       "get": {
         "operationId": "getAllVersions",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Gets all versions of an infoitem.",
         "parameters": [
@@ -18758,7 +18761,7 @@
       "get": {
         "operationId": "checkName",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Checks if a given file name is valid (**available since v7.8.1, preliminary**).",
         "parameters": [
@@ -18787,7 +18790,7 @@
       "put": {
         "operationId": "getDocumentsAsZip",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Gets multiple documents as a ZIP archive (**available since v7.4.0**).",
         "consumes": [
@@ -18828,7 +18831,7 @@
       "put": {
         "operationId": "moveInfoItems",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Moves one or more infoitems to another folder.",
         "consumes": [
@@ -18872,7 +18875,7 @@
       "put": {
         "operationId": "updateInfoItem",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Updates an infoitem.",
         "description": "Updates an infoitem's data. This request cannot change or add files. Therefore it\nis necessary to use the `POST` method.\n",
@@ -18923,7 +18926,7 @@
       "post": {
         "operationId": "updateInfoItemAdvanced",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Updates an infoitem.",
         "description": "Updates an infoitem's data and file. The normal request body must be placed as form-data using the\ncontent-type `multipart/form-data`. The form field `json` contains the infoitem's data while the file\nmust be placed in a file field named `file` (see also [File uploads](#file-uploads)).\n",
@@ -18989,7 +18992,7 @@
       "put": {
         "operationId": "createInfoItem",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Creates an infoitem.",
         "description": "Creates a new contact. This request cannot add a file to the infoitem. Therefor it\nis necessary to use the `POST` method.\n",
@@ -19040,7 +19043,7 @@
       "post": {
         "operationId": "createInfoItemAdvanced",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Creates an infoitem.",
         "description": "Creates a new infoitem with a file. The normal request body must be placed as form-data using the\ncontent-type `multipart/form-data`. The form field `json` contains the infoitem's data while the file\nmust be placed in a file field named `file` (see also [File uploads](#file-uploads)).\n",
@@ -19090,7 +19093,7 @@
       "put": {
         "operationId": "importAttachment",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Saves an attachment in the infostore.",
         "consumes": [
@@ -19143,7 +19146,7 @@
       "put": {
         "operationId": "deleteInfoItems",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Deletes infoitems.",
         "consumes": [
@@ -19195,7 +19198,7 @@
       "put": {
         "operationId": "deleteInfoItemVersions",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Deletes versions of an infoitem.",
         "description": "#### Note\nWhen the current version of a document is deleted the new current version will be the latest version.\n",
@@ -19255,7 +19258,7 @@
       "put": {
         "operationId": "deleteAllInfoItemVersions",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Deletes all versions of an infoitem leaving only the base object.",
         "parameters": [
@@ -19299,7 +19302,7 @@
       "put": {
         "operationId": "copyInfoItem",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Copies an infoitem.",
         "description": "This request cannot change or add files. Therefore it is necessary to use the `POST` method.\n",
@@ -19339,7 +19342,7 @@
       "post": {
         "operationId": "copyInfoItemAdvanced",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Copies an infoitem.",
         "description": "Copies an infoitem's data with the possibility to change the file. The normal request body must be placed as form-data using the\ncontent-type `multipart/form-data`. The form field `json` contains the infoitem's data while the file\nmust be placed in a file field named `file` (see also [File uploads](#file-uploads)).\n",
@@ -19389,7 +19392,7 @@
       "get": {
         "operationId": "lockInfoItem",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Locks an infoitem.",
         "parameters": [
@@ -19426,7 +19429,7 @@
       "get": {
         "operationId": "unlockInfoItem",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Unlocks an infoitem.",
         "parameters": [
@@ -19455,7 +19458,7 @@
       "get": {
         "operationId": "getSharedInfoItems",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Gets shared infoitems (**available since v7.8.0, preliminary**).",
         "parameters": [
@@ -19494,7 +19497,7 @@
       "put": {
         "operationId": "notifyAboutSharedInfoItem",
         "tags": [
-          "infostore"
+          "Infostore"
         ],
         "summary": "Notifies users or groups about a shared infoitem (**available since v7.8.0, preliminary**).",
         "consumes": [
@@ -19535,7 +19538,7 @@
       "get": {
         "operationId": "getAllAttachments",
         "tags": [
-          "attachments"
+          "Attachments"
         ],
         "summary": "Gets all attachments for an object.",
         "parameters": [
@@ -19583,7 +19586,7 @@
       "put": {
         "operationId": "getAttachmentList",
         "tags": [
-          "attachments"
+          "Attachments"
         ],
         "summary": "Gets a list of attachments.",
         "consumes": [
@@ -19632,7 +19635,7 @@
       "post": {
         "operationId": "createAttachment",
         "tags": [
-          "attachments"
+          "Attachments"
         ],
         "summary": "Creates an attachment.",
         "description": "#### Note\nIt is possible to create multiple attachments at once. Therefor add additional form fields and replace \"[index]\" in `json_[index]`\nand `file_[index]` with the appropriate index, like `json_1`, `file_1`. The index always starts with 0 (mandatory attachment object).\n",
@@ -19675,7 +19678,7 @@
       "put": {
         "operationId": "deleteAttachments",
         "tags": [
-          "attachments"
+          "Attachments"
         ],
         "summary": "Deletes attachments.",
         "consumes": [
@@ -19721,7 +19724,7 @@
       "get": {
         "operationId": "getAttachmentUpdates",
         "tags": [
-          "attachments"
+          "Attachments"
         ],
         "summary": "Gets the new and deleted attachments.",
         "parameters": [
@@ -19787,7 +19790,7 @@
       "get": {
         "operationId": "getAttachment",
         "tags": [
-          "attachments"
+          "Attachments"
         ],
         "summary": "Gets an attachment.",
         "parameters": [
@@ -19825,7 +19828,7 @@
       "get": {
         "operationId": "getAttachmentDocument",
         "tags": [
-          "attachments"
+          "Attachments"
         ],
         "summary": "Gets an attachment's document/filedata.",
         "description": "It is possible to add a filename to the request's URI like `/attachment/{filename}?action=document`.\nThe filename may be added to the customary attachment path to suggest a filename to a Save-As dialog.\n",
@@ -19875,7 +19878,7 @@
       "get": {
         "operationId": "getRange",
         "tags": [
-          "reminder"
+          "Reminder"
         ],
         "summary": "Gets a reminder range.",
         "description": "Gets all reminders which are scheduled until the specified time (end date).",
@@ -19906,7 +19909,7 @@
       "put": {
         "operationId": "deleteReminders",
         "tags": [
-          "reminder"
+          "Reminder"
         ],
         "summary": "Deletes reminders (**available since v6.22**).",
         "description": "Before version 6.22 the request body contained only a JSON object with the field `id`.",
@@ -19944,7 +19947,7 @@
       "put": {
         "operationId": "remindAgain",
         "tags": [
-          "reminder"
+          "Reminder"
         ],
         "summary": "Updates the reminder alarm (**available since v6.18.1**).",
         "consumes": [
@@ -19985,7 +19988,7 @@
       "put": {
         "operationId": "process",
         "tags": [
-          "multiple"
+          "Multiple"
         ],
         "summary": "Processes multiple requests to other modules in a single request.",
         "description": "#### Not supported requests are:\n * the ones from modules login and multiple\n * POST requests with a multipart encoding (uploads)\n * GET requests which do not use an object as described in [Low level protocol](#low-level-protocol)\n\n#### Request body\nA JSON array with JSON objects describing the requests. Each object contains a field `module` with the\nname of the request's module and the field `action` with the concrete request action to execute. Additionally the\nparameters of the request are added as fields too. A session parameter is not included! If the request has\na request body itself, this body is stored as a JSON object in a field `data`.\n\n#### Example: query reminder range and update a reminder's alarm\n```json\n[{\"module\":\"reminder\",\"action\":\"range\",\"end\":1497461067180},{\"module\":\"reminder\",\"action\":\"remindAgain\",\"id\":51,\"data\":{\"alarm\":1459478800000}}]\n```\n",
@@ -20036,7 +20039,7 @@
       "get": {
         "operationId": "getQuotaInformation",
         "tags": [
-          "quota"
+          "Quota"
         ],
         "summary": "Gets quota information (**available since v7.6.1, preliminary**).",
         "parameters": [
@@ -20075,7 +20078,7 @@
       "get": {
         "operationId": "getFilestoreUsage",
         "tags": [
-          "quota"
+          "Quota"
         ],
         "summary": "Gets the filestore usage data.",
         "parameters": [
@@ -20097,7 +20100,7 @@
       "get": {
         "operationId": "getMailUsage",
         "tags": [
-          "quota"
+          "Quota"
         ],
         "summary": "Gets the mail usage data.",
         "parameters": [
@@ -20119,7 +20122,7 @@
       "post": {
         "operationId": "importCSV",
         "tags": [
-          "import"
+          "Import"
         ],
         "summary": "Imports contact data from CSV file.",
         "description": "#### Example CSV\n```\n\"Given name\",\"Sur name\"\n\"Günther\",\"Mustermann\"\n\"Hildegard\",\"Musterfrau\"\n```\nThe delimiter may be any CSV-valid character (e.g. \",\" or \";\"). The first line must contain the column titles that are related\nto the corresponding fields of the ContactData model (see [getContact](#contacts/getContact) request). See [Detailed contact data](#detailed-contact-data)\nfor a mapping of fields to CSV column titles.\n",
@@ -20169,7 +20172,7 @@
       "post": {
         "operationId": "importOutlookCSV",
         "tags": [
-          "import"
+          "Import"
         ],
         "summary": "Imports contact data from an Outlook CSV file.",
         "description": "#### Example: exported Outlook CSV\n```\nFirst Name,Last Name\nGünther,Mustermann\nHildegard,Musterfrau\n```\nThe column titles in the first line of the CSV file may be those used by the English, French or German version of Outlook.\n",
@@ -20219,7 +20222,7 @@
       "post": {
         "operationId": "importICal",
         "tags": [
-          "import"
+          "Import"
         ],
         "summary": "Imports calendar data from iCalendar file.",
         "consumes": [
@@ -20275,7 +20278,7 @@
       "post": {
         "operationId": "importVCard",
         "tags": [
-          "import"
+          "Import"
         ],
         "summary": "Imports data from vCard file.",
         "description": "#### Supported vCard formats\n * vCard 2.1\n * vCard 3.0\n * vCalendar 1.0\n",
@@ -20318,7 +20321,7 @@
       "get": {
         "operationId": "exportAsCSV",
         "tags": [
-          "export"
+          "Export"
         ],
         "summary": "Exports contact data to a CSV file.",
         "parameters": [
@@ -20361,7 +20364,7 @@
       "get": {
         "operationId": "exportAsICal",
         "tags": [
-          "export"
+          "Export"
         ],
         "summary": "Exports appointment and task data to an iCalendar file.",
         "parameters": [
@@ -20390,7 +20393,7 @@
       "get": {
         "operationId": "exportAsVCard",
         "tags": [
-          "export"
+          "Export"
         ],
         "summary": "Exports contact data to a vCard file.",
         "parameters": [
@@ -20419,7 +20422,7 @@
       "put": {
         "operationId": "clearFoldersSynced",
         "tags": [
-          "sync"
+          "Sync"
         ],
         "summary": "Clears a folder's content.",
         "description": "#### Note\nAlthough the request offers to clear multiple folders at once it is recommended to clear only one folder per\nrequest since if any exception occurs (e.g. missing permissions) the complete request is going to be aborted.\n",
@@ -20453,7 +20456,7 @@
       "get": {
         "operationId": "acquireToken",
         "tags": [
-          "token"
+          "Token"
         ],
         "summary": "Gets a login token (**available since v7.4.0**).",
         "description": "With a valid session it is possible to acquire a secret. Using this secret another system is able to\ngenerate a valid session (see [login?action=redeemToken](#operation--login-action-redeemToken-post)).\n",
@@ -20476,7 +20479,7 @@
       "get": {
         "operationId": "getConfig",
         "tags": [
-          "mailfilter"
+          "Mailfilter"
         ],
         "summary": "Gets the configuration of the mail filter backend.",
         "description": "A mail filter can have different rules each containing one command. A command has a test condition and actions\nthat are executed if the condition is true. The list of available comparisions (that can be used in test\nconditions) and the list of available actions depends on a given test and the mail filter server configuration\nand must be determined at runtime.\n\nAll those dynamic values can be fetched via a config object at startup, which shows the capabilities of the server\nto the client.\n",
@@ -20506,7 +20509,7 @@
       "get": {
         "operationId": "getRules",
         "tags": [
-          "mailfilter"
+          "Mailfilter"
         ],
         "summary": "Gets all mail filter rules.",
         "parameters": [
@@ -20542,7 +20545,7 @@
       "put": {
         "operationId": "createRule",
         "tags": [
-          "mailfilter"
+          "Mailfilter"
         ],
         "summary": "Creates a mail filter rule.",
         "consumes": [
@@ -20583,7 +20586,7 @@
       "put": {
         "operationId": "deleteRule",
         "tags": [
-          "mailfilter"
+          "Mailfilter"
         ],
         "summary": "Deletes a mail filter rule.",
         "consumes": [
@@ -20624,7 +20627,7 @@
       "put": {
         "operationId": "reorderRules",
         "tags": [
-          "mailfilter"
+          "Mailfilter"
         ],
         "summary": "Reorders mail filter rules.",
         "consumes": [
@@ -20668,7 +20671,7 @@
       "put": {
         "operationId": "updateRule",
         "tags": [
-          "mailfilter"
+          "Mailfilter"
         ],
         "summary": "Updates a mail filter rule.",
         "consumes": [
@@ -20709,7 +20712,7 @@
       "put": {
         "operationId": "deleteScript",
         "tags": [
-          "mailfilter"
+          "Mailfilter"
         ],
         "summary": "Deletes the whole mail filter script.",
         "description": "This call is only used as workaround for parsing errors in the backend, so that the user is able to kick a whole script if it contains errors in the grammar.",
@@ -20739,7 +20742,7 @@
       "put": {
         "operationId": "getScript",
         "tags": [
-          "mailfilter"
+          "Mailfilter"
         ],
         "summary": "Gets the whole mail filter script.",
         "description": "This call is only used as workaround for parsing errors in the backend, so that the user is able to get the plaintext of a complete script.",
@@ -20769,7 +20772,7 @@
       "post": {
         "operationId": "uploadFile",
         "tags": [
-          "file"
+          "File"
         ],
         "summary": "Uploads a file.",
         "description": "It can be uploaded multiple files at once. Each file must be specified in an own form field\n(the form field name is arbitrary).\n",
@@ -20828,7 +20831,7 @@
       "get": {
         "operationId": "keepAlive",
         "tags": [
-          "file"
+          "File"
         ],
         "summary": "Updates a file's last access timestamp and keeps it alive.",
         "description": "By updating the last access timestamp the file is prevented from being deleted from both session and disk\nstorage.\n",
@@ -20858,7 +20861,7 @@
       "get": {
         "operationId": "getFile",
         "tags": [
-          "file"
+          "File"
         ],
         "summary": "Requests a formerly uploaded file.",
         "produces": [
@@ -20894,7 +20897,7 @@
       "get": {
         "operationId": "getInlineMailImage",
         "tags": [
-          "image"
+          "Image"
         ],
         "summary": "Requests an inline image from a mail.",
         "produces": [
@@ -20948,7 +20951,7 @@
       "get": {
         "operationId": "getContactProfileImage",
         "tags": [
-          "image"
+          "Image"
         ],
         "summary": "Requests a contact's profile image.",
         "produces": [
@@ -20988,7 +20991,7 @@
       "get": {
         "operationId": "getUserProfileImage",
         "tags": [
-          "image"
+          "Image"
         ],
         "summary": "Requests a user's profile image.",
         "produces": [
@@ -21021,7 +21024,7 @@
       "get": {
         "operationId": "getMP3CoverImage",
         "tags": [
-          "image"
+          "Image"
         ],
         "summary": "Requests a MP3 cover image.",
         "produces": [
@@ -21054,7 +21057,7 @@
       "get": {
         "operationId": "getManagedImageFile",
         "tags": [
-          "image"
+          "Image"
         ],
         "summary": "Requests an image that was previously uploaded with the ajax file upload module.",
         "produces": [
@@ -21087,7 +21090,7 @@
       "put": {
         "operationId": "convertData",
         "tags": [
-          "conversion"
+          "Conversion"
         ],
         "summary": "Converts data from source using a specific data handler.",
         "description": "#### Saving an iCal email attachment\nIf an iCal file is attached to an email, its content can be saved as appointments and tasks into given\ncalendar and task folder. If the fields \"com.openexchange.groupware.calendar.confirmstatus\" and\n\"com.openexchange.groupware.calendar.confirmmessage\" are set, the data handler inserts the appointment with\nthe given status for the user, if the appointment does not exist. If it is already existing, the handler\njust updates the participant status.\n```json\n{\n  \"datasource\": {\n    \"identifier\":\"com.openexchange.mail.ical\",\n    \"args\":\n    [\n      {\"com.openexchange.mail.conversion.fullname\":\"<folder-fullname>\"},\n      {\"com.openexchange.mail.conversion.mailid\":\"<mail-id>\"},\n      {\"com.openexchange.mail.conversion.sequenceid\":\"<attachment-sequence-id>\"}\n    ]\n  },\n  \"datahandler\": {\n    \"identifier\":\"com.openexchange.ical\",\n    \"args\":\n    [\n      {\"com.openexchange.groupware.calendar.folder\":\"<calendar-folder-id>\"},\n      {\"com.openexchange.groupware.task.folder\":\"<task-folder-id>\"},\n      {\"com.openexchange.groupware.calendar.confirmstatus\":\"<status>\"},\n      {\"com.openexchange.groupware.calendar.confirmmessage\":\"<message>\"}\n    ]\n  }\n}\n```\nThe response is a JSON array of JSON objects each providing folder and object ID of added appointments/tasks, e.g.\n`[{\"folder_id\":2567,\"id\":7689}, ...]`.\n#### Converting an iCal email attachment into JSON objects\nIf an iCal file is attached to an email, its content can be converted to JSON appointments and tasks.\n```json\n{\n  \"datasource\": {\n    \"identifier\":\"com.openexchange.mail.ical\",\n    \"args\":\n    [\n      {\"com.openexchange.mail.conversion.fullname\":\"<folder-fullname>\"},\n      {\"com.openexchange.mail.conversion.mailid\":\"<mail-id>\"},\n      {\"com.openexchange.mail.conversion.sequenceid\":\"<attachment-sequence-id>\"}\n    ]\n  },\n  \"datahandler\": {\n    \"identifier\":\"com.openexchange.ical.json\",\n    \"args\":\n    [\n      {\"com.openexchange.groupware.calendar.timezone\":\"<timezone-id>\"},\n      {\"com.openexchange.groupware.calendar.recurrencePosition\":\"<recurrence-position>\"},\n      {\"com.openexchange.groupware.calendar.searchobject\":\"<true|false>\"}\n    ]\n  }\n}\n```\nThe response is a JSON array of JSON objects for each appointment/task. See the TaskData model of the [getTask](#tasks/getTask) request and the AppointmentData model of the [getAttachment](#attachments/getAttachment) request for more informations.\n#### Saving a vCard email attachment\nIf a vCard file is attached to an email, its content can be saved as contacts into given contact folder.\n```json\n{\n  \"datasource\": {\n    \"identifier\":\"com.openexchange.mail.vcard\",\n    \"args\":\n    [\n      {\"com.openexchange.mail.conversion.fullname\":\"<folder-fullname>\"},\n      {\"com.openexchange.mail.conversion.mailid\":\"<mail-id>\"},\n      {\"com.openexchange.mail.conversion.sequenceid\":\"<attachment-sequence-id>\"}\n    ]\n  },\n  \"datahandler\": {\n    \"identifier\":\"com.openexchange.contact\",\n    \"args\":\n    [\n      {\"com.openexchange.groupware.contact.folder\":\"<contact-folder-id>\"}\n    ]\n  }\n}\n```\nThe response is a JSON array of JSON objects each providing folder and object ID of added contacts, e.g.\n`[{\"folder_id\":2567,\"id\":7689}, ...]`.\n#### Contact(s) attached to a new email as a vCard file\nObtain vCard data from spacified contact object(s).\n```json\n{\n  \"datasource\": {\n    \"identifier\":\"com.openexchange.contact\",\n    \"args\":\n    [\n      {\"folder\":\"<folder-id1>\",\"id\":\"<id1>\"},\n      ...,\n      \"folder\":\"<folder-idn>\",\"id\":\"<idn>\"\n    ]\n  },\n  \"datahandler\": {\n    \"identifier\":\"com.openexchange.mail.vcard\",\n    \"args\": []\n  }\n}\n```\nThe response is a JSON object containing mail data. See the MailData model of the [getMail](#mail/getMail) request.\n`[{\"folder_id\":2567,\"id\":7689}, ...]`.\n",
@@ -21122,7 +21125,7 @@
       "get": {
         "operationId": "getAllAccounts",
         "tags": [
-          "mailaccount"
+          "Mailaccount"
         ],
         "summary": "Gets all mail accounts (**available since v6.12**).",
         "parameters": [
@@ -21147,7 +21150,7 @@
       "get": {
         "operationId": "getAccount",
         "tags": [
-          "mailaccount"
+          "Mailaccount"
         ],
         "summary": "Gets a mail account (**available since v6.12**).",
         "parameters": [
@@ -21176,7 +21179,7 @@
       "put": {
         "operationId": "createAccount",
         "tags": [
-          "mailaccount"
+          "Mailaccount"
         ],
         "summary": "Creates a new mail account (**available since v6.12**).",
         "consumes": [
@@ -21210,7 +21213,7 @@
       "put": {
         "operationId": "updateAccount",
         "tags": [
-          "mailaccount"
+          "Mailaccount"
         ],
         "summary": "Updates a mail account (**available since v6.12**).",
         "consumes": [
@@ -21244,7 +21247,7 @@
       "put": {
         "operationId": "deleteAccount",
         "tags": [
-          "mailaccount"
+          "Mailaccount"
         ],
         "summary": "Deletes a mail account (**available since v6.12**).",
         "consumes": [
@@ -21281,7 +21284,7 @@
       "put": {
         "operationId": "validateAccount",
         "tags": [
-          "mailaccount"
+          "Mailaccount"
         ],
         "summary": "Validates a mail account which shall be created (**available since v6.12**).",
         "consumes": [
@@ -21322,7 +21325,7 @@
       "post": {
         "operationId": "getAutoConfig",
         "tags": [
-          "autoconfig"
+          "Autoconfig"
         ],
         "summary": "Gets the auto configuration for a mail account (**available since v6.22**).",
         "parameters": [
@@ -21365,7 +21368,7 @@
       "get": {
         "operationId": "getAllUsers",
         "tags": [
-          "user"
+          "User"
         ],
         "summary": "Gets all users (**available since v6.14**).",
         "parameters": [
@@ -21404,7 +21407,7 @@
       "put": {
         "operationId": "getUserList",
         "tags": [
-          "user"
+          "User"
         ],
         "summary": "Gets a list of users (**available since v6.14**).",
         "consumes": [
@@ -21444,7 +21447,7 @@
       "get": {
         "operationId": "getUser",
         "tags": [
-          "user"
+          "User"
         ],
         "summary": "Gets a user (**available since v6.14**).",
         "parameters": [
@@ -21473,7 +21476,7 @@
       "put": {
         "operationId": "updateUser",
         "tags": [
-          "user"
+          "User"
         ],
         "summary": "Updates a user (**available since v6.14**).",
         "consumes": [
@@ -21522,7 +21525,7 @@
       "put": {
         "operationId": "searchUsers",
         "tags": [
-          "user"
+          "User"
         ],
         "summary": "Search for users (**available since v6.14**).",
         "consumes": [
@@ -21573,7 +21576,7 @@
       "get": {
         "operationId": "getUserAttribute",
         "tags": [
-          "user"
+          "User"
         ],
         "summary": "Gets a user attribute (**available since v6.20**).",
         "description": "Gets a custom user attribute that was previously set with the `/user?action=setAttribute` request.",
@@ -21610,7 +21613,7 @@
       "put": {
         "operationId": "setUserAttribute",
         "tags": [
-          "user"
+          "User"
         ],
         "summary": "Sets a user attribute (**available since v6.20**).",
         "description": "Sets a custom user attribute consisting of a name and a value. The attribute can later be\nretrieved using the [/user?action=getAttribute](#operation--user-action-getAttribute-get) request.\n",
@@ -21659,7 +21662,7 @@
       "get": {
         "operationId": "getCurrentUser",
         "tags": [
-          "user/me"
+          "User/Me"
         ],
         "summary": "Gets information about current user (**available since v7.6.2**).",
         "parameters": [
@@ -22211,7 +22214,7 @@
       "get": {
         "operationId": "getFreeBusy",
         "tags": [
-          "freebusy"
+          "Freebusy"
         ],
         "summary": "Gets free/busy information (**available since v6.22.1**).",
         "parameters": [
@@ -22263,7 +22266,7 @@
       "put": {
         "operationId": "getFreeBusyList",
         "tags": [
-          "freebusy"
+          "Freebusy"
         ],
         "summary": "Gets a list of free/busy information (**available since v6.22.1**).",
         "consumes": [
@@ -22323,7 +22326,7 @@
       "get": {
         "operationId": "getAllMessagingAccounts",
         "tags": [
-          "messaging"
+          "Messaging"
         ],
         "summary": "Gets all messaging accounts.",
         "parameters": [
@@ -22352,7 +22355,7 @@
       "get": {
         "operationId": "getMessagingAccount",
         "tags": [
-          "messaging"
+          "Messaging"
         ],
         "summary": "Gets a messaging account.",
         "parameters": [
@@ -22388,7 +22391,7 @@
       "put": {
         "operationId": "createMessagingAccount",
         "tags": [
-          "messaging"
+          "Messaging"
         ],
         "summary": "Creates a messaging account.",
         "consumes": [
@@ -22422,7 +22425,7 @@
       "put": {
         "operationId": "updateMessagingAccount",
         "tags": [
-          "messaging"
+          "Messaging"
         ],
         "summary": "Updates a messaging account.",
         "consumes": [
@@ -22456,7 +22459,7 @@
       "get": {
         "operationId": "deleteMessagingAccount",
         "tags": [
-          "messaging"
+          "Messaging"
         ],
         "summary": "Deletes a messaging account.",
         "consumes": [
@@ -22495,7 +22498,7 @@
       "get": {
         "operationId": "getAllMessagingMessages",
         "tags": [
-          "messaging"
+          "Messaging"
         ],
         "summary": "Gets all messaging messages.",
         "parameters": [
@@ -22545,7 +22548,7 @@
       "put": {
         "operationId": "getMessagingMessageList",
         "tags": [
-          "messaging"
+          "Messaging"
         ],
         "summary": "Gets a list of messaging messages.",
         "consumes": [
@@ -22592,7 +22595,7 @@
       "get": {
         "operationId": "getMessagingMessage",
         "tags": [
-          "messaging"
+          "Messaging"
         ],
         "summary": "Gets a messaging message.",
         "description": "A messaging message consists of some metadata, headers and a content. The content attribute varies\nby the content-type header. If the content-type is `text/*` it is a string, if it is `multipart/*` it\nis an array of objects, each representing a part of the multipart. If it is anything else it is considered binary\nand is a Base64 encoded string.\n\nThe folder ID of a message follows a predefined format: `[messagingService]://[accountId]/[path]`, like\n`com.openexchange.messaging.twitter://535/defaultTimeline/directMessages`.\n",
@@ -22636,7 +22639,7 @@
       "put": {
         "operationId": "sendMessagingMessage",
         "tags": [
-          "messaging"
+          "Messaging"
         ],
         "summary": "Sends a messaging message.",
         "consumes": [
@@ -22677,7 +22680,7 @@
       "put": {
         "operationId": "performMessagingAction",
         "tags": [
-          "messaging"
+          "Messaging"
         ],
         "summary": "Performs a certain messaging action on a message.",
         "description": "On actions of type \"message\" the body should contain the JSON representation of the message the action should be applied to.\nTo invoke a messaging action of type \"storage\" the folder and id are needed in URL parameters.\nMessaging actions of type \"none\" need a messaging message and account.\n",
@@ -22740,7 +22743,7 @@
       "get": {
         "operationId": "getAllMessagingServices",
         "tags": [
-          "messaging"
+          "Messaging"
         ],
         "summary": "Gets all messaging services.",
         "parameters": [
@@ -22762,7 +22765,7 @@
       "get": {
         "operationId": "getMessagingService",
         "tags": [
-          "messaging"
+          "Messaging"
         ],
         "summary": "Gets a messaging service.",
         "parameters": [
@@ -22791,7 +22794,7 @@
       "get": {
         "operationId": "getAllSnippets",
         "tags": [
-          "snippet"
+          "Snippet"
         ],
         "summary": "Gets all snippets (**available since v7.0.0/v6.22.0**).",
         "parameters": [
@@ -22820,7 +22823,7 @@
       "get": {
         "operationId": "getSnippet",
         "tags": [
-          "snippet"
+          "Snippet"
         ],
         "summary": "Gets a snippet (**available since v7.0.0/v6.22.0**).",
         "parameters": [
@@ -22849,7 +22852,7 @@
       "put": {
         "operationId": "getSnippetList",
         "tags": [
-          "snippet"
+          "Snippet"
         ],
         "summary": "Gets a list of snippets (**available since v7.0.0/v6.22.0**).",
         "consumes": [
@@ -22886,7 +22889,7 @@
       "get": {
         "operationId": "getSnippetAttachment",
         "tags": [
-          "snippet"
+          "Snippet"
         ],
         "summary": "Gets the attachment of a snippet (**available since v7.0.0/v6.22.0**).",
         "parameters": [
@@ -22929,7 +22932,7 @@
       "put": {
         "operationId": "createSnippet",
         "tags": [
-          "snippet"
+          "Snippet"
         ],
         "summary": "Creates a snippet (**available since v7.0.0/v6.22.0**).",
         "consumes": [
@@ -22963,7 +22966,7 @@
       "put": {
         "operationId": "updateSnippet",
         "tags": [
-          "snippet"
+          "Snippet"
         ],
         "summary": "Updates a snippet (**available since v7.0.0/v6.22.0**).",
         "consumes": [
@@ -23004,7 +23007,7 @@
       "put": {
         "operationId": "deleteSnippet",
         "tags": [
-          "snippet"
+          "Snippet"
         ],
         "summary": "Deletes one or multiple snippets (**available since v7.0.0/v6.22.0**).",
         "consumes": [
@@ -23048,7 +23051,7 @@
       "post": {
         "operationId": "addSnippetAttachment",
         "tags": [
-          "snippet"
+          "Snippet"
         ],
         "summary": "Attaches one or more files to an existing snippet (**available since v7.0.0/v6.22.0**).",
         "description": "It can be uploaded multiple files at once. Each file must be specified in an own form field\n(the form field name is arbitrary).\n",
@@ -23107,7 +23110,7 @@
       "put": {
         "operationId": "removeSnippetAttachments",
         "tags": [
-          "snippet"
+          "Snippet"
         ],
         "summary": "Detaches one or more files from an existing snippet (**available since v7.0.0/v6.22.0**).",
         "consumes": [
@@ -23151,7 +23154,7 @@
       "get": {
         "operationId": "getHaloServices",
         "tags": [
-          "halo"
+          "Halo"
         ],
         "summary": "Gets all halo services.",
         "parameters": [
@@ -23173,7 +23176,7 @@
       "get": {
         "operationId": "investigateContactHalo",
         "tags": [
-          "halo"
+          "Halo"
         ],
         "summary": "Investigates a contact.",
         "parameters": [
@@ -23253,7 +23256,7 @@
       "get": {
         "operationId": "getHaloContactPicture",
         "tags": [
-          "halo"
+          "Halo"
         ],
         "summary": "Gets a contact picture.",
         "description": "At least one of the optional search parameters should be set. All parameters are connected by OR during\nthe search. More specific parameters like `user_id` or `id` are prioritized in case of multiple matches.\n",
@@ -23340,7 +23343,7 @@
       "get": {
         "operationId": "getAllCapabilities",
         "tags": [
-          "capabilities"
+          "Capabilities"
         ],
         "summary": "Gets all capabilities (**available since v7.4.2**).",
         "parameters": [
@@ -23362,7 +23365,7 @@
       "get": {
         "operationId": "getCapability",
         "tags": [
-          "capabilities"
+          "Capabilities"
         ],
         "summary": "Gets a capability (**available since v7.4.2**).",
         "parameters": [
@@ -23391,7 +23394,7 @@
       "get": {
         "operationId": "acquireIdentityToken",
         "tags": [
-          "jump"
+          "Jump"
         ],
         "summary": "Acquires an identity token (**available since v7.6.0**).",
         "parameters": [
@@ -23419,7 +23422,7 @@
       "put": {
         "operationId": "doAutoComplete",
         "tags": [
-          "find"
+          "Find"
         ],
         "summary": "Suggests possible search filters based on a user's input (**available since v7.6.1**).",
         "description": "Filters are grouped into categories, the so called facets.\n#### Facets\nThe style of a facet is responsible for how the according object is structured, how it is handled on the\nserver-side and how the client has to handle it. We distinguish three styles of facets:\n * simple\n * default\n * exclusive\n___\nEvery facet value contains an embedded `filter` object. The filter must not be changed by the client, it has\nto be seen as a black-box. Instead the filters of selected facet values have to be copied and sent to the\nserver with the subsequent requests.\n#### Simple facets\nA simple facet is a special facet that has exactly one value. The facet's type and its value are strictly\ncoupled, in a way that a display name for both, facet and value would be redundant. A simple facet generally\ndenotes a logical field like 'phone number'. Internally this logical field can map to several internal\nfields (e.g. 'phone_private', 'phone_mobile', 'phone_business'). In clients the facet as a whole can be\ndisplayed as a single item. Example: \"Search for 'term' in field 'phone number'\".\n#### Default facets\nA default facet contains multiple values and may be present multiple times in search requests to filter\nresults by a combination of different values (e.g. \"mails with 'foo' and 'bar' in subject\").\n\nFacet values may be one- or two-dimensional. A one-dimensional value can be displayed as is and contains an\naccording filter object. A two-dimensional value contains an array \"options\" with every option defining\ndifferent semantics of how the value is used to filter the search results.\n#### Exclusive facets\nAn exclusive facet is a facet where the contained values are mutually exclusive. That means that the facet\nmust only be present once in an autocomplete or query request.\n\nFacet values may be one- or two-dimensional. A one-dimensional value can be displayed as is and contains an\naccording filter object. A two-dimensional value contains an array \"options\" with every option defining\ndifferent semantics of how the value is used to filter the search results.\n",
@@ -23468,7 +23471,7 @@
       "put": {
         "operationId": "doQuery",
         "tags": [
-          "find"
+          "Find"
         ],
         "summary": "Performs the actual search and returns the found items (**available since v7.6.1**).",
         "description": "Before querying the search you should fetch the search filters (facets) by calling the [/find?action=autocomplete](#operation--find-action-autocomplete-put) \nrequest.\n#### Active facets\nEvery value that has been selected by a user must be remembered and provided with every subsequent request.\nThe representation of a facet within a request body differs from the one within an autocomplete response.\nWe call those \"active facets\". Their representation is independent from their style.\n",
@@ -23517,7 +23520,7 @@
       "put": {
         "operationId": "getShareLink",
         "tags": [
-          "share/management"
+          "Share/Management"
         ],
         "summary": "Creates or gets a share link (**available since v7.8.0**).",
         "consumes": [
@@ -23551,7 +23554,7 @@
       "put": {
         "operationId": "updateShareLink",
         "tags": [
-          "share/management"
+          "Share/Management"
         ],
         "summary": "Updates a share link (**available since v7.8.0**).",
         "consumes": [
@@ -23593,7 +23596,7 @@
       "put": {
         "operationId": "deleteShareLink",
         "tags": [
-          "share/management"
+          "Share/Management"
         ],
         "summary": "Deletes a share link (**available since v7.8.0**).",
         "consumes": [
@@ -23627,7 +23630,7 @@
       "put": {
         "operationId": "sendShareLink",
         "tags": [
-          "share/management"
+          "Share/Management"
         ],
         "summary": "Sends a share link (**available since v7.8.0**).",
         "consumes": [
@@ -23661,7 +23664,7 @@
       "put": {
         "operationId": "updatePassword",
         "tags": [
-          "passwordchange"
+          "Passwordchange"
         ],
         "summary": "Updates or changes the password of the current use.",
         "description": "#### Note\nThe new password will be set without any checks. The client must ensure that it is the password the user wants to set.\n",
@@ -23696,7 +23699,7 @@
       "get": {
         "operationId": "getAllFileAccounts",
         "tags": [
-          "filestorage"
+          "Filestorage"
         ],
         "summary": "Gets all file storage accounts.",
         "parameters": [
@@ -23725,7 +23728,7 @@
       "get": {
         "operationId": "getFileAccount",
         "tags": [
-          "filestorage"
+          "Filestorage"
         ],
         "summary": "Gets a file storage account.",
         "parameters": [
@@ -23761,7 +23764,7 @@
       "put": {
         "operationId": "createFileAccount",
         "tags": [
-          "filestorage"
+          "Filestorage"
         ],
         "summary": "Creates a file storage account.",
         "description": "#### Example for creating a new OAuth-based file storage account\nFirst, get the description of the file storage service for which a new account is supposed to be created:\n`GET /ajax/fileservice?action=get&id=boxcom&session=...`\n\nThe response might be:\n```json\n{\n  id: \"boxcom\",\n  displayName: \"Box File Storage Service\",\n  configuration: {\n    widget: \"oauthAccount\",\n    options: {\n      type: \"com.openexchange.oauth.boxcom\"\n    },\n    name: \"account\",\n    displayName: \"Select an existing account\",\n    mandatory: true\n  }\n}\n```\nNext get the associated OAuth account information:\n`GET /ajax/oauth/accounts?action=all&serviceId=com.openexchange.oauth.boxcom&session=...`\n\nThe response might be:\n```json\n{\n  \"data\":[\n    {\n      \"id\":333,\n      \"displayName\":\"My Box.com account\",\n      \"serviceId\":\"com.openexchange.oauth.boxcom\"\n    }\n  ]\n}\n```\nFinally, create the file storage account:\n```\nPUT /ajax/fileaccount?action=new&session=...\n\n{\n  \"filestorageService\":\"boxcom\",\n  \"displayName\":\"My box.com account\",\n  \"configuration\":{\n    \"account\":\"333\",\n    \"type\":\"com.openexchange.oauth.boxcom\"\n  }\n}\n```\nThe response provides the relative identifier of the newly created account.\n",
@@ -23796,7 +23799,7 @@
       "put": {
         "operationId": "updateFileAccount",
         "tags": [
-          "filestorage"
+          "Filestorage"
         ],
         "summary": "Updates a file storage account.",
         "consumes": [
@@ -23830,7 +23833,7 @@
       "get": {
         "operationId": "deleteFileAccount",
         "tags": [
-          "filestorage"
+          "Filestorage"
         ],
         "summary": "Deletes a file storage account.",
         "parameters": [
@@ -23866,7 +23869,7 @@
       "get": {
         "operationId": "getAllFileServices",
         "tags": [
-          "filestorage"
+          "Filestorage"
         ],
         "summary": "Gets all file storage services.",
         "parameters": [
@@ -23888,7 +23891,7 @@
       "get": {
         "operationId": "getFileService",
         "tags": [
-          "filestorage"
+          "Filestorage"
         ],
         "summary": "Gets a file storage service.",
         "parameters": [
@@ -23917,7 +23920,7 @@
       "put": {
         "operationId": "moveMails",
         "tags": [
-          "mail_categories"
+          "Mail_categories"
         ],
         "summary": "Moves mails to the given category",
         "consumes": [
@@ -23961,7 +23964,7 @@
       "get": {
         "operationId": "unread",
         "tags": [
-          "mail_categories"
+          "Mail_categories"
         ],
         "summary": "Retrieves the unread counts of active mail categories",
         "parameters": [
@@ -23990,7 +23993,7 @@
       "put": {
         "operationId": "train",
         "tags": [
-          "mail_categories"
+          "Mail_categories"
         ],
         "summary": "Add a new rule",
         "description": "Adds a new rule with the given mail addresses to the given category and optionally reorganize all existing mails in the inbox.",
@@ -24046,7 +24049,7 @@
       "put": {
         "operationId": "getAdvertisementConfig",
         "tags": [
-          "advertisement"
+          "Advertisement"
         ],
         "summary": "Retrieves the advertisement configuration",
         "parameters": [

@@ -2,7 +2,7 @@
   put:
     operationId: receiptMailAck
     tags:
-      - mail
+      - Mail
     summary: Requests a delivery receipt for a priviously sent mail.
     description: This delivery receipt only acknowledges that the message could be receipted on the recipients computer.
     consumes:

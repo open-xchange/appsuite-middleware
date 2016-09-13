@@ -2,7 +2,7 @@
   put:
     operationId: searchAppointments
     tags:
-      - calendar
+      - Calendar
     summary: Searches for appointments.
     consumes:
       - application/json

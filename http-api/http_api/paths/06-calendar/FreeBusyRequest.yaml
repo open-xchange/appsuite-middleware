@@ -3,7 +3,7 @@
     operationId: getFreeAndBusy
     summary: Gets appointments between a specified time range.
     tags:
-      - calendar
+      - Calendar
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query

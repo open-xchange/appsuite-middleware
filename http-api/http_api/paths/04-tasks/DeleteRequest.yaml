@@ -2,7 +2,7 @@
   put:
     operationId: deleteTasks
     tags:
-      - tasks
+      - Tasks
     summary: Deletes tasks (**available since v6.22**).
     description: |
       Before version 6.22 the request body contained a JSON object with the fields `id` and `folder` and could

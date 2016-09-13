@@ -2,7 +2,7 @@
   get:
     operationId: hasAppointmentsOnDays
     tags:
-      - calendar
+      - Calendar
     summary: Requests whether there are appointments on days in a specified time range.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

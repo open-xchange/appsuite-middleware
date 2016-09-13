@@ -2,7 +2,7 @@
   put:
     operationId: getScript
     tags:
-      - mailfilter
+      - Mailfilter
     summary: Gets the whole mail filter script.
     description: This call is only used as workaround for parsing errors in the backend, so that the user is able to get the plaintext of a complete script.
     parameters:

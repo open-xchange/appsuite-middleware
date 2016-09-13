@@ -2,7 +2,7 @@
   get:
     operationId: getSubFolders
     tags:
-      - folders
+      - Folders
     summary: Gets the subfolders of a specified parent folder.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

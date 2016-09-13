@@ -2,7 +2,7 @@
   post:
     operationId: importCSV
     tags:
-      - import
+      - Import
     summary: Imports contact data from CSV file.
     description: |
       #### Example CSV

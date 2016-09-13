@@ -4,7 +4,7 @@
   get:
     operationId: getMailSource
     tags:
-      - mail
+      - Mail
     summary: Gets the complete message source as plain text.
     description: |
       #### Note

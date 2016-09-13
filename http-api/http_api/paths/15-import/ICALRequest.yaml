@@ -2,7 +2,7 @@
   post:
     operationId: importICal
     tags:
-      - import
+      - Import
     summary: Imports calendar data from iCalendar file.
     consumes:
       - multipart/form-data

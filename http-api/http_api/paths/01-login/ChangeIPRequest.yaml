@@ -2,7 +2,7 @@
   post:
     operationId: changeIP
     tags:
-      - login
+      - Login
     summary: Change IP of client host in a session.
     description: |
       The following request is especially for integration with systems located in the providers

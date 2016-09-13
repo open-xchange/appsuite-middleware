@@ -2,7 +2,7 @@
   put:
     operationId: getInfoItemList
     tags:
-      - infostore
+      - Infostore
     summary: Gets a list of infoitems.
     consumes:
       - application/json

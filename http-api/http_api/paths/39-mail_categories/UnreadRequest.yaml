@@ -2,7 +2,7 @@
   get:
     operationId: unread
     tags: 
-      - mail_categories
+      - Mail_categories
     summary: Retrieves the unread counts of active mail categories
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

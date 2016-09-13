@@ -2,7 +2,7 @@
   put:
     operationId: moveMails
     tags: 
-      - mail_categories
+      - Mail_categories
     summary: Moves mails to the given category
     consumes:
       - application/json

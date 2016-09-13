@@ -2,7 +2,7 @@
   get:
     operationId: replyMail
     tags:
-      - mail
+      - Mail
     summary: Replies a mail.
     description: Returns the data for the message that shall be replied.
     parameters:
