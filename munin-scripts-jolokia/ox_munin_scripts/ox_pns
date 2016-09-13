@@ -44,8 +44,8 @@ my $url = $ENV{oxJolokiaUrl};
 my $username = $ENV{oxJolokiaUser};
 my $password = $ENV{oxJolokiaPassword};
 
-callUrl("avg","/read/com.openexchange.pns:type=PushNotificationMBean/NotificationsPerMinute");
-callUrl("enqueued","/read/com.openexchange.pns:type=PushNotificationMBean/EnqueuedNotifications");
+callUrl("avg","/read/com.openexchange.pns:name=PushNotificationMBean/NotificationsPerMinute");
+callUrl("enqueued","/read/com.openexchange.pns:name=PushNotificationMBean/EnqueuedNotifications");
 
 sub callUrl {
 	my $ua = LWP::UserAgent->new();
