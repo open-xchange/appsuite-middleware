@@ -60,7 +60,7 @@
       - in: formData
         name: json
         type: string
-        description: Represents the normal request body as JSON string containing the infoitem's data as described in the [InfoItemBody](#/definitions/InfoItemBody) model.
+        description: Represents the normal request body as JSON string containing the infoitem's data (See InfoItemBody model of the [newInfoItem](#infostore/createInfoItem) request).
         required: true
       - in: formData
         name: file

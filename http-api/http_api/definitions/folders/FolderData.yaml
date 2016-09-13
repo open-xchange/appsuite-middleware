@@ -80,7 +80,7 @@ properties:
     type: integer
     description: 'Indicates the default folder type.'
     enum:
-      -0 (non-default folder)
+      - 0 (non-default folder)
       - 1 (task)
       - 2 (calendar)
       - 3 (contact)

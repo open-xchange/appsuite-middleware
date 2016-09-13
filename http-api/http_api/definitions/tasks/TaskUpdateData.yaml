@@ -1,3 +1,5 @@
-id:
-  type: string
-  description: ID of a newly created task.
+type: object
+properties:
+  id:
+    type: string
+    description: ID of a newly created task.

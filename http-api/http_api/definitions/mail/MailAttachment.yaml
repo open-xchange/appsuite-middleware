@@ -20,7 +20,7 @@ properties:
     type: string
     description: "Attachment's disposition."
     enum: 
-      - null
+      - "null"
       - inline
       - attachment
       - alternative

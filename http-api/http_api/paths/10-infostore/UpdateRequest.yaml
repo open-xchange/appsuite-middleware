@@ -71,7 +71,7 @@
       - in: formData
         name: json
         type: string
-        description: Represents the normal request body as JSON string containing the infoitem's data as described in the [InfoItemBody](#/definitions/InfoItemBody) model. Only modified fields must be specified but at least "{}".
+        description: Represents the normal request body as JSON string containing the infoitem's data (See InfoItemBody model of the [newInfoItem](#infostore/createInfoItem) request). Only modified fields must be specified but at least "{}".
         required: true
         default: "{}"
       - in: formData

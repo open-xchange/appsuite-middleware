@@ -51,7 +51,7 @@
       - in: formData
         name: json
         type: string
-        description: Represents the normal request body as JSON string containing the infoitem's data as described in the [InfoItemData](#/definitions/InfoItemData) model. Only modified fields must be specified but at least `{"folder_id":"destination"}`.
+        description: Represents the normal request body as JSON string containing the infoitem's data (See InfoItemData model of the [getInfoItem](#infostore/getInfoItem) request). Only modified fields must be specified but at least `{"folder_id":"destination"}`.
         required: true
       - in: formData
         name: file

@@ -137,17 +137,19 @@ function addATagHandler() {
 $('a').on('click', function (e) { 
 	var node = $(e.target);
 	var href = node.attr('href');
-	if (href.indexOf('#') !== 0) return;
+	if (href.indexOf('#') !== 0 || href.indexOf('#!') === 0) return;
 
-	debugger;
 	e.preventDefault();
-
 	var target = document.getElementById(href.substr(1));
+	if(target==null){
+		return;
+	}
+	var endpoints = target.closest('.endpoints');
+	$(endpoints).show();
+	var content = $(target.parentNode.parentNode).children('.content');
+	$(content).show();
 
-	var parent = target.closest('.endpoints');
-
-	$(parent).show();
-
-	target.scrollIntoView();});
+	target.scrollIntoView();
+});
 
 }
