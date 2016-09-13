@@ -51,6 +51,7 @@ package com.openexchange.cluster.lock;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
+import com.openexchange.cluster.lock.policies.RetryPolicy;
 import com.openexchange.exception.OXException;
 
 /**
@@ -98,13 +99,29 @@ public interface ClusterLockService {
     /**
      * Runs the specified cluster task while previously acquiring a lock on the entire cluster
      * for this specific task. The current thread will acquire the lock for a predefined amount
-     * of time.
+     * of time. This method will either run the cluster task or not depending on whether the
+     * cluster lock was acquired. If not an exception will be thrown
      * 
      * @param clusterTask The {@link ClusterTask} to perform
      * @return The result {@link T}
-     * @throws OXException if an error is occurred during the execution
+     * @throws OXException if an error is occurred during the execution of the task or if the acquisition
+     *             of the cluster lock fails
      */
     <T> T runClusterTask(ClusterTask<T> clusterTask) throws OXException;
+
+    /**
+     * Runs the specified cluster task while previously acquiring a lock on the entire cluster
+     * for this specific task. The current thread will acquire the lock for a predefined amount
+     * of time. The amount of retries to acquire the lock is depended on the specified {@link RetryPolicy}.
+     * If the lock is not acquired after the predefined amount of retries an exception will be thrown.
+     * 
+     * @param clusterTask The {@link ClusterTask} to perform
+     * @param retryPolicy The {@link RetryPolicy} for acquiring a lock
+     * @return The result {@link T}
+     * @throws OXException if an error is occurred during the execution or if the acquisition
+     *             of the cluster lock fails
+     */
+    <T> T runClusterTask(ClusterTask<T> clusterTask, RetryPolicy retryPolicy) throws OXException;
 
     /**
      * Runs the specified cluster task while previously acquiring a lock on the entire cluster

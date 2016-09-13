@@ -60,6 +60,8 @@ import com.hazelcast.core.ILock;
 import com.hazelcast.core.IMap;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
+import com.openexchange.cluster.lock.policies.RetryPolicy;
+import com.openexchange.cluster.lock.policies.RunOnceRetryPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -99,9 +101,6 @@ public class ClusterLockServiceImpl implements ClusterLockService {
             throw ClusterLockExceptionCodes.CLUSTER_LOCKED.create(action);
         }
         HazelcastInstance hazelcastInstance = getHazelcastInstance();
-        if (hazelcastInstance == null) {
-            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
-        }
         final Lock lock = hazelcastInstance.getLock(action);
         if (map.putIfAbsent(action, lock) != null) {
             throw ClusterLockExceptionCodes.CLUSTER_LOCKED.create(action);
@@ -128,14 +127,8 @@ public class ClusterLockServiceImpl implements ClusterLockService {
     @Override
     public <T> boolean acquireClusterLock(ClusterTask<T> clusterTask) throws OXException {
         HazelcastInstance hzInstance = getHazelcastInstance();
-        if (hzInstance == null) {
-            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
-        }
 
         IMap<String, Long> clusterLocks = hzInstance.getMap(ClusterLockType.ClusterTaskLocks.name());
-        if (clusterLocks == null) {
-            return true;
-        }
         long timeNow = System.currentTimeMillis(); //FIXME: Switch to nanoTime()
         Long timeThen = clusterLocks.putIfAbsent(clusterTask.getTaskName(), timeNow);
         if (timeThen == null) {
@@ -157,15 +150,7 @@ public class ClusterLockServiceImpl implements ClusterLockService {
     @Override
     public <T> void releaseClusterLock(ClusterTask<T> clusterTask) throws OXException {
         HazelcastInstance hzInstance = getHazelcastInstance();
-        if (hzInstance == null) {
-            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
-        }
-
         IMap<String, Long> map = hzInstance.getMap(ClusterLockType.ClusterTaskLocks.name());
-        if (map == null) {
-            return;
-        }
-
         map.remove(clusterTask.getTaskName());
     }
 
@@ -176,32 +161,39 @@ public class ClusterLockServiceImpl implements ClusterLockService {
      */
     @Override
     public <T> T runClusterTask(ClusterTask<T> clusterTask) throws OXException {
-        HazelcastInstance hzInstance = getHazelcastInstance();
-        if (hzInstance == null) {
-            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
-        }
+        return runClusterTask(clusterTask, new RunOnceRetryPolicy());
+    }
 
-        // Acquire the lock
-        boolean lockAcquired = acquireClusterLock(clusterTask);
-        ScheduledTimerTask timerTask = null;
-        try {
-            if (lockAcquired) {
-                TimerService service = services.getService(TimerService.class);
-                timerTask = service.scheduleAtFixedRate(new RefreshLockTask(clusterTask.getTaskName()), TimeUnit.SECONDS.toMillis(30), TimeUnit.SECONDS.toMillis(30));
-                return clusterTask.perform();
-            } else {
-                throw ClusterLockExceptionCodes.UNABLE_TO_ACQUIRE_CLUSTER_LOCK.create(clusterTask.getTaskName());
-            }
-
-        } finally {
-            LOGGER.debug("Cluster task '{}' completed. Releasing cluster lock.", clusterTask.getTaskName());
-            if (lockAcquired) {
-                releaseClusterLock(clusterTask);
-                if (timerTask != null) {
-                    timerTask.cancel();
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cluster.lock.ClusterLockService#runClusterTask(com.openexchange.cluster.lock.ClusterTask, com.openexchange.cluster.lock.RetryPolicy)
+     */
+    @Override
+    public <T> T runClusterTask(ClusterTask<T> clusterTask, RetryPolicy retryPolicy) throws OXException {
+        do {
+            // Acquire the lock
+            boolean lockAcquired = acquireClusterLock(clusterTask);
+            ScheduledTimerTask timerTask = null;
+            try {
+                if (lockAcquired) {
+                    TimerService service = services.getService(TimerService.class);
+                    timerTask = service.scheduleAtFixedRate(new RefreshLockTask(clusterTask.getTaskName()), TimeUnit.SECONDS.toMillis(30), TimeUnit.SECONDS.toMillis(30));
+                    return clusterTask.perform();
+                }
+            } finally {
+                LOGGER.debug("Cluster task '{}' completed. Releasing cluster lock.", clusterTask.getTaskName());
+                if (lockAcquired) {
+                    releaseClusterLock(clusterTask);
+                    if (timerTask != null) {
+                        timerTask.cancel();
+                    }
                 }
             }
-        }
+        } while (retryPolicy.isRetryAllowed());
+
+        // Failed to acquire lock permanently
+        throw ClusterLockExceptionCodes.UNABLE_TO_ACQUIRE_CLUSTER_LOCK.create(clusterTask.getTaskName());
     }
 
     /*
