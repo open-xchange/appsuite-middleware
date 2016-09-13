@@ -315,6 +315,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 sessionBoundSocket.send("session:invalid");
                 closeSocketSafe(sessionBoundSocket);
                 it.remove();
+                LOG.info("Closed Web Socket ({}) with path \"{}\" for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
             }
         }
     }
@@ -342,6 +343,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 sessionBoundSocket.send("session:invalid");
                 closeSocketSafe(sessionBoundSocket);
                 it.remove();
+                LOG.info("Closed Web Socket ({}) with path \"{}\" bound to dropped/removed session {} for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), sessionId, I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
             }
         }
     }
@@ -351,7 +353,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             remoteDistributor.removeWebSocket(webSocket);
             webSocket.close();
         } catch (Exception e) {
-            LOG.error("Failed closing Web Socket () with path {} for user {} in context {}", webSocket.getConnectionId(), webSocket.getPath(), I(webSocket.getUserId()), I(webSocket.getContextId()), e);
+            LOG.error("Failed closing Web Socket ({}) with path \"{}\" for user {} in context {}", webSocket.getConnectionId(), webSocket.getPath(), I(webSocket.getUserId()), I(webSocket.getContextId()), e);
         }
     }
 
