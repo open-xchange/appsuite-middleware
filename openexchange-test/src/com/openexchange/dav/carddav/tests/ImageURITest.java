@@ -70,6 +70,7 @@ import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.carddav.CardDAVTest;
+import com.openexchange.dav.carddav.Photos;
 import com.openexchange.dav.carddav.VCardResource;
 import com.openexchange.dav.carddav.reports.AddressbookMultiGetReportInfo;
 import com.openexchange.groupware.container.Contact;
@@ -136,7 +137,7 @@ public class ImageURITest extends CardDAVTest {
          */
         String uid = randomUID();
         Contact contact = new Contact();
-        contact.setImage1(ImageTest.PNG_100x100);
+        contact.setImage1(Photos.PNG_100x100);
         contact.setImageContentType("image/png");
         contact.setUid(uid);
         rememberForCleanUp(create(contact));
@@ -169,7 +170,7 @@ public class ImageURITest extends CardDAVTest {
         PhotoType photo = new PhotoType();
         photo.setImageMediaType(ImageMediaType.PNG);
         photo.setEncodingType(EncodingType.BINARY);
-        photo.setPhoto(ImageTest.PNG_100x100);
+        photo.setPhoto(Photos.PNG_100x100);
         vCard.getVCard().addPhoto(photo);
         PutMethod put = null;
         try {
@@ -186,7 +187,7 @@ public class ImageURITest extends CardDAVTest {
          */
         Contact contact = getContact(uid);
         assertNotNull(contact);
-        Assert.assertArrayEquals("image data wrong", ImageTest.PNG_100x100, contact.getImage1());
+        Assert.assertArrayEquals("image data wrong", Photos.PNG_100x100, contact.getImage1());
         /*
          * get & verify photo in vCard
          */
@@ -203,7 +204,7 @@ public class ImageURITest extends CardDAVTest {
          */
         String uid = randomUID();
         Contact contact = new Contact();
-        contact.setImage1(ImageTest.PNG_100x100);
+        contact.setImage1(Photos.PNG_100x100);
         contact.setImageContentType("image/png");
         contact.setUid(uid);
         rememberForCleanUp(create(contact));
@@ -224,7 +225,7 @@ public class ImageURITest extends CardDAVTest {
         PhotoType photo = new PhotoType();
         photo.setImageMediaType(ImageMediaType.SGIF);
         photo.setEncodingType(EncodingType.BINARY);
-        photo.setPhoto(ImageTest.GIF_100x100);
+        photo.setPhoto(Photos.GIF_100x100);
         vCard.getVCard().addPhoto(photo);
         putVCardUpdate(uid, vCard.toString(), vCard.getETag());
         /*
@@ -232,11 +233,11 @@ public class ImageURITest extends CardDAVTest {
          */
         contact = getContact(uid);
         assertNotNull(contact);
-        Assert.assertArrayEquals("image data wrong", ImageTest.GIF_100x100, contact.getImage1());
+        Assert.assertArrayEquals("image data wrong", Photos.GIF_100x100, contact.getImage1());
         /*
          * get & verify photo in vCard
          */
-        verifyPhoto(href, ImageTest.GIF_100x100, prefer);
+        verifyPhoto(href, Photos.GIF_100x100, prefer);
     }
 
     private void testRemoveOnClient(String prefer) throws Exception {
@@ -249,7 +250,7 @@ public class ImageURITest extends CardDAVTest {
          */
         String uid = randomUID();
         Contact contact = new Contact();
-        contact.setImage1(ImageTest.PNG_100x100);
+        contact.setImage1(Photos.PNG_100x100);
         contact.setImageContentType("image/png");
         contact.setUid(uid);
         rememberForCleanUp(create(contact));
