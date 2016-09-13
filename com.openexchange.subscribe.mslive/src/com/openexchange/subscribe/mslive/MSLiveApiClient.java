@@ -62,6 +62,7 @@ import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
+import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
@@ -105,7 +106,7 @@ public class MSLiveApiClient {
         String token = account.getToken();
         if (isExpired(token)) {
             ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-            token = clusterLockService.runClusterTask(new MSLiveReauthorizeClusterTask(session, account));
+            token = clusterLockService.runClusterTask(new MSLiveReauthorizeClusterTask(session, account), new ExponentialBackOffRetryPolicy());
         }
 
         return token;

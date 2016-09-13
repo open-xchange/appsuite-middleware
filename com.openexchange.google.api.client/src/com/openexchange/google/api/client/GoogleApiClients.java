@@ -61,6 +61,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
+import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.services.Services;
@@ -137,7 +138,7 @@ public class GoogleApiClients {
                 if (expiry < 300) {
                     // Less than 5 minutes to live -> refresh token!
                     ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-                    defaultAccount =  clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, defaultAccount));
+                    defaultAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, defaultAccount), new ExponentialBackOffRetryPolicy());
                 }
             } catch (org.scribe.exceptions.OAuthException e) {
                 // Failed to request new access token
@@ -197,7 +198,7 @@ public class GoogleApiClients {
             if (expiry < 300) {
                 // Less than 5 minutes to live -> refresh token!
                 ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-                googleAccount =  clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount));
+                googleAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount), new ExponentialBackOffRetryPolicy());
             }
         }
 
@@ -259,7 +260,7 @@ public class GoogleApiClients {
         }
 
         ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-        return clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount));
+        return clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount), new ExponentialBackOffRetryPolicy());
     }
 
     /**

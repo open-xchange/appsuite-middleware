@@ -61,6 +61,7 @@ import com.box.sdk.BoxAPIResponse;
 import com.box.sdk.BoxUser;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
+import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -170,7 +171,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         // Box SDK performs an automatic access token refresh, so we need to see if the tokens were renewed
         if (!oAuthAccount.getToken().equals(apiConnection.getAccessToken()) || !oAuthAccount.getSecret().equals(apiConnection.getRefreshToken())) {
             ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-            clusterLockService.runClusterTask(new BoxReauthorizeClusterTask(getSession(), oAuthAccount));
+            clusterLockService.runClusterTask(new BoxReauthorizeClusterTask(getSession(), oAuthAccount), new ExponentialBackOffRetryPolicy());
         }
         return this;
     }

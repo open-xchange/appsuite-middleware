@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
+import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
@@ -106,7 +107,7 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
         }
 
         ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-        clusterLockService.runClusterTask(new ReauthorizeClusterTask(request, session, accountId, serviceId));
+        clusterLockService.runClusterTask(new ReauthorizeClusterTask(request, session, accountId, serviceId), new ExponentialBackOffRetryPolicy());
 
         /*
          * Return appropriate result

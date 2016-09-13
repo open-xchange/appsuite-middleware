@@ -67,6 +67,7 @@ import org.scribe.model.Token;
 import org.slf4j.Logger;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
+import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -208,7 +209,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         if (considerExpired || scribeOAuthService.isExpired(liveconnectOAuthAccount.getToken())) {
             // Expired...
             ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-            return clusterLockService.runClusterTask(new OneDriveReauthorizeClusterTask(session, liveconnectOAuthAccount));
+            return clusterLockService.runClusterTask(new OneDriveReauthorizeClusterTask(session, liveconnectOAuthAccount), new ExponentialBackOffRetryPolicy());
         }
         return null;
     }
@@ -231,7 +232,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         public OAuthAccount perform() throws OXException {
             Session session = getSession();
             OAuthAccount cachedAccount = getCachedAccount();
-            
+
             OAuthService oAuthService = Services.getService(OAuthService.class);
             OAuthAccount dbAccount = oAuthService.getAccount(cachedAccount.getId(), session, session.getUserId(), session.getContextId());
 
