@@ -54,6 +54,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -430,12 +431,15 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         }
 
         // Check if any satisfies given filter
-        for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
+        List<SessionBoundWebSocket> sockets = new ArrayList<>(userSockets.values());
+        for (SessionBoundWebSocket sessionBoundSocket : sockets) {
             if (WebSockets.matches(pathFilter, sessionBoundSocket)) {
                 LOG.info("Found local Web Socket for user {} in context {} matching filter \"{}\"", I(userId), I(contextId), pathFilter);
                 return true;
             }
         }
+
+        LOG.info("Found no local Web Socket for user {} in context {} matching filter \"{}\". Available Web Sockets: {}", I(userId), I(contextId), pathFilter, sockets);
         return false;
     }
 
