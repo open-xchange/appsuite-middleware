@@ -524,11 +524,13 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             }
 
             // Look-up optional connection identifier; generate a new, unique one if absent
+            boolean validateAbsence = true;
             ConnectionId connectionId;
             {
                 String sConId = parameters.getParameter("connection");
                 if (sConId == null) {
                     sConId = com.openexchange.java.util.UUIDs.getUnformattedStringFromRandom();
+                    validateAbsence = false;
                 }
                 connectionId = ConnectionId.newInstance(sConId);
             }
@@ -537,7 +539,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             Session session = checkSession(sessionId, requestPacket, parameters);
 
             // Check if such a Web Socket already exists
-            if (exists(connectionId, session.getUserId(), session.getContextId())) {
+            if (validateAbsence && exists(connectionId, session.getUserId(), session.getContextId())) {
                 throw new HandshakeException("Such a Web Socket connection already exists: " + connectionId);
             }
 
