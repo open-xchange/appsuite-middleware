@@ -419,17 +419,20 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
         if (null == userSockets || userSockets.isEmpty()) {
             // No socket at all
+            LOG.info("Found no local Web Sockes for user {} in context {}", I(userId), I(contextId));
             return false;
         }
 
         if (null == pathFilter) {
             // No filter given
+            LOG.info("Found local Web Socket for user {} in context {}", I(userId), I(contextId));
             return true;
         }
 
         // Check if any satisfies given filter
         for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
             if (WebSockets.matches(pathFilter, sessionBoundSocket)) {
+                LOG.info("Found local Web Socket for user {} in context {} matching filter \"{}\"", I(userId), I(contextId), pathFilter);
                 return true;
             }
         }
