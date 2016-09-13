@@ -709,6 +709,8 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 }
 
                 remoteDistributor.addWebSocket(sessionBoundSocket);
+
+                LOG.debug("Accepted Web Socket ({}) with path \"{}\" for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
             } else {
                 super.onConnect(socket);
             }
@@ -733,6 +735,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             }
 
             closeSocketSafe(sessionBoundSocket);
+            LOG.debug("Closed Web Socket ({}) with path \"{}\" due to connection closure for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
         } else {
             super.onClose(socket, frame);
         }
