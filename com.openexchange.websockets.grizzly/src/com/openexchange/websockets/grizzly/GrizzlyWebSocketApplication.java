@@ -475,33 +475,31 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
      * @param optSession The optional session associated with the socket to close
      */
     public void close(WebSocket socket, Session optSession) {
-        try {
-            if (socket instanceof SessionBoundWebSocket) {
-                boolean found = false;
-                if (null != optSession) {
-                    ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(optSession));
-                    if (null != userSockets) {
-                        for (Iterator<SessionBoundWebSocket> iter = userSockets.values().iterator(); !found && iter.hasNext();) {
-                            if (socket.equals(iter.next())) {
-                                iter.remove();
-                                found = true;
-                            }
-                        }
-                    }
-                } else {
-                    for (Iterator<ConcurrentMap<ConnectionId, SessionBoundWebSocket>> i = openSockets.values().iterator(); !found && i.hasNext();) {
-                        for (Iterator<SessionBoundWebSocket> iter = i.next().values().iterator(); !found && iter.hasNext();) {
-                            if (socket.equals(iter.next())) {
-                                iter.remove();
-                                found = true;
-                            }
+        if (socket instanceof SessionBoundWebSocket) {
+            boolean found = false;
+            if (null != optSession) {
+                ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(optSession));
+                if (null != userSockets) {
+                    for (Iterator<SessionBoundWebSocket> iter = userSockets.values().iterator(); !found && iter.hasNext();) {
+                        if (socket.equals(iter.next())) {
+                            iter.remove();
+                            found = true;
                         }
                     }
                 }
             } else {
-                remove(socket);
+                for (Iterator<ConcurrentMap<ConnectionId, SessionBoundWebSocket>> i = openSockets.values().iterator(); !found && i.hasNext();) {
+                    for (Iterator<SessionBoundWebSocket> iter = i.next().values().iterator(); !found && iter.hasNext();) {
+                        if (socket.equals(iter.next())) {
+                            iter.remove();
+                            found = true;
+                        }
+                    }
+                }
             }
-        } finally {
+            closeSocketSafe((SessionBoundWebSocket) socket);
+        } else {
+            remove(socket);
             socket.close();
         }
     }
