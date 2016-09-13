@@ -1,0 +1,5 @@
+open-xchange-imageserver (7.8.2-4) unstable; urgency=medium
+
+  * initial packaging for open-xchange-imageserver
+
+ -- Kai Ahrens <kai.ahrens@open-xchange.com>  Thu, 28 July 2016 17:19:32 +0200
