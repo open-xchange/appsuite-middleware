@@ -404,20 +404,23 @@ public class ContactResource extends CommonResource<Contact> {
                     }
                 }
             }
-            WebdavProperty result = new WebdavProperty(property.getNamespace(), property.getName());
+            String value;
             if (null != propertyNames && 0 < propertyNames.size()) {
                 try (VCardExport vCardExport = generateVCardResource(propertyNames); InputStream inputStream = vCardExport.getClosingStream()) {
-                    result.setValue(Streams.stream2string(inputStream, Charsets.UTF_8_NAME));
+                    value = Streams.stream2string(inputStream, Charsets.UTF_8_NAME);
                 } catch (IOException | OXException e) {
                     throw protocolException(e);
                 }
             } else {
                 try (InputStream inputStream = getBody()) {
-                    result.setValue(Streams.stream2string(inputStream, Charsets.UTF_8_NAME));
+                    value = Streams.stream2string(inputStream, Charsets.UTF_8_NAME);
                 } catch (IOException e) {
                     throw protocolException(e);
                 }
             }
+            WebdavProperty result = new WebdavProperty(property.getNamespace(), property.getName());
+            result.setXML(true);
+            result.setValue("<![CDATA[" + value + "]]>");
             return result;
         }
         return null;
