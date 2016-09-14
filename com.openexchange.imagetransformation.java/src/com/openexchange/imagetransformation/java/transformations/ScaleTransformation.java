@@ -124,6 +124,8 @@ public class ScaleTransformation implements ImageTransformation {
 
     /**
      * Resizes an image to a specific size and adds white lines in respect to the ratio.
+     * <p>
+     * See <a href="http://www.programcreek.com/java-api-examples/index.php?source_dir=proudcase-master/src/java/com/proudcase/util/ImageScale.java">this code example</a> from which this routine was derived
      *
      * @param resizedImage The previously resized image using {@link ScaleType#CONTAIN CONTAIN} policy
      * @param resultWidth The desired width
