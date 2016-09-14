@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Google2Api;
+import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
@@ -73,6 +74,7 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
@@ -336,19 +338,30 @@ public class GoogleApiClients {
 
                 // Refresh the token
                 String refreshToken = getCachedAccount().getSecret();
-                Token accessToken = scribeOAuthService.getAccessToken(new Token(getCachedAccount().getToken(), getCachedAccount().getSecret()), null);
-                if (!Strings.isEmpty(accessToken.getSecret())) {
-                    refreshToken = accessToken.getSecret();
-                }
-                // Update account
-                int accountId = getCachedAccount().getId();
-                Map<String, Object> arguments = new HashMap<String, Object>(3);
-                arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
-                arguments.put(OAuthConstants.ARGUMENT_SESSION, getSession());
-                oAuthService.updateAccount(accountId, arguments, getSession().getUserId(), getSession().getContextId(), getCachedAccount().getEnabledScopes());
+                Token accessToken;
+                try {
+                    accessToken = scribeOAuthService.getAccessToken(new Token(getCachedAccount().getToken(), getCachedAccount().getSecret()), null);
 
-                // Reload
-                return oAuthService.getAccount(accountId, getSession(), getSession().getUserId(), getSession().getContextId());
+                    if (!Strings.isEmpty(accessToken.getSecret())) {
+                        refreshToken = accessToken.getSecret();
+                    }
+                    // Update account
+                    int accountId = getCachedAccount().getId();
+                    Map<String, Object> arguments = new HashMap<String, Object>(3);
+                    arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
+                    arguments.put(OAuthConstants.ARGUMENT_SESSION, getSession());
+                    oAuthService.updateAccount(accountId, arguments, getSession().getUserId(), getSession().getContextId(), getCachedAccount().getEnabledScopes());
+
+                    // Reload
+                    return oAuthService.getAccount(accountId, getSession(), getSession().getUserId(), getSession().getContextId());
+                } catch (OAuthException e) {
+                    String exMessage = e.getMessage();
+                    if (exMessage.contains("invalid_grant")) {
+                        String cburl = OAuthUtil.buildCallbackURL(getSession(), dbAccount);
+                        throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(dbAccount.getId(), cburl);
+                    }
+                    throw OAuthExceptionCodes.OAUTH_ERROR.create(exMessage, e);
+                }
             } else {
                 return dbAccount;
             }
