@@ -118,6 +118,8 @@ public abstract class Stanza implements Serializable {
     protected volatile Map<ElementPath, List<PayloadTree>> payloads;
     
     protected int resendCount = 0;
+    
+    private Map<String, Object> channelAttributes = new HashMap<String, Object>();
 
     /**
      * Initializes a new {@link Stanza}.
@@ -615,6 +617,14 @@ public abstract class Stanza implements Serializable {
             copy.add(tree);
         }
         setPayloads(copy);
+    }
+    
+    public Object getChannelAttribute(String name) {
+    	return channelAttributes.get(name);
+    }
+    
+    public void setChannelAttribute(String name, Object o) {
+    	channelAttributes.put(name, o);
     }
 
     /**
