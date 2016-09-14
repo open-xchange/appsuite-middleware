@@ -106,7 +106,7 @@ public final class BoxAccountAccess implements CapabilityAware {
     public void connect() throws OXException {
         OAuthAccessRegistryService service = Services.getService(OAuthAccessRegistryService.class);
         OAuthAccessRegistry registry = service.get(API.BOX_COM.getFullName());
-        OAuthAccess boxAccess = registry.get(session.getContextId(), session.getUserId());
+        OAuthAccess boxAccess = registry.get(session);
         if (boxAccess == null) {
             BoxOAuthAccess access = new BoxOAuthAccess(account, session);
             boxAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), access);

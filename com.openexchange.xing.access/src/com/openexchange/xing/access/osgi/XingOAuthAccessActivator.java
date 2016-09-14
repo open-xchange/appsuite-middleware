@@ -130,7 +130,7 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
 
                 OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
                 OAuthAccessRegistry registry = registryService.get(API.XING.getFullName());
-                OAuthAccess oAuthAccess = registry.get(session.getContextId(), session.getUserId());
+                OAuthAccess oAuthAccess = registry.get(session);
                 if (oAuthAccess == null) {
                     // Create
                     XingOAuthAccessImpl newInstance = new XingOAuthAccessImpl(session, oAuthAccount);

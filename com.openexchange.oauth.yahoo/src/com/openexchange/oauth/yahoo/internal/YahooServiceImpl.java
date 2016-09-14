@@ -216,7 +216,7 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
     private OAuthAccess getOAuthAccess(Session session, int accountId) throws OXException {
         OAuthAccessRegistryService service = services.getService(OAuthAccessRegistryService.class);
         OAuthAccessRegistry oAuthAccessRegistry = service.get(API.YAHOO.getFullName());
-        OAuthAccess oAuthAccess = oAuthAccessRegistry.get(session.getContextId(), session.getUserId());
+        OAuthAccess oAuthAccess = oAuthAccessRegistry.get(session);
         if (oAuthAccess == null) {
             OAuthAccess access = new YahooOAuthAccess(session, accountId);
 

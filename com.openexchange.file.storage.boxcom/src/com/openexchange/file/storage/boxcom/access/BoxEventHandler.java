@@ -55,6 +55,7 @@ import com.openexchange.file.storage.boxcom.Services;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
+import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
@@ -87,7 +88,7 @@ public final class BoxEventHandler implements EventHandler {
                     if (null != userId) {
                         OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
                         OAuthAccessRegistry registry = registryService.get(API.BOX_COM.getFullName());
-                        if (registry.removeIfLast(contextId, userId)) {
+                        if (registry.removeIfLast((Session) event.getProperty(SessiondEventConstants.PROP_SESSION))) {
                             LOG.debug("Box.com access removed for user {} in context {}", userId, contextId);
                         }
                     }

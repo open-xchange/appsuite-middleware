@@ -165,7 +165,7 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
 
             OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
             OAuthAccessRegistry oAuthAccessRegistry = registryService.get(serviceId);
-            OAuthAccess access = oAuthAccessRegistry.get(session.getContextId(), session.getUserId());
+            OAuthAccess access = oAuthAccessRegistry.get(session);
 
             if (access == null) {
                 performReauthorize(oauthService);

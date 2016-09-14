@@ -83,6 +83,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
 
     /**
      * Initializes a new {@link AbstractOAuthAccess}.
+     * 
      * @param session TODO
      */
     protected AbstractOAuthAccess(Session session) {
@@ -202,11 +203,12 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
         }
     }
 
-    /**
-     * Gets the session
-     *
-     * @return The session
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.access.OAuthAccess#getSession()
      */
+    @Override
     public Session getSession() {
         return session;
     }

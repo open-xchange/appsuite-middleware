@@ -58,6 +58,7 @@ final class OAuthAccessKey {
 
     private final int contextId;
     private final int userId;
+    private final String sessionId;
     private final int hash;
 
     /**
@@ -66,24 +67,36 @@ final class OAuthAccessKey {
      * @param contextId The context identifier
      * @param userId The user identifier
      */
-    OAuthAccessKey(final int contextId, final int userId) {
+    OAuthAccessKey(final int contextId, final int userId, final String sessionId) {
         super();
         this.contextId = contextId;
         this.userId = userId;
+        this.sessionId = sessionId;
 
         // Pre-build hash code
         final int prime = 31;
         int result = 1;
         result = prime * result + contextId;
+        result = prime * result + ((sessionId == null) ? 0 : sessionId.hashCode());
         result = prime * result + userId;
         hash = result;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
     @Override
     public int hashCode() {
         return hash;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
     @Override
     public boolean equals(final Object obj) {
         if (this == obj) {
@@ -95,8 +108,15 @@ final class OAuthAccessKey {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        OAuthAccessKey other = (OAuthAccessKey) obj;
+        final OAuthAccessKey other = (OAuthAccessKey) obj;
         if (contextId != other.contextId) {
+            return false;
+        }
+        if (sessionId == null) {
+            if (other.sessionId != null) {
+                return false;
+            }
+        } else if (!sessionId.equals(other.sessionId)) {
             return false;
         }
         if (userId != other.userId) {

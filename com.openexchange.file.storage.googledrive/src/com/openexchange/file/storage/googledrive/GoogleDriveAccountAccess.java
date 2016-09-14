@@ -107,7 +107,7 @@ public final class GoogleDriveAccountAccess implements CapabilityAware {
     public void connect() throws OXException {
         OAuthAccessRegistryService service = Services.getService(OAuthAccessRegistryService.class);
         OAuthAccessRegistry registry = service.get(API.GOOGLE.getFullName());
-        OAuthAccess googleDriveAccess = registry.get(session.getContextId(), session.getUserId());
+        OAuthAccess googleDriveAccess = registry.get(session);
         if (googleDriveAccess == null) {
             GoogleDriveOAuthAccess access = new GoogleDriveOAuthAccess(account, session);
             googleDriveAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), access);
