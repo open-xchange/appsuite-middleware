@@ -102,7 +102,7 @@ public class DropboxOAuthAccess extends AbstractOAuthAccess {
                     return false;
                 }
             }
-            throw Utils.handle(e, null, session, oauthAccount);
+            throw Utils.handle(e, null, getSession(), getOAuthAccount());
         }
     }
 
