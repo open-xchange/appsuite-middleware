@@ -108,7 +108,7 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
     public void connect() throws OXException {
         OAuthAccessRegistryService service = DropboxServices.getService(OAuthAccessRegistryService.class);
         OAuthAccessRegistry registry = service.get(API.DROPBOX.getFullName());
-        OAuthAccess dropboxOAuthAccess = registry.get(session);
+        OAuthAccess dropboxOAuthAccess = registry.get(session.getContextId(), session.getUserId());
         if (dropboxOAuthAccess == null) {
             AbstractOAuthAccess newInstance = new DropboxOAuthAccess(account, session);
             dropboxOAuthAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), newInstance);

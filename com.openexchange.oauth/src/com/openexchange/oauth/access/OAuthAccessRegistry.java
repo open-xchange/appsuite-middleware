@@ -51,7 +51,6 @@ package com.openexchange.oauth.access;
 
 import java.util.concurrent.Callable;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
  * {@link OAuthAccessRegistry} - A registry for in-use OAuth accesses by a certain user.
@@ -88,12 +87,13 @@ public interface OAuthAccessRegistry {
 
     /**
      * Checks the presence of the {@link OAuthAccess} associated with the given user/context/account tuple
-     * @param session TODO
-     * @param accountId The account identifier
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param accountId The account identifier
      * @return <code>true if such an {@link OAuthAccess} is present; <code>false</code> otherwise
      */
-    boolean contains(Session session);
+    boolean contains(int contextId, int userId);
 
     /**
      * Retrieves the {@link OAuthAccess} associated with the given user/context/account tuple
@@ -103,15 +103,16 @@ public interface OAuthAccessRegistry {
      * @param accountId The account identifier
      * @return The {@link OAuthAccess} that is associated with the tuple, or <code>null</code> if none exists
      */
-    OAuthAccess get(Session session);
+    OAuthAccess get(int contextId, int userId);
 
     /**
      * Removes the {@link OAuthAccess} associated with the specified user/context tuple, if no more accesses for that tuple are present
-     * @param session TODO
      *
+     * @param contextId The context identifier
+     * @param userId The user identifier
      * @return <code>true</code> if an {@link OAuthAccess} for the specified tuple was found and removed; <code>false</code> otherwise
      */
-    boolean removeIfLast(Session session);
+    boolean removeIfLast(int contextId, int userId);
 
     /**
      * Purges the {@link OAuthAccess} associated with the specified user/context/account tuple.

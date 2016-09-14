@@ -51,7 +51,6 @@ package com.openexchange.oauth.access;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.session.Session;
 
 /**
  * {@link OAuthAccess} - Wraps the concrete client that is supposed to be used to access OAuth account's resources.
@@ -122,11 +121,4 @@ public interface OAuthAccess {
      * @return the account identifier of this {@link OAuthAccess}
      */
     int getAccountId() throws OXException;
-
-    /**
-     * Returns the groupware {@link Session} assigned to the {@link OAuthAccess}
-     * 
-     * @return The groupware {@link Session}
-     */
-    Session getSession();
 }

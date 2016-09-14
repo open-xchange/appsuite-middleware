@@ -55,7 +55,6 @@ import com.openexchange.oauth.API;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.yahoo.osgi.Services;
-import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
@@ -88,7 +87,7 @@ public final class YahooAccessEventHandler implements EventHandler {
                     if (null != userId) {
                         OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
                         OAuthAccessRegistry registry = registryService.get(API.YAHOO.getFullName());
-                        if (registry.removeIfLast((Session) event.getProperty(SessiondEventConstants.PROP_SESSION))) {
+                        if (registry.removeIfLast(contextId, userId)) {
                             LOG.debug("Yahoo session removed for user {} in context {}", userId, contextId);
                         }
                     }

@@ -55,7 +55,6 @@ import com.openexchange.file.storage.googledrive.osgi.Services;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
-import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 
 /**
@@ -88,7 +87,7 @@ public final class GoogleDriveEventHandler implements EventHandler {
                     if (null != userId) {
                         OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
                         OAuthAccessRegistry registry = registryService.get(API.GOOGLE.getFullName());
-                        if (registry.removeIfLast((Session) event.getProperty(SessiondEventConstants.PROP_SESSION))) {
+                        if (registry.removeIfLast(contextId, userId)) {
                             LOG.debug("Google Drive access removed for user {} in context {}", userId, contextId);
                         }
                     }

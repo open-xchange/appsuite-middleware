@@ -72,10 +72,8 @@ import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
-import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
@@ -171,18 +169,9 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         OAuthAccount oAuthAccount = getOAuthAccount();
 
         // Box SDK performs an automatic access token refresh, so we need to see if the tokens were renewed
-        try {
-            if (!oAuthAccount.getToken().equals(apiConnection.getAccessToken()) || !oAuthAccount.getSecret().equals(apiConnection.getRefreshToken())) {
-                ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-                clusterLockService.runClusterTask(new BoxReauthorizeClusterTask(getSession(), oAuthAccount), new ExponentialBackOffRetryPolicy());
-            }
-        } catch (BoxAPIException e) {
-            if (e.getResponse().contains("invalid_grant")) {
-                //TODO: Maybe try to automatically re-authorise once instead of directly throwing an exception?
-                String cburl = OAuthUtil.buildCallbackURL(getSession(), oAuthAccount);
-                throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(oAuthAccount.getAPI().getFullName(), cburl);
-            }
-            throw OAuthExceptionCodes.OAUTH_ERROR.create(e.getMessage(), e);
+        if (!oAuthAccount.getToken().equals(apiConnection.getAccessToken()) || !oAuthAccount.getSecret().equals(apiConnection.getRefreshToken())) {
+            ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
+            clusterLockService.runClusterTask(new BoxReauthorizeClusterTask(getSession(), oAuthAccount), new ExponentialBackOffRetryPolicy());
         }
         return this;
     }
