@@ -79,7 +79,7 @@ public class ClusterLockServiceImpl implements ClusterLockService {
 
     private final Unregisterer unregisterer;
     private final ServiceLookup services;
-    
+
     //FIXME: Switch to nanoseconds
 
     /** Defines the threshold for the lock refresh in seconds */
@@ -95,36 +95,6 @@ public class ClusterLockServiceImpl implements ClusterLockService {
         super();
         this.services = services;
         this.unregisterer = unregisterer;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.ClusterLockService#acquireClusterLock(java.lang.String)
-     */
-    @Override
-    public Lock acquireClusterLock(final String action) throws OXException {
-        final ConcurrentMap<String, Lock> map = getHzMap();
-        if (map.get(action) != null) {
-            throw ClusterLockExceptionCodes.CLUSTER_LOCKED.create(action);
-        }
-        HazelcastInstance hazelcastInstance = getHazelcastInstance();
-        final Lock lock = hazelcastInstance.getLock(action);
-        if (map.putIfAbsent(action, lock) != null) {
-            throw ClusterLockExceptionCodes.CLUSTER_LOCKED.create(action);
-        }
-        return lock;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.ClusterLockService#releaseClusterLock(java.lang.String, java.util.concurrent.locks.Lock)
-     */
-    @Override
-    public void releaseClusterLock(final String action, final Lock lock) throws OXException {
-        final ConcurrentMap<String, Lock> map = getHzMap();
-        map.remove(action, lock);
     }
 
     /*
@@ -300,18 +270,6 @@ public class ClusterLockServiceImpl implements ClusterLockService {
             throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
         return hazelcastInstance;
-    }
-
-    private IMap<String, Lock> getHzMap() throws OXException {
-        try {
-            HazelcastInstance hazelcastInstance = getHazelcastInstance();
-            if (hazelcastInstance == null) {
-                throw ServiceExceptionCode.absentService(HazelcastInstance.class);
-            }
-            return hazelcastInstance.getMap("SingleNodeClusterLocks");
-        } catch (HazelcastInstanceNotActiveException e) {
-            throw handleNotActiveException(e);
-        }
     }
 
     private IMap<String, Long> getPeriodicHzMap() throws OXException {

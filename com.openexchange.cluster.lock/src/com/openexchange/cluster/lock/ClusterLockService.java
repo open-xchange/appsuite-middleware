@@ -62,24 +62,6 @@ import com.openexchange.exception.OXException;
 public interface ClusterLockService {
 
     /**
-     * Acquire a cluster lock.
-     * 
-     * @param node The action that is going to be performed cluster-wise
-     * @return The lock
-     * @throws OXException if the cluster is already locked for that action
-     */
-    public Lock acquireClusterLock(String action) throws OXException;
-
-    /**
-     * Release a cluster lock previously acquired via {@link ClusterLockService.acquireClusterLock}.
-     * 
-     * @param action the action that was performed cluster-wise
-     * @param lock The lock
-     * @throws OXException
-     */
-    void releaseClusterLock(String action, Lock lock) throws OXException;
-
-    /**
      * Acquires a cluster lock for the specified {@link ClusterTask}
      * 
      * @param clusterTask The {@link ClusterTask} for which to acquire the cluster lock
@@ -155,6 +137,7 @@ public interface ClusterLockService {
      * @param period
      * @return The lock
      * @throws OXException
+     * @deprecated Use {@link ClusterTimerService#scheduleAtFixedRate(String, Runnable, long, long)} instead
      */
     public Lock acquirePeriodicClusterLock(String action, long period) throws OXException;
 
@@ -163,6 +146,7 @@ public interface ClusterLockService {
      * 
      * @param action
      * @throws OXException
+     * @deprecated See {@link #acquirePeriodicClusterLock(String, long)}
      */
     public void releasePeriodicClusterLock(String action) throws OXException;
 }
