@@ -353,7 +353,6 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         int userId = uac.getUserId();
         int contextId = uac.getContextId();
         webSocketService.sendMessage(textMessage, clientAndPathFilter.getPathFilter(), userId, contextId);
-        LOG.info("Sent notification \"{}\" via transport '{}' using path filter \"{}\" to user {} in context {}", notification.getTopic(), ID, clientAndPathFilter.getPathFilter(), I(userId), I(contextId));
     }
 
     private Map<String, ClientAndPathFilter> getResolveResultsFor(Collection<PushMatch> matches) throws OXException {

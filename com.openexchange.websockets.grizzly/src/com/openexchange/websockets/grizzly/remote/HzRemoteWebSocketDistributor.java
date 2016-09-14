@@ -806,7 +806,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                     return;
                 }
 
-                LOG.info("Running cleaner task for user {} in context {}...", I(userId), I(contextId));
+                LOG.debug("Running cleaner task for user {} in context {}...", I(userId), I(contextId));
 
                 MultiMap<String, String> map = map(mapName, hzInstance);
 
@@ -814,7 +814,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                 String key = generateKey(userId, contextId, address.getHost(), address.getPort());
                 Collection<String> collection = map.get(key);
                 if (null == collection || collection.isEmpty()) {
-                    LOG.info("Detected no orphaned entries in Hazelcast map during cleaner task run for user {} in context {}", I(userId), I(contextId));
+                    LOG.debug("Detected no orphaned entries in Hazelcast map during cleaner task run for user {} in context {}", I(userId), I(contextId));
                     return;
                 }
 
@@ -831,7 +831,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                 application.retainNonExisting(connectionIds.keySet(), userId, contextId);
 
                 if (connectionIds.isEmpty()) {
-                    LOG.info("Detected no orphaned entries in Hazelcast map during cleaner task run for user {} in context {}", I(userId), I(contextId));
+                    LOG.debug("Detected no orphaned entries in Hazelcast map during cleaner task run for user {} in context {}", I(userId), I(contextId));
                     return;
                 }
 

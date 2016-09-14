@@ -382,21 +382,24 @@ public class ContactResource extends CommonResource<Contact> {
     @Override
     protected WebdavProperty internalGetProperty(WebdavProperty property) throws WebdavProtocolException {
         if (exists() && DAVProtocol.CARD_NS.getURI().equals(property.getNamespace()) && "address-data".equals(property.getName())) {
-            WebdavProperty result = new WebdavProperty(property.getNamespace(), property.getName());
+            String value;
             Set<String> propertyNames = extractRequestedProperties(property);
             if (null != propertyNames && 0 < propertyNames.size()) {
                 try (VCardExport vCardExport = generateVCardResource(propertyNames); InputStream inputStream = vCardExport.getClosingStream()) {
-                    result.setValue(Streams.stream2string(inputStream, Charsets.UTF_8_NAME));
+                    value = Streams.stream2string(inputStream, Charsets.UTF_8_NAME);
                 } catch (IOException | OXException e) {
                     throw protocolException(getUrl(), e);
                 }
             } else {
                 try (InputStream inputStream = getBody()) {
-                    result.setValue(Streams.stream2string(inputStream, Charsets.UTF_8_NAME));
+                    value = Streams.stream2string(inputStream, Charsets.UTF_8_NAME);
                 } catch (IOException e) {
                     throw protocolException(getUrl(), e);
                 }
             }
+            WebdavProperty result = new WebdavProperty(property.getNamespace(), property.getName());
+            result.setXML(true);
+            result.setValue("<![CDATA[" + value + "]]>");
             return result;
         }
         return null;

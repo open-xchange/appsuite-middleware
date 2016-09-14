@@ -420,6 +420,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         Hits hits = subscriptionRegistry.getInterestedSubscriptions(userId, contextId, topic);
         if (null == hits || hits.isEmpty()) {
             LOG.info("No subscriptions of interest for topic \"{}\" for user {} in context {}", topic, I(userId), I(contextId));
+            addNumOfProcessedNotifications(numOfNotifications);
             return;
         }
 
@@ -443,6 +444,10 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             }
         }
 
+        addNumOfProcessedNotifications(numOfNotifications);
+    }
+
+    private void addNumOfProcessedNotifications(int numOfNotifications) {
         if (numOfProcessedNotifications.addAndGet(numOfNotifications) < 0L) {
             numOfProcessedNotifications.set(0L);
         }

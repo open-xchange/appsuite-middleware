@@ -381,19 +381,29 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
      * @param contextId The context identifier
      */
     public void sendToUser(final String message, String pathFilter, boolean remote, int userId, int contextId) {
+        String info = remote ? "remotely received" : "locally created";
+
         ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
-        if (null != userSockets) {
-            String info = remote ? "remotely received" : "locally created";
-            for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
-                if (WebSockets.matches(pathFilter, sessionBoundSocket.getPath())) {
-                    try {
-                        sessionBoundSocket.sendMessage(message);
-                        LOG.info("Sent {} message \"{}\" via Web Socket using path filter \"{}\" to user {} in context {}", info, new Object() { @Override public String toString(){ return StringUtils.abbreviate(message, 24); }}, pathFilter, userId, contextId);
-                    } catch (OXException e) {
-                        LOG.error("Failed to send {} message to Web Socket: {}", info, sessionBoundSocket, e);
-                    }
+        if (null == userSockets || userSockets.isEmpty()) {
+            LOG.info("Found no local Web Sockets to send {} message \"{}\" to user {} in context {}", info, new Object() { @Override public String toString(){ return StringUtils.abbreviate(message, 24); }}, I(userId), I(contextId));
+            return;
+        }
+
+        boolean any = false;
+        for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
+            if (WebSockets.matches(pathFilter, sessionBoundSocket.getPath())) {
+                any = true;
+                try {
+                    sessionBoundSocket.sendMessage(message);
+                    LOG.info("Sent {} message \"{}\" via Web Socket using path filter \"{}\" to user {} in context {}", info, new Object() { @Override public String toString(){ return StringUtils.abbreviate(message, 24); }}, pathFilter, I(userId), I(contextId));
+                } catch (OXException e) {
+                    LOG.error("Failed to send {} message to Web Socket: {}", info, sessionBoundSocket, e);
                 }
             }
+        }
+
+        if (!any) {
+            LOG.info("Found no matching local Web Socket to send {} message \"{}\" using path filter \"{}\" to user {} in context {}", info, new Object() { @Override public String toString(){ return StringUtils.abbreviate(message, 24); }}, pathFilter, I(userId), I(contextId));
         }
     }
 
