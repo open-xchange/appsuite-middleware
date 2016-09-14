@@ -67,7 +67,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang.StringUtils;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
 import org.glassfish.grizzly.http.Cookies;
 import org.glassfish.grizzly.http.HttpContent;
@@ -380,12 +379,12 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public void sendToUser(final String message, String pathFilter, boolean remote, int userId, int contextId) {
+    public void sendToUser(String message, String pathFilter, boolean remote, int userId, int contextId) {
         String info = remote ? "remotely received" : "locally created";
 
         ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
         if (null == userSockets || userSockets.isEmpty()) {
-            LOG.info("Found no local Web Sockets to send {} message \"{}\" to user {} in context {}", info, new Object() { @Override public String toString(){ return StringUtils.abbreviate(message, 24); }}, I(userId), I(contextId));
+            LOG.info("Found no local Web Sockets to send {} message \"{}\" to user {} in context {}", info, GrizzlyWebSocketUtils.abbreviateMessageArg(message), I(userId), I(contextId));
             return;
         }
 
@@ -395,7 +394,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 any = true;
                 try {
                     sessionBoundSocket.sendMessage(message);
-                    LOG.info("Sent {} message \"{}\" via Web Socket using path filter \"{}\" to user {} in context {}", info, new Object() { @Override public String toString(){ return StringUtils.abbreviate(message, 24); }}, pathFilter, I(userId), I(contextId));
+                    LOG.info("Sent {} message \"{}\" via Web Socket ({}) using path filter \"{}\" to user {} in context {}", info, GrizzlyWebSocketUtils.abbreviateMessageArg(message), sessionBoundSocket.getConnectionId(), pathFilter, I(userId), I(contextId));
                 } catch (OXException e) {
                     LOG.error("Failed to send {} message to Web Socket: {}", info, sessionBoundSocket, e);
                 }
@@ -403,7 +402,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         }
 
         if (!any) {
-            LOG.info("Found no matching local Web Socket to send {} message \"{}\" using path filter \"{}\" to user {} in context {}", info, new Object() { @Override public String toString(){ return StringUtils.abbreviate(message, 24); }}, pathFilter, I(userId), I(contextId));
+            LOG.info("Found no matching local Web Socket to send {} message \"{}\" using path filter \"{}\" to user {} in context {}", info, GrizzlyWebSocketUtils.abbreviateMessageArg(message), pathFilter, I(userId), I(contextId));
         }
     }
 

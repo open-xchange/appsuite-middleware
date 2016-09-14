@@ -55,13 +55,13 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.regex.Pattern;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
 import com.openexchange.java.Strings;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
+import com.openexchange.websockets.grizzly.GrizzlyWebSocketUtils;
 
 /**
  * {@link PortableMessageDistributor}
@@ -206,15 +206,15 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
             return null;
         }
 
-        LOG.info("Received {} message(s) on cluster member {} for user {} in context {}", messages.length, GrizzlyWebSocketApplication.getLocalHost(), I(userId), I(contextId));
+        LOG.info("Received {} message(s) on cluster member {} for user {} in context {}", I(messages.length), GrizzlyWebSocketApplication.getLocalHost(), I(userId), I(contextId));
 
-        for (final String msg : messages) {
+        for (String msg : messages) {
             if (async) {
                 application.sendToUserAsync(msg, filter, true, userId, contextId);
             } else {
                 application.sendToUser(msg, filter, true, userId, contextId);
             }
-            LOG.info("Transmitted message \"{}\" to Web Socket application using path filter \"{}\" to user {} in context {}", new Object() { @Override public String toString(){ return StringUtils.abbreviate(msg, 24); }}, filter, I(userId), I(contextId));
+            LOG.info("Transmitted message \"{}\" to Web Socket application using path filter \"{}\" to user {} in context {}", GrizzlyWebSocketUtils.abbreviateMessageArg(msg), filter, I(userId), I(contextId));
         }
         return null;
     }
