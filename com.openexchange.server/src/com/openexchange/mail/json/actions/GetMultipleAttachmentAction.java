@@ -52,10 +52,13 @@ package com.openexchange.mail.json.actions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import javax.mail.MessageRemovedException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -114,7 +117,14 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
              */
             final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
             final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
-            final String[] sequenceIds = req.optStringArray(Mail.PARAMETER_MAILATTCHMENT);
+            String[] sequenceIds = req.optStringArray(Mail.PARAMETER_MAILATTCHMENT);
+
+            /*
+             * Remove duplicate attachment ids
+             */
+            Set<String> attachmentIds = new LinkedHashSet<>(Arrays.asList(sequenceIds));
+            sequenceIds = attachmentIds.toArray(new String[attachmentIds.size()]);
+
             /*
              * Get mail interface
              */
