@@ -47,89 +47,42 @@
  *
  */
 
-package com.openexchange.configread.clt;
+package com.openexchange.config.rmi;
 
+import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.Options;
-import com.openexchange.auth.rmi.RemoteAuthenticator;
-import com.openexchange.cli.AbstractRmiCLI;
-import com.openexchange.config.rmi.RemoteConfigurationService;
-import com.openexchange.java.Strings;
 
 
 /**
- * {@link ListReloadablesCLT}
+ * {@link RemoteConfigurationService}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @since v7.8.3
  */
-public class ListReloadablesCLT extends AbstractRmiCLI<Void> {
+public interface RemoteConfigurationService extends Remote {
 
     /**
-     * Initializes a new {@link ListReloadablesCLT}.
+     * RMI name to be used in the naming lookup.
      */
-    public ListReloadablesCLT() {
-        super();
-    }
+    public static final String RMI_NAME = RemoteConfigurationService.class.getSimpleName();
 
     /**
-     * @param args
+     * Reloads the configuration of Open-Xchange Server.
+     *
+     * @throws RemoteConfigurationServiceException If reload attempt fails
+     * @throws RemoteException If a communication-related error occurs
      */
-    public static void main(String[] args) {
-        new ListReloadablesCLT().execute(args);
-    }
+    public void reloadConfiguration() throws RemoteConfigurationServiceException, RemoteException;
 
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return false;
-    }
-
-    @Override
-    protected String getFooter() {
-        return null;
-    }
-
-    @Override
-    protected String getName() {
-        return "listreloadableoptions";
-    }
-
-    @Override
-    protected void checkOptions(CommandLine cmd) {
-        // nothing to do
-    }
-
-    @Override
-    protected void addOptions(Options options) {
-        // nothing to do
-    }
-
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
-        // nothing to do
-    }
-
-    @Override
-    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
-        RemoteConfigurationService remoteConfigService = getRmiStub(optRmiHostName, RemoteConfigurationService.RMI_NAME);
-        Map<String, List<String>> reloadables = remoteConfigService.listReloadables();
-        StringBuilder sb = new StringBuilder();
-        for (Entry<String, List<String>> entry : reloadables.entrySet()) {
-            String fileName = entry.getKey();
-            if (null != fileName && Strings.isNotEmpty(fileName)) {
-                sb.append(fileName).append(":").append("\n");
-                for (String property : entry.getValue()) {
-                    sb.append(property).append("\n");
-                }
-                sb.append("\n");
-            }
-        }
-        System.out.println(sb.toString());
-        return null;
-    }
+    /**
+     * Gets a listing for all properties that are reloadable.
+     *
+     * @return The listing for all reloadable properties
+     * @throws RemoteConfigurationServiceException If retrieval fails
+     * @throws RemoteException If a communication-related error occurs
+     */
+    public Map<String, List<String>> listReloadables() throws RemoteConfigurationServiceException, RemoteException;
 
 }
