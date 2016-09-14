@@ -79,6 +79,14 @@ public class ClusterLockServiceImpl implements ClusterLockService {
 
     private final Unregisterer unregisterer;
     private final ServiceLookup services;
+    
+    //FIXME: Switch to nanoseconds
+
+    /** Defines the threshold for the lock refresh in seconds */
+    private static final long REFRESH_LOCK_THRESHOLD = TimeUnit.SECONDS.toMillis(60);
+
+    /** Defines the ttl for a cluster lock in seconds */
+    private static final long LOCK_TTL = TimeUnit.SECONDS.toMillis(45);
 
     /**
      * Initializes a new {@link ClusterLockServiceImpl}.
@@ -177,12 +185,16 @@ public class ClusterLockServiceImpl implements ClusterLockService {
             ScheduledTimerTask timerTask = null;
             try {
                 if (lockAcquired) {
+                    LOGGER.debug("Cluster lock for cluster task '{}' acquired with retry policy '{}'", clusterTask.getTaskName(), retryPolicy.getClass().getSimpleName());
                     TimerService service = services.getService(TimerService.class);
-                    timerTask = service.scheduleAtFixedRate(new RefreshLockTask(clusterTask.getTaskName()), TimeUnit.SECONDS.toMillis(30), TimeUnit.SECONDS.toMillis(30));
-                    return clusterTask.perform();
+                    timerTask = service.scheduleAtFixedRate(new RefreshLockTask(clusterTask.getTaskName()), REFRESH_LOCK_THRESHOLD, REFRESH_LOCK_THRESHOLD);
+                    T t = clusterTask.perform();
+                    LOGGER.debug("Cluster task '{}' completed.", clusterTask.getTaskName());
+                    return t;
                 }
+                LOGGER.debug("Another node is performing the cluster task '{}'. Cluster lock was not acquired.", clusterTask.getTaskName(), retryPolicy.getClass().getSimpleName());
             } finally {
-                LOGGER.debug("Cluster task '{}' completed. Releasing cluster lock.", clusterTask.getTaskName());
+                LOGGER.debug("Releasing cluster lock held by the cluster task '{}'.", clusterTask.getTaskName());
                 if (lockAcquired) {
                     releaseClusterLock(clusterTask);
                     if (timerTask != null) {
@@ -383,9 +395,7 @@ public class ClusterLockServiceImpl implements ClusterLockService {
                 }
 
                 IMap<String, Long> clusterLocks = hzInstance.getMap(ClusterLockType.ClusterTaskLocks.name());
-                if (clusterLocks == null) {
-                    return;
-                }
+                LOGGER.debug("Refreshing lock for cluster task '{}'", taskName);
                 long timeNow = System.currentTimeMillis(); //FIXME: Switch to nanoTime()
                 clusterLocks.put(taskName, timeNow);
             } catch (OXException e) {
@@ -403,7 +413,6 @@ public class ClusterLockServiceImpl implements ClusterLockService {
      * @return <code>true</code> if the lease time was expired; <code>false</code> otherwise
      */
     private boolean leaseExpired(long timeNow, long timeThen) {
-        //FIXME: Switch to nano computation
-        return (timeNow - timeThen > TimeUnit.MINUTES.toMillis(1));
+        return (timeNow - timeThen > LOCK_TTL);
     }
 }
