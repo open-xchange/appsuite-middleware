@@ -197,19 +197,20 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                         account.setToken(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessToken", contextId, account.getId())));
                         account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, account.getId())));
                     } catch (final OXException e) {
-                        // IGNORE
+                        // Log for debug purposes and ignore...
+                        LOG.debug("{}", e.getMessage(), e);
                     }
                     String scopes = rs.getString(6);
-                    if (!Strings.isEmpty(scopes)) {
-                        Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), Module.valuesOf(scopes));
-                        account.setEnabledScopes(enabledScopes);
-                    }
+                    Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), Module.valuesOf(scopes));
+                    account.setEnabledScopes(enabledScopes);
+
                     accounts.add(account);
                 } catch (final OXException e) {
                     if (!OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.equals(e)) {
                         throw e;
                     }
-                    // Obviously associated service is not available. Ignore...
+                    // Obviously associated service is not available. Log for debug purposes and ignore...
+                    LOG.debug("{}", e.getMessage(), e);
                 }
             } while (rs.next());
             return accounts;
@@ -240,20 +241,31 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             }
             final List<OAuthAccount> accounts = new ArrayList<OAuthAccount>(8);
             do {
-                final DefaultOAuthAccount account = new DefaultOAuthAccount();
-                account.setId(rs.getInt(1));
-                account.setDisplayName(rs.getString(2));
+
                 try {
-                    account.setToken(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessToken", contextId, account.getId())));
-                    account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, account.getId())));
-                } catch (final OXException x) {
-                    // IGNORE
+                    final DefaultOAuthAccount account = new DefaultOAuthAccount();
+                    account.setId(rs.getInt(1));
+                    account.setDisplayName(rs.getString(2));
+                    try {
+                        account.setToken(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessToken", contextId, account.getId())));
+                        account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, account.getId())));
+                    } catch (final OXException x) {
+                        // Log for debug purposes and ignore...
+                        LOG.debug("{}", x.getMessage(), x);
+                    }
+                    account.setMetaData(registry.getService(serviceMetaData, user, contextId));
+                    String scopes = rs.getString(5);
+                    Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), Module.valuesOf(scopes));
+                    account.setEnabledScopes(enabledScopes);
+
+                    accounts.add(account);
+                } catch (final OXException e) {
+                    if (!OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.equals(e)) {
+                        throw e;
+                    }
+                    // Obviously associated service is not available. Log for debug purposes and ignore...
+                    LOG.debug("{}", e.getMessage(), e);
                 }
-                account.setMetaData(registry.getService(serviceMetaData, user, contextId));
-                String scopes = rs.getString(5);
-                Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), Module.valuesOf(scopes));
-                account.setEnabledScopes(enabledScopes);
-                accounts.add(account);
             } while (rs.next());
             return accounts;
         } catch (final SQLException e) {
@@ -455,7 +467,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Execute INSERT command
              */
             executeUpdate(contextId, insert, values);
-            // TODO: Decide whether we want the scopes in the following info log entry
             LOG.info("Created new {} account with ID {} for user {} in context {}", serviceMetaData, account.getId(), user, contextId);
             /*
              * Return newly created account

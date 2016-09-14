@@ -88,6 +88,9 @@ public enum Module {
      * @throws OXException if the specified string cannot be resolved to a valid {@link Module}
      */
     public static final Module[] valuesOf(String string) throws OXException {
+        if (Strings.isEmpty(string)) {
+            return new Module[0];
+        }
         List<Module> list = new ArrayList<>();
         String[] split = Strings.splitByWhitespaces(string);
         for (String s : split) {
