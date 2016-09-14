@@ -59,6 +59,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveOAuthAccess;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthUtil;
@@ -189,7 +190,8 @@ public abstract class AbstractGoogleDriveAccess {
      *         otherwise
      */
     private boolean hasInvalidGrant(HttpResponseException e) {
-        return e.getContent().contains("invalid_grant");
+        String content = e.getContent();
+        return !Strings.isEmpty(content) && content.contains("invalid_grant");
     }
 
     /**
