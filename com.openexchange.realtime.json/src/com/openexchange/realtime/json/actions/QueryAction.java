@@ -56,6 +56,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -158,6 +162,14 @@ public class QueryAction extends RTAction {
         StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(id, session, (JSONObject) request.requireData());
 
         Stanza stanza = stanzaBuilder.build();
+        
+        HttpServletRequest servletRequest = request.optHttpServletRequest();
+		if (servletRequest != null) {
+	        HttpSession httpSession = servletRequest.getSession();
+			String jsessionid = httpSession.getId();
+			stanza.setChannelAttribute("JSESSIONID", jsessionid);
+		}
+        
         if (stanza.traceEnabled()) {
             stanza.trace("received in backend");
         }
