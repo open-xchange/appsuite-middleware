@@ -168,7 +168,8 @@ public class HashCalculator {
             if (null != salt) {
                 md.update(salt);
             }
-            return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
+            // return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
+            return removeNonWordCharactersFrom(Base64.encode(md.digest()));
         } catch (final NoSuchAlgorithmException e) {
             LOG.error("", e);
         }
@@ -242,6 +243,38 @@ public class HashCalculator {
             return "";
         }
         return header;
+    }
+
+    private static String removeNonWordCharactersFrom(String str) {
+        if (null == str) {
+            return null;
+        }
+
+        int length = str.length();
+        if (length == 0) {
+            return str;
+        }
+
+        StringBuilder sb = null;
+        for (int i = 0, k = length; k-- > 0; i++) {
+            char ch = str.charAt(i);
+            if ((ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') && (ch < '0' || ch > '9') && ch != '_') {
+                // A non-word character
+                if (null == sb) {
+                    sb = new StringBuilder(length);
+                    if (i > 0) {
+                        sb.append(str, 0, i);
+                    }
+                }
+            } else {
+                // A word character
+                if (null != sb) {
+                    sb.append(ch);
+                }
+            }
+        }
+
+        return null == sb ? str : sb.toString();
     }
 
 }
