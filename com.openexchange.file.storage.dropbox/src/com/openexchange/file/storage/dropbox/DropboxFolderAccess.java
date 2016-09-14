@@ -84,7 +84,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
      * @param account The associated account
      * @param session The session
      * @param accountAccess The account access
-     * @throws OXException 
+     * @throws OXException
      */
     public DropboxFolderAccess(final AbstractOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session) throws OXException {
         super(dropboxOAuthAccess, account, session);
@@ -99,7 +99,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
             Entry entry = dropboxAPI.metadata(path, 1, null, false, null);
             return entry.isDir && false == entry.isDeleted;
         } catch (Exception e) {
-            OXException x = handle(e, path);
+            OXException x = handle(e, path, session, dropboxOAuthAccess.getOAuthAccount());
             if (FileStorageExceptionCodes.NOT_FOUND.equals(x)) {
                 return false;
             }
@@ -117,7 +117,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
             }
             return new DropboxFolder(entry, userId, accountDisplayName);
         } catch (Exception e) {
-            throw handle(e, path);
+            throw handle(e, path, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -160,7 +160,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
             }
             return list.toArray(new FileStorageFolder[0]);
         } catch (Exception e) {
-            throw handle(e, path);
+            throw handle(e, path, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -180,11 +180,10 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
     public String createFolder(final FileStorageFolder toCreate) throws OXException {
         String parentPath = toPath(toCreate.getParentId());
         try {
-            final Entry entry =
-                dropboxAPI.createFolder(new StringBuilder("/".equals(parentPath) ? "" : parentPath).append('/').append(toCreate.getName()).toString());
+            final Entry entry = dropboxAPI.createFolder(new StringBuilder("/".equals(parentPath) ? "" : parentPath).append('/').append(toCreate.getName()).toString());
             return toId(entry.path);
         } catch (Exception e) {
-            throw handle(e, parentPath);
+            throw handle(e, parentPath, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -205,14 +204,10 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
         try {
             final int pos = path.lastIndexOf('/');
             final String newParentPath = toPath(newParentId);
-            final Entry moved =
-                dropboxAPI.move(
-                    path,
-                    new StringBuilder("/".equals(newParentPath) ? "" : newParentPath).append('/').append(
-                        null != newName ? newName : (pos < 0 ? path : path.substring(pos + 1))).toString());
+            final Entry moved = dropboxAPI.move(path, new StringBuilder("/".equals(newParentPath) ? "" : newParentPath).append('/').append(null != newName ? newName : (pos < 0 ? path : path.substring(pos + 1))).toString());
             return toId(moved.path);
         } catch (Exception e) {
-            throw handle(e, path);
+            throw handle(e, path, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -230,7 +225,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
             Entry entry = dropboxAPI.move(path, toPath);
             return toId(entry.path);
         } catch (Exception e) {
-            throw handle(e, path);
+            throw handle(e, path, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -241,7 +236,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
             dropboxAPI.delete(path);
             return folderId;
         } catch (Exception e) {
-            OXException x = handle(e, path);
+            OXException x = handle(e, path, session, dropboxOAuthAccess.getOAuthAccount());
             if (FileStorageExceptionCodes.NOT_FOUND.equals(x)) {
                 return folderId;
             }
@@ -269,7 +264,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
                 }
             }
         } catch (Exception e) {
-            throw handle(e, path);
+            throw handle(e, path, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -296,7 +291,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
             }
             return list.toArray(new FileStorageFolder[list.size()]);
         } catch (Exception e) {
-            throw handle(e, path);
+            throw handle(e, path, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -311,7 +306,7 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
             Account accountInfo = dropboxAPI.accountInfo();
             return new Quota(accountInfo.quota, accountInfo.quotaNormal + accountInfo.quotaShared, Type.STORAGE);
         } catch (Exception e) {
-            throw handle(e, toPath(folderId));
+            throw handle(e, toPath(folderId), session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 

@@ -58,7 +58,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthUtil;
+import com.openexchange.session.Session;
 
 
 /**
@@ -168,9 +171,11 @@ public final class Utils {
      *
      * @param e The exception
      * @param path The path of the dropbox entry where the exception occurred, or <code>null</code> if not relevant
+     * @param session TODO
+     * @param oauthAccount TODO
      * @return The most appropriate OX exception, ready to be re-thrown
      */
-    public static OXException handle(Exception e, String path) {
+    public static OXException handle(Exception e, String path, Session session, OAuthAccount oauthAccount) {
         if (OXException.class.isInstance(e)) {
             return (OXException) e;
         }
@@ -207,7 +212,8 @@ public final class Utils {
             return FileStorageExceptionCodes.PROTOCOL_ERROR.create(serverException, new StringBuilder("HTTP (").append(serverException.error).append(')').toString(), msg);
         }
         if (DropboxUnlinkedException.class.isInstance(e)) {
-            return FileStorageExceptionCodes.UNLINKED_ERROR.create(e, new Object[0]);
+            String cburl = OAuthUtil.buildCallbackURL(session, oauthAccount);
+            return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(oauthAccount.getAPI().getFullName(), cburl);
         }
         if (DropboxException.class.isInstance(e)) {
             return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, DropboxConstants.ID, e.getMessage());
