@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.compose.share;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -81,12 +82,10 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor;
-import com.openexchange.ajax.requesthandler.converters.preview.PreviewConst;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -118,6 +117,7 @@ import com.openexchange.mail.json.compose.share.spi.EnabledChecker;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.datasource.FileHolderDataSource;
 import com.openexchange.preview.PreviewDocument;
@@ -146,6 +146,17 @@ import com.openexchange.user.UserService;
 public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportComposeContext, ShareDraftComposeContext> {
 
     private static final Logger LOG = LoggerFactory.getLogger(ShareComposeHandler.class);
+
+    // Default thumbnails
+    private static final String THUMBNAIL_ARCHIVE = "font-awesome-file-archive.png";
+    private static final String THUMBNAIL_AUDIO = "font-awesome-file-audio.png";
+    private static final String THUMBNAIL_EXCEL = "font-awesome-file-excel.png";
+    private static final String THUMBNAIL_IMAGE = "font-awesome-file-image.png";
+    private static final String THUMBNAIL_DEFAULT = "font-awesome-file-default.png";
+    private static final String THUMBNAIL_PDF = "font-awesome-file-pdf.png";
+    private static final String THUMBNAIL_POWERPOINT = "font-awesome-file-powerpoint.png";
+    private static final String THUMBNAIL_VIDEO = "font-awesome-file-video.png";
+    private static final String THUMBNAIL_WORD = "font-awesome-file-word.png";
 
     /**
      * Initializes a new {@link ShareComposeHandler}.
@@ -470,39 +481,107 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         ThreadPoolService threadPoolService = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
         ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         boolean documentPreviewEnabled = false;
+        int timeout = 500;
+        String templatePath = null;
         if (null != configurationService) {
             documentPreviewEnabled = configurationService.getBoolProperty("com.openexchange.mail.compose.share.documentPreviewEnabled", false);
+            timeout = configurationService.getIntProperty("com.openexchange.mail.compose.share.preview.timeout", 500);
+            templatePath = configurationService.getProperty("com.openexchange.templating.path");
         }
         if (null == items || items.isEmpty() || null == previewService || null == transformationService || null == fileAccessFactory || null == threadPoolService) {
             return java.util.Collections.emptyMap();
         }
         Map<String, ThresholdFileHolder> previews = new HashMap<>(6);
         Map<String, Future<ThresholdFileHolder>> previewFutures = new HashMap<>(6);
+        Map<String, String> mimeTypes = new HashMap<>(6);
+        IDBasedFileAccess access = fileAccessFactory.createAccess(session);
         for (int k = Math.min(items.size(), 6), i = 0; k-- > 0; i++) {
             String id = items.get(i).getId();
-            PreviewTask previewTask = new PreviewTask(id, fileAccessFactory, transformationService, previewService, session, documentPreviewEnabled);
+            InputStream document = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
+            String mimeType = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION).getFileMIMEType();
+            PreviewTask previewTask = new PreviewTask(id, document, mimeType, transformationService, previewService, documentPreviewEnabled, session);
             Future<ThresholdFileHolder> future = threadPoolService.submit(previewTask);
             previewFutures.put(id, future);
+            mimeTypes.put(id, mimeType);
         }
         for (Entry<String, Future<ThresholdFileHolder>> entry : previewFutures.entrySet()) {
             String id = entry.getKey();
             try {
-                ThresholdFileHolder encodedThumbnail = entry.getValue().get(500, TimeUnit.MILLISECONDS);
+                ThresholdFileHolder encodedThumbnail = entry.getValue().get(timeout, TimeUnit.MILLISECONDS);
                 previews.put(id, encodedThumbnail);
             } catch (InterruptedException | TimeoutException e) {
                 LOG.debug(e.getMessage(), e);
-                ThresholdFileHolder encodedThumbnail = new ThresholdFileHolder();
-                encodedThumbnail.write(PreviewConst.DEFAULT_THUMBNAIL);
-                previews.put(id, encodedThumbnail);
             } catch (ExecutionException e) {
                 LOG.error(e.getMessage(), e);
-                ThresholdFileHolder encodedThumbnail = new ThresholdFileHolder();
-                encodedThumbnail.write(PreviewConst.DEFAULT_THUMBNAIL);
-                previews.put(id, encodedThumbnail);
             }
-            // Close fileholders?
+            if (null == previews.get(id)) {
+                previews.put(id, getDefaultThumbnail(mimeTypes.get(id), templatePath));
+            }
         }
         return previews;
+    }
+
+    private ThresholdFileHolder getDefaultThumbnail(String mimeType, String templatePath) throws OXException {
+        String thumbnailName = null;
+        switch (mimeType) {
+            case "application/zip":
+            case "application/x-bzip2":
+            case "application/x-gzip":
+                thumbnailName = THUMBNAIL_ARCHIVE;
+                break;
+            case "audio/mpeg":
+            case "audio/x-wav":
+                thumbnailName = THUMBNAIL_AUDIO;
+                break;
+            case "application/excel":
+            case "application/vnd.oasis.opendocument.spreadsheet":
+            case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                thumbnailName = THUMBNAIL_EXCEL;
+                break;
+            case "image/png":
+            case "image/jpg":
+            case "image/jpeg":
+            case "image/gif":
+            case "image/svg":
+                thumbnailName = THUMBNAIL_IMAGE;
+                break;
+            case "application/pdf":
+                thumbnailName = THUMBNAIL_PDF;
+                break;
+            case "application/powerpoint":
+            case "application/vnd.oasis.opendocument.presentation":
+            case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+                thumbnailName = THUMBNAIL_POWERPOINT;
+                break;
+            case "video/mpeg":
+            case "video/mp4":
+            case "video/avi":
+            case "video/3gpp":
+            case "video/quicktime":
+            case "video/msvideo":
+            case "video/x-ms-wmv":
+                thumbnailName = THUMBNAIL_VIDEO;
+                break;
+            case "application/msword":
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            case "application/vnd.oasis.opendocument.text":
+                thumbnailName = THUMBNAIL_WORD;
+                break;
+            default: thumbnailName = THUMBNAIL_DEFAULT;
+        }
+        String thumbnail = templatePath + java.io.File.separator + thumbnailName;
+        InputStream in = null;
+        ThresholdFileHolder preview = null;
+        try {
+            in = new FileInputStream(thumbnail);
+            preview = new ThresholdFileHolder();
+            preview.write(in);
+        } catch (IOException e) {
+            throw MimeMailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(in);
+        }
+        return preview;
     }
 
     private Map<String, String> getCidMapping(Map<String, ThresholdFileHolder> previewImages) {
@@ -547,28 +626,26 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
     private static class PreviewTask extends AbstractTask<ThresholdFileHolder> {
 
         private final String id;
-        private final IDBasedFileAccessFactory fileAccess;
+        private final InputStream document;
+        private final String mimeType;
         private final ImageTransformationService transformationService;
         private final PreviewService previewService;
-        private final Session session;
         private final boolean documentPreviewEnabled;
+        private final Session session;
 
-        public PreviewTask(String id, IDBasedFileAccessFactory fileAccess, ImageTransformationService transformationService, PreviewService previewService, Session session, boolean documentPreviewEnabled) {
+        public PreviewTask(String id, InputStream document, String mimeType, ImageTransformationService transformationService, PreviewService previewService, boolean documentPreviewEnabled, Session session) {
             super();
             this.id = id;
-            this.fileAccess = fileAccess;
+            this.document = document;
+            this.mimeType = mimeType;
             this.transformationService = transformationService;
             this.previewService = previewService;
-            this.session = session;
             this.documentPreviewEnabled = documentPreviewEnabled;
+            this.session = session;
         }
 
         @Override
         public ThresholdFileHolder call() throws Exception {
-            IDBasedFileAccess access = fileAccess.createAccess(session);
-            File file = access.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
-            String mimeType = file.getFileMIMEType();
-            InputStream document = access.getDocument(id, FileStorageFileAccess.CURRENT_VERSION);
             ThresholdFileHolder encodedThumbnail = null;
             try {
 
@@ -612,10 +689,6 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 }
             } finally {
                 Streams.close(document);
-            }
-            if (null == encodedThumbnail) {
-                encodedThumbnail = new ThresholdFileHolder();
-                encodedThumbnail.write(PreviewConst.DEFAULT_THUMBNAIL);
             }
             return encodedThumbnail;
         }
