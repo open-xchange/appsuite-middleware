@@ -47,56 +47,31 @@
  *
  */
 
-package com.openexchange.upload;
+package com.openexchange.groupware.upload;
 
-import com.openexchange.exception.OXException;
+import java.util.Iterator;
 import com.openexchange.groupware.upload.UploadFile;
 
 /**
- * {@link UploadFileListener} - Receives various call-backs on upload of a file.
+ * {@link Upload} - Represents a successfully parsed upload.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface UploadFileListener {
+public interface Upload {
 
     /**
-     * Invoked before the upload's stream gets processed; providing basic information.
+     * Gets the number of upload files.
      *
-     * @param uploadId The identifier that uniquely identifies the upload
-     * @param fileName The name of the uploaded file
-     * @param fieldName The name of the field in the multipart form (if any)
-     * @param contentType The content type
-     * @throws OXException If this listener signals that uploaded should be aborted
+     * @return The number of upload files.
      */
-    void onBeforeUploadProcessed(String uploadId, String fileName, String fieldName, String contentType) throws OXException;
+    int getNumberOfUploadFiles();
 
     /**
-     * Invoked after the upload's stream gets processed; providing basic information.
+     * Gets an iterator for upload files.
      *
-     * @param uploadId The identifier that uniquely identifies the upload
-     * @param uploadFile The fully parsed uploaded file
-     * @throws OXException If this listener signals that uploaded should be aborted
+     * @return An iterator for upload files.
      */
-    void onAfterUploadProcessed(String uploadId, UploadFile uploadFile) throws OXException;
+    Iterator<UploadFile> getUploadFilesIterator();
 
-    /**
-     * Invoked in case upload failed while processing individual uploaded files;<br>
-     * e.g. upload quota is exceeded.
-     * <p>
-     * All previously processed upload files will be deleted.
-     *
-     * @param uploadId The identifier that uniquely identifies the upload
-     * @param exception The exception rendering the upload as failure
-     */
-    void onUploadFailed(String uploadId, OXException exception);
-
-    /**
-     * Invoked in case upload succeeded.
-     * <p>
-     * All uploaded files were successfully processed.
-     *
-     * @param uploadId The identifier that uniquely identifies the upload
-     */
-    void onUploadSuceeded(String uploadId);
 }

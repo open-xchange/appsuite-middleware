@@ -5,6 +5,5 @@ Bundle-SymbolicName: com.openexchange.upload
 Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Export-Package: com.openexchange.groupware.upload,
- com.openexchange.upload
+Export-Package: com.openexchange.groupware.upload
 Import-Package: com.openexchange.exception
