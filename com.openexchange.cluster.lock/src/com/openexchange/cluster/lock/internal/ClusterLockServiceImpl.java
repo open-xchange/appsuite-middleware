@@ -83,10 +83,10 @@ public class ClusterLockServiceImpl implements ClusterLockService {
     //FIXME: Switch to nanoseconds
 
     /** Defines the threshold for the lock refresh in seconds */
-    private static final long REFRESH_LOCK_THRESHOLD = TimeUnit.SECONDS.toMillis(60);
+    private static final long REFRESH_LOCK_THRESHOLD = TimeUnit.SECONDS.toMillis(20);
 
     /** Defines the ttl for a cluster lock in seconds */
-    private static final long LOCK_TTL = TimeUnit.SECONDS.toMillis(45);
+    private static final long LOCK_TTL = TimeUnit.SECONDS.toMillis(30);
 
     /**
      * Initializes a new {@link ClusterLockServiceImpl}.
