@@ -424,7 +424,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             return;
         }
 
-        // Transport each subscription using associated transport
+        // Transport each hit using associated transport
         for (Hit hit : hits) {
             String client = hit.getClient();
             String transportId = hit.getTransportId();
