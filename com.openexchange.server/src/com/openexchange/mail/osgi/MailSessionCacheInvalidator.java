@@ -63,8 +63,8 @@ import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.java.util.Pair;
+import com.openexchange.java.util.Tools;
 import com.openexchange.mail.MailSessionCache;
-import com.openexchange.mailaccount.Tools;
 
 
 /**

@@ -49,8 +49,6 @@
 
 package com.openexchange.folderstorage.outlook;
 
-import gnu.trove.map.TObjectIntMap;
-import gnu.trove.map.hash.TObjectIntHashMap;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.Collator;
@@ -106,7 +104,6 @@ import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.DatabaseFolderStorage.ConnectionMode;
-import com.openexchange.folderstorage.database.DatabaseFolderStorageUtility;
 import com.openexchange.folderstorage.database.DatabaseFolderType;
 import com.openexchange.folderstorage.database.DatabaseParameterConstants;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
@@ -114,7 +111,6 @@ import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.StorageParametersImpl;
-import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.mail.MailFolderType;
 import com.openexchange.folderstorage.mail.contentType.DraftsContentType;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
@@ -143,6 +139,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.Collators;
+import com.openexchange.java.util.Tools;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -171,6 +168,8 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.map.TObjectIntMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 /**
  * {@link OutlookFolderStorage} - The MS Outlook folder storage.
@@ -2867,7 +2866,7 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     private boolean isDatabaseFolder(final String folderId) {
-        return DatabaseFolderStorageUtility.getUnsignedInteger(folderId) >= 0;
+        return Tools.getUnsignedInteger(folderId) >= 0;
     }
 
     static void addWarnings(final StorageParameters storageParameters, final WarningsAware warningsAware) {

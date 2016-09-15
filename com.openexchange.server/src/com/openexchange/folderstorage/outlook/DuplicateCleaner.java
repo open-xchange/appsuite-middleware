@@ -62,10 +62,9 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
-import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.outlook.sql.Delete;
 import com.openexchange.folderstorage.outlook.sql.Duplicate;
-import com.openexchange.session.Session;
+import com.openexchange.java.util.Tools;
 import com.openexchange.tools.sql.DBUtils;
 
 

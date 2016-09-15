@@ -354,7 +354,7 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public ContentType parseContentType(String value) {
-        int module = Tools.getUnsignedInteger(value);
+        int module = com.openexchange.java.util.Tools.getUnsignedInteger(value);
         if (-1 != module) {
             return ContentTypeRegistry.getInstance().getByModule(module);
         } else {

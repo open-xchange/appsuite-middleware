@@ -62,11 +62,11 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.util.Tools;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.utils.Column;
 import com.openexchange.mail.json.utils.ColumnCollection;
-import com.openexchange.mailaccount.Tools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

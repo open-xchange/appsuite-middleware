@@ -49,11 +49,6 @@
 
 package com.openexchange.folder.json.writer;
 
-import gnu.trove.ConcurrentTIntObjectHashMap;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.Closeable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -77,7 +72,6 @@ import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folder.json.FolderFieldRegistry;
-import com.openexchange.folder.json.Tools;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -88,11 +82,17 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Streams;
+import com.openexchange.java.util.Tools;
 import com.openexchange.publish.PublicationTarget;
 import com.openexchange.publish.PublicationTargetDiscoveryService;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import gnu.trove.ConcurrentTIntObjectHashMap;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link FolderWriter} - Write methods for folder module.
@@ -592,7 +592,7 @@ public final class FolderWriter {
         final List<FolderObject> retval = new ArrayList<FolderObject>(folders.length);
         for (final UserizedFolder folder : folders) {
             final FolderObject fo = new FolderObject();
-            final int numFolderId = getUnsignedInteger(folder.getID());
+            final int numFolderId = Tools.getUnsignedInteger(folder.getID());
             if (numFolderId < 0) {
                 fo.setFullName(folder.getID());
             } else {
@@ -794,17 +794,6 @@ public final class FolderWriter {
             }
         }
         return pw;
-    }
-
-
-    /**
-     * Parses a positive <code>int</code> value from passed {@link String} instance.
-     *
-     * @param s The string to parse
-     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
-     */
-    static final int getUnsignedInteger(final String s) {
-        return Tools.getUnsignedInteger(s);
     }
 
     /**

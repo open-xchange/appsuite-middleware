@@ -50,6 +50,7 @@
 package com.openexchange.oauth.json.oauthaccount.actions;
 
 import static com.openexchange.java.Strings.isEmpty;
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -60,7 +61,6 @@ import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.json.Tools;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -83,7 +83,7 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
         if (null == accountId) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
-        final int id = Tools.getUnsignedInteger(accountId);
+        final int id = getUnsignedInteger(accountId);
         if (id < 0) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("id", Integer.valueOf(id));
         }
