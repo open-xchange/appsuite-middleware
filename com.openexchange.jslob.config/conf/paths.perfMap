@@ -5,6 +5,7 @@
 # Core LOB
 language > io.ox/core//language
 timezone > io.ox/core//timezone
+trustedConnections > io.ox/core//trustedConnections
 serverVersion > io.ox/core//serverVersion
 folder > io.ox/core//folder
 validate_contact_email > io.ox/core//features/validateMailAddresses
