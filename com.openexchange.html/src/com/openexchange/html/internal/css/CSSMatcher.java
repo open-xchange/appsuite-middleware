@@ -64,6 +64,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.html.HtmlServices;
+import com.openexchange.html.Result;
 import com.openexchange.html.internal.MatcherReplacer;
 import com.openexchange.html.internal.RegexUtility;
 import com.openexchange.html.internal.RegexUtility.GroupType;
@@ -252,9 +254,13 @@ public final class CSSMatcher {
                 if (allowedValue.indexOf('*') >= 0) {
                     return true;
                 }
-                final int length = allowedValue.length();
-                for (int j = 0; j < length; j++) {
-                    if (matchesPattern(allowedValue.charAt(j), value)) {
+                int length = allowedValue.length();
+                for (int k = length, j = 0; k-- > 0; j++) {
+                    Result result = matchesPattern(allowedValue.charAt(j), value);
+                    if (Result.DENY == result) {
+                        return false;
+                    }
+                    if (Result.ALLOW == result) {
                         return true;
                     }
                 }
@@ -275,7 +281,7 @@ public final class CSSMatcher {
         return retval;
     }
 
-    private static boolean matchesPattern(final char pattern, final String value) {
+    private static Result matchesPattern(final char pattern, final String value) {
         // u: url(<URL>);
         // n: number string without %
         // N: number string
@@ -284,21 +290,27 @@ public final class CSSMatcher {
         // t: time
         switch (pattern) {
         case 'i':
-            return PAT_u_cid.matcher(value).matches();
+            return PAT_u_cid.matcher(value).matches() ? Result.ALLOW : Result.NEUTRAL;
         case 'u':
-            return PAT_u.matcher(value).matches();
+            {
+                Matcher matcher = PAT_u.matcher(value);
+                if (!matcher.matches()) {
+                    return Result.NEUTRAL;
+                }
+                return HtmlServices.isAcceptableDataUri(value, null);
+            }
         case 'n':
-            return PAT_n.matcher(value).matches();
+            return PAT_n.matcher(value).matches() ? Result.ALLOW : Result.NEUTRAL;
         case 'N':
-            return PAT_N.matcher(value).matches();
+            return PAT_N.matcher(value).matches() ? Result.ALLOW : Result.NEUTRAL;
         case 'c':
-            return PAT_c.matcher(value).matches();
+            return PAT_c.matcher(value).matches() ? Result.ALLOW : Result.NEUTRAL;
         case 'd':
-            return false;
+            return Result.NEUTRAL;
         case 't':
-            return PAT_t.matcher(value).matches();
+            return PAT_t.matcher(value).matches() ? Result.ALLOW : Result.NEUTRAL;
         default:
-            return false;
+            return Result.NEUTRAL;
         }
     }
 
