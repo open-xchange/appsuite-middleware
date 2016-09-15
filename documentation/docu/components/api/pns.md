@@ -7,6 +7,9 @@ title: Push Notification Service
 Starting with v7.8.3 the Open-Xchange Middleware implemented a generic Push Notification Service that supports delivering arbitrary
 user-associated push notification messages to multiple clients in a transport-agnostic way.
 
+# Big picture
+
+![Execution flow](pns.png "Execution flow")
 
 # How it works
 
@@ -41,3 +44,32 @@ An implicit subscription can be advertised through implementing and OSGi-wise re
 For instance, due to the volatile nature of Web Sockets, there is no permanent subscription (and unsubscription), but an instance of
 `com.openexchange.pns.PushSubscriptionProvider` that simply checks if there is any open Web Socket for notification-associated user and
 signals that there is an interested subscription (provided that notification's topic fits into Web Socket processable messages)
+
+# Web Socket transport
+
+The Web Socket transport needs special attention. As outlined above dealing with Web Sockets required to register an appropriate instance of
+`com.openexchange.pns.PushSubscriptionProvider` since writing to/deleting from persistent subscription storage might be too frequent
+according to a Web Sockets volatile life cycle.
+
+Moreover, a client association of a Web Socket is determined by the path used when the Web Socket was established. Hence, a client that is
+supposed to receive push notifications via Web Sockets needs an accompanying instance of `com.openexchange.pns.transport.websocket.WebSocketToClientResolver`.
+That instance needs to be OSGi-wise registered and lets the Web Socket specific implementation of `com.openexchange.pns.PushNotificationTransport`
+resolve to what client an open Web Socket belongs to and what path filter expression to use when trying to send a message to exactly that
+client.
+
+For instance, Socket.IO compatible Web Sockets are established using `"/socket.io/"` path information in the upgrade request:
+
+```
+GET /socket.io/?session=XYZ HTTP/1.1
+Host: my.open-xchange.invalid
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Key: x3JJHMbDL1EzLkh9GBhXDw==
+Sec-WebSocket-Version: 13
+Origin: http://open-xchange.invalid
+
+```
+
+The associated instance of `com.openexchange.pns.transport.websocket.WebSocketToClientResolver` announces that path `"/socket.io/"` is linked
+to client `"open-xchange-appsuite"` and path filter expression `"/socket.io/*"` is supposed to be used when attempting to send a message to
+App Suite UI. 
