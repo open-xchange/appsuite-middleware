@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oauth.json;
+package com.openexchange.java.util;
 
 /**
  * {@link Tools} - A utility class.

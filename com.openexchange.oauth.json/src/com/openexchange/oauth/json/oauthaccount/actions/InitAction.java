@@ -50,6 +50,7 @@
 package com.openexchange.oauth.json.oauthaccount.actions;
 
 import static com.openexchange.java.Strings.isEmpty;
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -85,7 +86,6 @@ import com.openexchange.oauth.OAuthToken;
 import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.oauth.Parameterizable;
 import com.openexchange.oauth.json.Services;
-import com.openexchange.oauth.json.Tools;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
 import com.openexchange.oauth.scope.OAuthScope;
@@ -190,7 +190,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
         /*
          * Get account by identifier
          */
-        final OAuthAccount account = oAuthService.getAccount(Tools.getUnsignedInteger(accountId), session, session.getUserId(), session.getContextId());
+        final OAuthAccount account = oAuthService.getAccount(getUnsignedInteger(accountId), session, session.getUserId(), session.getContextId());
         final String serviceId = account.getMetaData().getId();
         // Get the scopes
         Set<OAuthScope> scopesToEnable = getScopes(request, serviceId);

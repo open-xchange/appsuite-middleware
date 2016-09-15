@@ -140,6 +140,30 @@ public class PushNotificationMBeanImpl extends AnnotatedStandardMBean implements
     }
 
     @Override
+    public long getTotalNumberOfSubmittedNotifications() throws MBeanException {
+        try {
+            return pushNotificationService.getTotalNumberOfSubmittedNotifications();
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    @Override
+    public long getTotalNumberOfProcessedNotifications() throws MBeanException {
+        try {
+            return pushNotificationService.getTotalNumberOfProcessedNotifications();
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    @Override
     public long getNotificationsPerMinute() throws MBeanException {
         try {
             long meantimes = 0L;

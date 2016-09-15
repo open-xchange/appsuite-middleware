@@ -50,10 +50,8 @@
 package com.openexchange.caldav.resources;
 
 import static com.openexchange.dav.DAVProtocol.protocolException;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -625,59 +623,46 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     }
 
     @Override
-    protected String generateICal() throws OXException {
+    protected byte[] generateICal() throws OXException {
         ICalEmitter icalEmitter = factory.getIcalEmitter();
-        ICalSession session;
-        if (DAVUserAgent.WINDOWS.equals(getUserAgent()) || DAVUserAgent.WINDOWS_PHONE.equals(getUserAgent())) {
-            session = icalEmitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK));
-        } else {
-            session = icalEmitter.createSession();
-        }
+        ICalSession session = icalEmitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK));
         List<ConversionError> conversionErrors = new LinkedList<ConversionError>();
         List<ConversionWarning> conversionWarnings = new LinkedList<ConversionWarning>();
-        try {
-            /*
-             * load appointment & apply extended properties for serialization
-             */
-            CalendarDataObject appointment = parent.load(object, true);
-            applyReminderProperties(appointment);
-            applyPrivateComments(appointment);
-            applyAttachments(appointment);
-            CalendarDataObject[] changeExceptions = 0 < object.getRecurrenceID() ? parent.loadChangeExceptions(object, true) : null;
-            /*
-             * transform change exceptions to delete-exceptions where user is removed from participants if needed (bug #26293)
-             */
-            if (null != changeExceptions && 0 < changeExceptions.length) {
-                changeExceptions = Patches.Outgoing.setDeleteExceptionForRemovedParticipant(factory, appointment, changeExceptions);
-            }
-            /*
-             * write appointment
-             */
-            icalEmitter.writeAppointment(session, appointment, factory.getContext(), conversionErrors, conversionWarnings);
-            /*
-             * write exceptions
-             */
-            if (null != changeExceptions && 0 < changeExceptions.length) {
-                for (CalendarDataObject changeException : changeExceptions) {
-                    applyReminderProperties(changeException);
-                    applyPrivateComments(changeException);
-                    if (false == DAVUserAgent.MAC_CALENDAR.equals(getUserAgent())) {
-                        applyAttachments(changeException);
-                    }
-                    icalEmitter.writeAppointment(session, changeException, factory.getContext(), conversionErrors, conversionWarnings);
-                }
-            }
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            icalEmitter.writeSession(session, bytes);
-            /*
-             * apply patches
-             */
-            String iCal = new String(bytes.toByteArray(), "UTF-8");
-            iCal = Patches.Outgoing.removeEmptyRDates(iCal);
-            return iCal;
-        } catch (UnsupportedEncodingException e) {
-            throw protocolException(getUrl(), e);
+        /*
+         * load appointment & apply extended properties for serialization
+         */
+        CalendarDataObject appointment = parent.load(object, true);
+        applyReminderProperties(appointment);
+        applyPrivateComments(appointment);
+        applyAttachments(appointment);
+        CalendarDataObject[] changeExceptions = 0 < object.getRecurrenceID() ? parent.loadChangeExceptions(object, true) : null;
+        /*
+         * transform change exceptions to delete-exceptions where user is removed from participants if needed (bug #26293)
+         */
+        if (null != changeExceptions && 0 < changeExceptions.length) {
+            changeExceptions = Patches.Outgoing.setDeleteExceptionForRemovedParticipant(factory, appointment, changeExceptions);
         }
+        /*
+         * write appointment
+         */
+        icalEmitter.writeAppointment(session, appointment, factory.getContext(), conversionErrors, conversionWarnings);
+        /*
+         * write exceptions
+         */
+        if (null != changeExceptions && 0 < changeExceptions.length) {
+            for (CalendarDataObject changeException : changeExceptions) {
+                applyReminderProperties(changeException);
+                applyPrivateComments(changeException);
+                if (false == DAVUserAgent.MAC_CALENDAR.equals(getUserAgent())) {
+                    applyAttachments(changeException);
+                }
+                icalEmitter.writeAppointment(session, changeException, factory.getContext(), conversionErrors, conversionWarnings);
+            }
+        }
+        /*
+         * serialize iCal data
+         */
+        return serialize(session);
     }
 
     @Override

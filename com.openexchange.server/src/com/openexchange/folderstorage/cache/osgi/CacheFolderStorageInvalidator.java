@@ -61,7 +61,7 @@ import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
-import com.openexchange.folderstorage.internal.Tools;
+import com.openexchange.java.util.Tools;
 
 
 /**

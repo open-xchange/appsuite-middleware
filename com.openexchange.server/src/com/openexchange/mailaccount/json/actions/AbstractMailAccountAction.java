@@ -49,8 +49,8 @@
 
 package com.openexchange.mailaccount.json.actions;
 
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import static com.openexchange.mail.utils.ProviderUtility.extractProtocol;
-import static com.openexchange.mailaccount.Tools.getUnsignedInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;

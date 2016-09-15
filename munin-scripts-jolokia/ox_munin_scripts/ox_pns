@@ -9,8 +9,9 @@ use JSON;
 
 ###
 # Infos about Push Notification Service:
-#   avg:   The number of submitted notifications per minute.
-#   enqueued:  The number of notifications that are currently submitted, but not yet processed
+#   avg:      The number of submitted notifications per minute.
+#   enqueued: The number of notifications that are currently submitted, but not yet processed
+#   total:    Derivation of total notifications
 ###
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf")
@@ -37,6 +38,11 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
     print "avg.label notifications per minute\n";
     print "avg.draw AREA\n";
 
+    print "total.label Push Notifications\n";
+    print "total.draw LINE1\n";
+    print "total.type DERIVE\n";
+    print "total.min 0\n";
+
     exit 0
 }
 
@@ -46,6 +52,7 @@ my $password = $ENV{oxJolokiaPassword};
 
 callUrl("avg","/read/com.openexchange.pns:name=PushNotificationMBean/NotificationsPerMinute");
 callUrl("enqueued","/read/com.openexchange.pns:name=PushNotificationMBean/EnqueuedNotifications");
+callUrl("total","/read/com.openexchange.pns:name=PushNotificationMBean/TotalNumberOfSubmittedNotifications");
 
 sub callUrl {
 	my $ua = LWP::UserAgent->new();

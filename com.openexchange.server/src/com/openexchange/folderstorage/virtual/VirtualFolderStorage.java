@@ -49,9 +49,7 @@
 
 package com.openexchange.folderstorage.virtual;
 
-import static com.openexchange.folderstorage.internal.Tools.getUnsignedInteger;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -110,6 +108,8 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 
 /**
  * {@link VirtualFolderStorage} - The virtual folder storage.
