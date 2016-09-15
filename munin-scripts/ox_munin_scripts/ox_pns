@@ -4,8 +4,9 @@
 
 ###
 # Infos about Push Notification Service:
-#   avg:   The number of submitted notifications per minute.
-#   enqueued:  The number of notifications that are currently submitted, but not yet processed
+#   avg:      The number of submitted notifications per minute.
+#   enqueued: The number of notifications that are currently submitted, but not yet processed
+#   total:    Derivation of total notifications
 ###
 
 $showruntimestats="/opt/open-xchange/sbin/showruntimestats";
@@ -35,6 +36,11 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
     print "avg.label notifications per minute\n";
     print "avg.draw AREA\n";
 
+    print "total.label Push Notifications\n";
+    print "total.draw LINE1\n";
+    print "total.type DERIVE\n";
+    print "total.min 0\n";
+
     exit 0
 }
 
@@ -52,6 +58,12 @@ while (<SHOWRUNTIME>)
         s/.*\=//;
         $val=$_+0;
         print "avg.value $val\n";
+        next;
+    }
+    if ( $_ =~ /PushNotificationMBean,TotalNumberOfSubmittedNotifications/) {
+        s/.*\=//; 
+        $val=$_+0;
+        print "total.value $val\n";
         next;
     }
 }
