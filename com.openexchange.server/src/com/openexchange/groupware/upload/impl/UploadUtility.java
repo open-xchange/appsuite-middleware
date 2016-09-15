@@ -82,7 +82,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.upload.UploadFileListener;
+import com.openexchange.groupware.upload.UploadFileListener;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -388,7 +388,7 @@ public final class UploadUtility {
 
             // Signal success
             for (UploadFileListener listener : listeners) {
-                listener.onUploadSuceeded(uuid);
+                listener.onUploadSuceeded(uuid, uploadEvent);
             }
 
             // Everything went well

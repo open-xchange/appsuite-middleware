@@ -47,27 +47,56 @@
  *
  */
 
-package com.openexchange.groupware.upload.osgi;
+package com.openexchange.groupware.upload;
 
-import org.osgi.framework.BundleContext;
-import com.openexchange.groupware.upload.UploadFileListener;
-import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link UploadListenerTracker} - Tracks registered instances of {@link UploadFileListener}.
+ * {@link UploadFileListener} - Receives various call-backs on upload of a file.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class UploadListenerTracker extends RankingAwareNearRegistryServiceTracker<UploadFileListener> {
+public interface UploadFileListener {
 
     /**
-     * Initializes a new {@link UploadListenerTracker}.
+     * Invoked before the upload's stream gets processed; providing basic information.
      *
-     * @param context The bundle context
+     * @param uploadId The identifier that uniquely identifies the upload
+     * @param fileName The name of the uploaded file
+     * @param fieldName The name of the field in the multipart form (if any)
+     * @param contentType The content type
+     * @throws OXException If this listener signals that uploaded should be aborted
      */
-    public UploadListenerTracker(BundleContext context) {
-        super(context, UploadFileListener.class, 0);
-    }
+    void onBeforeUploadProcessed(String uploadId, String fileName, String fieldName, String contentType) throws OXException;
 
+    /**
+     * Invoked after the upload's stream gets processed; providing basic information.
+     *
+     * @param uploadId The identifier that uniquely identifies the upload
+     * @param uploadFile The fully parsed uploaded file
+     * @throws OXException If this listener signals that uploaded should be aborted
+     */
+    void onAfterUploadProcessed(String uploadId, UploadFile uploadFile) throws OXException;
+
+    /**
+     * Invoked in case upload failed while processing individual uploaded files;<br>
+     * e.g. upload quota is exceeded.
+     * <p>
+     * All previously processed upload files will be deleted.
+     *
+     * @param uploadId The identifier that uniquely identifies the upload
+     * @param exception The exception rendering the upload as failure
+     */
+    void onUploadFailed(String uploadId, OXException exception);
+
+    /**
+     * Invoked in case upload succeeded.
+     * <p>
+     * All uploaded files were successfully processed.
+     *
+     * @param uploadId The identifier that uniquely identifies the upload
+     * @param upload The successfully parsed upload
+     */
+    void onUploadSuceeded(String uploadId, Upload upload);
 }
