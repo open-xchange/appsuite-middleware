@@ -584,7 +584,10 @@ public final class ConfigJSlobService implements JSlobService {
                     final Setting setting = configTree.getSettingByPath(configTreePath);
                     stor.readValues(setting);
 
-                    putToJsonObject(lobPath, convert2JS(setting), jObject);
+                    Object value = convert2JS(setting);
+                    if (value != JSONObject.NULL) {
+                        putToJsonObject(lobPath, value, jObject);
+                    }
                 } catch (final OXException e) {
                     LOG.warn("Illegal config-tree path: {}. Please check paths.perfMap file (JSlob ID: {}) OR if path-associatd bundle has been started.", configTreePath, lobPath, e);
                 }
