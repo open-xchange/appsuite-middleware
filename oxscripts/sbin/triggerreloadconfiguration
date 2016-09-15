@@ -14,7 +14,7 @@ function read_port_and_reload () {
   rmi_port=""
 
   # search for rmi port in given config file.
-  # this can be a overwrite.properties or the default config file.
+  # this can be overwrite.properties or the default config file.
   if [ -f ${config_file} ]
   then
     rmi_port=$(ox_read_property com.openexchange.rmi.port ${config_file})
@@ -51,7 +51,7 @@ $0 [OPTIONS]
 Possible OPTIONS:
   -d      - Use rmi port from rmi.properties
   -f      - Config file containing the possibly overridden rmi port to use for the service to reload.
-            Falls back to server.properties if file or property are missing.
+            Falls back to rmi.properties if file or property are missing.
   -h      - Print usage help
 "
 }
