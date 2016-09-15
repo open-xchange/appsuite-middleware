@@ -84,15 +84,15 @@ public class GrizzlyWebSocketService implements WebSocketService {
 
     @Override
     public boolean exists(int userId, int contextId) throws OXException {
-        if (localApp.existsAny(null, userId, contextId)) {
-            return true;
-        }
-
-        return remoteDistributor.existsAnyRemote(null, userId, contextId);
+        return exists(null, userId, contextId);
     }
 
     @Override
-    public boolean exists(String pathFilter, int userId, int contextId) {
+    public boolean exists(String pathFilter, int userId, int contextId) throws OXException {
+        if (false == WebSockets.validatePath(pathFilter)) {
+            throw WebSocketExceptionCodes.INVALID_PATH_FILTER.create(pathFilter);
+        }
+
         if (localApp.existsAny(pathFilter, userId, contextId)) {
             return true;
         }
@@ -157,6 +157,10 @@ public class GrizzlyWebSocketService implements WebSocketService {
 
     @Override
     public void closeWebSockets(int userId, int contextId, String pathFilter) throws OXException {
+        if (false == WebSockets.validatePath(pathFilter)) {
+            throw WebSocketExceptionCodes.INVALID_PATH_FILTER.create(pathFilter);
+        }
+
         localApp.closeWebSockets(userId, contextId, pathFilter);
     }
 
