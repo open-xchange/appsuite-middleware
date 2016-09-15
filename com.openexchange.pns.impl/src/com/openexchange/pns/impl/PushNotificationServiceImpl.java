@@ -432,7 +432,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             if (null == transport) {
                 LOG.warn("No such transport '{}' for client '{}' to publish notification from user {} in context {} for topic {}", transportId, client, I(userId), I(contextId), topic);
             } else {
-                if (transport.isEnabled(topic, client, userId, contextId)) {
+                if (isTransportAllowed(transport, topic, client, userId, contextId)) {
                     while (notifications.hasNext()) {
                         PushNotification notification = notifications.next();
                         LOG.info("Trying to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId));
@@ -449,6 +449,15 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         }
 
         addNumOfProcessedNotifications(numOfNotifications);
+    }
+
+    private boolean isTransportAllowed(PushNotificationTransport transport, String topic, String client, int userId, int contextId) {
+        try {
+            return transport.isEnabled(topic, client, userId, contextId);
+        } catch (Exception e) {
+            LOG.error("Failed to check whether notification \"{}\" is allowed to be sent via transport '{}' to client '{}' for user {} in context {}. Transport will be denied...", topic, transport.getId(), client, I(userId), I(contextId), e);
+            return false;
+        }
     }
 
     private void addNumOfProcessedNotifications(int numOfNotifications) {
