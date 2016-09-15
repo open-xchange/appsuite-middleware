@@ -59,6 +59,9 @@ import com.openexchange.advertisement.AdvertisementExceptionCodes;
 import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.RemoteAdvertisementService;
 import com.openexchange.advertisement.osgi.Services;
+import com.openexchange.advertisement.services.AbstractAdvertisementConfigService;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.reseller.ResellerService;
@@ -241,6 +244,13 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                         }
                     }
                 }
+            }
+
+            // clear cache
+            CacheService cacheService = Services.getService(CacheService.class);
+            if (cacheService != null) {
+                Cache cache = cacheService.getCache(AbstractAdvertisementConfigService.CACHING_REGION);
+                cache.clear();
             }
         } catch (SQLException e) {
             throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage());
