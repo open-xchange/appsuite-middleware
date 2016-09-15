@@ -63,8 +63,8 @@ public interface PushNotificationTransport {
     /**
      * Checks if this transport is enabled for specified topic, client and user.
      *
-     * @param topic The topic that is about to be sent
-     * @param client The identifier of the client to send to
+     * @param topic The topic that is about to be sent; or <code>null</code> to ignore topic restrictions
+     * @param client The identifier of the client to send to; or <code>null</code> to ignore client restrictions
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return <code>true</code> if allowed; otherwise <code>false</code>
