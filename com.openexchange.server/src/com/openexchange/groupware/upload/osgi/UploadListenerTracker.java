@@ -47,33 +47,27 @@
  *
  */
 
-package com.openexchange.smtp.dataobjects;
+package com.openexchange.groupware.upload.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
+import org.osgi.framework.BundleContext;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.upload.UploadFileListener;
 
 /**
- * {@link SMTPFilePart} - A {@link MailPart} implementation that keeps a
- * reference to a temporary uploaded file that shall be added as an attachment
- * later
+ * {@link UploadListenerTracker} - Tracks registered instances of {@link UploadFileListener}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * @since v7.8.3
  */
-public final class SMTPFilePart extends UploadFileMailPart {
+public class UploadListenerTracker extends RankingAwareNearRegistryServiceTracker<UploadFileListener> {
 
-	private static final long serialVersionUID = -3267699308710097989L;
-
-	/**
-	 * Constructor
-	 *
-	 * @throws OXException
-	 *             If upload file's content type cannot be parsed
-	 */
-	public SMTPFilePart(final UploadFile uploadFile) throws OXException {
-		super(uploadFile);
-	}
+    /**
+     * Initializes a new {@link UploadListenerTracker}.
+     *
+     * @param context The bundle context
+     */
+    public UploadListenerTracker(BundleContext context) {
+        super(context, UploadFileListener.class, 0);
+    }
 
 }

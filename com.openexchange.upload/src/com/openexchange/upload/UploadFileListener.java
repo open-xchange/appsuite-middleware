@@ -47,33 +47,56 @@
  *
  */
 
-package com.openexchange.smtp.dataobjects;
+package com.openexchange.upload;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
 
 /**
- * {@link SMTPFilePart} - A {@link MailPart} implementation that keeps a
- * reference to a temporary uploaded file that shall be added as an attachment
- * later
+ * {@link UploadFileListener} - Receives various call-backs on upload of a file.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * @since v7.8.3
  */
-public final class SMTPFilePart extends UploadFileMailPart {
+public interface UploadFileListener {
 
-	private static final long serialVersionUID = -3267699308710097989L;
+    /**
+     * Invoked before the upload's stream gets processed; providing basic information.
+     *
+     * @param uploadId The identifier that uniquely identifies the upload
+     * @param fileName The name of the uploaded file
+     * @param fieldName The name of the field in the multipart form (if any)
+     * @param contentType The content type
+     * @throws OXException If this listener signals that uploaded should be aborted
+     */
+    void onBeforeUploadProcessed(String uploadId, String fileName, String fieldName, String contentType) throws OXException;
 
-	/**
-	 * Constructor
-	 *
-	 * @throws OXException
-	 *             If upload file's content type cannot be parsed
-	 */
-	public SMTPFilePart(final UploadFile uploadFile) throws OXException {
-		super(uploadFile);
-	}
+    /**
+     * Invoked after the upload's stream gets processed; providing basic information.
+     *
+     * @param uploadId The identifier that uniquely identifies the upload
+     * @param uploadFile The fully parsed uploaded file
+     * @throws OXException If this listener signals that uploaded should be aborted
+     */
+    void onAfterUploadProcessed(String uploadId, UploadFile uploadFile) throws OXException;
 
+    /**
+     * Invoked in case upload failed while processing individual uploaded files;<br>
+     * e.g. upload quota is exceeded.
+     * <p>
+     * All previously processed upload files will be deleted.
+     *
+     * @param uploadId The identifier that uniquely identifies the upload
+     * @param exception The exception rendering the upload as failure
+     */
+    void onUploadFailed(String uploadId, OXException exception);
+
+    /**
+     * Invoked in case upload succeeded.
+     * <p>
+     * All uploaded files were successfully processed.
+     *
+     * @param uploadId The identifier that uniquely identifies the upload
+     */
+    void onUploadSuceeded(String uploadId);
 }

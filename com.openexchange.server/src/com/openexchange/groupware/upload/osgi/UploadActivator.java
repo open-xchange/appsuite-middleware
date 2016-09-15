@@ -47,33 +47,45 @@
  *
  */
 
-package com.openexchange.smtp.dataobjects;
+package com.openexchange.groupware.upload.osgi;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
+import com.openexchange.groupware.upload.impl.UploadUtility;
+import com.openexchange.osgi.HousekeepingActivator;
+
 
 /**
- * {@link SMTPFilePart} - A {@link MailPart} implementation that keeps a
- * reference to a temporary uploaded file that shall be added as an attachment
- * later
+ * {@link UploadActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
+ * @since v7.8.3
  */
-public final class SMTPFilePart extends UploadFileMailPart {
+public class UploadActivator extends HousekeepingActivator {
 
-	private static final long serialVersionUID = -3267699308710097989L;
+    /**
+     * Initializes a new {@link UploadActivator}.
+     */
+    public UploadActivator() {
+        super();
+    }
 
-	/**
-	 * Constructor
-	 *
-	 * @throws OXException
-	 *             If upload file's content type cannot be parsed
-	 */
-	public SMTPFilePart(final UploadFile uploadFile) throws OXException {
-		super(uploadFile);
-	}
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        UploadListenerTracker tracker = new UploadListenerTracker(context);
+        rememberTracker(tracker);
+        openTrackers();
+
+        UploadUtility.setUploadFileListenerLsting(tracker);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        UploadUtility.setUploadFileListenerLsting(null);
+        super.stopBundle();
+    }
 
 }
