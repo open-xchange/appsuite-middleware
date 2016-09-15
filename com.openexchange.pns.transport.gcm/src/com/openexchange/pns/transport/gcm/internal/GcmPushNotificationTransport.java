@@ -194,12 +194,13 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
 
         String basePropertyName = "com.openexchange.pns.transport.gcm.enabled";
 
-        ComposedConfigProperty<Boolean> property = view.property(basePropertyName + "." + client + "." + topic, boolean.class);
+        ComposedConfigProperty<Boolean> property;
+        property = null == topic || null == client ? null : view.property(basePropertyName + "." + client + "." + topic, boolean.class);
         if (null != property && property.isDefined()) {
             return property.get().booleanValue();
         }
 
-        property = view.property(basePropertyName + "." + client, boolean.class);
+        property = null == client ? null : view.property(basePropertyName + "." + client, boolean.class);
         if (null != property && property.isDefined()) {
             return property.get().booleanValue();
         }
