@@ -211,12 +211,25 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     @Override
     public boolean isEnabled(String topic, String client, int userId, int contextId) throws OXException {
         ConfigView view = configViewFactory.getView(userId, contextId);
-        ComposedConfigProperty<Boolean> property = view.property("com.openexchange.pns.transport.apn.ios.enabled", boolean.class);
-        if (null == property || !property.isDefined()) {
-            return false;
+
+        String basePropertyName = "com.openexchange.pns.transport.apn.ios.enabled";
+
+        ComposedConfigProperty<Boolean> property = view.property(basePropertyName + "." + client + "." + topic, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
         }
 
-        return property.get().booleanValue();
+        property = view.property(basePropertyName + "." + client, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        property = view.property(basePropertyName, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        return false;
     }
 
     @Override
