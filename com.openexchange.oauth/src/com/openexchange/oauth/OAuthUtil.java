@@ -54,9 +54,11 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.util.Set;
 import com.openexchange.framework.request.RequestContext;
 import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
 
 /**
@@ -67,9 +69,47 @@ import com.openexchange.session.Session;
 public final class OAuthUtil {
 
     /**
-     * Builds the 'init' call-back URL for OAuth
+     * Parses the specified {@link OAuthScope}s and returns the mappings ({@link OAuthScope#getMapping()}) as a space separated string
      * 
-     * @return the 'init' call-back URL for OAuth
+     * @param scopes The {@link OAuthScope}s
+     * @return a space separated string with all {@link OAuthScope}s in the specified {@link Set}
+     */
+    public static final String scopeMappingsToString(Set<OAuthScope> scopes) {
+        if (scopes.isEmpty()) {
+            return "";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (OAuthScope scope : scopes) {
+            builder.append(scope.getMapping()).append(" ");
+        }
+        builder.setLength(builder.length() - 1);
+        return builder.toString();
+    }
+
+    /**
+     * Parses the specified {@link OAuthScope}s and returns the mappings ({@link OAuthScope#getModule()}) as a space separated string
+     * 
+     * @param scopes The {@link OAuthScope}s
+     * @return a space separated string with all {@link OAuthScope}s in the specified {@link Set}
+     */
+    public static final String scopeModulesToString(Set<OAuthScope> scopes) {
+        if (scopes.isEmpty()) {
+            return "";
+        }
+        StringBuilder builder = new StringBuilder();
+        for (OAuthScope scope : scopes) {
+            builder.append(scope.getModule()).append(" ");
+        }
+        builder.setLength(builder.length() - 1);
+        return builder.toString();
+    }
+
+    /**
+     * Builds the 'init' call-back URL for the given {@link OAuthAccount}
+     * 
+     * @param session The session
+     * @param account The {@link OAuthAccount}
+     * @return the 'init' call-back URL for the given {@link OAuthAccount}
      */
     public static final String buildCallbackURL(Session session, OAuthAccount account) {
         RequestContext requestContext = RequestContextHolder.get();
@@ -84,15 +124,17 @@ public final class OAuthUtil {
         builder.append("&serviceId=").append(account.getAPI().getFullName());
         builder.append("&id=").append(account.getId());
         builder.append('&').append(OAuthConstants.ARGUMENT_DISPLAY_NAME).append('=').append(urlEncode(account.getDisplayName()));
+        builder.append("&scopes=").append(urlEncode(OAuthUtil.scopeModulesToString(account.getEnabledScopes())));
         builder.append("&session=").append(session.getSessionID());
 
         return builder.toString();
     }
 
     /**
-     * Tries to determine the hostname by first looking in to the {@link RequestContext},
+     * Tries to determine the hostname by first looking in to {@link HostData},
      * then through Java and if still not available, falls back to 'localhost' as last resort.
      * 
+     * @param hostData The {@link HostData}
      * @return The hostname
      */
     private static final String determineHost(HostData hostData) {

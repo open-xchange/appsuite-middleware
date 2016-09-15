@@ -221,4 +221,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // User wants to compose a share message but does not specify an expiration date which is required
     public static final String EXPIRATION_DATE_MISSING_MSG = "Please specify an expiration date in order to compose a message containing share links";
 
+    // The authentication type selected for a certain mail/transport account is not supported; e.g. user wants to authenticate via OAuth, but IMAP server does not support AUTH=XOAUTH2 capability
+    public static final String AUTH_TYPE_NOT_SUPPORTED_MSG = "The selected authentication type is not supported by server %2$s";
+
 }

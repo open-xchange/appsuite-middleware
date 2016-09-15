@@ -49,6 +49,7 @@
 
 package com.openexchange.imagetransformation.java.transformations;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -97,6 +98,8 @@ public class ScaleTransformation implements ImageTransformation {
         case COVER:
             constrain = new CoverDimensionConstrain(maxWidth, maxHeight);
             break;
+        case CONTAIN_FORCE_DIMENSION:
+            // fall-through
         case CONTAIN:
             constrain = new ContainDimensionConstrain(maxWidth, maxHeight);
             break;
@@ -111,7 +114,76 @@ public class ScaleTransformation implements ImageTransformation {
         if (shrinkOnly && null != sourceImage && maxWidth >= sourceImage.getWidth() && maxHeight >= sourceImage.getHeight()) {
             return sourceImage; // nothing to do
         }
-        return Scalr.resize(sourceImage, Method.AUTOMATIC, targetWidth, targetHeight);
+
+        BufferedImage resized = Scalr.resize(sourceImage, Method.AUTOMATIC, targetWidth, targetHeight);
+        if (ScaleType.CONTAIN_FORCE_DIMENSION == scaleType) {
+            resized = extentImageIfNeeded(resized, maxWidth, maxHeight);
+        }
+        return resized;
+    }
+
+    /**
+     * Resizes an image to a specific size and adds white lines in respect to the ratio.
+     * <p>
+     * See <a href="http://www.programcreek.com/java-api-examples/index.php?source_dir=proudcase-master/src/java/com/proudcase/util/ImageScale.java">this code example</a> from which this routine was derived
+     *
+     * @param resizedImage The previously resized image using {@link ScaleType#CONTAIN CONTAIN} policy
+     * @param resultWidth The desired width
+     * @param resultHeight The desired height
+     * @return The resized image with smaller sides padded
+     */
+    private BufferedImage extentImageIfNeeded(BufferedImage resizedImage, int resultWidth, int resultHeight) {
+        // First, get the width and the height of the image
+        int originWidth = resizedImage.getWidth();
+        int originHeight = resizedImage.getHeight();
+
+        // Check which sides need padding
+        if (originWidth < resultWidth) {
+            // Padding on the width axis
+            int paddingSize = (resultWidth - originWidth) / 2;
+            if (paddingSize > 0) {
+                return extentImage(resizedImage, paddingSize, true);
+            }
+        } else if (originHeight < resultHeight) {
+            // Padding on the height axis
+            int paddingSize = (resultHeight - originHeight) / 2;
+            if (paddingSize > 0) {
+                return extentImage(resizedImage, paddingSize, false);
+            }
+        }
+
+        return resizedImage;
+    }
+
+    private BufferedImage extentImage(BufferedImage resizedImage, int paddingSize, boolean extentWidth) {
+
+        // Add the padding to the image
+        BufferedImage outputImage = Scalr.pad(resizedImage, paddingSize, Color.WHITE);
+
+        // Crop the image since padding was added to all sides
+        int x = 0, y = 0, width = 0, height = 0;
+        if (extentWidth) {
+            x = 0;
+            y = paddingSize;
+            width = outputImage.getWidth();
+            height = outputImage.getHeight() - (2 * paddingSize);
+        } else {
+            x = paddingSize;
+            y = 0;
+            width = outputImage.getWidth() - (2 * paddingSize);
+            height = outputImage.getHeight();
+        }
+
+        if (width > 0 && height > 0) {
+            outputImage = Scalr.crop(outputImage, x, y, width, height);
+        }
+
+        // Flush both images
+        resizedImage.flush();
+        outputImage.flush();
+
+        // Return the final image
+        return outputImage;
     }
 
     @Override
@@ -131,6 +203,8 @@ public class ScaleTransformation implements ImageTransformation {
         case COVER:
             constrain = new CoverDimensionConstrain(maxWidth, maxHeight);
             break;
+        case CONTAIN_FORCE_DIMENSION:
+            // fall-through
         case CONTAIN:
             if (null != originalResolution && maxWidth >= originalResolution.getWidth() && maxHeight >= originalResolution.getHeight()) {
                 return originalResolution; // nothing to do

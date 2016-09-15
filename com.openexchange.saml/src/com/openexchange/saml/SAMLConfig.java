@@ -149,4 +149,10 @@ public interface SAMLConfig {
      */
     boolean isAutoLoginEnabled();
 
+    /**
+     * Gets Whether SAML unsolicited responses are enabled.
+     *
+     * @return <code>true</code> if unsolicited responses are on.
+     */
+    boolean isAllowUnsolicitedResponses();
 }

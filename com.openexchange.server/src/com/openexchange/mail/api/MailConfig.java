@@ -84,6 +84,9 @@ import com.openexchange.mailaccount.Account;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
@@ -706,20 +709,55 @@ public abstract class MailConfig {
                 mailConfig.password = sessionPassword;
             }
         } else {
-            final String mailAccountPassword = account.getPassword();
-            if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
-                // Set to empty string
-                mailConfig.password = "";
+            int oAuthAccontId = assumeXOauth2For(account);
+            if (oAuthAccontId >= 0) {
+                // Do the XOAUTH2 dance...
+                OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
+                if (null == oauthService) {
+                    throw ServiceExceptionCode.absentService(OAuthService.class);
+                }
+
+                OAuthAccount oAuthAccount = oauthService.getAccount(oAuthAccontId, session, session.getUserId(), session.getContextId());
+                mailConfig.login = oAuthAccount.getToken();
+                mailConfig.password = oAuthAccount.getSecret();
+                mailConfig.authType = AuthType.OAUTH;
             } else {
-                // Mail account's password
-                if (account instanceof MailAccount) {
-                    mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), ((MailAccount)account).getMailServer());
+                String mailAccountPassword = account.getPassword();
+                if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
+                    // Set to empty string
+                    mailConfig.password = "";
                 } else {
-                    mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), account.getTransportServer());
+                    // Mail account's password
+                    if (account.isMailAccount()) {
+                        mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), ((MailAccount) account).getMailServer());
+                    } else {
+                        mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), account.getTransportServer());
+                    }
                 }
             }
         }
         mailConfig.doCustomParsing(account, session);
+    }
+
+    /**
+     * Checks whether XOAUTH2 authentication is assumed for specified account.
+     *
+     * @param account The account to check
+     * @return The verified identifier of the associated OAuth account or <code>-1</code>
+     */
+    protected static int assumeXOauth2For(Account account) {
+        if (account.isMailAccount()) {
+            MailAccount mailAccount = (MailAccount) account;
+            if (false == mailAccount.isMailOAuthAble()) {
+                return -1;
+            }
+            return (mailAccount.getMailOAuthId() >= 0 ? mailAccount.getMailOAuthId() : -1);
+        }
+
+        if (false == account.isTransportOAuthAble()) {
+            return -1;
+        }
+        return (account.getTransportOAuthId() >= 0 ? account.getTransportOAuthId() : -1);
     }
 
     private static final int LENGTH = 6;

@@ -69,25 +69,43 @@ ox_set_JAVA_BIN() {
         fi
     fi
     test -x $JAVA_BIN || die "$0: unable to get path to java vm"
-    minor_version=$(detect_minor_java_version)
-    if [ $minor_version -lt 7 ]; then
+    version=$(detect_java_version)
+    if [ $version -lt 7 ]; then
       JAVA_BIN=/opt/open-xchange/sbin/insufficientjava
     fi
 }
 
-# Detect the minor version of the selected JVM
+# Detect the version of the selected JVM
 #
+# Pre JEP 223:
 # JVMs output e.g: java version "1.7.0_80" as part of their version
-# specification. From this line we simply extract the minor version
-# which would be 7 in this case.
+# specification. From this line we simply extract the minor version which would
+# be 7 in this case.
 #
-# Returns the detected minor version or -1 if it can't be detected
-function detect_minor_java_version () {
+# Post JEP 223:
+# JVMs output e.g: java version "9-ea", "9" or "9.0.1" as part of their version
+# specification. From this line we simply extract the major version which would
+# be 9 in this case.
+#
+# Returns the detected version or -1 if it can't be detected
+function detect_java_version () {
     version_line_array=( $($JAVA_BIN -version 2>&1 | grep version) )
     unquoted_version=${version_line_array[2]//\"/}
-    version_components=( ${unquoted_version//./ } )
-    major=${version_components[1]}
-    echo ${major:--1}
+    version=-1
+    if [[ "$unquoted_version" =~ ^1\..* ]]  
+    then
+        version_components=( ${unquoted_version//./ } )
+        version=${version_components[1]}
+    elif [[ "$unquoted_version" =~ ^[1-9]([0-9])*-ea$ ]]  
+    then
+        version_components=( ${unquoted_version//./ } )
+        version=${unquoted_version//-ea/}
+    elif [[ "$unquoted_version" =~ ^[1-9]([0-9])*(\..*)* ]]  
+    then
+        version_components=( ${unquoted_version//./ } )
+        version=${version_components[0]}
+    fi
+    echo $version
 }
 
 DEBIAN=1
@@ -260,16 +278,32 @@ foreach my $line (@LINES) {
 
 $back  = 0;
 $count = 0;
+
+# either the line where the comments above the property start or the line where
+# the matching property was found (end)
 my $start = 0;
+
+# the line where we found the matching property
 my $end = 0;
+
+# > 0 if found
 my $found = 0;
 foreach my $line (@OUTLINES) {
+    # we can not properly match commented out properties, they might be contained
+    # in comments themselves
     if ( $line =~ /^$opt\s*[:=]/ ) {
+        # we got a match
         $found=1;
+
+        # set end to the line where we found the match
         $end=$count;
+
+        # increase back while lines above are comments
         while ( $OUTLINES[$count-++$back] =~ /^#/ ) {
         }
         ;
+        # if we found at least one comment line start at the comments otherwise
+        # start at the property
         if ( $count > 0 && $back > 1 ) {
             $start=$count-$back+1;
         } else {
@@ -279,6 +313,7 @@ foreach my $line (@OUTLINES) {
     $count++;
 }
 
+#if we did not find the property set it to provided values
 if ( length($out) == 0 ) {
     $out=$opt."=".$val."\n";
 }
@@ -290,6 +325,10 @@ if ( $found ) {
             print "\n" if( substr($OUTLINES[$i],-1) ne "\n" );
         }
         if ( $i == $start ) {
+            # add newline unless first line or line above is emtpy
+            if ($i > 0 && $OUTLINES[$i-1] !~ /^\s*$/) {
+              print "\n";
+            }
             print $out;
             print "\n" if( substr($OUTLINES[$i],-1) ne "\n" );
         }
@@ -297,6 +336,10 @@ if ( $found ) {
 } else {
     print @OUTLINES;
     print "\n" if( substr($OUTLINES[-1],-1) ne "\n" );
+    # add newline unless line above is emtpy
+    if ($OUTLINES[-1] !~ /^\s*$/) {
+      print "\n";
+    }
     print $out;
     print "\n";
 }

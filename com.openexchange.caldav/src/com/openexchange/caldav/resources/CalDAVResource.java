@@ -50,6 +50,7 @@
 package com.openexchange.caldav.resources;
 
 import static com.openexchange.dav.DAVProtocol.protocolException;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.TimeZone;
@@ -57,8 +58,10 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Tools;
+import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.dav.resources.CommonResource;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.exception.OXException;
@@ -107,23 +110,31 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
         this.parent = parent;
     }
 
-    protected abstract String generateICal() throws OXException;
+    protected abstract byte[] generateICal() throws OXException;
 
     protected abstract void move(CalDAVFolderCollection<T> target) throws OXException;
 
     protected byte[] getICalFile() throws WebdavProtocolException {
-        if (null == this.iCalFile) {
-            String iCal;
+        if (null == iCalFile) {
             try {
-                iCal = this.generateICal();
+                iCalFile = generateICal();
             } catch (OXException e) {
                 throw protocolException(getUrl(), e);
             }
-            if (null != iCal) {
-                this.iCalFile = iCal.getBytes(Charsets.UTF_8);
-            }
         }
         return iCalFile;
+    }
+
+    protected byte[] serialize(ICalSession session) throws ConversionError {
+        ICalEmitter icalEmitter = factory.getIcalEmitter();
+        ByteArrayOutputStream outputStream = null;
+        try {
+            outputStream = Streams.newByteArrayOutputStream();
+            icalEmitter.writeSession(session, outputStream);
+            return outputStream.toByteArray();
+        } finally {
+            Streams.close(outputStream);
+        }
     }
 
     protected ICalParser getICalParser() {

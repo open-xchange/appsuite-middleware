@@ -1336,7 +1336,7 @@ public class IMAPDefaultFolderChecker {
     }
 
     /** Gets fall-back name */
-    protected static String getFallbackName(int index) {
+    public static String getFallbackName(int index) {
         switch (index) {
         case StorageUtility.INDEX_CONFIRMED_HAM:
             return DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmedHam();

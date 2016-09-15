@@ -51,6 +51,7 @@ package com.openexchange.oauth.yahoo;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
@@ -59,6 +60,7 @@ import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
 
 
@@ -75,7 +77,7 @@ public class MockOAuthService implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, java.util.Map, int, int)
      */
     @Override
-    public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
+    public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
         // Nothing to do
         return null;
     }
@@ -84,7 +86,7 @@ public class MockOAuthService implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#createAccount(java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int)
      */
     @Override
-    public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
+    public OAuthAccount createAccount(final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
         // Nothing to do
         return null;
     }
@@ -139,6 +141,12 @@ public class MockOAuthService implements OAuthService {
 				return null;
 			}
 
+            @Override
+            public Set<OAuthScope> getEnabledScopes() {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
         };
     }
 
@@ -173,7 +181,7 @@ public class MockOAuthService implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#initOAuth(java.lang.String, java.lang.String)
      */
     @Override
-    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, String currentHost, Session session) throws OXException {
+    public OAuthInteraction initOAuth(final String serviceMetaData, final String callbackUrl, String currentHost, Session session, Set<OAuthScope> scopes) throws OXException {
         // Nothing to do
         return null;
     }
@@ -182,7 +190,7 @@ public class MockOAuthService implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.util.Map, int, int)
      */
     @Override
-    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
+    public void updateAccount(final int accountId, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
         // Nothing to do
 
     }
@@ -191,7 +199,7 @@ public class MockOAuthService implements OAuthService {
      * @see com.openexchange.oauth.OAuthService#updateAccount(int, java.lang.String, com.openexchange.oauth.OAuthInteractionType, java.util.Map, int, int)
      */
     @Override
-    public OAuthAccount updateAccount(final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId) throws OXException {
+    public OAuthAccount updateAccount(final int accountId, final String serviceMetaData, final OAuthInteractionType type, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
         // Nothing to do
         return null;
     }

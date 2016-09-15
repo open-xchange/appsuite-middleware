@@ -3,10 +3,10 @@
 #%# capabilities=autoconf
 
 ###
-# Infos about Web Sockets:
-#   buffered-count:    The number of buffered notifications.
-#   submitted-count:   The number of submitted notifications
-#   processing-count:  The number of processing notifications
+# Infos about Push Notification Service:
+#   avg:      The number of submitted notifications per minute.
+#   enqueued: The number of notifications that are currently submitted, but not yet processed
+#   total:    Derivation of total notifications
 ###
 
 $showruntimestats="/opt/open-xchange/sbin/showruntimestats";
@@ -27,24 +27,19 @@ if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 if ( $ARGV[0] and $ARGV[0] eq "config")
 {
     print "graph_title Push Notification Service\n";
-    print "graph_args --base 1000 -l 0\n";
     print "graph_category Open Xchange\n";
-    print "graph_vlabel Number\n";
+    print "graph_vlabel number of notifications\n";
+    print "graph_period minute\n";
     
-    print "buffered-count.label count\n";
-    print "buffered-count.draw LINE1\n";
-    print "buffered-count.type DERIVE\n";
-    print "buffered-count.min 0\n";
+    print "enqueued.label enqueued notifications\n";
     
-    print "submitted-message.label buffered-message\n";
-    print "submitted-message.draw LINE1\n";
-    print "submitted-message.type DERIVE\n";
-    print "submitted-message.min 0\n";
-    
-    print "processing-message.label buffered-message\n";
-    print "processing-message.draw LINE1\n";
-    print "processing-message.type DERIVE\n";
-    print "processing-message.min 0\n";
+    print "avg.label notifications per minute\n";
+    print "avg.draw AREA\n";
+
+    print "total.label Push Notifications\n";
+    print "total.draw LINE1\n";
+    print "total.type DERIVE\n";
+    print "total.min 0\n";
 
     exit 0
 }
@@ -53,22 +48,22 @@ open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
 
 while (<SHOWRUNTIME>)
 {
-    if ( $_ =~ /PushNotificationMBean,NumberOfBufferedNotifications/) {
+    if ( $_ =~ /PushNotificationMBean,EnqueuedNotifications/) {
         s/.*\=//;
         $val=$_+0;
-        print "buffered-count.value $val\n";
+        print "enqueued.value $val\n";
         next;
     }
-    if ( $_ =~ /PushNotificationMBean,NumberOfSubmittedNotifications/) {
+    if ( $_ =~ /PushNotificationMBean,NotificationsPerMinute/) {
         s/.*\=//;
         $val=$_+0;
-        print "submitted-count.value $val\n";
+        print "avg.value $val\n";
         next;
     }
-    if ( $_ =~ /PushNotificationMBean,NumberOfProcessingNotifications/) {
-        s/.*\=//;
+    if ( $_ =~ /PushNotificationMBean,TotalNumberOfSubmittedNotifications/) {
+        s/.*\=//; 
         $val=$_+0;
-        print "processing-count.value $val\n";
+        print "total.value $val\n";
         next;
     }
 }

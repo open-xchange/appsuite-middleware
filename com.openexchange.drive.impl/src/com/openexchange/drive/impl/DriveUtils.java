@@ -279,6 +279,17 @@ public class DriveUtils {
     }
 
     /**
+     * Gets a value indicating whether the supplied exception indicates an unrecoverable failed remove operation, e.g. due to insufficient
+     * permissions for a subfolder.
+     *
+     * @param e The exception to check
+     * @return <code>true</code> if the exception indicates a failed remove exception, <code>false</code>, otherwise
+     */
+    public static boolean indicatesFailedRemove(OXException e) {
+        return "FLD-0029".equals(e.getErrorCode()) || "FLD-0074".equals(e.getErrorCode());
+    }
+
+    /**
      * Gets a set of the normalized names of all supplied folders.
      *
      * @param folders The subfolders to get the names for

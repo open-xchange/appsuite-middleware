@@ -75,7 +75,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
-import com.openexchange.oauth.AbstractOAuthAccess;
+import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.session.Session;
 
 /**

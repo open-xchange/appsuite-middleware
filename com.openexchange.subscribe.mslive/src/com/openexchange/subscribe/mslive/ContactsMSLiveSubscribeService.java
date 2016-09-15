@@ -60,12 +60,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.scope.Module;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.mslive.internal.ContactParser;
 
@@ -103,6 +107,7 @@ public class ContactsMSLiveSubscribeService extends AbstractMSLiveSubscribeServi
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.subscribe.SubscribeService#getContent(com.openexchange.subscribe.Subscription)
      */
     @Override
@@ -118,8 +123,9 @@ public class ContactsMSLiveSubscribeService extends AbstractMSLiveSubscribeServi
     /**
      * @param accessToken
      * @return
+     * @throws OXException
      */
-    private JSONObject fetchData(final String accessToken) {
+    private JSONObject fetchData(final String accessToken) throws OXException {
         JSONObject wholeResponse = new JSONObject();
         try {
             final String protectedUrl = "https://apis.live.net/v5.0/me/contacts?access_token=" + URLEncoder.encode(accessToken, "UTF-8");
@@ -133,12 +139,24 @@ public class ContactsMSLiveSubscribeService extends AbstractMSLiveSubscribeServi
             String response = getMethod.getResponseBodyAsString();
             wholeResponse = new JSONObject(response);
 
+            if (wholeResponse.hasAndNotNull("error")) {
+                JSONObject error = wholeResponse.getJSONObject("error");
+                String code = error.getString("code");
+                if (code.equals("request_token_unauthorized")) {
+                    throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.MS_LIVE_CONNECT.getShortName(), Module.contacts_ro.getDisplayName());
+                }
+                throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(error.getString("message"));
+            }
+
         } catch (final HttpException e) {
             LOG.error("", e);
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e, e.getMessage());
         } catch (final IOException e) {
             LOG.error("", e);
+            throw SubscriptionErrorMessage.IO_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
             LOG.error("", e);
+            throw SubscriptionErrorMessage.ParseException.create(e, e.getMessage());
         }
         return wholeResponse;
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.config.osgi;
 
+import java.rmi.Remote;
 import java.util.Collection;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -62,6 +63,8 @@ import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.internal.ConfigProviderServiceImpl;
 import com.openexchange.config.internal.ConfigurationImpl;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
+import com.openexchange.config.rmi.RemoteConfigurationService;
+import com.openexchange.config.rmi.impl.RemoteConfigurationServiceImpl;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -96,7 +99,7 @@ public final class ConfigActivator extends HousekeepingActivator {
             registerService(ConfigurationService.class, configService, null);
 
             {
-                Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+                Dictionary<String, Object> properties = new Hashtable<>(2);
                 properties.put("scope", "server");
                 ConfigProviderServiceImpl configProviderServiceImpl = new ConfigProviderServiceImpl(configService);
                 configService.setConfigProviderServiceImpl(configProviderServiceImpl);
@@ -121,6 +124,11 @@ public final class ConfigActivator extends HousekeepingActivator {
                     rememberTracker(new ManagedServiceTracker(context, configService));
                 }
             }
+
+            // Register RMI stub
+            Dictionary<String, Object> props = new Hashtable<>(2);
+            props.put("RMIName", RemoteConfigurationService.RMI_NAME);
+            registerService(Remote.class, new RemoteConfigurationServiceImpl(configService), props);
 
             // Add & open service trackers
             track(Reloadable.class, new ReloadableServiceTracker(context, configService));

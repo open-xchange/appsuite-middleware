@@ -169,7 +169,6 @@ public final class OAuthConstants {
      */
     public static final String URLPARAM_OAUTH_ACCEPTABLE_TIMESTAMPS = "oauth_acceptable_timestamps";
 
-
     /*-
      * ------------------- Problem constants -------------------
      * see http://wiki.oauth.net/w/page/12238543/ProblemReporting

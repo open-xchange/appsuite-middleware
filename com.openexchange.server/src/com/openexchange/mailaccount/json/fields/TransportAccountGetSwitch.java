@@ -296,6 +296,16 @@ public class TransportAccountGetSwitch implements AttributeSwitch {
     }
 
     @Override
+    public Object mailOAuth() {
+        return null;
+    }
+
+    @Override
+    public Object transportOAuth() {
+        return Integer.valueOf(account.getTransportOAuthId());
+    }
+
+    @Override
     public Object rootFolder() {
         return null;
     }

@@ -1,0 +1,104 @@
+#!/bin/bash
+#
+#
+#   OPEN-XCHANGE legal information
+#
+#   All intellectual property rights in the Software are protected by
+#   international copyright laws.
+#
+#
+#   In some countries OX, OX Open-Xchange, open xchange and OXtender
+#   as well as the corresponding Logos OX Open-Xchange and OX are registered
+#   trademarks of the OX Software GmbH group of companies.
+#   The use of the Logos is not covered by the GNU General Public License.
+#   Instead, you are allowed to use these Logos according to the terms and
+#   conditions of the Creative Commons License, Version 2.5, Attribution,
+#   Non-commercial, ShareAlike, and the interpretation of the term
+#   Non-commercial applicable to the aforementioned license is published
+#   on the web site http://www.open-xchange.com/EN/legal/index.html.
+#
+#   Please make sure that third-party modules and libraries are used
+#   according to their respective licenses.
+#
+#   Any modifications to this package must retain all copyright notices
+#   of the original copyright holder(s) for the original code used.
+#
+#   After any such modifications, the original and derivative code shall remain
+#   under the copyright of the copyright holder(s) and/or original author(s)per
+#   the Attribution and Assignment Agreement that can be located at
+#   http://www.open-xchange.com/EN/developer/. The contributing author shall be
+#   given Attribution for the derivative code and a license granting use.
+#
+#    Copyright (C) 2016-2020 OX Software GmbH.
+#    Mail: info@open-xchange.com
+#
+#
+#    This program is free software; you can redistribute it and/or modify it
+#    under the terms of the GNU General Public License, Version 2 as published
+#    by the Free Software Foundation.
+#
+#    This program is distributed in the hope that it will be useful, but
+#    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+#    or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+#    for more details.
+#
+#    You should have received a copy of the GNU General Public License along
+#    with this program; if not, write to the Free Software Foundation, Inc., 59
+#    Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+#
+
+if [ "$(id -un)" != "open-xchange" ]; then
+    echo "The Open-Xchange backend start script must only be run as user open-xchange. Executing this script as root breaks the installation."
+    exit 1
+fi
+
+OXFUNCTIONS=@oxfunctions@
+OXCONFIG=@oxscriptconf@
+OXPREFIX=/opt/open-xchange/imageserver
+CONSOLELOG=@consolelogfile@
+
+test -f $OXFUNCTIONS || {
+    echo "missing common shell functions file"
+    exit 1
+}
+
+. $OXFUNCTIONS
+
+test -f $OXCONFIG && . $OXCONFIG
+
+ox_set_JAVA_BIN
+
+ox_update_config_init @configini@ @configini@.template @bundle.d@
+
+test -z "$JAVA_XTRAOPTS" && JAVA_XTRAOPTS="-Xmx512M"
+
+# Remove MaxPermSize to avoid warning with Java 8.
+# TODO remove this code and MaxPermSize option from JAVA_XTRAOPTS once Java 8 is minimum requirement.
+JAVA_VERSION=$($JAVA_BIN -version 2>&1 | grep 'version' | awk '{gsub(/\"/,""); print $3}' | awk '{ print substr($1, 1, 5); }')
+JAVA_MAJOR=$(echo $JAVA_VERSION | awk '{ print substr($1, 1, 1); }')
+JAVA_MINOR=$(echo $JAVA_VERSION | awk '{ print substr($1, 3, 1); }')
+JAVA_PATCH=$(echo $JAVA_VERSION | awk '{ print substr($1, 5, 1); }')
+if [ 1 -eq "$JAVA_MAJOR" -a 7 -lt "$JAVA_MINOR" ]; then
+    JAVA_XTRAOPTS=$(echo "$JAVA_XTRAOPTS" | sed -e 's/-XX:MaxPermSize \?= \?[^ ]\+//')
+fi
+if [ 1 -eq "$JAVA_MAJOR" -a 8 -lt "$JAVA_MINOR" ]; then
+    JAVA_XTRAOPTS=$(echo "$JAVA_XTRAOPTS" | sed -e 's/-XX:+UseParNewGC//')
+fi
+
+JAVA_OPTS="${JAVA_XTRAOPTS} \
+-Djava.awt.headless=true \
+-Dopenexchange.propdir=/opt/open-xchange/etc \
+-Dopenexchange.propdir2=/opt/open-xchange/imageserver/etc"
+
+CLASSPATH=""
+
+if [ -n "$CLASSPATH" ]; then
+    CLASSPATH="-classpath $CLASSPATH"
+fi
+
+ox_save_backup $CONSOLELOG
+
+umask 066
+
+exec $JAVA_BIN $JAVA_OPTS $CLASSPATH -jar /opt/open-xchange/bundles/org.eclipse.osgi_3.11.0.v20160603-1336.jar -configuration file:/opt/open-xchange/imageserver/osgi >> $CONSOLELOG 2>&1

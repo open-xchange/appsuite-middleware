@@ -139,6 +139,11 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             }
 
             @Override
+            public boolean isMailAccount() {
+                return true;
+            }
+
+            @Override
             public String getLogin() {
                 return acc.getLogin();
             }
@@ -344,6 +349,26 @@ public class MailAccountInsertRequest implements AJAXRequest<MailAccountInsertRe
             @Override
             public boolean isTransportStartTls() {
                 return acc.isTransportStartTls();
+            }
+
+            @Override
+            public int getMailOAuthId() {
+                return acc.getMailOAuthId();
+            }
+
+            @Override
+            public int getTransportOAuthId() {
+                return acc.getTransportOAuthId();
+            }
+
+            @Override
+            public boolean isMailOAuthAble() {
+                return acc.isMailOAuthAble();
+            }
+
+            @Override
+            public boolean isTransportOAuthAble() {
+                return acc.isTransportOAuthAble();
             }
 
             @Override

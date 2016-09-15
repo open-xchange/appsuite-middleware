@@ -146,4 +146,20 @@ public enum API {
     public String getFullName() {
         return fullName;
     }
+
+    /**
+     * Resolves the specified service identifier to a known OAuth {@link API}
+     * 
+     * @param serviceId The service identifier to resolve
+     * @return The resolved OAuth {@link API}
+     * @throws IllegalArgumentException if the specified service identifier cannot be resolved to any known OAuth {@link API}
+     */
+    public static API resolveFromServiceId(String serviceId) {
+        for (API api : values()) {
+            if (api.fullName.equals(serviceId)) {
+                return api;
+            }
+        }
+        throw new IllegalArgumentException("The serviceId '" + serviceId + "' cannot be resolved to any known OAuth API");
+    }
 }

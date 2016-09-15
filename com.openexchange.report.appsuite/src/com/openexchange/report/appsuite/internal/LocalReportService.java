@@ -51,12 +51,13 @@ package com.openexchange.report.appsuite.internal;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -64,12 +65,10 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.openexchange.context.ContextService;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.report.appsuite.ContextReport;
@@ -90,7 +89,7 @@ import com.openexchange.report.appsuite.storage.DataloaderMySQL;
  * @since v7.8.2
  */
 public class LocalReportService extends AbstractReportService {
-    
+
     //--------------------Class Attributes--------------------
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalReportService.class);
 
@@ -167,14 +166,7 @@ public class LocalReportService extends AbstractReportService {
                 cumulator.merge(contextReport, report);
             }
         }
-        // Mark context as done, thereby decreasing the number of pending tasks
-//        report.markTaskAsDone();
-
         pendingReports.put(report.getUUID(), report);
-
-//        if (report.getNumberOfPendingTasks() == 0) {
-//            finishUpReport(reportType, pendingReports, report);
-//        }
     }
 
     /**
@@ -192,13 +184,7 @@ public class LocalReportService extends AbstractReportService {
         if (report == null) {
             return;
         }
-        // Mark context as done
-//        report.markTaskAsDone();
         pendingReports.put(report.getUUID(), report);
-
-//        if (report.getNumberOfPendingTasks() == 0) {
-//            finishUpReport(reportType, pendingReports, report);
-//        }
     }
 
     @Override
@@ -279,6 +265,28 @@ public class LocalReportService extends AbstractReportService {
 
     //--------------------Private helper methods--------------------
     private void setUpContextAnalyzer(String uuid, String reportType, List<Integer> allContextIds, Report report) throws OXException {
+        List<List<Integer>> contextsInSameSchema = getContextsInSameSchemas(allContextIds);
+        processAllContexts(report, contextsInSameSchema);
+    }
+
+    private List<List<Integer>> getContextsInSameSchemas(List<Integer> allContextIds) throws OXException {
+        List<List<Integer>> contextsInSchemas = new ArrayList<>();
+        DataloaderMySQL dataloaderMySQL = new DataloaderMySQL();
+        try {
+            while (!allContextIds.isEmpty()) {
+                List<Integer> currentSchemaIds;
+
+                currentSchemaIds = dataloaderMySQL.getAllContextIdsInSameSchema(allContextIds.get(0).intValue());
+                contextsInSchemas.add(currentSchemaIds);
+                allContextIds.removeAll(currentSchemaIds);
+            }
+        } catch (SQLException e) {
+            throw ReportExceptionCodes.UNABLE_TO_RETRIEVE_ALL_CONTEXT_IDS.create(e.getMessage());
+        }
+        return contextsInSchemas;
+    }
+
+    private void processAllContexts(Report report, List<List<Integer>> contextsInSchemas) throws OXException {
         ExecutorService reportSchemaThreadPool = Executors.newFixedThreadPool(20, new ThreadFactory() {
 
             @Override
@@ -294,50 +302,29 @@ public class LocalReportService extends AbstractReportService {
                 return new Thread(r, getThreadName(threadNum));
             }
         });
+
+        CompletionService<Integer> schemaProcessor = new ExecutorCompletionService<>(reportSchemaThreadPool);
+
         EXECUTOR_SERVICE_REF.compareAndSet(null, reportSchemaThreadPool);
         if (EXECUTOR_SERVICE_REF.get().isShutdown()) {
             EXECUTOR_SERVICE_REF.set(reportSchemaThreadPool);
         }
-        ArrayList<Integer> contextsToProcess = new ArrayList<>(allContextIds);
-        LOG.debug("{} contexts in total will get processed!", contextsToProcess.size());
-        while (!contextsToProcess.isEmpty()) {
-            Integer firstRemainingContext = contextsToProcess.get(0);
-            DataloaderMySQL dataloaderMySQL = new DataloaderMySQL();
-            ArrayList<Integer> contextsInSameSchema = null;
-            try {
-                contextsInSameSchema = dataloaderMySQL.getAllContextIdsInSameSchema(firstRemainingContext.intValue());
-            } catch (SQLException e1) {
-                throw ReportExceptionCodes.UNABLE_TO_RETRIEVE_ALL_CONTEXT_IDS.create();
-            }
-
-            LOG.debug("For {} contexts a new thread will be spawned. Contained contexts: {}", contextsInSameSchema.size(), Arrays.toString(contextsInSameSchema.toArray()));
-            for (int i = 0; i < contextsInSameSchema.size(); i++) {
-                contextsToProcess.remove(contextsInSameSchema.get(i));
-            }
-            if (EXECUTOR_SERVICE_REF.get().isShutdown()) {
-                break;
-            }
-            if (report != null) {
-                Future<Integer> finishedContexts = EXECUTOR_SERVICE_REF.get().submit(new AnalyzeContextBatch(uuid, report, contextsInSameSchema));
-                
-                try {
-                    if (finishedContexts.get() != 0) {
-                        report.setTaskState(report.getNumberOfTasks(), report.getNumberOfPendingTasks() - finishedContexts.get());
-                        if (report.getNumberOfPendingTasks() <= 0) {
-                            finishUpReport(reportType, reportCache.asMap().get(PENDING_REPORTS_PRE_KEY + reportType), report);
-                        }
-                    }
-                    
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
-                }
-            }
-            
-            LOG.debug("{} assigned. {} contexts still to assign.", contextsInSameSchema.size(), contextsToProcess.size());
+        for (List<Integer> singleSchemaContexts : contextsInSchemas) {
+            schemaProcessor.submit(new AnalyzeContextBatch(report.getUUID(), report, singleSchemaContexts));
         }
-        LOG.debug("All {} contexts assigned.", allContextIds.size());
+        for (int i = 0; i < contextsInSchemas.size(); i++) {
+            try {
+                Future<Integer> finishedContexts = schemaProcessor.take();
+                report.setTaskState(report.getNumberOfTasks(), report.getNumberOfPendingTasks() - finishedContexts.get());
+                if (report.getNumberOfPendingTasks() <= 0) {
+                    finishUpReport(report.getType(), reportCache.asMap().get(PENDING_REPORTS_PRE_KEY + report.getType()), report);
+                }
+            } catch (InterruptedException e) {
+                throw ReportExceptionCodes.THREAD_WAS_INTERRUPTED.create(e.getMessage());
+            } catch (ExecutionException e) {
+                throw ReportExceptionCodes.UABLE_TO_RETRIEVE_THREAD_RESULT.create(e.getMessage());
+            }
+        }
     }
 
     private static String getThreadName(int threadNumber) {

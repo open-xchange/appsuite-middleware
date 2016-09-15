@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.linkedin.json.osgi;
 
+import java.rmi.activation.Activator;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.linkedin.LinkedInService;

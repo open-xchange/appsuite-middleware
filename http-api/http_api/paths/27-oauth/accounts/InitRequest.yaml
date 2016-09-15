@@ -16,6 +16,7 @@
         type: string
         description: The display name of the account.
         required: true
+      - $ref: "#/parameters/gblQueryParamScopes"
     responses:
       200:
         description: |

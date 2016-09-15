@@ -50,9 +50,9 @@
 package com.openexchange.xing.access.internal;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.session.Session;
@@ -90,6 +90,7 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
      */
     public XingOAuthAccessImpl(final Session session, final OAuthAccount oauthAccount) throws OXException {
         super(session);
+        verifyAccount(oauthAccount);
         setOAuthAccount(oauthAccount);
     }
 
@@ -115,7 +116,7 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
      */
     @Override
     public XingAPI<WebAuthSession> getXingAPI() throws OXException {
-        return this.<XingAPI<WebAuthSession>>getClient().client;
+        return this.<XingAPI<WebAuthSession>> getClient().client;
     }
 
     /**
@@ -176,7 +177,7 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
     private void init(String token, String secret) throws OXException {
         try {
             final OAuthServiceMetaData xingOAuthServiceMetaData = Services.getService(OAuthServiceMetaData.class);
-            final AppKeyPair appKeys = new AppKeyPair(xingOAuthServiceMetaData.getAPIKey(session), xingOAuthServiceMetaData.getAPISecret(session));
+            final AppKeyPair appKeys = new AppKeyPair(xingOAuthServiceMetaData.getAPIKey(getSession()), xingOAuthServiceMetaData.getAPISecret(getSession()));
             WebAuthSession webAuthSession = new WebAuthSession(appKeys, new AccessTokenPair(token, secret));
             XingAPI<WebAuthSession> xingApi = new XingAPI<WebAuthSession>(webAuthSession);
             setOAuthClient(new OAuthClient<XingAPI<WebAuthSession>>(xingApi, token));

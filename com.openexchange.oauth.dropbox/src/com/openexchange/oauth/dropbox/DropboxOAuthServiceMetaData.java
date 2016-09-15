@@ -54,7 +54,7 @@ import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractExtendedScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 
 /**

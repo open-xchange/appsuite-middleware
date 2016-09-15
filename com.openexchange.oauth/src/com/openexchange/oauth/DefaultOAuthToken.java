@@ -105,5 +105,4 @@ public class DefaultOAuthToken implements OAuthToken {
     public void setSecret(final String secret) {
         this.secret = secret;
     }
-
 }

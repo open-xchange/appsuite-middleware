@@ -65,7 +65,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
-import com.openexchange.oauth.AbstractOAuthAccess;
+import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.session.Session;
 
 /**

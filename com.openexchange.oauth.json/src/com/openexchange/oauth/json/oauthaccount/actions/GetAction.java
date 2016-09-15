@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -60,7 +61,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
-import com.openexchange.oauth.json.Tools;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -98,7 +98,7 @@ public final class GetAction extends AbstractOAuthAJAXActionService {
              */
             final OAuthService oAuthService = getOAuthService();
             final OAuthAccount account = oAuthService.getAccount(
-                Tools.getUnsignedInteger(accountId),
+                getUnsignedInteger(accountId),
                 session,
                 session.getUserId(),
                 session.getContextId());

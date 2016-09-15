@@ -49,8 +49,6 @@
 
 package com.openexchange.user.json.actions;
 
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
@@ -78,6 +76,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 import com.openexchange.user.json.UserContact;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link ListAction} - Maps the action to a <tt>list</tt> action.
@@ -186,7 +186,7 @@ public final class ListAction extends AbstractUserAction {
 
     private int[] parseUserIDs(final AJAXRequestData request, final int fallbackUserID) throws OXException {
         Object data = request.getData();
-        if (!(data instanceof JSONArray)) {
+        if (null == data || !(data instanceof JSONArray)) {
             throw AjaxExceptionCodes.INVALID_REQUEST_BODY.create("JSONArray", data.getClass().getSimpleName());
         }
         final JSONArray jsonArray = (JSONArray) request.getData();

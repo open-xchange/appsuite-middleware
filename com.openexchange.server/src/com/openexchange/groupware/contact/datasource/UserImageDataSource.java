@@ -65,6 +65,7 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
+import com.openexchange.java.util.Tools;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -220,7 +221,7 @@ public final class UserImageDataSource implements ImageDataSource {
     }
 
     private static Contact optUser(Session session, ImageLocation imageLocation, ContactField...fields) throws OXException {
-        return optUser(session, ImageUtility.getUnsignedInteger(imageLocation.getId()), fields);
+        return optUser(session, Tools.getUnsignedInteger(imageLocation.getId()), fields);
     }
 
     private static Contact optUser(Session session, int userID, ContactField...fields) {

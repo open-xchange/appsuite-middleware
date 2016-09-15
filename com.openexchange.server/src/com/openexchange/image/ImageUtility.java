@@ -56,9 +56,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
-import jonelo.jacksum.JacksumAPI;
-import jonelo.jacksum.algorithm.AbstractChecksum;
-import jonelo.jacksum.algorithm.MD;
 import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
@@ -70,6 +67,9 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
+import jonelo.jacksum.JacksumAPI;
+import jonelo.jacksum.algorithm.AbstractChecksum;
+import jonelo.jacksum.algorithm.MD;
 
 /**
  * {@link ImageUtility} - Utility class image module.
@@ -455,92 +455,6 @@ public final class ImageUtility {
             org.slf4j.LoggerFactory.getLogger(ImageUtility.class).error("", e);
         }
         return null;
-    }
-
-    /**
-     * The radix for base <code>10</code>.
-     */
-    private static final int RADIX = 10;
-
-    /**
-     * Parses a positive <code>int</code> value from passed {@link String} instance.
-     *
-     * @param s The string to parse
-     * @return The parsed positive <code>int</code> value or <code>-1</code> if parsing failed
-     */
-    public static final int getUnsignedInteger(final String s) {
-        if (s == null) {
-            return -1;
-        }
-
-        final int max = s.length();
-
-        if (max <= 0) {
-            return -1;
-        }
-        if (s.charAt(0) == '-') {
-            return -1;
-        }
-
-        final int limit = -Integer.MAX_VALUE;
-        final int multmin = limit / RADIX;
-
-        int result = 0;
-        int i = 0;
-        int digit;
-
-        if (i < max) {
-            digit = digit(s.charAt(i++));
-            if (digit < 0) {
-                return -1;
-            }
-            result = -digit;
-        }
-        while (i < max) {
-            /*
-             * Accumulating negatively avoids surprises near MAX_VALUE
-             */
-            digit = digit(s.charAt(i++));
-            if (digit < 0) {
-                return -1;
-            }
-            if (result < multmin) {
-                return -1;
-            }
-            result *= RADIX;
-            if (result < limit + digit) {
-                return -1;
-            }
-            result -= digit;
-        }
-        return -result;
-    }
-
-    private static int digit(final char c) {
-        switch (c) {
-        case '0':
-            return 0;
-        case '1':
-            return 1;
-        case '2':
-            return 2;
-        case '3':
-            return 3;
-        case '4':
-            return 4;
-        case '5':
-            return 5;
-        case '6':
-            return 6;
-        case '7':
-            return 7;
-        case '8':
-            return 8;
-        case '9':
-            return 9;
-        default:
-            return -1;
-        }
     }
 
     static String getDispatcherPrefix() {

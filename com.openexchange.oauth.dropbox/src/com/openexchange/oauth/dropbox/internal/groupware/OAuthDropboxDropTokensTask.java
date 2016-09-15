@@ -58,7 +58,7 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.internal.groupware.OAuthCreateTableTask2;
+import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask2;
 import com.openexchange.tools.sql.DBUtils;
 
 /**

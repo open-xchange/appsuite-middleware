@@ -64,8 +64,8 @@ import com.openexchange.halo.Picture;
 import com.openexchange.halo.linkedin.helpers.ContactEMailCompletor;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -105,7 +105,7 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
         final ContactEMailCompletor cc = new ContactEMailCompletor(session, contactService, userService);
         cc.complete(contact);
 
-        final List<OAuthAccount> accounts = getOauthService().getAccounts(LinkedInService.SERVICE_ID, session, uid, cid);
+        final List<OAuthAccount> accounts = getOauthService().getAccounts(API.LINKEDIN.getFullName(), session, uid, cid);
         if (accounts.size() == 0) {
             throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
         }
@@ -138,13 +138,7 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
             return result;
         }
         final OAuthAccount linkedinAccount = accounts.get(0);
-        final JSONObject json = getLinkedinService().getFullProfileByFirstAndLastName(
-            firstName,
-            lastName,
-            session,
-            uid,
-            cid,
-            linkedinAccount.getId());
+        final JSONObject json = getLinkedinService().getFullProfileByFirstAndLastName(firstName, lastName, session, uid, cid, linkedinAccount.getId());
         final AJAXRequestResult result = new AJAXRequestResult();
         result.setResultObject(json, "json");
         return result;
@@ -165,7 +159,7 @@ public class LinkedinProfileDataSource extends AbstractLinkedinDataSource implem
             throw LinkedinHaloExceptionCodes.MISSING_EMAIL_ADDR.create();
         }
 
-        final List<OAuthAccount> accounts = getOauthService().getAccounts(LinkedInService.SERVICE_ID, session, uid, cid);
+        final List<OAuthAccount> accounts = getOauthService().getAccounts(API.LINKEDIN.getFullName(), session, uid, cid);
         if (accounts.isEmpty()) {
             throw LinkedinHaloExceptionCodes.NO_ACCOUNT.create();
         }

@@ -29,6 +29,7 @@
         type: string
         description: The verifier string which confirms that user granted access.
         required: false
+      - $ref: "#/parameters/gblQueryParamScopes"
     responses:
       200:
         description: |

@@ -226,6 +226,11 @@ public class SimMailAccount implements MailAccount {
     }
 
     @Override
+    public boolean isMailAccount() {
+        return true;
+    }
+
+    @Override
     public String getLogin() {
         return login;
     }
@@ -402,6 +407,26 @@ public class SimMailAccount implements MailAccount {
 
     @Override
     public boolean isTransportStartTls() {
+        return false;
+    }
+
+    @Override
+    public int getMailOAuthId() {
+        return -1;
+    }
+
+    @Override
+    public int getTransportOAuthId() {
+        return -1;
+    }
+
+    @Override
+    public boolean isMailOAuthAble() {
+        return false;
+    }
+
+    @Override
+    public boolean isTransportOAuthAble() {
         return false;
     }
 

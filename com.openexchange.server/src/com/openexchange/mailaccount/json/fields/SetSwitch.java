@@ -363,6 +363,18 @@ public class SetSwitch implements AttributeSwitch {
     }
 
     @Override
+    public Object mailOAuth() {
+        desc.setMailOAuthId(value instanceof Number ? ((Number) value).intValue() : Integer.parseInt(value.toString()));
+        return null;
+    }
+
+    @Override
+    public Object transportOAuth() {
+        desc.setTransportOAuthId(value instanceof Number ? ((Number) value).intValue() : Integer.parseInt(value.toString()));
+        return null;
+    }
+
+    @Override
     public Object rootFolder() {
         return null;
     }

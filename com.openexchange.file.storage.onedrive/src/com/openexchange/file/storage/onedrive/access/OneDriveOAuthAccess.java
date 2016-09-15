@@ -73,12 +73,12 @@ import com.openexchange.file.storage.onedrive.OneDriveClosure;
 import com.openexchange.file.storage.onedrive.OneDriveConstants;
 import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.java.Strings;
-import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.rest.client.httpclient.HttpClients;
@@ -119,11 +119,12 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             OAuthAccount liveconnectOAuthAccount;
             {
                 OAuthService oAuthService = Services.getService(OAuthService.class);
-                liveconnectOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+                liveconnectOAuthAccount = oAuthService.getAccount(oauthAccountId, getSession(), getSession().getUserId(), getSession().getContextId());
+                verifyAccount(liveconnectOAuthAccount);
             }
             setOAuthAccount(liveconnectOAuthAccount);
 
-            OAuthAccount newAccount = recreateTokenIfExpired(true, liveconnectOAuthAccount, session);
+            OAuthAccount newAccount = recreateTokenIfExpired(true, liveconnectOAuthAccount, getSession());
             if (newAccount != null) {
                 setOAuthAccount(newAccount);
             }
@@ -156,7 +157,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
                 }
             }
         };
-        return closure.perform(null, this.<DefaultHttpClient> getClient().client, session).booleanValue();
+        return closure.perform(null, this.<DefaultHttpClient> getClient().client, getSession()).booleanValue();
     }
 
     @Override
@@ -216,7 +217,7 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
             Map<String, Object> arguments = new HashMap<String, Object>(3);
             arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
             arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
-            oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId());
+            oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId(), liveconnectOAuthAccount.getEnabledScopes());
 
             // Reload
             return oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());

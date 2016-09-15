@@ -87,5 +87,4 @@ public interface OAuthToken {
      * @return The secret
      */
     String getSecret();
-
 }

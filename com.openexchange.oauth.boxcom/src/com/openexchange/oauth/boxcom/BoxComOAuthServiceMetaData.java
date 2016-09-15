@@ -54,7 +54,7 @@ import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.BoxApi;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractExtendedScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -67,11 +67,11 @@ public final class BoxComOAuthServiceMetaData extends AbstractExtendedScribeAwar
 
     /**
      * Initializes a new {@link BoxComOAuthServiceMetaData}.
-     * 
+     *
      * @param services the service lookup instance
      */
     public BoxComOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, API.BOX_COM);
+        super(services, API.BOX_COM, BoxComOAuthScope.values());
     }
 
     @Override

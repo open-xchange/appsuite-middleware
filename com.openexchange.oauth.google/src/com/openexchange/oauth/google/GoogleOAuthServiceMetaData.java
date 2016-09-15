@@ -54,7 +54,7 @@ import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.Google2Api;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractExtendedScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -67,11 +67,11 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
 
     /**
      * Initializes a new {@link GoogleOAuthServiceMetaData}.
-     * 
+     *
      * @param services the service lookup instance
      */
     public GoogleOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, API.GOOGLE);
+        super(services, API.GOOGLE, GoogleOAuthScope.values());
     }
 
     @Override
@@ -82,18 +82,6 @@ public final class GoogleOAuthServiceMetaData extends AbstractExtendedScribeAwar
     @Override
     protected Collection<OAuthPropertyID> getExtraPropertyNames() {
         return Collections.singletonList(OAuthPropertyID.redirectUrl);
-    }
-
-    @Override
-    public String getScope() {
-        // Overview: https://developers.google.com/oauthplayground/
-        //
-        // https://www.googleapis.com/auth/calendar -> Manage calendar
-        // https://www.googleapis.com/auth/plus.login -> Know your basic profile info and list of people in your circles
-        // https://www.googleapis.com/auth/plus.me -> Know who you are on Google
-        // https://www.googleapis.com/auth/userinfo.email -> View your email address
-        // https://www.googleapis.com/auth/userinfo.profile -> View basic information about your account"
-        return "https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/drive";
     }
 
     @Override

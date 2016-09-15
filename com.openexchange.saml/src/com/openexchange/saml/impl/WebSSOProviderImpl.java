@@ -235,17 +235,42 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
             throw SAMLExceptionCode.UNSUPPORTED_BINDING.create(binding.name());
         }
 
-        String relayState = httpRequest.getParameter("RelayState");
-        if (relayState == null) {
-            throw SAMLExceptionCode.INVALID_REQUEST.create("The 'RelayState' parameter was not set");
-        }
-
-        AuthnRequestInfo requestInfo = stateManagement.removeAuthnRequestInfo(relayState);
-        if (requestInfo == null) {
-            throw SAMLExceptionCode.INVALID_REQUEST.create("The 'RelayState' parameter was invalid");
-        }
-
         Response response = extractAuthnResponse(httpRequest);
+
+        AuthnRequestInfo requestInfo;
+        if (response.getInResponseTo() == null) {
+            /*
+             * An unsolicited <Response> MUST NOT contain an InResponseTo attribute, nor should any bearer
+             * <SubjectConfirmationData> elements contain one. If metadata as specified in [SAMLMeta] is used,
+             * the <Response> or artifact SHOULD be delivered to the <md:AssertionConsumerService> endpoint
+             * of the service provider designated as the default.
+             * [profiles 06 - 4.1.5 p20]
+             */
+            if (config.isAllowUnsolicitedResponses()) {
+                String relayState = httpRequest.getParameter("RelayState");
+                if (relayState == null) {
+                    // use DefaultAuthnRequestInfo if no RelayState is set
+                    String domainName = getDomainName(httpRequest);
+                    requestInfo = new DefaultAuthnRequestInfo();
+                    ((DefaultAuthnRequestInfo)requestInfo).setDomainName(domainName);
+                } else {
+                    requestInfo = backend.parseRelayState(response, relayState);
+                }
+            } else {
+                throw SAMLExceptionCode.INVALID_REQUEST.create("Unsolicited responses are not enabled");
+            }
+        } else {
+            String relayState = httpRequest.getParameter("RelayState");
+            if (relayState == null) {
+                throw SAMLExceptionCode.INVALID_REQUEST.create("The 'RelayState' parameter was not set");
+            }
+
+            requestInfo = stateManagement.removeAuthnRequestInfo(relayState);
+            if (requestInfo == null) {
+                throw SAMLExceptionCode.INVALID_REQUEST.create("The 'RelayState' parameter was invalid");
+            }
+        }
+
         try {
             ValidationStrategy validationStrategy = backend.getValidationStrategy(config, stateManagement);
             AuthnResponseValidationResult validationResult = validationStrategy.validateAuthnResponse(response, requestInfo, binding);
@@ -334,7 +359,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         LogoutResponse response = extractLogoutResponse(httpRequest, binding);
         try {
             ValidationStrategy validationStrategy = backend.getValidationStrategy(config, stateManagement);
-            validationStrategy.validateLogoutResponse(response, requestInfo, binding);
+            validationStrategy.validateLogoutResponse(response, httpRequest, requestInfo, binding);
             URI redirectLocationBuilder = new URIBuilder()
                 .setScheme(getRedirectScheme(httpRequest))
                 .setHost(requestInfo.getDomainName())
@@ -862,7 +887,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         try {
             if (binding == Binding.HTTP_REDIRECT) {
                 // bytes are deflated in redirect binding
-                return openSAML.getParserPool().parse(new InflaterInputStream(new ByteArrayInputStream(requestBytes)));
+                return openSAML.getParserPool().parse(new InflaterInputStream(new ByteArrayInputStream(requestBytes), new Inflater(true)));
             } else {
                 return openSAML.getParserPool().parse(new ByteArrayInputStream(requestBytes));
             }

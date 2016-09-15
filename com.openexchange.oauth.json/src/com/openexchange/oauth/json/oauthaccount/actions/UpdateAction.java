@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
@@ -63,7 +64,6 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
-import com.openexchange.oauth.json.Tools;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountParser;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -103,7 +103,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
                 }
                 id = data.getInt(AccountField.ID.getName());
             } else {
-                id = Tools.getUnsignedInteger(accountId);
+                id = getUnsignedInteger(accountId);
             }
             if (id < 0) {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("id", accountId);
@@ -113,7 +113,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
              * Update account
              */
             final OAuthService oAuthService = getOAuthService();
-            final Map<String, Object> arguments = new HashMap<String, Object>(1);
+            final Map<String, Object> arguments = new HashMap<>(1);
 
             final String displayName = account.getDisplayName();
             if (null != displayName) {
@@ -127,7 +127,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
 
             if (!arguments.isEmpty()) {
                 arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
-                oAuthService.updateAccount(id, arguments, session.getUserId(), session.getContextId());
+                oAuthService.updateAccount(id, arguments, session.getUserId(), session.getContextId(), account.getEnabledScopes());
             }
 
             /*

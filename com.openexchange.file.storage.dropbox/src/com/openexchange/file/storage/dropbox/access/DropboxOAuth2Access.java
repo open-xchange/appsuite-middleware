@@ -58,9 +58,9 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.dropbox.DropboxConfiguration;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.file.storage.dropbox.DropboxServices;
-import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.session.Session;
@@ -91,7 +91,7 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
     public void initialize() throws OXException {
         final OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
         try {
-            final OAuthAccount oauthAccount = oAuthService.getAccount(getAccountId(), session, session.getUserId(), session.getContextId());
+            final OAuthAccount oauthAccount = oAuthService.getAccount(getAccountId(), getSession(), getSession().getUserId(), getSession().getContextId());
             verifyAccount(oauthAccount);
 
             DbxRequestConfig config = new DbxRequestConfig(DropboxConfiguration.getInstance().getProductName());

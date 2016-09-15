@@ -49,6 +49,8 @@
 
 package com.openexchange.imagetransformation;
 
+import com.openexchange.java.Strings;
+
 /**
  * {@link ScaleType}
  *
@@ -74,6 +76,15 @@ public enum ScaleType {
      * picture being resized to 200x150 pixels.
      */
     CONTAIN("contain"),
+
+    /**
+     * The "containForceDimension" scale type, specifying the maximum target dimensions. The source image will be resized in a way that the resulting
+     * image fits into the target resolution entirely, with the original aspect ratio being preserved while smaller sides get padded to fit exact dimension.
+     * <p/>
+     * For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "contain", will result in the
+     * picture being first resized to 200x150 pixels, then height gets padded by 25 pixels per side resulting in exactly 200x200 pixels.
+     */
+    CONTAIN_FORCE_DIMENSION("containforcedimension"),
 
     /**
      * The "auto" scale type
@@ -105,11 +116,13 @@ public enum ScaleType {
         if (keyword == null) {
             return AUTO;
         }
-        keyword = keyword.trim().toLowerCase();
+        keyword = Strings.asciiLowerCase(keyword.trim());
         if (keyword.equals(COVER.getKeyword())) {
             return COVER;
         } else if (keyword.equals(CONTAIN.getKeyword())) {
             return CONTAIN;
+        } else if (keyword.equals(CONTAIN_FORCE_DIMENSION.getKeyword())) {
+            return CONTAIN_FORCE_DIMENSION;
         } else {
             return AUTO;
         }

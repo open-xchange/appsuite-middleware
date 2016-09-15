@@ -57,6 +57,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2581
     ox_add_property com.openexchange.filestore.s3.[filestoreID].signerOverride S3SignerType $PFILE
+
+    # SoftwareChange_Request-3477
+    ox_add_property com.openexchange.filestore.s3.[filestoreID].chunkSize 5MB $PFILE
 fi
 
 %clean

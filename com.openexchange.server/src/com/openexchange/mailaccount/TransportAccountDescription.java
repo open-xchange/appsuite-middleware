@@ -83,17 +83,19 @@ public class TransportAccountDescription {
     private boolean transportStartTls;
     private String transportUrl;
     private Map<String, String> transportProperties;
+    private int transportOAuthId;
 
     /**
      * Initializes a new {@link TransportAccountDescription}.
      */
     public TransportAccountDescription() {
         super();
-        transportProperties = new HashMap<String, String>(4);
+        transportProperties = new HashMap<>(4);
         transportAuth = TransportAuth.MAIL;
         transportPort = 25;
         transportProtocol = "smtp";
         id = -1;
+        transportOAuthId = -1;
     }
 
     /**
@@ -112,6 +114,44 @@ public class TransportAccountDescription {
         } catch (final URISyntaxException e) {
             throw MailAccountExceptionCodes.INVALID_HOST_NAME.create(e, transportServerURL);
         }
+    }
+
+    /**
+     * Initializes a new {@link TransportAccountDescription}.
+     *
+     * @param id
+     * @param login
+     * @param name
+     * @param password
+     * @param personal
+     * @param primaryAddress
+     * @param replyTo
+     * @param transportOAuthId
+     * @param transportAuth
+     * @param transportPort
+     * @param transportProtocol
+     * @param transportSecure
+     * @param transportServer
+     * @param transportStartTls
+     * @param transportUrl
+     */
+    public TransportAccountDescription(int id, String login, String name, String password, String personal, String primaryAddress, String replyTo, int transportOAuthId, TransportAuth transportAuth, int transportPort, String transportProtocol, boolean transportSecure, String transportServer, boolean transportStartTls, String transportUrl) {
+        super();
+        this.id = id;
+        this.transportLogin = login;
+        this.name = name;
+        this.transportPassword = password;
+        this.personal = personal;
+        this.primaryAddress = primaryAddress;
+        this.replyTo = replyTo;
+        this.transportOAuthId = transportOAuthId < 0 ? -1 : transportOAuthId;
+        this.transportAuth = transportAuth;
+        this.transportPort = transportPort;
+        this.transportProtocol = transportProtocol;
+        this.transportSecure = transportSecure;
+        this.transportServer = transportServer;
+        this.transportStartTls = transportStartTls;
+        this.transportUrl = transportUrl;
     }
 
     /**
@@ -405,6 +445,33 @@ public class TransportAccountDescription {
     }
 
     /**
+     * Checks if transport server expects to authenticate via OAuth or not.
+     *
+     * @return <code>true</code> for OAuth authentication, otherwise <code>false</code>.
+     */
+    public boolean isTransportOAuthAble() {
+        return transportOAuthId >= 0;
+    }
+
+    /**
+     * Gets the identifier of the associated OAuth account (if any) to authenticate against transport server.
+     *
+     * @return The OAuth account identifier or <code>-1</code> if there is no associated OAuth account
+     */
+    public int getTransportOAuthId() {
+        return transportOAuthId < 0 ? -1 : transportOAuthId;
+    }
+
+    /**
+     * Sets the identifier of the associated OAuth account for transport server
+     *
+     * @param transportOAuthId The OAuth account identifier or <code>-1</code> to signal none
+     */
+    public void setTransportOAuthId(int transportOAuthId) {
+        this.transportOAuthId = transportOAuthId < 0 ? -1 : transportOAuthId;
+    }
+
+    /**
      * Gets the transport properties
      *
      * @return The transport properties
@@ -413,7 +480,7 @@ public class TransportAccountDescription {
         if (transportProperties.isEmpty()) {
             return Collections.emptyMap();
         }
-        return new HashMap<String, String>(transportProperties);
+        return new HashMap<>(transportProperties);
     }
 
     /**
@@ -423,7 +490,7 @@ public class TransportAccountDescription {
      */
     public void setTransportProperties(final Map<String, String> transportProperties) {
         if (null == transportProperties) {
-            this.transportProperties = new HashMap<String, String>(4);
+            this.transportProperties = new HashMap<>(4);
         } else {
             this.transportProperties = transportProperties;
         }
@@ -437,7 +504,7 @@ public class TransportAccountDescription {
      */
     public void addTransportProperty(final String name, final String value) {
         if (transportProperties.isEmpty()) {
-            transportProperties = new HashMap<String, String>(4);
+            transportProperties = new HashMap<>(4);
         }
         transportProperties.put(name, value);
     }

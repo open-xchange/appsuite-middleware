@@ -139,6 +139,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
 
     volatile HazelcastInstance hzInstance;
     volatile String mapName;
+    volatile String entryListenerRegistrationId;
 
     private final ConcurrentMap<UserAndContext, ScheduledTimerTask> cleanerTasks;
 
@@ -242,6 +243,23 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     public void setHazelcastResources(HazelcastInstance hzInstance, String mapName) {
         this.hzInstance = hzInstance;
         this.mapName = mapName;
+
+        GrizzlyWebSocketApplication app = GrizzlyWebSocketApplication.getGrizzlyWebSocketApplication();
+        if (null == app) {
+            LOG.warn("Entry listener cloud not be applied", new Throwable("Missing Grizzly Web Application"));
+            return;
+        }
+
+        try {
+            // Get the Hazelcast map reference & add listener
+            MultiMap<String, String> hzMap = map(mapName, hzInstance);
+            WebSocketClosingEntryListener entryListener = new WebSocketClosingEntryListener(app);
+            String entryListenerRegistrationId = hzMap.addEntryListener(entryListener, true);
+            this.entryListenerRegistrationId = entryListenerRegistrationId;
+            LOG.info("Successfully added entry listener with registration ID \"{}\"", entryListenerRegistrationId);
+        } catch (Exception e) {
+            LOG.error("Entry listener could not be applied", e);
+        }
     }
 
     /**
@@ -267,6 +285,25 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                     }
                 }
                 myValues.clear();
+            }
+        }
+
+        String entryListenerRegistrationId = this.entryListenerRegistrationId;
+        if (null != entryListenerRegistrationId) {
+            this.entryListenerRegistrationId = null;
+            HazelcastInstance hzInstance = this.hzInstance;
+            if (null != hzInstance) {
+                String mapName = this.mapName;
+                if (null != mapName) {
+                    try {
+                        // Get the Hazelcast map reference & remove listener
+                        MultiMap<String, String> hzMap = map(mapName, hzInstance);
+                        hzMap.removeEntryListener(entryListenerRegistrationId);
+                        LOG.info("Successfully removed entry listener with registration ID \"{}\"", entryListenerRegistrationId);
+                    } catch (Exception e) {
+                        LOG.error("Entry listener could not be removed", e);
+                    }
+                }
             }
         }
 
@@ -806,7 +843,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                     return;
                 }
 
-                LOG.info("Running cleaner task for user {} in context {}...", I(userId), I(contextId));
+                LOG.debug("Running cleaner task for user {} in context {}...", I(userId), I(contextId));
 
                 MultiMap<String, String> map = map(mapName, hzInstance);
 
@@ -814,7 +851,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                 String key = generateKey(userId, contextId, address.getHost(), address.getPort());
                 Collection<String> collection = map.get(key);
                 if (null == collection || collection.isEmpty()) {
-                    LOG.info("Detected no orphaned entries in Hazelcast map during cleaner task run for user {} in context {}", I(userId), I(contextId));
+                    LOG.debug("Detected no orphaned entries in Hazelcast map during cleaner task run for user {} in context {}", I(userId), I(contextId));
                     return;
                 }
 
@@ -831,7 +868,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                 application.retainNonExisting(connectionIds.keySet(), userId, contextId);
 
                 if (connectionIds.isEmpty()) {
-                    LOG.info("Detected no orphaned entries in Hazelcast map during cleaner task run for user {} in context {}", I(userId), I(contextId));
+                    LOG.debug("Detected no orphaned entries in Hazelcast map during cleaner task run for user {} in context {}", I(userId), I(contextId));
                     return;
                 }
 
