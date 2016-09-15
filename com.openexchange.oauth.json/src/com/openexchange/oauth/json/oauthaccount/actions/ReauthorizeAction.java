@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
-import static com.openexchange.java.Strings.isEmpty;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -60,7 +59,6 @@ import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -99,11 +97,6 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
         final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
         if (serviceId == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AccountField.SERVICE_ID.getName());
-        }
-
-        final String scope = request.getParameter("scopes");
-        if (isEmpty(scope)) {
-            throw OAuthExceptionCodes.MISSING_SCOPE.create();
         }
 
         ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
