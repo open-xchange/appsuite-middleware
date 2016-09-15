@@ -299,23 +299,27 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param connectionId The connection identifier
+     * @return <code>true</code> if such a Web Socket was closed; otherwise <code>false</code>
      */
-    public void closeWebSockets(int userId, int contextId, ConnectionId connectionId) {
+    public boolean closeWebSockets(int userId, int contextId, ConnectionId connectionId) {
         if (null == connectionId) {
-            return;
+            return false;
         }
 
         ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
         if (null == userSockets) {
-            return;
+            return false;
         }
 
         SessionBoundWebSocket sessionBoundSocket = userSockets.remove(connectionId);
-        if (null != sessionBoundSocket) {
-            sessionBoundSocket.send("session:invalid");
-            closeSocketSafe(sessionBoundSocket);
-            LOG.info("Closed Web Socket ({}) with path \"{}\" for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
+        if (null == sessionBoundSocket) {
+            return false;
         }
+
+        sessionBoundSocket.send("session:invalid");
+        closeSocketSafe(sessionBoundSocket);
+        LOG.info("Closed Web Socket ({}) with path \"{}\" for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
+        return true;
     }
 
     /**
