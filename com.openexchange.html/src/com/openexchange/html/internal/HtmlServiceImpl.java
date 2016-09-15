@@ -50,7 +50,6 @@
 package com.openexchange.html.internal;
 
 import static com.openexchange.java.Strings.isEmpty;
-
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,7 +70,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
@@ -90,7 +88,6 @@ import org.htmlcleaner.SimpleHtmlSerializer;
 import org.htmlcleaner.TagNode;
 import org.jsoup.Jsoup;
 import org.owasp.esapi.codecs.HTMLEntityCodec;
-
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlSanitizeResult;
@@ -113,7 +110,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.proxy.ImageContentTypeRestriction;
 import com.openexchange.proxy.ProxyRegistration;
 import com.openexchange.proxy.ProxyRegistry;
-
 import gnu.inet.encoding.IDNAException;
 import net.htmlparser.jericho.Attribute;
 import net.htmlparser.jericho.Attributes;
@@ -336,7 +332,7 @@ public final class HtmlServiceImpl implements HtmlService {
             int lastMatch = 0;
             while (m.find()) {
                 final String url = m.group();
-                if (HtmlServices.isSafe(url)) {
+                if (HtmlServices.isSafe(url, null)) {
                     final int startOpeningPos = m.start();
                     targetBuilder.append(content.substring(lastMatch, startOpeningPos));
                     sb.setLength(0);
@@ -615,7 +611,7 @@ public final class HtmlServiceImpl implements HtmlService {
             html = processDownlevelRevealedConditionalComments(html);
             html = dropDoubleAccents(html);
             html = dropSlashedTags(html);
-            
+
             // Repetitive sanitizing until no further replacement/changes performed
             final boolean[] sanitized = new boolean[] { true };
             while (sanitized[0]) {
