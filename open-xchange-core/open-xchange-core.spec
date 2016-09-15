@@ -1406,6 +1406,7 @@ ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
 ox_update_permissions "/var/spool/open-xchange/uploads" open-xchange:root 750
 ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
+ox_update_permissions "/opt/open-xchange/sbin/reloadconfiguration" root:open-xchange 740
 exit 0
 
 %clean
