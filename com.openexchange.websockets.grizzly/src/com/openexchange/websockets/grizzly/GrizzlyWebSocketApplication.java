@@ -294,6 +294,31 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     }
 
     /**
+     * Closes the Web Socket matching given identifier.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param connectionId The connection identifier
+     */
+    public void closeWebSockets(int userId, int contextId, ConnectionId connectionId) {
+        if (null == connectionId) {
+            return;
+        }
+
+        ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
+        if (null == userSockets) {
+            return;
+        }
+
+        SessionBoundWebSocket sessionBoundSocket = userSockets.remove(connectionId);
+        if (null != sessionBoundSocket) {
+            sessionBoundSocket.send("session:invalid");
+            closeSocketSafe(sessionBoundSocket);
+            LOG.info("Closed Web Socket ({}) with path \"{}\" for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
+        }
+    }
+
+    /**
      * Closes all locally available Web Sockets matching specified path filter expression (if any).
      * <p>
      * In case no path filter expression is given (<code>pathFilter == null</code>), all user-associated Web Sockets are closed.
