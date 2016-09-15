@@ -568,18 +568,21 @@ public class ContactResource extends CommonResource<Contact> {
                 }
             }
             /*
+             * load required contact data from storage
+             */
+            Contact contact = factory.getContactService().getContact(factory.getSession(), String.valueOf(object.getParentFolderID()), String.valueOf(object.getObjectID()));
+            applyAttachments(contact);
+            /*
              * export current contact data & return resulting vCard stream
              */
-            applyAttachments(object);
             VCardService vCardService = factory.requireService(VCardService.class);
             VCardParameters parameters = vCardService.createParameters(factory.getSession());
             if (null != propertyNames && 0 < propertyNames.size()) {
                 parameters.setPropertyNames(propertyNames);
             }
-            return vCardService.exportContact(object, originalVCard, parameters);
+            return vCardService.exportContact(contact, originalVCard, parameters);
         } finally {
             Streams.close(originalVCard);
         }
     }
-
 }
