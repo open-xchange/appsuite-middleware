@@ -113,9 +113,6 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.ConfigurationProperty;
-import com.openexchange.config.cascade.ConfigProperty;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.alias.UserAliasStorage;
@@ -1850,11 +1847,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
                 }
             } else {
-                if (destUser > 0) { // Move to master store
-                    if (!tool.existsUser(ctx, destUser)) {
-                        throw new InvalidDataException(String.format("The reassign user with id %1$s does not exist in context %2$s. Please choose a different reassign user.", destUser.intValue(), ctx.getId()));
+                if (destUser.intValue() > 0) { // Move to master store
+                    if (!tool.existsUser(ctx, destUser.intValue())) {
+                        throw new InvalidDataException(String.format("The reassign user with id %1$s does not exist in context %2$s. Please choose a different reassign user.", destUser, ctx.getId()));
                     }
-                    User masterUser = new User(destUser);
+                    if (!tool.isMasterFilestoreOwner(ctx, destUser.intValue())) {
+                        throw new InvalidDataException(String.format("The reassign user with id %1$s is not an owner of a filestore. Please choose a different reassign user.", destUser, ctx.getId()));
+                    }
+                    User masterUser = new User(destUser.intValue());
                     for (User filestoreOwner : filestoreOwners) {
                         LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to filestore of user {}", filestoreOwner.getId(), masterUser.getId());
                         moveFromUserFilestoreToMaster(ctx, filestoreOwner, masterUser, credentials);
@@ -2707,12 +2707,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
         return retval;
     }
-    
+
     /**
      * Property name black list REGEX. Taken from the oxsysreport
      */
     private static final Pattern PROPERTY_BLACK_LIST = Pattern.compile("[pP]assword[[:blank:]]*|[sS]ecret[[:blank:]]*|[kK]ey[[:blank:]]*|secretSource[[:blank:]]*|secretRandom[[:blank:]]*|[sS]alt[[:blank:]]*|SSLKey(Pass|Name)[[:blank:]]*|[lL]ogin[[:blank:]]*");
-    
+
     /**
      *
      * {@inheritDoc}
