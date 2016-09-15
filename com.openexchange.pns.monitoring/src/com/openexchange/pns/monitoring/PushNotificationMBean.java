@@ -85,6 +85,26 @@ public interface PushNotificationMBean {
     long getNotificationsPerMinute() throws MBeanException;
 
     /**
+     * Gets the total number of submitted notifications so far.
+     * <p>
+     * A notification is in submitted state if fetched from buffer and submitted for being transported, but not yet done.
+     *
+     * @return The total number of submitted notifications
+     * @throws MBeanException If number of submitted notifications cannot be returned
+     */
+    @MBeanMethodAnnotation (description="Gets the total number of submitted notifications so far.", parameters={}, parameterDescriptions={})
+    long getTotalNumberOfSubmittedNotifications() throws MBeanException;
+
+    /**
+     * Gets the total number of processed/distributed notifications so far.
+     *
+     * @return The total number of processed/distributed notifications
+     * @throws MBeanException If number of processed/distributed notifications cannot be returned
+     */
+    @MBeanMethodAnnotation (description="Gets the total number of processed/distributed notifications so far.", parameters={}, parameterDescriptions={})
+    long getTotalNumberOfProcessedNotifications() throws MBeanException;
+
+    /**
      * Gets the number of notifications that are currently submitted, but not yet processed.
      *
      * @return The number of enqueued notifications
