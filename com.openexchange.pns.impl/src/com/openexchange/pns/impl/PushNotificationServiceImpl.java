@@ -416,7 +416,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
      * @throws OXException If handling fails
      */
     protected void doHandle(Iterator<PushNotification> notifications, String topic, int numOfNotifications, int userId, int contextId) throws OXException {
-        // Query appropriate subscriptions
+        // Query appropriate hits
         Hits hits = subscriptionRegistry.getInterestedSubscriptions(userId, contextId, topic);
         if (null == hits || hits.isEmpty()) {
             LOG.info("No subscriptions of interest for topic \"{}\" for user {} in context {}", topic, I(userId), I(contextId));
