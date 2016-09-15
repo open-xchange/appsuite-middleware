@@ -49,8 +49,11 @@
 
 package com.openexchange.websockets.grizzly.remote;
 
+import static com.openexchange.java.Autoboxing.I;
+import org.slf4j.Logger;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.MapEvent;
+import com.openexchange.websockets.ConnectionId;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
 
 /**
@@ -60,6 +63,8 @@ import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
  * @since v7.8.3
  */
 public class WebSocketClosingEntryListener implements com.hazelcast.core.EntryListener<String, String> {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WebSocketClosingEntryListener.class);
 
     private final GrizzlyWebSocketApplication app;
 
@@ -76,7 +81,9 @@ public class WebSocketClosingEntryListener implements com.hazelcast.core.EntryLi
         // Manually close associated Web Socket (if any available) to enforce re-establishing a new one
         MapKey key = MapKey.parseFrom(event.getKey());
         MapValue value = MapValue.parseFrom(event.getValue());
-        app.closeWebSockets(key.getUserId(), key.getContextId(), value.getConnectionId());
+        if (app.closeWebSockets(key.getUserId(), key.getContextId(), ConnectionId.newInstance(value.getConnectionId()))) {
+            LOG.info("Closed Web Socket ({}) due to entry eviction for user {} in context {}.", value.getConnectionId(), I(key.getUserId()), I(key.getContextId()));
+        }
     }
 
     @Override
