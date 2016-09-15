@@ -47,15 +47,26 @@
  *
  */
 
-package com.openexchange.websockets.osgi;
+package com.openexchange.websockets.cap;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.websockets.WebSocketService;
 
 
@@ -74,6 +85,8 @@ public class WebSocketsCapabilityTracker implements ServiceTrackerCustomizer<Obj
     private boolean capabilityDeclared;
     private boolean webSocketServiceAvailable;
     private CapabilityService capabilityService;
+    private ConfigViewFactory configViewFactory;
+    private ServiceRegistration<CapabilityChecker> checkerRegistration;
 
     /**
      * Initializes a new {@link WebSocketsCapabilityTracker}.
@@ -81,7 +94,7 @@ public class WebSocketsCapabilityTracker implements ServiceTrackerCustomizer<Obj
     public WebSocketsCapabilityTracker(BundleContext context) {
         super();
         this.context = context;
-        neededServices = new Class<?>[] { WebSocketService.class, CapabilityService.class };
+        neededServices = new Class<?>[] { WebSocketService.class, CapabilityService.class, ConfigViewFactory.class };
         capabilityDeclared = false;
         webSocketServiceAvailable = false;
     }
@@ -110,13 +123,18 @@ public class WebSocketsCapabilityTracker implements ServiceTrackerCustomizer<Obj
 
         if (service instanceof WebSocketService) {
             webSocketServiceAvailable = true;
-            if (null != capabilityService && !capabilityDeclared) {
-                declareCapability();
+            if (null != capabilityService && null != configViewFactory && !capabilityDeclared) {
+                declareCapability(configViewFactory);
             }
         } else if (service instanceof CapabilityService) {
             capabilityService = (CapabilityService) service;
-            if (webSocketServiceAvailable && !capabilityDeclared) {
-                declareCapability();
+            if (webSocketServiceAvailable && null != configViewFactory && !capabilityDeclared) {
+                declareCapability(configViewFactory);
+            }
+        } else if (service instanceof ConfigViewFactory) {
+            configViewFactory = (ConfigViewFactory) service;
+            if (webSocketServiceAvailable && null != capabilityService && !capabilityDeclared) {
+                declareCapability(configViewFactory);
             }
         } else {
             // Discard...
@@ -127,7 +145,32 @@ public class WebSocketsCapabilityTracker implements ServiceTrackerCustomizer<Obj
         return service;
     }
 
-    private void declareCapability() {
+    private void declareCapability(final ConfigViewFactory configViewFactory) {
+        Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+        properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, CAPABILITY_WEBSOCKET);
+        checkerRegistration = context.registerService(CapabilityChecker.class, new CapabilityChecker() {
+
+            @Override
+            public boolean isEnabled(String capability, Session ses) throws OXException {
+                if (CAPABILITY_WEBSOCKET.equals(capability)) {
+                    final ServerSession session = ServerSessionAdapter.valueOf(ses);
+                    if (session.isAnonymous() || session.getUser().isGuest()) {
+                        return false;
+                    }
+
+                    ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
+                    ComposedConfigProperty<Boolean> property = view.property("com.openexchange.websockets.enabled", boolean.class);
+                    if (null == property || !property.isDefined()) {
+                        return false;
+                    }
+
+                    return property.get().booleanValue();
+                }
+
+                return true;
+            }
+        }, properties);
+
         capabilityService.declareCapability(CAPABILITY_WEBSOCKET);
         capabilityDeclared = true;
     }
@@ -149,6 +192,11 @@ public class WebSocketsCapabilityTracker implements ServiceTrackerCustomizer<Obj
                 undeclareCapability();
             }
             this.capabilityService = null;
+        } else if (service instanceof ConfigViewFactory) {
+            if (null != capabilityService && capabilityDeclared) {
+                undeclareCapability();
+            }
+            this.configViewFactory = null;
         }
 
         // Unget anyway
@@ -156,6 +204,12 @@ public class WebSocketsCapabilityTracker implements ServiceTrackerCustomizer<Obj
     }
 
     private void undeclareCapability() {
+        ServiceRegistration<CapabilityChecker> checkerRegistration = this.checkerRegistration;
+        if (null != checkerRegistration) {
+            this.checkerRegistration = null;
+            checkerRegistration.unregister();
+        }
+
         capabilityService.undeclareCapability(CAPABILITY_WEBSOCKET);
         capabilityDeclared = false;
     }

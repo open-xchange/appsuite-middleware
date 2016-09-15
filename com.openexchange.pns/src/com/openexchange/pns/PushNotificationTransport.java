@@ -61,6 +61,18 @@ import com.openexchange.exception.OXException;
 public interface PushNotificationTransport {
 
     /**
+     * Checks if this transport is enabled for specified topic, client and user.
+     *
+     * @param topic The topic that is about to be sent
+     * @param client The identifier of the client to send to
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if allowed; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean isEnabled(String topic, String client, int userId, int contextId) throws OXException;
+
+    /**
      * Transports a notification to the service provider
      *
      * @param notification The notification to transport

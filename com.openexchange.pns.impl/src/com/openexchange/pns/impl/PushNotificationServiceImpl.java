@@ -432,14 +432,18 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             if (null == transport) {
                 LOG.warn("No such transport '{}' for client '{}' to publish notification from user {} in context {} for topic {}", transportId, client, I(userId), I(contextId), topic);
             } else {
-                while (notifications.hasNext()) {
-                    PushNotification notification = notifications.next();
-                    LOG.info("Trying to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId));
-                    try {
-                        transport.transport(notification, hit.getMatches());
-                    } catch (Exception e) {
-                        LOG.error("Failed to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId), e);
+                if (transport.isEnabled(topic, client, userId, contextId)) {
+                    while (notifications.hasNext()) {
+                        PushNotification notification = notifications.next();
+                        LOG.info("Trying to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId));
+                        try {
+                            transport.transport(notification, hit.getMatches());
+                        } catch (Exception e) {
+                            LOG.error("Failed to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId), e);
+                        }
                     }
+                } else {
+                    LOG.info("Transport '{}' not enabled for client '{}' to publish notification from user {} in context {} for topic {}", transportId, client, I(userId), I(contextId), topic);
                 }
             }
         }

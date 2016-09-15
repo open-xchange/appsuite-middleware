@@ -47,28 +47,29 @@
  *
  */
 
-package com.openexchange.websockets.osgi;
+package com.openexchange.websockets.cap.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.websockets.cap.WebSocketsCapabilityTracker;
 
 
 /**
- * {@link WebSocketsActivator}
+ * {@link WebSocketsCapabilityActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class WebSocketsActivator implements BundleActivator {
+public class WebSocketsCapabilityActivator implements BundleActivator {
 
     private ServiceTracker<Object, Object> tracker;
 
     /**
-     * Initializes a new {@link WebSocketsActivator}.
+     * Initializes a new {@link WebSocketsCapabilityActivator}.
      */
-    public WebSocketsActivator() {
+    public WebSocketsCapabilityActivator() {
         super();
     }
 

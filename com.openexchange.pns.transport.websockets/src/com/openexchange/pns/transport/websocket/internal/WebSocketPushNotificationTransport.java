@@ -62,6 +62,9 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.pns.Hits;
 import com.openexchange.pns.KnownTopic;
@@ -152,6 +155,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
     // ---------------------------------------------------------------------------------------------------------------
 
+    private final ConfigViewFactory configViewFactory;
     private final WebSocketToClientResolverRegistry resolvers;
     private final WebSocketService webSocketService;
     private final PushMessageGeneratorRegistry generatorRegistry;
@@ -164,6 +168,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         this.resolvers = resolvers;
         this.webSocketService = services.getService(WebSocketService.class);
         this.generatorRegistry = services.getService(PushMessageGeneratorRegistry.class);
+        this.configViewFactory = services.getService(ConfigViewFactory.class);
     }
 
     /**
@@ -314,6 +319,17 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     @Override
     public String getId() {
         return ID;
+    }
+
+    @Override
+    public boolean isEnabled(String topic, String client, int userId, int contextId) throws OXException {
+        ConfigView view = configViewFactory.getView(userId, contextId);
+        ComposedConfigProperty<Boolean> property = view.property("com.openexchange.pns.transport.websocket.enabled", boolean.class);
+        if (null == property || !property.isDefined()) {
+            return false;
+        }
+
+        return property.get().booleanValue();
     }
 
     @Override

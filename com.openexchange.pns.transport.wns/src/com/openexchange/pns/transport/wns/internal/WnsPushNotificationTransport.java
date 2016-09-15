@@ -64,6 +64,9 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.SortableConcurrentList;
@@ -104,6 +107,7 @@ public class WnsPushNotificationTransport extends ServiceTracker<WnsOptionsProvi
 
     // ---------------------------------------------------------------------------------------------------------------
 
+    private final ConfigViewFactory configViewFactory;
     private final PushSubscriptionRegistry subscriptionRegistry;
     private final PushMessageGeneratorRegistry generatorRegistry;
     private final SortableConcurrentList<RankedService<WnsOptionsProvider>> trackedProviders;
@@ -112,8 +116,9 @@ public class WnsPushNotificationTransport extends ServiceTracker<WnsOptionsProvi
     /**
      * Initializes a new {@link ApnPushNotificationTransport}.
      */
-    public WnsPushNotificationTransport(PushSubscriptionRegistry subscriptionRegistry, PushMessageGeneratorRegistry generatorRegistry, BundleContext context) {
+    public WnsPushNotificationTransport(PushSubscriptionRegistry subscriptionRegistry, PushMessageGeneratorRegistry generatorRegistry, ConfigViewFactory configViewFactory, BundleContext context) {
         super(context, WnsOptionsProvider.class, null);
+        this.configViewFactory = configViewFactory;
         this.trackedProviders = new SortableConcurrentList<RankedService<WnsOptionsProvider>>();
         this.subscriptionRegistry = subscriptionRegistry;
         this.generatorRegistry = generatorRegistry;
@@ -179,6 +184,17 @@ public class WnsPushNotificationTransport extends ServiceTracker<WnsOptionsProvi
     @Override
     public String getId() {
         return ID;
+    }
+
+    @Override
+    public boolean isEnabled(String topic, String client, int userId, int contextId) throws OXException {
+        ConfigView view = configViewFactory.getView(userId, contextId);
+        ComposedConfigProperty<Boolean> property = view.property("com.openexchange.pns.transport.wns.enabled", boolean.class);
+        if (null == property || !property.isDefined()) {
+            return false;
+        }
+
+        return property.get().booleanValue();
     }
 
     @Override
