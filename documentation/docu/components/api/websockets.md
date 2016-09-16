@@ -13,8 +13,26 @@ representation in the Open-Xchange Middleware always has an association to a cer
 Once a Web Socket is initiated by a Browser, the special `"session"` URL parameter along-side with accompanying Open-Xchange cookies are
 expected to be passed along-side with the upgrade request that initiates to establish a Web Socket connection. Moreover, the upgrade request
 should be routed to a certain path to distinguish between Web Sockets' natures. E.g. having an upgrade request to path `"/socket.io"`
-indicates that the Web Socket is supposed to be used to serve Socket.IO clients. Thus, the class `com.openexchange.websockets.WebSocket`
-representing an accepted Web Socket provides
+indicates that the Web Socket is supposed to be used to serve Socket.IO clients.
+
+Example of an upgrade request initiating a Socket.IO Web Socket:
+
+```
+GET /socket.io/?session=00ba1bfdfc2d408b9863c901b777c52a&EIO=3&transport=websocket HTTP/1.1
+Host: my.open-xchange.invalid
+Connection:Upgrade
+Cookie:open-xchange-secret-LZA0kMLdU7GPfCR59bOQ2g=df1063191055408f812316bc7c8caff2;
+ open-xchange-public-session-AmpJwWzrwtlbr1l28oyO6w=74656ae2de7840f8b38fc25b051d11ca;
+ JSESSIONID=3625460667079969748.OX0;
+ language=en_US
+Origin:http://open-xchange.invalid
+Sec-WebSocket-Extensions:permessage-deflate; client_max_window_bits
+Sec-WebSocket-Key:6ZJrtzrsb0vhsc35fssBNQ==
+Sec-WebSocket-Version:13
+Upgrade:websocket
+```
+
+Thus, the class `com.openexchange.websockets.WebSocket` representing an accepted Web Socket provides
 
  - The identifier of the associated session
  - The identifiers of the associated user and context

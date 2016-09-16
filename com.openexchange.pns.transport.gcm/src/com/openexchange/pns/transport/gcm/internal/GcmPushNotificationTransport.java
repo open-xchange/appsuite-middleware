@@ -70,6 +70,9 @@ import com.google.android.gcm.MulticastResult;
 import com.google.android.gcm.Notification;
 import com.google.android.gcm.Result;
 import com.google.android.gcm.Sender;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.SortableConcurrentList;
 import com.openexchange.java.Strings;
@@ -106,6 +109,7 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
 
     // ---------------------------------------------------------------------------------------------------------------
 
+    private final ConfigViewFactory configViewFactory;
     private final PushSubscriptionRegistry subscriptionRegistry;
     private final PushMessageGeneratorRegistry generatorRegistry;
     private final SortableConcurrentList<RankedService<GcmOptionsProvider>> trackedProviders;
@@ -114,8 +118,9 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
     /**
      * Initializes a new {@link ApnPushNotificationTransport}.
      */
-    public GcmPushNotificationTransport(PushSubscriptionRegistry subscriptionRegistry, PushMessageGeneratorRegistry generatorRegistry, BundleContext context) {
+    public GcmPushNotificationTransport(PushSubscriptionRegistry subscriptionRegistry, PushMessageGeneratorRegistry generatorRegistry, ConfigViewFactory configViewFactory, BundleContext context) {
         super(context, GcmOptionsProvider.class, null);
+        this.configViewFactory = configViewFactory;
         this.trackedProviders = new SortableConcurrentList<RankedService<GcmOptionsProvider>>();
         this.subscriptionRegistry = subscriptionRegistry;
         this.generatorRegistry = generatorRegistry;
@@ -181,6 +186,31 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
     @Override
     public String getId() {
         return ID;
+    }
+
+    @Override
+    public boolean isEnabled(String topic, String client, int userId, int contextId) throws OXException {
+        ConfigView view = configViewFactory.getView(userId, contextId);
+
+        String basePropertyName = "com.openexchange.pns.transport.gcm.enabled";
+
+        ComposedConfigProperty<Boolean> property;
+        property = null == topic || null == client ? null : view.property(basePropertyName + "." + client + "." + topic, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        property = null == client ? null : view.property(basePropertyName + "." + client, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        property = view.property(basePropertyName, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        return false;
     }
 
     @Override

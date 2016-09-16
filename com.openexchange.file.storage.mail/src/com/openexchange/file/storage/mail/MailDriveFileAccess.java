@@ -265,16 +265,15 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
         AccessControl accessControl = AccessControl.getAccessControl(session);
         try {
             accessControl.acquireGrant();
-            return getResourceReleasingStream(folderId, id, fullName);
+
+            return getResourceReleasingStream(folderId, id, fullName, accessControl);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw MailExceptionCode.INTERRUPT_ERROR.create(e, new Object[0]);
-        } finally {
-            accessControl.close();
         }
     }
 
-    private InputStream getResourceReleasingStream(final String folderId, final String id, FullName fullName) throws OXException {
+    private InputStream getResourceReleasingStream(final String folderId, final String id, FullName fullName, AccessControl accessControl) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         IMAPFolder imapFolder = null;
         boolean error = true;
@@ -290,7 +289,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                 throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
             }
 
-            InputStream in = new ResourceReleasingInputStream(message.getInputStream(), imapFolder, mailAccess);
+            InputStream in = new ResourceReleasingInputStream(message.getInputStream(), imapFolder, mailAccess, accessControl);
             error = false;
             return in;
         } catch (IOException e) {
@@ -303,6 +302,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
             if (error) {
                 closeSafe(imapFolder);
                 MailAccess.closeInstance(mailAccess);
+                accessControl.close();
             }
         }
     }
@@ -827,12 +827,14 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
         private final InputStream in;
         private final IMAPFolder imapFolder;
         private final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess;
+        private final AccessControl accessControl;
 
-        ResourceReleasingInputStream(InputStream in,IMAPFolder imapFolder, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) {
+        ResourceReleasingInputStream(InputStream in,IMAPFolder imapFolder, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, AccessControl accessControl) {
             super();
             this.in = in;
             this.imapFolder = imapFolder;
             this.mailAccess = mailAccess;
+            this.accessControl = accessControl;
         }
 
         @Override
@@ -872,6 +874,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
             } finally {
                 closeSafe(imapFolder);
                 MailAccess.closeInstance(mailAccess);
+                accessControl.close();
             }
         }
 

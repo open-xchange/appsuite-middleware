@@ -1,0 +1,84 @@
+#!/bin/bash
+
+source /opt/open-xchange/lib/oxfunctions.sh
+
+set -euo pipefail
+IFS=$'\n\t'
+
+DEFAULT_CONFIG=/opt/open-xchange/etc/rmi.properties
+RELOAD_BIN=/opt/open-xchange/sbin/reloadconfiguration
+
+function read_port_and_reload () {
+  config_file=${1}
+
+  rmi_port=""
+
+  # search for rmi port in given config file.
+  # this can be overwrite.properties or the default config file.
+  if [ -f ${config_file} ]
+  then
+    rmi_port=$(ox_read_property com.openexchange.rmi.port ${config_file})
+    if [ -z "${rmi_port}" ]
+    then
+      echo "No rmi port found in ${config_file}"
+    fi
+  else
+    echo "File ${config_file} not found."
+  fi
+ 
+  # if the port is unknown and we haven't already read the default config file 
+  if [ -z ${rmi_port} ] && [ "${DEFAULT_CONFIG}" != "${config_file}" ]
+    then
+      echo "Falling back to reading rmi port from ${DEFAULT_CONFIG}."
+      rmi_port=$(ox_read_property com.openexchange.rmi.port ${DEFAULT_CONFIG})
+  fi
+
+  if [ -z "${rmi_port}" ]
+  then
+    echo "Unable to reload configuration without rmi port"
+    exit 1
+  else 
+    ${RELOAD_BIN} -p ${rmi_port}
+  fi
+
+}
+
+function show_usage() {
+echo "
+Usage:
+$0 [OPTIONS]
+
+Possible OPTIONS:
+  -d      - Use rmi port from rmi.properties
+  -f      - Config file containing the possibly overridden rmi port to use for the service to reload.
+            Falls back to rmi.properties if file or property are missing.
+  -h      - Print usage help
+"
+}
+
+main() {
+  if [ $# -eq 0 ]; then
+    show_usage
+  else   
+    while getopts ":df:h" opt; do
+      case $opt in
+        d)
+          read_port_and_reload ${DEFAULT_CONFIG}
+          ;;
+        f)
+          read_port_and_reload ${OPTARG} 
+          ;;
+        h)
+          show_usage
+          exit 0
+          ;;
+        \?)
+          echo "Invalid option: -$OPTARG. Use -h to show usage"  >&2
+          exit 1
+          ;;
+      esac
+    done
+  fi
+}
+
+main $@
