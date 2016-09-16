@@ -50,6 +50,7 @@
 package com.openexchange.groupware.upload;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link UploadFileListener} - Receives various call-backs on upload of a file.
@@ -66,18 +67,20 @@ public interface UploadFileListener {
      * @param fileName The name of the uploaded file
      * @param fieldName The name of the field in the multipart form (if any)
      * @param contentType The content type
+     * @param session The session associated with the upload or <code>null</code>
      * @throws OXException If this listener signals that uploaded should be aborted
      */
-    void onBeforeUploadProcessed(String uploadId, String fileName, String fieldName, String contentType) throws OXException;
+    void onBeforeUploadProcessed(String uploadId, String fileName, String fieldName, String contentType, Session session) throws OXException;
 
     /**
      * Invoked after the upload's stream gets processed; providing basic information.
      *
      * @param uploadId The identifier that uniquely identifies the upload
      * @param uploadFile The fully parsed uploaded file
+     * @param session The session associated with the upload or <code>null</code>
      * @throws OXException If this listener signals that uploaded should be aborted
      */
-    void onAfterUploadProcessed(String uploadId, UploadFile uploadFile) throws OXException;
+    void onAfterUploadProcessed(String uploadId, UploadFile uploadFile, Session session) throws OXException;
 
     /**
      * Invoked in case upload failed while processing individual uploaded files;<br>
@@ -87,8 +90,9 @@ public interface UploadFileListener {
      *
      * @param uploadId The identifier that uniquely identifies the upload
      * @param exception The exception rendering the upload as failure
+     * @param session The session associated with the upload or <code>null</code>
      */
-    void onUploadFailed(String uploadId, OXException exception);
+    void onUploadFailed(String uploadId, OXException exception, Session session);
 
     /**
      * Invoked in case upload succeeded.
@@ -97,6 +101,7 @@ public interface UploadFileListener {
      *
      * @param uploadId The identifier that uniquely identifies the upload
      * @param upload The successfully parsed upload
+     * @param session The session associated with the upload or <code>null</code>
      */
-    void onUploadSuceeded(String uploadId, Upload upload);
+    void onUploadSuceeded(String uploadId, Upload upload, Session session);
 }

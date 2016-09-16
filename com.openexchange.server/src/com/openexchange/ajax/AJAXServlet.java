@@ -1000,15 +1000,17 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @param req The request whose upload shall be processed
      * @return The processed instance of {@link UploadEvent}
      * @throws OXException Id processing the upload fails
+     * @deprecated Use {@link #processUpload(HttpServletRequest, long, long, Session)}
      */
+    @Deprecated
     @Override
     public UploadEvent processUpload(HttpServletRequest req) throws OXException {
-        return processUpload(req, -1, -1);
+        return processUpload(req, -1, -1, null);
     }
 
     @Override
-    public UploadEvent processUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize) throws OXException {
-        return processUploadStatic(req, maxFileSize, maxOverallSize);
+    public UploadEvent processUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize, Session session) throws OXException {
+        return processUploadStatic(req, maxFileSize, maxOverallSize, session);
     }
 
     /**
@@ -1049,9 +1051,11 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @param req The request whose upload shall be processed
      * @return The processed instance of {@link UploadEvent}
      * @throws OXException Id processing the upload fails
+     * @deprecated Use {@link #processUploadStatic(HttpServletRequest, long, long, Session)}
      */
+    @Deprecated
     public static final UploadEvent processUploadStatic(HttpServletRequest req) throws OXException {
-        return processUploadStatic(req, -1, -1);
+        return processUploadStatic(req, -1, -1, null);
     }
 
     /**
@@ -1060,11 +1064,12 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
      * @param req The request whose upload shall be processed
      * @param maxFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
      * @param maxOverallSize The maximum allowed size of a complete request or <code>-1</code>
+     * @param session The associated session or <code>null</code>
      * @return The processed instance of {@link UploadEvent}
      * @throws OXException Id processing the upload fails
      */
-    public static final UploadEvent processUploadStatic(HttpServletRequest req, long maxFileSize, long maxOverallSize) throws OXException {
-        return UploadUtility.processUpload(req, maxFileSize, maxOverallSize);
+    public static final UploadEvent processUploadStatic(HttpServletRequest req, long maxFileSize, long maxOverallSize, Session session) throws OXException {
+        return UploadUtility.processUpload(req, maxFileSize, maxOverallSize, session);
     }
 
     @Override

@@ -293,7 +293,7 @@ public class Attachment extends PermissionServlet {
                 try {
                     {
                         long maxSize = getMaxUploadSize();
-                        upload = processUpload(req, -1L, maxSize > 0 ? maxSize : -1L);
+                        upload = processUpload(req, -1L, maxSize > 0 ? maxSize : -1L, session);
                     }
                     final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
                     final List<UploadFile> uploadFiles = new ArrayList<UploadFile>();
