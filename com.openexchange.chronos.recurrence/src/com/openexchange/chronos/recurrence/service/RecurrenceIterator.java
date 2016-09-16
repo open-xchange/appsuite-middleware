@@ -49,9 +49,11 @@
 
 package com.openexchange.chronos.recurrence.service;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
@@ -73,6 +75,8 @@ public class RecurrenceIterator implements Iterator<Event> {
     private Calendar end;
     private Integer limit;
     private Long next;
+    private List<Date> exceptionDates;
+    private boolean ignoreExceptions;
     private int count;
     private RecurrenceRuleIterator inner;
 
@@ -83,15 +87,33 @@ public class RecurrenceIterator implements Iterator<Event> {
      * @param start The left side boundary for the calculation. Optional, can be null.
      * @param end The right side boundary for the calculation. Optional, can be null.
      * @param limit The maximum number of calculated instances. Optional, can be null.
+     * @param changeExceptions Change excpetions to be respected. If null or empty, chnage exceptions are not taken into account. There is no check if the provided changeExceptions match the change exceptions dates of the event.
+     * @param ignoreExceptions Determines if exceptions should be ignored. If true, all occurrences are calculated as if no exceptions exist. Note: This does not add change exceptions. See {@link ChangeExceptionAwareRecurrenceIterator}
      */
-    public RecurrenceIterator(Event master, Calendar start, Calendar end, Integer limit) {
+    public RecurrenceIterator(Event master, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) {
+        if (limit != null && limit == 0) {
+            // Nothing to do.
+            return;
+        }
         this.master = master;
         this.start = start;
         this.end = end;
         this.limit = limit;
         this.next = null;
+        this.ignoreExceptions = ignoreExceptions;
+        this.exceptionDates = new ArrayList<Date>();
+        if (master.getDeleteExceptionDates() != null) {
+            this.exceptionDates.addAll(master.getDeleteExceptionDates());
+        }
+        if (master.getChangeExceptionDates() != null) {
+            this.exceptionDates.addAll(master.getChangeExceptionDates());
+        }
         count = 0;
 
+        init();
+    }
+
+    private void init() {
         RecurrenceRule rrule = null;
         try {
             rrule = new RecurrenceRule(master.getRecurrenceRule());
@@ -105,13 +127,16 @@ public class RecurrenceIterator implements Iterator<Event> {
         if (this.start != null) {
             while (inner.hasNext()) {
                 long nextMillis = inner.peekMillis();
+                if (!ignoreExceptions && isException(nextMillis)) {
+                    inner.nextMillis();
+                    continue;
+                }
                 Date nextEnd = calculateEnd(master, new Date(nextMillis));
                 if (nextEnd.getTime() > start.getTimeInMillis()) {
                     break;
                 } else {
                     inner.nextMillis();
                 }
-
             }
         }
 
@@ -136,20 +161,38 @@ public class RecurrenceIterator implements Iterator<Event> {
 
     private void innerNext() {
         if (count >= MAX) {
+            // Reached internal limit
+            next = null;
             return;
         }
 
         if (limit != null && count >= limit) {
+            // Reached given limit
             next = null;
             return;
         }
 
         if (!inner.hasNext()) {
+            // No more instances
             next = null;
             return;
         }
 
-        if (this.end != null && inner.peekMillis() >= this.end.getTimeInMillis()) {
+        long peek = inner.peekMillis();
+        if (!ignoreExceptions) {
+            // Check for exceptions
+            while (isException(peek)) {
+                inner.nextMillis();
+                if (inner.hasNext()) {
+                    peek = inner.peekMillis();
+                } else {
+                    next = null;
+                    return;
+                }
+            }
+        }
+        if (this.end != null && peek >= this.end.getTimeInMillis()) {
+            // Reached end boundary
             next = null;
             return;
         }
@@ -159,6 +202,7 @@ public class RecurrenceIterator implements Iterator<Event> {
     }
 
     private Event getInstance() {
+        // TODO:
         Event retval = master.clone();
         retval.removeId();
         retval.removeRecurrenceRule();
@@ -166,6 +210,9 @@ public class RecurrenceIterator implements Iterator<Event> {
         retval.removeChangeExceptionDates();
         retval.setStartDate(new Date(next));
         retval.setEndDate(calculateEnd(master, retval.getStartDate()));
+        if (master.containsAllDay()) {
+            retval.setAllDay(master.getAllDay());
+        }
         return retval;
     }
 
@@ -174,6 +221,10 @@ public class RecurrenceIterator implements Iterator<Event> {
         long endMillis = master.getEndDate().getTime();
         long duration = endMillis - startMillis;
         return new Date(start.getTime() + duration);
+    }
+
+    private boolean isException(long start) {
+        return exceptionDates.contains(new Date(start));
     }
 
 }

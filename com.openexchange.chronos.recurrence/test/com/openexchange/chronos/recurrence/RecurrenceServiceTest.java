@@ -53,12 +53,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.recurrence.service.RecurrenceServiceImpl;
 import com.openexchange.chronos.service.RecurrenceService;
+import com.openexchange.time.TimeTools;
 
 /**
  * {@link RecurrenceServiceTest}
@@ -69,9 +71,12 @@ import com.openexchange.chronos.service.RecurrenceService;
 public abstract class RecurrenceServiceTest {
 
     protected RecurrenceService service;
+    protected String timeZone;
 
-    public RecurrenceServiceTest() {
+    public RecurrenceServiceTest() {}
 
+    public RecurrenceServiceTest(String timeZone) {
+        this.timeZone = timeZone;
     }
 
     @Before
@@ -98,6 +103,59 @@ public abstract class RecurrenceServiceTest {
         assertTrue("Not equal.", equals);
     }
 
+    protected void compareChangeExceptionWithMaster(Event master, Event instance, Date recurrenceId, Date start, Date end) {
+        assertNotNull("Master must not be null.", master);
+        assertNotNull("Instance must not be null", instance);
+        Event clone = master.clone();
+
+        clone.removeId();
+        clone.removeRecurrenceRule();
+        clone.removeDeleteExceptionDates();
+        clone.removeChangeExceptionDates();
+        clone.setRecurrenceId(recurrenceId);
+        clone.setStartDate(start);
+        clone.setEndDate(end);
+
+        boolean equals = clone.equals(instance);
+        assertTrue("Not equal.", equals);
+    }
+
+    protected void compareFullTimeChangeExceptionWithMaster(Event master, Event instance, Date recurrenceId, Date start, Date end) {
+        assertNotNull("Master must not be null.", master);
+        assertNotNull("Instance must not be null", instance);
+        Event clone = master.clone();
+
+        clone.removeId();
+        clone.removeRecurrenceRule();
+        clone.removeDeleteExceptionDates();
+        clone.removeChangeExceptionDates();
+        clone.setRecurrenceId(recurrenceId);
+        clone.setStartDate(start);
+        clone.setEndDate(end);
+        clone.setAllDay(true);
+
+        boolean equals = clone.equals(instance);
+        assertTrue("Not equal.", equals);
+    }
+
+    protected void compareChangeExceptionWithFullTimeMaster(Event master, Event instance, Date recurrenceId, Date start, Date end) {
+        assertNotNull("Master must not be null.", master);
+        assertNotNull("Instance must not be null", instance);
+        Event clone = master.clone();
+
+        clone.removeId();
+        clone.removeRecurrenceRule();
+        clone.removeDeleteExceptionDates();
+        clone.removeChangeExceptionDates();
+        clone.setRecurrenceId(recurrenceId);
+        clone.setStartDate(start);
+        clone.setEndDate(end);
+        clone.removeAllDay();
+
+        boolean equals = clone.equals(instance);
+        assertTrue("Not equal.", equals);
+    }
+
     protected String getUntilZulu(Calendar c) {
         c.setTimeZone(TimeZone.getTimeZone("UTC"));
         String month = Integer.toString(c.get(Calendar.MONTH) + 1);
@@ -119,6 +177,24 @@ public abstract class RecurrenceServiceTest {
             second = "0" + second;
         }
         return "" + year + month + dayOfMonth + "T" + hourOfDay + minute + second + "Z";
+    }
+
+    protected Calendar getCal(String date) {
+        Calendar retval = GregorianCalendar.getInstance(TimeZone.getTimeZone(timeZone));
+        retval.setTime(TimeTools.D(date, TimeZone.getTimeZone(timeZone)));
+        return retval;
+    }
+
+    protected Event getInstance(Event master, Date recurrenceId, Date start, Date end) {
+        Event instance = master.clone();
+        instance.removeId();
+        instance.removeRecurrenceRule();
+        instance.removeDeleteExceptionDates();
+        instance.removeChangeExceptionDates();
+        instance.setRecurrenceId(recurrenceId);
+        instance.setStartDate(start);
+        instance.setEndDate(end);
+        return instance;
     }
 
 }

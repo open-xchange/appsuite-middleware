@@ -51,6 +51,7 @@ package com.openexchange.chronos.service;
 
 import java.util.Calendar;
 import java.util.Iterator;
+import java.util.List;
 import com.openexchange.chronos.Event;
 
 /**
@@ -73,6 +74,20 @@ public interface RecurrenceService {
      * @return
      */
     public Iterator<Event> calculateInstances(Event master, Calendar start, Calendar end, Integer limit);
+    
+    /**
+     * Calculates the expanded instances of a recurring event with optional boundaries and an optional limit.
+     * If no limit is given an internal limit kicks in avoiding an endless calculation.
+     * If no boundaries are given the calculation starts with the first occurrence and lasts until the end of the series.
+     * 
+     * @param master The master event containing all necessary information like recurrence rule, star and end date, timezones etc.
+     * @param start The left side boundary for the calculation. Optional, can be null.
+     * @param end The right side boundary for the calculation. Optional, can be null.
+     * @param limit The maximum number of calculated instances. Optional, can be null.
+     * @param changeExceptions List of changeExceptions. Make sure this matches the change exception dates of the master, otherwise you might get weird results. Optional, can be null;
+     * @return
+     */
+    public Iterator<Event> calculateInstancesRespectExceptions(Event master, Calendar start, Calendar end, Integer limit, List<Event> changeExceptions);
 
     /**
      * Calculates a reccurrence date position for a given 1-based position of a recurring event.

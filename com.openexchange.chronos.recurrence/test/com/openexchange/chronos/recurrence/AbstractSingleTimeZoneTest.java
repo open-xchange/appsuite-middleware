@@ -65,10 +65,8 @@ import com.openexchange.time.TimeTools;
  */
 public abstract class AbstractSingleTimeZoneTest extends RecurrenceServiceTest {
 
-    protected String timeZone;
-
     public AbstractSingleTimeZoneTest(String timeZone) {
-        this.timeZone = timeZone;
+        super(timeZone);
     }
 
     @Parameters(name = "{0}")
@@ -78,12 +76,6 @@ public abstract class AbstractSingleTimeZoneTest extends RecurrenceServiceTest {
             //for (String tzId : new String[] { "Europe/Berlin", "UTC" }) {
             retval.add(new Object[] { tzId });
         }
-        return retval;
-    }
-
-    protected Calendar getCal(String date) {
-        Calendar retval = GregorianCalendar.getInstance(TimeZone.getTimeZone(timeZone));
-        retval.setTime(TimeTools.D(date, TimeZone.getTimeZone(timeZone)));
         return retval;
     }
 

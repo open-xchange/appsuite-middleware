@@ -66,7 +66,9 @@ import org.junit.runners.Suite.SuiteClasses;
     OccurrencesTest.class,
     DSTShiftTest.class,
     HourlyTest.class,
-    MultipleTimeZonesHourly.class
+    MultipleTimeZonesHourly.class,
+    DeleteExceptions.class,
+    ChangeExceptions.class
 })
 public class UnitTests {
 

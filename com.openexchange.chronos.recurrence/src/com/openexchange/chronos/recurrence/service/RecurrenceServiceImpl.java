@@ -52,6 +52,7 @@ package com.openexchange.chronos.recurrence.service;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
@@ -70,7 +71,11 @@ public class RecurrenceServiceImpl implements RecurrenceService {
 
     @Override
     public Iterator<Event> calculateInstances(Event master, final Calendar start, final Calendar end, Integer limit) {
-        return new RecurrenceIterator(master, start, end, limit);
+        return new RecurrenceIterator(master, start, end, limit, true);
+    }
+
+    public Iterator<Event> calculateInstancesRespectExceptions(Event master, Calendar start, Calendar end, Integer limit, List<Event> changeExceptions) {
+        return new ChangeExceptionAwareRecurrenceIterator(master, start, end, limit, changeExceptions);
     }
 
     @Override
