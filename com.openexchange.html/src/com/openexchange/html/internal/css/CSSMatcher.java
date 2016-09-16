@@ -297,7 +297,8 @@ public final class CSSMatcher {
                 if (!matcher.matches()) {
                     return Result.NEUTRAL;
                 }
-                return HtmlServices.isAcceptableDataUri(value, null);
+                Result dataUriResult = HtmlServices.isAcceptableDataUri(value, null);
+                return Result.NEUTRAL == dataUriResult ? Result.ALLOW : dataUriResult;
             }
         case 'n':
             return PAT_n.matcher(value).matches() ? Result.ALLOW : Result.NEUTRAL;
