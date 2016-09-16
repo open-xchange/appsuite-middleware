@@ -61,7 +61,8 @@ import javax.naming.ldap.LdapName;
 import javax.naming.ldap.Rdn;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.X509ExtendedTrustManager;
-import com.openexchange.net.ssl.config.SSLProperties;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.osgi.Services;
 
 /**
  * {@link AbstractTrustManager}
@@ -86,7 +87,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType, Socket socket) throws CertificateException {
-        if (SSLProperties.isWhitelisted(socket.getInetAddress().getHostName())) {
+        if (Services.getService(SSLConfigurationService.class).isWhitelisted(socket.getInetAddress().getHostName())) {
             return;
         }
         this.trustManager.checkServerTrusted(chain, authType, socket);
@@ -106,7 +107,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             }
         }
 
-        if (SSLProperties.isWhitelisted(hosts.toArray(new String[0]))) {
+        if (Services.getService(SSLConfigurationService.class).isWhitelisted(hosts.toArray(new String[0]))) {
             return;
         }
 
@@ -131,7 +132,7 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     @Override
     public void checkServerTrusted(X509Certificate[] chain, String authType, SSLEngine engine) throws CertificateException {
-        if (SSLProperties.isWhitelisted(engine.getSession().getPeerHost())) {
+        if (Services.getService(SSLConfigurationService.class).isWhitelisted(engine.getSession().getPeerHost())) {
             return;
         }
 

@@ -47,44 +47,78 @@
  *
  */
 
-package com.openexchange.net.ssl.user.osgi;
+package com.openexchange.net.ssl.config.osgi;
 
-import com.openexchange.context.ContextService;
-import com.openexchange.net.ssl.UserTrustConfiguration;
-import com.openexchange.net.ssl.user.internal.UserTrustConfigurationImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
  * 
- * {@link UserSSLActivator}
+ * {@link Services}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class UserSSLActivator extends HousekeepingActivator {
+public final class Services {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { UserService.class, ContextService.class };
+    /**
+     * Initializes a new {@link Services}.
+     */
+    private Services() {
+        super();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            org.slf4j.LoggerFactory.getLogger(UserSSLActivator.class).info("starting bundle: \"com.openexchange.net.ssl.user\"");
-            
-            registerService(UserTrustConfiguration.class, new UserTrustConfigurationImpl(getService(UserService.class), getService(ContextService.class)));
-        } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(UserSSLActivator.class).error("", e);
-            throw e;
+    private static final AtomicReference<BundleContext> REF = new AtomicReference<BundleContext>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param bundleContext The service lookup or <code>null</code>
+     */
+    public static void setBundleContext(final BundleContext bundleContext) {
+        REF.set(bundleContext);
+    }
+
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static BundleContext getBundleContext() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final BundleContext serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.net.ssl.config\" not started?");
         }
+        ServiceReference<? extends S> serviceReference = serviceLookup.getServiceReference(clazz);
+        if (serviceReference == null) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.net.ssl.config\" not started?");
+        }
+        return serviceLookup.getService(serviceReference);
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(UserSSLActivator.class).info("stopping bundle: \"com.openexchange.net.ssl.user\"");
-
-        super.stopBundle();
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 }

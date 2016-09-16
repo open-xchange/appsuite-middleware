@@ -1,4 +1,3 @@
-package com.openexchange.net.ssl;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -48,14 +47,47 @@ package com.openexchange.net.ssl;
  *
  */
 
+package com.openexchange.net.ssl.config.internal;
+
+import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
+import com.openexchange.user.UserService;
+
 /**
- * {@link UserTrustConfiguration}
+ * The {@link UserTrustConfigurationImpl} provides user specific configuration with regards to SSL
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public interface UserTrustConfiguration {
-    
-    boolean isTrustAll(int user, int context);
+public class UserTrustConfigurationImpl implements UserAwareSSLConfigurationService {
+
+    private static final String USER_ATTRIBUTE_NAME = "trustAllConnections";
+
+    private UserService userService;
+
+    private ContextService contextService;
+
+    public UserTrustConfigurationImpl(UserService userService, ContextService contextService) {
+        this.userService = userService;
+        this.contextService = contextService;
+    }
+
+    @Override
+    public boolean isTrustAll(int user, int context) {
+        if ((user <= 0) || (context <= 0) ) {
+            return false;
+        }
+        try {
+            String userTrustsAll = this.userService.getUserAttribute(USER_ATTRIBUTE_NAME, user, contextService.getContext(context));
+            if (userTrustsAll == null) {
+                return false;
+            }
+            return Boolean.parseBoolean(userTrustsAll);
+        } catch (OXException e) {
+            org.slf4j.LoggerFactory.getLogger(UserTrustConfigurationImpl.class).error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, user, context);
+        }
+        return false;
+    }
 
 }

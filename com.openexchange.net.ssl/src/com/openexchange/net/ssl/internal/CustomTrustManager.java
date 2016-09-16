@@ -60,9 +60,8 @@ import java.security.cert.CertificateException;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedTrustManager;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
-import com.openexchange.net.ssl.config.SSLProperties;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.osgi.Services;
 
 /**
@@ -80,13 +79,12 @@ public class CustomTrustManager extends AbstractTrustManager {
     }
 
     private X509ExtendedTrustManager initCustomTrustManager() {
-        ConfigurationService configService = Services.getService(ConfigurationService.class);
+        SSLConfigurationService sslConfigurationService = Services.getService(SSLConfigurationService.class);
 
-        boolean useCustomTruststore = configService.getBoolProperty(SSLProperties.CUSTOM_TRUSTSTORE_ENABLED.getName(), SSLProperties.CUSTOM_TRUSTSTORE_ENABLED.getDefaultBoolean());
-        if (useCustomTruststore) {
-            String trustStoreFile = configService.getProperty(SSLProperties.CUSTOM_TRUSTSTORE_LOCATION.getName(), SSLProperties.CUSTOM_TRUSTSTORE_LOCATION.getDefault());
+        if (sslConfigurationService.isCustomTruststoreEnabled()) {
+            String trustStoreFile = sslConfigurationService.getCustomTruststoreLocation();
             if (Strings.isEmpty(trustStoreFile)) {
-                LOG.error("Cannot load custom truststore file from location " + trustStoreFile + ". Adapt " + SSLProperties.CUSTOM_TRUSTSTORE_LOCATION.getName() + " to be able to use trusted connections only.");
+                LOG.error("Cannot load custom truststore file from location " + trustStoreFile);
                 return null;
             }
 
@@ -95,7 +93,7 @@ public class CustomTrustManager extends AbstractTrustManager {
                 LOG.error("Cannot find custom truststore file from location " + trustStoreFile + ". The file does not exist.");
                 return null;
             }
-            String password = configService.getProperty(SSLProperties.CUSTOM_TRUSTSTORE_PASSWORD.getName(), SSLProperties.CUSTOM_TRUSTSTORE_PASSWORD.getDefault());
+            String password = sslConfigurationService.getCustomTruststorePassword();
             try (InputStream in = new FileInputStream(file)) {
                 KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
                 ks.load(in, password.toCharArray());
@@ -109,17 +107,11 @@ public class CustomTrustManager extends AbstractTrustManager {
                     }
                 }
             } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (KeyStoreException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (NoSuchAlgorithmException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (CertificateException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                LOG.error("Unable to read custom truststore file from " + file.getAbsolutePath(), e);
+                //TODO re-throw or OXException?
+            } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
+                LOG.error("Unable to initialize custom truststore file from " + file.getAbsolutePath(), e);
+                //TODO re-throw or OXException?
             }
         } else {
             LOG.info("Using custom truststore is disabled by configuration.");

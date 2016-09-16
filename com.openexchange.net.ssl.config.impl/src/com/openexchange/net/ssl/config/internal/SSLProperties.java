@@ -47,15 +47,13 @@
  *
  */
 
-package com.openexchange.net.ssl.config;
+package com.openexchange.net.ssl.config.internal;
 
-import javax.net.ssl.HttpsURLConnection;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
-import com.openexchange.net.ssl.apache.DefaultHostnameVerifier;
-import com.openexchange.net.ssl.osgi.Services;
+import com.openexchange.net.ssl.config.TrustLevel;
+import com.openexchange.net.ssl.config.osgi.Services;
 
 /**
  * {@link SSLProperties} include configurations made by the administrator. This means that only server wide configurations can be found here. ConfigCascade properities should not be added here.
@@ -98,7 +96,7 @@ public enum SSLProperties {
 
     private static volatile TrustLevel trustLevel;
 
-    public static TrustLevel trustLevel() {
+    protected static TrustLevel trustLevel() {
         TrustLevel tmp = trustLevel;
         if (null == tmp) {
             synchronized (SSLProperties.class) {
@@ -124,7 +122,7 @@ public enum SSLProperties {
 
     private static volatile String[] protocols;
 
-    public static String[] supportedProtocols() {
+    protected static String[] supportedProtocols() {
         String[] tmp = protocols;
         if (null == tmp) {
             synchronized (SSLProperties.class) {
@@ -150,7 +148,7 @@ public enum SSLProperties {
 
     private static volatile String[] ciphers;
 
-    public static String[] supportedCipherSuites() {
+    protected static String[] supportedCipherSuites() {
         String[] tmp = ciphers;
         if (null == tmp) {
             synchronized (SSLProperties.class) {
@@ -174,7 +172,7 @@ public enum SSLProperties {
 
     private static volatile Boolean verifyHostname;
 
-    public static boolean isVerifyHostname() {
+    protected static boolean isVerifyHostname() {
         Boolean tmp = verifyHostname;
         if (null == tmp) {
             synchronized (SSLProperties.class) {
@@ -231,7 +229,7 @@ public enum SSLProperties {
      * @param hostName The host name; either a machine name or a textual representation of its IP address
      * @return <code>true</code> if white-listed; otherwise <code>false</code>
      */
-    public static boolean isWhitelisted(String hostName) {
+    protected static boolean isWhitelisted(String hostName) {
         if (Strings.isEmpty(hostName)) {
             return false;
         }
@@ -246,7 +244,7 @@ public enum SSLProperties {
      * @param hostNames The host names as an array; either a machine name or a textual representation of its IP address
      * @return <code>true</code> if at least one of the hosts is white-listed; otherwise <code>false</code>
      */
-    public static boolean isWhitelisted(String... hostNames) {
+    protected static boolean isWhitelisted(String... hostNames) {
         for (String hostName : hostNames) {
             boolean whitelisted = isWhitelisted(hostName);
             if (whitelisted) {
@@ -268,12 +266,13 @@ public enum SSLProperties {
         reinit();
     }
 
+    //FIXME should be moved to c.o.net.ssl
     private static void reinit() {
-        if (isVerifyHostname()) {
-            HttpsURLConnection.setDefaultHostnameVerifier(new DefaultHostnameVerifier());
-        } else {
-            HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
-        }
+//        if (isVerifyHostname()) {
+//            HttpsURLConnection.setDefaultHostnameVerifier(new DefaultHostnameVerifier());
+//        } else {
+//            HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
+//        }
     }
 
     //***************************************/

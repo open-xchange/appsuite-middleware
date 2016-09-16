@@ -47,12 +47,13 @@
  *
  */
 
-package com.openexchange.net.ssl.internal;
+package com.openexchange.net.ssl.config.internal;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
-import com.openexchange.net.ssl.config.SSLProperties;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.config.osgi.Services;
 
 /**
  * {@link SSLPropertiesReloadable}
@@ -64,7 +65,7 @@ public class SSLPropertiesReloadable implements Reloadable {
 
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
-        SSLProperties.reload();
+        Services.getService(SSLConfigurationService.class).reload();
     }
 
     @Override

@@ -47,56 +47,73 @@
  *
  */
 
-package com.openexchange.net.ssl.osgi;
+package com.openexchange.net.ssl.config.internal;
 
-import javax.net.ssl.HttpsURLConnection;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
-import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.net.ssl.apache.DefaultHostnameVerifier;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.net.ssl.config.TrustLevel;
 
 /**
- * 
- * {@link SSLActivator}
+ * The {@link SSLConfigurationServiceImpl} provides user specific configuration with regards to SSL
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class SSLActivator extends HousekeepingActivator {
+public class SSLConfigurationServiceImpl implements SSLConfigurationService {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { UserAwareSSLConfigurationService.class, SSLConfigurationService.class };
+    private ConfigurationService configService;
+
+    public SSLConfigurationServiceImpl(ConfigurationService configService) {
+        this.configService = configService;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        try {
-            org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("starting bundle: \"com.openexchange.net.ssl\"");
-            Services.setBundleContext(this.context);
-
-            SSLConfigurationService sslConfigurationService = getService(SSLConfigurationService.class);
-            
-            if (sslConfigurationService.isVerifyHostname()) {
-                HttpsURLConnection.setDefaultHostnameVerifier(new DefaultHostnameVerifier());
-            } else {
-                HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
-            }
-
-            HttpsURLConnection.setDefaultSSLSocketFactory(SSLSocketFactoryProvider.getDefault());
-        } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(SSLActivator.class).error("", e);
-            throw e;
-        }
+    public boolean isWhitelisted(String... hostNames) {
+        return SSLProperties.isWhitelisted(hostNames);
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("stopping bundle: \"com.openexchange.net.ssl\"");
+    public TrustLevel getTrustLevel() {
+        return SSLProperties.trustLevel();
+    }
 
-        Services.setBundleContext(null);
-        super.stopBundle();
+    @Override
+    public String[] getSupportedProtocols() {
+        return SSLProperties.supportedProtocols();
+    }
+
+    @Override
+    public String[] getSupportedCipherSuites() {
+        return SSLProperties.supportedCipherSuites();
+    }
+
+    @Override
+    public boolean isVerifyHostname() {
+        return SSLProperties.isVerifyHostname();
+    }
+
+    @Override
+    public boolean isDefaultTruststoreEnabled() {
+        return this.configService.getBoolProperty(SSLProperties.DEFAULT_TRUSTSTORE_ENABLED.getName(), SSLProperties.DEFAULT_TRUSTSTORE_ENABLED.getDefaultBoolean());
+    }
+
+    @Override
+    public boolean isCustomTruststoreEnabled() {
+        return this.configService.getBoolProperty(SSLProperties.CUSTOM_TRUSTSTORE_ENABLED.getName(), SSLProperties.CUSTOM_TRUSTSTORE_ENABLED.getDefaultBoolean());
+    }
+
+    @Override
+    public String getCustomTruststoreLocation() {
+        return this.configService.getProperty(SSLProperties.CUSTOM_TRUSTSTORE_LOCATION.getName(), SSLProperties.CUSTOM_TRUSTSTORE_LOCATION.getDefault());
+    }
+
+    @Override
+    public String getCustomTruststorePassword() {
+        return this.configService.getProperty(SSLProperties.CUSTOM_TRUSTSTORE_PASSWORD.getName(), SSLProperties.CUSTOM_TRUSTSTORE_PASSWORD.getDefault());
+    }
+
+    @Override
+    public void reload() {
+        SSLProperties.reload();
     }
 }

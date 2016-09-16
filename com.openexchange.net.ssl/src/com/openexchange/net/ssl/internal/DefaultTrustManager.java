@@ -55,8 +55,7 @@ import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509ExtendedTrustManager;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.net.ssl.config.SSLProperties;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.osgi.Services;
 
 /**
@@ -74,9 +73,7 @@ public class DefaultTrustManager extends AbstractTrustManager {
     }
 
     private X509ExtendedTrustManager initDefaultTrustManager() {
-        ConfigurationService configService = Services.getService(ConfigurationService.class);
-
-        boolean useDefaultTruststore = configService.getBoolProperty(SSLProperties.DEFAULT_TRUSTSTORE_ENABLED.getName(), SSLProperties.DEFAULT_TRUSTSTORE_ENABLED.getDefaultBoolean());
+        boolean useDefaultTruststore = Services.getService(SSLConfigurationService.class).isDefaultTruststoreEnabled();
 
         if (useDefaultTruststore) {
             try {
@@ -88,12 +85,9 @@ public class DefaultTrustManager extends AbstractTrustManager {
                         return (X509ExtendedTrustManager) tm;
                     }
                 }
-            } catch (KeyStoreException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (NoSuchAlgorithmException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+            } catch (KeyStoreException | NoSuchAlgorithmException e) {
+                LOG.error("Unable to initialize default truststore.", e);
+                //TODO re-throw or OXException?
             }
         } else {
             LOG.info("Using default JVM truststore is disabled by configuration.");

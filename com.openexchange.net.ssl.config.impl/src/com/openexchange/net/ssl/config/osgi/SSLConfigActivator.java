@@ -47,47 +47,57 @@
  *
  */
 
-package com.openexchange.net.ssl.user.internal;
+package com.openexchange.net.ssl.config.osgi;
 
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.net.ssl.UserTrustConfiguration;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
+import com.openexchange.net.ssl.config.internal.SSLProperties;
+import com.openexchange.net.ssl.config.internal.SSLPropertiesReloadable;
+import com.openexchange.net.ssl.config.internal.UserTrustConfigurationImpl;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
 /**
- * The {@link UserTrustConfigurationImpl} provides user specific configuration with regards to SSL
+ * 
+ * {@link SSLConfigActivator}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class UserTrustConfigurationImpl implements UserTrustConfiguration {
+public class SSLConfigActivator extends HousekeepingActivator {
 
-    private static final String USER_ATTRIBUTE_NAME = "trustAllConnections";
-
-    private UserService userService;
-
-    private ContextService contextService;
-
-    public UserTrustConfigurationImpl(UserService userService, ContextService contextService) {
-        this.userService = userService;
-        this.contextService = contextService;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { UserService.class, ContextService.class, ConfigurationService.class };
     }
 
     @Override
-    public boolean isTrustAll(int user, int context) {
-        if ((user <= 0) || (context <= 0) ) {
-            return false;
-        }
+    protected void startBundle() throws Exception {
         try {
-            String userTrustsAll = this.userService.getUserAttribute(USER_ATTRIBUTE_NAME, user, contextService.getContext(context));
-            if (userTrustsAll == null) {
-                return false;
+            org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("starting bundle: \"com.openexchange.net.ssl.user\"");
+            
+            ConfigurationService configService = getService(ConfigurationService.class);
+            
+            if (configService.getBoolProperty(SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getName(), SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getDefaultBoolean())) {
+                System.setProperty("javax.net.debug", "ssl:record");
+                org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("Enabled SSL debug logging.");
             }
-            return Boolean.parseBoolean(userTrustsAll);
-        } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(UserTrustConfigurationImpl.class).error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, user, context);
+            
+            registerService(Reloadable.class, new SSLPropertiesReloadable());
+
+            registerService(UserAwareSSLConfigurationService.class, new UserTrustConfigurationImpl(getService(UserService.class), getService(ContextService.class)));
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).error("", e);
+            throw e;
         }
-        return false;
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("stopping bundle: \"com.openexchange.net.ssl.user\"");
+
+        super.stopBundle();
+    }
 }

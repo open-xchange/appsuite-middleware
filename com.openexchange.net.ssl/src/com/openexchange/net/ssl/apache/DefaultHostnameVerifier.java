@@ -48,7 +48,6 @@ import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 import javax.security.auth.x500.X500Principal;
 import org.apache.http.conn.util.InetAddressUtils;
-import com.openexchange.net.ssl.internal.DefaultTrustManager;
 
 /**
  * Default {@link javax.net.ssl.HostnameVerifier} implementation.
@@ -60,7 +59,7 @@ public class DefaultHostnameVerifier implements HostnameVerifier {
     final static int DNS_NAME_TYPE = 2;
     final static int IP_ADDRESS_TYPE = 7;
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultTrustManager.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultHostnameVerifier.class);
 
     private final PublicSuffixMatcher publicSuffixMatcher;
 

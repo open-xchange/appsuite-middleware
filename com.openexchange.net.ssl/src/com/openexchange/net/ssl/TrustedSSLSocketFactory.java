@@ -68,9 +68,10 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import com.openexchange.net.ssl.config.SSLProperties;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.internal.CustomTrustManager;
 import com.openexchange.net.ssl.internal.DefaultTrustManager;
+import com.openexchange.net.ssl.osgi.Services;
 
 /**
  * {@link TrustedSSLSocketFactory}
@@ -165,7 +166,7 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
 
     @Override
     public String[] getSupportedCipherSuites() {
-        return SSLProperties.supportedCipherSuites();
+        return Services.getService(SSLConfigurationService.class).getSupportedCipherSuites();
     }
 
     /**
@@ -175,7 +176,8 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
      */
     private String[] merge() {
         String[] supportedCipherSuites = this.adapteeFactory.getSupportedCipherSuites();
-        Set<String> configuredCipherSuites = new HashSet<>(Arrays.asList(SSLProperties.supportedCipherSuites()));
+        String[] configuredSuites = Services.getService(SSLConfigurationService.class).getSupportedCipherSuites();
+        Set<String> configuredCipherSuites = new HashSet<>(Arrays.asList(configuredSuites));
 
         Set<String> suites = new HashSet<>();
         for (String supportedCipher : supportedCipherSuites) {
@@ -233,8 +235,9 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
             SSLSocket sslSocket = (SSLSocket) socket;
 //            String[] supportedProtocols = sslSocket.getSupportedProtocols();
 //            String[] supportedCipherSuites = sslSocket.getSupportedCipherSuites();
-            sslSocket.setEnabledProtocols(SSLProperties.supportedProtocols());
-            sslSocket.setEnabledCipherSuites(SSLProperties.supportedCipherSuites());
+            SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
+            sslSocket.setEnabledProtocols(sslConfigService.getSupportedProtocols());
+            sslSocket.setEnabledCipherSuites(sslConfigService.getSupportedCipherSuites());
             sslSocket.setUseClientMode(true);
             sslSocket.addHandshakeCompletedListener(this);
             socket = sslSocket;

@@ -47,56 +47,16 @@
  *
  */
 
-package com.openexchange.net.ssl.osgi;
-
-import javax.net.ssl.HttpsURLConnection;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
-import com.openexchange.net.ssl.SSLSocketFactoryProvider;
-import com.openexchange.net.ssl.apache.DefaultHostnameVerifier;
-import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
+package com.openexchange.net.ssl.config;
 
 /**
- * 
- * {@link SSLActivator}
+ * {@link UserAwareSSLConfigurationService}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class SSLActivator extends HousekeepingActivator {
+public interface UserAwareSSLConfigurationService {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { UserAwareSSLConfigurationService.class, SSLConfigurationService.class };
-    }
+    boolean isTrustAll(int user, int context);
 
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("starting bundle: \"com.openexchange.net.ssl\"");
-            Services.setBundleContext(this.context);
-
-            SSLConfigurationService sslConfigurationService = getService(SSLConfigurationService.class);
-            
-            if (sslConfigurationService.isVerifyHostname()) {
-                HttpsURLConnection.setDefaultHostnameVerifier(new DefaultHostnameVerifier());
-            } else {
-                HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
-            }
-
-            HttpsURLConnection.setDefaultSSLSocketFactory(SSLSocketFactoryProvider.getDefault());
-        } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(SSLActivator.class).error("", e);
-            throw e;
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("stopping bundle: \"com.openexchange.net.ssl\"");
-
-        Services.setBundleContext(null);
-        super.stopBundle();
-    }
 }
