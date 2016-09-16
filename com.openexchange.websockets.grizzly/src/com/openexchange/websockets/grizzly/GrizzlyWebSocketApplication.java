@@ -721,20 +721,26 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 UserAndContext userAndContext = UserAndContext.newInstance(sessionBoundSocket.getUserId(), sessionBoundSocket.getContextId());
                 ConcurrentMap<ConnectionId, SessionBoundWebSocket> sockets = openSockets.get(userAndContext);
                 if (sockets == null) {
-                    sockets = new BoundedConcurrentHashMap<>(MAX_SIZE, 0.9F, 1, MAX_SIZE);
+                    sockets = new ConcurrentHashMap<>(MAX_SIZE, 0.9F, 1);
                     ConcurrentMap<ConnectionId, SessionBoundWebSocket> existing = openSockets.putIfAbsent(userAndContext, sockets);
                     if (existing != null) {
                         sockets = existing;
                     }
                 }
 
-                try {
-                    if (null != sockets.putIfAbsent(sessionBoundSocket.getConnectionId(), sessionBoundSocket)) {
-                        throw new HandshakeException("Such a Web Socket connection already exists: " + sessionBoundSocket.getConnectionId());
+                synchronized (sockets) {
+                    if (sockets.size() == MAX_SIZE) {
+
                     }
-                } catch (BoundedConcurrentHashMap.BoundaryExceededException e) {
-                    // Max. number of sockets per user exceeded
-                    throw new HandshakeException("Max. number of Web Sockets (" + e.getMaxSize() + ") exceeded for user " + userAndContext.getUserId() + " in context " + userAndContext.getContextId());
+                }
+
+                if (null != sockets.putIfAbsent(sessionBoundSocket.getConnectionId(), sessionBoundSocket)) {
+                    throw new HandshakeException("Such a Web Socket connection already exists: " + sessionBoundSocket.getConnectionId());
+                }
+
+                // Successfully inserted
+                if (error) {
+
                 }
 
                 synchronized (sessionBoundSocket) {
