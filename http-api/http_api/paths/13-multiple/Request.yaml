@@ -44,8 +44,6 @@
       200:
         description: A JSON array containing the response data of the processed requests where response[0] corresponds to request[0], response[1] to request[1], and so on.
         schema:
-          type: array
-          items:
-            $ref: "#/definitions/SingleResponse"
+          $ref: "#/definitions/MultipleResponse"
       400:
         description: Syntactically incorrect request.

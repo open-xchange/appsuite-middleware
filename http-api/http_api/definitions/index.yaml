@@ -290,8 +290,8 @@ ReminderResponse:
 # Module: multiple
 SingleRequest:
   $ref: ./multiple/SingleRequest.yaml
-SingleResponse:
-  $ref: ./multiple/SingleResponse.yaml
+MultipleResponse:
+  $ref: ./multiple/MultipleResponse.yaml
 # Module: quota
 QuotasResponse:
   $ref: ./quota/QuotasResponse.yaml

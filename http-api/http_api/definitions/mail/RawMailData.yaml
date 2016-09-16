@@ -19,6 +19,7 @@ from:
     type: array
     items:
       type: string
+      description: The personal name and email adress of the from address
 to:
   type: array
   description: Each element is a two-element array (see the from field) specifying one receiver.
@@ -26,6 +27,7 @@ to:
     type: array
     items:
       type: string
+      description: The personal name and email adress of the to address
 cc:
   type: array
   description: Each element is a two-element array (see the from field) specifying one carbon-copy receiver.
@@ -33,6 +35,7 @@ cc:
     type: array
     items:
       type: string
+      description: The personal name and email adress of the cc address
 bcc:
   type: array
   description: Each element is a two-element array (see the from field) specifying one blind carbon-copy receiver.
@@ -40,6 +43,7 @@ bcc:
     type: array
     items:
       type: string
+      description: The personal name and email adress of the bcc address
 subject:
   type: string
   description: The mail's subject.
