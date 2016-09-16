@@ -176,12 +176,17 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                         }
 
                         DBUtils.closeSQLStuff(stmt);
-                        // remove all configs which does not have a mapping
-                        String sql = DBUtils.getIN(SQL_DELETE_CONFIG_WHERE_NOT_IN, ids.size(), ";");
-                        stmt = con.prepareStatement(sql);
-                        int x = 1;
-                        for (Integer id : ids) {
-                            stmt.setInt(x++, id);
+                        if (ids.isEmpty()) {
+                            // remove all configs, since noone has a mapping
+                            stmt = con.prepareStatement(SQL_DELETE_CONFIG_ALL);
+                        } else {
+                            // remove all configs which does not have a mapping
+                            String sql = DBUtils.getIN(SQL_DELETE_CONFIG_WHERE_NOT_IN, ids.size(), ";");
+                            stmt = con.prepareStatement(sql);
+                            int x = 1;
+                            for (Integer id : ids) {
+                                stmt.setInt(x++, id);
+                            }
                         }
                         if (stmt.executeUpdate() > 0) {
                             isReadOnly = false;
