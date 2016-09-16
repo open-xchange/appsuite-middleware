@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.settings.tree;
 
+import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -58,7 +59,6 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.AbstractUserFuncs;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.net.ssl.config.SSLProperties;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
@@ -103,10 +103,12 @@ public final class TrustAllConnections implements PreferencesItemService {
 
             @Override
             public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
-                if (!SSLProperties.isUserAllowedToConfigure()) {
+                ConfigView view = configView.getView(user.getId(), ctx.getContextId());
+                Boolean isUserAllowedToConfigureTrustlevel = view.property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class).get();
+                if (!isUserAllowedToConfigureTrustlevel.booleanValue()) {
                     return;
                 }
-                Boolean activated = configView.getView(user.getId(), ctx.getContextId()).property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class).get();
+                Boolean activated = view.property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class).get();
                 if ((activated == null) || !(activated.booleanValue())) {
                     LOG.info("Setting {} has been disabled due to configuration ('com.openexchange.net.ssl.user.configuration.enabled'). The request will be ignored.", USER_ATTRIBUTE_NAME);
                     return;
@@ -116,9 +118,6 @@ public final class TrustAllConnections implements PreferencesItemService {
 
             @Override
             public boolean isWritable() {
-                if (!SSLProperties.isUserAllowedToConfigure()) {
-                    return false;
-                }
                 return true;
             }
 
@@ -127,12 +126,14 @@ public final class TrustAllConnections implements PreferencesItemService {
              */
             @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
-                if (!SSLProperties.isUserAllowedToConfigure()) {
-                    return false;
-                }
-
                 try {
-                    Boolean activated = configView.getView(userConfig.getUserId(), userConfig.getContext().getContextId()).property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class).get();
+                    ConfigView view = configView.getView(userConfig.getUserId(), userConfig.getContext().getContextId());
+                    Boolean isUserAllowedToConfigureTrustlevel = view.property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class).get();
+                    if (!isUserAllowedToConfigureTrustlevel.booleanValue()) {
+                        return false;
+                    }
+
+                    Boolean activated = view.property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class).get();
                     if (activated != null) {
                         return activated.booleanValue();
                     }
@@ -145,18 +146,21 @@ public final class TrustAllConnections implements PreferencesItemService {
 
             @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                if (!SSLProperties.isUserAllowedToConfigure()) {
+                ConfigView view = configView.getView(userConfig.getUserId(), userConfig.getContext().getContextId());
+                
+                Boolean isUserAllowedToConfigureTrustlevel = view.property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class).get();
+                if (!isUserAllowedToConfigureTrustlevel.booleanValue()) {
                     return;
                 }
 
-                Boolean activated = configView.getView(user.getId(), ctx.getContextId()).property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class).get();
+                Boolean activated = view.property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class).get();
                 if ((activated == null) || !(activated.booleanValue())) {
                     LOG.debug("Reading {} has been disabled due to configuration ('com.openexchange.net.ssl.user.configuration.enabled'). The request will be ignored.", USER_ATTRIBUTE_NAME);
                     return;
                 }
-                
+
                 String userTrustsAll = userService.getUserAttribute(USER_ATTRIBUTE_NAME, user.getId(), ctx);
-                
+
                 if (userTrustsAll == null) {
                     setting.setSingleValue(Boolean.FALSE);
                     return;

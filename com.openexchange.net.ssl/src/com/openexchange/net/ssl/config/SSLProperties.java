@@ -58,7 +58,7 @@ import com.openexchange.net.ssl.apache.DefaultHostnameVerifier;
 import com.openexchange.net.ssl.osgi.Services;
 
 /**
- * {@link SSLProperties}
+ * {@link SSLProperties} include configurations made by the administrator. This means that only server wide configurations can be found here. ConfigCascade properities should not be added here.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
@@ -256,30 +256,6 @@ public enum SSLProperties {
         return false;
     }
 
-    public static final String USER_BASED_SECURE_CONFIGURATION = "com.openexchange.net.ssl.user.configuration.enabled";
-
-    private static volatile Boolean userConfiguration;
-
-    public static boolean isUserAllowedToConfigure() {
-        Boolean tmp = userConfiguration;
-        if (null == tmp) {
-            synchronized (SSLProperties.class) {
-                tmp = userConfiguration;
-                if (null == tmp) {
-                    ConfigurationService service = Services.optService(ConfigurationService.class);
-                    if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.net.ssl.user.configuration.enabled'.");
-                        return false;
-                    }
-                    boolean prop = service.getBoolProperty(USER_BASED_SECURE_CONFIGURATION, false);
-                    tmp = new Boolean(prop);
-                    userConfiguration = tmp;
-                }
-            }
-        }
-        return tmp.booleanValue();
-    }
-
     //---------- End of reloadable properties -------------//
 
     public static void reload() {
@@ -288,7 +264,6 @@ public enum SSLProperties {
         ciphers = null;
         whitelistedHosts = null;
         verifyHostname = null;
-        userConfiguration = null;
 
         reinit();
     }

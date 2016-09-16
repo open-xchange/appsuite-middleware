@@ -50,6 +50,8 @@
 package com.openexchange.net.ssl;
 
 import javax.net.ssl.SSLSocketFactory;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.util.Tools;
 import com.openexchange.log.LogProperties;
 import com.openexchange.net.ssl.config.SSLProperties;
@@ -66,6 +68,8 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  */
 public class SSLSocketFactoryProvider {
 
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SSLSocketFactoryProvider.class);
+
     /**
      * Returns the configured {@link SSLSocketFactory}. This method is invoked by by reflection.
      * <p>
@@ -77,17 +81,24 @@ public class SSLSocketFactoryProvider {
         if (SSLProperties.trustLevel().equals(TrustLevel.TRUST_ALL)) {
             return TrustAllSSLSocketFactory.getDefault();
         }
-        if (SSLProperties.isUserAllowedToConfigure()) {
+        try {
             int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
             int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
-            if ((user == -1) || (context == -1)) {
-                return TrustedSSLSocketFactory.getDefault();
+
+            Boolean isUserAllowedToConfigureTrustlevel = Services.getService(ConfigViewFactory.class).getView(user, context).get("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class);
+            if (isUserAllowedToConfigureTrustlevel.booleanValue()) {
+                if ((user == -1) || (context == -1)) {
+                    return TrustedSSLSocketFactory.getDefault();
+                }
+                UserTrustConfiguration userTrustConfiguration = Services.getService(UserTrustConfiguration.class);
+                if ((userTrustConfiguration != null) && (userTrustConfiguration.isTrustAll(user, context))) {
+                    return TrustAllSSLSocketFactory.getDefault();
+                }
             }
-            UserTrustConfiguration userTrustConfiguration = Services.getService(UserTrustConfiguration.class);
-            if ((userTrustConfiguration != null) && (userTrustConfiguration.isTrustAll(user, context))) {
-                return TrustAllSSLSocketFactory.getDefault();
-            }
+        } catch (OXException e) {
+            LOG.error("Unable to retrieve SSL configuration made by the user. Fall back to use truststore associated settings.", e);
         }
+
         return TrustedSSLSocketFactory.getDefault();
     }
 }
