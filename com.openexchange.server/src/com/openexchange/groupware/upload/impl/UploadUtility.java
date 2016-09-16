@@ -88,6 +88,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.servlet.http.Tools;
@@ -273,10 +274,11 @@ public final class UploadUtility {
      * @param req The request whose upload shall be processed
      * @param maxFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
      * @param maxOverallSize The maximum allowed size of a complete request or <code>-1</code>
+     * @param session The associated session or <code>null</code>
      * @return The processed instance of {@link UploadEvent}
      * @throws OXException Id processing the upload fails
      */
-    public static UploadEvent processUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize) throws OXException {
+    public static UploadEvent processUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize, Session session) throws OXException {
         if (!Tools.isMultipartContent(req)) {
             // No multipart content
             throw UploadException.UploadCode.NO_MULTIPART_CONTENT.create();
@@ -369,7 +371,7 @@ public final class UploadUtility {
                     String name = item.getName();
                     if (!isEmpty(name)) {
                         try {
-                            UploadFile uf = processUploadedFile(item, uploadDir, isEmpty(fileName) ? name : fileName, current, maxFileSize, maxOverallSize, uuid, listeners);
+                            UploadFile uf = processUploadedFile(item, uploadDir, isEmpty(fileName) ? name : fileName, current, maxFileSize, maxOverallSize, uuid, session, listeners);
                             current += uf.getSize();
                             uploadEvent.addUploadFile(uf);
                         } catch (OXException e) {
@@ -380,15 +382,15 @@ public final class UploadUtility {
                 }
             }
             if (maxOverallSize > 0 && current > maxOverallSize) {
-                throwException(uuid, UploadSizeExceededException.create(current, maxOverallSize, true), listeners);
+                throwException(uuid, UploadSizeExceededException.create(current, maxOverallSize, true), session, listeners);
             }
             if (uploadEvent.getAffiliationId() < 0) {
-                throwException(uuid, UploadException.UploadCode.MISSING_AFFILIATION_ID.create(action), listeners);
+                throwException(uuid, UploadException.UploadCode.MISSING_AFFILIATION_ID.create(action), session, listeners);
             }
 
             // Signal success
             for (UploadFileListener listener : listeners) {
-                listener.onUploadSuceeded(uuid, uploadEvent);
+                listener.onUploadSuceeded(uuid, uploadEvent, session);
             }
 
             // Everything went well
@@ -396,9 +398,9 @@ public final class UploadUtility {
 
             return uploadEvent;
         } catch (FileSizeLimitExceededException e) {
-            throwException(uuid, UploadFileSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true), listeners);
+            throwException(uuid, UploadFileSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true), session, listeners);
         } catch (SizeLimitExceededException e) {
-            throwException(uuid, UploadSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true), listeners);
+            throwException(uuid, UploadSizeExceededException.create(e.getActualSize(), e.getPermittedSize(), true), session, listeners);
         } catch (FileUploadException e) {
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {
@@ -407,33 +409,33 @@ public final class UploadUtility {
                     // E.g. Max. byte count of 10240 exceeded.
                     int pos = message.indexOf(" exceeded", 19 + 1);
                     String limit = message.substring(19, pos);
-                    throwException(uuid, UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, getSize(Long.parseLong(limit), 2, false, true)), listeners);
+                    throwException(uuid, UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED_UNKNOWN.create(cause, getSize(Long.parseLong(limit), 2, false, true)), session, listeners);
                 }
             } else if (cause instanceof EOFException) {
                 // Stream closed/ended unexpectedly
-                throwException(uuid, UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage()), listeners);
+                throwException(uuid, UploadException.UploadCode.UNEXPECTED_EOF.create(cause, cause.getMessage()), session, listeners);
             }
-            throwException(uuid, UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage())), listeners);
+            throwException(uuid, UploadException.UploadCode.UPLOAD_FAILED.create(e, null == cause ? e.getMessage() : (null == cause.getMessage() ? e.getMessage() : cause.getMessage())), session, listeners);
         } catch (FileUploadIOException e) {
             // Might wrap a size-limit-exceeded error
             Throwable cause = e.getCause();
             if (cause instanceof FileSizeLimitExceededException) {
                 FileSizeLimitExceededException exc = (FileSizeLimitExceededException) cause;
-                throwException(uuid, UploadFileSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true), listeners);
+                throwException(uuid, UploadFileSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true), session, listeners);
             }
             if (cause instanceof SizeLimitExceededException) {
                 SizeLimitExceededException exc = (SizeLimitExceededException) cause;
-                throwException(uuid, UploadSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true), listeners);
+                throwException(uuid, UploadSizeExceededException.create(exc.getActualSize(), exc.getPermittedSize(), true), session, listeners);
             }
-            throwException(uuid, UploadException.UploadCode.UPLOAD_FAILED.create(e, action), listeners);
+            throwException(uuid, UploadException.UploadCode.UPLOAD_FAILED.create(e, action), session, listeners);
         } catch (IOException e) {
             Throwable cause = e.getCause();
             if (cause instanceof java.util.concurrent.TimeoutException) {
-                throwException(uuid, UploadException.UploadCode.UNEXPECTED_TIMEOUT.create(e, new Object[0]), listeners);
+                throwException(uuid, UploadException.UploadCode.UNEXPECTED_TIMEOUT.create(e, new Object[0]), session, listeners);
             }
-            throwException(uuid, UploadException.UploadCode.UPLOAD_FAILED.create(e, action), listeners);
+            throwException(uuid, UploadException.UploadCode.UPLOAD_FAILED.create(e, action), session, listeners);
         } catch (RuntimeException e) {
-            throwException(uuid, UploadException.UploadCode.UPLOAD_FAILED.create(e, action), listeners);
+            throwException(uuid, UploadException.UploadCode.UPLOAD_FAILED.create(e, action), session, listeners);
         } finally {
             if (error) {
                 uploadEvent.cleanUp();
@@ -443,16 +445,16 @@ public final class UploadUtility {
         return null; // To keep compiler happy
     }
 
-    private static void throwException(String uuid, OXException exception, List<UploadFileListener> listeners) throws OXException {
+    private static void throwException(String uuid, OXException exception, Session session, List<UploadFileListener> listeners) throws OXException {
         for (UploadFileListener listener : listeners) {
-            listener.onUploadFailed(uuid, exception);
+            listener.onUploadFailed(uuid, exception, session);
         }
         throw exception;
     }
 
     private static final String PREFIX = "openexchange-upload-" + com.openexchange.exception.OXException.getServerId() + "-";
 
-    private static UploadFile processUploadedFile(FileItemStream item, String uploadDir, String fileName, long current, long maxFileSize, long maxOverallSize, String uuid, List<UploadFileListener> listeners) throws IOException, FileUploadException, OXException {
+    private static UploadFile processUploadedFile(FileItemStream item, String uploadDir, String fileName, long current, long maxFileSize, long maxOverallSize, String uuid, Session session, List<UploadFileListener> listeners) throws IOException, FileUploadException, OXException {
         UploadFile retval = new UploadFileImpl();
         retval.setFieldName(item.getFieldName());
         retval.setFileName(fileName);
@@ -483,7 +485,7 @@ public final class UploadUtility {
 
         // Signal basic info prior to processing
         for (UploadFileListener listener : listeners) {
-            listener.onBeforeUploadProcessed(uuid, fileName, retval.getFieldName(), retval.getContentType());
+            listener.onBeforeUploadProcessed(uuid, fileName, retval.getFieldName(), retval.getContentType(), session);
         }
 
         // Track size
@@ -547,7 +549,7 @@ public final class UploadUtility {
 
             // Signal success after processing
             for (UploadFileListener listener : listeners) {
-                listener.onAfterUploadProcessed(uuid, retval);
+                listener.onAfterUploadProcessed(uuid, retval, session);
             }
 
             error = false;
