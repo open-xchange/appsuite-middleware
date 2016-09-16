@@ -40,6 +40,9 @@
         container.before(searchBar);
       }
       return settings.searchInput.on("keyup.sieve change.sieve", function() {
+         if(event.keyCode != 13){
+          return;
+         }
         var items, query;
         query = compact($(this).val().toLowerCase().split(/\s+/));
         items = container.find(settings.itemSelector);

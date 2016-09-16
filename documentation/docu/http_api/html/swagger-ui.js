@@ -315,7 +315,7 @@ templates['operation'] = template({"1":function(container,depth0,helpers,partial
     + ((stack1 = (helpers.escape || (depth0 && depth0.escape) || alias2).call(alias1,(depth0 != null ? depth0.parentId : depth0),{"name":"escape","hash":{},"data":data})) != null ? stack1 : "")
     + "_"
     + ((stack1 = (helpers.escape || (depth0 && depth0.escape) || alias2).call(alias1,(depth0 != null ? depth0.nickname : depth0),{"name":"escape","hash":{},"data":data})) != null ? stack1 : "")
-    + "'>\n      <div class='heading'>\n        <h3 id='"
+    + "'>\n      <div class='heading toggleOperation2'>\n        <h3 id='"
     + alias3((helpers.sanitize || (depth0 && depth0.sanitize) || alias2).call(alias1,(depth0 != null ? depth0.encodedParentId : depth0),{"name":"sanitize","hash":{},"data":data}))
     + "/"
     + alias3((helpers.sanitize || (depth0 && depth0.sanitize) || alias2).call(alias1,(depth0 != null ? depth0.nickname : depth0),{"name":"sanitize","hash":{},"data":data}))
@@ -22535,7 +22535,7 @@ SwaggerUi.Views.OperationView = Backbone.View.extend({
     'submit .sandbox'         : 'submitOperation',
     'click .submit'           : 'submitOperation',
     'click .response_hider'   : 'hideResponse',
-    'click .toggleOperation'  : 'toggleOperationContent',
+    'click .toggleOperation2' : 'toggleOperationContent',
     'mouseenter .api-ic'      : 'mouseEnter',
     'dblclick .curl'          : 'selectText',
     'change [name=responseContentType]' : 'showSnippet'
@@ -24670,6 +24670,7 @@ SwaggerUi.Views.ResourceView = Backbone.View.extend({
     }
 
     $('.toggleEndpointList', this.el).click(this.callDocs.bind(this, 'toggleEndpointListForResource'));
+    $('.toggleEndpointList1', this.el).click(this.callDocs.bind(this, 'toggleEndpointListForResource'));
     $('.collapseResource', this.el).click(this.callDocs.bind(this, 'collapseOperationsForResource'));
     $('.expandResource', this.el).click(this.callDocs.bind(this, 'expandOperationsForResource'));
 

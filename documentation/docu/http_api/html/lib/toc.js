@@ -74,6 +74,28 @@ function generateTOC(toc) {
 
 }
 
+
+function generateChapterTOC(chapter) {
+	
+	var toc = chapter.parentNode.insertBefore(document.createElement("div"), chapter.nextSibling);
+	var mainToc = toc.appendChild(document.createElement("ol"));
+	mainToc.className = 'tocChapterList';
+	var id=chapter.id;
+	
+	var headers = $('#'+id).nextUntil('h1').filter('h2');
+
+	for (var i = 0; i < headers.length; ++i) {
+		
+		var tocName = headers[i].innerHTML;
+		var tocID = headers[i].id;
+		var node = document.createElement("li");
+		node.className = 'tocItem';
+		var aTag = createLink("#" + tocID, tocName);
+		aTag.className = 'tocATag';
+		mainToc.appendChild(node).appendChild(aTag);	
+	}
+}
+
 function addToggleAllButton(){
 	var parent = document.getElementById('searchDiv');
 	/* var button = "<a href=\"#\" onclick=\"toggleAll();\">Show all</a>"; */
@@ -153,3 +175,32 @@ $('a').on('click', function (e) {
 });
 
 }
+
+$(document).ready(function(){
+
+	// Der Button wird mit JavaScript erzeugt und vor dem Ende des body eingebunden.
+	var back_to_top_button = ['<a href="#top" class="back-to-top">&uArr;</a>'].join("");
+	$("body").append(back_to_top_button)
+
+	// Der Button wird ausgeblendet
+	$(".back-to-top").hide();
+
+	// Funktion für das Scroll-Verhalten
+	$(function () {
+		$(window).scroll(function () {
+			if ($(this).scrollTop() > 100) { // Wenn 100 Pixel gescrolled wurde
+				$('.back-to-top').fadeIn();
+			} else {
+				$('.back-to-top').fadeOut();
+			}
+		});
+
+		$('.back-to-top').click(function () { // Klick auf den Button
+			$('body,html').animate({
+				scrollTop: 0
+			}, 800);
+			return false;
+		});
+	});
+
+});

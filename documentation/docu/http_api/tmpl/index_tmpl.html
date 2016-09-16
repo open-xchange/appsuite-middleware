@@ -689,15 +689,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "array",
-          "description": "Array of folders. Each folder is described as an array itself.",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "description": "Array with elements that contain the information of a folder specified by the corresponding\nidentifiers in the `columns` parameter. Therefore, the element types can be distinguished.\n"
-            }
-          }
+          "type": "object",
+          "description": "Array of folders. Each folder is described as an array itself."
         },
         "error": {
           "type": "string",
@@ -748,12 +741,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "array",
-          "description": "Array of folders.",
-          "items": {
-            "type": "object",
-            "description": "An element can be an array itself for new and modified folders containing the information of a folder specified by the corresponding\nidentifiers in the `columns` parameter. Or the element can be a plain string representing the object ID of a deleted folder.\nTherefore, the element types can be distinguished.\n"
-          }
+          "type": "object",
+          "description": "Array of folders."
         },
         "error": {
           "type": "string",
@@ -1226,37 +1215,16 @@
       "type": "object",
       "properties": {
         "private": {
-          "type": "array",
-          "description": "Array of private folders. Each folder is described as an array itself.",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "description": "Array with elements that contain the information of a folder specified by the corresponding\nidentifiers in the `columns` parameter. The element types can be distinguished.\n"
-            }
-          }
+          "type": "object",
+          "description": "Array of private folders. Each folder is described as an array itself."
         },
         "public": {
-          "type": "array",
-          "description": "Array of public folders. Each folder is described as an array itself.",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "description": "Array with elements that contain the information of a folder specified by the corresponding\nidentifiers in the `columns` parameter. The element types can be distinguished.\n"
-            }
-          }
+          "type": "object",
+          "description": "Array of public folders. Each folder is described as an array itself."
         },
         "shared": {
-          "type": "array",
-          "description": "Array of shared folders. Each folder is described as an array itself.",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "description": "Array with elements that contain the information of a folder specified by the corresponding\nidentifiers in the `columns` parameter. The element types can be distinguished.\n"
-            }
-          }
+          "type": "object",
+          "description": "Array of shared folders. Each folder is described as an array itself."
         }
       }
     },
@@ -1333,11 +1301,8 @@
       "type": "object",
       "properties": {
         "warnings": {
-          "type": "array",
-          "description": "Can contain transport warnings that occured during sending the notifications.",
-          "items": {
-            "type": "object"
-          }
+          "type": "object",
+          "description": "An array of transport warnings that occured during sending the notifications."
         }
       }
     },
@@ -1396,15 +1361,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "array",
-          "description": "Array of tasks. Each task is described as an array itself.",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "description": "Array with elements that contain the information of a task specified by the corresponding\nidentifiers in the `columns` parameter. Therefore, the element types can be distinguished.\n"
-            }
-          }
+          "type": "object",
+          "description": "Array of tasks. Each task is described as an array itself."
         },
         "error": {
           "type": "string",
@@ -1472,12 +1430,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "array",
-          "description": "Array of tasks.",
-          "items": {
-            "type": "object",
-            "description": "An element can be an array itself for new and modified tasks containing the information of a task specified by the corresponding\nidentifiers in the `columns` parameter. Or the element can be an integer representing the object ID of a deleted task.\nTherefore, the element types can be distinguished.\n"
-          }
+          "type": "object",
+          "description": "Array of tasks."
         },
         "error": {
           "type": "string",
@@ -2070,15 +2024,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "array",
-          "description": "Array of contacts. Each contact is described as an array itself.",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "description": "Array with elements that contain the information of a contact specified by the corresponding\nidentifiers in the `columns` parameter. The element types can be distinguished.\n"
-            }
-          }
+          "type": "object",
+          "description": "Array of contacts. Each contact is described as an array itself."
         },
         "error": {
           "type": "string",
@@ -2146,12 +2093,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "array",
-          "description": "Array of contacts.",
-          "items": {
-            "type": "object",
-            "description": "An element can be an array itself for new and modified contacts containing the information of a contact specified by the corresponding\nidentifiers in the `columns` parameter. Or the element can be an integer representing the object ID of a deleted contact.\nTherefore, the element types can be distinguished.\n"
-          }
+          "type": "object",
+          "description": "Array of contacts."
         },
         "error": {
           "type": "string",
@@ -2953,15 +2896,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "array",
-          "description": "Array of appointments. Each appointment is described as an array itself.",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "description": "Array with elements that contain the information of an appointment specified by the corresponding\nidentifiers in the `columns` parameter. Therefore, the element types can be distinguished.\n"
-            }
-          }
+          "type": "object",
+          "description": "Array of appointments. Each appointment is described as an array itself."
         },
         "error": {
           "type": "string",
@@ -3050,12 +2986,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "array",
-          "description": "Array of appointments.",
-          "items": {
-            "type": "object",
-            "description": "An element can be an array itself for new and modified appointments containing the information of an appointment specified by the corresponding\nidentifiers in the `columns` parameter. Or the element can be an integer representing the object ID of a deleted appointment.\nTherefore, the element types can be distinguished.\n"
-          }
+          "type": "object",
+          "description": "Array of appointments."
         },
         "error": {
           "type": "string",
@@ -4060,15 +3992,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "array",
-          "description": "Array of mails. Each mail is described as an array itself.",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "description": "Array with elements that contain the information of a mail specified by the corresponding\nidentifiers in the `columns` parameter. Therefore, the element types can be distinguished.\n"
-            }
-          }
+          "type": "object",
+          "description": "Array of mails. Each mail is described as an array itself."
         },
         "error": {
           "type": "string",
@@ -4178,7 +4103,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "The personal name and email adress of the from address"
             }
           }
         },
@@ -4188,7 +4114,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "The personal name and email adress of the to address"
             }
           }
         },
@@ -4198,7 +4125,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "The personal name and email adress of the cc address"
             }
           }
         },
@@ -4208,7 +4136,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "The personal name and email adress of the bcc address"
             }
           }
         },
@@ -4363,7 +4292,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "The personal name and email adress of the from address"
             }
           }
         },
@@ -4373,7 +4303,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "The personal name and email adress of the to address"
             }
           }
         },
@@ -4383,7 +4314,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "The personal name and email adress of the cc address"
             }
           }
         },
@@ -4393,7 +4325,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "The personal name and email adress of the bcc address"
             }
           }
         },
@@ -4743,10 +4676,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "array",
-          "items": {
-            "type": "object"
-          }
+          "type": "object",
+          "description": "An empty json array"
         },
         "error": {
           "type": "string",
@@ -5002,7 +4933,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "The personal name and email adress of the from address"
             }
           }
         },
@@ -5012,7 +4944,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "The personal name and email adress of the to address"
             }
           }
         },
@@ -5022,7 +4955,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "The personal name and email adress of the cc address"
             }
           }
         },
@@ -5032,7 +4966,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "The personal name and email adress of the bcc address"
             }
           }
         },
@@ -5236,7 +5171,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "The personal name and email adress of the from address"
             }
           }
         },
@@ -5246,7 +5182,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "The personal name and email adress of the to address"
             }
           }
         },
@@ -5256,7 +5193,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "The personal name and email adress of the cc address"
             }
           }
         },
@@ -5266,7 +5204,8 @@
           "items": {
             "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "description": "The personal name and email adress of the bcc address"
             }
           }
         },
@@ -6494,15 +6433,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "array",
-          "description": "Array of infoitems. Each infoitem is described as an array itself.",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "description": "Array with elements that contain the information of an infoitem specified by the corresponding\nidentifiers in the `columns` parameter. Therefore, the element types can be distinguished.\n"
-            }
-          }
+          "type": "object",
+          "description": "Array of infoitems. Each infoitem is described as an array itself."
         },
         "error": {
           "type": "string",
@@ -6933,7 +6865,8 @@
           "type": "array",
           "description": "Array of infoitem identifiers that could not be moved (due to a conflict).",
           "items": {
-            "type": "object"
+            "type": "string",
+            "description": "The infoitem identifier"
           }
         },
         "error": {
@@ -7199,15 +7132,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "array",
-          "description": "Array of attachments. Each attachment is described as an array itself.",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "description": "Array with elements that contain the information of an attachment specified by the corresponding\nidentifiers in the `columns` parameter. Therefore, the element types can be distinguished.\n"
-            }
-          }
+          "type": "object",
+          "description": "Array of attachments. Each attachment is described as an array itself."
         },
         "error": {
           "type": "string",
@@ -7347,12 +7273,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "array",
-          "description": "Array of attachments.",
-          "items": {
-            "type": "object",
-            "description": "An element can be an array itself for new attachments containing the information of an attachment specified by the corresponding\nidentifiers in the `columns` parameter. Or the element can be an integer representing the object ID of a deleted attachment.\nTherefore, the element types can be distinguished.\n"
-          }
+          "type": "object",
+          "description": "Array of attachments."
         },
         "error": {
           "type": "string",
@@ -7965,12 +7887,12 @@
         }
       }
     },
-    "SingleResponse": {
+    "MultipleResponse": {
       "type": "object",
       "properties": {
         "data": {
           "type": "object",
-          "description": "The data of a request that was processed with the multiple module."
+          "description": "An array of the data of the requests that was processed with the multiple module."
         },
         "error": {
           "type": "string",
@@ -8822,15 +8744,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "array",
-          "description": "Array of mail accounts. Each account is described as an array itself.",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "description": "Array with elements that contain the information of an account specified by the corresponding\nidentifiers in the `columns` parameter. The element types can be distinguished.\n"
-            }
-          }
+          "type": "object",
+          "description": "Array of mail accounts. Each account is described as an array itself."
         },
         "error": {
           "type": "string",
@@ -9336,15 +9251,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "array",
-          "description": "Array of user. Each user is described as an array itself.",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "description": "Array with elements that contain the information of a user specified by the corresponding\nidentifiers in the `columns` parameter. The element types can be distinguished.\n"
-            }
-          }
+          "type": "object",
+          "description": "Array of user. Each user is described as an array itself."
         },
         "error": {
           "type": "string",
@@ -10984,11 +10892,8 @@
           "description": "Indicates whether the field is mandatory."
         },
         "options": {
-          "type": "array",
-          "description": "A list of available options in the field.",
-          "items": {
-            "type": "object"
-          }
+          "type": "object",
+          "description": "A list of available options in the field."
         },
         "defaultValue": {
           "type": "object",
@@ -11312,15 +11217,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "array",
-          "description": "Array of messages. Each message is described as an array itself.",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "description": "Array with elements that contain the information of a message specified by the corresponding\ncolumn names in the `columns` parameter. The element types can be distinguished.\n"
-            }
-          }
+          "type": "object",
+          "description": "Array of messages. Each message is described as an array itself."
         },
         "error": {
           "type": "string",
@@ -11836,15 +11734,8 @@
       "type": "object",
       "properties": {
         "data": {
-          "type": "array",
-          "description": "Array of halo data objects. Each object is described as an array itself.",
-          "items": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "description": "Array with elements that contain the information of a data object specified by the corresponding\nidentifiers in the `columns` parameter. The element types can be distinguished.\n"
-            }
-          }
+          "type": "object",
+          "description": "Array of halo data objects specified by the corresponding identifiers in the `columns` parameter. The element types can be distinguished."
         },
         "error": {
           "type": "string",
@@ -12402,11 +12293,8 @@
           "description": "The page size."
         },
         "results": {
-          "type": "array",
-          "description": "An array of search results. Each result is described by a JSON object containing the fields specified in the `columns` parameter.",
-          "items": {
-            "type": "object"
-          }
+          "type": "object",
+          "description": "An array of search results. Each result is described by a JSON object containing the fields specified in the `columns` parameter."
         }
       }
     },
@@ -12585,11 +12473,8 @@
       "type": "object",
       "properties": {
         "warnings": {
-          "type": "array",
-          "description": "Can contain possible warnings during sending of the notifications.",
-          "items": {
-            "type": "object"
-          }
+          "type": "object",
+          "description": "An array of possible warnings during sending of the notifications."
         },
         "error": {
           "type": "string",
@@ -12669,11 +12554,8 @@
           "description": "Indicates whether the field is mandatory."
         },
         "options": {
-          "type": "array",
-          "description": "A list of available options in the field.",
-          "items": {
-            "type": "object"
-          }
+          "type": "object",
+          "description": "An object describing the available options in the field."
         },
         "defaultValue": {
           "type": "object",
@@ -14532,7 +14414,7 @@
         ],
         "responses": {
           "200": {
-            "description": "A JSON object containing three fields: \"private\", \"public, and \"shared\". Each field is a\nJSON array with data for all folders. Each folder is itself described by an array. In case\nof errors the responsible fields in the response are filled (see [Error handling](#error-handling)).\n",
+            "description": "A JSON object containing three fields: \"private\", \"public, and \"shared\". Each field is a JSON array with data for all folders. \nEach folder is itself described by an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. \nIn case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).\n",
             "schema": {
               "$ref": "#/definitions/FoldersVisibilityResponse"
             }
@@ -20023,10 +19905,7 @@
           "200": {
             "description": "A JSON array containing the response data of the processed requests where response[0] corresponds to request[0], response[1] to request[1], and so on.",
             "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/SingleResponse"
-              }
+              "$ref": "#/definitions/MultipleResponse"
             }
           },
           "400": {
@@ -24098,8 +23977,10 @@
             itemSelector: "li",
             searchTemplate: searchTemplate
           });
-          $(".filter input").on("keypress", function() {
-           $("#resources > li > ul.endpoints").show();
+          $(".filter input").keyup(function() {
+             if(event.keyCode == 13){
+              $("#resources > li > ul.endpoints").show();
+             }
           });
 
         log("creating toc");        
@@ -24130,31 +24011,38 @@
   <script type="text/javascript">
      $(function () {
         generateTOC(document.getElementById('toc'));
+        generateChapterTOC(document.getElementById('column-identifiers'));
      });
   </script>
 </head>
 
 <body>
-<div class="oxNormalDiv">
-<h1>OX HTTP API</h1>
 
-This pages describes the HTTP API of the OX Middleware.
+<div id=flexDiv>
+  <div id=tocDiv>
+    <div id="toc" class="toc"></div>
+  </div>
+
+  <div id=flexContentDiv>
+
+    <div class="oxNormalDiv">
+      <h1>OX HTTP API</h1>
+
+      This pages describes the HTTP API of the OX Middleware.
+    </div>
+    <div id="before_insert_div" class="oxNormalDiv">
+    <!--OX_MARKDOWN_INTRO-->
+    </div>
+
+    <div class="swagger-section">
+      <div id="message-bar" class="swagger-ui-wrap" data-sw-translate>&nbsp;</div>
+      <div id="swagger-ui-container" class="swagger-ui-wrap"></div>
+    </div>
+
+    <div id="after_insert_div" class="oxNormalDiv">
+    <!--OX_MARKDOWN_APPENDIX-->
+    </div>
+  </div>
 </div>
-
-<div id="toc" class="toc"></div>
-
-<div id="before_insert_div" class="oxNormalDiv">
-<!--OX_MARKDOWN_INTRO-->
-</div>
-
-<div class="swagger-section">
-  <div id="message-bar" class="swagger-ui-wrap" data-sw-translate>&nbsp;</div>
-  <div id="swagger-ui-container" class="swagger-ui-wrap"></div>
-</div>
-
-<div id="after_insert_div" class="oxNormalDiv">
-<!--OX_MARKDOWN_APPENDIX-->
-</div>
-
 </body>
 </html>

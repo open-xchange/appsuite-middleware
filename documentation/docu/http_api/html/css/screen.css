@@ -1,27 +1,122 @@
 /* Original style from softwaremaniacs.org (c) Ivan Sagalaev <Maniac@SoftwareManiacs.Org> */
+
+body {
+    counter-reset: h2counter;
+}
+
+div.oxNormalDiv h2:before {
+    content: counter(h2counter) ".\0000a0\0000a0";
+    counter-increment: h2counter; 
+}
+
+h3:before {
+    content: counter(h2counter) "." counter(h3counter) "\0000a0\0000a0";
+    counter-increment: h3counter;
+}
+
+div.oxNormalDiv h4:before {
+    content: counter(h2counter) "." counter(h3counter) "." counter(h4counter) "\0000a0\0000a0";
+    counter-increment: h4counter;
+}
+
+div.heading h3:before {
+  content: none;
+}
+
+#flexDiv {
+  display:flex;
+}
+
+#tocDiv {
+  min-width: 250px;
+}
+
+#flexContentDiv {
+  flex-grow: 1;
+}
+
+.back-to-top {
+ background:#275885;
+ text-decoration: none;
+ color: white;
+ position: fixed;
+ bottom:20px;
+ right:20px;
+ padding:1em;
+}
+
+.back-to-top { 
+  text-align:center; 
+  background: rgba(0,0,0,0.4); 
+  text-decoration: none; 
+  position:fixed; 
+  z-index: 999; 
+  bottom: 125px; 
+  right: 0px; 
+  -webkit-border-top-left-radius: 5px; 
+  -webkit-border-bottom-left-radius: 5px; 
+  -moz-border-radius-topleft: 5px; 
+  -moz-border-radius-bottomleft: 5px; 
+  border-top-left-radius: 5px; 
+  border-bottom-left-radius: 5px; 
+  display: none; 
+  cursor: pointer; 
+  padding: 5px; 
+  color: #fff; 
+  font-size: 45px;
+  font-family: 'ETmodules'; }
+
+  /**
+  .back-to-top { 
+  font-family: 'ETmodules'; 
+  content: attr(data-icon); 
+  speak: none; 
+  font-weight: normal; 
+  font-variant: normal; 
+  text-transform: none; 
+  line-height: 1; 
+  -webkit-font-smoothing: antialiased; 
+  
+  display: inline-block; 
+  -moz-box-sizing: border-box; 
+  -webkit-box-sizing: border-box; 
+  box-sizing: border-box; }
+  **/
+
 ul.tocList {
+  position: fixed;
+  left: 0em;
+  top: 0em;
   margin: auto;
   margin-left: auto;
   margin-right: auto;
   padding: 20px;
-  width: 50%;
-  min-width: 760px;
-  max-width: 960px;
+  max-width: 250px;
   list-style-type: circle;
   font-family: "Droid Sans", sans-serif;
   list-style-position: inside;
 }
 
 ul.tocList2 {
-  margin: auto;
-  margin-left: auto;
-  margin-right: auto;
-  width: 50%;
-  min-width: 760px;
-  max-width: 960px;
+  margin-left: 20px;
   list-style-type: circle;
   font-family: "Droid Sans", sans-serif;
   list-style-position: inside;
+}
+
+ol.tocChapterList {
+  margin: auto;
+  margin-left: 10px;
+  margin-bottom: 15px;
+  width: 50%;
+  min-width: 760px;
+  max-width: 960px;
+  font-family: "Droid Sans", sans-serif;
+  list-style-position: inside;
+}
+
+ol.tocChapterList li{
+  left-padding:0.5em;
 }
 
 li.hideItem {
@@ -38,6 +133,7 @@ h1 {
   padding: 15px 0 10px 0;
   font-family: "Droid Sans", sans-serif;
   font-weight: bold;
+  counter-reset: h2counter;
 }
 
 h2 {
@@ -47,6 +143,7 @@ h2 {
   padding: 10px 0 10px 0;
   font-family: "Droid Sans", sans-serif;
   font-weight: bold;
+  counter-reset: h3counter;
 }
 
 h3 {
@@ -56,6 +153,7 @@ h3 {
   padding: 10px 0 10px 0;
   font-family: "Droid Sans", sans-serif;
   font-weight: bold;
+  counter-reset: h4counter;
 }
 
 h4 {
@@ -68,6 +166,7 @@ h4 {
 
 div.oxNormalDiv {
   margin: auto;
+  margin-left: 100px;
   min-width: 760px;
   max-width: 960px;
   overflow: hidden;
@@ -374,7 +473,7 @@ a.tocPlusTag:hover {
   font-family: "Droid Sans", sans-serif;
   min-width: 760px;
   max-width: 960px;
-  margin-left: auto;
+  margin-left: 100px;
   margin-right: auto;
   /* JSONEditor specific styling */
 }
@@ -869,6 +968,7 @@ a.tocPlusTag:hover {
 .swagger-section .swagger-ui-wrap ul#resources li.resource {
   border-bottom: 1px solid #dddddd;
 }
+.swagger-section .swagger-ui-wrap ul#resources li.resource:hover div.heading h2,
 .swagger-section .swagger-ui-wrap ul#resources li.resource:hover div.heading h2 a,
 .swagger-section .swagger-ui-wrap ul#resources li.resource.active div.heading h2 a {
   color: black;
@@ -942,6 +1042,7 @@ a.tocPlusTag:hover {
 .swagger-section .swagger-ui-wrap ul#resources li.resource div.heading h2 a {
   color: #999999;
 }
+.swagger-section .swagger-ui-wrap ul#resources li.resource div.heading h2:hover,
 .swagger-section .swagger-ui-wrap ul#resources li.resource div.heading h2 a:hover {
   color: black;
 }
