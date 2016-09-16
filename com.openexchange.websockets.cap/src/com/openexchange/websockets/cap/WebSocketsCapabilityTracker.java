@@ -123,17 +123,17 @@ public class WebSocketsCapabilityTracker implements ServiceTrackerCustomizer<Obj
 
         if (service instanceof WebSocketService) {
             webSocketServiceAvailable = true;
-            if (null != capabilityService && null != configViewFactory && !capabilityDeclared) {
+            if (shouldDeclareCapability()) {
                 declareCapability(configViewFactory);
             }
         } else if (service instanceof CapabilityService) {
             capabilityService = (CapabilityService) service;
-            if (webSocketServiceAvailable && null != configViewFactory && !capabilityDeclared) {
+            if (shouldDeclareCapability()) {
                 declareCapability(configViewFactory);
             }
         } else if (service instanceof ConfigViewFactory) {
             configViewFactory = (ConfigViewFactory) service;
-            if (webSocketServiceAvailable && null != capabilityService && !capabilityDeclared) {
+            if (shouldDeclareCapability()) {
                 declareCapability(configViewFactory);
             }
         } else {
@@ -143,6 +143,10 @@ public class WebSocketsCapabilityTracker implements ServiceTrackerCustomizer<Obj
         }
 
         return service;
+    }
+
+    private boolean shouldDeclareCapability() {
+        return !capabilityDeclared && webSocketServiceAvailable && null != configViewFactory && null != capabilityService;
     }
 
     private void declareCapability(final ConfigViewFactory configViewFactory) {
