@@ -719,28 +719,24 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 SessionBoundWebSocket sessionBoundSocket = (SessionBoundWebSocket) socket;
 
                 UserAndContext userAndContext = UserAndContext.newInstance(sessionBoundSocket.getUserId(), sessionBoundSocket.getContextId());
-                ConcurrentMap<ConnectionId, SessionBoundWebSocket> sockets = openSockets.get(userAndContext);
-                if (sockets == null) {
-                    sockets = new ConcurrentHashMap<>(MAX_SIZE, 0.9F, 1);
-                    ConcurrentMap<ConnectionId, SessionBoundWebSocket> existing = openSockets.putIfAbsent(userAndContext, sockets);
+                ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(userAndContext);
+                if (userSockets == null) {
+                    userSockets = new ConcurrentHashMap<>(MAX_SIZE, 0.9F, 1);
+                    ConcurrentMap<ConnectionId, SessionBoundWebSocket> existing = openSockets.putIfAbsent(userAndContext, userSockets);
                     if (existing != null) {
-                        sockets = existing;
+                        userSockets = existing;
                     }
                 }
 
-                synchronized (sockets) {
-                    if (sockets.size() == MAX_SIZE) {
-
+                synchronized (userSockets) {
+                    if (userSockets.size() == MAX_SIZE) {
+                        // Max. number of sockets per user exceeded
+                        throw new HandshakeException("Max. number of Web Sockets (" + MAX_SIZE + ") exceeded for user " + userAndContext.getUserId() + " in context " + userAndContext.getContextId());
                     }
-                }
 
-                if (null != sockets.putIfAbsent(sessionBoundSocket.getConnectionId(), sessionBoundSocket)) {
-                    throw new HandshakeException("Such a Web Socket connection already exists: " + sessionBoundSocket.getConnectionId());
-                }
-
-                // Successfully inserted
-                if (error) {
-
+                    if (null != userSockets.putIfAbsent(sessionBoundSocket.getConnectionId(), sessionBoundSocket)) {
+                        throw new HandshakeException("Such a Web Socket connection already exists: " + sessionBoundSocket.getConnectionId());
+                    }
                 }
 
                 synchronized (sessionBoundSocket) {
