@@ -8,8 +8,11 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.googlecode.ipv6,
  com.openexchange.config,
+ com.openexchange.config.cascade,
  com.openexchange.exception,
  com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.log,
  com.openexchange.net,
  com.openexchange.osgi,
  com.openexchange.tools.ssl,
@@ -34,4 +37,5 @@ Import-Package: com.googlecode.ipv6,
  org.slf4j,
  sun.security.util
 Bundle-ClassPath: .
-Export-Package: com.openexchange.net.ssl
+Export-Package: com.openexchange.net.ssl,
+ com.openexchange.net.ssl.config

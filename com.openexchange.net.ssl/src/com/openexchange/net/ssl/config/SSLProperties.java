@@ -90,7 +90,7 @@ public enum SSLProperties {
 
     static final String CUSTOM_TRUSTSTORE_PASSWORD_KEY = "com.openexchange.net.ssl.custom.truststore.password";
 
-    //---------- Reloadable Properties -------------//
+    //---------- Reloadable Properties - not CC aware -------------//
 
     static final String TRUST_LEVEL_KEY = "com.openexchange.net.ssl.trustlevel";
 
@@ -256,12 +256,39 @@ public enum SSLProperties {
         return false;
     }
 
+    public static final String USER_BASED_SECURE_CONFIGURATION = "com.openexchange.net.ssl.user.configuration.enabled";
+
+    private static volatile Boolean userConfiguration;
+
+    public static boolean isUserAllowedToConfigure() {
+        Boolean tmp = userConfiguration;
+        if (null == tmp) {
+            synchronized (SSLProperties.class) {
+                tmp = userConfiguration;
+                if (null == tmp) {
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
+                    if (null == service) {
+                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.net.ssl.user.configuration.enabled'.");
+                        return false;
+                    }
+                    boolean prop = service.getBoolProperty(USER_BASED_SECURE_CONFIGURATION, false);
+                    tmp = new Boolean(prop);
+                    userConfiguration = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
+    //---------- End of reloadable properties -------------//
+
     public static void reload() {
         trustLevel = null;
         protocols = null;
         ciphers = null;
         whitelistedHosts = null;
         verifyHostname = null;
+        userConfiguration = null;
 
         reinit();
     }

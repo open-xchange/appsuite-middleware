@@ -47,35 +47,47 @@
  *
  */
 
-package com.openexchange.groupware.settings;
+package com.openexchange.net.ssl.user.internal;
 
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.groupware.settings.tree.TrustAllConnections;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
+import com.openexchange.net.ssl.UserTrustConfiguration;
 import com.openexchange.user.UserService;
 
 /**
- * 
- * {@link PreferencesActivator}
+ * The {@link UserTrustConfigurationImpl} provides user specific configuration with regards to SSL
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class PreferencesActivator extends HousekeepingActivator {
+public class UserTrustConfigurationImpl implements UserTrustConfiguration {
 
-    @Override
-    public void startBundle() throws Exception {
-        registerService(PreferencesItemService.class, new TrustAllConnections(getService(UserService.class), getService(ConfigViewFactory.class)), null);
+    private static final String USER_ATTRIBUTE_NAME = "trustAllConnections";
+
+    private UserService userService;
+
+    private ContextService contextService;
+
+    public UserTrustConfigurationImpl(UserService userService, ContextService contextService) {
+        this.userService = userService;
+        this.contextService = contextService;
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ConfigViewFactory.class };
+    public boolean isTrustAll(int user, int context) {
+        if ((user <= 0) || (context <= 0) ) {
+            return false;
+        }
+        try {
+            String userTrustsAll = this.userService.getUserAttribute(USER_ATTRIBUTE_NAME, user, contextService.getContext(context));
+            if (userTrustsAll == null) {
+                return false;
+            }
+            return Boolean.parseBoolean(userTrustsAll);
+        } catch (OXException e) {
+            org.slf4j.LoggerFactory.getLogger(UserTrustConfigurationImpl.class).error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, user, context);
+        }
+        return false;
     }
 
 }

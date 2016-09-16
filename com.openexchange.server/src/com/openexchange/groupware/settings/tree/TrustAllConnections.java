@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.settings.tree;
 
-import java.util.Iterator;
-import java.util.Set;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -60,28 +58,29 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.AbstractUserFuncs;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.net.ssl.config.SSLProperties;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
 /**
  * 
- * {@link TrustedConnections}
+ * {@link TrustAllConnections}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public final class TrustedConnections implements PreferencesItemService {
+public final class TrustAllConnections implements PreferencesItemService {
 
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TrustedConnections.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TrustAllConnections.class);
 
-    private static final String NAME = "trustedConnections";
+    private static final String USER_ATTRIBUTE_NAME = "trustAllConnections";
     private UserService userService;
     private ConfigViewFactory configView;
 
     /**
      * Default constructor.
      */
-    public TrustedConnections(UserService userService, ConfigViewFactory configView) {
+    public TrustAllConnections(UserService userService, ConfigViewFactory configView) {
         super();
         this.userService = userService;
         this.configView = configView;
@@ -92,7 +91,7 @@ public final class TrustedConnections implements PreferencesItemService {
      */
     @Override
     public String[] getPath() {
-        return new String[] { NAME };
+        return new String[] { USER_ATTRIBUTE_NAME };
     }
 
     /**
@@ -104,17 +103,22 @@ public final class TrustedConnections implements PreferencesItemService {
 
             @Override
             public void writeValue(Session session, Context ctx, User user, Setting setting) throws OXException {
-                Boolean activated = configView.getView(user.getId(), ctx.getContextId()).property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class).get();
-                if ((activated == null) || !(activated.booleanValue())) {
-                    LOG.info("Setting {} has been disabled due to configuration ('com.openexchange.net.ssl.user.configuration.enabled'). The request will be ignored.", NAME);
+                if (!SSLProperties.isUserAllowedToConfigure()) {
                     return;
                 }
-
-                userService.setUserAttribute(NAME, setting.getSingleValue().toString(), user.getId(), ctx);
+                Boolean activated = configView.getView(user.getId(), ctx.getContextId()).property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class).get();
+                if ((activated == null) || !(activated.booleanValue())) {
+                    LOG.info("Setting {} has been disabled due to configuration ('com.openexchange.net.ssl.user.configuration.enabled'). The request will be ignored.", USER_ATTRIBUTE_NAME);
+                    return;
+                }
+                userService.setUserAttribute(USER_ATTRIBUTE_NAME, setting.getSingleValue().toString(), user.getId(), ctx);
             }
 
             @Override
             public boolean isWritable() {
+                if (!SSLProperties.isUserAllowedToConfigure()) {
+                    return false;
+                }
                 return true;
             }
 
@@ -123,6 +127,10 @@ public final class TrustedConnections implements PreferencesItemService {
              */
             @Override
             public boolean isAvailable(final UserConfiguration userConfig) {
+                if (!SSLProperties.isUserAllowedToConfigure()) {
+                    return false;
+                }
+
                 try {
                     Boolean activated = configView.getView(userConfig.getUserId(), userConfig.getContext().getContextId()).property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class).get();
                     if (activated != null) {
@@ -137,20 +145,23 @@ public final class TrustedConnections implements PreferencesItemService {
 
             @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
+                if (!SSLProperties.isUserAllowedToConfigure()) {
+                    return;
+                }
+
                 Boolean activated = configView.getView(user.getId(), ctx.getContextId()).property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class).get();
                 if ((activated == null) || !(activated.booleanValue())) {
-                    LOG.debug("Reading {} has been disabled due to configuration ('com.openexchange.net.ssl.user.configuration.enabled'). The request will be ignored.", NAME);
+                    LOG.debug("Reading {} has been disabled due to configuration ('com.openexchange.net.ssl.user.configuration.enabled'). The request will be ignored.", USER_ATTRIBUTE_NAME);
                     return;
                 }
                 
-                Set<String> set = user.getAttributes().get(NAME);
-                if (set == null) {
+                String userTrustsAll = userService.getUserAttribute(USER_ATTRIBUTE_NAME, user.getId(), ctx);
+                
+                if (userTrustsAll == null) {
                     setting.setSingleValue(Boolean.FALSE);
                     return;
                 }
-                Iterator iter = set.iterator();
-                Object next = iter.next();
-                setting.setSingleValue(next);
+                setting.setSingleValue(userTrustsAll);
             }
         };
     }

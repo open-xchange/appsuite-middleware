@@ -1,3 +1,4 @@
+package com.openexchange.net.ssl;
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -47,35 +48,14 @@
  *
  */
 
-package com.openexchange.groupware.settings;
-
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.groupware.settings.tree.TrustAllConnections;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
-
 /**
- * 
- * {@link PreferencesActivator}
+ * {@link UserTrustConfiguration}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class PreferencesActivator extends HousekeepingActivator {
-
-    @Override
-    public void startBundle() throws Exception {
-        registerService(PreferencesItemService.class, new TrustAllConnections(getService(UserService.class), getService(ConfigViewFactory.class)), null);
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ConfigViewFactory.class };
-    }
+public interface UserTrustConfiguration {
+    
+    boolean isTrustAll(int user, int context);
 
 }

@@ -93,7 +93,7 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
     /** Holds a SSLSocketFactory to pass all API-method-calls to */
     private SSLSocketFactory adapteeFactory = null;
 
-    private TrustedSSLSocketFactory() {
+    protected TrustedSSLSocketFactory() {
         init();
 
         try {
@@ -231,8 +231,8 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
     private void setProperties(Socket socket) {
         if (socket instanceof SSLSocket) {
             SSLSocket sslSocket = (SSLSocket) socket;
-            String[] supportedProtocols = sslSocket.getSupportedProtocols();
-            String[] supportedCipherSuites = sslSocket.getSupportedCipherSuites();
+//            String[] supportedProtocols = sslSocket.getSupportedProtocols();
+//            String[] supportedCipherSuites = sslSocket.getSupportedCipherSuites();
             sslSocket.setEnabledProtocols(SSLProperties.supportedProtocols());
             sslSocket.setEnabledCipherSuites(SSLProperties.supportedCipherSuites());
             sslSocket.setUseClientMode(true);

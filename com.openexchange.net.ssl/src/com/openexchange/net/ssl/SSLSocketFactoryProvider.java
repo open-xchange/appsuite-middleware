@@ -50,8 +50,11 @@
 package com.openexchange.net.ssl;
 
 import javax.net.ssl.SSLSocketFactory;
+import com.openexchange.java.util.Tools;
+import com.openexchange.log.LogProperties;
 import com.openexchange.net.ssl.config.SSLProperties;
 import com.openexchange.net.ssl.config.TrustLevel;
+import com.openexchange.net.ssl.osgi.Services;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -73,6 +76,17 @@ public class SSLSocketFactoryProvider {
     public static SSLSocketFactory getDefault() {
         if (SSLProperties.trustLevel().equals(TrustLevel.TRUST_ALL)) {
             return TrustAllSSLSocketFactory.getDefault();
+        }
+        if (SSLProperties.isUserAllowedToConfigure()) {
+            int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
+            int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
+            if ((user == -1) || (context == -1)) {
+                return TrustedSSLSocketFactory.getDefault();
+            }
+            UserTrustConfiguration userTrustConfiguration = Services.getService(UserTrustConfiguration.class);
+            if ((userTrustConfiguration != null) && (userTrustConfiguration.isTrustAll(user, context))) {
+                return TrustAllSSLSocketFactory.getDefault();
+            }
         }
         return TrustedSSLSocketFactory.getDefault();
     }

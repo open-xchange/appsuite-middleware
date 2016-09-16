@@ -29,7 +29,7 @@ gblPathParamConfigNode:
     - currentTime
     - maxUploadIdleTimeout
     - search
-    - trustedConnections
+    - trustAllConnections
     - folder
     - folder/tasks
     - folder/calendar

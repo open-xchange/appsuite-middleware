@@ -47,35 +47,44 @@
  *
  */
 
-package com.openexchange.groupware.settings;
+package com.openexchange.net.ssl.user.osgi;
 
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.groupware.settings.tree.TrustAllConnections;
+import com.openexchange.context.ContextService;
+import com.openexchange.net.ssl.UserTrustConfiguration;
+import com.openexchange.net.ssl.user.internal.UserTrustConfigurationImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
 /**
  * 
- * {@link PreferencesActivator}
+ * {@link UserSSLActivator}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class PreferencesActivator extends HousekeepingActivator {
-
-    @Override
-    public void startBundle() throws Exception {
-        registerService(PreferencesItemService.class, new TrustAllConnections(getService(UserService.class), getService(ConfigViewFactory.class)), null);
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
-    }
+public class UserSSLActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ConfigViewFactory.class };
+        return new Class[] { UserService.class, ContextService.class };
     }
 
+    @Override
+    protected void startBundle() throws Exception {
+        try {
+            org.slf4j.LoggerFactory.getLogger(UserSSLActivator.class).info("starting bundle: \"com.openexchange.net.ssl.user\"");
+            
+            registerService(UserTrustConfiguration.class, new UserTrustConfigurationImpl(getService(UserService.class), getService(ContextService.class)));
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(UserSSLActivator.class).error("", e);
+            throw e;
+        }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        org.slf4j.LoggerFactory.getLogger(UserSSLActivator.class).info("stopping bundle: \"com.openexchange.net.ssl.user\"");
+
+        super.stopBundle();
+    }
 }

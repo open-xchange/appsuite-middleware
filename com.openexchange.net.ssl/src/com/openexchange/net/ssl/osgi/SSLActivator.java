@@ -53,7 +53,9 @@ import javax.net.ssl.HttpsURLConnection;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.UserTrustConfiguration;
 import com.openexchange.net.ssl.apache.DefaultHostnameVerifier;
 import com.openexchange.net.ssl.config.SSLProperties;
 import com.openexchange.net.ssl.internal.SSLPropertiesReloadable;
@@ -70,7 +72,7 @@ public class SSLActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class };
+        return new Class[] { ConfigurationService.class, ConfigViewFactory.class, UserTrustConfiguration.class };
     }
 
     @Override
