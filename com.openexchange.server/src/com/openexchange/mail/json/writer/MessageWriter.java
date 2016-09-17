@@ -213,7 +213,7 @@ public final class MessageWriter {
      * @throws OXException If writing message fails
      */
     public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, boolean exactLength, int maxContentSize, int maxNestedMessageLevels) throws OXException {
-        MessageWriterParams params = MessageWriterParams.builder(accountId, mail)
+        MessageWriterParams params = MessageWriterParams.builder(accountId, mail, session)
             .setDisplayMode(displayMode)
             .setEmbedded(embedded)
             .setExactLength(exactLength)
@@ -221,7 +221,6 @@ public final class MessageWriter {
             .setMaxNestedMessageLevels(maxNestedMessageLevels)
             .setMimeFilter(mimeFilter)
             .setOptTimeZone(optTimeZone)
-            .setSession(session)
             .setSettings(settings)
             .setToken(token)
             .setTokenTimeout(tokenTimeout)

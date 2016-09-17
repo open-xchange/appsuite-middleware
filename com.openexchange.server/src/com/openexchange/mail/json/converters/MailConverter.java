@@ -600,7 +600,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         boolean exactLength = AJAXRequestDataTools.parseBoolParameter(paramContainer.getStringParam("exact_length"));
         JSONObject jMail;
         try {
-            MessageWriterParams params = MessageWriterParams.builder(mail.getAccountId(), mail)
+            MessageWriterParams params = MessageWriterParams.builder(mail.getAccountId(), mail, session)
                                                             .setDisplayMode(displayMode)
                                                             .setEmbedded(embedded)
                                                             .setExactLength(exactLength)
@@ -609,7 +609,6 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                                                             .setMaxNestedMessageLevels(allowNestedMessages ? -1 : 1)
                                                             .setMimeFilter(mimeFilter)
                                                             .setOptTimeZone(timeZone)
-                                                            .setSession(session)
                                                             .setSettings(usmNoSave)
                                                             .setToken(token)
                                                             .setTokenTimeout(ttlMillis)

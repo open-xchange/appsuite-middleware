@@ -69,10 +69,13 @@ public class MessageWriterParams {
     /**
      * Creates a new builder instance
      *
+     * @param accountId The identifier of the mail account
+     * @param mail The mail to render
+     * @param session The associated session
      * @return The new builder instance
      */
-    public static Builder builder(int accountId, MailMessage mail) {
-        return new Builder(accountId, mail);
+    public static Builder builder(int accountId, MailMessage mail, Session session) {
+        return new Builder(accountId, mail, session);
     }
 
     /** The builder for an instance if <code>MessageWriterParams</code> */
@@ -80,9 +83,9 @@ public class MessageWriterParams {
 
         private final int accountId;
         private final MailMessage mail;
+        private final Session session;
         private DisplayMode displayMode;
         private boolean embedded;
-        private Session session;
         private UserSettingMail settings;
         private Collection<OXException> warnings;
         private boolean token;
@@ -94,10 +97,11 @@ public class MessageWriterParams {
         private int maxNestedMessageLevels;
         private boolean includePlainText;
 
-        Builder(int accountId, MailMessage mail) {
+        Builder(int accountId, MailMessage mail, Session session) {
             super();
             this.accountId = accountId;
             this.mail = mail;
+            this.session = session;
         }
 
         /**
@@ -117,16 +121,6 @@ public class MessageWriterParams {
          */
         public Builder setEmbedded(boolean embedded) {
             this.embedded = embedded;
-            return this;
-        }
-
-        /**
-         * Sets the session
-         * @param session The session to set
-         * @return This builder
-         */
-        public Builder setSession(Session session) {
-            this.session = session;
             return this;
         }
 
