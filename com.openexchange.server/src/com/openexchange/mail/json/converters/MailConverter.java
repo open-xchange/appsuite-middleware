@@ -94,6 +94,7 @@ import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.utils.Column;
 import com.openexchange.mail.json.writer.MessageWriter;
+import com.openexchange.mail.json.writer.MessageWriterParams;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
 import com.openexchange.mail.mime.MimeFilter;
 import com.openexchange.mail.mime.MimeMailException;
@@ -542,6 +543,8 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         }
         tmp = paramContainer.getStringParam("embedded");
         final boolean embedded = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
+        tmp = paramContainer.getStringParam("includePlainText");
+        final boolean includePlainText = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
         tmp = paramContainer.getStringParam("ignorable");
         final MimeFilter mimeFilter;
         if (com.openexchange.java.Strings.isEmpty(tmp)) {
@@ -597,7 +600,22 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         boolean exactLength = AJAXRequestDataTools.parseBoolParameter(paramContainer.getStringParam("exact_length"));
         JSONObject jMail;
         try {
-            jMail = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, session, usmNoSave, warnings, token, ttlMillis, mimeFilter, timeZone, exactLength, maxContentSize, allowNestedMessages ? -1 : 1);
+            MessageWriterParams params = MessageWriterParams.builder(mail.getAccountId(), mail)
+                                                            .setDisplayMode(displayMode)
+                                                            .setEmbedded(embedded)
+                                                            .setExactLength(exactLength)
+                                                            .setIncludePlainText(includePlainText)
+                                                            .setMaxContentSize(maxContentSize)
+                                                            .setMaxNestedMessageLevels(allowNestedMessages ? -1 : 1)
+                                                            .setMimeFilter(mimeFilter)
+                                                            .setOptTimeZone(timeZone)
+                                                            .setSession(session)
+                                                            .setSettings(usmNoSave)
+                                                            .setToken(token)
+                                                            .setTokenTimeout(ttlMillis)
+                                                            .setWarnings(warnings)
+                                                            .build();
+            jMail = MessageWriter.writeMailMessage(params);
         } catch (final OXException e) {
             if (MailExceptionCode.MESSAGING_ERROR.equals(e)) {
                 final Throwable cause = e.getCause();

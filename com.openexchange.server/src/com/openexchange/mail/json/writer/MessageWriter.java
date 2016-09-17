@@ -213,22 +213,48 @@ public final class MessageWriter {
      * @throws OXException If writing message fails
      */
     public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, boolean exactLength, int maxContentSize, int maxNestedMessageLevels) throws OXException {
+        MessageWriterParams params = MessageWriterParams.builder(accountId, mail)
+            .setDisplayMode(displayMode)
+            .setEmbedded(embedded)
+            .setExactLength(exactLength)
+            .setMaxContentSize(maxContentSize)
+            .setMaxNestedMessageLevels(maxNestedMessageLevels)
+            .setMimeFilter(mimeFilter)
+            .setOptTimeZone(optTimeZone)
+            .setSession(session)
+            .setSettings(settings)
+            .setToken(token)
+            .setTokenTimeout(tokenTimeout)
+            .setWarnings(warnings)
+            .build();
+        return writeMailMessage(params);
+    }
+
+    /**
+     * Writes whole mail as a JSON object by trimming the mail content to the length provided by maxContentSize parameter
+     *
+     * @param param The parameters to use
+     * @return The written JSON object
+     * @throws OXException If writing message fails
+     */
+    public static JSONObject writeMailMessage(MessageWriterParams params) throws OXException {
+        MailMessage mail = params.getMail();
         String fullName = mail.getFolder();
-        String mailId = mail.getMailId();
+        String mailId = params.getMail().getMailId();
         MailPath mailPath;
         if (fullName != null && mailId != null) {
-            mailPath = new MailPath(getAccountIdFor(accountId, mail), fullName, mailId);
+            mailPath = new MailPath(getAccountIdFor(params.getAccountId(), params.getMail()), fullName, mailId);
         } else if (mail.getMsgref() != null) {
             mailPath = mail.getMsgref();
         } else {
             mailPath = MailPath.NULL;
         }
-        UserSettingMail usm = null == settings ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId()) : settings;
+        UserSettingMail usm = null == params.getSettings() ? UserSettingMailStorage.getInstance().getUserSettingMail(params.getSession().getUserId(), params.getSession().getContextId()) : params.getSettings();
         /*
          * Add log properties
          */
         {
-            LogProperties.putProperty(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.toString(accountId));
+            LogProperties.putProperty(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.toString(params.getAccountId()));
             if (null != fullName) {
                 LogProperties.putProperty(LogProperties.Name.MAIL_FULL_NAME, fullName);
             }
@@ -238,12 +264,15 @@ public final class MessageWriter {
         }
 
         try {
-            JsonMessageHandler handler = new JsonMessageHandler(accountId, mailPath, mail, displayMode, embedded, session, usm, token, tokenTimeout, maxContentSize, maxNestedMessageLevels);
-            handler.setExactLength(exactLength);
-            if (null != optTimeZone) {
-                handler.setTimeZone(optTimeZone);
+            JsonMessageHandler handler = new JsonMessageHandler(params.getAccountId(), mailPath, mail, params.getDisplayMode(), params.isEmbedded(), params.getSession(), usm, params.isToken(), params.getTokenTimeout(), params.getMaxContentSize(), params.getMaxNestedMessageLevels());
+            handler.setExactLength(params.isExactLength());
+            if (null != params.getOptTimeZone()) {
+                handler.setTimeZone(params.getOptTimeZone());
             }
-            MailMessageParser parser = new MailMessageParser().addMimeFilter(mimeFilter);
+            if (params.isIncludePlaintext()) {
+                handler.setIncludePlainText(true);
+            }
+            MailMessageParser parser = new MailMessageParser().addMimeFilter(params.getMimeFilter());
             {
                 ThresholdFileHolder backup = null;
                 try {
@@ -269,10 +298,10 @@ public final class MessageWriter {
                     }
                 }
             }
-            if (null != warnings) {
+            if (null != params.getWarnings()) {
                 List<OXException> list = parser.getWarnings();
                 if (!list.isEmpty()) {
-                    warnings.addAll(list);
+                    params.getWarnings().addAll(list);
                 }
             }
             JSONObject jsonObject = handler.getJSONObject();
