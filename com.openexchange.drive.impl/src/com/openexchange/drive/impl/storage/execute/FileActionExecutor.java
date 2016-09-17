@@ -478,12 +478,15 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
 
     private static boolean isFromTemp(SyncSession session, File file) throws OXException {
         if (session.getTemp().exists()) {
-            String tempFolderID = session.getStorage().getFolderID(session.getTemp().getPath(true));
-            if (tempFolderID.equals(file.getFolderId())) {
-                return true;
+            String tempPath = session.getTemp().getPath(true);
+            if (null != tempPath) {
+                String tempFolderID = session.getStorage().getFolderID(tempPath);
+                if (tempFolderID.equals(file.getFolderId())) {
+                    return true;
+                }
+                FileStorageFolder folder = session.getStorage().getFolderAccess().getFolder(file.getFolderId());
+                return null != folder && tempFolderID.equals(folder.getParentId());
             }
-            FileStorageFolder folder = session.getStorage().getFolderAccess().getFolder(file.getFolderId());
-            return null != folder && tempFolderID.equals(folder.getParentId());
         }
         return false;
     }
