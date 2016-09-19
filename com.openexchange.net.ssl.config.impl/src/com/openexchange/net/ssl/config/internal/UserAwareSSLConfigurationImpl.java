@@ -55,12 +55,12 @@ import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.user.UserService;
 
 /**
- * The {@link UserTrustConfigurationImpl} provides user specific configuration with regards to SSL
+ * The {@link UserAwareSSLConfigurationImpl} provides user specific configuration with regards to SSL
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class UserTrustConfigurationImpl implements UserAwareSSLConfigurationService {
+public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationService {
 
     private static final String USER_ATTRIBUTE_NAME = "trustAllConnections";
 
@@ -68,7 +68,7 @@ public class UserTrustConfigurationImpl implements UserAwareSSLConfigurationServ
 
     private ContextService contextService;
 
-    public UserTrustConfigurationImpl(UserService userService, ContextService contextService) {
+    public UserAwareSSLConfigurationImpl(UserService userService, ContextService contextService) {
         this.userService = userService;
         this.contextService = contextService;
     }
@@ -85,7 +85,7 @@ public class UserTrustConfigurationImpl implements UserAwareSSLConfigurationServ
             }
             return Boolean.parseBoolean(userTrustsAll);
         } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(UserTrustConfigurationImpl.class).error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, user, context);
+            org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class).error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, user, context);
         }
         return false;
     }

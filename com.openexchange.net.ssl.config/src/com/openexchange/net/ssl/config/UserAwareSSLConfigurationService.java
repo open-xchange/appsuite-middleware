@@ -49,12 +49,15 @@
 
 package com.openexchange.net.ssl.config;
 
+import com.openexchange.osgi.annotation.SingletonService;
+
 /**
  * {@link UserAwareSSLConfigurationService}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
+@SingletonService
 public interface UserAwareSSLConfigurationService {
 
     boolean isTrustAll(int user, int context);

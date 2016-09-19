@@ -7,3 +7,4 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: .
 Export-Package: com.openexchange.net.ssl.config
+Import-Package: com.openexchange.osgi.annotation

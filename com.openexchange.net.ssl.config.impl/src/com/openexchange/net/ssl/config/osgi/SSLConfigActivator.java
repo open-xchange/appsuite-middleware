@@ -52,10 +52,12 @@ package com.openexchange.net.ssl.config.osgi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.context.ContextService;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
+import com.openexchange.net.ssl.config.internal.SSLConfigurationServiceImpl;
 import com.openexchange.net.ssl.config.internal.SSLProperties;
 import com.openexchange.net.ssl.config.internal.SSLPropertiesReloadable;
-import com.openexchange.net.ssl.config.internal.UserTrustConfigurationImpl;
+import com.openexchange.net.ssl.config.internal.UserAwareSSLConfigurationImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
@@ -76,7 +78,8 @@ public class SSLConfigActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         try {
-            org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("starting bundle: \"com.openexchange.net.ssl.user\"");
+            org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("starting bundle: \"com.openexchange.net.ssl.config.impl\"");
+            Services.setBundleContext(this.context);
             
             ConfigurationService configService = getService(ConfigurationService.class);
             
@@ -87,7 +90,8 @@ public class SSLConfigActivator extends HousekeepingActivator {
             
             registerService(Reloadable.class, new SSLPropertiesReloadable());
 
-            registerService(UserAwareSSLConfigurationService.class, new UserTrustConfigurationImpl(getService(UserService.class), getService(ContextService.class)));
+            registerService(UserAwareSSLConfigurationService.class, new UserAwareSSLConfigurationImpl(getService(UserService.class), getService(ContextService.class)));
+            registerService(SSLConfigurationService.class, new SSLConfigurationServiceImpl(getService(ConfigurationService.class)));
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).error("", e);
             throw e;
@@ -96,7 +100,9 @@ public class SSLConfigActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("stopping bundle: \"com.openexchange.net.ssl.user\"");
+        org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("stopping bundle: \"com.openexchange.net.ssl.config.impl\"");
+
+        Services.setBundleContext(null);
 
         super.stopBundle();
     }
