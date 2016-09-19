@@ -718,8 +718,7 @@ public abstract class MailConfig {
                 }
 
                 OAuthAccount oAuthAccount = oauthService.getAccount(oAuthAccontId, session, session.getUserId(), session.getContextId());
-                mailConfig.login = oAuthAccount.getToken();
-                mailConfig.password = oAuthAccount.getSecret();
+                mailConfig.password = oAuthAccount.getToken();
                 mailConfig.authType = AuthType.OAUTH;
             } else {
                 String mailAccountPassword = account.getPassword();
