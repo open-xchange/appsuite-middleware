@@ -393,7 +393,8 @@ public class FileActionExecutor extends BatchActionExecutor<FileVersion> {
              * check if versions already known in trash if applicable
              */
             if (OPTIMISTIC_MOVE_TO_TEMP_THRESHOLD < versionsToRemove.size() && session.getTemp().exists()) {
-                FileStorageFolder tempFolder = session.getStorage().optFolder(session.getTemp().getPath(false));
+                String tempPath = session.getTemp().getPath(false);
+                FileStorageFolder tempFolder = null != tempPath ? session.getStorage().optFolder(tempPath) : null;
                 if (null != tempFolder) {
                     List<FileChecksum> knownChecksums = session.getChecksumStore().getFileChecksums(new FolderID(tempFolder.getId()));
                     if (null != knownChecksums && 0 < knownChecksums.size()) {
