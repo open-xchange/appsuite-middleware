@@ -121,6 +121,8 @@ import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.session.Sessions;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -1365,6 +1367,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         final String sPort = String.valueOf(config.getPort());
         final String socketFactoryClass = SSLSocketFactoryProvider.getDefault().getClass().getName();
+        String protocols = config.getIMAPProperties().getSSLProtocols();
+        String cipherSuites = config.getIMAPProperties().getSSLCipherSuites();
+        SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
         if (config.isSecure()) {
             /*
              * Enables the use of the STARTTLS command.
@@ -1383,13 +1388,25 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Specify SSL protocols
              */
-            imapProps.put("mail.imap.ssl.protocols", config.getIMAPProperties().getSSLProtocols());
+            if (Strings.isNotEmpty(protocols)) {
+                imapProps.put("mail.imap.ssl.protocols", protocols);
+            } else {
+                if (sslConfigService == null) {
+                    throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                }
+                imapProps.put("mail.imap.ssl.protocols", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedProtocols()));
+            }
             /*
              * Specify SSL cipher suites
              */
-            final String cipherSuites = config.getIMAPProperties().getSSLCipherSuites();
-            if (false == Strings.isEmpty(cipherSuites)) {
+            
+            if (Strings.isNotEmpty(cipherSuites)) {
                 imapProps.put("mail.imap.ssl.ciphersuites", cipherSuites);
+            } else {
+                if (null == sslConfigService) {
+                    throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                }
+                imapProps.put("mail.imap.ssl.ciphersuites", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedCipherSuites()));
             }
         } else {
             /*
@@ -1411,13 +1428,24 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Specify SSL protocols
              */
-            imapProps.put("mail.imap.ssl.protocols", config.getIMAPProperties().getSSLProtocols());
+            if (Strings.isNotEmpty(protocols)) {
+                imapProps.put("mail.imap.ssl.protocols", protocols);
+            } else {
+                if (null == sslConfigService) {
+                    throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                }
+                imapProps.put("mail.imap.ssl.protocols", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedProtocols()));
+            }
             /*
              * Specify SSL cipher suites
              */
-            final String cipherSuites = config.getIMAPProperties().getSSLCipherSuites();
-            if (false == Strings.isEmpty(cipherSuites)) {
+            if (Strings.isNotEmpty(cipherSuites)) {
                 imapProps.put("mail.imap.ssl.ciphersuites", cipherSuites);
+            } else {
+                if (null == sslConfigService) {
+                    throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                }
+                imapProps.put("mail.imap.ssl.ciphersuites", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedCipherSuites()));
             }
             // imapProps.put("mail.imap.ssl.enable", "true");
             /*

@@ -128,6 +128,8 @@ import com.openexchange.mail.transport.listener.Result;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.ISMTPProperties;
 import com.openexchange.smtp.config.SMTPConfig;
@@ -463,6 +465,9 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                      */
                     final String sPort = String.valueOf(smtpConfig.getPort());
                     final String socketFactoryClass = SSLSocketFactoryProvider.getDefault().getClass().getName();
+                    String protocols = smtpConfig.getSMTPProperties().getSSLProtocols();
+                    String cipherSuites = smtpConfig.getSMTPProperties().getSSLCipherSuites();
+                    SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
                     if (smtpConfig.isSecure()) {
                         /*
                          * Enables the use of the STARTTLS command (if supported by the server) to switch the connection to a TLS-protected
@@ -479,13 +484,24 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         /*
                          * Specify SSL protocols
                          */
-                        smtpProps.put("mail.smtp.ssl.protocols", smtpConfig.getSMTPProperties().getSSLProtocols());
+                        if (Strings.isNotEmpty(protocols)) {
+                            smtpProps.put("mail.smtp.ssl.protocols", protocols);
+                        } else {
+                            if (null == sslConfigService) {
+                                throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                            }
+                            smtpProps.put("mail.smtp.ssl.protocols", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedProtocols()));
+                        }
                         /*
                          * Specify SSL cipher suites
                          */
-                        final String cipherSuites = smtpConfig.getSMTPProperties().getSSLCipherSuites();
-                        if (false == Strings.isEmpty(cipherSuites)) {
+                        if (Strings.isNotEmpty(cipherSuites)) {
                             smtpProps.put("mail.smtp.ssl.ciphersuites", cipherSuites);
+                        } else {
+                            if (null == sslConfigService) {
+                                throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                            }
+                            smtpProps.put("mail.smtp.ssl.ciphersuites", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedCipherSuites()));
                         }
                         // smtpProps.put("mail.smtp.ssl", "true");
                         /*
@@ -521,13 +537,24 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         /*
                          * Specify SSL protocols
                          */
-                        smtpProps.put("mail.smtp.ssl.protocols", smtpConfig.getSMTPProperties().getSSLProtocols());
+                        if (Strings.isNotEmpty(protocols)) {
+                            smtpProps.put("mail.smtp.ssl.protocols", protocols);
+                        } else {
+                            if (null == sslConfigService) {
+                                throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                            }
+                            smtpProps.put("mail.smtp.ssl.protocols", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedProtocols()));
+                        }
                         /*
                          * Specify SSL cipher suites
                          */
-                        final String cipherSuites = smtpConfig.getSMTPProperties().getSSLCipherSuites();
-                        if (false == Strings.isEmpty(cipherSuites)) {
+                        if (Strings.isNotEmpty(cipherSuites)) {
                             smtpProps.put("mail.smtp.ssl.ciphersuites", cipherSuites);
+                        } else {
+                            if (null == sslConfigService) {
+                                throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                            }
+                            smtpProps.put("mail.smtp.ssl.ciphersuites", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedCipherSuites()));
                         }
                         // smtpProps.put("mail.smtp.ssl", "true");
                         /*

@@ -80,13 +80,16 @@ import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.POP3Provider;
 import com.openexchange.pop3.config.IPOP3Properties;
 import com.openexchange.pop3.config.POP3Config;
 import com.openexchange.pop3.config.POP3Properties;
 import com.openexchange.pop3.config.POP3SessionProperties;
+import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.pop3.util.POP3CapabilityCache;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Prober;
@@ -311,17 +314,34 @@ public final class POP3StoreConnector {
              */
             final String sPort = String.valueOf(port);
             final String socketFactoryClass = SSLSocketFactoryProvider.getDefault().getClass().getName();
+            String protocols = pop3Config.getPOP3Properties().getSSLProtocols();
+            String cipherSuites = pop3Config.getPOP3Properties().getSSLCipherSuites();
+            SSLConfigurationService sslConfigService = POP3ServiceRegistry.getServiceRegistry().getService(SSLConfigurationService.class);
             if (pop3Config.isSecure()) {
                 pop3Props.put("mail.pop3.socketFactory.class", socketFactoryClass);
                 pop3Props.put("mail.pop3.socketFactory.port", sPort);
                 pop3Props.put("mail.pop3.socketFactory.fallback", "false");
-                pop3Props.put("mail.pop3.ssl.protocols", pop3Config.getPOP3Properties().getSSLProtocols());
+                /*
+                 * Specify SSL protocols
+                 */
+                if (Strings.isNotEmpty(protocols)) {
+                    pop3Props.put("mail.pop3.ssl.protocols", protocols);
+                } else {
+                    if (null == sslConfigService) {
+                        throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                    }
+                    pop3Props.put("mail.pop3.ssl.protocols", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedProtocols()));
+                }
                 /*
                  * Specify SSL cipher suites
                  */
-                final String cipherSuites = pop3Config.getPOP3Properties().getSSLCipherSuites();
-                if (false == Strings.isEmpty(cipherSuites)) {
+                if (Strings.isNotEmpty(cipherSuites)) {
                     pop3Props.put("mail.pop3.ssl.ciphersuites", cipherSuites);
+                } else {
+                    if (null == sslConfigService) {
+                        throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                    }
+                    pop3Props.put("mail.pop3.ssl.ciphersuites", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedCipherSuites()));
                 }
             } else {
                 /*
@@ -342,13 +362,24 @@ public final class POP3StoreConnector {
                 /*
                  * Specify SSL protocols
                  */
-                pop3Props.put("mail.pop3.ssl.protocols", pop3Config.getPOP3Properties().getSSLProtocols());
+                if (Strings.isNotEmpty(protocols)) {
+                    pop3Props.put("mail.pop3.ssl.protocols", protocols);
+                } else {
+                    if (null == sslConfigService) {
+                        throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                    }
+                    pop3Props.put("mail.pop3.ssl.protocols", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedProtocols()));
+                }
                 /*
                  * Specify SSL cipher suites
                  */
-                final String cipherSuites = pop3Config.getPOP3Properties().getSSLCipherSuites();
-                if (false == Strings.isEmpty(cipherSuites)) {
+                if (Strings.isNotEmpty(cipherSuites)) {
                     pop3Props.put("mail.pop3.ssl.ciphersuites", cipherSuites);
+                } else {
+                    if (null == sslConfigService) {
+                        throw ServiceExceptionCode.absentService(SSLConfigurationService.class);
+                    }
+                    pop3Props.put("mail.pop3.ssl.ciphersuites", Strings.toWhitespaceSeparatedList(sslConfigService.getSupportedCipherSuites()));
                 }
                 // pop3Props.put("mail.pop3.ssl.enable", "true");
                 /*
