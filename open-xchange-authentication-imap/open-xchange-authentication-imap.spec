@@ -62,6 +62,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-3327
     ox_add_property USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP false /opt/open-xchange/etc/imapauth.properties
+
+    # SoftwareChange_Request-3554
+    ox_add_property LOWERCASE_FOR_CONTEXT_USER_LOOKUP false /opt/open-xchange/etc/imapauth.properties
 fi
 
 %clean
