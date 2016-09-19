@@ -49,8 +49,6 @@
 
 package com.openexchange.folderstorage.outlook.memory.impl;
 
-import gnu.trove.ConcurrentTIntHashSet;
-import gnu.trove.set.TIntSet;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,13 +64,15 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
-import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.outlook.memory.MemoryCRUD;
 import com.openexchange.folderstorage.outlook.memory.MemoryFolder;
 import com.openexchange.folderstorage.outlook.memory.MemoryTree;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Collators;
+import com.openexchange.java.util.Tools;
+import gnu.trove.ConcurrentTIntHashSet;
+import gnu.trove.set.TIntSet;
 
 /**
  * {@link MemoryTreeImpl}

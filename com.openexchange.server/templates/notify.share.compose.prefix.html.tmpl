@@ -1,13 +1,81 @@
 <#include "notify.common.button.tmpl">
+
+<style>
+	/* List with Thumbnails Pattern CSS */
+	@media only screen and (max-width: 599px) {
+        td[class="pattern"] img {
+            width: 100%;
+            height: auto !important;
+        }
+        td[class="pattern"] .col {
+            width: 25%;
+        }
+	}
+    @media only screen and (max-width: 430px) {
+        td[class="pattern"] .col {
+            width: 50%;
+            float: left;
+            margin-bottom: 20px;
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+        td[class="pattern"] .col table,
+        td[class="pattern"] .col img { width: 100%; }
+    }
+    @media only screen and (max-width: 380px) {
+        td[class="pattern"] .col {
+            width: 100%;
+            display: block;
+            float: none;
+            padding: 0 !important;
+        }
+        td[class="pattern"] .col tr {
+            display: table-cell;
+            width: 60%;
+        }
+        td[class="pattern"] .col tr:first-child {
+            width: 40%;
+            padding-right: 20px;
+        }
+        td[class="pattern"] .col td {
+            font-size: 16px !important;
+        }
+    }
+</style>
+
 <p>
   ${intro}
-  <ul>
-    <#list filenames as filename>
-    <li>${filename}</li>
-    </#list>
-  </ul>
+  <table cellpadding="0" cellspacing="0" id="1">
+    <tr>
+      <td class="pattern" width="700">
+        <table cellpadding="0" cellspacing="0" id="2">
+          <tr>
+           <#list previews?keys as key>
+            <td class="col" width="165" style="padding: 0 5px;">
+              <table cellpadding="0" cellspacing="0" id="3">
+                <tr>
+                  <td align="left"><img src="${previews[key]}" width="165" height="128" alt="" style="display: block; border: 0;" /></td>
+                </tr>
+                <tr>
+                  <td align="left" style="font-family: arial,sans-serif; font-size: 14px; color: #333; padding-top: 10px;">
+                    ${filenames[key]}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </#list>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+  <br />
+  <div style="clear:both"></div>
+  <#if more?has_content>${more}</#if>
 </p>
-<p id="view_items" style="padding:10px 0;margin:20px 0;">
+
+<p>
   <@styledButton link=link>${link_text}</@styledButton>
 </p>
 <#if expiration?has_content || password?has_content>
@@ -16,3 +84,4 @@
     <#if password?has_content>${password}</#if>
   </p>
 </#if>
+<hr>

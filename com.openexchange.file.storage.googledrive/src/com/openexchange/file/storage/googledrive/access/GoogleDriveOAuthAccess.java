@@ -58,8 +58,8 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.googledrive.GoogleDriveConstants;
 import com.openexchange.google.api.client.GoogleApiClients;
-import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.session.Session;
@@ -87,11 +87,12 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
         synchronized (this) {
             // Grab Google OAuth account
             int oauthAccountId = getAccountId();
-            OAuthAccount oauthAccount = GoogleApiClients.getGoogleAccount(oauthAccountId, session, false);
+            OAuthAccount oauthAccount = GoogleApiClients.getGoogleAccount(oauthAccountId, getSession(), false);
+            verifyAccount(oauthAccount);
             setOAuthAccount(oauthAccount);
 
             {
-                OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(oauthAccount, session);
+                OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(oauthAccount, getSession());
                 if (null != newAccount) {
                     oauthAccount = newAccount;
                     setOAuthAccount(newAccount);
@@ -99,7 +100,7 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
             }
 
             // Generate appropriate credentials for it
-            GoogleCredential credentials = GoogleApiClients.getCredentials(oauthAccount, session);
+            GoogleCredential credentials = GoogleApiClients.getCredentials(oauthAccount, getSession());
 
             // Establish Drive instance
             setOAuthClient(new OAuthClient<Drive>(new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build(), getOAuthAccount().getToken()));

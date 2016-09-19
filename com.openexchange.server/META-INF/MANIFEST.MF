@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Server
 Bundle-SymbolicName: com.openexchange.server
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Activator: com.openexchange.server.osgi.ServerCompositeActivator
 Bundle-Vendor: OX Software GmbH
 Import-Package: com.davekoelle,
@@ -74,6 +74,7 @@ Import-Package: com.davekoelle,
  com.openexchange.groupware.results,
  com.openexchange.groupware.tools.mappings,
  com.openexchange.groupware.tools.mappings.database,
+ com.openexchange.groupware.upload,
  com.openexchange.html,
  com.openexchange.i18n,
  com.openexchange.id,
@@ -98,6 +99,7 @@ Import-Package: com.davekoelle,
  com.openexchange.mime,
  com.openexchange.monitoring,
  com.openexchange.notification.service,
+ com.openexchange.oauth,
  com.openexchange.oauth.provider.exceptions,
  com.openexchange.oauth.provider.resourceserver,
  com.openexchange.oauth.provider.resourceserver.annotations,
@@ -460,7 +462,6 @@ Export-Package: com.openexchange.ajax,
  com.openexchange.groupware.tasks,
  com.openexchange.groupware.tools.iterator,
  com.openexchange.groupware.update,
- com.openexchange.groupware.upload,
  com.openexchange.groupware.upload.impl,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.groupware.userconfiguration.osgi,

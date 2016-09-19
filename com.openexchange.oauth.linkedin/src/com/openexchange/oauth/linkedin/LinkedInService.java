@@ -63,8 +63,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface LinkedInService {
 
-    static final String SERVICE_ID = "com.openexchange.socialplugin.linkedin";
-
     public List<Contact> getContacts(Session session, int user, int contextId, int accountId) throws OXException;
 
     public String getAccountDisplayName(Session session, int user, int contextId, int accountId);

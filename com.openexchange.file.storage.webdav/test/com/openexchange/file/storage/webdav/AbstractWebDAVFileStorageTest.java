@@ -51,9 +51,9 @@ package com.openexchange.file.storage.webdav;
 
 import java.util.HashMap;
 import java.util.Map;
-import junit.framework.TestCase;
 import com.openexchange.file.storage.SimFileStorageAccount;
 import com.openexchange.session.SimSession;
+import junit.framework.TestCase;
 
 
 /**

@@ -49,11 +49,16 @@
 
 package com.openexchange.pns.monitoring.impl;
 
+import java.util.Iterator;
+import java.util.concurrent.LinkedBlockingDeque;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
+import org.slf4j.Logger;
 import com.openexchange.management.AnnotatedStandardMBean;
 import com.openexchange.pns.PushNotificationService;
 import com.openexchange.pns.monitoring.PushNotificationMBean;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 
 /**
@@ -64,14 +69,62 @@ import com.openexchange.pns.monitoring.PushNotificationMBean;
  */
 public class PushNotificationMBeanImpl extends AnnotatedStandardMBean implements PushNotificationMBean {
 
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PushNotificationMBeanImpl.class);
+
+    /** Window size for average calculation: 1 hour */
+    private static final long WINDOW_SIZE = 60L * 60000L;
+
     private final PushNotificationService pushNotificationService;
+    private final LinkedBlockingDeque<Measurement> measurements;
+    private final ScheduledTimerTask timerTask;
 
     /**
      * Initializes a new {@link PushNotificationMBeanImpl}.
      */
-    public PushNotificationMBeanImpl(PushNotificationService pushNotificationService) throws NotCompliantMBeanException {
+    public PushNotificationMBeanImpl(final PushNotificationService pushNotificationService, TimerService timerService) throws NotCompliantMBeanException {
         super("Management Bean for Push Notification Service", PushNotificationMBean.class);
         this.pushNotificationService = pushNotificationService;
+        final LinkedBlockingDeque<Measurement> measurements = new LinkedBlockingDeque<Measurement>();
+        this.measurements = measurements;
+
+        Runnable task = new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    long submittedNots = pushNotificationService.getTotalNumberOfSubmittedNotifications();
+                    long processedNots = pushNotificationService.getTotalNumberOfProcessedNotifications();
+                    Measurement measurement = new Measurement(submittedNots, processedNots);
+
+
+                    if (measurement.measuredSubmittedNotifications < measurement.measuredProcessedNotifications) {
+                        // invalid measurement maybe due to overflow
+                        return;
+                    }
+
+                    measurements.add(measurement);
+                    cleanUp();
+                } catch (Exception e) {
+                    // Failed run...
+                    LOG.error("", e);
+                }
+            }
+
+            private void cleanUp() {
+                long minTime = System.currentTimeMillis() - WINDOW_SIZE;
+                for (Measurement measurement; (measurement = measurements.peek()) != null && measurement.timestamp < minTime;) {
+                    measurements.poll();
+                }
+            }
+        };
+        timerTask = timerService.scheduleAtFixedRate(task, 0L, 60000L);
+    }
+
+    /**
+     * Stops this MBean.
+     */
+    public void stop() {
+        timerTask.cancel();
     }
 
     @Override
@@ -87,9 +140,9 @@ public class PushNotificationMBeanImpl extends AnnotatedStandardMBean implements
     }
 
     @Override
-    public long getNumberOfSubmittedNotifications() throws MBeanException {
+    public long getTotalNumberOfSubmittedNotifications() throws MBeanException {
         try {
-            return pushNotificationService.getNumberOfSubmittedNotifications();
+            return pushNotificationService.getTotalNumberOfSubmittedNotifications();
         } catch (Exception e) {
             org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationMBeanImpl.class);
             logger.error("", e);
@@ -99,14 +152,79 @@ public class PushNotificationMBeanImpl extends AnnotatedStandardMBean implements
     }
 
     @Override
-    public long getNumberOfProcessingNotifications() throws MBeanException {
+    public long getTotalNumberOfProcessedNotifications() throws MBeanException {
         try {
-            return pushNotificationService.getNumberOfProcessingNotifications();
+            return pushNotificationService.getTotalNumberOfProcessedNotifications();
         } catch (Exception e) {
             org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationMBeanImpl.class);
             logger.error("", e);
             String message = e.getMessage();
             throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    @Override
+    public long getNotificationsPerMinute() throws MBeanException {
+        try {
+            long meantimes = 0L;
+            long events = 0L;
+
+            Measurement last = null;
+            for (Iterator<Measurement> it = measurements.iterator(); it.hasNext();) {
+                Measurement current = it.next();
+                if (last != null) {
+                    meantimes += current.timestamp - last.timestamp;
+                    events += current.measuredSubmittedNotifications - last.measuredSubmittedNotifications;
+                }
+
+                last = current;
+            }
+
+            double eventsPerMillis = 0L;
+            if (events > 0L && meantimes > 0L) {
+                eventsPerMillis = events / (double) meantimes;
+            }
+
+            return Math.round(eventsPerMillis * 60000L);
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    @Override
+    public long getEnqueuedNotifications() throws MBeanException {
+        try {
+            Measurement current = measurements.peekLast();
+            if (current != null) {
+                return current.measuredSubmittedNotifications - current.measuredProcessedNotifications;
+            }
+
+            return 0L;
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    /**
+     * Represents a measurement of submitted and in-progress notifications for a certain point in time.
+     */
+    static final class Measurement {
+
+        final long timestamp;
+        final long measuredSubmittedNotifications;
+        final long measuredProcessedNotifications;
+
+        Measurement(long submittedNots, long processedNots) {
+            super();
+            this.measuredSubmittedNotifications = submittedNots;
+            this.measuredProcessedNotifications = processedNots;
+            this.timestamp = System.currentTimeMillis();
         }
     }
 

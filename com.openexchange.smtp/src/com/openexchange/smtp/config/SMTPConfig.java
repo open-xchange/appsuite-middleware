@@ -54,6 +54,7 @@ import java.net.URISyntaxException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.MailCapabilities;
 import com.openexchange.mail.api.UrlInfo;
 import com.openexchange.mail.transport.config.ITransportProperties;
@@ -62,8 +63,12 @@ import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.Account;
 import com.openexchange.mailaccount.TransportAuth;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.SMTPExceptionCode;
+import com.openexchange.smtp.services.Services;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 
@@ -189,8 +194,21 @@ public final class SMTPConfig extends TransportConfig implements TransportAuthSu
             }
             switch (transportAuth) {
             case CUSTOM:
-                login = saneLogin(account.getTransportLogin());
-                password = MailPasswordUtil.decrypt(account.getTransportPassword(), session, account.getId(), login, account.getTransportServer());
+                int oAuthAccontId = assumeXOauth2For(account);
+                if (oAuthAccontId >= 0) {
+                    OAuthService oauthService = Services.optService(OAuthService.class);
+                    if (null == oauthService) {
+                        throw ServiceExceptionCode.absentService(OAuthService.class);
+                    }
+
+                    OAuthAccount oAuthAccount = oauthService.getAccount(oAuthAccontId, session, session.getUserId(), session.getContextId());
+                    login = oAuthAccount.getToken();
+                    password = oAuthAccount.getSecret();
+                    authType = AuthType.OAUTH;
+                } else {
+                    login = saneLogin(account.getTransportLogin());
+                    password = MailPasswordUtil.decrypt(account.getTransportPassword(), session, account.getId(), login, account.getTransportServer());
+                }
                 break;
             case NONE:
                 login = null;

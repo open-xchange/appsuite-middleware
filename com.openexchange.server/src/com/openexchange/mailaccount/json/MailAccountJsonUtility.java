@@ -55,9 +55,9 @@ import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Tools;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
-import com.openexchange.mailaccount.Tools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**

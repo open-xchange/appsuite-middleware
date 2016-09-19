@@ -117,6 +117,8 @@ public abstract class AbstractMailAccount implements MailAccount {
     protected Map<String, String> transportProperties;
     protected boolean mailStartTls;
     protected boolean transportStartTls;
+    protected int mailOAuthId;
+    protected int transportOAuthId;
     protected String rootFolder;
 
     /**
@@ -124,20 +126,27 @@ public abstract class AbstractMailAccount implements MailAccount {
      */
     protected AbstractMailAccount() {
         super();
-        properties = new HashMap<String, String>(4);
+        properties = new HashMap<>(4);
         transportAuth = TransportAuth.MAIL;
-        transportProperties = new HashMap<String, String>(4);
+        transportProperties = new HashMap<>(4);
         transportPort = 25;
         mailPort = 143;
         final String transportProvider = TransportProperties.getInstance().getDefaultTransportProvider();
         transportProtocol = transportProvider == null ? "smtp" : transportProvider;
         final String mailProvider = MailProperties.getInstance().getDefaultMailProvider();
         mailProtocol = mailProvider == null ? "imap" : mailProvider;
+        mailOAuthId = -1;
+        transportOAuthId = -1;
     }
 
     @Override
     public int getId() {
         return id;
+    }
+
+    @Override
+    public boolean isMailAccount() {
+        return true;
     }
 
     @Override
@@ -801,8 +810,46 @@ public abstract class AbstractMailAccount implements MailAccount {
     }
 
     @Override
+    public boolean isMailOAuthAble() {
+        return mailOAuthId >= 0;
+    }
+
+    @Override
+    public int getMailOAuthId() {
+        return mailOAuthId < 0 ? -1 : mailOAuthId;
+    }
+
+    /**
+     * Sets the identifier of the associated OAuth account for mail server
+     *
+     * @param mailOauthId The OAuth account identifier or <code>-1</code> to signal none
+     */
+    public void setMailOAuthId(int mailOauthId) {
+        this.mailOAuthId = mailOauthId < 0 ? -1 : mailOauthId;
+    }
+
+    @Override
     public boolean isTransportStartTls() {
         return transportStartTls;
+    }
+
+    @Override
+    public boolean isTransportOAuthAble() {
+        return transportOAuthId >= 0;
+    }
+
+    @Override
+    public int getTransportOAuthId() {
+        return transportOAuthId < 0 ? -1 : transportOAuthId;
+    }
+
+    /**
+     * Sets the identifier of the associated OAuth account for transport server
+     *
+     * @param transportOAuthId The OAuth account identifier or <code>-1</code> to signal none
+     */
+    public void setTransportOAuthId(int transportOAuthId) {
+        this.transportOAuthId = transportOAuthId < 0 ? -1 : transportOAuthId;
     }
 
     @Override
@@ -810,7 +857,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         if (properties.isEmpty()) {
             return Collections.emptyMap();
         }
-        final Map<String, String> clone = new HashMap<String, String>(properties.size());
+        final Map<String, String> clone = new HashMap<>(properties.size());
         clone.putAll(properties);
         if (null != replyTo) {
             clone.put("replyto", replyTo);
@@ -825,9 +872,9 @@ public abstract class AbstractMailAccount implements MailAccount {
      */
     public void setProperties(final Map<String, String> properties) {
         if (null == properties) {
-            this.properties = new HashMap<String, String>(4);
+            this.properties = new HashMap<>(4);
         } else if (properties.isEmpty()) {
-            this.properties = new HashMap<String, String>(4);
+            this.properties = new HashMap<>(4);
         } else {
             for (final Map.Entry<String, String> e : properties.entrySet()) {
                 if ("replyto".equals(e.getKey())) {
@@ -835,7 +882,7 @@ public abstract class AbstractMailAccount implements MailAccount {
                     break;
                 }
             }
-            this.properties = new HashMap<String, String>(properties.size());
+            this.properties = new HashMap<>(properties.size());
             this.properties.putAll(properties);
         }
     }
@@ -843,7 +890,7 @@ public abstract class AbstractMailAccount implements MailAccount {
     @Override
     public void addProperty(final String name, final String value) {
         if (properties.isEmpty()) {
-            properties = new HashMap<String, String>(4);
+            properties = new HashMap<>(4);
         }
         if ("replyto".equals(name)) {
             replyTo = value;
@@ -856,7 +903,7 @@ public abstract class AbstractMailAccount implements MailAccount {
         if (transportProperties.isEmpty()) {
             return Collections.emptyMap();
         }
-        return new HashMap<String, String>(transportProperties);
+        return new HashMap<>(transportProperties);
     }
 
     /**
@@ -866,18 +913,18 @@ public abstract class AbstractMailAccount implements MailAccount {
      */
     public void setTransportProperties(final Map<String, String> transportProperties) {
         if (null == transportProperties) {
-            this.transportProperties = new HashMap<String, String>(4);
+            this.transportProperties = new HashMap<>(4);
         } else if (transportProperties.isEmpty()) {
-            this.transportProperties = new HashMap<String, String>(4);
+            this.transportProperties = new HashMap<>(4);
         } else {
-            this.transportProperties = new HashMap<String, String>(transportProperties);
+            this.transportProperties = new HashMap<>(transportProperties);
         }
     }
 
     @Override
     public void addTransportProperty(final String name, final String value) {
         if (transportProperties.isEmpty()) {
-            transportProperties = new HashMap<String, String>(4);
+            transportProperties = new HashMap<>(4);
         }
         transportProperties.put(name, value);
     }
@@ -890,4 +937,5 @@ public abstract class AbstractMailAccount implements MailAccount {
         sb.append("\nmail-server=").append(generateMailServerURL()).append(" transport-server=").append(generateTransportServerURL());
         return sb.toString();
     }
+
 }

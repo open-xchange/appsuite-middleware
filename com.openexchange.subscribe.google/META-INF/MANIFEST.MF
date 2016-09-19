@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Subscribe Google Bundle
 Bundle-SymbolicName: com.openexchange.subscribe.google
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.fasterxml.jackson.core,
@@ -16,6 +16,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.google.api.client.auth.oauth2,
  com.google.api.client.googleapis.auth.clientlogin,
  com.google.api.client.googleapis.auth.oauth2,
+ com.google.api.client.googleapis.json,
  com.google.api.client.googleapis.services,
  com.google.api.client.http,
  com.google.api.client.http.javanet,
@@ -87,6 +88,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.mail.mime,
  com.openexchange.oauth,
  com.openexchange.oauth.google,
+ com.openexchange.oauth.scope,
  com.openexchange.osgi,
  com.openexchange.secret,
  com.openexchange.server,

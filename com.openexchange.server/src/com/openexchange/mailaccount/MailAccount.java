@@ -104,6 +104,20 @@ public interface MailAccount extends Account {
     public boolean isMailSecure();
 
     /**
+     * Checks if mail server expects to authenticate via OAuth or not.
+     *
+     * @return <code>true</code> for OAuth authentication, otherwise <code>false</code>.
+     */
+    boolean isMailOAuthAble();
+
+    /**
+     * Gets the identifier of the associated OAuth account (if any) to authenticate against mail server.
+     *
+     * @return The OAuth account identifier or <code>-1</code> if there is no associated OAuth account
+     */
+    int getMailOAuthId();
+
+    /**
      * Gets the transport authentication information
      *
      * @return The transport authentication information
@@ -130,6 +144,22 @@ public interface MailAccount extends Account {
      */
     @Override
     public String getTransportPassword();
+
+    /**
+     * Checks if transport server expects to authenticate via OAuth or not.
+     *
+     * @return <code>true</code> for OAuth authentication, otherwise <code>false</code>.
+     */
+    @Override
+    boolean isTransportOAuthAble();
+
+    /**
+     * Gets the identifier of the associated OAuth account (if any) to authenticate against transport server.
+     *
+     * @return The OAuth account identifier or <code>-1</code> if there is no associated OAuth account
+     */
+    @Override
+    int getTransportOAuthId();
 
     /**
      * Gets the spam handler name for this mail account.

@@ -50,6 +50,7 @@
 package com.openexchange.advertisement;
 
 import java.util.List;
+import java.util.Map;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -139,7 +140,7 @@ public interface AdvertisementConfigService {
      * @return A list of {@link ConfigResult}
      * @throws OXException in case configs couldn't be parsed
      */
-    public List<ConfigResult> setConfig(String reseller, String configs) throws OXException;
+    public List<ConfigResult> setConfig(String reseller, Map<String, String> configs) throws OXException;
 
     /**
      * Retrieves the package scheme identifier for this configuration service.

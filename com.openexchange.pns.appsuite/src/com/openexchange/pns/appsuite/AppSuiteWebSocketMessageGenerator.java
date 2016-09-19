@@ -129,7 +129,7 @@ public class AppSuiteWebSocketMessageGenerator implements PushMessageGenerator {
             throw PushExceptionCodes.UNSUPPORTED_TRANSPORT.create(null == transportId ? "null" : transportId);
         }
 
-        // From here on it known that we are supposed to compile a Socket.IO JSON message since
+        // From here on it's known that we are supposed to compile a Socket.IO JSON message since
         // com.openexchange.pns.appsuite.AppSuiteWebSocketToClientResolver only accepts "/socket.io/*"
 
         String topic = notification.getTopic();

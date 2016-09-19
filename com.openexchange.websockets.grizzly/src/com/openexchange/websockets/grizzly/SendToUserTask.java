@@ -64,6 +64,7 @@ public class SendToUserTask extends AbstractTask<Void> {
 
     private final String message;
     private final String pathFilter;
+    private final boolean remote;
     private final int userId;
     private final int contextId;
     private final GrizzlyWebSocketApplication application;
@@ -73,14 +74,16 @@ public class SendToUserTask extends AbstractTask<Void> {
      *
      * @param message The text message to send
      * @param pathFilter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
+     * @param remote Whether the text message was remotely received; otherwise <code>false</code> for local origin
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param application The running application
      */
-    public SendToUserTask(String message, String pathFilter, int userId, int contextId, GrizzlyWebSocketApplication application) {
+    public SendToUserTask(String message, String pathFilter, boolean remote, int userId, int contextId, GrizzlyWebSocketApplication application) {
         super();
         this.message = message;
         this.pathFilter = pathFilter;
+        this.remote = remote;
         this.userId = userId;
         this.contextId = contextId;
         this.application = application;
@@ -89,7 +92,7 @@ public class SendToUserTask extends AbstractTask<Void> {
     @Override
     public Void call() throws Exception {
         try {
-            application.sendToUser(message, pathFilter, userId, contextId);
+            application.sendToUser(message, pathFilter, remote, userId, contextId);
         } catch (Exception e) {
             LOG.error("Failed to send message to user {} in context {}", userId, contextId, e);
         }

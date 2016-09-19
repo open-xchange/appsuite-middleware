@@ -5320,7 +5320,17 @@ public class CalendarMySQL implements CalendarSqlImp {
     private final void triggerDeleteEvent(final Connection con, final int oid, final int fid, final Session so, final Context ctx, final CalendarDataObject edao) throws OXException {
         final CalendarDataObject ao;
         if (edao == null) {
-            ao = new CalendarDataObject();
+            // fix for bug 48598 where we previously sent a shallow CalenderDataObject that only
+            // contained the objectID and parentFolderID (as of the setters invoked below), but that
+            // made it impossible to compute recurrence information in event listeners; hence, for
+            // those cases where this method gets called without the CalenderDataObject, we need to
+            // retrieve the complete Appointment object that is to be deleted:
+            final AppointmentSQLInterface calendarSql = FACTORY_REF.get().createAppointmentSql(so);
+            try {
+                ao = calendarSql.getObjectById(oid, fid);
+            } catch (final SQLException e) {
+                throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
+            }
         } else {
             ao = edao.clone();
         }

@@ -52,6 +52,7 @@ package com.openexchange.oauth.dropbox;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.DropBoxApi;
 import com.dropbox.client2.DropboxAPI;
@@ -66,14 +67,15 @@ import com.dropbox.client2.session.WebAuthSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractParameterizableOAuthInteraction;
-import com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthToken;
+import com.openexchange.oauth.impl.AbstractParameterizableOAuthInteraction;
+import com.openexchange.oauth.impl.AbstractScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -91,7 +93,7 @@ public final class DropboxOAuthServiceMetaData extends AbstractScribeAwareOAuthS
      * Initializes a new {@link DropboxOAuthServiceMetaData}.
      */
     public DropboxOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, API.DROPBOX);
+        super(services, API.DROPBOX, DropboxOAuthScope.values());
     }
 
     @Override
@@ -107,9 +109,8 @@ public final class DropboxOAuthServiceMetaData extends AbstractScribeAwareOAuthS
     @Override
     public OAuthInteraction initOAuth(final String callbackUrl, final Session session) throws OXException {
         try {
-            final AppKeyPair appKeys = new AppKeyPair(getAPIKey(), getAPISecret());
-            final DropboxAPI<WebAuthSession> dropboxAPI =
-                new DropboxAPI<WebAuthSession>(new TrustAllWebAuthSession(appKeys, AccessType.DROPBOX));
+            final AppKeyPair appKeys = new AppKeyPair(getAPIKey(session), getAPISecret(session));
+            final DropboxAPI<WebAuthSession> dropboxAPI = new DropboxAPI<WebAuthSession>(new TrustAllWebAuthSession(appKeys, AccessType.DROPBOX));
             final StringBuilder authUrl = new StringBuilder(dropboxAPI.getSession().getAuthInfo().url);
             if (!Strings.isEmpty(callbackUrl)) {
                 authUrl.append('&').append(OAuthConstants.URLPARAM_OAUTH_CALLBACK).append('=').append(urlEncode(callbackUrl)).toString();
@@ -174,9 +175,10 @@ public final class DropboxOAuthServiceMetaData extends AbstractScribeAwareOAuthS
             arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, token);
             // Check
             {
-                final AppKeyPair appKeys = new AppKeyPair(getAPIKey(), getAPISecret());
-                final WebAuthSession session = new TrustAllWebAuthSession(appKeys, AccessType.APP_FOLDER);
-                final DropboxAPI<WebAuthSession> mDBApi = new DropboxAPI<WebAuthSession>(session);
+                Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
+                final AppKeyPair appKeys = new AppKeyPair(getAPIKey(session), getAPISecret(session));
+                final WebAuthSession dbxSession = new TrustAllWebAuthSession(appKeys, AccessType.APP_FOLDER);
+                final DropboxAPI<WebAuthSession> mDBApi = new DropboxAPI<WebAuthSession>(dbxSession);
                 // Re-auth specific stuff
                 final AccessTokenPair reAuthTokens = new AccessTokenPair(tokenKey, tokenSecret);
                 mDBApi.getSession().setAccessTokenPair(reAuthTokens);
@@ -208,7 +210,7 @@ public final class DropboxOAuthServiceMetaData extends AbstractScribeAwareOAuthS
     }
 
     @Override
-    public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OXException {
+    public OAuthToken getOAuthToken(final Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
         return (OAuthToken) arguments.get(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
     }
 

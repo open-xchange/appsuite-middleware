@@ -139,6 +139,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
 
     volatile HazelcastInstance hzInstance;
     volatile String mapName;
+    volatile String entryListenerRegistrationId;
 
     private final ConcurrentMap<UserAndContext, ScheduledTimerTask> cleanerTasks;
 
@@ -166,27 +167,6 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
      * Shuts-down this remote distributor.
      */
     public void shutDown() {
-        synchronized (myValues) {
-            if (!myValues.isEmpty()) {
-                HazelcastInstance hzInstance = this.hzInstance;
-                if (null != hzInstance) {
-                    String mapName = this.mapName;
-                    if (null != mapName) {
-                        try {
-                            // Get the Hazelcast map reference
-                            MultiMap<String, String> hzMap = map(mapName, hzInstance);
-
-                            for (Entry<String, String> entry : myValues.entries()) {
-                                hzMap.remove(entry.getKey(), entry.getValue());
-                            }
-                        } catch (Exception e) {
-                            LOG.warn("Failed to remove keys from Hazelcast map.", e);
-                        }
-                    }
-                }
-            }
-        }
-
         unsetHazelcastResources();
         lock.lock();
         try {
@@ -230,6 +210,11 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             // Get the Hazelcast map reference
             MultiMap<String, String> hzMap = map(mapName, hzInstance);
 
+            if (null == hzMap) {
+                LOG.warn("Missing Hazelcast map (Hazelcast inactive?). Failed to check for cluster Web Sockets' information");
+                return null;
+            }
+
             // Iterate its entry set
             Set<Entry<String, String>> entrySet = hzMap.entrySet();
             List<WebSocketInfo> infos = new ArrayList<>(entrySet.size());
@@ -263,12 +248,80 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     public void setHazelcastResources(HazelcastInstance hzInstance, String mapName) {
         this.hzInstance = hzInstance;
         this.mapName = mapName;
+
+        GrizzlyWebSocketApplication app = GrizzlyWebSocketApplication.getGrizzlyWebSocketApplication();
+        if (null == app) {
+            LOG.warn("Entry listener cloud not be applied", new Throwable("Missing Grizzly Web Application"));
+            return;
+        }
+
+        try {
+            // Get the Hazelcast map reference & add listener
+            MultiMap<String, String> hzMap = map(mapName, hzInstance);
+            if (null == hzMap) {
+                LOG.warn("Missing Hazelcast map (Hazelcast inactive?). Failed to add entry listener");
+                return;
+            }
+
+            WebSocketClosingEntryListener entryListener = new WebSocketClosingEntryListener(app);
+            String entryListenerRegistrationId = hzMap.addEntryListener(entryListener, true);
+            this.entryListenerRegistrationId = entryListenerRegistrationId;
+            LOG.info("Successfully added entry listener with registration ID \"{}\"", entryListenerRegistrationId);
+        } catch (Exception e) {
+            LOG.error("Entry listener could not be applied", e);
+        }
     }
 
     /**
      * Unsets the previously set Hazelcast resources (if any).
      */
     public void unsetHazelcastResources() {
+        HazelcastInstance hzInstance = this.hzInstance;
+        if (null == hzInstance) {
+            return;
+        }
+
+        String mapName = this.mapName;
+        if (null == mapName) {
+            return;
+        }
+
+        // Get the Hazelcast map reference
+        MultiMap<String, String> hzMap;
+        try {
+            hzMap = map(mapName, hzInstance);
+            if (null == hzMap) {
+                return;
+            }
+        } catch (Exception e) {
+            LOG.warn("Failed to acquire Hazelcast map", e);
+            return;
+        }
+
+        synchronized (myValues) {
+            if (!myValues.isEmpty()) {
+                try {
+                    for (Entry<String, String> entry : myValues.entries()) {
+                        hzMap.remove(entry.getKey(), entry.getValue());
+                    }
+                } catch (Exception e) {
+                    LOG.warn("Failed to remove keys from Hazelcast map.", e);
+                }
+                myValues.clear();
+            }
+        }
+
+        String entryListenerRegistrationId = this.entryListenerRegistrationId;
+        if (null != entryListenerRegistrationId) {
+            this.entryListenerRegistrationId = null;
+            try {
+                hzMap.removeEntryListener(entryListenerRegistrationId);
+                LOG.info("Successfully removed entry listener with registration ID \"{}\"", entryListenerRegistrationId);
+            } catch (Exception e) {
+                LOG.error("Entry listener could not be removed", e);
+            }
+        }
+
         this.hzInstance = null;
         this.mapName = null;
     }
@@ -339,18 +392,23 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
         try {
             HazelcastInstance hzInstance = this.hzInstance;
             if (null == hzInstance) {
-                LOG.warn("Missing Hazelcast instance. Failed to check for open remote Web Sockets for user " + userId + " in context " + contextId);
+                LOG.warn("Missing Hazelcast instance. Failed to check for open remote Web Sockets for user {} in context {}", I(userId), I(contextId));
                 return false;
             }
 
             String mapName = this.mapName;
             if (null == mapName) {
-                LOG.warn("Missing Hazelcast map name. Failed to check for open remote Web Sockets for user " + userId + " in context " + contextId);
+                LOG.warn("Missing Hazelcast map name. Failed to check for open remote Web Sockets for user {} in context {}", I(userId), I(contextId));
                 return false;
             }
 
             // Get the Hazelcast map reference
             MultiMap<String, String> hzMap = map(mapName, hzInstance);
+
+            if (null == hzMap) {
+                LOG.warn("Missing Hazelcast map (Hazelcast inactive?). Failed to check for open remote Web Sockets for user {} in context {}", I(userId), I(contextId));
+                return false;
+            }
 
             // Get local member
             Cluster cluster = hzInstance.getCluster();
@@ -460,6 +518,10 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             try {
                 // Get the Hazelcast map reference
                 MultiMap<String, String> hzMap = map(mapName, hzInstance);
+                if (null == hzMap) {
+                    LOG.warn("Missing Hazelcast map (Hazelcast inactive?). Failed to remotely distribute notifications");
+                    return;
+                }
 
                 // Get local member
                 Cluster cluster = hzInstance.getCluster();
@@ -511,24 +573,27 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
 
             for (List<String> partition : Lists.partition(payloads, 5)) {
                 Map<Member, Future<Void>> futureMap = executor.submitToMembers(new PortableMessageDistributor(partition, pathFilter, userId, contextId, async), effectiveOtherMembers);
-                if (false == async) {
+                if (async) {
+                    LOG.info("Submitted {} message(s) to remote Web Socket(s) connected to member(s) \"{}\" using path filter \"{}\" to user {} in context {}", I(partition.size()), effectiveOtherMembers, pathFilter, I(userId), I(contextId));
+                } else {
                     // Wait for completion of each submitted task
+                    int numOfPayloads = partition.size();
                     for (Map.Entry<Member, Future<Void>> element : futureMap.entrySet()) {
-                        handleSubmittedFuture(element.getValue(), pathFilter, element.getKey(), userId, contextId);
+                        handleSubmittedFuture(element.getValue(), numOfPayloads, pathFilter, element.getKey(), userId, contextId);
                     }
                 }
             }
         }
     }
 
-    private void handleSubmittedFuture(Future<Void> future, String pathFilter, Member member, int userId, int contextId) throws Error {
+    private void handleSubmittedFuture(Future<Void> future, int numOfPayloads, String pathFilter, Member member, int userId, int contextId) throws Error {
         // Check Future's return value
         int retryCount = 3;
         while (retryCount-- > 0) {
             try {
                 future.get();
                 retryCount = 0;
-                LOG.info("Submitted message(s) to remote Web Socket(s) connected to member \"{}\" using path filter \"{}\" to user {} in context {}", member, pathFilter, I(userId), I(contextId));
+                LOG.info("Transmitted {} message(s) to remote Web Socket(s) connected to member \"{}\" using path filter \"{}\" to user {} in context {}", I(numOfPayloads), member, pathFilter, I(userId), I(contextId));
             } catch (InterruptedException e) {
                 // Interrupted - Keep interrupted state
                 LOG.debug("Interrupted while waiting for {} to complete on member \"{}\" using path filter \"{}\" for user {} in context {}", PortableMessageDistributor.class.getSimpleName(), member, pathFilter, I(userId), I(contextId), e);
@@ -554,7 +619,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                 // Timeout while awaiting remote result
                 if (retryCount <= 0) {
                     // No further retry
-                    LOG.warn("Repeatedly failed submitting message(s) to remote Web Socket(s) connected to member \"{}\" using path filter \"{}\" to user {} in context {}", member, pathFilter, I(userId), I(contextId));
+                    LOG.warn("Repeatedly failed transmitting message(s) to remote Web Socket(s) connected to member \"{}\" using path filter \"{}\" to user {} in context {}", member, pathFilter, I(userId), I(contextId));
                     cancelFutureSafe(future);
                 }
             }
@@ -635,6 +700,11 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             return;
         }
 
+        if (null == map) {
+            LOG.warn("Missing Hazelcast map (Hazelcast inactive?). Failed to add Web Sockets");
+            return;
+        }
+
         for (WebSocket socket : sockets) {
             int userId = socket.getUserId();
             int contextId = socket.getContextId();
@@ -665,21 +735,28 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
 
         HazelcastInstance hzInstance = this.hzInstance;
         if (null == hzInstance) {
-            LOG.warn("Missing Hazelcast instance. Failed to remove Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId));
+            LOG.warn("Missing Hazelcast instance. Failed to add Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId));
             return;
         }
 
         String mapName = this.mapName;
         if (null == mapName) {
-            LOG.warn("Missing Hazelcast map name. Failed to remove Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId));
+            LOG.warn("Missing Hazelcast map name. Failed to add Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId));
             return;
         }
 
         try {
+            MultiMap<String, String> map = map(mapName, hzInstance);
+
+            if (null == map) {
+                LOG.warn("Missing Hazelcast map (Hazelcast inactive?). Failed to add Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId));
+                return;
+            }
+
             Address address = hzInstance.getCluster().getLocalMember().getAddress();
             String key = generateKey(userId, contextId, address.getHost(), address.getPort());
             String value = generateValue(socket.getConnectionId().getId(), path);
-            map(mapName, hzInstance).put(key, value);
+            map.put(key, value);
             synchronized (myValues) {
                 myValues.put(key, value);
             }
@@ -716,7 +793,14 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
             synchronized (myValues) {
                 myValues.remove(key, value);
             }
-            map(mapName, hzInstance).remove(key, value);
+            MultiMap<String, String> hzMap = map(mapName, hzInstance);
+
+            if (null == hzMap) {
+                LOG.warn("Missing Hazelcast map (Hazelcast inactive?). Failed to remove Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId));
+                return;
+            }
+
+            hzMap.remove(key, value);
         } catch (Exception e) {
             LOG.warn("Failed to remove Web Socket with path {} for user {} in context {}", path, I(userId), I(contextId), e);
         }
@@ -727,19 +811,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     @Override
     public void addWebSocket(WebSocket socket) {
         addToHzMultiMap(socket);
-
-        UserAndContext key = UserAndContext.newInstance(socket.getUserId(), socket.getContextId());
-        ScheduledTimerTask cleanerTask = cleanerTasks.get(key);
-        if (null == cleanerTask) {
-            Runnable r = new CleanerRunnable(socket.getUserId(), socket.getContextId());
-            ScheduledTimerTask newTask = timerService.scheduleAtFixedRate(r, 5, 5, TimeUnit.MINUTES);
-            cleanerTask = cleanerTasks.putIfAbsent(key, newTask);
-            if (null != cleanerTask) {
-                // Another thread scheduled a timer task in the meantime
-                newTask.cancel();
-                timerService.purge();
-            }
-        }
+        startCleanerTaskFor(socket.getUserId(), socket.getContextId());
     }
 
     @Override
@@ -750,6 +822,24 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     @Override
     public void removeWebSocket(WebSocket socket) {
         removeFromHzMultiMap(socket);
+    }
+
+    @Override
+    public void startCleanerTaskFor(int userId, int contextId) {
+        UserAndContext key = UserAndContext.newInstance(userId, contextId);
+        ScheduledTimerTask cleanerTask = cleanerTasks.get(key);
+        if (null == cleanerTask) {
+            Runnable r = new CleanerRunnable(userId, contextId);
+            ScheduledTimerTask newTask = timerService.scheduleAtFixedRate(r, 5, 5, TimeUnit.MINUTES);
+            cleanerTask = cleanerTasks.putIfAbsent(key, newTask);
+            if (null != cleanerTask) {
+                // Another thread scheduled a timer task in the meantime
+                newTask.cancel();
+                timerService.purge();
+            } else {
+                LOG.info("Started cleaner task for user {} in context {}", I(userId), I(contextId));
+            }
+        }
     }
 
     @Override
@@ -796,14 +886,20 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                     return;
                 }
 
-                LOG.info("Running cleaner task for user {} in context {}...", I(userId), I(contextId));
-
                 MultiMap<String, String> map = map(mapName, hzInstance);
+                if (null == map) {
+                    LOG.warn("Missing Hazelcast map (Hazelcast inactive?). Failed to perform cleaner task for user {} in context {}", I(userId), I(contextId));
+                    return;
+                }
+
+                LOG.debug("Running cleaner task for user {} in context {}...", I(userId), I(contextId));
+
 
                 Address address = hzInstance.getCluster().getLocalMember().getAddress();
                 String key = generateKey(userId, contextId, address.getHost(), address.getPort());
                 Collection<String> collection = map.get(key);
                 if (null == collection || collection.isEmpty()) {
+                    LOG.debug("Detected no orphaned entries in Hazelcast map during cleaner task run for user {} in context {}", I(userId), I(contextId));
                     return;
                 }
 
@@ -820,7 +916,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                 application.retainNonExisting(connectionIds.keySet(), userId, contextId);
 
                 if (connectionIds.isEmpty()) {
-                    LOG.info("Detected no orphaned entries in Hazelcast map during cleaner task run for user {} in context {}", I(userId), I(contextId));
+                    LOG.debug("Detected no orphaned entries in Hazelcast map during cleaner task run for user {} in context {}", I(userId), I(contextId));
                     return;
                 }
 

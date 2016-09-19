@@ -13,7 +13,7 @@ $showexec="$showruntimestats --websocketstats";
 
 if ( $ARGV[0] and $ARGV[0] eq "autoconf")
 {
-    if (-x $showruntimestats) {
+    if (-e "/opt/open-xchange/bundles/com.openexchange.websockets.grizzly.jar") {
         print "yes\n";
         exit 0;
     }

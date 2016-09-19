@@ -50,13 +50,12 @@
 package com.openexchange.oauth.yahoo;
 
 import java.util.List;
-import junit.framework.TestCase;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.yahoo.internal.OAuthServiceMetaDataYahooImpl;
 import com.openexchange.oauth.yahoo.internal.YahooServiceImpl;
 import com.openexchange.oauth.yahoo.osgi.YahooOAuthActivator;
-
+import junit.framework.TestCase;
 
 /**
  * {@link YahooConnectionTest}
@@ -72,7 +71,7 @@ public class YahooConnectionTest extends TestCase {
     private final String tokenSecret = "7a28439ac5d9a3bec5a27f09cc72a402e061bf62";
     private final String callbackURL = "http://www.open-xchange.com";
 
-    public void testUsingExistingAccessToken() throws OXException{
+    public void testUsingExistingAccessToken() throws OXException {
 
         final YahooOAuthActivator activator = new YahooOAuthActivator();
         activator.setOAuthMetaData(new OAuthServiceMetaDataYahooImpl(null));
@@ -83,8 +82,8 @@ public class YahooConnectionTest extends TestCase {
 
         final YahooService service = new YahooServiceImpl(activator);
         final List<Contact> contacts = service.getContacts(null, 1, 1, 1);
-        assertTrue("there should be contacts in here", contacts.size()>0);
-        for (final Contact contact : contacts){
+        assertTrue("there should be contacts in here", contacts.size() > 0);
+        for (final Contact contact : contacts) {
             System.out.println(contact.getGivenName() + " " + contact.getSurName());
         }
     }

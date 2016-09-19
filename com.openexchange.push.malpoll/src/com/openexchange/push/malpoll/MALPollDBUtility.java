@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
@@ -422,7 +423,14 @@ public final class MALPollDBUtility {
                 stmt.setString(pos++, fullname);
                 final UUID hash = UUID.randomUUID();
                 stmt.setString(pos, hash.toString());
-                stmt.executeUpdate();
+                try {
+                    stmt.executeUpdate();
+                } catch (SQLException e) {
+                    if (Databases.isPrimaryKeyConflictInMySQL(e)) {
+                        return null;
+                    }
+                    throw e;
+                }
                 return hash;
             } catch (final SQLException e) {
                 throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());

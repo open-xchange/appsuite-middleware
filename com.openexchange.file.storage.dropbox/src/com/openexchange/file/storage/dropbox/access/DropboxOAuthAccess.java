@@ -64,9 +64,9 @@ import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.file.storage.dropbox.Utils;
 import com.openexchange.file.storage.dropbox.auth.TrustAllWebAuthSession;
-import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.session.Session;
@@ -79,6 +79,7 @@ import com.openexchange.session.Session;
 public class DropboxOAuthAccess extends AbstractOAuthAccess {
 
     private final FileStorageAccount fsAccount;
+
     /**
      * Initializes a new {@link DropboxOAuthAccess}.
      */
@@ -111,7 +112,8 @@ public class DropboxOAuthAccess extends AbstractOAuthAccess {
             try {
                 int oauthAccountId = getAccountId();
                 OAuthService oAuthService = DropboxServices.getService(OAuthService.class);
-                OAuthAccount dropboxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+                OAuthAccount dropboxOAuthAccount = oAuthService.getAccount(oauthAccountId, getSession(), getSession().getUserId(), getSession().getContextId());
+                verifyAccount(dropboxOAuthAccount);
                 setOAuthAccount(dropboxOAuthAccount);
 
                 /*-

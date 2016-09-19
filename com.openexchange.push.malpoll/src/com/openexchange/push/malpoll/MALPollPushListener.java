@@ -61,6 +61,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
@@ -238,13 +239,14 @@ public final class MALPollPushListener implements PushListener {
             LOG.debug("Listener still in process for user {} in context {}. Return immediately.", userId, contextId);
             return;
         }
-        final ContextService contextService = MALPollServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
-        final Context context = contextService.getContext(contextId);
-        if (context.isReadOnly()) {
-            return;
-        }
         try {
-            final MailService mailService = MALPollServiceRegistry.getServiceRegistry().getService(MailService.class, true);
+            ContextService contextService = MALPollServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
+            Context context = contextService.getContext(contextId);
+            if (context.isReadOnly()) {
+                return;
+            }
+
+            MailService mailService = MALPollServiceRegistry.getServiceRegistry().getService(MailService.class, true);
             if (started) {
                 subsequentRun(mailService);
             } else {
@@ -260,19 +262,23 @@ public final class MALPollPushListener implements PushListener {
         /*
          * First run
          */
-        final String fullname = folder;
-        UUID hash = MALPollDBUtility.getHash(contextId, userId, ACCOUNT_ID, fullname);
-        boolean loadDBIDs = true;
-        if (null == hash) {
-            /*
-             * Insert hash
-             */
-            hash = MALPollDBUtility.insertHash(contextId, userId, ACCOUNT_ID, fullname);
-            loadDBIDs = false;
-        }
-        /*
-         * Synchronize
-         */
+        String fullname = folder;
+
+        UUID hash;
+        boolean loadDBIDs;
+        do {
+            hash = MALPollDBUtility.getHash(contextId, userId, ACCOUNT_ID, fullname);
+            loadDBIDs = true;
+            if (null == hash) {
+                // Insert new hash
+                hash = MALPollDBUtility.insertHash(contextId, userId, ACCOUNT_ID, fullname);
+                if (null != hash) {
+                    loadDBIDs = false;
+                }
+            }
+        } while (null == hash);
+
+        // Synchronize
         synchronizeIDs(mailService, hash, loadDBIDs);
     }
 
@@ -351,11 +357,23 @@ public final class MALPollPushListener implements PushListener {
         try {
             mailAccess = mailService.getMailAccess(session, ACCOUNT_ID);
             mailAccess.connect();
-            final String fullname = folder;
-            final MailMessage[] messages =
-                mailAccess.getMessageStorage().searchMessages(fullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS);
-            final Set<String> uidSet = new HashSet<String>(messages.length);
-            for (final MailMessage mailMessage : messages) {
+            String fullname = folder;
+
+            /*-
+             *
+            IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+            if (folderStorage instanceof com.openexchange.mail.api.IMailFolderStorageStatusSupport) {
+                com.openexchange.mail.api.IMailFolderStorageStatusSupport statusSupport = (com.openexchange.mail.api.IMailFolderStorageStatusSupport) folderStorage;
+                MailFolderStatus folderStatus = statusSupport.getFolderStatus(fullname);
+                folderStatus.getNextId()
+            }
+             *
+             */
+
+            IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            MailMessage[] messages = messageStorage.searchMessages(fullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS);
+            Set<String> uidSet = new HashSet<String>(messages.length);
+            for (MailMessage mailMessage : messages) {
                 uidSet.add(mailMessage.getMailId());
             }
             return uidSet;

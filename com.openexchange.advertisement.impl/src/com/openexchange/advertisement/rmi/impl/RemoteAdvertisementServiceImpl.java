@@ -59,6 +59,9 @@ import com.openexchange.advertisement.AdvertisementExceptionCodes;
 import com.openexchange.advertisement.AdvertisementPackageService;
 import com.openexchange.advertisement.RemoteAdvertisementService;
 import com.openexchange.advertisement.osgi.Services;
+import com.openexchange.advertisement.services.AbstractAdvertisementConfigService;
+import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.reseller.ResellerService;
@@ -173,12 +176,17 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                         }
 
                         DBUtils.closeSQLStuff(stmt);
-                        // remove all configs which does not have a mapping
-                        String sql = DBUtils.getIN(SQL_DELETE_CONFIG_WHERE_NOT_IN, ids.size(), ";");
-                        stmt = con.prepareStatement(sql);
-                        int x = 1;
-                        for (Integer id : ids) {
-                            stmt.setInt(x++, id);
+                        if (ids.isEmpty()) {
+                            // remove all configs, since noone has a mapping
+                            stmt = con.prepareStatement(SQL_DELETE_CONFIG_ALL);
+                        } else {
+                            // remove all configs which does not have a mapping
+                            String sql = DBUtils.getIN(SQL_DELETE_CONFIG_WHERE_NOT_IN, ids.size(), ";");
+                            stmt = con.prepareStatement(sql);
+                            int x = 1;
+                            for (Integer id : ids) {
+                                stmt.setInt(x++, id);
+                            }
                         }
                         if (stmt.executeUpdate() > 0) {
                             isReadOnly = false;
@@ -241,6 +249,13 @@ public class RemoteAdvertisementServiceImpl implements RemoteAdvertisementServic
                         }
                     }
                 }
+            }
+
+            // clear cache
+            CacheService cacheService = Services.getService(CacheService.class);
+            if (cacheService != null) {
+                Cache cache = cacheService.getCache(AbstractAdvertisementConfigService.CACHING_REGION);
+                cache.clear();
             }
         } catch (SQLException e) {
             throw AdvertisementExceptionCodes.UNEXPECTED_DATABASE_ERROR.create(e.getMessage());

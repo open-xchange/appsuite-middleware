@@ -310,6 +310,16 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public int acquireId(int userId, Context ctx) throws OXException {
+        return delegate.acquireId(userId, ctx);
+    }
+
+    @Override
+    public String getDefaultFolderPrefix(Session session) throws OXException {
+        return delegate.getDefaultFolderPrefix(session);
+    }
+
+    @Override
     public MailAccount getDefaultMailAccount(int userId, int contextId) throws OXException {
         CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {

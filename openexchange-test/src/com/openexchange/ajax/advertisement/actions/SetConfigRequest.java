@@ -183,6 +183,11 @@ public class SetConfigRequest implements PortAwareAjaxRequest<SetConfigResponse>
 
             @Override
             protected String checkCustom(HttpResponse resp) throws ParseException, IOException {
+
+                if (resp.getStatusLine().getStatusCode() == HttpStatus.SC_NO_CONTENT) {
+                    return "";
+                }
+
                 if (resp.getStatusLine().getStatusCode() != HttpStatus.SC_OK && resp.getStatusLine().getStatusCode() != HttpStatus.SC_CREATED) {
                     fail("Wrong status code: " + resp.getStatusLine().getStatusCode());
                 }

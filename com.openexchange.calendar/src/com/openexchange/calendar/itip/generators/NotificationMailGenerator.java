@@ -525,6 +525,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     protected NotificationMail create(final NotificationMail mail) throws OXException {
         mail.setTemplateName("notify.appointment.create");
         mail.setSubject(prefix(mail) + new Sentence(Messages.SUBJECT_NEW_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
+        if (mail.getRecipient().isResource()) {
+            mail.setAdditionalHeader("X-Open-Xchange-Recipient-Type", "Resource");
+        }
         render(mail);
         return mail;
     }
@@ -532,6 +535,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
     protected NotificationMail update(final NotificationMail mail) throws OXException {
         mail.setTemplateName("notify.appointment.update");
         mail.setSubject(prefix(mail) + new Sentence(Messages.SUBJECT_CHANGED_APPOINTMENT).add(mail.getAppointment().getTitle()).getMessage(mail.getRecipient().getLocale()));
+        if (mail.getRecipient().isResource()) {
+            mail.setAdditionalHeader("X-Open-Xchange-Recipient-Type", "Resource");
+        }
         render(mail);
         return mail;
     }

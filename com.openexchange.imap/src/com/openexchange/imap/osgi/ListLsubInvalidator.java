@@ -64,7 +64,7 @@ import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.java.util.Pair;
-import com.openexchange.mailaccount.Tools;
+import com.openexchange.java.util.Tools;
 
 
 /**

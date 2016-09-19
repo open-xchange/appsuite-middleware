@@ -49,6 +49,7 @@
 
 package com.openexchange.imap;
 
+import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
@@ -104,6 +105,7 @@ import com.openexchange.log.audit.DefaultAttribute;
 import com.openexchange.log.audit.DefaultAttribute.Name;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.Protocol;
+import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailProperties;
@@ -508,6 +510,23 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             }
         }
         return tmp;
+    }
+
+    @Override
+    protected boolean supports(AuthType authType) throws OXException {
+        switch (authType) {
+            case LOGIN:
+                return true;
+            case OAUTH:
+                try {
+                    IMAPConfig imapConfig = getIMAPConfig();
+                    return IMAPCapabilityAndGreetingCache.getCapabilities(imapConfig.getServer(), imapConfig.isSecure(), imapConfig.getIMAPProperties()).containsKey("AUTH=XOAUTH2");
+                } catch (IOException e) {
+                    throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                }
+            default:
+                return false;
+        }
     }
 
     @Override
@@ -1334,6 +1353,12 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          */
         if (config.getIMAPProperties().isAuditLogEnabled()) {
             imapProps.put("mail.imap.auditLog.enabled", "true");
+        }
+        /*
+         * Enable XOAUTH2 (if appropriate)
+         */
+        if (AuthType.OAUTH == config.getAuthType()) {
+            imapProps.put("mail.imap.auth.mechanisms", "XOAUTH2");
         }
         /*
          * Check if a secure IMAP connection should be established

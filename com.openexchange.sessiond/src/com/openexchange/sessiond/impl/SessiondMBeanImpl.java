@@ -82,6 +82,11 @@ public final class SessiondMBeanImpl extends AnnotatedStandardMBean implements S
     }
 
     @Override
+    public int getNumberOfUserSessons(int userId, int contextId) throws MBeanException {
+        return SessionHandler.getNumOfUserSessions(userId, contextId, false);
+    }
+
+    @Override
     public void clearContextSessions(final int contextId) {
         /*
          * Clear context-associated sessions

@@ -145,17 +145,28 @@ public class HashCalculator {
      */
     public String getHash(final HttpServletRequest req, final String userAgent, final String client, String...additionals) {
         try {
-            final MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update((null == userAgent ? parseClientUserAgent(req, "") : userAgent).getBytes(Charsets.UTF_8));
+            MessageDigest md = MessageDigest.getInstance("MD5");
+
+            // Update digest with User-Agent info
+            {
+                String effectiveUserAgent = null == userAgent ? parseClientUserAgent(req, "") : userAgent;
+                md.update(effectiveUserAgent.getBytes(Charsets.UTF_8));
+            }
+
+            // Update digest with client info
             if (null != client) {
                 md.update(client.getBytes(Charsets.UTF_8));
             }
+
+            // Update digest with additional info (if any)
             if (null != additionals) {
                 for (String value : additionals) {
                     md.update(value.getBytes(Charsets.UTF_8));
                 }
             }
-            final String[] fields = this.fields;
+
+            // Update digest with configured header info (if any)
+            String[] fields = this.fields;
             if (null != fields) {
                 for (final String field : fields) {
                     final String header = req.getHeader(field);
@@ -164,11 +175,15 @@ public class HashCalculator {
                     }
                 }
             }
-            final byte[] salt = this.salt;
+
+            // Update digest with configured salt
+            byte[] salt = this.salt;
             if (null != salt) {
                 md.update(salt);
             }
-            return PATTERN_NON_WORD_CHAR.matcher(Base64.encode(md.digest())).replaceAll("");
+
+            // Calculate hash & create its string representation
+            return removeNonWordCharactersFrom(Base64.encode(md.digest()));
         } catch (final NoSuchAlgorithmException e) {
             LOG.error("", e);
         }
@@ -242,6 +257,38 @@ public class HashCalculator {
             return "";
         }
         return header;
+    }
+
+    private static String removeNonWordCharactersFrom(String str) {
+        if (null == str) {
+            return null;
+        }
+
+        int length = str.length();
+        if (length == 0) {
+            return str;
+        }
+
+        StringBuilder sb = null;
+        for (int i = 0, k = length; k-- > 0; i++) {
+            char ch = str.charAt(i);
+            if ((ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') && (ch < '0' || ch > '9') && ch != '_') {
+                // A non-word character
+                if (null == sb) {
+                    sb = new StringBuilder(length);
+                    if (i > 0) {
+                        sb.append(str, 0, i);
+                    }
+                }
+            } else {
+                // A word character
+                if (null != sb) {
+                    sb.append(ch);
+                }
+            }
+        }
+
+        return null == sb ? str : sb.toString();
     }
 
 }

@@ -255,7 +255,7 @@ public abstract class AbstractOneDriveResourceAccess {
                 try {
                     int keepOn = 1;
                     while (keepOn > 0) {
-                        DefaultHttpClient httpClient = oneDriveAccess.<DefaultHttpClient>getClient().client;
+                        DefaultHttpClient httpClient = oneDriveAccess.<DefaultHttpClient> getClient().client;
                         HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
                         request = method;
                         // HttpClients.setRequestTimeout(3500, method);
@@ -427,7 +427,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws OXException If performing closure fails
      */
     protected <R> R perform(OneDriveClosure<R> closure) throws OXException {
-        return closure.perform(this, oneDriveAccess.<DefaultHttpClient>getClient().client, session);
+        return closure.perform(this, oneDriveAccess.<DefaultHttpClient> getClient().client, session);
     }
 
     /**

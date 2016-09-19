@@ -2,11 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange File Storage GoogleDrive Bundle
 Bundle-SymbolicName: com.openexchange.file.storage.googledrive
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.google.api.client.auth.oauth2,
  com.google.api.client.googleapis.auth.oauth2,
+ com.google.api.client.googleapis.json,
  com.google.api.client.googleapis.media,
  com.google.api.client.googleapis.services,
  com.google.api.client.http,
@@ -33,6 +34,8 @@ Import-Package: com.google.api.client.auth.oauth2,
  com.openexchange.mime,
  com.openexchange.oauth,
  com.openexchange.oauth.access,
+ com.openexchange.oauth.impl.access.impl,
+ com.openexchange.oauth.scope,
  com.openexchange.osgi,
  com.openexchange.rest.client.httpclient,
  com.openexchange.server,

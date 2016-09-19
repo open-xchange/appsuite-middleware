@@ -49,16 +49,20 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
+import static com.openexchange.java.Strings.isEmpty;
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.json.Tools;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -67,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Module(name = "oauth", description = "The OAuth module is used to manage multiple OAuth accounts for certian online services for a user. The OAuth mechanism allows the Open-Xchange application to act as behalf of this user using previously obtained access tokens granted by user.")
+@Module(name = "oauth", description = "The OAuth module is used to manage multiple OAuth accounts for certain online services for a user. The OAuth mechanism allows the Open-Xchange application to act on behalf of this user using previously obtained access tokens granted by the user.")
 public class ReauthorizeAction extends AbstractOAuthTokenAction {
 
     @Override
@@ -77,27 +81,36 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
          */
         final String accountId = request.getParameter("id");
         if (null == accountId) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( "id");
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
-        final int id = Tools.getUnsignedInteger(accountId);
+        final int id = getUnsignedInteger(accountId);
         if (id < 0) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("id", Integer.valueOf(id));
         }
 
         final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
         if (serviceId == null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( AccountField.SERVICE_ID.getName());
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(AccountField.SERVICE_ID.getName());
         }
+
+        final String scope = request.getParameter("scopes");
+        if (isEmpty(scope)) {
+            throw OAuthExceptionCodes.MISSING_SCOPE.create();
+        }
+
         final OAuthService oAuthService = getOAuthService();
 
         OAuthServiceMetaData service = oAuthService.getMetaDataRegistry().getService(serviceId, session.getUserId(), session.getContextId());
 
         Map<String, Object> arguments = processOAuthArguments(request, session, service);
 
+        // Get the scopes
+        Set<OAuthScope> scopes = getScopes(request, serviceId);
+
         /*
          * By now it doesn't matter which interaction type is passed
          */
-        oAuthService.updateAccount(id, serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId());
+        oAuthService.updateAccount(id, serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId(), scopes);
         /*
          * Return appropriate result
          */

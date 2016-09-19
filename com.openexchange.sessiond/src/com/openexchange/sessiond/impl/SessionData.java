@@ -562,9 +562,10 @@ final class SessionData {
      *
      * @param userId The user identifier
      * @param contextId The context identifier
+     * @param considerLongTerm <code>true</code> to also consider long-term sessions; otherwise <code>false</code>
      * @return The number of sessions
      */
-    int getNumOfUserSessions(int userId, int contextId) {
+    int getNumOfUserSessions(int userId, int contextId, boolean considerLongTerm) {
         // A read-only access to session list
         int count = 0;
         rlock.lock();
@@ -575,21 +576,23 @@ final class SessionData {
         } finally {
             rlock.unlock();
         }
-        rlongTermLock.lock();
-        try {
-            if (!hasLongTermSession(userId, contextId)) {
-                return count;
-            }
-            for (SessionMap longTermMap : longTermList) {
-                for (SessionControl control : longTermMap.values()) {
-                    Session session = control.getSession();
-                    if (session.getContextId() == contextId && session.getUserId() == userId) {
-                        count++;
+        if (considerLongTerm) {
+            rlongTermLock.lock();
+            try {
+                if (!hasLongTermSession(userId, contextId)) {
+                    return count;
+                }
+                for (SessionMap longTermMap : longTermList) {
+                    for (SessionControl control : longTermMap.values()) {
+                        Session session = control.getSession();
+                        if (session.getContextId() == contextId && session.getUserId() == userId) {
+                            count++;
+                        }
                     }
                 }
+            } finally {
+                rlongTermLock.unlock();
             }
-        } finally {
-            rlongTermLock.unlock();
         }
         return count;
     }

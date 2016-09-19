@@ -60,6 +60,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushNotificationTransport;
@@ -116,7 +117,7 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, PushMessageGeneratorRegistry.class, WebSocketService.class };
+        return new Class<?>[] { ConfigurationService.class, PushMessageGeneratorRegistry.class, WebSocketService.class, ConfigViewFactory.class };
     }
 
     @Override

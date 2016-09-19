@@ -62,6 +62,9 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.pns.Hits;
 import com.openexchange.pns.KnownTopic;
@@ -152,6 +155,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
     // ---------------------------------------------------------------------------------------------------------------
 
+    private final ConfigViewFactory configViewFactory;
     private final WebSocketToClientResolverRegistry resolvers;
     private final WebSocketService webSocketService;
     private final PushMessageGeneratorRegistry generatorRegistry;
@@ -164,6 +168,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         this.resolvers = resolvers;
         this.webSocketService = services.getService(WebSocketService.class);
         this.generatorRegistry = services.getService(PushMessageGeneratorRegistry.class);
+        this.configViewFactory = services.getService(ConfigViewFactory.class);
     }
 
     /**
@@ -317,6 +322,31 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
     }
 
     @Override
+    public boolean isEnabled(String topic, String client, int userId, int contextId) throws OXException {
+        ConfigView view = configViewFactory.getView(userId, contextId);
+
+        String basePropertyName = "com.openexchange.pns.transport.websocket.enabled";
+
+        ComposedConfigProperty<Boolean> property;
+        property = null == topic || null == client ? null : view.property(basePropertyName + "." + client + "." + topic, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        property = null == client ? null : view.property(basePropertyName + "." + client, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        property = view.property(basePropertyName, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        return false;
+    }
+
+    @Override
     public void transport(PushNotification notification, Collection<PushMatch> matches) throws OXException {
         if (null != notification && null != matches && !matches.isEmpty()) {
             // Determine associated client and path filter
@@ -353,7 +383,6 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         int userId = uac.getUserId();
         int contextId = uac.getContextId();
         webSocketService.sendMessage(textMessage, clientAndPathFilter.getPathFilter(), userId, contextId);
-        LOG.info("Sent notification \"{}\" via transport '{}' using path filter \"{}\" to user {} in context {}", notification.getTopic(), ID, clientAndPathFilter.getPathFilter(), I(userId), I(contextId));
     }
 
     private Map<String, ClientAndPathFilter> getResolveResultsFor(Collection<PushMatch> matches) throws OXException {

@@ -54,13 +54,14 @@ import org.json.JSONObject;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteraction;
+import com.openexchange.oauth.json.AbstractOAuthWriter;
 
 /**
  * The OAuth account writer
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AccountWriter {
+public class AccountWriter extends AbstractOAuthWriter {
 
     /**
      * Initializes a new {@link AccountWriter}.
@@ -81,6 +82,8 @@ public class AccountWriter {
         jAccount.put(AccountField.ID.getName(), account.getId());
         jAccount.put(AccountField.DISPLAY_NAME.getName(), account.getDisplayName());
         jAccount.put(AccountField.SERVICE_ID.getName(), account.getMetaData().getId());
+        jAccount.put(AccountField.ENABLED_SCOPES.getName(), write(account.getEnabledScopes()));
+        jAccount.put(AccountField.AVAILABLE_SCOPES.getName(), write(account.getMetaData().getAvailableScopes()));
         return jAccount;
     }
 
@@ -100,5 +103,4 @@ public class AccountWriter {
         jInteraction.put(OAuthConstants.SESSION_PARAM_UUID, uuid);
         return jInteraction;
     }
-
 }

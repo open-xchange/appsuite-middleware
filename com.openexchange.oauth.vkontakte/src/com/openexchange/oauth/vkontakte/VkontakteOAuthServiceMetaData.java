@@ -54,7 +54,7 @@ import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.VkontakteApi;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.impl.AbstractScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -71,17 +71,12 @@ public final class VkontakteOAuthServiceMetaData extends AbstractScribeAwareOAut
      * @param configService The configuration service
      */
     public VkontakteOAuthServiceMetaData(ServiceLookup services) {
-        super(services, API.VKONTAKTE);
+        super(services, API.VKONTAKTE, VkontakteOAuthScope.values());
     }
 
     @Override
     public Class<? extends Api> getScribeService() {
         return VkontakteApi.class;
-    }
-
-    @Override
-    public String getScope() {
-        return "friends,wall,offline";
     }
 
     @Override

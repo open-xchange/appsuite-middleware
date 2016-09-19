@@ -232,6 +232,15 @@ public interface MailAccountStorageService {
     MailAccount getDefaultMailAccount(int userId, int contextId) throws OXException;
 
     /**
+     * Gets the prefix of the default mail account belonging to specified user in given context.
+     *
+     * @param session The session
+     * @return The prefix or <code>null</code>
+     * @throws OXException If the default mail account cannot be returned
+     */
+    String getDefaultFolderPrefix(Session session) throws OXException;
+
+    /**
      * Updates mail account's value taken specified {@code MailAccountDescription} instance.
      *
      * @param mailAccount TThe {@code MailAccountDescription} instance to read from
@@ -292,6 +301,16 @@ public interface MailAccountStorageService {
     void updateTransportAccount(TransportAccountDescription transportAccount, int userId, int cid, Session session) throws OXException;
 
     /**
+     * Acquires next available mail/transport account identifier.
+     *
+     * @param userId The user identifier
+     * @param ctx The context
+     * @return The identifier
+     * @throws OXException If identifier cannot be returned
+     */
+    int acquireId(int userId, Context ctx) throws OXException;
+
+    /**
      * Inserts mail account's value taken from specified mail account.
      *
      * @param mailAccount The mail account containing the values to update.
@@ -299,7 +318,7 @@ public interface MailAccountStorageService {
      * @param ctx The context
      * @param session The session; set to <code>null</code> to insert mail account with an empty password
      * @return The identifier of the newly created mail account
-     * @throws OXException If the mail account cannot be updated
+     * @throws OXException If the mail account cannot be inserted
      */
     int insertMailAccount(MailAccountDescription mailAccount, int userId, Context ctx, Session session) throws OXException;
 

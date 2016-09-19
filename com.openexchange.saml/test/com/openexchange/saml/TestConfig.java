@@ -117,4 +117,9 @@ public class TestConfig implements SAMLConfig {
         return true;
     }
 
+    @Override
+    public boolean isAllowUnsolicitedResponses() {
+        return true;
+    }
+
 }

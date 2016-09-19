@@ -49,14 +49,22 @@
 
 package com.openexchange.oauth.json.oauthaccount;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.json.Services;
+import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.oauth.scope.OAuthScopeRegistry;
 
 /**
  * Parses the JSON representation of an OAuth account.
@@ -88,6 +96,19 @@ public class AccountParser {
             final String serviceId = accountJSON.getString(AccountField.SERVICE_ID.getName());
             final OAuthServiceMetaDataRegistry registry = Services.getService(OAuthService.class).getMetaDataRegistry();
             account.setMetaData(registry.getService(serviceId, user, contextId));
+        }
+        if (accountJSON.hasAndNotNull(AccountField.ENABLED_SCOPES.getName()) && account.getMetaData() != null) {
+            OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
+            API api = account.getMetaData().getAPI();
+
+            Set<OAuthScope> enabledScopes = new HashSet<>();
+
+            JSONArray enabledScopesArray = accountJSON.getJSONArray(AccountField.ENABLED_SCOPES.getName());
+            Iterator<Object> scopesIterator = enabledScopesArray.iterator();
+            while (scopesIterator.hasNext()) {
+                String scope = (String) scopesIterator.next();
+                enabledScopes.add(scopeRegistry.getScope(api, Module.valueOf(scope)));
+            }
         }
 
         return account;

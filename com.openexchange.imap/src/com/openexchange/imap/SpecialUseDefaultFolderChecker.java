@@ -136,7 +136,7 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
                 throw e;
             }
         } else {
-            if (hasMetadata && setSpecialUseFlags && index <= StorageUtility.INDEX_TRASH) {
+            if (hasMetadata && setSpecialUseFlags && index <= StorageUtility.INDEX_TRASH && specialUseInfo.get(index) == null) {
                 // E.g. SETMETADATA "SavedDrafts" (/private/specialuse "\\Drafts")
                 String flag = SPECIAL_USES[index];
                 try {

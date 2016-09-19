@@ -56,7 +56,7 @@ package com.openexchange.websockets;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class ConnectionId {
+public class ConnectionId implements Comparable<ConnectionId> {
 
     /**
      * Creates a new instance.
@@ -65,7 +65,7 @@ public class ConnectionId {
      * @return The new instance
      */
     public static ConnectionId newInstance(String id) {
-        return new ConnectionId(id);
+        return null == id ? null : new ConnectionId(id);
     }
 
     // ---------------------------------------------------------
@@ -79,7 +79,7 @@ public class ConnectionId {
     private ConnectionId(String id) {
         super();
         this.id = id;
-        this.hash = 31 * 1 + ((id == null) ? 0 : id.hashCode());
+        this.hash = id.hashCode();
     }
 
     /**
@@ -101,7 +101,10 @@ public class ConnectionId {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof ConnectionId)) {
+        if (null == obj) {
+            return false;
+        }
+        if (obj.getClass() != ConnectionId.class) {
             return false;
         }
         ConnectionId other = (ConnectionId) obj;
@@ -118,6 +121,11 @@ public class ConnectionId {
     @Override
     public String toString() {
         return id;
+    }
+
+    @Override
+    public int compareTo(ConnectionId o) {
+        return o == null ? -1 : id.compareTo(o.id);
     }
 
 }

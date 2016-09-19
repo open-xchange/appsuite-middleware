@@ -1,0 +1,331 @@
+# The YAML configuration file for on-boarding scenarios
+#
+# Notation/meaning is:
+# <unique-scenario-identifier>:
+#     enabled: <true|false>
+#       Boolean. If set to 'false' the scenario will not be available, useful for testing/enabling the scenario later on
+#
+#     type: <plist|manual|link>
+#       String. The type of the scenario. Currently known:
+#       "plist" for generating a plist configuration file for iOS and OSX devices,
+#       "manual" for a description for the user for manual set-up
+#       "link" for a link/URL to either Apple App Store, Apple Mac App Store or Google Play Store
+#
+#     link: <link>
+#       Object. The link and type routing to the app in either Apple App Store, Apple Mac App Store or Google Play Store. ONLY VALID IN CASE "type" IS SET TO "link"!
+#         url: <url>
+#         String: The URL of the link. For specifying a property that provides the actual link, please use special "property" scheme; e.g. "property://com.openexchange.client.onboarding.app.mylink"
+#
+#         type: <appstore|playstore>
+#         String: Optional. Denotes to what store the URL points to (if it is not a common download link not pointing to a commercial store. Supported values are "appstore", "macappstore" and "playstore"
+#
+#     providers: <provider-identifiers>
+#       Array of strings. A list of providers that are supposed to "contribute" to this scenario.
+#
+#     alternatives: <alternative-scenarios>
+#       Array of strings. A list of alternative/fall-back scenarios; e.g. the scenario for manual setup
+#
+#     icon: <file-name>
+#       String. The name of the icon image file located in '/opt/open-xchange/templates' directory or the base64-encoded binary content
+#
+#     displayName_t10e: <display-name>
+#       String. The translatable display name; will be available in scenarios.pot file
+#
+#     description_t10e: <description>
+#       String. The translatable description; will be available in scenarios.pot file
+#
+
+
+#
+# ------------------------------================== NOTE ==================------------------------------
+#
+#  Each scenario listed in this file needs to be added to 'client-onboarding.properties' as well to become effective.
+#  Moreover, the capabilites for the scenario-associated provider(s) need to be available for such users that
+#  are supposed to use it.
+#
+#  Example:
+#   A scenario identified by "myscenario" is intended to be added:
+#
+#   - Add the scenario identifier to the "scenarios" property of such devices that are supposed to offer it;
+#      e.g. "com.openexchange.client.onboarding.windows.desktop.scenarios= ... , myscenario
+#
+#   - Add the scenario identifier to the generic "enabledScenarios" property;
+#      e.g. "com.openexchange.client.onboarding.enabledScenarios= ... , myscenario
+#
+#   - At last, ensure the capabilities as required by the associated provider(s) are available
+#      app                -> No capabilites required; always available
+#      drivewindowsclient -> Requires "drive" capability
+#      emclient           -> Requires "emclient_basic" or "emclient_premium" capability
+#      mailapp            -> Requires "mobile_mail_app" and "webmail" capabilities
+#      driveapp           -> Requires "drive" capability
+#      caldav             -> Requires "caldav" capability
+#      carddav            -> Requires "carddav" capability
+#      oxupdater          -> Requires at least one product being available that is managed by OX Updater 
+#                             (OX Drive, OX Notifier, OXtender2, OX Uploader)
+#      eas                -> Requires "active_sync" capability
+#      mail               -> Requires "webmail" capability
+#
+
+
+### Generic Apps
+################################################################################
+
+# Only an example
+myappleappinstall:
+    # Disabled...
+    enabled: false
+    type: link
+    link:
+        url: property://com.openexchange.client.onboarding.app.store.url
+        type: appstore
+    providers: [app]
+    alternatives: []
+    # The comma-separated Font Awesome names
+    ## icon: <icon>
+    # The translatable display name
+    ## displayName_t10e: <the display name>
+    # The translatable description
+    ## description_t10e: <the description>
+
+# Only another example
+mygoogleappinstall:
+    # Disabled...
+    enabled: false
+    type: link
+    link:
+        url: http://play.google.com/store/apps/details?id=mygoogleapp
+        type: playstore
+    providers: [app]
+    alternatives: []
+    # The comma-separated Font Awesome names
+    ## icon: <icon>
+    # The translatable display name
+    ## displayName_t10e: <the display name>
+    # The translatable description
+    ## description_t10e: <the description>
+
+# Yet another example
+myplainappinstall:
+    # Disabled...
+    enabled: false
+    type: link
+    link:
+        url: http://my.host.invalid/path/to/the/installer
+    providers: [app]
+    alternatives: []
+    # The comma-separated Font Awesome names
+    ## icon: <icon>
+    # The translatable display name
+    ## displayName_t10e: <the display name>
+    # The translatable description
+    ## description_t10e: <the description>
+
+
+### Installer for Drive Windows Client
+################################################################################
+
+drivewindowsclientinstall:
+    enabled: true
+    type: link
+    providers: [drivewindowsclient]
+    alternatives: []
+    # The comma-separated Font Awesome names
+    icon: fa-cloud
+    # The translatable display name
+    displayName_t10e: "Drive Application"
+    # The translatable description
+    description_t10e: "Synchronize your files with our Drive application."
+
+
+### Installer for Windows eM-Client
+################################################################################
+
+emclientinstall:
+    # Disabled by default
+    enabled: false
+    type: link
+    providers: [emclient]
+    alternatives: []
+    # The comma-separated Font Awesome names
+    icon: "fa-envelope-o, fa-calendar, fa-users"
+    # The translatable display name
+    displayName_t10e: "Mail + Calendar + Address Book"
+    # The translatable description
+    description_t10e: "To synchronize your Mail, Calendar, Tasks and Address Book data, download and install our desktop application."
+
+
+### OX Drive App
+################################################################################
+
+driveappinstall:
+    # Disbled by default
+    enabled: false
+    type: link
+    providers: [driveapp]
+    alternatives: []
+    # The comma-separated Font Awesome names
+    icon: fa-cloud
+    # The translatable display name
+    displayName_t10e: "Drive App"
+    # The translatable description
+    description_t10e: "Synchronize your files with our Drive App."
+
+
+### OX Mail App
+################################################################################
+
+mailappinstall:
+    # Disbled by default
+    enabled: false
+    type: link
+    providers: [mailapp]
+    alternatives: []
+    # The comma-separated Font Awesome names
+    icon: fa-envelope-o
+    # The translatable display name
+    displayName_t10e: "Mail App"
+    # The translatable description
+    description_t10e: "Synchronize your Mail with our Mail App."
+
+
+### Sync App
+################################################################################
+
+syncappinstall:
+    # Disbled by default
+    enabled: false
+    type: link
+    providers: [syncapp]
+    alternatives: []
+    # The comma-separated Font Awesome names
+    icon: "fa-calendar, fa-users"
+    # The translatable display name
+    displayName_t10e: "Calendar + Address Book"
+    # The translatable description
+    description_t10e: "Synchronize your Calendar and Address Book data with your device."
+
+
+### CalDAV & CardDAV Sync
+################################################################################
+
+davsync:
+    # Disbled by default
+    enabled: false
+    type: plist
+    providers: [carddav, caldav]
+    alternatives: [davmanual]
+    # The comma-separated Font Awesome names
+    icon: "fa-calendar, fa-users"
+    # The translatable display name
+    displayName_t10e: "Calendar + Address Book"
+    # The translatable description
+    description_t10e: "Synchronize your Calendar and Address Book data with your device."
+
+#davsync_mybrand:
+#    enabled: true
+#    type: plist
+#    providers: [carddav, caldav]
+#    alternatives: [davmanual]
+#    # The comma-separated Font Awesome names
+#    icon: <base64>
+#    # The translatable display name
+#    displayName_t10e: "OX Sync"
+#    # The translatable description
+#    description_t10e: "Synchronize all your appointments and contacts"
+
+davmanual:
+    # Disbled by default
+    enabled: false
+    type: manual
+    providers: [carddav, caldav]
+    alternatives: []
+    # The comma-separated Font Awesome names
+    icon: fa-wrench
+    # The translatable display name
+    displayName_t10e: "Calendar + Address Book"
+    # The translatable description
+    description_t10e: "To manually setup your Calendar and Address Book accounts, please use the following information."
+
+
+### OX Updater
+################################################################################
+
+# Requires the appropriate updater package being installed (e.g. "open-xchange-outlook-updater", "open-xchange-updater-drive", and so on)
+# and the associated permissions are granted to the users, which are supposed to download the file
+
+oxupdaterinstall:
+    # Disbled by default
+    enabled: false
+    type: link
+    providers: [oxupdater]
+    alternatives: []
+    # The comma-separated Font Awesome names
+    icon: fa-laptop
+    # The translatable display name
+    displayName_t10e: "Updater"
+    # The translatable description
+    description_t10e: "When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater."
+    # Alternative texts for Outlook Connector. If they should be used, remove the 'alt_' prefix and comment out the above ones.
+    alt_displayName_t10e: "Connector for Microsoft Outlook®"
+    alt_description_t10e: "Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients."
+
+
+### Exchange ActiveSync
+################################################################################
+
+eassync:
+    # Disbled by default
+    enabled: false
+    type: plist
+    providers: [eas]
+    alternatives: [easmanual]
+    # The comma-separated Font Awesome names
+    icon: "fa-envelope-o, fa-calendar, fa-users"
+    # The translatable display name
+    displayName_t10e: "Mail + Calendar + Address Book"
+    # The translatable description
+    description_t10e: "Synchronize your Mail, Calendar and Address Book data with your device."
+
+easmanual:
+    # Disbled by default
+    enabled: false
+    type: manual
+    providers: [eas]
+    alternatives: []
+    # The comma-separated Font Awesome names
+    icon: "fa-envelope-o, fa-calendar, fa-users"
+    # The translatable display name
+    displayName_t10e: "Mail + Calendar + Address Book"
+    # The translatable description
+    description_t10e: "To manually setup your Mail, Calendar and Address Book accounts, please use the following information."
+
+
+### IMAP/SMTP
+################################################################################
+
+mailsync:
+    # Disbled by default
+    enabled: false
+    type: plist
+    providers: [mail]
+    alternatives: [mailmanual]
+    # The comma-separated Font Awesome names
+    icon: fa-envelope-o
+    # The translatable display name
+    displayName_t10e: "Mail"
+    # The translatable description
+    description_t10e: "Synchronize your Mail with Apple Mail App."
+
+mailmanual:
+    # Disbled by default
+    enabled: false
+    type: manual
+    providers: [mail]
+    alternatives: []
+    # The comma-separated Font Awesome names
+    icon: fa-envelope-o
+    # The translatable display name
+    displayName_t10e: "Mail"
+    # The translatable description
+    description_t10e: "To manually setup your Mail account, please use the following information"
+

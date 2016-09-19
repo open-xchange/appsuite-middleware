@@ -52,9 +52,10 @@ package com.openexchange.oauth.dropbox.osgi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.dropbox.DropboxOAuthScope;
 import com.openexchange.oauth.dropbox.DropboxOAuthServiceMetaData;
+import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
-
 
 /**
  * {@link DropboxOAuthActivator}
@@ -69,7 +70,7 @@ public final class DropboxOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, OAuthScopeRegistry.class };
     }
 
     @Override
@@ -77,6 +78,10 @@ public final class DropboxOAuthActivator extends HousekeepingActivator {
         DropboxOAuthServiceMetaData service = new DropboxOAuthServiceMetaData(this);
         registerService(OAuthServiceMetaData.class, service);
         registerService(Reloadable.class, service);
+
+        // Register the scope
+        OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
+        scopeRegistry.registerScope(service.getAPI(), DropboxOAuthScope.drive);
     }
 
 }

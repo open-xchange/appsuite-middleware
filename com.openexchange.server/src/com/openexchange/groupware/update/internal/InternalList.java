@@ -54,6 +54,7 @@ import java.util.List;
 
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.groupware.update.tasks.AddOAuthColumnToMailAccountTableTask;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardPrincipalTask;
 import com.openexchange.groupware.update.tasks.AddSnippetAttachmentPrimaryKeyUpdateTask;
@@ -166,7 +167,7 @@ public final class InternalList {
     private static UpdateTaskV2[] TASKS = null;
 
     private static UpdateTaskV2[] genTaskList() {
-        List<UpdateTaskV2> list = new ArrayList<UpdateTaskV2>();
+        List<UpdateTaskV2> list = new ArrayList<>();
 
         // Renames "Unified INBOX" to "Unified Mail"
         list.add(new com.openexchange.groupware.update.tasks.UnifiedINBOXRenamerTask());
@@ -619,6 +620,9 @@ public final class InternalList {
         // +++++++++++++++++++++++++++++++++ Version 7.8.3 starts here. +++++++++++++++++++++++++++++++++
 
         list.add(new AllowNullValuesForStandardFolderNamesUpdateTask());
+
+        //Adds "oauth" column to account tables
+        list.add(new AddOAuthColumnToMailAccountTableTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

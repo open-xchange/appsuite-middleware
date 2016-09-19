@@ -104,6 +104,7 @@ import com.openexchange.log.audit.DefaultAttribute;
 import com.openexchange.log.audit.DefaultAttribute.Name;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.api.AuthType;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -450,6 +451,12 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                      */
                     if (smtpProperties.isSendPartial()) {
                         smtpProps.put("mail.smtp.sendpartial", "true");
+                    }
+                    /*
+                     * Enable XOAUTH2 (if appropriate)
+                     */
+                    if (AuthType.OAUTH == smtpConfig.getAuthType()) {
+                        smtpProps.put("mail.smtp.auth.mechanisms", "XOAUTH2");
                     }
                     /*
                      * Check if a secure SMTP connection should be established
@@ -804,6 +811,19 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             }
         }
         return tmp;
+    }
+
+    @Override
+    protected boolean supports(AuthType authType) {
+        switch (authType) {
+            case LOGIN:
+                return true;
+            case OAUTH:
+                // Don't know better here
+                return true;
+            default:
+                return false;
+        }
     }
 
     @Override

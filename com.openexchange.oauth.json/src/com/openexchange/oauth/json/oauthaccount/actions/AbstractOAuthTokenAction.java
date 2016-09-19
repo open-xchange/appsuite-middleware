@@ -49,20 +49,49 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
-import static com.openexchange.oauth.OAuthConstants.*;
+import static com.openexchange.java.Strings.isEmpty;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_ACCESS_DENIED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_ADDITIONAL_AUTHORIZATION_REQUIRED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_CONSUMER_KEY_REFUSED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_CONSUMER_KEY_REJECTED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_CONSUMER_KEY_UNKNOWN;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_NONCE_USED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_PARAMETER_ABSENT;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_PARAMETER_REJECTED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_PERMISSION_DENIED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_PERMISSION_UNKNOWN;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_SIGNATURE_INVALID;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_SIGNATURE_METHOD_REJECTED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_TIMESTAMP_REFUSED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_TOKEN_EXPIRED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_TOKEN_REJECTED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_TOKEN_REVOKED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_TOKEN_USED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_USER_REFUSED;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_VERIFIER_INVALID;
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_VERSION_REJECTED;
+import static com.openexchange.oauth.OAuthConstants.URLPARAM_OAUTH_ACCEPTABLE_TIMESTAMPS;
+import static com.openexchange.oauth.OAuthConstants.URLPARAM_OAUTH_PARAMETERS_ABSENT;
+import static com.openexchange.oauth.OAuthConstants.URLPARAM_OAUTH_PARAMETERS_REJECTED;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
+import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
+import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -250,5 +279,25 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
             acceptable_versions = Strings.isEmpty(acceptable_versions) ? "unknown" : acceptable_versions;
         }
         return OAuthExceptionCodes.OAUTH_PROBLEM_UNEXPECTED.create(oauth_problem);
+    }
+    
+
+    /**
+     * Gets the scopes from the request and converts them to {@link OAuthScope}s using the {@link OAuthScopeRegistry}
+     * 
+     * @param request The {@link AJAXRequestData}
+     * @param serviceId The OAuth service provider's identifier
+     * @return A {@link Set} with all {@link OAuthScope}s to enable
+     * @throws OXException if the {@link OAuthScope}s can not be retrieved or if the <code>scopes</code> URL parameter is missing form the request
+     */
+    protected Set<OAuthScope> getScopes(AJAXRequestData request, String serviceId) throws OXException {
+        OAuthScopeRegistry scopeRegistry = Services.getService(OAuthScopeRegistry.class);
+        // Get the scope parameter
+        String scope = request.getParameter("scopes");
+        if (isEmpty(scope)) {
+            return scopeRegistry.getLegacyScopes(API.resolveFromServiceId(serviceId));
+        }
+        // Get the scopes
+        return scopeRegistry.getAvailableScopes(API.resolveFromServiceId(serviceId), Module.valuesOf(scope));
     }
 }

@@ -138,6 +138,11 @@ public class SimStateManagement implements StateManagement {
         return id;
     }
 
+    public String addLogoutRequestInfo(String id, LogoutRequestInfo requestInfo, long ttl, TimeUnit timeUnit) throws OXException {
+        logoutRequests.put(id, new TimedEntry<LogoutRequestInfo>(requestInfo, ttl, timeUnit));
+        return id;
+    }
+
     @Override
     public LogoutRequestInfo removeLogoutRequestInfo(String id) throws OXException {
         TimedEntry<LogoutRequestInfo> entry = logoutRequests.get(id);

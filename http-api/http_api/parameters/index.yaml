@@ -286,3 +286,9 @@ gblQueryParamUserColumns:
   type: string
   description: A comma-separated list of columns to return, like "1,501,610". Each column is specified by a numeric column identifier, see [Common object data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#common-object-data), [Detailed contact data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-contact-data) and [Detailed user data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-user-data).
   required: true
+gblQueryParamScopes:
+  name: scopes
+  in: query
+  type: string
+  description: A space-separated list of scopes to be added. Valid scopes are 'calendar', 'contacts', 'mail', 'drive', 'generic'. Note that not all scopes are applicable to every OAuth provider.
+  required: true

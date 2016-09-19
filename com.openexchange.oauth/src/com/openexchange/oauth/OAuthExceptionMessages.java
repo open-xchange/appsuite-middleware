@@ -81,6 +81,9 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
 	// Please provide a display name.
     public static final String MISSING_DISPLAY_NAME_MSG = "Please provide a display name.";
 
+    // Please provide at least one scope.
+    public static final String MISSING_SCOPE_MSG = "Please provide at least one scope.";
+
     // The associated OAuth provider denied the request: %1$s.
     public static final String DENIED_BY_PROVIDER_MSG = "The associated OAuth provider denied the request: %1$s.";
 
@@ -101,6 +104,13 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
 
     // Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
     public static String OAUTH_PROBLEM_TOKEN_REVOKED_MSG = "Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.";
+    
+    // Your access token for '%1$s' is invalid. You have to reauthorize your account.
+    public static String OAUTH_TOKEN_INVALID = "Your access token for '%1$s' is invalid. You have to reauthorize your account. URL: '%2$s'";
+    
+    // You need to explicitely authorise %1$s to subscribe to %2$s
+    public static final String NO_SCOPE_PERMISSION = "You need to explicitely authorise %1$s to subscribe to %2$s";
+
 
     /**
      * Initializes a new {@link OAuthExceptionMessages}.

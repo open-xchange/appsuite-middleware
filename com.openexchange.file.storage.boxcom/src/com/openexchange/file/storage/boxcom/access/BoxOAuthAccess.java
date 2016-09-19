@@ -65,12 +65,12 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.boxcom.BoxClosure;
 import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.Services;
-import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.session.Session;
@@ -98,7 +98,8 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
             // Grab Box.com OAuth account
             int oauthAccountId = getAccountId();
             OAuthService oAuthService = Services.getService(OAuthService.class);
-            OAuthAccount boxOAuthAccount = oAuthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+            OAuthAccount boxOAuthAccount = oAuthService.getAccount(oauthAccountId, getSession(), getSession().getUserId(), getSession().getContextId());
+            verifyAccount(boxOAuthAccount);
             setOAuthAccount(boxOAuthAccount);
             createOAuthClient(boxOAuthAccount);
         }
@@ -110,7 +111,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
             // No Java API call
             // More information here: https://docs.box.com/reference#revoke
             try {
-                URL url = new URL("https://api.box.com/oauth2/revoke?client_id=" + getOAuthAccount().getMetaData().getId() + "&client_secret" + getOAuthAccount().getMetaData().getAPISecret(session) + "&token=" + getOAuthAccount().getToken());
+                URL url = new URL("https://api.box.com/oauth2/revoke?client_id=" + getOAuthAccount().getMetaData().getId() + "&client_secret" + getOAuthAccount().getMetaData().getAPISecret(getSession()) + "&token=" + getOAuthAccount().getToken());
                 BoxAPIRequest request = new BoxAPIRequest((BoxAPIConnection) getOAuthClient().client, url, "GET");
                 BoxAPIResponse apiResponse = request.send();
 
@@ -146,7 +147,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
                 }
             }
         };
-        return closure.perform(null, this, session).booleanValue();
+        return closure.perform(null, this, getSession()).booleanValue();
     }
 
     @Override
@@ -169,27 +170,21 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
 
             Map<String, Object> arguments = new HashMap<>();
             arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(apiConnection.getAccessToken(), apiConnection.getRefreshToken()));
-            arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
+            arguments.put(OAuthConstants.ARGUMENT_SESSION, getSession());
 
-            int userId = session.getUserId();
-            int contextId = session.getContextId();
-            oauthService.updateAccount(oAuthAccount.getId(), arguments, userId, contextId);
-            setOAuthAccount(oauthService.getAccount(oAuthAccount.getId(), session, userId, contextId));
+            int userId = getSession().getUserId();
+            int contextId = getSession().getContextId();
+            oauthService.updateAccount(oAuthAccount.getId(), arguments, userId, contextId, oAuthAccount.getEnabledScopes());
+            setOAuthAccount(oauthService.getAccount(oAuthAccount.getId(), getSession(), userId, contextId));
         }
         return this;
     }
 
     //////////////////////////////////////////// HELPERS ///////////////////////////////////////////////////
 
-    /**
-     * Creates the {@link OAuthClient}
-     * 
-     * @param account
-     * @throws OXException
-     */
     private void createOAuthClient(OAuthAccount account) throws OXException {
         OAuthServiceMetaData boxMetaData = account.getMetaData();
-        BoxAPIConnection boxAPI = new BoxAPIConnection(boxMetaData.getAPIKey(session), boxMetaData.getAPISecret(session), account.getToken(), account.getSecret());
+        BoxAPIConnection boxAPI = new BoxAPIConnection(boxMetaData.getAPIKey(getSession()), boxMetaData.getAPISecret(getSession()), account.getToken(), account.getSecret());
         OAuthClient<BoxAPIConnection> oAuthClient = new OAuthClient<>(boxAPI, account.getToken());
         setOAuthClient(oAuthClient);
     }

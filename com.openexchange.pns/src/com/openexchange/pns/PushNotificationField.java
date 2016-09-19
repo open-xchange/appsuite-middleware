@@ -71,8 +71,10 @@ public enum PushNotificationField {
     // -------------------------------- Mail-related fields --------------------------------
     /** The subject of a mail; type is <code>java.lang.String</code> */
     MAIL_SUBJECT("subject"),
-    /** The sender of a mail; type is <code>java.lang.String</code> */
-    MAIL_SENDER("sender"),
+    /** The sender's address of a mail; type is <code>java.lang.String</code> */
+    MAIL_SENDER_EMAIL("email"),
+    /** The sender's address of a mail; type is <code>java.lang.String</code> */
+    MAIL_SENDER_PERSONAL("displayname"),
     /** The unread count; type is <code>java.lang.Integer</code> */
     MAIL_UNREAD("unread"),
     /** The key providing the mail path; type is <code>java.lang.String</code> */

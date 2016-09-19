@@ -130,7 +130,7 @@ public class RTJSONHandler implements StanzaSender {
             } catch (JSONException e) {
                 throw RealtimeExceptionCodes.STANZA_BAD_REQUEST.create(e.getMessage());
             }
-            protocolHandler.handleIncomingMessages(constructedId, serverSession, entry, stanzas, null);
+            protocolHandler.handleIncomingMessages(constructedId, serverSession, entry, stanzas, null, null);
         }
     }
 

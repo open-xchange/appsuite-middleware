@@ -59,9 +59,11 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.linkedin.LinkedInOAuthScope;
 import com.openexchange.oauth.linkedin.LinkedInService;
 import com.openexchange.oauth.linkedin.LinkedInServiceImpl;
 import com.openexchange.oauth.linkedin.OAuthServiceMetaDataLinkedInImpl;
+import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -90,7 +92,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, OAuthService.class, ConfigViewFactory.class, CapabilityService.class };
+        return new Class<?>[] { ConfigurationService.class, OAuthService.class, ConfigViewFactory.class, CapabilityService.class, OAuthScopeRegistry.class };
     }
 
     @Override
@@ -123,6 +125,10 @@ public class Activator extends HousekeepingActivator {
             }
         }, properties);
         getService(CapabilityService.class).declareCapability("linkedin");
+
+        // Register the scope
+        OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
+        scopeRegistry.registerScope(linkedInMetaDataService.getAPI(), LinkedInOAuthScope.contacts_ro);
     }
 
     @Override

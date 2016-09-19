@@ -52,12 +52,14 @@ package com.openexchange.oauth.twitter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.TwitterApi;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.oauth.OAuthToken;
+import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -72,7 +74,7 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAware
      * Initializes a new {@link OAuthServiceMetaDataTwitterImpl}.
      */
     public OAuthServiceMetaDataTwitterImpl(ServiceLookup services) {
-        super(services, API.TWITTER, true, true);
+        super(services, API.TWITTER, true, true, TwitterOAuthScope.values());
     }
 
     @Override
@@ -106,7 +108,7 @@ public class OAuthServiceMetaDataTwitterImpl extends AbstractExtendedScribeAware
     }
 
     @Override
-    public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OXException {
+    public OAuthToken getOAuthToken(final Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
         return null;
     }
 }
