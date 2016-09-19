@@ -51,6 +51,8 @@ package com.openexchange.chronos.recurrence;
 
 import static com.openexchange.time.TimeTools.D;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.Date;
@@ -59,6 +61,8 @@ import java.util.List;
 import java.util.TimeZone;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import com.openexchange.chronos.Event;
 
 /**
@@ -67,10 +71,11 @@ import com.openexchange.chronos.Event;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class ChangeExceptions extends RecurrenceServiceTest {
+@RunWith(Parameterized.class)
+public class ChangeExceptions extends AbstractSingleTimeZoneTest {
 
-    public ChangeExceptions() {
-        super("Europe/Berlin");
+    public ChangeExceptions(String timeZone) {
+        super(timeZone);
     }
 
     @Before
@@ -425,30 +430,42 @@ public class ChangeExceptions extends RecurrenceServiceTest {
         changeExceptions.add(change);
 
         Iterator<Event> instances = service.calculateInstancesRespectExceptions(master, null, null, null, changeExceptions);
+        boolean found1 = false, found2 = false, found3 = false, found4 = false, found5 = false;
         int count = 0;
-        outer: while (instances.hasNext()) {
+        Date previous = null;
+        while (instances.hasNext()) {
             Event instance = instances.next();
-            switch (++count) {
-                case 1:
-                    compareInstanceWithMaster(master, instance, D("01.10.2008 14:45:00", tz), D("01.10.2008 15:45:00", tz));
-                    break;
-                case 2:
-                    compareInstanceWithMaster(master, instance, D("02.10.2008 14:45:00", tz), D("02.10.2008 15:45:00", tz));
-                    break;
-                case 3:
-                    compareFullTimeChangeExceptionWithMaster(master, instance, D("03.10.2008 14:45:00", tz), D("03.10.2008 00:00:00", utc), D("04.10.2008 00:00:00", utc));
-                    break;
-                case 4:
-                    compareInstanceWithMaster(master, instance, D("04.10.2008 14:45:00", tz), D("04.10.2008 15:45:00", tz));
-                    break;
-                case 5:
-                    compareInstanceWithMaster(master, instance, D("05.10.2008 14:45:00", tz), D("05.10.2008 15:45:00", tz));
-                    break outer;
-                default:
-                    fail("Too many instances.");
-                    break;
+            if (instance.getStartDate().equals(D("01.10.2008 14:45:00", tz))) {
+                compareInstanceWithMaster(master, instance, D("01.10.2008 14:45:00", tz), D("01.10.2008 15:45:00", tz));
+                found1 = true;
+            } else if (instance.getStartDate().equals(D("02.10.2008 14:45:00", tz))) {
+                compareInstanceWithMaster(master, instance, D("02.10.2008 14:45:00", tz), D("02.10.2008 15:45:00", tz));
+                found2 = true;
+            } else if (instance.getStartDate().equals(D("03.10.2008 00:00:00", utc))) {
+                compareFullTimeChangeExceptionWithMaster(master, instance, D("03.10.2008 14:45:00", tz), D("03.10.2008 00:00:00", utc), D("04.10.2008 00:00:00", utc));
+                found3 = true;
+            } else if (instance.getStartDate().equals(D("04.10.2008 14:45:00", tz))) {
+                compareInstanceWithMaster(master, instance, D("04.10.2008 14:45:00", tz), D("04.10.2008 15:45:00", tz));
+                found4 = true;
+            } else if (instance.getStartDate().equals(D("05.10.2008 14:45:00", tz))) {
+                compareInstanceWithMaster(master, instance, D("05.10.2008 14:45:00", tz), D("05.10.2008 15:45:00", tz));
+                found5 = true;
+            } else {
+                fail("Bad occurrence/exception found.");
             }
+            if (count++ > 0) {
+                assertFalse("Bad order of occurrences.", previous.after(instance.getStartDate()));
+            }
+            if (count >= 5) {
+                break;
+            }
+            previous = instance.getStartDate();
         }
+        assertTrue("Missing instance.", found1);
+        assertTrue("Missing instance.", found2);
+        assertTrue("Missing instance.", found3);
+        assertTrue("Missing instance.", found4);
+        assertTrue("Missing instance.", found5);
         assertEquals("Missing instance.", 5, count);
     }
 
@@ -461,47 +478,98 @@ public class ChangeExceptions extends RecurrenceServiceTest {
         master.setStartDate(D("01.10.2008 00:00:00", utc));
         master.setEndDate(D("01.10.2008 00:00:00", utc));
         master.setTimeZone(timeZone);
+        master.setAllDay(true);
         List<Date> changeExceptionDates = new ArrayList<Date>();
         changeExceptionDates.add(D("03.10.2008 00:00:00", utc));
         master.setChangeExceptionDates(changeExceptionDates);
 
-        Event change = getInstance(master, D("03.10.2008 00:00:00", utc), D("03.10.2008 14:30:00", tz), D("03.10.2008 16:30:00", tz));
+        Event change = getInstance(master, D("03.10.2008 00:00:00", utc), D("03.10.2008 14:35:00", tz), D("03.10.2008 16:35:00", tz));
+        change.removeAllDay();
+        List<Event> changeExceptions = new ArrayList<Event>();
+        changeExceptions.add(change);
+
+        Iterator<Event> instances = service.calculateInstancesRespectExceptions(master, null, null, null, changeExceptions);
+        boolean found1 = false, found2 = false, found3 = false, found4 = false, found5 = false;
+        int count = 0;
+        Date previous = null;
+        while (instances.hasNext()) {
+            Event instance = instances.next();
+            if (instance.getStartDate().equals(D("01.10.2008 00:00:00", utc))) {
+                compareInstanceWithMaster(master, instance, D("01.10.2008 00:00:00", utc), D("01.10.2008 00:00:00", utc));
+                found1 = true;
+            } else if (instance.getStartDate().equals(D("02.10.2008 00:00:00", utc))) {
+                compareInstanceWithMaster(master, instance, D("02.10.2008 00:00:00", utc), D("02.10.2008 00:00:00", utc));
+                found2 = true;
+            } else if (instance.getStartDate().equals(D("03.10.2008 14:35:00", tz))) {
+                compareChangeExceptionWithFullTimeMaster(master, instance, D("03.10.2008 00:00:00", utc), D("03.10.2008 14:35:00", tz), D("03.10.2008 16:35:00", tz));
+                found3 = true;
+            } else if (instance.getStartDate().equals(D("04.10.2008 00:00:00", utc))) {
+                compareInstanceWithMaster(master, instance, D("04.10.2008 00:00:00", utc), D("04.10.2008 00:00:00", utc));
+                found4 = true;
+            } else if (instance.getStartDate().equals(D("05.10.2008 00:00:00", utc))) {
+                compareInstanceWithMaster(master, instance, D("05.10.2008 00:00:00", utc), D("05.10.2008 00:00:00", utc));
+                found5 = true;
+            } else {
+                fail("Bad occurrence/exception found.");
+            }
+            if (count++ > 0) {
+                assertFalse("Bad order of occurrences.", previous.after(instance.getStartDate()));
+            }
+            if (count >= 5) {
+                break;
+            }
+            previous = instance.getStartDate();
+        }
+        assertTrue("Missing instance.", found1);
+        assertTrue("Missing instance.", found2);
+        assertTrue("Missing instance.", found3);
+        assertTrue("Missing instance.", found4);
+        assertTrue("Missing instance.", found5);
+        assertEquals("Missing instance.", 5, count);
+    }
+
+    @Test
+    public void afterLastRegularOccurrence() {
+        Event master = new Event();
+        master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1;COUNT=3");
+        TimeZone tz = TimeZone.getTimeZone(timeZone);
+        master.setStartDate(D("01.10.2008 14:45:00", tz));
+        master.setEndDate(D("01.10.2008 15:45:00", tz));
+        master.setTimeZone(timeZone);
+        List<Date> changeExceptionDates = new ArrayList<Date>();
+        changeExceptionDates.add(D("02.10.2008 14:45:00", tz));
+        master.setChangeExceptionDates(changeExceptionDates);
+
+        Event change = getInstance(master, D("02.10.2008 14:45:00", tz), D("23.10.2008 18:45:00", tz), D("23.10.2008 19:45:00", tz));
         List<Event> changeExceptions = new ArrayList<Event>();
         changeExceptions.add(change);
 
         Iterator<Event> instances = service.calculateInstancesRespectExceptions(master, null, null, null, changeExceptions);
         int count = 0;
-        outer: while (instances.hasNext()) {
+        while (instances.hasNext()) {
             Event instance = instances.next();
             switch (++count) {
                 case 1:
-                    compareInstanceWithMaster(master, instance, D("01.10.2008 00:00:00", utc), D("01.10.2008 00:00:00", utc));
+                    compareInstanceWithMaster(master, instance, D("01.10.2008 14:45:00", tz), D("01.10.2008 15:45:00", tz));
                     break;
                 case 2:
-                    compareInstanceWithMaster(master, instance, D("02.10.2008 00:00:00", utc), D("02.10.2008 00:00:00", utc));
+                    compareInstanceWithMaster(master, instance, D("03.10.2008 14:45:00", tz), D("03.10.2008 15:45:00", tz));
                     break;
                 case 3:
-                    compareChangeExceptionWithFullTimeMaster(master, instance, D("03.10.2008 00:00:00", utc), D("03.10.2008 14:30:00", tz), D("03.10.2008 16:30:00", tz));
+                    compareChangeExceptionWithMaster(master, instance, D("02.10.2008 14:45:00", tz), D("23.10.2008 18:45:00", tz), D("23.10.2008 19:45:00", tz));
                     break;
-                case 4:
-                    compareInstanceWithMaster(master, instance, D("04.10.2008 00:00:00", utc), D("04.10.2008 00:00:00", utc));
-                    break;
-                case 5:
-                    compareInstanceWithMaster(master, instance, D("05.10.2008 00:00:00", utc), D("05.10.2008 00:00:00", utc));
-                    break outer;
                 default:
                     fail("Too many instances.");
                     break;
             }
         }
-        assertEquals("Missing instance.", 5, count);
+        assertEquals("Missing instance.", 3, count);
     }
 
     @Test
     public void changeAndDeleteException() {
         Event master = new Event();
         master.setRecurrenceRule("FREQ=DAILY;INTERVAL=1");
-        TimeZone utc = TimeZone.getTimeZone("UTC");
         TimeZone tz = TimeZone.getTimeZone(timeZone);
         master.setStartDate(D("01.10.2008 14:45:00", tz));
         master.setEndDate(D("01.10.2008 15:45:00", tz));
@@ -513,8 +581,7 @@ public class ChangeExceptions extends RecurrenceServiceTest {
         deleteExceptionDates.add(D("04.10.2008 14:45:00", tz));
         master.setDeleteExceptionDates(deleteExceptionDates);
 
-        Event change = getInstance(master, D("03.10.2008 14:45:00", tz), D("03.10.2008 00:00:00", utc), D("04.10.2008 00:00:00", utc));
-        change.setAllDay(true);
+        Event change = getInstance(master, D("03.10.2008 14:45:00", tz), D("03.10.2008 18:45:00", tz), D("03.10.2008 19:45:00", tz));
         List<Event> changeExceptions = new ArrayList<Event>();
         changeExceptions.add(change);
 
@@ -530,7 +597,7 @@ public class ChangeExceptions extends RecurrenceServiceTest {
                     compareInstanceWithMaster(master, instance, D("02.10.2008 14:45:00", tz), D("02.10.2008 15:45:00", tz));
                     break;
                 case 3:
-                    compareFullTimeChangeExceptionWithMaster(master, instance, D("03.10.2008 14:45:00", tz), D("03.10.2008 00:00:00", utc), D("04.10.2008 00:00:00", utc));
+                    compareChangeExceptionWithMaster(master, instance, D("03.10.2008 14:45:00", tz), D("03.10.2008 18:45:00", tz), D("03.10.2008 19:45:00", tz));
                     break;
                 case 4:
                     compareInstanceWithMaster(master, instance, D("05.10.2008 14:45:00", tz), D("05.10.2008 15:45:00", tz));

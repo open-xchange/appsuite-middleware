@@ -61,6 +61,8 @@ import java.util.NoSuchElementException;
 import java.util.TimeZone;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import com.openexchange.chronos.Event;
 import com.openexchange.time.TimeTools;
 
@@ -70,10 +72,11 @@ import com.openexchange.time.TimeTools;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class DeleteExceptions extends RecurrenceServiceTest {
+@RunWith(Parameterized.class)
+public class DeleteExceptions extends AbstractSingleTimeZoneTest {
 
-    public DeleteExceptions() {
-        super("Europe/Berlin");
+    public DeleteExceptions(String timeZone) {
+        super(timeZone);
     }
 
     @Before
