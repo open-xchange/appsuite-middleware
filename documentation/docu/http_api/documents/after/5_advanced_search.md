@@ -2,23 +2,42 @@
 # Advanced Search
 
 
-This section describes the syntax of the JSON object representing the search term. The search term is embedded
-in a JSON object with the field `filter`, like `{"filter":[search term]}`. In general the structure of a search
+This chapter describes the search module in more detail. Each search request contains a JSON object representing the search term. The search term is embedded
+in a wrapping JSON object with the field `filter`, like `{"filter":[search term]}`. In general the structure of a search
 term is in prefix notation, meaning the operator is written before its operands: `[">", 5, 2]` represents the condition
 "5 > 2".
 
-Available operators are:
- * comparision operators ">", "<", "=", "<=", ">=", "<>"
- * logic operators "not", "and", "or"
+There are two kinds of search operators, comparison operators and logic operators.
+
+## Comparison operators
 
 Comparison operators have exactly two operands. Each operand can either be a field name or a constant. A field name is a JSON object
 with the member `field` specifying the field name, e.g. `{"field":"first_name"}`. The available field names depend on the module
 that implements the search. Primitive JSON types are interpreted as constants. Arrays are not valid operands for comparison operators!
 
+| Operator | Description |
+|:---------|:------------|
+| ">"      | greater |
+| "<" | smaller |
+| "=" | equal |
+| "<=" | smaller or equal | 
+| ">=" | greater or equal |
+| "<>" | unequal |
+
+
+## Logic operators
+
 The logic operator "not" has exactly one operand, the other logic operators can have any number of operands. Each operand must be an
 array representing a nested search expression.
 
-Example:
+| Operator |
+|:---------|
+| "not"    |
+| "and"    |
+| "or"     |
+
+
+## Examples
 
 ```json
 {
@@ -46,122 +65,4 @@ Example:
 ```
 
 Represents the expression `field_name1 = value1 AND NOT field_name2 > value2`.
-___
 
-
-## Version information
-*Version* : 7.8.2
-
-
-## Contact information
-*Contact* : Open-Xchange GmbH  
-*Contact Email* : info@open-xchange.com
-
-
-## URI scheme
-*Host* : example.com  
-*BasePath* : /ajax  
-*Schemes* : HTTPS
-
-
-## Tags
-
-* login : The login module is used to obtain a session from the user's login credentials. To understand the details
-of the different login methods, see the article titled "[Login variations](http://oxpedia.org/wiki/index.php?title=Login_variations)".
-
-Because of security reasons each login variation will reject requests containing the parameter
-"password" within the URL query (starting with 7.8.0). 
-
-* config : The config module is used to retrieve and set user-specific configuration. The configuration is
-stored in a tree. Each node of the tree has a name and a value. The values of leaf nodes are strings
-which store the actual configuration data. The values of inner nodes are defined recursively as
-objects with one field for each child node. The name and the value of each field is the name and the
-value of the corresponding child node, respectively.
-
-* folders : The folders module is used to access the OX folder structure.
-
-Folders with some kind of special:
-
-| ID | Type | Description |
-|----|------|-------------|
-| 6 | contacts | System Users |
-
-* tasks : The tasks module is used to access task information.
-* contacts : The contacts module is used to access contact information.
-* calendar : The calendar module is used to access calendar data.
-* mail : The mail module is used to access mail data. When mails are stored on an IMAP server, some functionality is not available due to restrictions of the IMAP protocol. Such functionality is marked with "not IMAP".
-* groups : The group module allows to query available groups. It is mainly used by the dialog for the selection of participants.
-* resources : The resource module allows to query available resources. It is mainly used by the dialog for the selection of participants.
-* infostore : The module infostore or filestore or files or drive has been renamed quite often. Whatever its name, it combines the knowledge database, bookmarks and document storage.
-* attachments : The module attachments allows file attachments to arbitrary objects. An attachment always belongs to an object (called 'attached') in a certain folder of a certain module.
-* reminder : The reminder module provides the ability to fetch all active reminders for a user between two dates.
-* multiple : The multiple module allows to bundle multiple requests to most other modules in a single request.
-* quota : The filestore module allows accesssing information about the use and quota of the filestore.
-* import : The module import allows to import specific module data (like Contacts, Tasks or Appointments) in several formats (iCal, vCard, CSV) into a folder. Please note: The callback for all actions of this bundle is `callback_import`, not `callback_$actionname` for legacy purposes.
-* export : The module export allows to export specific module data (like contacts, tasks or appointments) from a folder in several formats (iCal, vCard, CSV).
-* sync : The module sync delivers several core API extensions to support common operations used in a mobile synchronization environment.
-* token : The module token delivers several core API extensions to support token based logins.
-* mailfilter : The mailfilter module is used to access all mail filter related options.
-
-First of all the main structure of a mail filter script is, that it has different rules. Each of them contains one command. This command takes a test condition which executes the actions given in that command if the test condition is true.
-The test condition consists of a test command and some arguments for this command depending on the command itself. Because the available tests depend on the mail filter server, these tests must be determined at runtime. So that no test field is transferred to the server which it isn't able to handle. Examples for tests are `address`, `allof` and `anyof`.
-Each test has a special comparison. The list of available comparisons depends on the test given and the mail filter server configuration so they have to be determined at runtime too.
-
-* file : The ajax file upload module offers to store files in server's dedicated download directory for a configureable amount of time. The files are then accessible for further operations like inline images in (html) mails.
-* image : The image module allows to download images from Open-Xchange server without providing a session ID in request's URL parameters.
-* conversion : The conversion module is a generic module to request data from a data source and to process obtained/submitted data with a data handler. Thus data is converted from a data source by a data handler.
-* mailaccount : The mailaccount module is used to manage multiple mail accounts held by a user (available since v6.12).
-* autoconfig : The module autoconfig can be used to request the best available settings for an appropriate mail server (available since v6.22).
-* user : The user module is used to access user information (available since v6.14).
-* user/me : The module user/me is used to access formal information about current user (available since v7.6.2).
-* OAuth : The Open-Xchange server can act as an OAuth client (starting with v6.20) or be an OAuth provider itself (starting with v7.8.0). The OAuth module supports both aspects:
- * Manage multiple OAuth accounts for certain online services for a user. The OAuth mechanism allows the Open-Xchange application to act as behalf of this user using previously obtained access tokens granted by user. The according interface is divided into two parts: Account access and service's meta data access.
- * Manage granted accesses of external services that can access a users data on his behalf, called "grants".
-
-* JSlob : The JSlob module is used to store and retrieve arbitrary JSON-structured configuration for a single user (available since v6.22).
-* freebusy : Provides access to free/busy information (available since v6.22.1).
-* messaging : The messaging module is divided into services which represent a messaging backend (they add a new folder module "messaging"),
-into accounts which represent the concrete configuration of accounts for a given messaging service, and into messages which
-represent single messages consisting of some metadata, headers and a content.
-
-* snippet : Available since v7.0.0/v6.22.0.
-* halo
-* capabilities : Provides access to capabilities, i.e. modules or features that are available on the backend and the user has access to (available since v7.4.2).
-* jump : The jump module is used to pass an acquired identity token for an authenticated user from one system to another for a single sign-on (available since v7.6.0).
-* find : The find module consists of calls for performing searches within the modules mail, contacts, tasks and drive.
-It was designed to provide an iterative approach where the search criteria can be refined step-wise until
-the desired items are found.  The starting point is always an `autocomplete` request, that suggests possible
-search filters based on a users input. Those filters are grouped into categories, called "facets".
-A facet may provide one or more values with every value being a possible filter. A client is meant to remember
-every value that was selected by a user and include it within the following `autocomplete` and `query` requests,
-while `query` performs the actual search and returns the found items.
-
-Some of the objects returned by the server contain former user input. A client must never interpret strings as HTML
-but always as plain text to be not vulnerable for CSS attacks!
-
-Preliminary, available since v7.6.1.
-
-* share/management : The share/management module can create and manage share links via different actions. Dedicated actions to list all shares of a
-user can be found in the corresponding modules, like `/folders?action=shares` of module "folders" or `/infostore?action=shares`
-of module "infostore".
-
-Preliminary, available since v7.8.0.
-
-* passwordchange : Via the passwordchange module the users can change their password.
-* filestorage : The file storage module provides access to file storage backends, e.g. Drive, Dropbox, etc.
-* mail_categories : The module mail_categories allows to manage mail categories.
-
-
-## Consumes
-
-* `application/x-www-form-urlencoded`
-
-
-## Produces
-
-* `application/json`
-
-
-
-
-<a name="paths"></a>

@@ -124,7 +124,7 @@ specific field data of single or multiple objects.
 |216 | until| Date | Inclusive end date of a sequence. May be present only if recurrence_type > 0. The sequence has no end date if recurrence_type > 0 and this field is not present. Note: since this is a Date, the entire day after the midnight specified by the value is included.|
 |217 | notification| Boolean | If true, all participants are notified of any changes to this object. This flag is valid for the current change only, i. e. it is not stored in the database and is never sent by the server to the client.|
 |220 | participants| Array | Each element identifies a participant, user, group or booked resource as described in [Participant identifier](#participant-identifier).|
-|221 | users| Array | Each element represents a participant as described in User participant object. User groups are resolved and are represented by their members. Any user can occur only once.|
+|221 | users| Array | Each element represents a participant as described in [User participant object](#user-participant-object). User groups are resolved and are represented by their members. Any user can occur only once.|
 |222 | occurrences| Number | Specifies how often a recurrence should appear. May be present only if recurrence_type > 0.|
 |223 | uid| String | Can only be written when the object is created. Internal and external globally unique identifier of the appointment or task. Is used to recognize appointments within iCal files. If this attribute is not written it contains an automatic generated UUID.|
 |224 | organizer| String | Contains the email address of the appointment organizer which is not necessarily an internal user. Not implemented for tasks.|
@@ -135,7 +135,7 @@ specific field data of single or multiple objects.
 |229 | principalId| Number | Contains the userIId of the appointment principal if it is an internal user. Not implemented for tasks. (Introduced with 6.20.1)|
 |401 | full_time| Boolean | True if the event is a whole day appointment or task, false otherwise.|
 
-## Task sequence type
+### Task sequence type
 
 |Number | Description|
 |:------|:-----------|
@@ -146,7 +146,7 @@ specific field data of single or multiple objects.
 |4 | yearly|
 
 
-## Participant identifier
+### Participant identifier
 |Name | Type | Value|
 |:----|:-----|:-----|
 |id | Number | User ID|
@@ -154,7 +154,7 @@ specific field data of single or multiple objects.
 |mail | String | mail address of an external participant|
 
 
-## Participant types
+### Participant types
 
 |Number | Type |
 |:------|:-----|
@@ -165,7 +165,7 @@ specific field data of single or multiple objects.
 |5 | external user|
 
 
-## User participant object
+### User participant object
 
 |Name | Type | Value|
 |:----|:-----|:-----|
@@ -174,7 +174,7 @@ specific field data of single or multiple objects.
 |confirmation | Number | See [Confirmation status](#confirmation-status) |
 |confirmmessage | String | Confirm Message of the participant|
 
-## Confirmation status
+### Confirmation status
 
 |Number | Status |
 |:------|:-------|
@@ -183,7 +183,7 @@ specific field data of single or multiple objects.
 |2 | declined|
 |3 | tentative|
 
-## Confirming participant
+### Confirming participant
 
 |Name | Type | Value|
 |:----|:-----|:-----|
@@ -213,7 +213,7 @@ specific field data of single or multiple objects.
 |316 | start_time| Date or Time | Inclusive start as Date for whole day tasks and Time for normal tasks.|
 |317 | end_time| Date or Time |	Exclusive end as Date for whole day tasks and as Time for normal tasks.|
 
-## Task status
+### Task status
 
 |Number | Status |
 |:------|:-------|
@@ -339,7 +339,7 @@ specific field data of single or multiple objects.
 
 
 
-## Distribution list member
+### Distribution list member
 | Name | Type | Value |
 |:-----|:-----|:------|
 | id | String | Object ID of the member's contact if the member is an existing contact. |
@@ -348,7 +348,7 @@ specific field data of single or multiple objects.
 | mail | String | Email address (mandatory before 6.22, afterwards optional if you are referring to an internal contact) |
 | mail_field | Number | Which email field of an existing contact (if any) is used for the mail field. See [Mail fields](#mail-fields). |
 
-## Mail fields
+### Mail fields
 
 |Number|Field|
 |:-----|:----|
@@ -372,7 +372,7 @@ specific field data of single or multiple objects.
 |410 |	recurrence_start |	Date | Start of a sequence without time |
 ||ignore_conflicts | Boolean |	Ignore soft conflicts for the new or modified appointment. This flag is valid for the current change only, i. e. it is not stored in the database and is never sent by the server to the client. |
 
-## Appointment availability
+### Appointment availability
 
 |Number|Value|
 |:-----|:----|
@@ -415,7 +415,7 @@ specific field data of single or multiple objects.
 |654 | original_id | String | The original mail identifier (e.g. if fetched from "virtual/all" folder).|
 |655 | original_folder_id | String | The original folder identifier (e.g. if fetched from "virtual/all" folder).|
 
-## Mail system flags
+### Mail system flags
 
 |Number | Description |
 |:------|:------------|
@@ -429,7 +429,7 @@ specific field data of single or multiple objects.
 |128 | spam |
 |256 | forwarded |
 
-## X-Priority header
+### X-Priority header
 
 |Number | Description |
 |:------|:------------|
@@ -440,7 +440,7 @@ specific field data of single or multiple objects.
 |2 | High |
 |1 | Very High |
 
-## Attachment
+### Attachment
 
 |Name |	Type | Value |
 |:----|:-----|:------|
@@ -474,7 +474,7 @@ specific field data of single or multiple objects.
 |7020 | com.openexchange.realtime.resourceID | String | The resource identifier for the infoitem for usage within the realtime component. Read Only, Since 7.8.0. |
 
 
-## Object Permission object
+### Object Permission object
 
 |Name |	Type | Value |
 |:----|:-----|:------|
@@ -489,7 +489,7 @@ specific field data of single or multiple objects.
 | contact_folder | String | The folder identifier of the corresponding contact entry if the recipient was chosen from the address book (for type "guest", required if "contact_id" is set).|
 | expiry_date | Time | The end date / expiration time after which the share link is no longer accessible (for type "anonymous", optional).|
 
-## Extended object permission object
+### Extended object permission object
 
 |Name |	Type | Value |
 |:----|:-----|:------|
@@ -516,7 +516,7 @@ specific field data of single or multiple objects.
 |805 |file_mimetype | String | The MIME-Type of the attached file|
 |806 |rft_flag | Boolean | If the attachment is a RTF Attachment of Outlook. (Outlook descriptions can be stored as RTF Documents).|
 
-## Attachment module
+### Attachment module
 
 |Number | Name |
 |:------|:-----|
@@ -575,7 +575,7 @@ specific field data of single or multiple objects.
 | 1044 | mail_starttls | Boolean | Available since v7.8.2 Whether to establish a secure connection to mail server via STARTTLS. |
 | 1045 | transport_starttls | Boolean | Available since v7.8.2 Whether to establish a secure connection to transport server via STARTTLS. |
 
-## Credential source
+### Credential source
 
 |Value | Description |
 |:-----|:------------|

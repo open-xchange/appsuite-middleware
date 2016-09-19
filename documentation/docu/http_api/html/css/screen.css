@@ -1,5 +1,9 @@
 /* Original style from softwaremaniacs.org (c) Ivan Sagalaev <Maniac@SoftwareManiacs.Org> */
 
+html, body {
+  height: 100%;
+}
+
 body {
     counter-reset: h2counter;
 }
@@ -25,14 +29,27 @@ div.heading h3:before {
 
 #flexDiv {
   display:flex;
+  height: 100%;
+  width: 70%;
 }
 
 #tocDiv {
-  min-width: 250px;
+  min-width: 300px;
+  background-color: #F5F5F5;
+  border-right: 1px solid #DDDDDD;
+  height:100vh;
+  overflow-y: overlay;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 999;
 }
 
 #flexContentDiv {
   flex-grow: 1;
+  position: relative;
+  left: 300px;
+  width: calc(100% - 300px);
 }
 
 .back-to-top {
@@ -64,29 +81,17 @@ div.heading h3:before {
   padding: 5px; 
   color: #fff; 
   font-size: 45px;
-  font-family: 'ETmodules'; }
+}
 
-  /**
-  .back-to-top { 
-  font-family: 'ETmodules'; 
-  content: attr(data-icon); 
-  speak: none; 
-  font-weight: normal; 
-  font-variant: normal; 
-  text-transform: none; 
-  line-height: 1; 
-  -webkit-font-smoothing: antialiased; 
-  
-  display: inline-block; 
-  -moz-box-sizing: border-box; 
-  -webkit-box-sizing: border-box; 
-  box-sizing: border-box; }
-  **/
+h1#tocHeading {
+  position: fixed;
+  margin-left: 1em;
+}
 
 ul.tocList {
   position: fixed;
   left: 0em;
-  top: 0em;
+  top: 2em;
   margin: auto;
   margin-left: auto;
   margin-right: auto;
@@ -169,10 +174,13 @@ div.oxNormalDiv {
   margin-left: 100px;
   min-width: 760px;
   max-width: 960px;
-  overflow: hidden;
   font-family: "Droid Sans", sans-serif;
   line-height: 1.25;
   padding-top: 15px;
+}
+
+div#after_insert_div {
+  margin-bottom: 40px;
 }
 
 div.oxShowButtonDiv {
@@ -186,6 +194,30 @@ div.oxShowButtonDiv {
   padding-right: 15px;
   float: right;
 }
+
+div.oxShowButtonDiv button.oxButton {
+    background-color: white; 
+    border: none;
+    color: #AAAAAA;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+}
+
+div.oxShowButtonDiv button.oxButton:hover {
+    background-color: white; 
+    border: none;
+    color: black;
+    text-align: center;
+    text-decoration: underline;
+    display: inline-block;
+}
+
+div.oxShowButtonDiv button.oxButton:focus {
+    outline:0;
+}
+
 
 div.bodyHeaderDiv {
   background-color: inherit;
@@ -284,6 +316,13 @@ a.tocPlusTag:hover {
   color: #1199DD;
 }
 
+.oxNormalDiv pre {
+  background:#F8F8FF; 
+  border:black dashed 1px; 
+  padding: 6px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
 
 
 .swagger-section pre code {

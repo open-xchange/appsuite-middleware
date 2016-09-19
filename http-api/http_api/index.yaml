@@ -74,7 +74,7 @@ tags:
       
       First of all the main structure of a mail filter script is, that it has different rules. Each of them contains one command. This command takes a test condition which executes the actions given in that command if the test condition is true.
       The test condition consists of a test command and some arguments for this command depending on the command itself. Because the available tests depend on the mail filter server, these tests must be determined at runtime. So that no test field is transferred to the server which it isn't able to handle. Examples for tests are `address`, `allof` and `anyof`.
-      Each test has a special comparison. The list of available comparisons depends on the test given and the mail filter server configuration so they have to be determined at runtime too.
+      Each test has a special comparison. The list of available comparisons depends on the test given and the mail filter server configuration so they have to be determined at runtime too. See chapter [Mail filter](#mail-filter) for more information.
   - name: File
     description: The ajax file upload module offers to store files in server's dedicated download directory for a configureable amount of time. The files are then accessible for further operations like inline images in (html) mails.
   - name: Image

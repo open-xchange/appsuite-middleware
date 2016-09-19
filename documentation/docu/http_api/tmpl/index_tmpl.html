@@ -23972,7 +23972,7 @@
           $('pre code').each(function(i, e) {
             hljs.highlightBlock(e)
           });
-          var searchTemplate = "<div id='searchDiv' class='filter'><fieldset class='search'><input type='text' placeholder='Search for methods... '><button type='submit'><i class='icon-search'></i></button></fieldset></div>";
+          var searchTemplate = "<div id='searchDiv' class='filter'><fieldset class='search'><input id='searchInput' type='text' placeholder='Search for methods... '><button class='submitButton' type='submit'><i class='icon-search'></i></button></fieldset></div>";
           $("#swagger-ui-container").find(">div>ul").sieve({
             itemSelector: "li",
             searchTemplate: searchTemplate
@@ -23981,6 +23981,11 @@
              if(event.keyCode == 13){
               $("#resources > li > ul.endpoints").show();
              }
+          });
+
+          $(".submitButton").click(function() {
+              
+              $("#resources > li > ul.endpoints").show();
           });
 
         log("creating toc");        
@@ -24020,6 +24025,7 @@
 
 <div id=flexDiv>
   <div id=tocDiv>
+  <h1 id=tocHeading>Table of Contents</h1>
     <div id="toc" class="toc"></div>
   </div>
 
