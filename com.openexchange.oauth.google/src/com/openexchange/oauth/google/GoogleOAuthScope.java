@@ -65,12 +65,12 @@ public enum GoogleOAuthScope implements OAuthScope {
     contacts_rw("https://www.googleapis.com/auth/contacts", Module.contacts_rw),
     drive("https://www.googleapis.com/auth/drive", Module.drive);
 
-    private String mapping;
-    private Module module;
+    private final String mapping;
+    private final Module module;
 
     /**
      * Initialises a new {@link GoogleOAuthScope}.
-     * 
+     *
      * @param mapping The OAuth mapping
      * @param module The {@link Module}
      */
@@ -81,7 +81,7 @@ public enum GoogleOAuthScope implements OAuthScope {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
      */
     @Override
@@ -91,7 +91,7 @@ public enum GoogleOAuthScope implements OAuthScope {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScope#getModule()
      */
     @Override

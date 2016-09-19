@@ -65,12 +65,12 @@ public enum MSLiveConnectOAuthScope implements OAuthScope {
     contacts_rw("wl.contacts_create wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses", Module.contacts_rw),
     drive("wl.skydrive wl.skydrive_update", Module.drive);
 
-    private String mapping;
-    private Module module;
+    private final String mapping;
+    private final Module module;
 
     /**
      * Initialises a new {@link MSLiveConnectOAuthScope}.
-     * 
+     *
      * @param mapping The OAuth mapping
      * @param module The {@link Module}
      */
@@ -81,7 +81,7 @@ public enum MSLiveConnectOAuthScope implements OAuthScope {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
      */
     @Override
@@ -91,7 +91,7 @@ public enum MSLiveConnectOAuthScope implements OAuthScope {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScope#getModule()
      */
     @Override
