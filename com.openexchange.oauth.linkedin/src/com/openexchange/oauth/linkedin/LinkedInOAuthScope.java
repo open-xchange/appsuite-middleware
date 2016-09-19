@@ -61,12 +61,12 @@ import com.openexchange.oauth.scope.OAuthScope;
 public enum LinkedInOAuthScope implements OAuthScope {
     contacts_ro("r_basicprofile r_emailaddress", Module.contacts_ro);
 
-    private String mapping;
-    private Module module;
+    private final String mapping;
+    private final Module module;
 
     /**
      * Initialises a new {@link LinkedInOAuthScope}.
-     * 
+     *
      * @param mapping The OAuth mapping
      * @param module The {@link Module}
      */
@@ -77,7 +77,7 @@ public enum LinkedInOAuthScope implements OAuthScope {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
      */
     @Override
@@ -87,7 +87,7 @@ public enum LinkedInOAuthScope implements OAuthScope {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScope#getModule()
      */
     @Override

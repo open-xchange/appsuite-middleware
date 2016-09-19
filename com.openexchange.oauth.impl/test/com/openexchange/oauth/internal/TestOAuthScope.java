@@ -63,8 +63,8 @@ public enum TestOAuthScope implements OAuthScope {
     drive("some scopes the OAuth provider specifies for DRIVE", Module.drive),
     ;
 
-    private String mapping;
-    private Module module;
+    private final String mapping;
+    private final Module module;
 
     /**
      * Initialises a new {@link TestOAuthScope}.
@@ -77,7 +77,7 @@ public enum TestOAuthScope implements OAuthScope {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
      */
     @Override
@@ -87,7 +87,7 @@ public enum TestOAuthScope implements OAuthScope {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScope#getModule()
      */
     @Override

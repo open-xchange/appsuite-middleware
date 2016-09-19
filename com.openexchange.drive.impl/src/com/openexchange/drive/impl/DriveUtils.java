@@ -146,8 +146,11 @@ public class DriveUtils {
      * @throws OXException
      */
     public static boolean isIgnoredPath(SyncSession session, String path) throws OXException {
-        if (session.getTemp().supported() && session.getTemp().getPath(false).equals(path)) {
-            return true; // no temp path
+        if (session.getTemp().supported()) {
+            String tempPath = session.getTemp().getPath(false);
+            if (null != tempPath && tempPath.equals(path)) {
+                return true; // no temp path
+            }
         }
         if (DriveConfig.getInstance().getExcludedDirectoriesPattern().matcher(path).matches()) {
             return true; // no (server-side) excluded paths
