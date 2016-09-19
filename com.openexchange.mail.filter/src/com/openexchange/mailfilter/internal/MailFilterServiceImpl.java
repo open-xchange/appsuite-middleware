@@ -344,7 +344,9 @@ public final class MailFilterServiceImpl implements MailFilterService {
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
                 String activeScript = sieveHandler.getActiveScript();
-                writeScript(sieveHandler, activeScript, "");
+                SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
+                String writeback = sieveTextFilter.writeEmptyScript();
+                writeScript(sieveHandler, activeScript, writeback);
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
             } catch (OXSieveHandlerException e) {
@@ -381,6 +383,11 @@ public final class MailFilterServiceImpl implements MailFilterService {
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mailfilter.MailFilterService#listRules(com.openexchange.mailfilter.Credentials)
+     */
     @Override
     public List<Rule> listRules(Credentials credentials, FilterType flag) throws OXException {
         Object lock = lockFor(credentials);
@@ -708,7 +715,13 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     /**
      * Check own vacation
+     * <<<<<<< HEAD
      *
+     * ||||||| parent of 93f30cc... Fix for bug 48832: Don't write a completely empty sieve script when purging. Instead write only a comment line
+     * =======
+     * 
+     * >>>>>>> 93f30cc... Fix for bug 48832: Don't write a completely empty sieve script when purging. Instead write only a comment line
+     * 
      * @param arguments
      * @return
      */
