@@ -78,7 +78,8 @@ import com.openexchange.report.appsuite.ReportSystemHandler;
 import com.openexchange.report.appsuite.jobs.AnalyzeContextBatch;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.report.appsuite.serialization.ReportConfigs;
-import com.openexchange.report.appsuite.storage.DataloaderMySQL;
+import com.openexchange.report.appsuite.storage.ChunkingUtilities;
+import com.openexchange.report.appsuite.storage.ContextLoader;
 
 /**
  * {@link LocalReportService}
@@ -88,7 +89,7 @@ import com.openexchange.report.appsuite.storage.DataloaderMySQL;
  * @since v7.8.2
  */
 public class LocalReportService extends AbstractReportService {
-    
+
     //--------------------Class Attributes--------------------
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalReportService.class);
 
@@ -104,7 +105,7 @@ public class LocalReportService extends AbstractReportService {
     private static AtomicReference<ExecutorService> EXECUTOR_SERVICE_REF = new AtomicReference<ExecutorService>();
 
     private final AtomicInteger threadNumber = new AtomicInteger();
-    
+
     //--------------------Public override methods--------------------
     /**
      * {@inheritDoc}
@@ -166,13 +167,13 @@ public class LocalReportService extends AbstractReportService {
             }
         }
         // Mark context as done, thereby decreasing the number of pending tasks
-//        report.markTaskAsDone();
+        //        report.markTaskAsDone();
 
         pendingReports.put(report.getUUID(), report);
 
-//        if (report.getNumberOfPendingTasks() == 0) {
-//            finishUpReport(reportType, pendingReports, report);
-//        }
+        //        if (report.getNumberOfPendingTasks() == 0) {
+        //            finishUpReport(reportType, pendingReports, report);
+        //        }
     }
 
     /**
@@ -191,12 +192,12 @@ public class LocalReportService extends AbstractReportService {
             return;
         }
         // Mark context as done
-//        report.markTaskAsDone();
+        //        report.markTaskAsDone();
         pendingReports.put(report.getUUID(), report);
 
-//        if (report.getNumberOfPendingTasks() == 0) {
-//            finishUpReport(reportType, pendingReports, report);
-//        }
+        //        if (report.getNumberOfPendingTasks() == 0) {
+        //            finishUpReport(reportType, pendingReports, report);
+        //        }
     }
 
     @Override
@@ -220,6 +221,7 @@ public class LocalReportService extends AbstractReportService {
         }
 
         pendingReports.remove(uuid);
+        ChunkingUtilities.removeAllReportParts(uuid);
         LOG.info("Report generation stopped due to an error. Solve the following error and start report again: {}", reason);
     }
 
@@ -252,7 +254,7 @@ public class LocalReportService extends AbstractReportService {
 
         // Set up an AnalyzeContextBatch instance for every chunk of contextIds
         if (reportConfig.isShowSingleTenant()) {
-            DataloaderMySQL dataloaderMySQL = new DataloaderMySQL();
+            ContextLoader dataloaderMySQL = new ContextLoader();
             try {
                 allContextIds = dataloaderMySQL.getAllContextsForSid(reportConfig.getSingleTenantId());
             } catch (SQLException e) {
@@ -302,8 +304,8 @@ public class LocalReportService extends AbstractReportService {
         LOG.debug("{} contexts in total will get processed!", contextsToProcess.size());
         while (!contextsToProcess.isEmpty()) {
             Integer firstRemainingContext = contextsToProcess.get(0);
-            DataloaderMySQL dataloaderMySQL = new DataloaderMySQL();
-            ArrayList<Integer> contextsInSameSchema = null;
+            ContextLoader dataloaderMySQL = new ContextLoader();
+            List<Integer> contextsInSameSchema = null;
             try {
                 contextsInSameSchema = dataloaderMySQL.getAllContextIdsInSameSchema(firstRemainingContext.intValue());
             } catch (SQLException e1) {
@@ -317,24 +319,22 @@ public class LocalReportService extends AbstractReportService {
             if (EXECUTOR_SERVICE_REF.get().isShutdown()) {
                 break;
             }
-            if (report != null) {
-                Future<Integer> finishedContexts = EXECUTOR_SERVICE_REF.get().submit(new AnalyzeContextBatch(uuid, report, contextsInSameSchema));
-                
-                try {
-                    if (finishedContexts.get() != 0) {
-                        report.setTaskState(report.getNumberOfTasks(), report.getNumberOfPendingTasks() - finishedContexts.get());
-                        if (report.getNumberOfPendingTasks() <= 0) {
-                            finishUpReport(report.getType(), reportCache.asMap().get(PENDING_REPORTS_PRE_KEY + report.getType()), report);
-                        }
+            Future<Integer> finishedContexts = EXECUTOR_SERVICE_REF.get().submit(new AnalyzeContextBatch(uuid, report, contextsInSameSchema));
+
+            try {
+                if (finishedContexts.get() != 0) {
+                    report.setTaskState(report.getNumberOfTasks(), report.getNumberOfPendingTasks() - finishedContexts.get());
+                    if (report.getNumberOfPendingTasks() <= 0) {
+                        finishUpReport(report);
                     }
-                    
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
-                    e.printStackTrace();
                 }
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
             }
-            
+
             LOG.debug("{} assigned. {} contexts still to assign.", contextsInSameSchema.size(), contextsToProcess.size());
         }
         LOG.debug("All {} contexts assigned.", allContextIds.size());
@@ -344,16 +344,16 @@ public class LocalReportService extends AbstractReportService {
         return LocalReportService.class.getSimpleName() + "-" + threadNumber;
     }
 
-    private void finishUpReport(String reportType, Map<String, Report> pendingReports, Report report) {
+    private void finishUpReport(Report report) {
         for (ReportSystemHandler handler : Services.getSystemHandlers()) {
-            if (handler.appliesTo(reportType)) {
+            if (handler.appliesTo(report.getType())) {
                 handler.runSystemReport(report);
             }
         }
 
         // And perform the finishing touches
         for (ReportFinishingTouches handler : Services.getFinishingTouches()) {
-            if (handler.appliesTo(reportType)) {
+            if (handler.appliesTo(report.getType())) {
                 handler.finish(report);
             }
         }
@@ -370,8 +370,7 @@ public class LocalReportService extends AbstractReportService {
         reportCache.asMap().put(REPORTS_KEY, finishedReports);
 
         // Clean up resources
-        pendingReports.remove(report.getUUID());
-        reportCache.asMap().get(PENDING_REPORTS_PRE_KEY + reportType).remove(report.getUUID());
+        reportCache.asMap().get(PENDING_REPORTS_PRE_KEY + report.getType()).remove(report.getUUID());
     }
 
 }

@@ -139,7 +139,6 @@ public class Total implements ContextReportCumulator{
 
     @Override
     public void storeAndMergeReportParts(Report report) {
-        // TODO Auto-generated method stub
-        
+        // Method not needed in this class, nothing to do here
     }
 }

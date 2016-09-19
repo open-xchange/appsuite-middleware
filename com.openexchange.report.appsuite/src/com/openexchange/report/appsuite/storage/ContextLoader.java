@@ -54,24 +54,26 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserExceptionCode;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.report.appsuite.internal.Services;
 
 /**
- * The {@link DataloaderMySQL} class is used to load data from the database, that is needed
+ * The {@link ContextLoader} class is used to load data from the database, that is needed
  * by the report creation functions.
  *
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.8.2
  */
-public class DataloaderMySQL {
+public class ContextLoader {
 
     DatabaseService dbService;
 
-    public DataloaderMySQL() {
+    public ContextLoader() {
         super();
-        this.dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        this.dbService = Services.getService(DatabaseService.class);
     }
 
     /**
@@ -82,13 +84,14 @@ public class DataloaderMySQL {
      * @throws SQLException, if the query is incorrect or can not be executed
      * @throws OXException
      */
-    public ArrayList<Integer> getAllContextsForSid(Long sid) throws SQLException, OXException {
+    public List<Integer> getAllContextsForSid(Long sid) throws SQLException, OXException {
         ArrayList<Integer> result = new ArrayList<>();
         PreparedStatement stmt = null;
         ResultSet sqlResult = null;
         Connection currentConnection = this.dbService.getReadOnly();
         try {
-            stmt = currentConnection.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=" + sid);
+            stmt = currentConnection.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=?");
+            stmt.setLong(1, sid);
             sqlResult = stmt.executeQuery();
             while (sqlResult.next()) {
                 result.add(sqlResult.getInt(1));
@@ -102,13 +105,23 @@ public class DataloaderMySQL {
         return result;
     }
     
-    public ArrayList<Integer> getAllContextIdsInSameSchema(int cid) throws SQLException, OXException {
+    /**
+     * Loads all context-ids that are in the same schema, as the given cid. The given cid
+     * will be also returned in the list.
+     * 
+     * @param cid
+     * @return a list with all context ids in the same schema
+     * @throws SQLException
+     * @throws OXException
+     */
+    public List<Integer> getAllContextIdsInSameSchema(int cid) throws SQLException, OXException {
         ArrayList<Integer> result = new ArrayList<>();
         PreparedStatement stmt = null;
         ResultSet sqlResult = null;
         Connection currentConnection = this.dbService.getReadOnly();
         try {
-            stmt = currentConnection.prepareStatement("SELECT cid FROM context_server2db_pool WHERE db_schema = (SELECT db_schema FROM context_server2db_pool where cid = "+cid+")");
+            stmt = currentConnection.prepareStatement("SELECT cid FROM context_server2db_pool WHERE db_schema = (SELECT db_schema FROM context_server2db_pool where cid =?)");
+            stmt.setInt(1, cid);
             sqlResult = stmt.executeQuery();
             while (sqlResult.next()) {
                 result.add(sqlResult.getInt(1));

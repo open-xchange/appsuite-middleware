@@ -51,7 +51,6 @@ package com.openexchange.report.appsuite.osgi;
 
 import javax.management.ObjectName;
 import org.osgi.framework.ServiceReference;
-import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
@@ -92,8 +91,6 @@ public class ReportActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServices(this);
-
-        trackService(HazelcastInstance.class);
 
         // ContextReportCumulator
         track(ContextReportCumulator.class, new SimpleRegistryListener<ContextReportCumulator>() {
@@ -214,6 +211,7 @@ public class ReportActivator extends HousekeepingActivator {
         managementService.registerMBean(new ObjectName("com.openexchange.reporting.appsuite", "name", "AppSuiteReporting"), new ReportMXBeanImpl());
     }
 
+    @Override
     protected void stopBundle() throws Exception {
         Services.setServices(null);
 

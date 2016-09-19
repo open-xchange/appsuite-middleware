@@ -14,11 +14,10 @@ Import-Package: com.hazelcast.core,
  com.openexchange.exception,
  com.openexchange.hazelcast.serialization,
  com.openexchange.osgi,
+ com.openexchange.server,
  com.openexchange.tools.strings,
  javax.management.openmbean,
  org.json,
  org.osgi.framework
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.report.appsuite.serialization
-Require-Bundle: com.openexchange.test,
- com.openexchange.global

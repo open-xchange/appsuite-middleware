@@ -58,6 +58,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -74,6 +75,7 @@ import com.openexchange.server.services.ServerServiceRegistry;
 /**
  * The {@link InfostoreInformationImpl} class is an implementations of {@link InfostoreInformationService} class.
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
+ * @since v7.8.2
  */
 public class InfostoreInformationImpl implements InfostoreInformationService {
 
@@ -95,14 +97,14 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
     }
 
     @Override
-    public Map<String, Integer> getFileSizeMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+    public Map<String, Integer> getFileSizeMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
         String whereQuery = buildWhereClause(usersInContext, "created_by");
         String query = "SELECT min(file_size), max(file_size), avg(file_size), sum(file_size), count(*) FROM infostore_document" + whereQuery + "AND version_number > 0;";
         return this.getDataFromDB(usersInContext, query, "count", true, false, null, null);
     }
 
     @Override
-    public Map<String, Integer> getFileCountMimetypeMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+    public Map<String, Integer> getFileCountMimetypeMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
         LinkedHashMap<String, Integer> resultMap = new LinkedHashMap<>();
 
         // DB Connection
@@ -134,35 +136,35 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
     }
 
     @Override
-    public Map<String, Integer> getStorageUseMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+    public Map<String, Integer> getStorageUseMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
         String whereQuery = buildWhereClause(usersInContext, "created_by");
         String query = "SELECT min(roundup.sum), max(roundup.sum), avg(roundup.sum), sum(roundup.sum), count(*) FROM " + "(SELECT cid, created_by, sum(file_size) AS sum FROM infostore_document" + whereQuery + "GROUP BY cid, created_by) AS roundup;";
         return this.getDataFromDB(usersInContext, query, "count", true, false, null, null);
     }
 
     @Override
-    public Map<String, Integer> getFileCountMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+    public Map<String, Integer> getFileCountMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
         String whereQuery = buildWhereClause(usersInContext, "created_by");
         String query = "SELECT min(roundup.count), max(roundup.count), avg(roundup.count), sum(roundup.count), count(DISTINCT roundup.created_by) FROM " + "(SELECT cid, created_by, count(version_number) AS count FROM infostore_document " + whereQuery + " AND version_number > 0 GROUP BY cid, created_by) AS roundup;";
         return this.getDataFromDB(usersInContext, query, "users", false, false, null, null);
     }
 
     @Override
-    public Map<String, Integer> getFileCountInTimeframeMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext, Date start, Date end) throws SQLException, OXException {
+    public Map<String, Integer> getFileCountInTimeframeMetrics(Map<Integer, List<Integer>> usersInContext, Date start, Date end) throws SQLException, OXException {
         String whereQuery = buildWhereClause(usersInContext, "created_by");
         String query = "SELECT min(roundup.count), max(roundup.count), avg(roundup.count), sum(roundup.count), count(*) FROM " + "(SELECT cid, created_by, count(version_number) AS count FROM infostore_document " + whereQuery + " AND creating_date > ? AND creating_date < ? AND version_number > 0 " + "GROUP BY cid, created_by) AS roundup;";
         return this.getDataFromDB(usersInContext, query, "count", true, true, start, end);
     }
 
     @Override
-    public Map<String, Integer> getExternalStorageMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+    public Map<String, Integer> getExternalStorageMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
         String whereQuery = buildWhereClause(usersInContext, "user");
         String query = "SELECT min(roundup.sum), max(roundup.sum), avg(roundup.sum), sum(roundup.sum), sum(roundup.users) FROM " + "(SELECT cid, user, count(id) AS sum, count(DISTINCT user) AS users FROM oauthAccounts" + whereQuery + " GROUP BY cid, user) AS roundup;";
         return this.getDataFromDB(usersInContext, query, "users", false, false, null, null);
     }
 
     @Override
-    public Map<String, Integer> getFileCountNoVersions(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+    public Map<String, Integer> getFileCountNoVersions(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
         LinkedHashMap<String, Integer> resultMap = new LinkedHashMap<>();
 
         // DB Connection
@@ -192,14 +194,14 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
     }
 
     @Override
-    public Map<String, Integer> getQuotaUsageMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+    public Map<String, Integer> getQuotaUsageMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
         QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
         HashMap<String, Integer> resultMap = new HashMap<>();
         if (null == storageService) {
             throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
         }
         HashMap<String, Integer> filestoreMap = new HashMap<>();
-        for (Entry<Integer, ArrayList<Integer>> contexts : usersInContext.entrySet()) {
+        for (Entry<Integer, List<Integer>> contexts : usersInContext.entrySet()) {
             for (Integer userId : contexts.getValue()) {
                 QuotaFileStorage userStorage = storageService.getQuotaFileStorage(userId, contexts.getKey());
                 long quota = userStorage.getQuota();
@@ -253,10 +255,10 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
      * @param userIdColumn, the colums that contains the userId
      * @return a where query with all contextIds/userIds like in the example
      */
-    private String buildWhereClause(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext, String userIdColumn) {
+    private String buildWhereClause(Map<Integer, List<Integer>> usersInContext, String userIdColumn) {
         String whereQuery = " WHERE (";
         boolean isFirst = true;
-        for (Entry<Integer, ArrayList<Integer>> currentContext : usersInContext.entrySet()) {
+        for (Entry<Integer, List<Integer>> currentContext : usersInContext.entrySet()) {
             String contextUserQuery = buildWhereQueryCtxsUsrs(currentContext.getKey(), currentContext.getValue(), userIdColumn);
             if (isFirst) {
                 whereQuery += contextUserQuery;
@@ -280,7 +282,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
      * @param userIdColumn, the column that contains the userId
      * @return
      */
-    private static String buildWhereQueryCtxsUsrs(Integer contextId, ArrayList<Integer> userIds, String userIdColumn) {
+    private static String buildWhereQueryCtxsUsrs(Integer contextId, List<Integer> userIds, String userIdColumn) {
         String resultQuery = "(cid=" + contextId + " AND " + userIdColumn + " in (";
         boolean isFirst = true;
         for (Integer id : userIds) {
@@ -303,11 +305,11 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-    private void loadAllNecessaryDBConnections(LinkedHashMap<Integer, ArrayList<Integer>> contextUserMap) throws SQLException, OXException {
+    private void loadAllNecessaryDBConnections(Map<Integer, List<Integer>> contextUserMap) throws SQLException, OXException {
 
         Set<Integer> alreadyProcessed = new HashSet<Integer>();
 
-        for (Entry<Integer, ArrayList<Integer>> current : contextUserMap.entrySet()) {
+        for (Entry<Integer, List<Integer>> current : contextUserMap.entrySet()) {
 
             if (alreadyProcessed.contains(current.getKey())) {
                 continue;
@@ -374,7 +376,7 @@ public class InfostoreInformationImpl implements InfostoreInformationService {
      * @throws SQLException
      * @throws OXException
      */
-    private LinkedHashMap<String, Integer> getDataFromDB(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext, String query, String counter, boolean deleteCounter, boolean hasTimerange, Date start, Date end) throws SQLException, OXException {
+    private Map<String, Integer> getDataFromDB(Map<Integer, List<Integer>> usersInContext, String query, String counter, boolean deleteCounter, boolean hasTimerange, Date start, Date end) throws SQLException, OXException {
         LinkedHashMap<String, Integer> resultMap = new LinkedHashMap<>();
         // DB Connection
         if (this.nececarryConnections.size() == 0) {

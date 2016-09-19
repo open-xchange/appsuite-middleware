@@ -65,6 +65,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
@@ -94,6 +95,7 @@ import com.openexchange.report.appsuite.UserReportCumulator;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.report.appsuite.serialization.Report.JsonObjectType;
+import com.openexchange.report.appsuite.storage.ChunkingUtilities;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -137,7 +139,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         this.createCapabilityInformations(userReport);
         this.addUserInformationToReport(userReport);
     }
-    
+
     private void createCapabilityInformations(UserReport userReport) throws OXException {
         CapabilitySet userCapabilitySet = getUserCapabilities(userReport.getUser(), userReport.getContext());
         ArrayList<String> userCapabilityIds = createSortedListOfCapabilityIds(userCapabilitySet);
@@ -173,7 +175,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         capabilityIdsAsString.setLength(capabilityIdsAsString.length() - 1);
         return capabilityIdsAsString.toString();
     }
-    
+
     private void addUserInformationToReport(UserReport userReport) throws OXException {
         if (!userReport.getUser().isGuest()) {
             // Determine if the user is disabled
@@ -247,7 +249,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
         //Only for single tenant deployment
         if (report.isSingleDeployment()) {
-            addContextAnUserToDeployment(report, contextReport, quotaSpec);
+            addContextAndUserToDeployment(report, contextReport, quotaSpec);
         }
 
         if (macdetail.values().size() >= report.getMaxChunkSize()) {
@@ -271,11 +273,11 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         capSData.put(Report.CONTEXT_USERS_MAX, 0l);
         capSData.put(Report.CONTEXT_USERS_MIN, 0l);
         capSData.put(Report.CONTEXT_USERS_AVG, 0l);
-        
+
         return capSData;
     }
 
-    private void addContextAnUserToDeployment(Report report, ContextReport contextReport, String quotaSpec) {
+    private void addContextAndUserToDeployment(Report report, ContextReport contextReport, String quotaSpec) {
         // Get all capS of the currentContext
         for (Entry<String, LinkedHashMap<Integer, ArrayList<Integer>>> capS : contextReport.getCapSToContext().entrySet()) {
             // Add all Context/UserIds to this reports capS
@@ -312,23 +314,16 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
 
         ArrayList<Object> values = new ArrayList(macdetail.values());
 
-        // Merge all stored data into report files, if neccessary
-        if (report.isNeedsComposition()) {
-            storeAndMergeReportParts(report);
-        } else {
-            this.sumClientsInSingleMap(values);
-        }
-
         if (report.getType().equals("extended")) {
             addDriveMetricsToReport(report);
         }
-
-        // Compose the report-content, if neccessary
+        // Merge all stored data into report files, if neccessary
         if (report.isNeedsComposition()) {
             storeAndMergeReportParts(report);
             report.composeReportFromStoredParts(Report.CAPABILITY_SETS, JsonObjectType.ARRAY, Report.MACDETAIL, 1);
+        } else {
+            this.sumClientsInSingleMap(values);
         }
-
         report.clearNamespace(Report.MACDETAIL);
 
         report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, values);
@@ -344,7 +339,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                     macdetail.put(currentCapS.getKey(), new HashMap<>());
                     compositionCapSList = new ArrayList<>(Arrays.asList(compositionCapS.split(",")));
                 }
-                addDriveMetricsToCapS((HashMap<String, Object>) macdetail.get(currentCapS.getKey()), (LinkedHashMap<Integer, ArrayList<Integer>>) currentCapS.getValue(), new Date(report.getConsideredTimeframeStart()), new Date(report.getConsideredTimeframeEnd()), report, compositionCapSList);
+                addDriveMetricsToCapS((Map<String, Object>) macdetail.get(currentCapS.getKey()), (Map<Integer, List<Integer>>) currentCapS.getValue(), new Date(report.getConsideredTimeframeStart()), new Date(report.getConsideredTimeframeEnd()), report, compositionCapSList);
             }
         }
         // calculate correct drive average values
@@ -369,7 +364,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         // given capability set already exists
         for (HashMap<String, Object> singleCapS : capSets) {
             try {
-                this.storeCapSContentToFiles(report.getUUID(), report.getStorageFolderPath(), singleCapS);
+                ChunkingUtilities.storeCapSContentToFiles(report.getUUID(), report.getStorageFolderPath(), singleCapS);
             } catch (JSONException e) {
                 final OXException oxException = new OXException(e);
                 LOG.error("Error while trying create JSONObject from stored capability-set data. " + oxException.getMessage(), oxException);
@@ -380,71 +375,6 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
         // remove whole capability set content
         report.clearNamespace(Report.MACDETAIL);
-    }
-
-    private void storeCapSContentToFiles(String reportUUID, String folderPath, HashMap<String, Object> data) throws JSONException, IOException {
-        String filename = reportUUID + "_" + data.get(Report.CAPABILITIES).hashCode() + ".part";
-        File storedDataFile = new File(folderPath + "/" + filename);
-        FileWriter fw = null;
-        try {
-            if (storedDataFile.exists()) {
-                mergeNewWithStoredData(storedDataFile, data);
-            }
-            // overwrite the so far stored data
-            JSONObject jsonData = (JSONObject) JSONCoercion.coerceToJSON(data);
-
-            fw = new FileWriter(storedDataFile);
-            fw.write(jsonData.toString(2));
-        } finally {
-            if (fw != null) {
-                fw.close();
-            }
-        }
-    }
-
-    private void mergeNewWithStoredData(File storedDataFile, HashMap<String, Object> data) throws IOException {
-        RandomAccessFile storedFile = null;
-        FileLock fileLock = null;
-        try {
-            storedFile = new RandomAccessFile(storedDataFile, "rw");
-            fileLock = getFileLock(fileLock, storedFile);
-            // unable to get file lock for more then 20 seconds
-            if (fileLock == null) {
-                if (storedFile != null) {
-                    storedFile.close();
-                }
-                throw new IOException("Unable to get file lock on file: " + storedDataFile.getAbsolutePath());
-            }
-            // Load and parse the existing data first into an Own JSONObject
-            Scanner sc = new Scanner(storedDataFile);
-            String content = sc.useDelimiter("\\Z").next();
-            sc.close();
-            HashMap<String, Object> storedData = (HashMap<String, Object>) JSONCoercion.parseAndCoerceToNative(content);
-            // Merge the data of the two files into dataToStore
-            mergeNewValuesWithStoredValues(storedData, data);
-        } catch (FileNotFoundException e1) {
-            e1.printStackTrace();
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
-        } finally {
-            if (storedFile != null) {
-                storedFile.close();
-            }
-        }
-    }
-
-    private FileLock getFileLock(FileLock fileLock, RandomAccessFile storedFile) throws InterruptedException, IOException {
-        int fileLockAttempts = 0;
-        while (fileLock == null && fileLockAttempts <= MAX_LOCK_FILE_ATTEMPTS) {
-            try {
-                fileLock = storedFile.getChannel().tryLock();
-            } catch (OverlappingFileLockException e) {
-                Thread.sleep(1000);
-                fileLockAttempts++;
-                continue;
-            }
-        }
-        return fileLock;
     }
 
     /**
@@ -556,7 +486,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
      * @param consideredTimeframeEnd, end of potential timeframe for calculating file count
      * @param report, the report with all values
      */
-    private void addDriveMetricsToCapS(HashMap<String, Object> capSMap, LinkedHashMap<Integer, ArrayList<Integer>> usersInContext, Date consideredTimeframeStart, Date consideredTimeframeEnd, Report report, ArrayList<String> compositionCapS) {
+    private void addDriveMetricsToCapS(Map<String, Object> capSMap, Map<Integer, List<Integer>> usersInContext, Date consideredTimeframeStart, Date consideredTimeframeEnd, Report report, List<String> compositionCapS) {
         InfostoreInformationService informationService = Services.getService(InfostoreInformationService.class);
         LinkedHashMap<String, Integer> driveUserMetrics = new LinkedHashMap<>();
         LinkedHashMap<String, Integer> driveMetrics = new LinkedHashMap<>();
@@ -639,7 +569,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
     }
 
-    private void addNewValuesToExistingValues(HashMap<String, Object> existingValues, HashMap<String, Object> newValues) {
+    private void addNewValuesToExistingValues(Map<String, Object> existingValues, Map<String, Object> newValues) {
         Long additionalContexts = 1l;
         existingValues.put(Report.CONTEXTS, Long.parseLong(String.valueOf(existingValues.get(Report.CONTEXTS))) + additionalContexts);
         for (Map.Entry<String, Object> entry : newValues.entrySet()) {
@@ -663,37 +593,6 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
     }
 
-    private void mergeNewValuesWithStoredValues(HashMap<String, Object> storedCounts, HashMap<String, Object> additionalCounts) {
-        if (storedCounts.get(Report.CONTEXTS) != null && additionalCounts.get(Report.CONTEXTS) != null) {
-            Long additionalContexts = Long.parseLong(String.valueOf(storedCounts.get(Report.CONTEXTS)));
-            additionalCounts.put(Report.CONTEXTS, Long.parseLong(String.valueOf(additionalCounts.get(Report.CONTEXTS))) + additionalContexts);
-        }
-        for (Map.Entry<String, Object> entry : storedCounts.entrySet()) {
-            String key = entry.getKey();
-            // loaded file data can be either Long or integer
-            if (!additionalCounts.containsKey(key)) {
-                additionalCounts.put(key, entry.getValue());
-                continue;
-            }
-            if (entry.getValue() instanceof Integer || entry.getValue() instanceof Long) {
-                Long value = additionalCounts.get(key) instanceof Integer ? Long.parseLong(String.valueOf(additionalCounts.get(key))) : (Long) additionalCounts.get(key);
-                Long storedValue = Long.parseLong(String.valueOf(entry.getValue()));
-                if (!StringUtils.containsIgnoreCase(key, "context") && !key.equals(Report.TOTAL)) {
-                    additionalCounts.put(key, value + storedValue);
-                } else if (key.equals(Report.TOTAL)) {
-                    additionalCounts.put(Report.TOTAL, value + storedValue);
-                    additionalCounts.put(Report.CONTEXT_USERS_AVG, (Long) additionalCounts.get(Report.TOTAL) / (Long) additionalCounts.get(Report.CONTEXTS));
-                } else if (key.equals(Report.CONTEXT_USERS_MAX) && storedValue > (Long) additionalCounts.get(Report.CONTEXT_USERS_MAX)) {
-                    additionalCounts.put(Report.CONTEXT_USERS_MAX, storedValue);
-                } else if (key.equals(Report.CONTEXT_USERS_MIN) && storedValue < (Long) additionalCounts.get(Report.CONTEXT_USERS_MIN) || (Long) additionalCounts.get(Report.CONTEXT_USERS_MIN) == 0l) {
-                    additionalCounts.put(Report.CONTEXT_USERS_MIN, storedValue);
-                }
-            } else if (entry.getValue() instanceof HashMap) {
-                mergeNewValuesWithStoredValues((HashMap<String, Object>) entry.getValue(), (HashMap<String, Object>) additionalCounts.get(entry.getKey()));
-            }
-        }
-    }
-
     /**
      * Sum all clients of the given attribute list in one single Map and remove them from from the given {@link ArrayList} afterwards.
      * A client is identified by the preceding string "client:". In the new Map, this preceding string is removed and the rest
@@ -701,15 +600,15 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
      *
      * @param capSValueMap - A list of {@link HashMap}<String, Object>s with the counted values of a capability-set
      */
-    private void sumClientsInSingleMap(ArrayList<Object> capSValueMap) {
+    private void sumClientsInSingleMap(List<Object> capSValueMap) {
         for (Object valueMap : capSValueMap) {
-            HashMap<String, Object> capSMap = (HashMap<String, Object>) valueMap;
+            Map<String, Object> capSMap = (HashMap<String, Object>) valueMap;
             capSMap.put(Report.CLIENT_LOGINS, extractClientMapFromCapSContent(capSMap));
         }
     }
 
-    private HashMap<String, Object> extractClientMapFromCapSContent(HashMap<String, Object> capSMap) {
-        HashMap<String, Object> clients = new HashMap<>();
+    private Map<String, Object> extractClientMapFromCapSContent(Map<String, Object> capSMap) {
+        Map<String, Object> clients = new HashMap<>();
         for (Iterator<Map.Entry<String, Object>> it = capSMap.entrySet().iterator(); it.hasNext();) {
             Map.Entry<String, Object> entry = it.next();
             if (entry.getKey().contains("client:")) {

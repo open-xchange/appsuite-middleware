@@ -15,35 +15,13 @@ import com.openexchange.report.appsuite.serialization.osgi.StringParserServiceRe
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.strings.StringParser;
 
-public class ReportConfigs implements Serializable, CompositeData{
+public class ReportConfigs implements Serializable, CompositeData {
 
     /**
      * serialVersionUID
      */
     private static final long serialVersionUID = 4288681340803505052L;
 
-    private String type;
-
-    private boolean isSingleDeployment = true;
-
-    private Long consideredTimeframeStart;
-
-    private Long consideredTimeframeEnd;
-
-    private boolean isConfigTimerange;
-    
-    //--------------------OXCS-Report, relevant attributes--------------------
-
-    private boolean isShowSingleTenant;
-
-    private Long singleTenantId;
-
-    private boolean isAdminIgnore;
-
-    private boolean isShowDriveMetrics;
-
-    private boolean isShowMailMetrics;
-    
     private HashMap<String, Object> attributeMap;
 
     @Override
@@ -66,7 +44,6 @@ public class ReportConfigs implements Serializable, CompositeData{
 
     @Override
     public Object[] getAll(String[] keys) {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -77,7 +54,6 @@ public class ReportConfigs implements Serializable, CompositeData{
 
     @Override
     public boolean containsValue(Object value) {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -86,7 +62,7 @@ public class ReportConfigs implements Serializable, CompositeData{
         return (Collection<?>) this.attributeMap;
     }
     //--------------------Constructors--------------------
-    
+
     public static ReportConfigs from(CompositeData cd) {
         return new ReportConfigs((String) cd.get("type"), 
                                 (boolean) cd.get("isSingleDeployment"), 
@@ -102,17 +78,7 @@ public class ReportConfigs implements Serializable, CompositeData{
 
     public ReportConfigs(String type, boolean isSingleDeployment, boolean isConfigTimerange, Long consideredTimeframeStart, Long consideredTimeframeEnd, boolean isShowSingleTenant, Long singleTenantId, boolean isAdminIgnore, boolean isShowDriveMetrics, boolean isShowMailMetrics) {
         super();
-        
-        this.type = type;
-        this.isSingleDeployment = isSingleDeployment;
-        this.isConfigTimerange = isConfigTimerange;
-        this.consideredTimeframeStart = consideredTimeframeStart;
-        this.consideredTimeframeEnd = consideredTimeframeEnd;
-        this.isShowSingleTenant = isShowSingleTenant;
-        this.singleTenantId = singleTenantId;
-        this.isAdminIgnore = isAdminIgnore;
-        this.isShowDriveMetrics = isShowDriveMetrics;
-        this.isShowMailMetrics = isShowMailMetrics;
+
         this.attributeMap = new HashMap<>();
         this.attributeMap.put("type", type);
         this.attributeMap.put("isSingleDeployment", isSingleDeployment);
@@ -129,84 +95,42 @@ public class ReportConfigs implements Serializable, CompositeData{
     //--------------------Getters and Setters--------------------
 
     public String getType() {
-        if (this.type == null)
-           this.type = "default"; 
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
+        return (String) this.attributeMap.get("type");
     }
 
     public boolean isSingleDeployment() {
-        return isSingleDeployment;
-    }
-
-    public void setSingleDeployment(boolean isSingleDeployment) {
-        this.isSingleDeployment = isSingleDeployment;
+        return (boolean) this.attributeMap.get("isSingleDeployment");
     }
 
     public Long getConsideredTimeframeStart() {
-        return consideredTimeframeStart;
-    }
-
-    public void setConsideredTimeframeStart(Long consideredTimeframeStart) {
-        this.consideredTimeframeStart = consideredTimeframeStart;
+        return (Long) this.attributeMap.get("consideredTimeframeStart");
     }
 
     public Long getConsideredTimeframeEnd() {
-        return consideredTimeframeEnd;
-    }
-
-    public void setConsideredTimeframeEnd(Long consideredTimeframeEnd) {
-        this.consideredTimeframeEnd = consideredTimeframeEnd;
+        return (Long) this.attributeMap.get("consideredTimeframeEnd");
     }
 
     public boolean isShowSingleTenant() {
-        return isShowSingleTenant;
-    }
-
-    public void setShowSingleTenant(boolean isShowSingleTenant) {
-        this.isShowSingleTenant = isShowSingleTenant;
+        return (boolean) this.attributeMap.get("isShowSingleTenant");
     }
 
     public Long getSingleTenantId() {
-        return singleTenantId;
-    }
-
-    public void setSingleTenantId(Long singleTenantId) {
-        this.singleTenantId = singleTenantId;
+        return (Long) this.attributeMap.get("singleTenantId");
     }
 
     public boolean isAdminIgnore() {
-        return isAdminIgnore;
-    }
-
-    public void setAdminIgnore(boolean isAdminIgnore) {
-        this.isAdminIgnore = isAdminIgnore;
+        return (boolean) this.attributeMap.get("isAdminIgnore");
     }
 
     public boolean isShowDriveMetrics() {
-        return isShowDriveMetrics;
-    }
-
-    public void setShowDriveMetrics(boolean isShowDriveMetrics) {
-        this.isShowDriveMetrics = isShowDriveMetrics;
+        return (boolean) this.attributeMap.get("isShowDriveMetrics");
     }
 
     public boolean isShowMailMetrics() {
-        return isShowMailMetrics;
-    }
-
-    public void setShowMailMetrics(boolean isShowMailMetrics) {
-        this.isShowMailMetrics = isShowMailMetrics;
+        return (boolean) this.attributeMap.get("isShowMailMetrics");
     }
 
     public boolean isConfigTimerange() {
-        return isConfigTimerange;
-    }
-
-    public void setConfigTimerange(boolean isConfigTimerange) {
-        this.isConfigTimerange = isConfigTimerange;
+        return (boolean) this.attributeMap.get("isConfigTimerange");
     }
 }

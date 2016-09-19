@@ -145,9 +145,9 @@ public class Report implements Serializable {
     public static final String TIMEFRAME_START = "start";
 
     public static final String TIMEFRAME_END = "end";
-    
+
     public static final String ERRORS = "errors";
-    
+
     public static final String IGNORED = "ignored";
 
     //--------------------Report attributes--------------------
@@ -167,8 +167,6 @@ public class Report implements Serializable {
     private int pendingTasks;
 
     private LinkedHashMap<String, LinkedHashMap<String, Object>> tenantMap;
-
-    private int tenantIdCounter;
 
     private boolean isSingleDeployment = true;
 
@@ -212,7 +210,6 @@ public class Report implements Serializable {
         this.tenantMap = new LinkedHashMap<>();
         this.tenantMap.put("deployment", new LinkedHashMap<String, Object>());
         this.singleTenantId = 0l;
-        this.tenantIdCounter = 0;
     }
 
     /**
@@ -303,7 +300,7 @@ public class Report implements Serializable {
     }
 
     private static Class[] allowedTypes = new Class[] { Integer.class, Long.class, Float.class, Short.class, Double.class, Byte.class, Boolean.class, String.class };
-    
+
     public void addError(OXException exception) {
         HashMap<String, String> errors = get(Report.ERRORS, Report.IGNORED, new HashMap<String, String>(), HashMap.class);
         errors.put(exception.getExceptionId(), exception.getLogMessage());
@@ -460,13 +457,6 @@ public class Report implements Serializable {
     }
 
     /**
-     * Mark one task as done
-     */
-    public void markTaskAsDone() {
-        this.pendingTasks--;
-    }
-
-    /**
      * Retrieve the number of tasks that remain to be done. A report is complete when this number reaches 0.
      */
     public int getNumberOfPendingTasks() {
@@ -490,16 +480,8 @@ public class Report implements Serializable {
         return isSingleDeployment;
     }
 
-    public void setSingleDeployment(boolean isSingleDeployment) {
-        this.isSingleDeployment = isSingleDeployment;
-    }
-
     public LinkedHashMap<String, LinkedHashMap<String, Object>> getTenantMap() {
         return tenantMap;
-    }
-
-    public void setTenantMap(LinkedHashMap<String, LinkedHashMap<String, Object>> tenantMap) {
-        this.tenantMap = tenantMap;
     }
 
     public Long getConsideredTimeframeStart() {
@@ -522,24 +504,12 @@ public class Report implements Serializable {
         return isShowSingleTenant;
     }
 
-    public void setShowSingleTenant(boolean isShowSingleTenant) {
-        this.isShowSingleTenant = isShowSingleTenant;
-    }
-
     public Long getSingleTenantId() {
         return singleTenantId;
     }
 
-    public void setSingleTenantId(Long singleTenantId) {
-        this.singleTenantId = singleTenantId;
-    }
-
     public boolean isAdminIgnore() {
         return isAdminIgnore;
-    }
-
-    public void setAdminIgnore(boolean isAdminIgnore) {
-        this.isAdminIgnore = isAdminIgnore;
     }
 
     public boolean isShowDriveMetrics() {
@@ -558,10 +528,6 @@ public class Report implements Serializable {
         this.isShowMailMetrics = isShowMailMetrics;
     }
 
-    public void setMaxChunkSize(int maxChunkSize) {
-        this.maxChunkSize = maxChunkSize;
-    }
-
     public int getMaxChunkSize() {
         if (this.maxChunkSize == 0) {
             this.maxChunkSize = Integer.parseInt(Services.getService(ConfigurationService.class).getProperty("com.openexchange.report.serialization.maxChunkSize", "200"));
@@ -573,14 +539,10 @@ public class Report implements Serializable {
         if (this.storageFolderPath == null || this.storageFolderPath.length() == 0) {
             this.storageFolderPath = Services.getService(ConfigurationService.class).getProperty("com.openexchange.report.serialization.fileStorage", "/tmp");
         }
-        
+
         return storageFolderPath;
     }
 
-    public void setStorageFolderPath(String storageFolderPath) {
-        this.storageFolderPath = storageFolderPath;
-    }
-    
     public int getThreadPriority() {
         if (this.threadPriority == 0) {
             this.threadPriority = Integer.parseInt(Services.getService(ConfigurationService.class).getProperty("com.openexchange.report.serialization.threadPriority", "1"));
@@ -592,7 +554,7 @@ public class Report implements Serializable {
         if (this.maxThreadPoolSize == 0) {
             this.maxThreadPoolSize = Integer.parseInt(Services.getService(ConfigurationService.class).getProperty("com.openexchange.report.serialization.maxThreadPoolSize", "20"));
         }
-        
+
         return this.maxThreadPoolSize;
     }
 
@@ -619,7 +581,7 @@ public class Report implements Serializable {
      * on the given <code>contentContainerType</code> ({@link JsonObjectType}). The <code>defaultIndentation</code> will add
      * two whitespace per count to each line.
      * <br><br>
-     * The result will be stored inside this reports <code>storageFolderPath</code> in a file which name 
+     * The result will be stored inside this reports <code>storageFolderPath</code> in a file which name
      * is <code>uuid</code>.report.
      * <br><br>
      * Every .part file will be deleted afterwards.
@@ -648,8 +610,8 @@ public class Report implements Serializable {
             return;
         }
         File reportContent = new File(storageFolderPath + "/" + uuid + ".report");
-        try {
-            OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(reportContent), "UTF-8");
+        try (OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(reportContent), "UTF-8")) {
+
             // create a new line with the rootAttribute and container attribute and open brackets depending on the given JsonObjectType
             if (rootAttribute != null && rootAttribute.length() > 0) {
                 osw.write(getIndentation(indentationLevel++) + "\"" + rootAttribute + "\"" + " : {\n");
@@ -672,7 +634,6 @@ public class Report implements Serializable {
             if (rootAttribute != null && rootAttribute.length() > 0) {
                 osw.write(getIndentation(--indentationLevel) + "},\n");
             }
-            osw.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
@@ -681,51 +642,19 @@ public class Report implements Serializable {
             e.printStackTrace();
         }
         for (File file : parts) {
-            file.delete();
-        }
-    }
-
-
-    /**
-     * Fetches the stored report in the storage folder defined by the given path and print the whole
-     * report to console. Very memory friendly because of utilizing {@link Scanner} operations.
-     * 
-     * The whole report-file is identified by the ".report" ending.
-     * 
-     * @param reportFolderPath, the path to the folder where the report-file is stored
-     * @throws IOException
-     */
-    public void printStoredReportContentToConsole() throws IOException {
-        FileInputStream is = null;
-        Scanner sc = null;
-        try {
-            is = new FileInputStream(this.storageFolderPath + "/" + this.uuid + ".report");
-            sc = new Scanner(is, "UTF-8");
-            while (sc.hasNext()) {
-                System.out.println(sc.nextLine());
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } finally {
-            if (is != null) {
-                is.close();
-            }
-            if (sc != null) {
-                sc.close();
+            if(file.getName().contains(this.uuid)) {
+                file.delete();
             }
         }
     }
 
     public void appendReportParts(OutputStreamWriter osw, File appendingFile, boolean hasNext, String indentation) {
         // load every part-file of the report 
-        BufferedReader br;
-        try {
-            br = new BufferedReader(new FileReader(appendingFile));
+        try (BufferedReader br = new BufferedReader(new FileReader(appendingFile))){
             String line = br.readLine();
             while (line != null) {
                 osw.write(indentation + line + ((line = br.readLine()) == null && hasNext ? "," : "") + "\n");
             }
-            br.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -734,23 +663,13 @@ public class Report implements Serializable {
     }
 
     public static void printStoredReportContentToConsole(String storageFolderPath, String uuid) throws IOException {
-        FileInputStream is = null;
-        Scanner sc = null;
-        try {
-            is = new FileInputStream(storageFolderPath + "/" + uuid + ".report");
-            sc = new Scanner(is, "UTF-8");
+        
+        try (FileInputStream is = new FileInputStream(storageFolderPath + "/" + uuid + ".report"); Scanner sc = new Scanner(is, "UTF-8")){
             while (sc.hasNext()) {
                 System.out.println(sc.nextLine());
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        } finally {
-            if (is != null) {
-                is.close();
-            }
-            if (sc != null) {
-                sc.close();
-            }
         }
     }
 
