@@ -52,6 +52,7 @@ package com.openexchange.groupware.upload.impl;
 import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * An interface that defines a method to register instances of <code>com.openexchange.groupware.upload.UploadListener</code>
@@ -76,7 +77,9 @@ public interface UploadRegistry {
      * @param req The corresponding instance of <code>HttpServletRequest</code>
      * @return An <code>UpdateEvent</code> object from incoming multipart form data
      * @throws OXException If an error like over quota occurs
+     * @deprecated Use {@link #processUpload(HttpServletRequest, long, long, Session)}
      */
+    @Deprecated
     UploadEvent processUpload(HttpServletRequest req) throws OXException;
 
     /**
@@ -85,8 +88,9 @@ public interface UploadRegistry {
      * @param req The corresponding instance of <code>HttpServletRequest</code>
      * @param maxFileSize The maximum allowed size of a single uploaded file or <code>-1</code>
      * @param maxOverallSize The maximum allowed size of a complete request or <code>-1</code>
+     * @param session The associated session or <code>null</code>
      * @return An <code>UpdateEvent</code> object from incoming multipart form data
      * @throws OXException If an error like over quota occurs
      */
-    UploadEvent processUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize) throws OXException;
+    UploadEvent processUpload(HttpServletRequest req, long maxFileSize, long maxOverallSize, Session session) throws OXException;
 }

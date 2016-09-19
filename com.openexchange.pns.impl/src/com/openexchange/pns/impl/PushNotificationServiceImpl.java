@@ -416,7 +416,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
      * @throws OXException If handling fails
      */
     protected void doHandle(Iterator<PushNotification> notifications, String topic, int numOfNotifications, int userId, int contextId) throws OXException {
-        // Query appropriate subscriptions
+        // Query appropriate hits
         Hits hits = subscriptionRegistry.getInterestedSubscriptions(userId, contextId, topic);
         if (null == hits || hits.isEmpty()) {
             LOG.info("No subscriptions of interest for topic \"{}\" for user {} in context {}", topic, I(userId), I(contextId));
@@ -424,7 +424,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             return;
         }
 
-        // Transport each subscription using associated transport
+        // Transport each hit using associated transport
         for (Hit hit : hits) {
             String client = hit.getClient();
             String transportId = hit.getTransportId();
@@ -432,19 +432,32 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             if (null == transport) {
                 LOG.warn("No such transport '{}' for client '{}' to publish notification from user {} in context {} for topic {}", transportId, client, I(userId), I(contextId), topic);
             } else {
-                while (notifications.hasNext()) {
-                    PushNotification notification = notifications.next();
-                    LOG.info("Trying to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId));
-                    try {
-                        transport.transport(notification, hit.getMatches());
-                    } catch (Exception e) {
-                        LOG.error("Failed to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId), e);
+                if (isTransportAllowed(transport, topic, client, userId, contextId)) {
+                    while (notifications.hasNext()) {
+                        PushNotification notification = notifications.next();
+                        LOG.info("Trying to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId));
+                        try {
+                            transport.transport(notification, hit.getMatches());
+                        } catch (Exception e) {
+                            LOG.error("Failed to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId), e);
+                        }
                     }
+                } else {
+                    LOG.info("Transport '{}' not enabled for client '{}' to publish notification from user {} in context {} for topic {}", transportId, client, I(userId), I(contextId), topic);
                 }
             }
         }
 
         addNumOfProcessedNotifications(numOfNotifications);
+    }
+
+    private boolean isTransportAllowed(PushNotificationTransport transport, String topic, String client, int userId, int contextId) {
+        try {
+            return transport.isEnabled(topic, client, userId, contextId);
+        } catch (Exception e) {
+            LOG.error("Failed to check whether notification \"{}\" is allowed to be sent via transport '{}' to client '{}' for user {} in context {}. Transport will be denied...", topic, transport.getId(), client, I(userId), I(contextId), e);
+            return false;
+        }
     }
 
     private void addNumOfProcessedNotifications(int numOfNotifications) {

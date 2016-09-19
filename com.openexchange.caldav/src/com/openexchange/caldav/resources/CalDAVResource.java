@@ -187,7 +187,8 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
             WebdavProperty property = new WebdavProperty(namespace, name);
             byte[] iCalFile = getICalFile();
             if (null != iCalFile) {
-                property.setValue(new String(iCalFile, Charsets.UTF_8));
+                property.setXML(true);
+                property.setValue("<![CDATA[" + new String(iCalFile, Charsets.UTF_8) + "]]>");
             }
             return property;
         }

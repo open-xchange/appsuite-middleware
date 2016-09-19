@@ -60,6 +60,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushExceptionCodes;
@@ -117,7 +118,7 @@ public class WnsPushNotificationTransportActivator extends HousekeepingActivator
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, PushSubscriptionRegistry.class, PushMessageGeneratorRegistry.class };
+        return new Class<?>[] { ConfigurationService.class, PushSubscriptionRegistry.class, PushMessageGeneratorRegistry.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -171,7 +172,7 @@ public class WnsPushNotificationTransportActivator extends HousekeepingActivator
             }
         }
 
-        wnsTransport = new WnsPushNotificationTransport(getService(PushSubscriptionRegistry.class), getService(PushMessageGeneratorRegistry.class), context);
+        wnsTransport = new WnsPushNotificationTransport(getService(PushSubscriptionRegistry.class), getService(PushMessageGeneratorRegistry.class), getService(ConfigViewFactory.class), context);
         wnsTransport.open();
         this.wnsTransport = wnsTransport;
     }

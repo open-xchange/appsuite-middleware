@@ -223,7 +223,7 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
                  */
                 String folderID = session.getStorage().deleteFolder(action.getVersion().getPath(), true);
                 session.getChecksumStore().removeDirectoryChecksum(new FolderID(folderID));
-            } else if (session.getTemp().supported()) {
+            } else if (session.getTemp().supported() && null != session.getTemp().getPath(true)) {
                 /*
                  * move to temp
                  */
@@ -331,7 +331,7 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
                 String folderID = session.getStorage().deleteFolder(action.getVersion().getPath(), false);
                 removedFolderIDs.add(new FolderID(folderID));
             } else if (DriveConstants.EMPTY_MD5.equals(action.getVersion().getChecksum()) || false == session.getTemp().supported() ||
-                false == mayMove(action.getVersion().getPath(), session.getTemp().getPath(true))) {
+                null == session.getTemp().getPath(true) || false == mayMove(action.getVersion().getPath(), session.getTemp().getPath(true))) {
                 /*
                  * just delete empty directory
                  */
@@ -341,23 +341,23 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
                 /*
                  * try to move whole directory to temp folder
                  */
-                String targetPath = DriveUtils.combine(session.getTemp().getPath(true), action.getVersion().getChecksum());
-                FileStorageFolder targetFolder = session.getStorage().optFolder(targetPath);
-                if (null == targetFolder) {
-                    String currentFolderID = session.getStorage().getFolderID(action.getVersion().getPath());
-                    String movedFolderID = session.getStorage().moveFolder(action.getVersion().getPath(), targetPath);
+                String tempPath = session.getTemp().exists() ? session.getTemp().getPath(true) : null;
+                String targetPath = null != tempPath ? DriveUtils.combine(tempPath, action.getVersion().getChecksum()) : null;
+                if (null == targetPath || null != session.getStorage().optFolder(targetPath)) {
                     /*
-                     * update stored checksums if needed
-                     */
-                    if (false == currentFolderID.equals(movedFolderID)) {
-                        updatedFolderIDs.add(new FolderID[] { new FolderID(currentFolderID), new FolderID(movedFolderID) });
-                    }
-                } else {
-                    /*
-                     * identical folder already in temp folder, hard-delete the directory
+                     * no temp folder or identical folder already present, hard-delete the directory
                      */
                     String folderID = session.getStorage().deleteFolder(action.getVersion().getPath());
                     removedFolderIDs.add(new FolderID(folderID));
+                } else {
+                    /*
+                     * move to temp & update stored checksums if needed
+                     */
+                    String currentFolderID = session.getStorage().getFolderID(action.getVersion().getPath());
+                    String movedFolderID = session.getStorage().moveFolder(action.getVersion().getPath(), targetPath);
+                    if (false == currentFolderID.equals(movedFolderID)) {
+                        updatedFolderIDs.add(new FolderID[] { new FolderID(currentFolderID), new FolderID(movedFolderID) });
+                    }
                 }
             }
         }

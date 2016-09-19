@@ -19,6 +19,7 @@ DEFAULTS=/etc/default/open-xchange
 OXFUNCTIONS=/opt/open-xchange/lib/oxfunctions.sh
 OXCONFIG=/opt/open-xchange/etc/ox-scriptconf.sh
 TRIGGER_UPDATE_THEMES=/opt/open-xchange/sbin/triggerupdatethemes
+TRIGGER_RELOAD_CONFIGURATION=/opt/open-xchange/sbin/triggerreloadconfiguration
 
 # Defaults - don't touch, edit /etc/default/open-xchange
 ENABLED=0
@@ -34,6 +35,10 @@ if [ ! -f $OXCONFIG ]; then
 fi
 if [ ! -x $TRIGGER_UPDATE_THEMES ]; then
     echo "$DESC: $TRIGGER_UPDATE_THEMES missing or not executable, exiting."
+    exit 0
+fi
+if [ ! -x $TRIGGER_RELOAD_CONFIGURATION ]; then
+    echo "$DESC: $TRIGGER_RELOAD_CONFIGURATION missing or not executable, exiting."
     exit 0
 fi
 
@@ -85,10 +90,16 @@ case "$1" in
     echo "$NAME."
     ;;
 
-  restart|force-reload)
+  restart)
     echo -n "Restarting $DESC: "
         $0 stop
         $0 start
+    echo "$NAME."
+    ;;
+  
+  reload|force-reload)
+    echo -n "Reloading config for $DESC: "
+    $TRIGGER_RELOAD_CONFIGURATION -d
     echo "$NAME."
     ;;
 
@@ -99,7 +110,7 @@ case "$1" in
 
   *)
     N=/etc/init.d/$SNAME
-    echo "Usage: $N {start|stop|restart|force-reload|status}" >&2
+    echo "Usage: $N {start|stop|restart|force-reload|reload|status}" >&2
     exit 1
     ;;
 esac

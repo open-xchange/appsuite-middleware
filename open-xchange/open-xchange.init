@@ -57,17 +57,20 @@ for f in $OXFUNCTIONS $OXCONFIG; do
 	fi
 	. $f
 done
-TRIGGER_UPDATE_THEMES=/opt/open-xchange/sbin/triggerupdatethemes
-if [ ! -x $TRIGGER_UPDATE_THEMES ]; then
-    echo "$DESC: $TRIGGER_UPDATE_THEMES missing or not executable, exiting."
-		if [ "$1" = "stop" ]; then
-		    exit 0
-		else
-		    exit 5
-		fi
-    exit 1
-fi
 
+TRIGGER_UPDATE_THEMES=/opt/open-xchange/sbin/triggerupdatethemes
+TRIGGER_RELOAD_CONFIGURATION=/opt/open-xchange/sbin/triggerreloadconfiguration
+for wrapper in $TRIGGER_UPDATE_THEMES $TRIGGER_RELOAD_CONFIGURATION; do
+  if [ ! -x $wrapper ]; then
+      echo "$DESC: $wrapper missing or not executable, exiting."
+      if [ "$1" = "stop" ]; then
+          exit 0
+      else
+          exit 5
+      fi
+      exit 1
+  fi
+done
 
 # Check for missing binaries (stale symlinks should not happen)
 # Note: Special treatment of stop for LSB conformance
@@ -274,34 +277,11 @@ case "$1" in
 	# Remember status and be quiet
 	rc_status
 	;;
-    force-reload)
-	## Signal the daemon to reload its config. Most daemons
-	## do this on signal 1 (SIGHUP).
-	## If it does not support it, restart the service if it
-	## is running.
+    reload|force-reload)
+	## Signal the daemon to reload its config
 
 	echo -n "Reload service open-xchange "
-	## if it supports it:
-	#killproc -p $PIDFILE -HUP $OX_BIN
-	#touch /var/run/FOO.pid
-	#rc_status -v
-
-	## Otherwise:
-	$0 try-restart
-	rc_status
-	;;
-    reload)
-	## Like force-reload, but if daemon does not support
-	## signaling, do nothing (!)
-
-	# If it supports signaling:
-	echo -n "Reload service open-xchange "
-	#killproc -p $PIDFILE -HUP $OX_BIN
-	#touch /var/run/FOO.pid
-	#rc_status -v
-	
-	## Otherwise if it does not support reload:
-	rc_failed 3
+	$TRIGGER_RELOAD_CONFIGURATION -d
 	rc_status -v
 	;;
     status)
