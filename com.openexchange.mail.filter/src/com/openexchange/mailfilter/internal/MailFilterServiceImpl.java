@@ -68,7 +68,6 @@ import org.apache.jsieve.parser.generated.ParseException;
 import org.apache.jsieve.parser.generated.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -330,7 +329,9 @@ public final class MailFilterServiceImpl implements MailFilterService {
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
                 String activeScript = sieveHandler.getActiveScript();
-                writeScript(sieveHandler, activeScript, "");
+                SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
+                String writeback = sieveTextFilter.writeEmptyScript();
+                writeScript(sieveHandler, activeScript, writeback);
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
             } catch (OXSieveHandlerException e) {
@@ -376,6 +377,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.mailfilter.MailFilterService#listRules(com.openexchange.mailfilter.Credentials)
      */
     @Override
@@ -432,7 +434,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
                 ClientRulesAndRequire splittedRules = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
 
-                if(splittedRules.getFlaggedRules() != null) {
+                if (splittedRules.getFlaggedRules() != null) {
                     return exclude(splittedRules.getFlaggedRules(), exclusionFlags);
                 }
                 return splittedRules.getRules();
@@ -473,7 +475,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                     String script = sieveHandler.getScript(activeScript);
                     RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
 
-                    ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire( rules.getRulelist(), null, rules.isError());
+                    ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
 
                     List<Rule> clientrules = clientrulesandrequire.getRules();
                     for (int i = 0; i < uids.length; i++) {
@@ -535,7 +537,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 RuleAndPosition rightRule = getRightRuleForUniqueId(clientrules, uid);
 
                 // no rule found
-                if(rightRule == null) {
+                if (rightRule == null) {
                     return null;
                 }
 
@@ -593,10 +595,10 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     private List<Rule> exclude(Map<String, List<Rule>> flagged, List<FilterType> exclusionFlags) {
         List<Rule> ret = new ArrayList<Rule>();
-        for(FilterType flag : exclusionFlags) {
+        for (FilterType flag : exclusionFlags) {
             flagged.remove(flag);
         }
-        for(List<Rule> l : flagged.values()) {
+        for (List<Rule> l : flagged.values()) {
             ret.addAll(l);
         }
         return ret;
@@ -687,14 +689,12 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     /**
      * Check own vacation
+     * 
      * @param arguments
      * @return
      */
     private boolean checkOwnVacation(List<Object> arguments) {
-        return null != arguments
-            && null != arguments.get(0) && arguments.get(0) instanceof TagArgument && ":is".equals(((TagArgument)arguments.get(0)).getTag())
-            && null != arguments.get(1) && arguments.get(1) instanceof TagArgument && ":domain".equals(((TagArgument)arguments.get(1)).getTag())
-            && null != arguments.get(2) && arguments.get(2) instanceof List<?> && "From".equals(((List<?>)arguments.get(2)).get(0));
+        return null != arguments && null != arguments.get(0) && arguments.get(0) instanceof TagArgument && ":is".equals(((TagArgument) arguments.get(0)).getTag()) && null != arguments.get(1) && arguments.get(1) instanceof TagArgument && ":domain".equals(((TagArgument) arguments.get(1)).getTag()) && null != arguments.get(2) && arguments.get(2) instanceof List<?> && "From".equals(((List<?>) arguments.get(2)).get(0));
     }
 
     /**
