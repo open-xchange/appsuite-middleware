@@ -60,7 +60,7 @@ import com.openexchange.oauth.scope.OAuthScope;
 public enum YahooOAuthScope implements OAuthScope {
     mail("mail-x", OXScope.mail),
     contacts_ro("sdct-r", OXScope.contacts_ro),
-    contacts_rw("sdct-w", OXScope.contacts_rw),
+    contacts("sdct-w", OXScope.contacts),
     ;
 
     private final String mapping;

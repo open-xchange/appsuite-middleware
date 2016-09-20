@@ -61,8 +61,8 @@ public enum GoogleOAuthScope implements OAuthScope {
     mail("https://mail.google.com/", OXScope.mail),
     calendar_ro("https://www.googleapis.com/auth/calendar.readonly", OXScope.calendar_ro),
     contacts_ro("https://www.googleapis.com/auth/contacts.readonly", OXScope.contacts_ro),
-    calendar_rw("https://www.googleapis.com/auth/calendar", OXScope.calendar_rw),
-    contacts_rw("https://www.googleapis.com/auth/contacts", OXScope.contacts_rw),
+    calendar("https://www.googleapis.com/auth/calendar", OXScope.calendar),
+    contacts("https://www.googleapis.com/auth/contacts", OXScope.contacts),
     drive("https://www.googleapis.com/auth/drive", OXScope.drive);
 
     private final String mapping;
