@@ -49,7 +49,7 @@
 
 package com.openexchange.oauth.xing;
 
-import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.oauth.scope.OAuthScope;
 
 /**
@@ -58,18 +58,18 @@ import com.openexchange.oauth.scope.OAuthScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum XingOAuthScope implements OAuthScope {
-    contacts_ro("", Module.contacts_ro);
+    contacts_ro("", OXScope.contacts_ro);
 
     private final String mapping;
-    private final Module module;
+    private final OXScope module;
 
     /**
      * Initialises a new {@link XingOAuthScope}.
      *
      * @param mapping The OAuth mapping
-     * @param module The {@link Module}
+     * @param module The {@link OXScope}
      */
-    private XingOAuthScope(String mapping, Module module) {
+    private XingOAuthScope(String mapping, OXScope module) {
         this.mapping = mapping;
         this.module = module;
     }
@@ -90,7 +90,7 @@ public enum XingOAuthScope implements OAuthScope {
      * @see com.openexchange.oauth.scope.OAuthScope#getModule()
      */
     @Override
-    public Module getModule() {
+    public OXScope getModule() {
         return module;
     }
 }

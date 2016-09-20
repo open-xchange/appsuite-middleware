@@ -61,7 +61,7 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -109,7 +109,7 @@ public class RenameMigrateLinkedInServiceIdUpdateTask extends UpdateTaskAdapter 
             stmt.close();
 
             stmt = writeCon.prepareStatement(MIGRATE_LINKED_IN);
-            stmt.setString(1, Module.contacts_ro.name());
+            stmt.setString(1, OXScope.contacts_ro.name());
             stmt.setInt(2, contextId);
             stmt.setString(3, API.LINKEDIN.getFullName());
             stmt.execute();

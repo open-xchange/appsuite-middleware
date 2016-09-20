@@ -55,11 +55,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
 /**
- * {@link Module} - Defines the AppSuite's available scopes/features
+ * {@link OXScope} - Defines the AppSuite's available scopes/features
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum Module {
+public enum OXScope {
     mail("Mail", false),
     calendar_ro("Calendars (Read Only)", true),
     contacts_ro("Contacts (Read Only)", true),
@@ -68,30 +68,30 @@ public enum Module {
     drive("Drive", true),
     generic("", true);
 
-    private static final String modules = Strings.concat(", ", (Object[]) Module.values());
+    private static final String modules = Strings.concat(", ", (Object[]) OXScope.values());
     private final boolean isLegacy;
     private final String displayName;
 
     /**
-     * Initialises a new {@link Module}.
+     * Initialises a new {@link OXScope}.
      */
-    private Module(String displayName, boolean isLegacy) {
+    private OXScope(String displayName, boolean isLegacy) {
         this.displayName = displayName;
         this.isLegacy = isLegacy;
     }
 
     /**
-     * Resolves the specified space separated string of {@link Module}s to an array of {@link Module} values
+     * Resolves the specified space separated string of {@link OXScope}s to an array of {@link OXScope} values
      * 
-     * @param string A space separated String containing the {@link Module} strings
-     * @return An array with the resolved {@link Module} values
-     * @throws OXException if the specified string cannot be resolved to a valid {@link Module}
+     * @param string A space separated String containing the {@link OXScope} strings
+     * @return An array with the resolved {@link OXScope} values
+     * @throws OXException if the specified string cannot be resolved to a valid {@link OXScope}
      */
-    public static final Module[] valuesOf(String string) throws OXException {
+    public static final OXScope[] valuesOf(String string) throws OXException {
         if (Strings.isEmpty(string)) {
-            return new Module[0];
+            return new OXScope[0];
         }
-        List<Module> list = new ArrayList<>();
+        List<OXScope> list = new ArrayList<>();
         String[] split = Strings.splitByWhitespaces(string);
         for (String s : split) {
             try {
@@ -101,7 +101,7 @@ public enum Module {
             }
         }
 
-        return list.toArray(new Module[list.size()]);
+        return list.toArray(new OXScope[list.size()]);
     }
 
     /**

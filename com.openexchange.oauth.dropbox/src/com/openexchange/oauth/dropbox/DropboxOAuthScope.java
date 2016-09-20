@@ -49,7 +49,7 @@
 
 package com.openexchange.oauth.dropbox;
 
-import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.oauth.scope.OAuthScope;
 
 /**
@@ -58,18 +58,18 @@ import com.openexchange.oauth.scope.OAuthScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum DropboxOAuthScope implements OAuthScope {
-    drive("", Module.drive);
+    drive("", OXScope.drive);
 
     private final String mapping;
-    private final Module module;
+    private final OXScope module;
 
     /**
      * Initialises a new {@link DropboxOAuthScope}.
      *
      * @param mapping The OAuth mapping
-     * @param module The {@link Module}
+     * @param module The {@link OXScope}
      */
-    private DropboxOAuthScope(String mapping, Module module) {
+    private DropboxOAuthScope(String mapping, OXScope module) {
         this.mapping = mapping;
         this.module = module;
     }
@@ -90,7 +90,7 @@ public enum DropboxOAuthScope implements OAuthScope {
      * @see com.openexchange.oauth.scope.OAuthScope#getModule()
      */
     @Override
-    public Module getModule() {
+    public OXScope getModule() {
         return module;
     }
 }
