@@ -61,6 +61,8 @@ import com.openexchange.java.Strings;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthUtil;
+import com.openexchange.session.Session;
+
 
 /**
  * {@link Utils} - Utility class for Dropbox resources.
@@ -169,10 +171,11 @@ public final class Utils {
      *
      * @param e The exception
      * @param path The path of the dropbox entry where the exception occurred, or <code>null</code> if not relevant
-     * @param oauthAccount The {@link OAuthAccount}
+     * @param session TODO
+     * @param oauthAccount TODO
      * @return The most appropriate OX exception, ready to be re-thrown
      */
-    public static OXException handle(Exception e, String path, OAuthAccount oauthAccount) {
+    public static OXException handle(Exception e, String path, Session session, OAuthAccount oauthAccount) {
         if (OXException.class.isInstance(e)) {
             return (OXException) e;
         }
