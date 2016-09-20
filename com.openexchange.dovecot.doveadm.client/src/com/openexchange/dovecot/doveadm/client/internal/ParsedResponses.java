@@ -94,12 +94,11 @@ public class ParsedResponses implements Iterable<DoveAdmResponse> {
             for (int k = 0; k < numResponses; k++) {
                 JSONArray jResponse = jResponses.getJSONArray(k);
 
-                String optionalIdentifier;
+                String optionalIdentifier = jResponse.length() > 2 ? jResponse.optString(2, null) : null;
                 DoveAdmResponse doveAdmResponse;
                 {
                     String responseType = jResponse.getString(0);
                     if (DoveAdmResponse.TYPE_DATA_RESPONSE.equals(responseType)) {
-                        optionalIdentifier = jResponse.length() > 2 ? jResponse.optString(3, null) : null;
                         JSONArray jResults = jResponse.getJSONArray(1);
 
                         int numResults = jResults.length();
@@ -118,7 +117,6 @@ public class ParsedResponses implements Iterable<DoveAdmResponse> {
                             doveAdmResponse = new DoveAdmDataResponseImpl(results, optionalIdentifier);
                         }
                     } else if (DoveAdmResponse.TYPE_ERROR_RESPONSE.equals(responseType)) {
-                        optionalIdentifier = jResponse.length() > 1 ? jResponse.optString(2, null) : null;
                         JSONObject jError = jResponse.getJSONObject(1);
                         String type = jError.getString("type");
                         int exitCode = jError.getInt("exitCode");
