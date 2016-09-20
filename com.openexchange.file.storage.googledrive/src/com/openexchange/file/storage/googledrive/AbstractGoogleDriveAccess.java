@@ -181,7 +181,8 @@ public abstract class AbstractGoogleDriveAccess {
     private OXException createInvalidAccessTokenException() {
         OAuthAccount oAuthAccount = googleDriveAccess.getOAuthAccount();
         String cburl = OAuthUtil.buildCallbackURL(oAuthAccount);
-        return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(oAuthAccount.getAPI().getShortName(), oAuthAccount.getId(), session.getUserId(), session.getContextId(), cburl);
+        API api = oAuthAccount.getAPI();
+        return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getShortName(), oAuthAccount.getId(), session.getUserId(), session.getContextId(), api.getFullName(), cburl);
     }
 
     /**

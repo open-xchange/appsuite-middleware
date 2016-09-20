@@ -54,6 +54,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthUtil;
@@ -115,7 +116,8 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
         // Verify that the account has an access token 
         if (Strings.isEmpty(account.getToken())) {
             String cburl = OAuthUtil.buildCallbackURL(account);
-            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(account.getAPI().getShortName(), account.getId(), session.getUserId(), session.getContextId(), cburl);
+            API api = account.getAPI();
+            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getShortName(), account.getId(), session.getUserId(), session.getContextId(), api.getFullName(), cburl);
         }
 
         // Other checks?
