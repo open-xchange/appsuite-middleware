@@ -47,73 +47,27 @@
  *
  */
 
-package com.openexchange.net.ssl.config.internal;
+package com.openexchange.net.ssl.config.impl.internal;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.net.ssl.config.TrustLevel;
+import static org.junit.Assert.fail;
+import org.junit.Before;
+import org.junit.Test;
+
 
 /**
- * The {@link SSLConfigurationServiceImpl} provides user specific configuration with regards to SSL
+ * {@link UserAwareSSLConfigurationImplTest}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class SSLConfigurationServiceImpl implements SSLConfigurationService {
+public class UserAwareSSLConfigurationImplTest {
 
-    private ConfigurationService configService;
+    @Before
+    public void setUp() throws Exception {}
 
-    public SSLConfigurationServiceImpl(ConfigurationService configService) {
-        this.configService = configService;
+    @Test
+    public void test() {
+        fail("Not yet implemented");
     }
 
-    @Override
-    public boolean isWhitelisted(String... hostNames) {
-        return SSLProperties.isWhitelisted(hostNames);
-    }
-
-    @Override
-    public TrustLevel getTrustLevel() {
-        return SSLProperties.trustLevel();
-    }
-
-    @Override
-    public String[] getSupportedProtocols() {
-        return SSLProperties.supportedProtocols();
-    }
-
-    @Override
-    public String[] getSupportedCipherSuites() {
-        return SSLProperties.supportedCipherSuites();
-    }
-
-    @Override
-    public boolean isVerifyHostname() {
-        return SSLProperties.isVerifyHostname();
-    }
-
-    @Override
-    public boolean isDefaultTruststoreEnabled() {
-        return this.configService.getBoolProperty(SSLProperties.DEFAULT_TRUSTSTORE_ENABLED.getName(), SSLProperties.DEFAULT_TRUSTSTORE_ENABLED.getDefaultBoolean());
-    }
-
-    @Override
-    public boolean isCustomTruststoreEnabled() {
-        return this.configService.getBoolProperty(SSLProperties.CUSTOM_TRUSTSTORE_ENABLED.getName(), SSLProperties.CUSTOM_TRUSTSTORE_ENABLED.getDefaultBoolean());
-    }
-
-    @Override
-    public String getCustomTruststoreLocation() {
-        return this.configService.getProperty(SSLProperties.CUSTOM_TRUSTSTORE_LOCATION.getName(), SSLProperties.CUSTOM_TRUSTSTORE_LOCATION.getDefault());
-    }
-
-    @Override
-    public String getCustomTruststorePassword() {
-        return this.configService.getProperty(SSLProperties.CUSTOM_TRUSTSTORE_PASSWORD.getName(), SSLProperties.CUSTOM_TRUSTSTORE_PASSWORD.getDefault());
-    }
-
-    @Override
-    public void reload() {
-        SSLProperties.reload();
-    }
 }

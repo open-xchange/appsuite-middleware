@@ -47,13 +47,13 @@
  *
  */
 
-package com.openexchange.net.ssl.config.internal;
+package com.openexchange.net.ssl.config.impl.internal;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
 import com.openexchange.net.ssl.config.TrustLevel;
-import com.openexchange.net.ssl.config.osgi.Services;
+import com.openexchange.net.ssl.config.impl.osgi.Services;
 
 /**
  * {@link SSLProperties} include configurations made by the administrator. This means that only server wide configurations can be found here. ConfigCascade properities should not be added here.
@@ -88,7 +88,7 @@ public enum SSLProperties {
 
     static final String CUSTOM_TRUSTSTORE_PASSWORD_KEY = "com.openexchange.net.ssl.custom.truststore.password";
 
-    //---------- Reloadable Properties - not CC aware -------------//
+    //---------- Reloadable Properties -------------//
 
     static final String TRUST_LEVEL_KEY = "com.openexchange.net.ssl.trustlevel";
 
@@ -254,8 +254,6 @@ public enum SSLProperties {
         return false;
     }
 
-    //---------- End of reloadable properties -------------//
-
     public static void reload() {
         trustLevel = null;
         protocols = null;
@@ -268,12 +266,14 @@ public enum SSLProperties {
 
     //FIXME should be moved to c.o.net.ssl
     private static void reinit() {
-//        if (isVerifyHostname()) {
-//            HttpsURLConnection.setDefaultHostnameVerifier(new DefaultHostnameVerifier());
-//        } else {
-//            HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
-//        }
+        //        if (isVerifyHostname()) {
+        //            HttpsURLConnection.setDefaultHostnameVerifier(new DefaultHostnameVerifier());
+        //        } else {
+        //            HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
+        //        }
     }
+
+    //---------- End of reloadables -------------//
 
     //***************************************/
 
@@ -304,4 +304,5 @@ public enum SSLProperties {
     public boolean getDefaultBoolean() {
         return defaultBoolValue;
     }
+
 }

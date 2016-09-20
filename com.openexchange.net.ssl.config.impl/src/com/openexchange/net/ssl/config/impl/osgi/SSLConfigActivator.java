@@ -47,31 +47,63 @@
  *
  */
 
-package com.openexchange.net.ssl.config.internal;
+package com.openexchange.net.ssl.config.impl.osgi;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.context.ContextService;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.net.ssl.config.osgi.Services;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
+import com.openexchange.net.ssl.config.impl.internal.SSLConfigurationServiceImpl;
+import com.openexchange.net.ssl.config.impl.internal.SSLProperties;
+import com.openexchange.net.ssl.config.impl.internal.SSLPropertiesReloadable;
+import com.openexchange.net.ssl.config.impl.internal.UserAwareSSLConfigurationImpl;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.user.UserService;
 
 /**
- * {@link SSLPropertiesReloadable}
+ * 
+ * {@link SSLConfigActivator}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class SSLPropertiesReloadable implements Reloadable {
+public class SSLConfigActivator extends HousekeepingActivator {
 
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        Services.getService(SSLConfigurationService.class).reload();
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { UserService.class, ContextService.class, ConfigurationService.class };
     }
 
     @Override
-    public Interests getInterests() {
-        // TODO Auto-generated method stub
-        return null;
+    protected void startBundle() throws Exception {
+        try {
+            org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("starting bundle: \"com.openexchange.net.ssl.config.impl\"");
+            Services.setBundleContext(this.context);
+            
+            ConfigurationService configService = getService(ConfigurationService.class);
+            
+            if (configService.getBoolProperty(SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getName(), SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getDefaultBoolean())) {
+                System.setProperty("javax.net.debug", "ssl:record");
+                org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("Enabled SSL debug logging.");
+            }
+            
+            registerService(Reloadable.class, new SSLPropertiesReloadable());
+
+            registerService(UserAwareSSLConfigurationService.class, new UserAwareSSLConfigurationImpl(getService(UserService.class), getService(ContextService.class)));
+            registerService(SSLConfigurationService.class, new SSLConfigurationServiceImpl(getService(ConfigurationService.class)));
+        } catch (Exception e) {
+            org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).error("", e);
+            throw e;
+        }
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("stopping bundle: \"com.openexchange.net.ssl.config.impl\"");
+
+        Services.setBundleContext(null);
+
+        super.stopBundle();
+    }
 }

@@ -47,78 +47,31 @@
  *
  */
 
-package com.openexchange.net.ssl.config.osgi;
+package com.openexchange.net.ssl.config.impl.internal;
 
-import java.util.concurrent.atomic.AtomicReference;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Interests;
+import com.openexchange.config.Reloadable;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.config.impl.osgi.Services;
 
 /**
- * 
- * {@link Services}
+ * {@link SSLPropertiesReloadable}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public final class Services {
+public class SSLPropertiesReloadable implements Reloadable {
 
-    /**
-     * Initializes a new {@link Services}.
-     */
-    private Services() {
-        super();
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        Services.getService(SSLConfigurationService.class).reload();
     }
 
-    private static final AtomicReference<BundleContext> REF = new AtomicReference<BundleContext>();
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param bundleContext The service lookup or <code>null</code>
-     */
-    public static void setBundleContext(final BundleContext bundleContext) {
-        REF.set(bundleContext);
+    @Override
+    public Interests getInterests() {
+        // TODO Auto-generated method stub
+        return null;
     }
 
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static BundleContext getBundleContext() {
-        return REF.get();
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final BundleContext serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.net.ssl.config\" not started?");
-        }
-        ServiceReference<? extends S> serviceReference = serviceLookup.getServiceReference(clazz);
-        if (serviceReference == null) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.net.ssl.config\" not started?");
-        }
-        return serviceLookup.getService(serviceReference);
-    }
-
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
-    }
 }

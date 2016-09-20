@@ -129,7 +129,7 @@ public final class TrustAllConnections implements PreferencesItemService {
                 try {
                     ConfigView view = configView.getView(userConfig.getUserId(), userConfig.getContext().getContextId());
                     Boolean isUserAllowedToConfigureTrustlevel = view.property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class).get();
-                    if (!isUserAllowedToConfigureTrustlevel.booleanValue()) {
+                    if ((isUserAllowedToConfigureTrustlevel == null) || (!isUserAllowedToConfigureTrustlevel.booleanValue())) {
                         return false;
                     }
 

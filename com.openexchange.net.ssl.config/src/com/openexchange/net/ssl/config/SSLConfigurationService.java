@@ -70,13 +70,44 @@ public interface SSLConfigurationService {
 
     boolean isVerifyHostname();
 
+    void reload();
+
+    /**
+     * Returns if the default truststore provided with the JVM should be used.
+     * 
+     * Hint: Loaded once per startup and cannot be reloaded as additional initialization is made based on the configuration.
+     * 
+     * @return <code>true</code> if the default truststore is used; otherwise <code>false</code>
+     */
     boolean isDefaultTruststoreEnabled();
 
+    /**
+     * Returns if the custom truststore defined by the administrator should be used.
+     * 
+     * Hint: Loaded once per startup and cannot be reloaded as additional initialization is made based on the configuration.
+     * 
+     * @return <code>true</code> if the custom truststore is used; otherwise <code>false</code>
+     * @see #getCustomTruststoreLocation()
+     * @see #getCustomTruststorePassword()
+     */
     boolean isCustomTruststoreEnabled();
 
+    /**
+     * Returns the location of the custom truststore consisting of the path and file name (e. g. /opt/open-xchange/customTrustStore.jks).
+     * 
+     * Hint: Loaded once per startup and cannot be reloaded as additional initialization is made based on the configuration.
+     * 
+     * @return the location of the custom truststore
+     */
     String getCustomTruststoreLocation();
 
+    /**
+     * Returns the password of the custom truststore to get access.
+     * 
+     * Hint: Loaded once per startup and cannot be reloaded as additional initialization is made based on the configuration.
+     * 
+     * @return the password to access the custom truststore
+     */
     String getCustomTruststorePassword();
-    
-    void reload();
+
 }

@@ -47,47 +47,78 @@
  *
  */
 
-package com.openexchange.net.ssl.config.internal;
+package com.openexchange.net.ssl.config.impl.osgi;
 
-import com.openexchange.context.ContextService;
-import com.openexchange.exception.OXException;
-import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
-import com.openexchange.user.UserService;
+import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
- * The {@link UserAwareSSLConfigurationImpl} provides user specific configuration with regards to SSL
+ * 
+ * {@link Services}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationService {
+public final class Services {
 
-    private static final String USER_ATTRIBUTE_NAME = "trustAllConnections";
-
-    private UserService userService;
-
-    private ContextService contextService;
-
-    public UserAwareSSLConfigurationImpl(UserService userService, ContextService contextService) {
-        this.userService = userService;
-        this.contextService = contextService;
+    /**
+     * Initializes a new {@link Services}.
+     */
+    private Services() {
+        super();
     }
 
-    @Override
-    public boolean isTrustAll(int user, int context) {
-        if ((user <= 0) || (context <= 0) ) {
-            return false;
+    private static final AtomicReference<BundleContext> REF = new AtomicReference<BundleContext>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param bundleContext The service lookup or <code>null</code>
+     */
+    public static void setBundleContext(final BundleContext bundleContext) {
+        REF.set(bundleContext);
+    }
+
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static BundleContext getBundleContext() {
+        return REF.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final BundleContext serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.net.ssl.config\" not started?");
         }
+        ServiceReference<? extends S> serviceReference = serviceLookup.getServiceReference(clazz);
+        if (serviceReference == null) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.net.ssl.config\" not started?");
+        }
+        return serviceLookup.getService(serviceReference);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
         try {
-            String userTrustsAll = this.userService.getUserAttribute(USER_ATTRIBUTE_NAME, user, contextService.getContext(context));
-            if (userTrustsAll == null) {
-                return false;
-            }
-            return Boolean.parseBoolean(userTrustsAll);
-        } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class).error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, user, context);
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
         }
-        return false;
     }
-
 }

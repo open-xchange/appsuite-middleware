@@ -47,53 +47,47 @@
  *
  */
 
-package com.openexchange.net.ssl;
+package com.openexchange.net.ssl.config.impl.internal;
 
-import javax.net.ssl.SSLSocketFactory;
-import com.openexchange.java.util.Tools;
-import com.openexchange.log.LogProperties;
-import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.net.ssl.config.TrustLevel;
+import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
-import com.openexchange.net.ssl.osgi.Services;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.openexchange.user.UserService;
 
 /**
- * The provider of the {@link SSLSocketFactory} based on the configuration made by the administrator.
+ * The {@link UserAwareSSLConfigurationImpl} provides user specific configuration with regards to SSL
  *
- * 
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class SSLSocketFactoryProvider {
+public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationService {
 
-    /**
-     * Returns the configured {@link SSLSocketFactory}. This method is invoked by by reflection.
-     * <p>
-     * Do not use the underlying {@link SSLSocketFactory} directly as this will bypass the server configuration.
-     * 
-     * @return {@link TrustedSSLSocketFactory} or {@link TrustAllSSLSocketFactory} based on the configuration
-     */
-    public static SSLSocketFactory getDefault() {
-        SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
+    private static final String USER_ATTRIBUTE_NAME = "trustAllConnections";
 
-        if (sslConfigService.getTrustLevel().equals(TrustLevel.TRUST_ALL)) {
-            return TrustAllSSLSocketFactory.getDefault();
-        }
-        int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
-        int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
-        if ((user == -1) || (context == -1)) {
-            return TrustedSSLSocketFactory.getDefault();
-        }
+    private UserService userService;
 
-        boolean isUserAllowedToConfigureTrustlevel = Services.getService(UserAwareSSLConfigurationService.class).isTrustAll(user, context);
-        if (isUserAllowedToConfigureTrustlevel) {
-            UserAwareSSLConfigurationService userSSLConfig = Services.getService(UserAwareSSLConfigurationService.class);
+    private ContextService contextService;
 
-            if (userSSLConfig.isTrustAll(user, context)) {
-                return TrustAllSSLSocketFactory.getDefault();
-            }
-        }
-        return TrustedSSLSocketFactory.getDefault();
+    public UserAwareSSLConfigurationImpl(UserService userService, ContextService contextService) {
+        this.userService = userService;
+        this.contextService = contextService;
     }
+
+    @Override
+    public boolean isTrustAll(int user, int context) {
+        if ((user <= 0) || (context <= 0) ) {
+            return false;
+        }
+        try {
+            String userTrustsAll = this.userService.getUserAttribute(USER_ATTRIBUTE_NAME, user, contextService.getContext(context));
+            if (userTrustsAll == null) {
+                return false;
+            }
+            return Boolean.parseBoolean(userTrustsAll);
+        } catch (OXException e) {
+            org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class).error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, user, context);
+        }
+        return false;
+    }
+
 }

@@ -47,63 +47,73 @@
  *
  */
 
-package com.openexchange.net.ssl.config.osgi;
+package com.openexchange.net.ssl.config.impl.internal;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.context.ContextService;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
-import com.openexchange.net.ssl.config.internal.SSLConfigurationServiceImpl;
-import com.openexchange.net.ssl.config.internal.SSLProperties;
-import com.openexchange.net.ssl.config.internal.SSLPropertiesReloadable;
-import com.openexchange.net.ssl.config.internal.UserAwareSSLConfigurationImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+import com.openexchange.net.ssl.config.TrustLevel;
 
 /**
- * 
- * {@link SSLConfigActivator}
+ * The {@link SSLConfigurationServiceImpl} provides user specific configuration with regards to SSL
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class SSLConfigActivator extends HousekeepingActivator {
+public class SSLConfigurationServiceImpl implements SSLConfigurationService {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { UserService.class, ContextService.class, ConfigurationService.class };
+    private ConfigurationService configService;
+
+    public SSLConfigurationServiceImpl(ConfigurationService configService) {
+        this.configService = configService;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        try {
-            org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("starting bundle: \"com.openexchange.net.ssl.config.impl\"");
-            Services.setBundleContext(this.context);
-            
-            ConfigurationService configService = getService(ConfigurationService.class);
-            
-            if (configService.getBoolProperty(SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getName(), SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getDefaultBoolean())) {
-                System.setProperty("javax.net.debug", "ssl:record");
-                org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("Enabled SSL debug logging.");
-            }
-            
-            registerService(Reloadable.class, new SSLPropertiesReloadable());
-
-            registerService(UserAwareSSLConfigurationService.class, new UserAwareSSLConfigurationImpl(getService(UserService.class), getService(ContextService.class)));
-            registerService(SSLConfigurationService.class, new SSLConfigurationServiceImpl(getService(ConfigurationService.class)));
-        } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).error("", e);
-            throw e;
-        }
+    public boolean isWhitelisted(String... hostNames) {
+        return SSLProperties.isWhitelisted(hostNames);
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("stopping bundle: \"com.openexchange.net.ssl.config.impl\"");
+    public TrustLevel getTrustLevel() {
+        return SSLProperties.trustLevel();
+    }
 
-        Services.setBundleContext(null);
+    @Override
+    public String[] getSupportedProtocols() {
+        return SSLProperties.supportedProtocols();
+    }
 
-        super.stopBundle();
+    @Override
+    public String[] getSupportedCipherSuites() {
+        return SSLProperties.supportedCipherSuites();
+    }
+
+    @Override
+    public boolean isVerifyHostname() {
+        return SSLProperties.isVerifyHostname();
+    }
+
+    @Override
+    public void reload() {
+        SSLProperties.reload();
+    }
+
+    @Override
+    public boolean isDefaultTruststoreEnabled() {
+        return this.configService.getBoolProperty(SSLProperties.DEFAULT_TRUSTSTORE_ENABLED.getName(), SSLProperties.DEFAULT_TRUSTSTORE_ENABLED.getDefaultBoolean());
+    }
+
+    @Override
+    public boolean isCustomTruststoreEnabled() {
+        return this.configService.getBoolProperty(SSLProperties.CUSTOM_TRUSTSTORE_ENABLED.getName(), SSLProperties.CUSTOM_TRUSTSTORE_ENABLED.getDefaultBoolean());
+    }
+
+    @Override
+    public String getCustomTruststoreLocation() {
+        return this.configService.getProperty(SSLProperties.CUSTOM_TRUSTSTORE_LOCATION.getName(), SSLProperties.CUSTOM_TRUSTSTORE_LOCATION.getDefault());
+    }
+
+    @Override
+    public String getCustomTruststorePassword() {
+        return this.configService.getProperty(SSLProperties.CUSTOM_TRUSTSTORE_PASSWORD.getName(), SSLProperties.CUSTOM_TRUSTSTORE_PASSWORD.getDefault());
     }
 }
