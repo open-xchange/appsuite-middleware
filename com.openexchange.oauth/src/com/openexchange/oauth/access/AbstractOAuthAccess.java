@@ -85,7 +85,7 @@ public abstract class AbstractOAuthAccess implements OAuthAccess {
     /**
      * Initializes a new {@link AbstractOAuthAccess}.
      * 
-     * @param session TODO
+     * @param session The groupware {@link Session}
      */
     protected AbstractOAuthAccess(Session session) {
         super();
