@@ -57,6 +57,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.pns.PushNotificationService;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.imapidle.ImapIdleConfiguration;
 import com.openexchange.push.imapidle.ImapIdleDeleteListener;
@@ -107,6 +108,7 @@ public class ImapIdleActivator extends HousekeepingActivator {
             track(registeringTracker.getFilter(), registeringTracker);
             trackService(HazelcastInstance.class);
         }
+        trackService(PushNotificationService.class);
         trackService(SessionStorageService.class);
         openTrackers();
 

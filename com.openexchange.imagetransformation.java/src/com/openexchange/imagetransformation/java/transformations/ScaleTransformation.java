@@ -111,7 +111,7 @@ public class ScaleTransformation implements ImageTransformation {
         Dimension dimension = constrain.getDimension(new Dimension(sourceImage.getWidth(), sourceImage.getHeight()));
         int targetWidth = (int) dimension.getWidth();
         int targetHeight = (int) dimension.getHeight();
-        if (shrinkOnly && null != sourceImage && maxWidth >= sourceImage.getWidth() && maxHeight >= sourceImage.getHeight()) {
+        if (shrinkOnly && maxWidth >= sourceImage.getWidth() && maxHeight >= sourceImage.getHeight()) {
             return sourceImage; // nothing to do
         }
 
@@ -134,25 +134,27 @@ public class ScaleTransformation implements ImageTransformation {
      */
     private BufferedImage extentImageIfNeeded(BufferedImage resizedImage, int resultWidth, int resultHeight) {
         // First, get the width and the height of the image
-        int originWidth = resizedImage.getWidth();
-        int originHeight = resizedImage.getHeight();
+        BufferedImage paddedImage = resizedImage;
+        int originWidth = paddedImage.getWidth();
+        int originHeight = paddedImage.getHeight();
 
         // Check which sides need padding
         if (originWidth < resultWidth) {
             // Padding on the width axis
             int paddingSize = (resultWidth - originWidth) / 2;
             if (paddingSize > 0) {
-                return extentImage(resizedImage, paddingSize, true);
+                paddedImage = extentImage(paddedImage, paddingSize, true);
             }
-        } else if (originHeight < resultHeight) {
+        }
+        if (originHeight < resultHeight) {
             // Padding on the height axis
             int paddingSize = (resultHeight - originHeight) / 2;
             if (paddingSize > 0) {
-                return extentImage(resizedImage, paddingSize, false);
+                paddedImage = extentImage(paddedImage, paddingSize, false);
             }
         }
 
-        return resizedImage;
+        return paddedImage;
     }
 
     private BufferedImage extentImage(BufferedImage resizedImage, int paddingSize, boolean extentWidth) {
