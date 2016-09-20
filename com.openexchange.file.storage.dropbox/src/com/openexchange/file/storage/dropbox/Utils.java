@@ -212,7 +212,7 @@ public final class Utils {
             return FileStorageExceptionCodes.PROTOCOL_ERROR.create(serverException, new StringBuilder("HTTP (").append(serverException.error).append(')').toString(), msg);
         }
         if (DropboxUnlinkedException.class.isInstance(e)) {
-            String cburl = OAuthUtil.buildCallbackURL(session, oauthAccount);
+            String cburl = OAuthUtil.buildCallbackURL(oauthAccount);
             return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(oauthAccount.getAPI().getFullName(), cburl);
         }
         if (DropboxException.class.isInstance(e)) {

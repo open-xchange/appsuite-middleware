@@ -59,7 +59,6 @@ import com.openexchange.framework.request.RequestContext;
 import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.oauth.scope.OAuthScope;
-import com.openexchange.session.Session;
 
 /**
  * {@link OAuthUtil}
@@ -106,12 +105,11 @@ public final class OAuthUtil {
 
     /**
      * Builds the 'init' call-back URL for the given {@link OAuthAccount}
-     * 
-     * @param session The session
      * @param account The {@link OAuthAccount}
+     * 
      * @return the 'init' call-back URL for the given {@link OAuthAccount}
      */
-    public static final String buildCallbackURL(Session session, OAuthAccount account) {
+    public static final String buildCallbackURL(OAuthAccount account) {
         RequestContext requestContext = RequestContextHolder.get();
         HostData hostData = requestContext.getHostData();
         boolean isSecure = hostData.isSecure();
@@ -125,7 +123,6 @@ public final class OAuthUtil {
         builder.append("&id=").append(account.getId());
         builder.append('&').append(OAuthConstants.ARGUMENT_DISPLAY_NAME).append('=').append(urlEncode(account.getDisplayName()));
         builder.append("&scopes=").append(urlEncode(OAuthUtil.scopeModulesToString(account.getEnabledScopes())));
-        builder.append("&session=").append(session.getSessionID());
 
         return builder.toString();
     }

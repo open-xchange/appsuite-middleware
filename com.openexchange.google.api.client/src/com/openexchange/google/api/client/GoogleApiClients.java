@@ -334,7 +334,7 @@ public class GoogleApiClients {
                 String exMessage = e.getMessage();
                 if (exMessage.contains("invalid_grant")) {
                     OAuthAccount dbAccount = getDBAccount();
-                    String cburl = OAuthUtil.buildCallbackURL(getSession(), dbAccount);
+                    String cburl = OAuthUtil.buildCallbackURL(dbAccount);
                     throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(dbAccount.getId(), cburl);
                 }
                 throw OAuthExceptionCodes.OAUTH_ERROR.create(exMessage, e);
