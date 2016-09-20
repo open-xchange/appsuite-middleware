@@ -52,8 +52,7 @@ package com.openexchange.file.storage.boxcom.access;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import org.scribe.model.Token;
 import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxAPIException;
 import com.box.sdk.BoxAPIRequest;
@@ -69,9 +68,7 @@ import com.openexchange.file.storage.boxcom.BoxClosure;
 import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.Services;
 import com.openexchange.oauth.AbstractReauthorizeClusterTask;
-import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
@@ -171,7 +168,8 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         // Box SDK performs an automatic access token refresh, so we need to see if the tokens were renewed
         if (!oAuthAccount.getToken().equals(apiConnection.getAccessToken()) || !oAuthAccount.getSecret().equals(apiConnection.getRefreshToken())) {
             ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-            clusterLockService.runClusterTask(new BoxReauthorizeClusterTask(getSession(), oAuthAccount), new ExponentialBackOffRetryPolicy());
+            OAuthAccount account = clusterLockService.runClusterTask(new BoxReauthorizeClusterTask(getSession(), oAuthAccount), new ExponentialBackOffRetryPolicy());
+            setOAuthAccount(account);
         }
         return this;
     }
@@ -191,7 +189,7 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
          * Initialises a new {@link BoxOAuthAccess.BoxReauthorizeClusterTask}.
          */
         public BoxReauthorizeClusterTask(Session session, OAuthAccount cachedAccount) {
-            super(session, cachedAccount);
+            super(Services.getServices(), session, cachedAccount);
         }
 
         /*
@@ -200,25 +198,11 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
          * @see com.openexchange.cluster.lock.ClusterTask#perform()
          */
         @Override
-        public OAuthAccount perform() throws OXException {
-            OAuthService oauthService = Services.getService(OAuthService.class);
-            OAuthAccount dbAccount = oauthService.getAccount(getCachedAccount().getId(), getSession(), getSession().getUserId(), getSession().getContextId());
-
-            if (dbAccount.getToken().equals(getCachedAccount().getToken()) && dbAccount.getSecret().equals(getCachedAccount().getSecret())) {
-                BoxAPIConnection apiConnection = (BoxAPIConnection) getClient().client;
-                Map<String, Object> arguments = new HashMap<>();
-                arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(apiConnection.getAccessToken(), apiConnection.getRefreshToken()));
-                arguments.put(OAuthConstants.ARGUMENT_SESSION, getSession());
-
-                int userId = getSession().getUserId();
-                int contextId = getSession().getContextId();
-                oauthService.updateAccount(dbAccount.getId(), arguments, userId, contextId, dbAccount.getEnabledScopes());
-                setOAuthAccount(oauthService.getAccount(dbAccount.getId(), getSession(), userId, contextId));
-                return getOAuthAccount();
-            } else {
-                return dbAccount;
-            }
+        public Token reauthorize() throws OXException {
+            // Box SDK performs an automatic access token refresh, therefore the access token and refresh token
+            // should already be present in the BoxAPIConnection instance.
+            BoxAPIConnection apiConnection = (BoxAPIConnection) getClient().client;
+            return new Token(apiConnection.getAccessToken(), apiConnection.getRefreshToken());
         }
-
     }
 }

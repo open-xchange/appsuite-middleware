@@ -50,8 +50,6 @@
 package com.openexchange.google.api.client;
 
 import java.security.GeneralSecurityException;
-import java.util.HashMap;
-import java.util.Map;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Google2Api;
 import org.scribe.exceptions.OAuthException;
@@ -66,12 +64,9 @@ import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.services.Services;
-import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractReauthorizeClusterTask;
-import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthUtil;
@@ -318,7 +313,7 @@ public class GoogleApiClients {
          * Initialises a new {@link GoogleApiClients.GoogleReauthorizeClusterTask}.
          */
         public GoogleReauthorizeClusterTask(Session session, OAuthAccount cachedAccount) {
-            super(session, cachedAccount);
+            super(Services.getServiceLookup(), session, cachedAccount);
         }
 
         /*
@@ -327,45 +322,23 @@ public class GoogleApiClients {
          * @see com.openexchange.cluster.lock.ClusterTask#perform()
          */
         @Override
-        public OAuthAccount perform() throws OXException {
-            OAuthService oAuthService = Services.getService(OAuthService.class);
-            OAuthAccount dbAccount = oAuthService.getAccount(getCachedAccount().getId(), getSession(), getSession().getUserId(), getSession().getContextId());
+        public Token reauthorize() throws OXException {
+            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
+            serviceBuilder.apiKey(getCachedAccount().getMetaData().getAPIKey(getSession())).apiSecret(getCachedAccount().getMetaData().getAPISecret(getSession()));
+            Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
 
-            if (dbAccount.getToken().equals(getCachedAccount().getToken()) && dbAccount.getSecret().equals(getCachedAccount().getSecret())) {
-                final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
-                serviceBuilder.apiKey(getCachedAccount().getMetaData().getAPIKey(getSession())).apiSecret(getCachedAccount().getMetaData().getAPISecret(getSession()));
-                Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
-
-                // Refresh the token
-                String refreshToken = getCachedAccount().getSecret();
-                Token accessToken;
-                try {
-                    accessToken = scribeOAuthService.getAccessToken(new Token(getCachedAccount().getToken(), getCachedAccount().getSecret()), null);
-
-                    if (!Strings.isEmpty(accessToken.getSecret())) {
-                        refreshToken = accessToken.getSecret();
-                    }
-                    // Update account
-                    int accountId = getCachedAccount().getId();
-                    Map<String, Object> arguments = new HashMap<String, Object>(3);
-                    arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
-                    arguments.put(OAuthConstants.ARGUMENT_SESSION, getSession());
-                    oAuthService.updateAccount(accountId, arguments, getSession().getUserId(), getSession().getContextId(), getCachedAccount().getEnabledScopes());
-
-                    // Reload
-                    return oAuthService.getAccount(accountId, getSession(), getSession().getUserId(), getSession().getContextId());
-                } catch (OAuthException e) {
-                    String exMessage = e.getMessage();
-                    if (exMessage.contains("invalid_grant")) {
-                        String cburl = OAuthUtil.buildCallbackURL(getSession(), dbAccount);
-                        throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(dbAccount.getId(), cburl);
-                    }
-                    throw OAuthExceptionCodes.OAUTH_ERROR.create(exMessage, e);
+            // Refresh the token
+            try {
+                return scribeOAuthService.getAccessToken(new Token(getCachedAccount().getToken(), getCachedAccount().getSecret()), null);
+            } catch (OAuthException e) {
+                String exMessage = e.getMessage();
+                if (exMessage.contains("invalid_grant")) {
+                    OAuthAccount dbAccount = getDBAccount();
+                    String cburl = OAuthUtil.buildCallbackURL(getSession(), dbAccount);
+                    throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(dbAccount.getId(), cburl);
                 }
-            } else {
-                return dbAccount;
+                throw OAuthExceptionCodes.OAUTH_ERROR.create(exMessage, e);
             }
         }
-
     }
 }

@@ -49,6 +49,12 @@
 
 package com.openexchange.oauth;
 
+import java.util.HashMap;
+import java.util.Map;
+import org.scribe.model.Token;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -61,6 +67,9 @@ public abstract class AbstractReauthorizeClusterTask {
     private final String taskName;
     private final Session session;
     private final OAuthAccount cachedAccount;
+    private final ServiceLookup services;
+    private OAuthAccount dbAccount;
+    private OAuthService oauthService;
 
     /**
      * Initialises a new {@link AbstractReauthorizeClusterTask} and generates the name of
@@ -72,11 +81,13 @@ public abstract class AbstractReauthorizeClusterTask {
      * e.g.
      * <pre>SomeProviderReauthorizeClusterTask:1138@31145:34:tld.domain.provider.oauth</pre>
      * 
+     * @param services The {@link ServiceLookup} instance
      * @param session The groupware {@link Session}
      * @param cachedAccount The cached {@link OAuthAccount}
      */
-    public AbstractReauthorizeClusterTask(Session session, OAuthAccount cachedAccount) {
+    public AbstractReauthorizeClusterTask(ServiceLookup services, Session session, OAuthAccount cachedAccount) {
         super();
+        this.services = services;
         this.session = session;
         this.cachedAccount = cachedAccount;
 
@@ -115,4 +126,71 @@ public abstract class AbstractReauthorizeClusterTask {
     public OAuthAccount getCachedAccount() {
         return cachedAccount;
     }
+
+    /**
+     * Returns the database {@link OAuthAccount}
+     * 
+     * @return The database {@link OAuthAccount}
+     * @throws OXException if the {@link OAuthAccount} cannot be retrieved
+     */
+    public OAuthAccount getDBAccount() throws OXException {
+        if (dbAccount == null) {
+            dbAccount = getOAuthService().getAccount(cachedAccount.getId(), session, session.getUserId(), session.getContextId());
+        }
+        return dbAccount;
+    }
+
+    /**
+     * Returns the {@link OAuthService}
+     * 
+     * @return the {@link OAuthService}
+     */
+    public OAuthService getOAuthService() {
+        if (oauthService == null) {
+            oauthService = services.getService(OAuthService.class);
+        }
+        return oauthService;
+    }
+
+    /**
+     * Common logic for the perform
+     * 
+     * @return The re-authorised OAuthAccount
+     * @throws OXException if an error is occurred
+     */
+    public OAuthAccount perform() throws OXException {
+        dbAccount = getDBAccount();
+
+        // Cached account does not match the database account. DB account is always considered to be up-to-date, thus return it
+        if (!(dbAccount.getToken().equals(cachedAccount.getToken()) && dbAccount.getSecret().equals(cachedAccount.getSecret()))) {
+            return dbAccount;
+        }
+
+        // Perform the actual re-authorise
+        Token token = reauthorize();
+
+        // Did the OAuth provider returned a new refresh token?
+        String refreshToken = (Strings.isEmpty(token.getSecret())) ? dbAccount.getSecret() : token.getSecret();
+
+        // Set the arguments for the update
+        int accountId = dbAccount.getId();
+        Map<String, Object> arguments = new HashMap<>(2);
+        arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(token.getToken(), refreshToken));
+        arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
+
+        // Update the account
+        OAuthService oAuthService = getOAuthService();
+        oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId(), dbAccount.getEnabledScopes());
+
+        // Reload
+        return oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Performs the actual re-authorise task
+     * 
+     * @return The re-authorised OAuthAccount
+     * @throws OXException if an error is occurred
+     */
+    protected abstract Token reauthorize() throws OXException;
 }

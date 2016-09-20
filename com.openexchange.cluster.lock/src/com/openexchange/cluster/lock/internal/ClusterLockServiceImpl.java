@@ -80,13 +80,11 @@ public class ClusterLockServiceImpl implements ClusterLockService {
     private final Unregisterer unregisterer;
     private final ServiceLookup services;
 
-    //FIXME: Switch to nanoseconds
-
     /** Defines the threshold for the lock refresh in seconds */
-    private static final long REFRESH_LOCK_THRESHOLD = TimeUnit.SECONDS.toMillis(20);
+    private static final long REFRESH_LOCK_THRESHOLD = TimeUnit.SECONDS.toNanos(20);
 
     /** Defines the ttl for a cluster lock in seconds */
-    private static final long LOCK_TTL = TimeUnit.SECONDS.toMillis(30);
+    private static final long LOCK_TTL = TimeUnit.SECONDS.toNanos(30);
 
     /**
      * Initializes a new {@link ClusterLockServiceImpl}.
@@ -107,7 +105,7 @@ public class ClusterLockServiceImpl implements ClusterLockService {
         HazelcastInstance hzInstance = getHazelcastInstance();
 
         IMap<String, Long> clusterLocks = hzInstance.getMap(ClusterLockType.ClusterTaskLocks.name());
-        long timeNow = System.currentTimeMillis(); //FIXME: Switch to nanoTime()
+        long timeNow = System.nanoTime();
         Long timeThen = clusterLocks.putIfAbsent(clusterTask.getTaskName(), timeNow);
         if (timeThen == null) {
             return true;
@@ -166,10 +164,10 @@ public class ClusterLockServiceImpl implements ClusterLockService {
             } finally {
                 LOGGER.debug("Releasing cluster lock held by the cluster task '{}'.", clusterTask.getTaskName());
                 if (lockAcquired) {
-                    releaseClusterLock(clusterTask);
                     if (timerTask != null) {
                         timerTask.cancel();
                     }
+                    releaseClusterLock(clusterTask);
                 }
             }
         } while (retryPolicy.isRetryAllowed());
@@ -354,7 +352,7 @@ public class ClusterLockServiceImpl implements ClusterLockService {
 
                 IMap<String, Long> clusterLocks = hzInstance.getMap(ClusterLockType.ClusterTaskLocks.name());
                 LOGGER.debug("Refreshing lock for cluster task '{}'", taskName);
-                long timeNow = System.currentTimeMillis(); //FIXME: Switch to nanoTime()
+                long timeNow = System.nanoTime();
                 clusterLocks.put(taskName, timeNow);
             } catch (OXException e) {
                 LOGGER.error("{}", e.getMessage(), e);
