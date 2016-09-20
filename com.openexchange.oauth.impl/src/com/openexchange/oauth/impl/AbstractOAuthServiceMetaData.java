@@ -88,6 +88,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
     private final Map<OAuthPropertyID, OAuthConfigurationProperty> properties;
 
     protected String id;
+    private String name;
     protected String displayName;
     protected boolean needsRequestToken = true;
     protected boolean registerTokenBasedDeferrer = false;
@@ -222,6 +223,13 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
      */
     public void setId(final String id) {
         this.id = id;
+
+        // retrieve name from id
+        int index = id.lastIndexOf('.');
+        if (index >= 0) {
+            this.name = id.substring(index + 1, id.length());
+        }
+
     }
 
     /**
@@ -284,8 +292,8 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
      * @see com.openexchange.oauth.OAuthServiceMetaData#getAvailableScopes()
      */
     @Override
-    public Set<OAuthScope> getAvailableScopes() {
-        return availableScopes;
+    public Set<OAuthScope> getAvailableScopes(int userId, int ctxId) throws OXException {
+        return Collections.unmodifiableSet(OAuthScopeConfigurationService.getInstance().getScopes(availableScopes, userId, ctxId, name));
     }
 
     /**

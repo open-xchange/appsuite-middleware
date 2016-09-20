@@ -139,7 +139,7 @@ public final class CreateAction extends AbstractOAuthTokenAction {
             }
 
             // Write as JSON
-            final JSONObject jsonAccount = AccountWriter.write(newAccount);
+            final JSONObject jsonAccount = AccountWriter.write(newAccount, session);
 
             // Return appropriate result
             return new AJAXRequestResult(jsonAccount);

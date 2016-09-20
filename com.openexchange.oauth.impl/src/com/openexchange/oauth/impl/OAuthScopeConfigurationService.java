@@ -47,63 +47,70 @@
  *
  */
 
-package com.openexchange.oauth.json.oauthaccount;
+package com.openexchange.oauth.impl;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthConstants;
-import com.openexchange.oauth.OAuthInteraction;
-import com.openexchange.oauth.json.AbstractOAuthWriter;
-import com.openexchange.session.Session;
+import com.openexchange.java.Strings;
+import com.openexchange.oauth.impl.services.Services;
+import com.openexchange.oauth.scope.OAuthScope;
 
 /**
- * The OAuth account writer
+ * {@link OAuthScopeConfigurationService}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.3
  */
-public class AccountWriter extends AbstractOAuthWriter {
+public class OAuthScopeConfigurationService {
 
-    /**
-     * Initializes a new {@link AccountWriter}.
-     */
-    private AccountWriter() {
+    private static final OAuthScopeConfigurationService INSTANCE = new OAuthScopeConfigurationService();
+    private static final String PROPERTY_PREFIX = "com.openexchange.oauth.modules.enabled.";
+
+    private OAuthScopeConfigurationService() {
         super();
     }
 
-    /**
-     * Writes specified account as a JSON object.
-     *
-     * @param account The account
-     * @return The JSON object
-     * @throws JSONException If writing to JSON fails
-     * @throws OXException
-     */
-    public static JSONObject write(final OAuthAccount account, Session session) throws JSONException, OXException {
-        final JSONObject jAccount = new JSONObject(5);
-        jAccount.put(AccountField.ID.getName(), account.getId());
-        jAccount.put(AccountField.DISPLAY_NAME.getName(), account.getDisplayName());
-        jAccount.put(AccountField.SERVICE_ID.getName(), account.getMetaData().getId());
-        jAccount.put(AccountField.ENABLED_SCOPES.getName(), write(account.getEnabledScopes()));
-        jAccount.put(AccountField.AVAILABLE_SCOPES.getName(), write(account.getMetaData().getAvailableScopes(session.getUserId(), session.getContextId())));
-        return jAccount;
+    public static OAuthScopeConfigurationService getInstance() {
+        return INSTANCE;
     }
 
     /**
-     * Writes specified interaction as a JSON object.
-     *
-     * @param interaction The interaction
-     * @param uuid The UUID associated with request token secret
-     * @return The JSON object
-     * @throws JSONException If writing to JSON fails
+     * Filters all disabled scopes from the given list of scopes for the given user and oauth api.
+     * 
+     * @param availableScopes All available scopes
+     * @param userId The user id
+     * @param ctxId The context id
+     * @param oauthApiName The OAuth api name
+     * @return A set of enabled and available OAuthScopes
+     * @throws OXException if the configured scopes couldn't be retrieved for the given user
      */
-    public static JSONObject write(final OAuthInteraction interaction, final String uuid) throws JSONException {
-        final JSONObject jInteraction = new JSONObject(6);
-        jInteraction.put(AccountField.AUTH_URL.getName(), interaction.getAuthorizationURL());
-        jInteraction.put(AccountField.INTERACTION_TYPE.getName(), interaction.getInteractionType().getName());
-        jInteraction.put(AccountField.TOKEN.getName(), interaction.getRequestToken().getToken());
-        jInteraction.put(OAuthConstants.SESSION_PARAM_UUID, uuid);
-        return jInteraction;
+    Set<OAuthScope> getScopes(Set<OAuthScope> availableScopes, int userId, int ctxId, String oauthApiName) throws OXException {
+
+        Set<OAuthScope> result = new HashSet<>();
+
+        ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = factory.getView(userId, ctxId);
+        String enabledModulesStr = view.opt(PROPERTY_PREFIX + oauthApiName, String.class, null);
+        if (enabledModulesStr == null) {
+            // Fallback to all enabled
+            return availableScopes;
+        }
+        
+        List<String> enabledScopes = Arrays.asList(Strings.splitByComma(enabledModulesStr));
+        
+        for (OAuthScope availableScope : availableScopes) {
+            if (enabledScopes.contains(availableScope.getModule().name())) {
+                result.add(availableScope);
+            }
+        }
+
+        return result;
+
     }
+
 }

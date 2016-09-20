@@ -214,7 +214,10 @@ public interface OAuthServiceMetaData {
     /**
      * Returns an unmodifiable {@link Set} with all available {@link OAuthScope}s
      * 
+     * @param userId The user id
+     * @param ctxId The context id
      * @return an unmodifiable {@link Set} with all available {@link OAuthScope}s
+     * @throws OXException if available scopes couldn't be retrieved
      */
-    Set<OAuthScope> getAvailableScopes();
+    Set<OAuthScope> getAvailableScopes(int userId, int ctxId) throws OXException;
 }

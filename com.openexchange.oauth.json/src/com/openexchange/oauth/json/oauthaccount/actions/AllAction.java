@@ -105,7 +105,7 @@ public final class AllAction extends AbstractOAuthAJAXActionService {
              */
             final JSONArray jsonArray = new JSONArray();
             for (final OAuthAccount oAuthAccount : accounts) {
-                jsonArray.put(AccountWriter.write(oAuthAccount));
+                jsonArray.put(AccountWriter.write(oAuthAccount, session));
             }
             /*
              * Return appropriate result
