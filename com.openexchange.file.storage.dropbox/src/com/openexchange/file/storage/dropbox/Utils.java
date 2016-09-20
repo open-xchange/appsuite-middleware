@@ -213,7 +213,7 @@ public final class Utils {
         }
         if (DropboxUnlinkedException.class.isInstance(e)) {
             String cburl = OAuthUtil.buildCallbackURL(oauthAccount);
-            return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(oauthAccount.getAPI().getFullName(), cburl);
+            return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(oauthAccount.getAPI().getShortName(), oauthAccount.getId(), session.getUserId(), session.getContextId(), cburl);
         }
         if (DropboxException.class.isInstance(e)) {
             return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, DropboxConstants.ID, e.getMessage());
