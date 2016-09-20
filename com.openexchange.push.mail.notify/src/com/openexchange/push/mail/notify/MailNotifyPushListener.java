@@ -49,10 +49,19 @@
 
 package com.openexchange.push.mail.notify;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.pns.DefaultPushNotification;
+import com.openexchange.pns.KnownTopic;
+import com.openexchange.pns.PushNotification;
+import com.openexchange.pns.PushNotificationField;
+import com.openexchange.pns.PushNotificationService;
+import com.openexchange.push.PushEventConstants;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
+import com.openexchange.push.mail.notify.osgi.Services;
 import com.openexchange.session.Session;
 
 /**
@@ -133,7 +142,33 @@ public final class MailNotifyPushListener implements PushListener {
 
     @Override
     public void notifyNewMail() throws OXException {
-        PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(ACCOUNT_ID, "INBOX"), session, null, /* Distribute remotely! */ true, false);
+        String folderId = MailFolderUtility.prepareFullname(ACCOUNT_ID, "INBOX");
+
+        PushNotificationService pushNotificationService = Services.optService(PushNotificationService.class);
+        if (null != pushNotificationService) {
+            PushNotification notification = createNotification(folderId);
+            if (null != notification) {
+                pushNotificationService.handle(notification);
+            }
+        }
+
+        Map<String, Object> props = new LinkedHashMap<>(2);
+        props.put(PushEventConstants.PROPERTY_NO_FORWARD, Boolean.TRUE); // Do not redistribute through com.openexchange.pns.impl.event.PushEventHandler!
+        PushUtility.triggerOSGiEvent(folderId, session, props, /* Distribute remotely! */ true, false);
+    }
+
+    private PushNotification createNotification(String folderId) {
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+
+        Map<String, Object> messageData = new LinkedHashMap<>(2);
+        messageData.put(PushNotificationField.FOLDER.getId(), folderId);
+        return DefaultPushNotification.builder()
+            .contextId(contextId)
+            .userId(userId)
+            .topic(KnownTopic.MAIL_NEW.getName())
+            .messageData(messageData)
+            .build();
     }
 
 }
