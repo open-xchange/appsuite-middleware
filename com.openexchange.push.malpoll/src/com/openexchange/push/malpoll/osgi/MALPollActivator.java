@@ -65,6 +65,7 @@ import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
+import com.openexchange.pns.PushNotificationService;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.malpoll.MALPollCreateTableTask;
 import com.openexchange.push.malpoll.MALPollDeleteListener;
@@ -107,9 +108,7 @@ public final class MALPollActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            MailService.class, EventAdmin.class, TimerService.class, ConfigurationService.class, DatabaseService.class,
-            ContextService.class };
+        return new Class<?>[] { MailService.class, EventAdmin.class, TimerService.class, ConfigurationService.class, DatabaseService.class, ContextService.class };
     }
 
     @Override
@@ -160,6 +159,15 @@ public final class MALPollActivator extends HousekeepingActivator {
                     new RegistryServiceTrackerCustomizer<SessiondService>(context, getServiceRegistry(), SessiondService.class);
                 track(SessiondService.class, trackerCustomizer);
             }
+            /*
+             * Initialize & open tracker for PNS service
+             */
+            {
+                final ServiceTrackerCustomizer<PushNotificationService,PushNotificationService> trackerCustomizer =
+                    new RegistryServiceTrackerCustomizer<PushNotificationService>(context, getServiceRegistry(), PushNotificationService.class);
+                track(PushNotificationService.class, trackerCustomizer);
+            }
+            openTrackers();
             /*
              * Read configuration
              */

@@ -51,6 +51,8 @@ package com.openexchange.push.malpoll;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -66,6 +68,12 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.pns.DefaultPushNotification;
+import com.openexchange.pns.KnownTopic;
+import com.openexchange.pns.PushNotification;
+import com.openexchange.pns.PushNotificationField;
+import com.openexchange.pns.PushNotificationService;
+import com.openexchange.push.PushEventConstants;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
@@ -386,7 +394,34 @@ public final class MALPollPushListener implements PushListener {
 
     @Override
     public void notifyNewMail() throws OXException {
-        PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(ACCOUNT_ID, folder), session);
+        String folderId = MailFolderUtility.prepareFullname(ACCOUNT_ID, folder);
+
+        MALPollServiceRegistry serviceRegistry = MALPollServiceRegistry.getServiceRegistry();
+        PushNotificationService pushNotificationService = serviceRegistry.getService(PushNotificationService.class);
+        if (null != pushNotificationService) {
+            PushNotification notification = createNotification(folderId);
+            if (null != notification) {
+                pushNotificationService.handle(notification);
+            }
+        }
+
+        Map<String, Object> props = new LinkedHashMap<>(2);
+        props.put(PushEventConstants.PROPERTY_NO_FORWARD, Boolean.TRUE); // Do not redistribute through com.openexchange.pns.impl.event.PushEventHandler!
+        PushUtility.triggerOSGiEvent(folderId, session, props, true, false);
+    }
+
+    private PushNotification createNotification(String folderId) {
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+
+        Map<String, Object> messageData = new LinkedHashMap<>(2);
+        messageData.put(PushNotificationField.FOLDER.getId(), folderId);
+        return DefaultPushNotification.builder()
+            .contextId(contextId)
+            .userId(userId)
+            .topic(KnownTopic.MAIL_NEW.getName())
+            .messageData(messageData)
+            .build();
     }
 
     /**
