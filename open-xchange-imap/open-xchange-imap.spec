@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 20
+%define        ox_release 21
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -100,6 +100,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-3413
     ox_add_property com.openexchange.imap.initWithSpecialUse false $PFILE
+
+    # SoftwareChange_Request-3524
+    ox_add_property com.openexchange.imap.setSpecialUseFlags false $PFILE
 fi
 
 %clean
@@ -115,6 +118,8 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Mon Sep 05 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2016-09-12 (3546)
 * Fri Aug 19 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-08-29 (3521)
 * Mon Aug 08 2016 Marcus Klein <marcus.klein@open-xchange.com>
