@@ -64,5 +64,6 @@ public class CalendarFieldStrings implements LocalizableStrings {
     public static final String LABEL = "Label";
     public static final String NOTE = "Note";
     public static final String TIMEZONE = "Timezone";
+    public static final String PARTICIPANTS = "Participants";
 
 }
