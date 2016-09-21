@@ -133,6 +133,7 @@ public class Bug44109Test extends CalDAVTest {
         exception1.setParentFolderID(appointment.getParentFolderID());
         exception1.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
         exception1.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
+        exception1.setIgnoreConflicts(true);
         manager2.update(exception1);
         clientLastModified = manager2.getLastModification();
         Appointment exception2 = new Appointment();
@@ -143,6 +144,7 @@ public class Bug44109Test extends CalDAVTest {
         exception2.setParentFolderID(appointment.getParentFolderID());
         exception2.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
         exception2.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
+        exception2.setIgnoreConflicts(true);
         manager2.update(exception2);
         clientLastModified = manager2.getLastModification();
         /*
@@ -170,6 +172,7 @@ public class Bug44109Test extends CalDAVTest {
          */
         appointment = manager2.get(appointment);
         appointment.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
+        appointment.setIgnoreConflicts(true);
         manager2.update(appointment);
         /*
          * verify recurrence on client as user a
