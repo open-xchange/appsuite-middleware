@@ -150,7 +150,7 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
 
         BOXCOM(API.BOX_COM.getFullName(), Module.drive),
         DROPBOX(API.DROPBOX.getFullName(), Module.drive),
-        GOOGLE(API.GOOGLE.getFullName(), Module.calendar_ro, Module.contacts_ro, Module.drive),
+        GOOGLE(API.GOOGLE.getFullName(), Module.calendar_ro, Module.contacts_ro, Module.drive, Module.offline),
         MSLIVE_CONNECT(API.MS_LIVE_CONNECT.getFullName(), Module.calendar_ro, Module.contacts_ro, Module.drive),
         LINKEDIN(API.LINKEDIN.getFullName(), Module.contacts_ro),
         VKONTAKTE(API.VKONTAKTE.getFullName(), Module.contacts_ro),
