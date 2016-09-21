@@ -57,9 +57,7 @@ public class ChunkingUtilities {
     }
     
     private static void mergeNewWithStoredData(File storedDataFile, Map<String, Object> data) throws IOException {
-        FileLock fileLock = null;
-        try (RandomAccessFile storedFile = new RandomAccessFile(storedDataFile, "rw")){
-            fileLock = getFileLock(fileLock, storedFile);
+        try (RandomAccessFile storedFile = new RandomAccessFile(storedDataFile, "rw"); FileLock fileLock = getFileLock(storedFile)){
             // unable to get file lock for more then 20 seconds
             if (fileLock == null) {
                 storedFile.close();
@@ -79,7 +77,8 @@ public class ChunkingUtilities {
         }
     }
     
-    private static FileLock getFileLock(FileLock fileLock, RandomAccessFile storedFile) throws InterruptedException, IOException {
+    private static FileLock getFileLock(RandomAccessFile storedFile) throws InterruptedException, IOException {
+        FileLock fileLock = null;
         int fileLockAttempts = 0;
         while (fileLock == null && fileLockAttempts <= MAX_LOCK_FILE_ATTEMPTS) {
             try {
