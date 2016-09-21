@@ -430,7 +430,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             String transportId = hit.getTransportId();
             PushNotificationTransport transport = transportRegistry.getTransportFor(client, transportId);
             if (null == transport) {
-                LOGGER.info("No such transport '{}' for client '{}' to publish notification from user {} in context {} for topic {}", transportId, client, I(userId), I(contextId), topic);
+                LOGGER.info("No such transport '{}' for client '{}' to publish notification \"{}\" from user {} in context {}", transportId, client, topic, I(userId), I(contextId));
             } else {
                 if (isTransportAllowed(transport, topic, client, userId, contextId)) {
                     while (notifications.hasNext()) {
@@ -443,7 +443,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                         }
                     }
                 } else {
-                    LOGGER.info("Transport '{}' not enabled for client '{}' to publish notification from user {} in context {} for topic {}", transportId, client, I(userId), I(contextId), topic);
+                    LOGGER.info("Transport '{}' not enabled for client '{}' to publish notification \"{}\" from user {} in context {}", transportId, client, topic, I(userId), I(contextId));
                 }
             }
         }
