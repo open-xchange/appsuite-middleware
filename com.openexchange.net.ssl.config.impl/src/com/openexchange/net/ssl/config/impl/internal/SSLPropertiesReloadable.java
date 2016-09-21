@@ -50,6 +50,7 @@
 package com.openexchange.net.ssl.config.impl.internal;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.DefaultInterests;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
@@ -68,10 +69,15 @@ public class SSLPropertiesReloadable implements Reloadable {
         Services.getService(SSLConfigurationService.class).reload();
     }
 
+    private static final String[] RELOADABLES = new String[] {
+        SSLProperties.TRUST_LEVEL_KEY,
+        SSLProperties.PROTOCOLS_KEY,
+        SSLProperties.CIPHERS_KEY,
+        SSLProperties.TRUSTSTORE_WHITELIST_KEY,
+    };
+
     @Override
     public Interests getInterests() {
-        // TODO Auto-generated method stub
-        return null;
+        return DefaultInterests.builder().propertiesOfInterest(RELOADABLES).build();
     }
-
 }

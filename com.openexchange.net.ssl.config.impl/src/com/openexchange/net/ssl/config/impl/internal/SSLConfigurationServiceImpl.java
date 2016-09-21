@@ -88,13 +88,13 @@ public class SSLConfigurationServiceImpl implements SSLConfigurationService {
     }
 
     @Override
-    public boolean isVerifyHostname() {
-        return SSLProperties.isVerifyHostname();
+    public void reload() {
+        SSLProperties.reload();
     }
 
     @Override
-    public void reload() {
-        SSLProperties.reload();
+    public boolean isVerifyHostname() {
+        return this.configService.getBoolProperty(SSLProperties.HOSTNAME_VERIFICATION_ENABLED.getName(), SSLProperties.HOSTNAME_VERIFICATION_ENABLED.getDefaultBoolean());
     }
 
     @Override

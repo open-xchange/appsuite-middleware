@@ -74,9 +74,11 @@ public enum SSLProperties {
 
     CUSTOM_TRUSTSTORE_PASSWORD(SSLProperties.CUSTOM_TRUSTSTORE_PASSWORD_KEY, SSLProperties.EMPTY_STRING),
 
+    HOSTNAME_VERIFICATION_ENABLED(SSLProperties.HOSTNAME_VERIFICATION_ENABLED_KEY, true),
+
     ;
 
-    static final String EMPTY_STRING = "";
+    private static final String EMPTY_STRING = "";
 
     static final String SECURE_CONNECTIONS_DEBUG_LOGS_KEY = "com.openexchange.net.ssl.debug.logs";
 
@@ -88,6 +90,8 @@ public enum SSLProperties {
 
     static final String CUSTOM_TRUSTSTORE_PASSWORD_KEY = "com.openexchange.net.ssl.custom.truststore.password";
 
+    static final String HOSTNAME_VERIFICATION_ENABLED_KEY = "com.openexchange.net.ssl.hostname.verification.enabled";
+    
     //---------- Reloadable Properties -------------//
 
     static final String TRUST_LEVEL_KEY = "com.openexchange.net.ssl.trustlevel";
@@ -168,30 +172,6 @@ public enum SSLProperties {
         return tmp;
     }
 
-    static final String HOSTNAME_VERIFICATION_ENABLED_KEY = "com.openexchange.net.ssl.hostname.verification.enabled";
-
-    private static volatile Boolean verifyHostname;
-
-    protected static boolean isVerifyHostname() {
-        Boolean tmp = verifyHostname;
-        if (null == tmp) {
-            synchronized (SSLProperties.class) {
-                tmp = verifyHostname;
-                if (null == tmp) {
-                    ConfigurationService service = Services.optService(ConfigurationService.class);
-                    if (null == service) {
-                        org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.net.ssl.hostname.verification.enabled'.");
-                        return true;
-                    }
-                    boolean prop = service.getBoolProperty(HOSTNAME_VERIFICATION_ENABLED_KEY, true);
-                    tmp = new Boolean(prop);
-                    verifyHostname = tmp;
-                }
-            }
-        }
-        return tmp.booleanValue();
-    }
-
     static final String TRUSTSTORE_WHITELIST_KEY = "com.openexchange.net.ssl.whitelist";
 
     static final String TRUSTSTORE_WHITELIST_DEFAULT = "127.0.0.1-127.255.255.255,localhost";
@@ -259,18 +239,6 @@ public enum SSLProperties {
         protocols = null;
         ciphers = null;
         whitelistedHosts = null;
-        verifyHostname = null;
-
-        reinit();
-    }
-
-    //FIXME should be moved to c.o.net.ssl
-    private static void reinit() {
-        //        if (isVerifyHostname()) {
-        //            HttpsURLConnection.setDefaultHostnameVerifier(new DefaultHostnameVerifier());
-        //        } else {
-        //            HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
-        //        }
     }
 
     //---------- End of reloadables -------------//
