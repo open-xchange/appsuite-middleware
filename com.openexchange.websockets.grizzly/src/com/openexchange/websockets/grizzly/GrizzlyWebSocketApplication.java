@@ -461,7 +461,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
         if (null == userSockets || userSockets.isEmpty()) {
             // No socket at all
-            WS_LOGGER.debug("Found no local Web Sockes for user {} in context {}", I(userId), I(contextId));
+            WS_LOGGER.debug("Found no local Web Sockets for user {} in context {}", I(userId), I(contextId));
             return false;
         }
 
