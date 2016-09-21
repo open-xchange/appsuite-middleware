@@ -3255,7 +3255,7 @@ public final class IMAPCommandsCollection {
                         if (null == message) {
                             return null;
                         }
-                        return toMailPart((IMAPMessage) message, sectionId, peek, bid.bodystructure, imapFolder.getFullName());
+                        return toMailPart((IMAPMessage) message, sectionId, peek, bid.bodystructure, imapFolder.getFullName(), true);
                     } catch (final Exception e) {
                         // Ignore
                     }
@@ -3412,7 +3412,7 @@ public final class IMAPCommandsCollection {
                         if (null == message) {
                             return null;
                         }
-                        return toMailPart((IMAPMessage) message, bid.sectionId, peek, bid.bodystructure, imapFolder.getFullName());
+                        return toMailPart((IMAPMessage) message, bid.sectionId, peek, bid.bodystructure, imapFolder.getFullName(), true);
                     } catch (final Exception e) {
                         // Ignore
                     }
@@ -3490,11 +3490,13 @@ public final class IMAPCommandsCollection {
         return null;
     }
 
-    protected static MailPart toMailPart(final IMAPMessage msg, final String sectionId, final boolean peek, final BODYSTRUCTURE bodystructure, final String fullName) throws ProtocolException {
+    protected static MailPart toMailPart(final IMAPMessage msg, final String sectionId, final boolean peek, final BODYSTRUCTURE bodystructure, final String fullName, final boolean loadContent) throws ProtocolException {
         try {
-            final IMAPMailPart ret = new IMAPMailPart(msg, sectionId, peek, bodystructure, fullName);
+            final IMAPMailPart ret = new IMAPMailPart(msg, sectionId, peek, bodystructure, fullName, loadContent);
             ret.applyBodyStructure(bodystructure);
             return ret;
+        } catch (final IOException e) {
+            throw new ProtocolException(e.getMessage(), e);
         } catch (final RuntimeException e) {
             throw new ProtocolException(e.getMessage(), e);
         }

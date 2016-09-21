@@ -65,6 +65,7 @@ import com.openexchange.search.internal.operands.AttachmentOperand;
 import com.openexchange.search.internal.operands.AttachmentOperand.AttachmentOperandType;
 import com.openexchange.search.internal.operands.ColumnOperand;
 import com.openexchange.search.internal.operands.ConstantOperand;
+import com.openexchange.search.internal.operands.HeaderOperand;
 
 /**
  * {@link SearchTermParser}
@@ -146,6 +147,8 @@ public class SearchTermParser {
 
         if (operand.hasAndNotNull(SearchTermFields.FIELD)) {
             return new ColumnOperand(operand.optString(SearchTermFields.FIELD));
+        } else if (operand.hasAndNotNull(SearchTermFields.HEADER)) {
+            return new HeaderOperand(operand.optString(SearchTermFields.HEADER));
         } else {
             return new AttachmentOperand(AttachmentOperandType.valueOf(operand.optString(SearchTermFields.ATTACHMENT)));
         }

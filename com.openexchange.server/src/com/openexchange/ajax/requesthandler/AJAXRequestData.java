@@ -1333,7 +1333,7 @@ public class AJAXRequestData {
         synchronized (thisFiles) {
             UploadEvent uploadEvent = this.uploadEvent;
             if (null == uploadEvent) {
-                uploadEvent = AJAXServlet.processUploadStatic(httpServletRequest, maxFileSize, maxOverallSize);
+                uploadEvent = AJAXServlet.processUploadStatic(httpServletRequest, maxFileSize, maxOverallSize, session);
                 this.uploadEvent = uploadEvent;
                 final Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator();
                 while (iterator.hasNext()) {

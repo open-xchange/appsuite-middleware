@@ -118,16 +118,23 @@ public final class IMAPMailPart extends MailPart implements MimeRawSource, Conne
      * @param sectionId The referenced section identifier
      * @param peek Whether to peek (<code>\Seen</code> flag not set) or not
      * @param body The body structure information
+     * @throws IOException If an I/O error occurs while loading content
      */
-    public IMAPMailPart(final IMAPMessage msg, final String sectionId, final boolean peek, final BODYSTRUCTURE body, final String fullName) {
+    public IMAPMailPart(final IMAPMessage msg, final String sectionId, final boolean peek, final BODYSTRUCTURE body, final String fullName, final boolean loadContent) throws IOException {
         super();
-        inProvider = new InputStreamProvider() {
+        if (loadContent) {
+            ThresholdInputStreamProvider tisp = new ThresholdInputStreamProvider();
+            tisp.write(new IMAPInputStream(msg, sectionId, body.size, peek));
+            this.inProvider = tisp;
+        } else {
+            inProvider = new InputStreamProvider() {
 
-            @Override
-            public InputStream getInputStream() throws OXException {
-                return new IMAPInputStream(msg, sectionId, body.size, peek);
-            }
-        };
+                @Override
+                public InputStream getInputStream() throws OXException {
+                    return new IMAPInputStream(msg, sectionId, body.size, peek);
+                }
+            };
+        }
         this.body = body;
         this.fullName = fullName;
     }
