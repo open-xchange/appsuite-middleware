@@ -84,7 +84,7 @@ import com.openexchange.timer.TimerService;
 public class PushNotificationServiceImpl implements PushNotificationService {
 
     /** The logger constant */
-    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PushNotificationServiceImpl.class);
+    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PushNotificationServiceImpl.class);
 
     private static volatile Long delayDuration;
 
@@ -259,7 +259,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                     try {
                         doHandle(Iterators.singletonIterator(notification), notification.getTopic(), 1, userId, contextId);
                     } catch (Exception e) {
-                        LOG.error("Failed to handle notification with topic {} for user {} in context {}", notification.getTopic(), I(userId), I(contextId), e);
+                        LOGGER.error("Failed to handle notification with topic {} for user {} in context {}", notification.getTopic(), I(userId), I(contextId), e);
                     }
                 }
 
@@ -306,9 +306,9 @@ public class PushNotificationServiceImpl implements PushNotificationService {
                 if (numOfSubmittedNotifications.incrementAndGet() < 0L) {
                     numOfSubmittedNotifications.set(0L);
                 }
-                LOG.debug("Scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
+                LOGGER.debug("Scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
             } else {
-                LOG.debug("Reset & re-scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
+                LOGGER.debug("Reset & re-scheduled notification \"{}\" for user {} in context {}", notification.getTopic(), I(notification.getUserId()), I(notification.getContextId()));
             }
 
             if (null == scheduledTimerTask) {
@@ -419,7 +419,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         // Query appropriate hits
         Hits hits = subscriptionRegistry.getInterestedSubscriptions(userId, contextId, topic);
         if (null == hits || hits.isEmpty()) {
-            LOG.info("No subscriptions of interest for topic \"{}\" for user {} in context {}", topic, I(userId), I(contextId));
+            LOGGER.debug("No subscriptions of interest for topic \"{}\" for user {} in context {}", topic, I(userId), I(contextId));
             addNumOfProcessedNotifications(numOfNotifications);
             return;
         }
@@ -430,20 +430,20 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             String transportId = hit.getTransportId();
             PushNotificationTransport transport = transportRegistry.getTransportFor(client, transportId);
             if (null == transport) {
-                LOG.warn("No such transport '{}' for client '{}' to publish notification from user {} in context {} for topic {}", transportId, client, I(userId), I(contextId), topic);
+                LOGGER.info("No such transport '{}' for client '{}' to publish notification from user {} in context {} for topic {}", transportId, client, I(userId), I(contextId), topic);
             } else {
                 if (isTransportAllowed(transport, topic, client, userId, contextId)) {
                     while (notifications.hasNext()) {
                         PushNotification notification = notifications.next();
-                        LOG.info("Trying to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId));
+                        LOGGER.debug("Trying to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId));
                         try {
                             transport.transport(notification, hit.getMatches());
                         } catch (Exception e) {
-                            LOG.error("Failed to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId), e);
+                            LOGGER.error("Failed to send notification \"{}\" via transport '{}' to client '{}' for user {} in context {}", topic, transportId, client, I(userId), I(contextId), e);
                         }
                     }
                 } else {
-                    LOG.info("Transport '{}' not enabled for client '{}' to publish notification from user {} in context {} for topic {}", transportId, client, I(userId), I(contextId), topic);
+                    LOGGER.info("Transport '{}' not enabled for client '{}' to publish notification from user {} in context {} for topic {}", transportId, client, I(userId), I(contextId), topic);
                 }
             }
         }
@@ -455,7 +455,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
         try {
             return transport.isEnabled(topic, client, userId, contextId);
         } catch (Exception e) {
-            LOG.error("Failed to check whether notification \"{}\" is allowed to be sent via transport '{}' to client '{}' for user {} in context {}. Transport will be denied...", topic, transport.getId(), client, I(userId), I(contextId), e);
+            LOGGER.error("Failed to check whether notification \"{}\" is allowed to be sent via transport '{}' to client '{}' for user {} in context {}. Transport will be denied...", topic, transport.getId(), client, I(userId), I(contextId), e);
             return false;
         }
     }
@@ -492,7 +492,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             try {
                 doHandle(notifications, topic, numOfNotifications, userId, contextId);
             } catch (Exception e) {
-                LOG.error("Failed to handle notification(s) with topic {} for user {} in context {}", topic, I(userId), I(contextId), e);
+                LOGGER.error("Failed to handle notification(s) with topic {} for user {} in context {}", topic, I(userId), I(contextId), e);
             }
         }
     }
