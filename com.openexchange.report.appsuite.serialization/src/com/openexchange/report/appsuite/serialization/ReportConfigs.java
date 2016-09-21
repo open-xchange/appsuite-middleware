@@ -75,10 +75,24 @@ public class ReportConfigs implements Serializable, CompositeData {
                                 (boolean) cd.get("isShowDriveMetrics"), 
                                 (boolean) cd.get("isShowMailMetrics"));
     }
+    
+    public ReportConfigs(ReportConfigsBuilder builder) {
+        super();
+        this.attributeMap = new HashMap<>();
+        this.attributeMap.put("type", builder.type);
+        this.attributeMap.put("isSingleDeployment", builder.isSingleDeployment);
+        this.attributeMap.put("isConfigTimerange", builder.isConfigTimerange);
+        this.attributeMap.put("consideredTimeframeStart", builder.consideredTimeframeStart);
+        this.attributeMap.put("consideredTimeframeEnd", builder.consideredTimeframeEnd);
+        this.attributeMap.put("isShowSingleTenant", builder.isShowSingleTenant);
+        this.attributeMap.put("singleTenantId", builder.singleTenantId);
+        this.attributeMap.put("isAdminIgnore", builder.isAdminIgnore);
+        this.attributeMap.put("isShowDriveMetrics", builder.isShowDriveMetrics);
+        this.attributeMap.put("isShowMailMetrics", builder.isShowMailMetrics);
+    }
 
     public ReportConfigs(String type, boolean isSingleDeployment, boolean isConfigTimerange, Long consideredTimeframeStart, Long consideredTimeframeEnd, boolean isShowSingleTenant, Long singleTenantId, boolean isAdminIgnore, boolean isShowDriveMetrics, boolean isShowMailMetrics) {
         super();
-
         this.attributeMap = new HashMap<>();
         this.attributeMap.put("type", type);
         this.attributeMap.put("isSingleDeployment", isSingleDeployment);
@@ -91,7 +105,7 @@ public class ReportConfigs implements Serializable, CompositeData {
         this.attributeMap.put("isShowDriveMetrics", isShowDriveMetrics);
         this.attributeMap.put("isShowMailMetrics", isShowMailMetrics);
     }
-
+    
     //--------------------Getters and Setters--------------------
 
     public String getType() {
@@ -132,5 +146,70 @@ public class ReportConfigs implements Serializable, CompositeData {
 
     public boolean isConfigTimerange() {
         return (boolean) this.attributeMap.get("isConfigTimerange");
+    }
+    
+    public static class ReportConfigsBuilder {
+        private String type;
+        private boolean isSingleDeployment;
+        private boolean isConfigTimerange;
+        private Long consideredTimeframeStart;
+        private Long consideredTimeframeEnd;
+        private boolean isShowSingleTenant;
+        private Long singleTenantId;
+        private boolean isAdminIgnore;
+        private boolean isShowDriveMetrics;
+        private boolean isShowMailMetrics;
+        
+        public ReportConfigsBuilder(String type) {
+            this.type = type;
+        }
+        
+        public ReportConfigsBuilder isSingleDeployment(boolean isSingleDeployment) {
+            this.isSingleDeployment = isSingleDeployment;
+            return this;
+        }
+        
+        public ReportConfigsBuilder isConfigTimerange(boolean isConfigTimerange) {
+            this.isConfigTimerange = isConfigTimerange;
+            return this;
+        }
+        
+        public ReportConfigsBuilder consideredTimeframeStart(Long consideredTimeframeStart) {
+            this.consideredTimeframeStart = consideredTimeframeStart;
+            return this;
+        }
+        
+        public ReportConfigsBuilder consideredTimeframeEnd(Long consideredTimeframeEnd) {
+            this.consideredTimeframeEnd = consideredTimeframeEnd;
+            return this;
+        }
+        
+        public ReportConfigsBuilder isShowSingleTenant(boolean isShowSingleTenant) {
+            this.isShowSingleTenant = isShowSingleTenant;
+            return this;
+        }
+        
+        public ReportConfigsBuilder singleTenantId(Long singleTenantId) {
+            this.singleTenantId = singleTenantId;
+            return this;
+        }
+        
+        public ReportConfigsBuilder isAdminIgnore(boolean isAdminIgnore) {
+            this.isAdminIgnore = isAdminIgnore;
+            return this;
+        }
+        
+        public ReportConfigsBuilder isShowDriveMetrics(boolean isShowDriveMetrics) {
+            this.isShowDriveMetrics = isShowDriveMetrics;
+            return this;
+        }
+        public ReportConfigsBuilder isShowMailMetrics(boolean isShowMailMetrics) {
+            this.isShowMailMetrics = isShowMailMetrics;
+            return this;
+        }
+        
+        public ReportConfigs build() {
+            return new ReportConfigs(this);
+        }
     }
 }

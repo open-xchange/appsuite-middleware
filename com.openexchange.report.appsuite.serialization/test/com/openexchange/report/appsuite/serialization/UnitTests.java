@@ -1,3 +1,4 @@
+package com.openexchange.report.appsuite.serialization;
 /*
  *    OPEN-XCHANGE legal information
  *
@@ -50,7 +51,6 @@
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.report.appsuite.serialization.ReportTest;
 
 /**
  * {@link UnitTests}

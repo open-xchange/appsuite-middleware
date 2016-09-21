@@ -99,9 +99,9 @@ public class LocalReportService extends AbstractReportService {
      * 
      * 'Implementations of this interface are expected to be thread-safe, and can be safely accessed by multiple concurrent threads.' from http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/cache/Cache.html
      */
-    private static final Cache<String, Map<String, Report>> reportCache = CacheBuilder.newBuilder().concurrencyLevel(20).expireAfterWrite(180, TimeUnit.MINUTES).<String, Map<String, Report>> build();
+    private static final Cache<String, Map<String, Report>> reportCache = CacheBuilder.newBuilder().concurrencyLevel(ReportProperties.getMaxThreadPoolSize()).expireAfterWrite(180, TimeUnit.MINUTES).<String, Map<String, Report>> build();
 
-    private static final Cache<String, Map<String, Report>> failedReportCache = CacheBuilder.newBuilder().concurrencyLevel(20).expireAfterWrite(180, TimeUnit.MINUTES).<String, Map<String, Report>> build();
+    private static final Cache<String, Map<String, Report>> failedReportCache = CacheBuilder.newBuilder().concurrencyLevel(ReportProperties.getMaxThreadPoolSize()).expireAfterWrite(180, TimeUnit.MINUTES).<String, Map<String, Report>> build();
 
     private static AtomicReference<ExecutorService> EXECUTOR_SERVICE_REF = new AtomicReference<ExecutorService>();
 
@@ -259,6 +259,7 @@ public class LocalReportService extends AbstractReportService {
 
         // Set up the report instance
         Report report = new Report(uuid, System.currentTimeMillis(), reportConfig);
+        report.setStorageFolderPath(ReportProperties.getStoragePath());
         report.setNumberOfTasks(allContextIds.size());
         pendingReports.put(uuid, report);
         reportCache.asMap().put(PENDING_REPORTS_PRE_KEY + reportConfig.getType(), pendingReports);
@@ -291,7 +292,7 @@ public class LocalReportService extends AbstractReportService {
     }
 
     private void processAllContexts(Report report, List<List<Integer>> contextsInSchemas) throws OXException {
-        ExecutorService reportSchemaThreadPool = Executors.newFixedThreadPool(20, new ThreadFactory() {
+        ExecutorService reportSchemaThreadPool = Executors.newFixedThreadPool(ReportProperties.getMaxThreadPoolSize(), new ThreadFactory() {
 
             @Override
             public Thread newThread(Runnable r) {

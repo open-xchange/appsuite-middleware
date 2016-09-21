@@ -92,6 +92,7 @@ import com.openexchange.report.appsuite.ReportService;
 import com.openexchange.report.appsuite.ReportUserHandler;
 import com.openexchange.report.appsuite.UserReport;
 import com.openexchange.report.appsuite.UserReportCumulator;
+import com.openexchange.report.appsuite.internal.ReportProperties;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.report.appsuite.serialization.Report.JsonObjectType;
@@ -252,7 +253,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             addContextAndUserToDeployment(report, contextReport, quotaSpec);
         }
 
-        if (macdetail.values().size() >= report.getMaxChunkSize()) {
+        if (macdetail.values().size() >= ReportProperties.getMaxChunkSize()) {
             prepareReportForStorageOfContent(report);
             storeAndMergeReportParts(report);
         }
@@ -350,7 +351,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     @Override
     public void storeAndMergeReportParts(Report report) {
         // create storage folder, if not already exists
-        File storageFolder = new File(report.getStorageFolderPath());
+        File storageFolder = new File(ReportProperties.getStoragePath());
         if (!storageFolder.exists()) {
             if (!storageFolder.mkdir()) {
                 LOG.error("Failed to create storage folder");
@@ -364,7 +365,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         // given capability set already exists
         for (HashMap<String, Object> singleCapS : capSets) {
             try {
-                ChunkingUtilities.storeCapSContentToFiles(report.getUUID(), report.getStorageFolderPath(), singleCapS);
+                ChunkingUtilities.storeCapSContentToFiles(report.getUUID(), ReportProperties.getStoragePath(), singleCapS);
             } catch (JSONException e) {
                 final OXException oxException = new OXException(e);
                 LOG.error("Error while trying create JSONObject from stored capability-set data. " + oxException.getMessage(), oxException);
@@ -517,8 +518,10 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                 driveUserMetrics.put("quota-usage-percent-" + quotaUsage.getKey(), quotaUsage.getValue());
             }
         } catch (final SQLException e) {
+            LOG.error("Unable to execute SQL for drive metric gathering.");
             e.printStackTrace();
         } catch (OXException e) {
+            LOG.error("Unable to gather drive metrics.");
             e.printStackTrace();
         } finally {
             informationService.closeAllDBConnections();

@@ -70,9 +70,9 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Scanner;
-import com.openexchange.config.ConfigurationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.report.appsuite.serialization.internal.Services;
 import com.openexchange.report.appsuite.serialization.osgi.StringParserServiceRegistry;
 import com.openexchange.tools.strings.StringParser;
 
@@ -86,6 +86,7 @@ import com.openexchange.tools.strings.StringParser;
  */
 public class Report implements Serializable {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Report.class);
     private static final long serialVersionUID = 6998213011280390705L;
 
     //--------------------Report output sections and identifiers--------------------
@@ -168,33 +169,17 @@ public class Report implements Serializable {
 
     private LinkedHashMap<String, LinkedHashMap<String, Object>> tenantMap;
 
+    private ReportConfigs reportConfig;
+
     private boolean isSingleDeployment = true;
 
-    private Long consideredTimeframeStart;
+    private Long defaultTimeframeStart;
 
-    private Long consideredTimeframeEnd;
-
-    private int maxChunkSize;
+    private Long defaultTimeframeEnd;
 
     private String storageFolderPath;
 
     private boolean needsComposition;
-
-    //--------------------OXCS-Report, relevant attributes--------------------
-
-    private boolean isShowSingleTenant;
-
-    private Long singleTenantId;
-
-    private boolean isAdminIgnore;
-
-    private boolean isShowDriveMetrics;
-
-    private boolean isShowMailMetrics;
-
-    private int threadPriority;
-
-    private int maxThreadPoolSize;
 
     /**
      * Initializes a new {@link Report}.
@@ -209,7 +194,6 @@ public class Report implements Serializable {
         this.startTime = startTime;
         this.tenantMap = new LinkedHashMap<>();
         this.tenantMap.put("deployment", new LinkedHashMap<String, Object>());
-        this.singleTenantId = 0l;
     }
 
     /**
@@ -250,25 +234,17 @@ public class Report implements Serializable {
         this.startTime = startTime;
         this.tenantMap = new LinkedHashMap<>();
         this.tenantMap.put("deployment", new LinkedHashMap<String, Object>());
-        this.singleTenantId = 0l;
         if (isCustomTimerange) {
-            this.consideredTimeframeStart = startDate.getTime();
-            this.consideredTimeframeEnd = endDate.getTime();
+            this.defaultTimeframeStart = startDate.getTime();
+            this.defaultTimeframeEnd = endDate.getTime();
         } else {
             Calendar cal = Calendar.getInstance();
             Date ed = cal.getTime();
             cal.add(Calendar.YEAR, -1);
             Date sd = cal.getTime();
-            this.consideredTimeframeStart = sd.getTime();
-            this.consideredTimeframeEnd = ed.getTime();
+            this.defaultTimeframeStart = sd.getTime();
+            this.defaultTimeframeEnd = ed.getTime();
         }
-        this.isShowSingleTenant = isShowSingleTenant;
-        if (isShowSingleTenant) {
-            this.singleTenantId = singleTenantId;
-        }
-        this.isAdminIgnore = isIgnoreAdmin;
-        this.isShowDriveMetrics = isShowDriveMetrics;
-        this.isShowMailMetrics = isShowMailMetrics;
     }
 
     public Report(String uuid, long startTime, ReportConfigs reportConfig) {
@@ -277,25 +253,13 @@ public class Report implements Serializable {
         this.startTime = startTime;
         this.tenantMap = new LinkedHashMap<>();
         this.tenantMap.put("deployment", new LinkedHashMap<String, Object>());
-        this.singleTenantId = 0l;
-        if (reportConfig.isConfigTimerange()) {
-            this.consideredTimeframeStart = reportConfig.getConsideredTimeframeStart();
-            this.consideredTimeframeEnd = reportConfig.getConsideredTimeframeEnd();
-        } else {
-            Calendar cal = Calendar.getInstance();
-            Date ed = cal.getTime();
-            cal.add(Calendar.YEAR, -1);
-            Date sd = cal.getTime();
-            this.consideredTimeframeStart = sd.getTime();
-            this.consideredTimeframeEnd = ed.getTime();
-        }
-        this.isShowSingleTenant = reportConfig.isShowSingleTenant();
-        if (isShowSingleTenant) {
-            this.singleTenantId = reportConfig.getSingleTenantId();
-        }
-        this.isAdminIgnore = reportConfig.isAdminIgnore();
-        this.isShowDriveMetrics = reportConfig.isShowDriveMetrics();
-        this.isShowMailMetrics = reportConfig.isShowMailMetrics();
+        this.reportConfig = reportConfig;
+        Calendar cal = Calendar.getInstance();
+        Date ed = cal.getTime();
+        cal.add(Calendar.YEAR, -1);
+        Date sd = cal.getTime();
+        this.defaultTimeframeStart = sd.getTime();
+        this.defaultTimeframeEnd = ed.getTime();
         this.needsComposition = false;
     }
 
@@ -483,79 +447,57 @@ public class Report implements Serializable {
     public LinkedHashMap<String, LinkedHashMap<String, Object>> getTenantMap() {
         return tenantMap;
     }
-
-    public Long getConsideredTimeframeStart() {
-        return consideredTimeframeStart;
+    
+    public ReportConfigs getReportConfig() {
+        return reportConfig;
     }
 
-    public void setConsideredTimeframeStart(Long consideredTimeframeStart) {
-        this.consideredTimeframeStart = consideredTimeframeStart;
+    public void setReportConfig(ReportConfigs reportConfig) {
+        this.reportConfig = reportConfig;
+    }
+
+    public Long getConsideredTimeframeStart() {
+        Long timeframeStart = defaultTimeframeStart;
+        if (this.reportConfig.isConfigTimerange()) {
+            timeframeStart = this.reportConfig.getConsideredTimeframeStart();
+        }
+        return timeframeStart;
     }
 
     public Long getConsideredTimeframeEnd() {
-        return consideredTimeframeEnd;
-    }
-
-    public void setConsideredTimeframeEnd(Long consideredTimeframeEnd) {
-        this.consideredTimeframeEnd = consideredTimeframeEnd;
+        Long timeframeEnd = defaultTimeframeEnd;
+        if (this.reportConfig.isConfigTimerange()) {
+            timeframeEnd = this.reportConfig.getConsideredTimeframeEnd();
+        }
+        return timeframeEnd;
     }
 
     public boolean isShowSingleTenant() {
-        return isShowSingleTenant;
+        return this.reportConfig.isShowSingleTenant();
     }
 
     public Long getSingleTenantId() {
-        return singleTenantId;
+        return this.reportConfig.getSingleTenantId();
     }
 
     public boolean isAdminIgnore() {
-        return isAdminIgnore;
+        return this.reportConfig.isAdminIgnore();
     }
 
     public boolean isShowDriveMetrics() {
-        return isShowDriveMetrics;
-    }
-
-    public void setShowDriveMetrics(boolean isShowDriveMetrics) {
-        this.isShowDriveMetrics = isShowDriveMetrics;
+        return this.reportConfig.isShowDriveMetrics();
     }
 
     public boolean isShowMailMetrics() {
-        return isShowMailMetrics;
-    }
-
-    public void setShowMailMetrics(boolean isShowMailMetrics) {
-        this.isShowMailMetrics = isShowMailMetrics;
-    }
-
-    public int getMaxChunkSize() {
-        if (this.maxChunkSize == 0) {
-            this.maxChunkSize = Integer.parseInt(Services.getService(ConfigurationService.class).getProperty("com.openexchange.report.serialization.maxChunkSize", "200"));
-        }
-        return maxChunkSize;
+        return this.reportConfig.isShowMailMetrics();
     }
 
     public String getStorageFolderPath() {
-        if (this.storageFolderPath == null || this.storageFolderPath.length() == 0) {
-            this.storageFolderPath = Services.getService(ConfigurationService.class).getProperty("com.openexchange.report.serialization.fileStorage", "/tmp");
-        }
-
         return storageFolderPath;
     }
 
-    public int getThreadPriority() {
-        if (this.threadPriority == 0) {
-            this.threadPriority = Integer.parseInt(Services.getService(ConfigurationService.class).getProperty("com.openexchange.report.serialization.threadPriority", "1"));
-        }
-        return this.threadPriority;
-    }
-
-    public int getMAxThreadPoolSize() {
-        if (this.maxThreadPoolSize == 0) {
-            this.maxThreadPoolSize = Integer.parseInt(Services.getService(ConfigurationService.class).getProperty("com.openexchange.report.serialization.maxThreadPoolSize", "20"));
-        }
-
-        return this.maxThreadPoolSize;
+    public void setStorageFolderPath(String storageFolderPath) {
+        this.storageFolderPath = storageFolderPath;
     }
 
     public boolean isNeedsComposition() {
@@ -635,14 +577,17 @@ public class Report implements Serializable {
                 osw.write(getIndentation(--indentationLevel) + "},\n");
             }
         } catch (FileNotFoundException e) {
+            LOG.error("Unable to create the .report file");
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {
+            LOG.error("Used encode is not supported.");
             e.printStackTrace();
         } catch (IOException e) {
+            LOG.error("Unable to write into .report file.");
             e.printStackTrace();
         }
         for (File file : parts) {
-            if(file.getName().contains(this.uuid)) {
+            if (file.getName().contains(this.uuid)) {
                 file.delete();
             }
         }
@@ -650,25 +595,31 @@ public class Report implements Serializable {
 
     public void appendReportParts(OutputStreamWriter osw, File appendingFile, boolean hasNext, String indentation) {
         // load every part-file of the report 
-        try (BufferedReader br = new BufferedReader(new FileReader(appendingFile))){
+        try (BufferedReader br = new BufferedReader(new FileReader(appendingFile))) {
             String line = br.readLine();
             while (line != null) {
                 osw.write(indentation + line + ((line = br.readLine()) == null && hasNext ? "," : "") + "\n");
             }
         } catch (FileNotFoundException e) {
+            LOG.error("Unable to load file: " + appendingFile.getAbsolutePath());
             e.printStackTrace();
         } catch (IOException e) {
+            LOG.error("Unable to write into file: " + appendingFile.getAbsolutePath());
             e.printStackTrace();
         }
     }
 
-    public static void printStoredReportContentToConsole(String storageFolderPath, String uuid) throws IOException {
-        
-        try (FileInputStream is = new FileInputStream(storageFolderPath + "/" + uuid + ".report"); Scanner sc = new Scanner(is, "UTF-8")){
+    public static void printStoredReportContentToConsole(String storageFolderPath, String uuid) {
+
+        try (FileInputStream is = new FileInputStream(storageFolderPath + "/" + uuid + ".report"); Scanner sc = new Scanner(is, "UTF-8")) {
             while (sc.hasNext()) {
                 System.out.println(sc.nextLine());
             }
         } catch (FileNotFoundException e) {
+            LOG.error("Unable to load file: " + storageFolderPath + "/" + uuid + ".report");
+            e.printStackTrace();
+        } catch (IOException e) {
+            LOG.error("Unable to load and write report data to console.");
             e.printStackTrace();
         }
     }

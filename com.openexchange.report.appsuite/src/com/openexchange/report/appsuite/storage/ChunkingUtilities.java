@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.report.appsuite.ReportExceptionCodes;
 import com.openexchange.report.appsuite.serialization.Report;
 
 public class ChunkingUtilities {
@@ -72,9 +73,9 @@ public class ChunkingUtilities {
             // Merge the data of the two files into dataToStore
             mergeNewValuesWithStoredValues(storedData, data);
         } catch (FileNotFoundException e1) {
-            e1.printStackTrace();
+            ReportExceptionCodes.STORED_FILE_NOT_FOUND.create(e1.getMessage());
         } catch (InterruptedException e1) {
-            e1.printStackTrace();
+            ReportExceptionCodes.UNABLE_TO_GET_FILELOCK.create(e1.getMessage());
         }
     }
     

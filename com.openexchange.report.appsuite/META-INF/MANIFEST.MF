@@ -60,4 +60,5 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.framework,
  org.slf4j
 Export-Package: com.openexchange.report.appsuite,
- com.openexchange.report.appsuite.defaultHandlers
+ com.openexchange.report.appsuite.defaultHandlers,
+ com.openexchange.report.appsuite.internal

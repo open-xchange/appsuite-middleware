@@ -35,11 +35,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
@@ -48,11 +51,16 @@ import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.UserReport;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
+import com.openexchange.report.appsuite.serialization.ReportConfigs;
+import com.openexchange.server.ServiceLookup;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Services.class)
 public class CapabilityHandlerTest {
 
+    @Mock
+    private ConfigurationService configService;
+    
     private ContextReport contextReport;
     private Report report;
     private CapabilityHandler capabilityHandlerTest = new CapabilityHandler();
@@ -75,6 +83,10 @@ public class CapabilityHandlerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        PowerMockito.mockStatic(Services.class);
+        PowerMockito.when(Services.getService(ConfigurationService.class)).thenReturn(configService);
+        Mockito.when(configService.getProperty("com.openexchange.report.serialization.fileStorage", "/tmp")).thenReturn(REPORT_PATH);
+        Mockito.when(configService.getIntProperty("com.openexchange.report.serialization.maxChunkSize", 200)).thenReturn(200);
         this.contextReport = initContextReport(2);
         this.initReport("default");
         this.initReportForStorage();
@@ -174,44 +186,44 @@ public class CapabilityHandlerTest {
         InfostoreInformationService informationService = new InfostoreInformationService() {
 
             @Override
-            public Map<String, Integer> getStorageUseMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getStorageUseMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
                 return createPotentialInfostoreReturn(10, 20, 15, 30, null, 0);
             }
 
             @Override
-            public Map<String, Integer> getQuotaUsageMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getQuotaUsageMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
                 return createPotentialInfostoreReturn(1, 1, 1, 2, "sum", 2);
             }
 
             @Override
-            public Map<String, Integer> getFileSizeMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getFileSizeMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
                 return createPotentialInfostoreReturn(10, 20, 15, 30, null, 0);
             }
 
             @Override
-            public Map<String, Integer> getFileCountNoVersions(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getFileCountNoVersions(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
                 HashMap<String, Integer> returnMap = new HashMap<>();
                 returnMap.put("total", 2);
                 return returnMap;
             }
 
             @Override
-            public Map<String, Integer> getFileCountMimetypeMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getFileCountMimetypeMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
                 return new HashMap<>();
             }
 
             @Override
-            public Map<String, Integer> getFileCountMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getFileCountMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
                 return createPotentialInfostoreReturn(1, 1, 1, 2, "users", 2);
             }
 
             @Override
-            public Map<String, Integer> getFileCountInTimeframeMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext, Date start, Date end) throws SQLException, OXException {
+            public Map<String, Integer> getFileCountInTimeframeMetrics(Map<Integer, List<Integer>> usersInContext, Date start, Date end) throws SQLException, OXException {
                 return createPotentialInfostoreReturn(1, 1, 1, 2, null, 0);
             }
 
             @Override
-            public Map<String, Integer> getExternalStorageMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getExternalStorageMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
                 return createPotentialInfostoreReturn(1, 1, 1, 1, null, 0);
             }
 
@@ -235,7 +247,7 @@ public class CapabilityHandlerTest {
         InfostoreInformationService informationService = new InfostoreInformationService() {
 
             @Override
-            public Map<String, Integer> getStorageUseMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getStorageUseMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
                 if (usersInContext.containsKey(20)) {
                     return createPotentialInfostoreReturn(30, 60, 45, 135, null, 0);
                 }
@@ -243,7 +255,7 @@ public class CapabilityHandlerTest {
             }
 
             @Override
-            public Map<String, Integer> getQuotaUsageMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getQuotaUsageMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
                 if (usersInContext.containsKey(20)) {
                     return createPotentialInfostoreReturn(5, 20, 15, 3, "sum", 35);
                 }
@@ -251,7 +263,7 @@ public class CapabilityHandlerTest {
             }
 
             @Override
-            public Map<String, Integer> getFileSizeMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getFileSizeMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
                 if (usersInContext.containsKey(20)) {
                     return createPotentialInfostoreReturn(30, 60, 45, 135, null, 0);
                 }
@@ -259,7 +271,7 @@ public class CapabilityHandlerTest {
             }
 
             @Override
-            public Map<String, Integer> getFileCountNoVersions(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getFileCountNoVersions(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
                 HashMap<String, Integer> returnMap = new HashMap<>();
                 if (usersInContext.containsKey(20)) {
                     returnMap.put("total", 3);
@@ -270,12 +282,12 @@ public class CapabilityHandlerTest {
             }
 
             @Override
-            public Map<String, Integer> getFileCountMimetypeMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getFileCountMimetypeMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
                 return new HashMap<>();
             }
 
             @Override
-            public Map<String, Integer> getFileCountMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getFileCountMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
                 if (usersInContext.containsKey(20)) {
                     return createPotentialInfostoreReturn(1, 1, 1, 3, "users", 3);
                 }
@@ -283,7 +295,7 @@ public class CapabilityHandlerTest {
             }
 
             @Override
-            public Map<String, Integer> getFileCountInTimeframeMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext, Date start, Date end) throws SQLException, OXException {
+            public Map<String, Integer> getFileCountInTimeframeMetrics(Map<Integer, List<Integer>> usersInContext, Date start, Date end) throws SQLException, OXException {
                 if (usersInContext.containsKey(20)) {
                     return createPotentialInfostoreReturn(1, 1, 1, 3, null, 0);
                 }
@@ -291,7 +303,7 @@ public class CapabilityHandlerTest {
             }
 
             @Override
-            public Map<String, Integer> getExternalStorageMetrics(LinkedHashMap<Integer, ArrayList<Integer>> usersInContext) throws SQLException, OXException {
+            public Map<String, Integer> getExternalStorageMetrics(Map<Integer, List<Integer>> usersInContext) throws SQLException, OXException {
                 if (usersInContext.containsKey(20)) {
                     return createPotentialInfostoreReturn(0, 0, 0, 0, null, 0);
                 }
@@ -466,6 +478,27 @@ public class CapabilityHandlerTest {
     }
 
     //-------------------Helpers-------------------
+    private ServiceLookup initServiceForTest1() {
+        return new ServiceLookup() {
+
+            @Override
+            public <S> S getService(Class<? extends S> clazz) {
+                if (clazz == ConfigurationService.class) {
+                    ConfigurationService mockedConfig = PowerMockito.mock(ConfigurationService.class);
+                    PowerMockito.when(mockedConfig.getProperty("com.openexchange.cloudplugins.dovecot.contextChunks")).thenReturn("100");
+                    return (S) mockedConfig;
+                }
+                return null;
+            }
+
+            @Override
+            public <S> S getOptionalService(Class<? extends S> clazz) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+        };
+    }
+    
     private void initWrongDataForLocks() {
         try {
             copyFileUsingStream(new File(reportStoringLocks.getStorageFolderPath() + "/filelock_test_wrong.init"), new File(reportStoringLocks.getStorageFolderPath() + "/" + reportStoringLocks.getUUID() + "_-853702361.part"));
@@ -579,9 +612,8 @@ public class CapabilityHandlerTest {
 
     private void initReport(String type) {
         report = new Report(UUID.randomUUID().toString(), type, new Date().getTime());
-        report.setConsideredTimeframeStart(new Date().getTime() - 100000);
-        report.setConsideredTimeframeEnd(new Date().getTime());
-        report.setMaxChunkSize(100);
+        ReportConfigs rc = new ReportConfigs.ReportConfigsBuilder("default").consideredTimeframeStart(new Date().getTime() - 100000).consideredTimeframeEnd(new Date().getTime()).isConfigTimerange(true).build();
+        report.setReportConfig(rc);
     }
 
     private void initReportForStorage() {

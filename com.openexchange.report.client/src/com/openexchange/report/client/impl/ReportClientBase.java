@@ -72,6 +72,7 @@ import com.openexchange.admin.console.CLIOption;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.report.appsuite.serialization.ReportConfigs;
+import com.openexchange.report.appsuite.serialization.ReportConfigs.ReportConfigsBuilder;
 import com.openexchange.report.client.configuration.ReportConfiguration;
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
@@ -299,8 +300,18 @@ public class ReportClientBase extends AbstractJMXTools {
                 }
             }
 
-            ReportConfigs reportConfigs = new ReportConfigs(reportType, false, isCustomTimeframe, timeframeStart.getTime(), timeframeEnd.getTime(), isSingleTenant, singeTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics);
-
+//            ReportConfigs reportConfigs = new ReportConfigs(reportType, false, isCustomTimeframe, timeframeStart.getTime(), timeframeEnd.getTime(), isSingleTenant, singeTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics);
+            ReportConfigs reportConfigs = new ReportConfigs.ReportConfigsBuilder(reportType)
+                                              .isSingleDeployment(false)
+                                              .isConfigTimerange(isCustomTimeframe)
+                                              .consideredTimeframeStart(timeframeStart.getTime())
+                                              .consideredTimeframeEnd(timeframeEnd.getTime())
+                                              .isShowSingleTenant(isSingleTenant)
+                                              .singleTenantId(singeTenantId)
+                                              .isAdminIgnore(isIgnoreAdmin)
+                                              .isShowDriveMetrics(isShowDriveMetrics)
+                                              .isShowMailMetrics(isShowMailMetrics)
+                                              .build();
             //Start the report generation
             System.out.println("Starting the Open-Xchange report client. Note that the report generation may take a little while.");
             final MBeanServerConnection initConnection = initConnection(env);
@@ -919,12 +930,8 @@ public class ReportClientBase extends AbstractJMXTools {
                     } else if(data.get(string) instanceof Boolean) {
                         System.out.println("  \"" + string + "\" : " + data.get(string) + ",");
                     } else if (string.equals("macdetail") || string.equals("oxaas")){
-                       try {
                         Report.printStoredReportContentToConsole((String) report.get("storageFolderPath"), (String) report.get("uuid"));
                         System.out.print(",");
-                       } catch (IOException e) {
-                        e.printStackTrace();
-                       } 
                     } else {
                         JSONObject obj = (JSONObject) data.get(string);
                         System.out.println("  " + string + " : " + obj.toString(2, 1) + ",");

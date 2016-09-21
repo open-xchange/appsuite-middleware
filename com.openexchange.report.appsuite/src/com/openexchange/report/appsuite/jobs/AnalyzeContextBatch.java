@@ -65,6 +65,7 @@ import com.openexchange.report.appsuite.ReportService;
 import com.openexchange.report.appsuite.ReportUserHandler;
 import com.openexchange.report.appsuite.UserReport;
 import com.openexchange.report.appsuite.UserReportCumulator;
+import com.openexchange.report.appsuite.internal.ReportProperties;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.user.UserService;
@@ -108,7 +109,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
     public Integer call() throws Exception {
         Thread currentThread = Thread.currentThread();
         int previousPriority = currentThread.getPriority();
-        currentThread.setPriority(report.getThreadPriority());
+        currentThread.setPriority(ReportProperties.getThreadPriority());
 
         try {
             if (reportType == null) {
@@ -186,16 +187,18 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
                 if (report.isAdminIgnore() && ctx.getMailadmin() == user.getId()) {
                     continue;
                 }
-                userReport.setShowDriveMetrics(this.report.isShowDriveMetrics());
-                userReport.setShowMailMetrics(this.report.isShowMailMetrics());
-                userReport.setConsideredTimeframeStart(this.report.getConsideredTimeframeStart());
-                userReport.setConsideredTimeframeEnd(this.report.getConsideredTimeframeEnd());
+//                userReport.setShowDriveMetrics(this.report.isShowDriveMetrics());
+//                userReport.setShowMailMetrics(this.report.isShowMailMetrics());
+//                userReport.setConsideredTimeframeStart(this.report.getConsideredTimeframeStart());
+//                userReport.setConsideredTimeframeEnd(this.report.getConsideredTimeframeEnd());
+                userReport.setReportConfig(this.report.getReportConfig());
                 //Add user to context
-                contextReport.getUserList().add(user.getId());
-                contextReport.setShowDriveMetrics(this.report.isShowDriveMetrics());
-                contextReport.setShowMailMetrics(this.report.isShowMailMetrics());
-                contextReport.setConsideredTimeframeStart(this.report.getConsideredTimeframeStart());
-                contextReport.setConsideredTimeframeEnd(this.report.getConsideredTimeframeEnd());
+//                contextReport.getUserList().add(user.getId());
+//                contextReport.setShowDriveMetrics(this.report.isShowDriveMetrics());
+//                contextReport.setShowMailMetrics(this.report.isShowMailMetrics());
+//                contextReport.setConsideredTimeframeStart(this.report.getConsideredTimeframeStart());
+//                contextReport.setConsideredTimeframeEnd(this.report.getConsideredTimeframeEnd());
+                contextReport.setReportConfig(this.report.getReportConfig());
             }
             // Run User Analyzers
             for (ReportUserHandler userHandler : Services.getUserHandlers()) {
