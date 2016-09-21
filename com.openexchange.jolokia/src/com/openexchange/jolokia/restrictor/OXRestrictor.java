@@ -51,27 +51,36 @@ package com.openexchange.jolokia.restrictor;
 
 import javax.management.ObjectName;
 import org.jolokia.restrictor.AllowAllRestrictor;
+import org.jolokia.util.RequestType;
 
 /**
  * 
  * Based on {@link AllowAllRestrictor}
- * Only write access is denied by {@link OXRestrictor}.  
+ * Only write access is denied by {@link OXRestrictor}.
  *
  * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
  * @since v7.8.3
  */
 public class OXRestrictor extends AllowAllRestrictor {
-    
+
+    /**
+     * If a remote access is allowed to perform action or not
+     */
     private boolean remoteAccessAllowed = false;
-    
+
+    // Munin specific
+    private static final String MEMORYCACHECOUNT = "getMemoryCacheCount";
+    private static final String CACHINGOBJECTNAME = "com.openexchange.caching:name=JCSCacheInformation";
+
     public OXRestrictor() {
         super();
     }
-    
+
     /**
-     * Set if remote access is allowed. 
+     * Set if remote access is allowed.
      * Initializes a new {@link OXRestrictor}.
-     * @param remoteAccessAllowed <code>false</code> if only localhost should access, <code>true</code> otherwise.  
+     * 
+     * @param remoteAccessAllowed <code>false</code> if only localhost should access, <code>true</code> otherwise.
      */
     public OXRestrictor(boolean remoteAccessAllowed) {
         this();
@@ -80,20 +89,44 @@ public class OXRestrictor extends AllowAllRestrictor {
 
     @Override
     public boolean isAttributeWriteAllowed(ObjectName pName, String pAttribute) {
+        // No write allowed at any time
         return false;
     }
-    
+
     @Override
     public boolean isRemoteAccessAllowed(String... pHostOrAddress) {
+        // Remote access is only allowed if it was configured in 'jolokia.propertis'
         if (false == remoteAccessAllowed) {
             return false;
         }
         return super.isRemoteAccessAllowed(pHostOrAddress);
     }
-    
+
+    @Override
+    public boolean isTypeAllowed(RequestType pType) {
+        switch (pType) {
+            // Allow
+            case READ:
+            case LIST:
+            case VERSION:
+            case SEARCH:
+                return true;
+            // Access denied
+            case WRITE:
+            case EXEC:
+            case REGNOTIF: // Unsupported by Jolokia
+            case REMNOTIF: // Unsupported by Jolokia
+            default:
+                return false;
+        }
+    }
+
     @Override
     public boolean isOperationAllowed(ObjectName pName, String pOperation) {
-        // TODO Get this working with munin scripts
-        return super.isOperationAllowed(pName, pOperation);
+        // Look up munin script specific case.
+        if (pOperation.equals(MEMORYCACHECOUNT) && pName.getCanonicalName().equals(CACHINGOBJECTNAME)) {
+            return true;
+        }
+        return false;
     }
 }
