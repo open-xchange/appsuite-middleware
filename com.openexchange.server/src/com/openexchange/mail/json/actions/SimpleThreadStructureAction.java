@@ -59,6 +59,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.json.cache.JsonCacheService;
 import com.openexchange.json.cache.JsonCaches;
@@ -339,33 +340,36 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 mailInterface.openFor(folderId);
                 {
                     // Check if mail categories are enabled
-                    MailCategoriesConfigService categoriesService = MailJSONActivator.SERVICES.get().getOptionalService(MailCategoriesConfigService.class);
-                    if (categoriesService != null && categoriesService.isEnabled(req.getSession()) && category_filter != null && !category_filter.equals("none")) {
-                        filterApplied = true;
-                        if (category_filter.equals("general")) {
-                            // Special case with unkeyword
-                            String categoryNames[] = categoriesService.getAllFlags(req.getSession(), true, false);
-                            if (categoryNames.length != 0) {
-                                searchTerm = new UserFlagTerm(categoryNames, false);
-                            }
-                        } else {
-                            // Normal case with keyword
-                            String flag = categoriesService.getFlagByCategory(req.getSession(), category_filter);
-                            if (flag == null) {
-                                throw MailExceptionCode.INVALID_PARAMETER_VALUE.create(category_filter);
-                            }
+                    CapabilityService capabilityService = MailJSONActivator.SERVICES.get().getService(CapabilityService.class);
+                    if (null != capabilityService && capabilityService.getCapabilities(req.getSession()).contains("mail_categories")) {
+                        MailCategoriesConfigService categoriesService = MailJSONActivator.SERVICES.get().getOptionalService(MailCategoriesConfigService.class);
+                        if (categoriesService != null && categoriesService.isEnabled(req.getSession()) && category_filter != null && !category_filter.equals("none")) {
+                            filterApplied = true;
+                            if (category_filter.equals("general")) {
+                                // Special case with unkeyword
+                                String categoryNames[] = categoriesService.getAllFlags(req.getSession(), true, false);
+                                if (categoryNames.length != 0) {
+                                    searchTerm = new UserFlagTerm(categoryNames, false);
+                                }
+                            } else {
+                                // Normal case with keyword
+                                String flag = categoriesService.getFlagByCategory(req.getSession(), category_filter);
+                                if (flag == null) {
+                                    throw MailExceptionCode.INVALID_PARAMETER_VALUE.create(category_filter);
+                                }
 
-                            // test if category is a system category
-                            if (categoriesService.isSystemCategory(category_filter, req.getSession())) {
-                                // Add active user categories as unkeywords
-                                String[] unkeywords = categoriesService.getAllFlags(req.getSession(), true, true);
-                                if (unkeywords.length != 0) {
-                                    searchTerm = new ANDTerm(new UserFlagTerm(flag, true), new UserFlagTerm(unkeywords, false));
+                                // test if category is a system category
+                                if (categoriesService.isSystemCategory(category_filter, req.getSession())) {
+                                    // Add active user categories as unkeywords
+                                    String[] unkeywords = categoriesService.getAllFlags(req.getSession(), true, true);
+                                    if (unkeywords.length != 0) {
+                                        searchTerm = new ANDTerm(new UserFlagTerm(flag, true), new UserFlagTerm(unkeywords, false));
+                                    } else {
+                                        searchTerm = new UserFlagTerm(flag, true);
+                                    }
                                 } else {
                                     searchTerm = new UserFlagTerm(flag, true);
                                 }
-                            } else {
-                                searchTerm = new UserFlagTerm(flag, true);
                             }
                         }
                     }
