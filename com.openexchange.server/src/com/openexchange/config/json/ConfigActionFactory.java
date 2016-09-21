@@ -51,7 +51,7 @@ package com.openexchange.config.json;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
@@ -79,11 +79,12 @@ public class ConfigActionFactory implements AJAXActionServiceFactory {
      */
     public ConfigActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2, 0.9f, 1);
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         actions.put("GET", new com.openexchange.config.json.actions.GETAction(services));
         actions.put("PUT", new com.openexchange.config.json.actions.PUTAction(services));
         actions.put("get_property", new com.openexchange.config.json.actions.GetPropertyAction(services));
         actions.put("set_property", new com.openexchange.config.json.actions.SetPropertyAction(services));
+        this.actions = actions.build();
     }
 
     @Override
