@@ -187,17 +187,9 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
                 if (report.isAdminIgnore() && ctx.getMailadmin() == user.getId()) {
                     continue;
                 }
-//                userReport.setShowDriveMetrics(this.report.isShowDriveMetrics());
-//                userReport.setShowMailMetrics(this.report.isShowMailMetrics());
-//                userReport.setConsideredTimeframeStart(this.report.getConsideredTimeframeStart());
-//                userReport.setConsideredTimeframeEnd(this.report.getConsideredTimeframeEnd());
                 userReport.setReportConfig(this.report.getReportConfig());
                 //Add user to context
-//                contextReport.getUserList().add(user.getId());
-//                contextReport.setShowDriveMetrics(this.report.isShowDriveMetrics());
-//                contextReport.setShowMailMetrics(this.report.isShowMailMetrics());
-//                contextReport.setConsideredTimeframeStart(this.report.getConsideredTimeframeStart());
-//                contextReport.setConsideredTimeframeEnd(this.report.getConsideredTimeframeEnd());
+                contextReport.getUserList().add(user.getId());
                 contextReport.setReportConfig(this.report.getReportConfig());
             }
             // Run User Analyzers
