@@ -52,8 +52,7 @@ package com.openexchange.pop3.storage.mailaccount;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.pop3.POP3Access;
@@ -109,7 +108,7 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
 
     private final POP3StorageProperties delegatee;
 
-    private final ReadWriteLock rwLock;
+    private final Lock lock;
 
     private final boolean[] invalid;
 
@@ -118,11 +117,11 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
      */
     private SessionPOP3StorageProperties(final POP3StorageProperties delegatee, final Session session, final String key) {
         super();
-        rwLock = new ReentrantReadWriteLock();
+        lock = new ReentrantLock();
         invalid = new boolean[] { false };
         this.delegatee = delegatee;
         map = new ConcurrentHashMap<String, String>();
-        final CleanMapRunnable cmr = new CleanMapRunnable(session, key, map, rwLock, invalid);
+        final CleanMapRunnable cmr = new CleanMapRunnable(session, key, map, lock, invalid);
         final ScheduledTimerTask timerTask = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class).scheduleWithFixedDelay(
             cmr,
             SessionCacheProperties.SCHEDULED_TASK_INITIAL_DELAY,
@@ -138,21 +137,21 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
 
     @Override
     public void addProperty(final String propertyName, final String propertyValue) throws OXException {
-        final Lock readLock = rwLock.readLock();
-        readLock.lock();
+        Lock lock = this.lock;
+        lock.lock();
         try {
             checkValid();
             delegatee.addProperty(propertyName, propertyValue);
             map.put(propertyName, propertyValue);
         } finally {
-            readLock.unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public String getProperty(final String propertyName) throws OXException {
-        final Lock readLock = rwLock.readLock();
-        readLock.lock();
+        Lock lock = this.lock;
+        lock.lock();
         try {
             checkValid();
             if (map.containsKey(propertyName)) {
@@ -164,20 +163,20 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
             }
             return value;
         } finally {
-            readLock.unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public void removeProperty(final String propertyName) throws OXException {
-        final Lock readLock = rwLock.readLock();
-        readLock.lock();
+        Lock lock = this.lock;
+        lock.lock();
         try {
             checkValid();
             delegatee.removeProperty(propertyName);
             map.remove(propertyName);
         } finally {
-            readLock.unlock();
+            lock.unlock();
         }
     }
 
@@ -189,7 +188,7 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
 
         private final Map<String, String> tmap;
 
-        private final ReadWriteLock trwLock;
+        private final Lock tLock;
 
         private ScheduledTimerTask timerTask;
 
@@ -197,18 +196,18 @@ public final class SessionPOP3StorageProperties implements POP3StorageProperties
 
         private int countEmptyRuns;
 
-        public CleanMapRunnable(final Session tsession, final String tkey, final Map<String, String> tmap, final ReadWriteLock trwLock, final boolean[] tinvalid) {
+        public CleanMapRunnable(final Session tsession, final String tkey, final Map<String, String> tmap, final Lock tLock, final boolean[] tinvalid) {
             super();
             this.tsession = tsession;
             this.tkey = tkey;
             this.tmap = tmap;
-            this.trwLock = trwLock;
+            this.tLock = tLock;
             this.tinvalid = tinvalid;
         }
 
         @Override
         public void run() {
-            final Lock writeLock = trwLock.writeLock();
+            final Lock writeLock = tLock;
             writeLock.lock();
             try {
                 if (tmap.isEmpty()) {
