@@ -66,7 +66,8 @@ public enum OXScope {
     calendar("Calendars", false),
     contacts("Contacts", false),
     drive("Drive", true),
-    generic("", true);
+    generic("", true),
+    offline("Offline Access", true);
 
     private static final String modules = Strings.concat(", ", (Object[]) OXScope.values());
     private final boolean isLegacy;
