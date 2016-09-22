@@ -9,7 +9,7 @@ Default 1000
       Version: 7.8.3
       Reloadable: true
       Configcascade_Aware: false
-      Related: 
+      Related:
       File: pns.properties
   - data:
       Key: com.openexchange.pns.timerFrequency
@@ -21,7 +21,7 @@ Default 500
       Version: 7.8.3
       Reloadable: true
       Configcascade_Aware: false
-      Related: 
+      Related:
       File: pns.properties
   - data:
       Key: com.openexchange.pns.numProcessorThreads
@@ -33,7 +33,7 @@ Default 10
       Version: 7.8.3
       Reloadable: true
       Configcascade_Aware: false
-      Related: 
+      Related:
       File: pns.properties
   - data:
       Key: com.openexchange.pns.maxProcessorTasks
@@ -45,7 +45,7 @@ Default 65536
       Version: 7.8.3
       Reloadable: true
       Configcascade_Aware: false
-      Related: 
+      Related:
       File: pns.properties
   - data:
       Key: com.openexchange.pns.transport.apn.ios.enabled
@@ -57,7 +57,7 @@ Moreover, an even finer-grained decision is possible to be configured as a certa
 is checked for availability providing user, context, client and topic.
 Hence, it is possible to  specify:
 
-com.openexchange.pns.transport.apn.ios.enabled + ("." + <client>)? + ("." + <topic>)?
+com.openexchange.pns.transport.apn.ios.enabled + ("." + {client})? + ("." + {topic})?
 
 com.openexchange.pns.transport.apn.ios.enabled.open-xchange-appsuite.ox:mail:new=true
 com.openexchange.pns.transport.apn.ios.enabled.open-xchange-appsuite.ox:calendar:new=false
@@ -70,7 +70,7 @@ Default false
       Version: 7.8.3
       Reloadable: true
       Configcascade_Aware: true
-      Related: 
+      Related:
       File: pns.properties
   - data:
       Key: com.openexchange.pns.transport.apn.ios.feedbackQueryInterval
@@ -82,7 +82,7 @@ Default 3600000 (1 hour)
       Version: 7.8.3
       Reloadable: true
       Configcascade_Aware: false
-      Related: 
+      Related:
       File: pns.properties
   - data:
       Key: com.openexchange.pns.transport.gcm.enabled
@@ -94,7 +94,7 @@ Moreover, an even finer-grained decision is possible to be configured as a certa
 is checked for availability providing user, context, client and topic.
 Hence, it is possible to  specify:
 
-com.openexchange.pns.transport.gcm.enabled + ("." + <client>)? + ("." + <topic>)?
+com.openexchange.pns.transport.gcm.enabled + ("." + {client})? + ("." + {topic})?
 
 com.openexchange.pns.transport.gcm.enabled.open-xchange-appsuite.ox:mail:new=true
 com.openexchange.pns.transport.gcm.enabled.open-xchange-appsuite.ox:calendar:new=false
@@ -107,7 +107,7 @@ Default false
       Version: 7.8.3
       Reloadable: true
       Configcascade_Aware: true
-      Related: 
+      Related:
       File: pns.properties
   - data:
       Key: com.openexchange.pns.transport.wns.enabled
@@ -119,7 +119,7 @@ Moreover, an even finer-grained decision is possible to be configured as a certa
 is checked for availability providing user, context, client and topic.
 Hence, it is possible to  specify:
 
-com.openexchange.pns.transport.wns.enabled + ("." + <client>)? + ("." + <topic>)?
+com.openexchange.pns.transport.wns.enabled + ("." + {client})? + ("." + {topic})?
 
 com.openexchange.pns.transport.wns.enabled.open-xchange-appsuite.ox:mail:new=true
 com.openexchange.pns.transport.wns.enabled.open-xchange-appsuite.ox:calendar:new=false
@@ -132,7 +132,7 @@ Default false
       Version: 7.8.3
       Reloadable: true
       Configcascade_Aware: true
-      Related: 
+      Related:
       File: pns.properties
   - data:
       Key: com.openexchange.pns.transport.websocket.enabled
@@ -144,7 +144,7 @@ Moreover, an even finer-grained decision is possible to be configured as a certa
 is checked for availability providing user, context, client and topic.
 Hence, it is possible to  specify:
 
-com.openexchange.pns.transport.websocket.enabled + ("." + <client>)? + ("." + <topic>)?
+com.openexchange.pns.transport.websocket.enabled + ("." + {client})? + ("." + {topic})?
 
 com.openexchange.pns.transport.websocket.enabled.open-xchange-appsuite.ox:mail:new=true
 com.openexchange.pns.transport.websocket.enabled.open-xchange-appsuite.ox:calendar:new=false
@@ -157,6 +157,5 @@ Default false
       Version: 7.8.3
       Reloadable: true
       Configcascade_Aware: true
-      Related: 
+      Related:
       File: pns.properties
-      
