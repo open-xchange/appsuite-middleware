@@ -106,7 +106,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     private static final Logger WS_LOGGER = org.slf4j.LoggerFactory.getLogger("WEBSOCKET");
 
     private static int delayDuration(ConfigurationService configService) {
-        int defaultValue = 1500;
+        int defaultValue = 1000;
         if (null == configService) {
             return defaultValue;
         }
@@ -122,7 +122,7 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     }
 
     private static int timerFrequency(ConfigurationService configService) {
-        int defaultValue = 750;
+        int defaultValue = 500;
         if (null == configService) {
             return defaultValue;
         }

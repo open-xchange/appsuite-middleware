@@ -61,13 +61,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.pns.Hits;
-import com.openexchange.pns.KnownTopic;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
@@ -91,67 +89,12 @@ import com.openexchange.websockets.WebSocketService;
  */
 public class WebSocketPushNotificationTransport implements PushNotificationTransport, PushSubscriptionProvider {
 
-    /** The topic for all */
-    private static final String ALL = KnownTopic.ALL.getName();
-
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WebSocketPushNotificationTransport.class);
 
     /** The identifier of the Web Socket transport */
     static final String ID = KnownTransport.WEB_SOCKET.getTransportId();
 
     private static final String TOKEN_PREFIX = "ws::";
-
-    private static final String ATTR_WS_CLIENT = "ws:client";
-
-    private static volatile Long delayDuration;
-
-    private static long delayDuration(ServiceLookup services) {
-        Long tmp = delayDuration;
-        if (null == tmp) {
-            synchronized (WebSocketPushNotificationTransport.class) {
-                tmp = delayDuration;
-                if (null == tmp) {
-                    int defaultValue = 10000; // 10 seconds
-                    ConfigurationService service = services.getOptionalService(ConfigurationService.class);
-                    if (null == service) {
-                        return defaultValue;
-                    }
-                    tmp = Long.valueOf(service.getIntProperty("com.openexchange.pns.transport.websocket.delayDuration", defaultValue));
-                    delayDuration = tmp;
-                }
-            }
-        }
-        return tmp.longValue();
-    }
-
-    private static volatile Long timerFrequency;
-
-    private static long timerFrequency(ServiceLookup services) {
-        Long tmp = timerFrequency;
-        if (null == tmp) {
-            synchronized (WebSocketPushNotificationTransport.class) {
-                tmp = timerFrequency;
-                if (null == tmp) {
-                    int defaultValue = 2000; // 2 seconds
-                    ConfigurationService service = services.getOptionalService(ConfigurationService.class);
-                    if (null == service) {
-                        return defaultValue;
-                    }
-                    tmp = Long.valueOf(service.getIntProperty("com.openexchange.pns.transport.websocket.timerFrequency", defaultValue));
-                    timerFrequency = tmp;
-                }
-            }
-        }
-        return tmp.longValue();
-    }
-
-    /**
-     * Cleans statically initialized values.
-     */
-    public static void cleanseInits() {
-        delayDuration = null;
-        timerFrequency = null;
-    }
 
     // ---------------------------------------------------------------------------------------------------------------
 

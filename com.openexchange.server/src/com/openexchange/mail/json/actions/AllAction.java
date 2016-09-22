@@ -342,7 +342,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                             CapabilityService capabilityService = MailJSONActivator.SERVICES.get().getService(CapabilityService.class);
                             if (null != capabilityService && capabilityService.getCapabilities(req.getSession()).contains("mail_categories")) {
                                 MailCategoriesConfigService categoriesService = MailJSONActivator.SERVICES.get().getOptionalService(MailCategoriesConfigService.class);
-                                if (categoriesService != null && categoriesService.isEnabled(req.getSession()) && category_filter != null && !category_filter.equals("none")) {
+                                if (categoriesService != null && category_filter != null && !category_filter.equals("none")) {
 
                                     if (category_filter.equals("general")) {
                                         // Special case with unkeyword

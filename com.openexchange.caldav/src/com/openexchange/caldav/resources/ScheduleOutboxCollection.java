@@ -66,6 +66,7 @@ import java.util.TimeZone;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
 import javax.servlet.http.HttpServletResponse;
+import org.jdom2.CDATA;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.output.XMLOutputter;
@@ -272,7 +273,7 @@ public class ScheduleOutboxCollection extends DAVCollection {
                 if (false == freeBusyData.hasData() && freeBusyData.hasWarnings()) {
                     requestStatus.addContent("3.7;Invalid calendar user");
                 } else {
-                    calendarData.addContent(getVFreeBusy(uid, freeBusyData, attendee));
+                    calendarData.addContent(new CDATA(getVFreeBusy(uid, freeBusyData, attendee)));
                     requestStatus.addContent("2.0;Success");
                 }
             } catch (OXException e) {

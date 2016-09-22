@@ -154,11 +154,6 @@ public class WnsPushNotificationTransportActivator extends HousekeepingActivator
             this.optionsProviderRegistration = null;
         }
 
-        if (!configService.getBoolProperty("com.openexchange.pns.transport.wns.enabled", false)) {
-            LOG.info("WNS push notification transport is disabled per configuration");
-            return;
-        }
-
         Object yaml = configService.getYaml(CONFIGFILE_WNS_OPTIONS);
         if (null != yaml && Map.class.isInstance(yaml)) {
             Map<String, Object> map = (Map<String, Object>) yaml;

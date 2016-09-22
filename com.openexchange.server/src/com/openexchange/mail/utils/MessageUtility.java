@@ -461,14 +461,7 @@ public final class MessageUtility {
             // MS932
             return CP932EmojiMapping.getInstance().replaceIn(new String(bytes, Charsets.forName("MS932")));
         }
-        final String retval = readStream0(streamProvider.getInputStream(), charset, errorOnNoContent, maxSize);
-        if (true || retval.indexOf(UNKNOWN) < 0) {
-            return retval;
-        }
-        final byte[] bytes = getBytesFrom(streamProvider.getInputStream(), maxSize);
-        final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
-        LOG.debug("Mapped \"{}\" charset to \"{}\".", charset, detectedCharset);
-        return new String(bytes, detectedCharset);
+        return readStream0(streamProvider.getInputStream(), charset, errorOnNoContent, maxSize);
     }
 
     /**
@@ -1181,7 +1174,9 @@ public final class MessageUtility {
 
             headers = new HashMap<String, MailMessage>(ms.length);
             for (MailMessage header : ms) {
-                headers.put(header.getMailId(), header);
+                if (header != null) {
+                    headers.put(header.getMailId(), header);
+                }
             }
         }
 
