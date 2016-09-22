@@ -154,11 +154,6 @@ public class GcmPushNotificationTransportActivator extends HousekeepingActivator
             this.optionsProviderRegistration = null;
         }
 
-        if (!configService.getBoolProperty("com.openexchange.pns.transport.gcm.enabled", false)) {
-            LOG.info("GCM push notification transport is disabled per configuration");
-            return;
-        }
-
         Object yaml = configService.getYaml(CONFIGFILE_GCM_OPTIONS);
         if (null != yaml && Map.class.isInstance(yaml)) {
             Map<String, Object> map = (Map<String, Object>) yaml;

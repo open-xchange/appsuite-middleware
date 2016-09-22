@@ -175,11 +175,6 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
             this.feedbackQueryTask = null;
         }
 
-        if (!configService.getBoolProperty("com.openexchange.pns.transport.apn.ios.enabled", false)) {
-            LOG.info("APNS push notification transport is disabled per configuration");
-            return;
-        }
-
         Object yaml = configService.getYaml(CONFIGFILE_APNS_OPTIONS);
         if (null != yaml && Map.class.isInstance(yaml)) {
             Map<String, Object> map = (Map<String, Object>) yaml;

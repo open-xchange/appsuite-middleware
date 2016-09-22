@@ -94,7 +94,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             synchronized (PushNotificationServiceImpl.class) {
                 tmp = delayDuration;
                 if (null == tmp) {
-                    int defaultValue = 1500; // 1,5 seconds
+                    int defaultValue = 1000; // 1 second
                     if (null == configService) {
                         return defaultValue;
                     }
@@ -114,7 +114,7 @@ public class PushNotificationServiceImpl implements PushNotificationService {
             synchronized (PushNotificationServiceImpl.class) {
                 tmp = timerFrequency;
                 if (null == tmp) {
-                    int defaultValue = 750; // 0,75 seconds
+                    int defaultValue = 500; // 0,5 seconds
                     if (null == configService) {
                         return defaultValue;
                     }
