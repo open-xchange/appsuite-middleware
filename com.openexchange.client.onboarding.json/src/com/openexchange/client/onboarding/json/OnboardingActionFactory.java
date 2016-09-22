@@ -50,8 +50,8 @@
 package com.openexchange.client.onboarding.json;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.client.onboarding.json.actions.AllScenariosAction;
@@ -78,11 +78,12 @@ public class OnboardingActionFactory implements AJAXActionServiceFactory {
      */
     public OnboardingActionFactory(ServiceLookup services) {
         super();
-        actions = new HashMap<String, AJAXActionService>(4, 0.9F);
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         actions.put("config", new ConfigAction(services));
         actions.put("get", new GetScenarioAction(services));
         actions.put("scenarios", new AllScenariosAction(services));
         actions.put("execute", new ExecuteAction(services));
+        this.actions = actions.build();
     }
 
     @Override

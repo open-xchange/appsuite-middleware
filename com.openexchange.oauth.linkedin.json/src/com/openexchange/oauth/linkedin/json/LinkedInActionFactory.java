@@ -51,7 +51,7 @@ package com.openexchange.oauth.linkedin.json;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
@@ -77,10 +77,11 @@ public class LinkedInActionFactory implements AJAXActionServiceFactory {
      */
     public LinkedInActionFactory(final ServiceLookup serviceLookup) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractLinkedInAction>(3, 0.9f, 1);
+        ImmutableMap.Builder<String, AbstractLinkedInAction> actions = ImmutableMap.builder();
         actions.put("fullProfile", new FullProfilesAction(serviceLookup));
         actions.put("inbox", new InboxAction(serviceLookup));
         actions.put("updates", new UpdatesAction(serviceLookup));
+        this.actions = actions.build();
     }
 
     @Override
