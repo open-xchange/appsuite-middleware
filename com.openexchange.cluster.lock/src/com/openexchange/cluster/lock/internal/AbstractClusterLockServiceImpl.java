@@ -70,10 +70,10 @@ abstract class AbstractClusterLockServiceImpl implements ClusterLockService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractClusterLockServiceImpl.class);
 
     /** Defines the threshold for the lock refresh in seconds */
-    static final long REFRESH_LOCK_THRESHOLD = TimeUnit.SECONDS.toNanos(20);
+    private static final long REFRESH_LOCK_THRESHOLD = TimeUnit.SECONDS.toNanos(20);
 
     /** Defines the TTL for a cluster lock in seconds */
-    static final long LOCK_TTL = TimeUnit.SECONDS.toNanos(30);
+    private static final long LOCK_TTL = TimeUnit.SECONDS.toNanos(30);
 
     protected final ServiceLookup services;
 
