@@ -66,7 +66,7 @@ public enum SSLExceptionCode implements DisplayableOXExceptionCode {
     
     UNTRUSTED_CERTIFICATE("The certificate for domain \"%1$s\" is untrusted.", CATEGORY_ERROR, 1, SSLExceptionMessages.UNTRUSTED_CERTIFICATE_MSG),
     
-    UNTRUSTED__CERT_USER_CONFIG("The certificate for domain \"%1$s\" is untrusted.", CATEGORY_ERROR, 2, SSLExceptionMessages.UNTRUSTED_CERT_USER_CONFIG_MSG);
+    UNTRUSTED_CERT_USER_CONFIG("The certificate for domain \"%1$s\" is untrusted.", CATEGORY_ERROR, 2, SSLExceptionMessages.UNTRUSTED_CERT_USER_CONFIG_MSG);
     
     public static final String PREFIX = "SSL";
 
