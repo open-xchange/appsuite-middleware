@@ -163,7 +163,9 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
         private final ClusterTask<T> clusterTask;
 
         /**
-         * Initialises a new {@link ClusterLockServiceHazelcastImpl.RefreshLockTask}.
+         * Initialises a new {@link RefreshLockTask}.
+         * 
+         * @param clusterTask The {@link ClusterTask} to refresh
          */
         public RefreshLockTask(ClusterTask<T> clusterTask) {
             super();
@@ -188,13 +190,13 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
             try {
                 connection = databaseService.getWritable(contextId);
                 statement = connection.prepareStatement(UPDATE_TIMESTAMP);
-                
+
                 int pos = 1;
                 statement.setString(pos++, Long.toString(System.nanoTime()));
                 statement.setInt(pos++, contextId);
                 statement.setInt(pos++, userId);
                 statement.setString(pos++, clusterTask.getTaskName());
-                
+
                 statement.executeUpdate();
             } catch (SQLException e) {
                 LOGGER.error("The lock for cluster task '{}' was not refreshed. {}", clusterTask.getTaskName(), e.getMessage(), e);

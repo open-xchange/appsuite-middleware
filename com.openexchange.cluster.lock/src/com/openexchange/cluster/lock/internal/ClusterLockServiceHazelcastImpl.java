@@ -171,7 +171,9 @@ public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceI
         private String taskName;
 
         /**
-         * Initialises a new {@link ClusterLockServiceHazelcastImpl.RefreshLockTask}.
+         * Initialises a new {@link RefreshLockTask}.
+         * 
+         * @param taskName The cluster task's name to refresh
          */
         public RefreshLockTask(String taskName) {
             super();
