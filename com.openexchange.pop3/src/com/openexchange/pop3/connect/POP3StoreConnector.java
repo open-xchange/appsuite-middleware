@@ -69,6 +69,9 @@ import javax.mail.AuthenticationFailedException;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.internet.idn.IDNA;
+import javax.net.ssl.SSLHandshakeException;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.log.audit.AuditLogService;
@@ -81,6 +84,7 @@ import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.POP3Provider;
 import com.openexchange.pop3.config.IPOP3Properties;
@@ -459,6 +463,16 @@ public final class POP3StoreConnector {
             } catch (final MessagingException e) {
                 final Exception nested = e.getNextException();
                 if (nested != null) {
+                    if (SSLHandshakeException.class.isInstance(nested)) {
+                        ConfigViewFactory factory = POP3ServiceRegistry.getServiceRegistry().getService(ConfigViewFactory.class);
+                        ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+                        Boolean userConfigurable = view.get("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class);
+                        if (userConfigurable.booleanValue()) {
+                            throw SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(server);
+                        } else {
+                            throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(server);
+                        }
+                    }
                     if (nested instanceof IOException) {
                         throw MimeMailExceptionCode.CONNECT_ERROR.create(e, pop3Config.getServer(), pop3Config.getLogin());
                     } else if (tmpDownEnabled && SocketTimeoutException.class.isInstance(e.getNextException())) {
