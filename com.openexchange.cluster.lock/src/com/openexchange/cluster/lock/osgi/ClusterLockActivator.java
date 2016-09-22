@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.cluster.lock.ClusterLockService;
-import com.openexchange.cluster.lock.internal.ClusterLockServiceImpl;
+import com.openexchange.cluster.lock.internal.ClusterLockServiceHazelcastImpl;
 import com.openexchange.cluster.lock.internal.Unregisterer;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -101,7 +101,7 @@ public class ClusterLockActivator extends HousekeepingActivator implements Unreg
                 @Override
                 public HazelcastInstance addingService(ServiceReference<HazelcastInstance> ref) {
                     HazelcastInstance hzInstance = context.getService(ref);
-                    registerService(ClusterLockService.class, new ClusterLockServiceImpl(ClusterLockActivator.this, ClusterLockActivator.this));
+                    registerService(ClusterLockService.class, new ClusterLockServiceHazelcastImpl(ClusterLockActivator.this, ClusterLockActivator.this));
                     return hzInstance;
                 }
 

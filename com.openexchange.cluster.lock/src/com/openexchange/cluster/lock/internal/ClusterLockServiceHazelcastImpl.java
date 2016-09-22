@@ -64,13 +64,13 @@ import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link ClusterLockServiceImpl}
+ * {@link ClusterLockServiceHazelcastImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ClusterLockServiceImpl implements ClusterLockService {
+public class ClusterLockServiceHazelcastImpl implements ClusterLockService {
 
-    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ClusterLockServiceImpl.class);
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ClusterLockServiceHazelcastImpl.class);
 
     private final Unregisterer unregisterer;
     private final ServiceLookup services;
@@ -82,9 +82,9 @@ public class ClusterLockServiceImpl implements ClusterLockService {
     private static final long LOCK_TTL = TimeUnit.SECONDS.toNanos(30);
 
     /**
-     * Initializes a new {@link ClusterLockServiceImpl}.
+     * Initializes a new {@link ClusterLockServiceHazelcastImpl}.
      */
-    public ClusterLockServiceImpl(ServiceLookup services, Unregisterer unregisterer) {
+    public ClusterLockServiceHazelcastImpl(ServiceLookup services, Unregisterer unregisterer) {
         super();
         this.services = services;
         this.unregisterer = unregisterer;
@@ -157,7 +157,7 @@ public class ClusterLockServiceImpl implements ClusterLockService {
                 }
                 LOGGER.debug("Another node is performing the cluster task '{}'. Cluster lock was not acquired.", clusterTask.getTaskName(), retryPolicy.getClass().getSimpleName());
             } catch (HazelcastInstanceNotActiveException e) {
-                LOGGER.warn("Encountered a {} error. {} will be shut-down!", HazelcastInstanceNotActiveException.class.getSimpleName(), ClusterLockServiceImpl.class, e);
+                LOGGER.warn("Encountered a {} error. {} will be shut-down!", HazelcastInstanceNotActiveException.class.getSimpleName(), ClusterLockServiceHazelcastImpl.class, e);
                 unregisterer.propagateNotActive(e);
                 unregisterer.unregister();
             } finally {
@@ -201,7 +201,7 @@ public class ClusterLockServiceImpl implements ClusterLockService {
         private String taskName;
 
         /**
-         * Initialises a new {@link ClusterLockServiceImpl.RefreshLockTask}.
+         * Initialises a new {@link ClusterLockServiceHazelcastImpl.RefreshLockTask}.
          */
         public RefreshLockTask(String taskName) {
             super();
