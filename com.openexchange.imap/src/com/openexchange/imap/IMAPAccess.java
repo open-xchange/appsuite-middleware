@@ -70,12 +70,15 @@ import javax.mail.Provider;
 import javax.mail.Store;
 import javax.mail.URLName;
 import javax.mail.internet.idn.IDNA;
+import javax.net.ssl.SSLHandshakeException;
 import javax.security.auth.Subject;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionInit;
@@ -122,6 +125,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.session.Sessions;
@@ -813,6 +817,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     Exception next = e.getNextException();
                     if (StarttlsRequiredException.class.isInstance(next)) {
                         throw MailExceptionCode.NON_SECURE_DENIED.create(server);
+                    }
+                    if (SSLHandshakeException.class.isInstance(next)) {
+                        ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+                        ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+                        Boolean userConfigurable = view.get("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class);
+                        if (userConfigurable.booleanValue()) {
+                            throw SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(server);
+                        } else {
+                            throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(server);
+                        }
                     }
                 }
                 throw e;
