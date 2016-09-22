@@ -192,7 +192,7 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
         apnTransport.open();
         this.apnTransport = apnTransport;
 
-        String feedbackQueryInterval = configService.getProperty("com.openexchange.pns.transport.apn.ios.feedbackQueryInterval", (String)null);
+        String feedbackQueryInterval = configService.getProperty("com.openexchange.pns.transport.apn.ios.feedbackQueryInterval", "3600000");
         setupFeedbackQueries(apnTransport, feedbackQueryInterval);
     }
 
