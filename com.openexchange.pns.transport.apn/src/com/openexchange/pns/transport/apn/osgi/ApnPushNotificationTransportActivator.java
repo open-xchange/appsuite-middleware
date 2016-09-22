@@ -63,6 +63,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -134,6 +135,19 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
     @Override
     protected synchronized void startBundle() throws Exception {
         reinit(getService(ConfigurationService.class));
+
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                ApnPushNotificationTransport.invalidateEnabledCache();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return null;
+            }
+        });
     }
 
     @Override
