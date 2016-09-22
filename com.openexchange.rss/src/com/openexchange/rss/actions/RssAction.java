@@ -61,6 +61,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import javax.net.ssl.SSLHandshakeException;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -70,10 +71,13 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Strings;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.rss.RssExceptionCodes;
 import com.openexchange.rss.RssResult;
 import com.openexchange.rss.osgi.Services;
@@ -138,7 +142,7 @@ public class RssAction implements AJAXActionService {
 
         try {
             List<URL> urls = getUrls(request);
-            feeds = getAcceptedFeeds(urls, warnings);
+            feeds = getAcceptedFeeds(urls, warnings, session);
         } catch (IllegalArgumentException | MalformedURLException e) {
             throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, e.getMessage());
         } catch (JSONException e) {
@@ -250,7 +254,7 @@ public class RssAction implements AJAXActionService {
      * @return {@link List} of {@link SyndFeed}s that have been accepted for further processing
      * @throws OXException
      */
-    protected List<SyndFeed> getAcceptedFeeds(List<URL> urls, List<OXException> warnings) throws OXException {
+    protected List<SyndFeed> getAcceptedFeeds(List<URL> urls, List<OXException> warnings, ServerSession session) throws OXException {
         List<SyndFeed> feeds = new LinkedList<SyndFeed>();
 
         for (URL url : urls) {
@@ -270,7 +274,19 @@ public class RssAction implements AJAXActionService {
             } catch (UnsupportedEncodingException e) {
                 /* yeah, right... not happening for UTF-8 */
             } catch (IOException e) {
-                OXException oxe = RssExceptionCodes.IO_ERROR.create(e, e.getMessage(), url.toString());
+                OXException oxe = null;
+                if (SSLHandshakeException.class.isInstance(e)) {
+                    ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+                    ConfigView config = factory.getView(session.getUserId(), session.getContextId());
+                    Boolean userConfigurable = config.get("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class);
+                    if (userConfigurable.booleanValue()) {
+                        oxe = SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(url.getHost());
+                    } else {
+                        oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(url.getHost());
+                    }
+                } else {
+                    oxe = RssExceptionCodes.IO_ERROR.create(e, e.getMessage(), url.toString());
+                }
                 if (1 == urls.size()) {
                     throw oxe;
                 }
