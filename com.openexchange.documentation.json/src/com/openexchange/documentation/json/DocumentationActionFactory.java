@@ -52,8 +52,7 @@ package com.openexchange.documentation.json;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
@@ -81,11 +80,12 @@ public class DocumentationActionFactory implements AJAXActionServiceFactory {
      */
     public DocumentationActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>();
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         actions.put("modules", new ModulesAction(services));
         actions.put("module", new ModuleAction(services));
         actions.put("containers", new ContainersAction(services));
         actions.put("container", new ContainerAction(services));
+        this.actions = actions.build();
     }
 
     @Override

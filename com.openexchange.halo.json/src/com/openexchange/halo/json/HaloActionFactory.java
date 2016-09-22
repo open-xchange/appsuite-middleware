@@ -51,7 +51,7 @@ package com.openexchange.halo.json;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
@@ -74,10 +74,10 @@ public class HaloActionFactory implements AJAXActionServiceFactory {
      */
     public HaloActionFactory(ServiceLookup services) {
         super();
-        Map<String, AJAXActionService> actions = new ConcurrentHashMap<>(2, 0.9F, 1);
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         actions.put("services", new ServicesAction(services));
         actions.put("investigate", new InvestigateAction(services));
-        this.actions = actions;
+        this.actions = actions.build();
     }
 
     @Override

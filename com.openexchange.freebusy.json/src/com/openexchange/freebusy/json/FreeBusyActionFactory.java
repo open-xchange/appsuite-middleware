@@ -50,8 +50,8 @@
 package com.openexchange.freebusy.json;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
@@ -78,9 +78,10 @@ public class FreeBusyActionFactory implements AJAXActionServiceFactory {
      */
     public FreeBusyActionFactory(ServiceLookup serviceLookup) {
         super();
-        this.actions = new HashMap<String, FreeBusyAction>();
+        ImmutableMap.Builder<String, FreeBusyAction> actions = ImmutableMap.builder();
         actions.put("get", new GetAction(serviceLookup));
         actions.put("list", new ListAction(serviceLookup));
+        this.actions = actions.build();
     }
 
     @Override

@@ -51,7 +51,7 @@ package com.openexchange.group.json;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
@@ -77,12 +77,13 @@ public class GroupActionFactory implements AJAXActionServiceFactory {
      */
     public GroupActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractGroupAction>(5, 0.9f, 1);
+        ImmutableMap.Builder<String, AbstractGroupAction> actions = ImmutableMap.builder();
         actions.put("get", new com.openexchange.group.json.actions.GetAction(services));
         actions.put("all", new com.openexchange.group.json.actions.AllAction(services));
         actions.put("list", new com.openexchange.group.json.actions.ListAction(services));
         actions.put("search", new com.openexchange.group.json.actions.SearchAction(services));
         actions.put("updates", new com.openexchange.group.json.actions.UpdatesAction(services));
+        this.actions = actions.build();
     }
 
     @Override

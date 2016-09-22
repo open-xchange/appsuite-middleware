@@ -51,7 +51,7 @@ package com.openexchange.conversion.servlet;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.conversion.servlet.actions.ConvertAction;
@@ -73,8 +73,9 @@ public class ConversionActionFactory implements AJAXActionServiceFactory {
      */
     public ConversionActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2, 0.9f, 1);
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         actions.put("convert", new ConvertAction(services));
+        this.actions = actions.build();
     }
 
     @Override
