@@ -47,60 +47,29 @@
  *
  */
 
-package com.openexchange.advertisement.json;
+package com.openexchange.html.vulntests;
 
-import java.util.Collection;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
+import com.openexchange.html.AssertionHelper;
 
 /**
- * {@link AdvertisementActionFactory}
+ * {@link Bug48843VulTest}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.3
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AdvertisementActionFactory implements AJAXActionServiceFactory {
+public class Bug48843VulTest extends AbstractSanitizing {
 
-    private static final AdvertisementActionFactory SINGLETON = new AdvertisementActionFactory();
-
-    public static final AdvertisementActionFactory getInstance() {
-        return SINGLETON;
-    }
-
-    // -----------------------------------------------------------------------------------------------------
-
-    private final Map<String, AJAXActionService> actions;
-
-    /**
-     * Initializes a new {@link AdvertisementActionFactory}.
-     */
-    private AdvertisementActionFactory() {
+    public Bug48843VulTest() {
         super();
-        actions = initActions();
     }
 
-    private Map<String, AJAXActionService> initActions() {
-        ImmutableMap.Builder<String, AJAXActionService> tmp = ImmutableMap.builder();
-        tmp.put(GetConfigAction.ACTION, new GetConfigAction());
-        return tmp.build();
+    @Test
+    public void testHrefSanitizing() {
+        String content = "<!DOCTYPE html>\n" +
+            "<html><head>\n" +
+            "    <meta charset=\"UTF-8\">\n" +
+            "</head><body><p><a href=\"&amp;#0000106&amp;#0000097vascript:alert(1)\">test</a><br/><a href=\"&#0000118bscript:msgbox(1)\">test</a></p></body></html>";
+        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "vascript", "script");
     }
-
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        final AJAXActionService retval = actions.get(action);
-        if (null == retval) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
-        }
-        return retval;
-    }
-
-    @Override
-    public Collection<?> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
-
 }

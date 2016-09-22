@@ -2296,50 +2296,50 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             stmt.setLong(2, accountId);
             stmt.setLong(3, userId);
             result = stmt.executeQuery();
-            if (result.next()) {
-                transportAccount.setName(result.getString(1));
-                transportAccount.setId(result.getInt(2));
-                transportAccount.parseTransportServerURL(result.getString(3));
-                {
-                    final String transportLogin = result.getString(4);
-                    if (result.wasNull()) {
-                        transportAccount.setTransportLogin(null);
-                    } else {
-                        transportAccount.setTransportLogin(transportLogin);
-                    }
-                }
-                {
-                    final String transportPassword = result.getString(5);
-                    if (result.wasNull()) {
-                        transportAccount.setTransportPassword(null);
-                    } else {
-                        transportAccount.setTransportPassword(transportPassword);
-                    }
-                }
-                final String pers = result.getString(6);
-                if (!result.wasNull()) {
-                    transportAccount.setPersonal(pers);
-                }
-                final String replyTo = result.getString(7);
-                if (!result.wasNull()) {
-                    transportAccount.setReplyTo(replyTo);
-                }
-                transportAccount.setTransportStartTls(result.getBoolean(8));
-                transportAccount.setSendAddress(result.getString(9));
-
-                int oauthAccountId = result.getInt(10);
-                if (result.wasNull()) {
-                    transportAccount.setTransportOAuthId(-1);
-                } else {
-                    transportAccount.setTransportOAuthId(oauthAccountId);
-                }
-                /*
-                 * Fill properties
-                 */
-                fillTransportProperties(transportAccount, contextId, userId, accountId, con);
-            } else {
+            if (!result.next()) {
                 throw MailAccountExceptionCodes.NOT_FOUND.create(I(accountId), I(userId), I(contextId));
             }
+            
+            transportAccount.setName(result.getString(1));
+            transportAccount.setId(result.getInt(2));
+            transportAccount.parseTransportServerURL(result.getString(3));
+            {
+                final String transportLogin = result.getString(4);
+                if (result.wasNull()) {
+                    transportAccount.setTransportLogin(null);
+                } else {
+                    transportAccount.setTransportLogin(transportLogin);
+                }
+            }
+            {
+                final String transportPassword = result.getString(5);
+                if (result.wasNull()) {
+                    transportAccount.setTransportPassword(null);
+                } else {
+                    transportAccount.setTransportPassword(transportPassword);
+                }
+            }
+            final String pers = result.getString(6);
+            if (!result.wasNull()) {
+                transportAccount.setPersonal(pers);
+            }
+            final String replyTo = result.getString(7);
+            if (!result.wasNull()) {
+                transportAccount.setReplyTo(replyTo);
+            }
+            transportAccount.setTransportStartTls(result.getBoolean(8));
+            transportAccount.setSendAddress(result.getString(9));
+
+            int oauthAccountId = result.getInt(10);
+            if (result.wasNull()) {
+                transportAccount.setTransportOAuthId(-1);
+            } else {
+                transportAccount.setTransportOAuthId(oauthAccountId);
+            }
+            /*
+             * Fill properties
+             */
+            fillTransportProperties(transportAccount, contextId, userId, accountId, con);
         } catch (final SQLException e) {
             if (null != stmt) {
                 final String sql = stmt.toString();

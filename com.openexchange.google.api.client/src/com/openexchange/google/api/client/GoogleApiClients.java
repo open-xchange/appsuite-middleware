@@ -1,3 +1,4 @@
+
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -50,6 +51,10 @@
 package com.openexchange.google.api.client;
 
 import java.security.GeneralSecurityException;
+import java.util.HashMap;
+import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Google2Api;
 import org.scribe.exceptions.OAuthException;
@@ -64,6 +69,7 @@ import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.services.Services;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.OAuthAccount;
@@ -260,6 +266,26 @@ public class GoogleApiClients {
         return clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount), new ExponentialBackOffRetryPolicy());
     }
 
+    private static String parseErrorFrom(String message) {
+        if (Strings.isEmpty(message)) {
+            return null;
+        }
+
+        String marker = "Can't extract a token from this: '";
+        int pos = message.indexOf(marker);
+        if (pos < 0) {
+            return null;
+        }
+
+        try {
+            JSONObject jo = new JSONObject(message.substring(pos + marker.length(), message.length() - 1));
+            return jo.optString("error", null);
+        } catch (JSONException e) {
+            // Apparent no JSON response
+            return null;
+        }
+    }
+
     /**
      * Gets the Google credentials from default OAuth account.
      *
@@ -332,6 +358,10 @@ public class GoogleApiClients {
                 return scribeOAuthService.getAccessToken(new Token(getCachedAccount().getToken(), getCachedAccount().getSecret()), null);
             } catch (OAuthException e) {
                 String exMessage = e.getMessage();
+                String errorMsg = parseErrorFrom(exMessage);
+                if (Strings.isEmpty(errorMsg)) {
+                    throw OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
+                }
                 if (exMessage.contains("invalid_grant")) {
                     OAuthAccount dbAccount = getDBAccount();
                     String cburl = OAuthUtil.buildCallbackURL(dbAccount);

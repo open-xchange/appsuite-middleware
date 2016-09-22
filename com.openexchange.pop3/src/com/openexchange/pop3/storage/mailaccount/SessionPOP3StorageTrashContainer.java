@@ -55,8 +55,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.pop3.POP3Access;
@@ -111,7 +110,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
      * Member section
      */
 
-    private final ReadWriteLock rwLock;
+    private final Lock lock;
 
     private final int[] mode;
 
@@ -121,11 +120,11 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
 
     private SessionPOP3StorageTrashContainer(final POP3StorageTrashContainer delegatee, final Session session, final String key) throws OXException {
         super();
-        rwLock = new ReentrantReadWriteLock();
+        lock = new ReentrantLock();
         this.delegatee = delegatee;
         set = new ConcurrentHashMap<String, Object>();
         mode = new int[] { 1 };
-        final CleanSetRunnable csr = new CleanSetRunnable(session, key, set, rwLock, mode);
+        final CleanSetRunnable csr = new CleanSetRunnable(session, key, set, lock, mode);
         final ScheduledTimerTask timerTask = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class).scheduleWithFixedDelay(
             csr,
             SessionCacheProperties.SCHEDULED_TASK_INITIAL_DELAY,
@@ -144,100 +143,85 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
         }
     }
 
-    private void checkInit(final Lock obtainedReadLock) throws OXException {
+    private void checkInit() throws OXException {
         final int m = mode[0];
         if (-1 == m) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create("Error mode. Try again.");
         }
         if (1 == m) {
-            /*
-             * Upgrade lock: unlock first to acquire write lock
-             */
-            obtainedReadLock.unlock();
-            final Lock writeLock = rwLock.writeLock();
-            writeLock.lock();
-            try {
-                init();
-            } finally {
-                /*
-                 * Downgrade lock: reacquire read without giving up write lock and...
-                 */
-                obtainedReadLock.lock();
-                /*
-                 * ... unlock write.
-                 */
-                writeLock.unlock();
-            }
+            init();
         }
     }
 
     @Override
     public void addUIDL(final String uidl) throws OXException {
-        final Lock readLock = rwLock.readLock();
-        readLock.lock();
+        Lock lock = this.lock;
+        lock.lock();
         try {
-            checkInit(readLock);
+            checkInit();
             delegatee.addUIDL(uidl);
             set.put(uidl, PRESENT);
         } finally {
-            readLock.unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public void clear() throws OXException {
-        final Lock readLock = rwLock.readLock();
-        readLock.lock();
+        Lock lock = this.lock;
+        lock.lock();
         try {
-            checkInit(readLock);
+            checkInit();
             delegatee.clear();
             set.clear();
         } finally {
-            readLock.unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public Set<String> getUIDLs() throws OXException {
-        final Lock readLock = rwLock.readLock();
-        readLock.lock();
+        Lock lock = this.lock;
+        lock.lock();
         try {
-            checkInit(readLock);
+            checkInit();
             final Set<String> tmp = new HashSet<String>();
             tmp.addAll(set.keySet());
             return tmp;
         } finally {
-            readLock.unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public void removeUIDL(final String uidl) throws OXException {
-        final Lock readLock = rwLock.readLock();
-        readLock.lock();
+        Lock lock = this.lock;
+        lock.lock();
         try {
-            checkInit(readLock);
+            checkInit();
             delegatee.removeUIDL(uidl);
             set.remove(uidl);
         } finally {
-            readLock.unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public void addAllUIDL(final Collection<? extends String> uidls) throws OXException {
-        final Lock readLock = rwLock.readLock();
-        readLock.lock();
+        Lock lock = this.lock;
+        lock.lock();
         try {
-            checkInit(readLock);
+            checkInit();
             delegatee.addAllUIDL(uidls);
             for (final String uidl : uidls) {
                 set.put(uidl, PRESENT);
             }
         } finally {
-            readLock.unlock();
+            lock.unlock();
         }
     }
+
+    // -------------------------------------------------------------------------------------------------
 
     private static final class CleanSetRunnable implements Runnable {
 
@@ -247,7 +231,7 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
 
         private final Map<String, Object> tset;
 
-        private final ReadWriteLock trwLock;
+        private final Lock tLock;
 
         private final int[] tmode;
 
@@ -255,18 +239,18 @@ public final class SessionPOP3StorageTrashContainer implements POP3StorageTrashC
 
         private int countEmptyRuns;
 
-        public CleanSetRunnable(final Session tsession, final String tkey, final Map<String, Object> tset, final ReadWriteLock trwLock, final int[] tmode) {
+        public CleanSetRunnable(final Session tsession, final String tkey, final Map<String, Object> tset, final Lock tLock, final int[] tmode) {
             super();
             this.tsession = tsession;
             this.tkey = tkey;
             this.tset = tset;
-            this.trwLock = trwLock;
+            this.tLock = tLock;
             this.tmode = tmode;
         }
 
         @Override
         public void run() {
-            final Lock writeLock = trwLock.writeLock();
+            final Lock writeLock = tLock;
             writeLock.lock();
             try {
                 if (tset.isEmpty()) {

@@ -169,7 +169,7 @@ public final class HtmlServices {
         return (mimeType.startsWith("image/") && mimeType.indexOf("svg") < 0) ? Result.ALLOW : Result.DENY;
     }
 
-    private static final String[] UNSAFE_TOKENS = { "javascript:", "vbscript:", "<script" };
+    private static final String[] UNSAFE_TOKENS = { "javascript:", "vbscript:", "vascript:", "<script" };
 
     /**
      * Checks if specified URL String is safe or not.
