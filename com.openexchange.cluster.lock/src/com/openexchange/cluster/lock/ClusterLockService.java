@@ -50,7 +50,6 @@
 package com.openexchange.cluster.lock;
 
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 import com.openexchange.cluster.lock.policies.RetryPolicy;
 import com.openexchange.exception.OXException;
 
@@ -129,24 +128,4 @@ public interface ClusterLockService {
      * @throws OXException if an error is occurred during the execution
      */
     <T> T runClusterTask(ClusterTask<T> clusterTask, long waitTime, TimeUnit timeUnit) throws OXException;
-
-    /**
-     * Acquire a periodic cluster lock.
-     * 
-     * @param action
-     * @param period
-     * @return The lock
-     * @throws OXException
-     * @deprecated Use {@link ClusterTimerService#scheduleAtFixedRate(String, Runnable, long, long)} instead
-     */
-    public Lock acquirePeriodicClusterLock(String action, long period) throws OXException;
-
-    /**
-     * Release a periodic cluster lock.
-     * 
-     * @param action
-     * @throws OXException
-     * @deprecated See {@link #acquirePeriodicClusterLock(String, long)}
-     */
-    public void releasePeriodicClusterLock(String action) throws OXException;
 }

@@ -49,11 +49,8 @@
 
 package com.openexchange.cluster.lock.internal;
 
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.ILock;
@@ -217,48 +214,6 @@ public class ClusterLockServiceImpl implements ClusterLockService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.ClusterLockService#acquirePeriodicClusterLock(java.lang.String, long)
-     */
-    @Override
-    public Lock acquirePeriodicClusterLock(final String action, final long period) throws OXException {
-        final long now = System.currentTimeMillis();
-        final ConcurrentMap<String, Long> map = getPeriodicHzMap();
-        final Long timestamp = map.get(action);
-        if (timestamp != null) {
-            if (now - timestamp.longValue() < period) {
-                throw ClusterLockExceptionCodes.CLUSTER_PERIODIC_LOCKED.create(period, action, period - (now - timestamp));
-            }
-        }
-        HazelcastInstance hazelcastInstance = getHazelcastInstance();
-        if (hazelcastInstance == null) {
-            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
-        }
-        final Lock lock = hazelcastInstance.getLock(action);
-        final Long futureTS = map.putIfAbsent(action, Long.valueOf(now));
-        if (futureTS != null) {
-            throw ClusterLockExceptionCodes.CLUSTER_PERIODIC_LOCKED.create(period, action, period - (now - futureTS));
-        }
-
-        final TimerService timerService = services.getService(TimerService.class);
-        timerService.schedule(new ReleasePeriodicClusterLock(action), period, TimeUnit.MILLISECONDS);
-
-        return lock;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.ClusterLockService#releasePeriodicClusterLock(java.lang.String)
-     */
-    @Override
-    public void releasePeriodicClusterLock(String action) throws OXException {
-        final ConcurrentMap<String, Long> map = getPeriodicHzMap();
-        map.remove(action);
-    }
-
     ///////////////////////////////////// HELPERS ///////////////////////////////////////
 
     private HazelcastInstance getHazelcastInstance() throws OXException {
@@ -268,18 +223,6 @@ public class ClusterLockServiceImpl implements ClusterLockService {
             throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
         return hazelcastInstance;
-    }
-
-    private IMap<String, Long> getPeriodicHzMap() throws OXException {
-        try {
-            HazelcastInstance hazelcastInstance = getHazelcastInstance();
-            if (hazelcastInstance == null) {
-                throw ServiceExceptionCode.absentService(HazelcastInstance.class);
-            }
-            return hazelcastInstance.getMap("PeriodicClusterLocks");
-        } catch (HazelcastInstanceNotActiveException e) {
-            throw handleNotActiveException(e);
-        }
     }
 
     /**
@@ -294,32 +237,6 @@ public class ClusterLockServiceImpl implements ClusterLockService {
         unregisterer.propagateNotActive(e);
         unregisterer.unregister();
         return ServiceExceptionCode.absentService(HazelcastInstance.class);
-    }
-
-    private class ReleasePeriodicClusterLock implements Runnable {
-
-        private final String action;
-
-        /**
-         * Initializes a new {@link ReleasePeriodicClusterLock}.
-         * 
-         * @param action
-         * @param period
-         */
-        public ReleasePeriodicClusterLock(String action) {
-            super();
-            this.action = action;
-        }
-
-        @Override
-        public void run() {
-            try {
-                releasePeriodicClusterLock(action);
-            } catch (OXException e) {
-                final Logger log = LoggerFactory.getLogger(ClusterLockServiceImpl.class);
-                log.warn("Unable to release periodic lock for action {}", action, e);
-            }
-        }
     }
 
     /**
