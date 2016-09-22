@@ -9,6 +9,8 @@ import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.report.appsuite.serialization.internal.Services;
 import com.openexchange.report.appsuite.serialization.osgi.StringParserServiceRegistry;
@@ -21,6 +23,7 @@ public class ReportConfigs implements Serializable, CompositeData {
      * serialVersionUID
      */
     private static final long serialVersionUID = 4288681340803505052L;
+    private static final Logger LOG = LoggerFactory.getLogger(ReportConfigs.class);
 
     private HashMap<String, Object> attributeMap;
 
@@ -32,7 +35,7 @@ public class ReportConfigs implements Serializable, CompositeData {
                                                                          , new String[] {"type", "isSingleDeployment", "consideredTimeframeStart", "consideredTimeframeEnd", "isConfigTimerange", "isShowSingleTenant", "singleTenantId", "isAdminIgnore", "isShowDriveMetrics", "isShowMailMetrics"}
                                                                          , new OpenType[] {SimpleType.STRING, SimpleType.LONG, SimpleType.LONG, SimpleType.BOOLEAN, SimpleType.BOOLEAN, SimpleType.LONG, SimpleType.BOOLEAN, SimpleType.BOOLEAN, SimpleType.BOOLEAN, SimpleType.BOOLEAN});
         } catch (OpenDataException e) {
-            e.printStackTrace();
+            LOG.error("Unable to create CompositeType of report" , e);
         }
         return compType;
     }

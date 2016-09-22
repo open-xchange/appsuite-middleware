@@ -367,11 +367,9 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             try {
                 ChunkingUtilities.storeCapSContentToFiles(report.getUUID(), ReportProperties.getStoragePath(), singleCapS);
             } catch (JSONException e) {
-                final OXException oxException = new OXException(e);
-                LOG.error("Error while trying create JSONObject from stored capability-set data. " + oxException.getMessage(), oxException);
+                LOG.error("Error while trying create JSONObject from stored capability-set data. ", e );
             } catch (IOException e) {
-                final OXException oxException = new OXException(e);
-                LOG.error("Error while trying to read stored capability-set data. " + oxException.getMessage(), oxException);
+                LOG.error("Error while trying to read stored capability-set data. " , e);
             }
         }
         // remove whole capability set content
@@ -518,11 +516,9 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                 driveUserMetrics.put("quota-usage-percent-" + quotaUsage.getKey(), quotaUsage.getValue());
             }
         } catch (final SQLException e) {
-            LOG.error("Unable to execute SQL for drive metric gathering.");
-            e.printStackTrace();
+            LOG.error("Unable to execute SQL for drive metric gathering." , e);
         } catch (OXException e) {
-            LOG.error("Unable to gather drive metrics.");
-            e.printStackTrace();
+            LOG.error("Unable to gather drive metrics." , e);
         } finally {
             informationService.closeAllDBConnections();
         }

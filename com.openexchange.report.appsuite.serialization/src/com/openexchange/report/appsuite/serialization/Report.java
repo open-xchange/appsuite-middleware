@@ -577,14 +577,11 @@ public class Report implements Serializable {
                 osw.write(getIndentation(--indentationLevel) + "},\n");
             }
         } catch (FileNotFoundException e) {
-            LOG.error("Unable to create the .report file");
-            e.printStackTrace();
+            LOG.error("Unable to create the .report file", e);
         } catch (UnsupportedEncodingException e) {
-            LOG.error("Used encode is not supported.");
-            e.printStackTrace();
+            LOG.error("Used encode is not supported." , e);
         } catch (IOException e) {
-            LOG.error("Unable to write into .report file.");
-            e.printStackTrace();
+            LOG.error("Unable to write into .report file." , e);
         }
         for (File file : parts) {
             if (file.getName().contains(this.uuid)) {
@@ -601,11 +598,9 @@ public class Report implements Serializable {
                 osw.write(indentation + line + ((line = br.readLine()) == null && hasNext ? "," : "") + "\n");
             }
         } catch (FileNotFoundException e) {
-            LOG.error("Unable to load file: " + appendingFile.getAbsolutePath());
-            e.printStackTrace();
+            LOG.error("Unable to load file: " + appendingFile.getAbsolutePath() , e);
         } catch (IOException e) {
-            LOG.error("Unable to write into file: " + appendingFile.getAbsolutePath());
-            e.printStackTrace();
+            LOG.error("Unable to write into file: " + appendingFile.getAbsolutePath() , e);
         }
     }
 
@@ -616,11 +611,9 @@ public class Report implements Serializable {
                 System.out.println(sc.nextLine());
             }
         } catch (FileNotFoundException e) {
-            LOG.error("Unable to load file: " + storageFolderPath + "/" + uuid + ".report");
-            e.printStackTrace();
+            LOG.error("Unable to load file: " + storageFolderPath + "/" + uuid + ".report" , e);
         } catch (IOException e) {
-            LOG.error("Unable to load and write report data to console.");
-            e.printStackTrace();
+            LOG.error("Unable to load and write report data to console." , e);
         }
     }
 

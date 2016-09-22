@@ -246,8 +246,7 @@ public class LocalReportService extends AbstractReportService {
             try {
                 allContextIds = dataloaderMySQL.getAllContextsForSid(reportConfig.getSingleTenantId());
             } catch (SQLException e) {
-                LOG.error("Failed to execute SQL to retrieve all context ids");
-                e.printStackTrace();
+                LOG.error("Failed to execute SQL to retrieve all context ids", e);
             }
             if (allContextIds.isEmpty()) {
                 LOG.error("No contexts for this brand or the sid is invalid.");
@@ -286,7 +285,7 @@ public class LocalReportService extends AbstractReportService {
                 allContextIds.removeAll(currentSchemaIds);
             }
         } catch (SQLException e) {
-            throw ReportExceptionCodes.UNABLE_TO_RETRIEVE_ALL_CONTEXT_IDS.create(e.getMessage());
+            throw ReportExceptionCodes.UNABLE_TO_RETRIEVE_ALL_CONTEXT_IDS.create(e);
         }
         return contextsInSchemas;
     }
@@ -325,9 +324,9 @@ public class LocalReportService extends AbstractReportService {
                     finishUpReport(report);
                 }
             } catch (InterruptedException e) {
-                throw ReportExceptionCodes.THREAD_WAS_INTERRUPTED.create(e.getMessage());
+                throw ReportExceptionCodes.THREAD_WAS_INTERRUPTED.create(e);
             } catch (ExecutionException e) {
-                throw ReportExceptionCodes.UABLE_TO_RETRIEVE_THREAD_RESULT.create(e.getMessage());
+                throw ReportExceptionCodes.UABLE_TO_RETRIEVE_THREAD_RESULT.create(e);
             }
         }
     }

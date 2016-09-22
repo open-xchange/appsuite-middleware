@@ -70,10 +70,10 @@ public class ChunkingUtilities {
             Map<String, Object> storedData = (HashMap<String, Object>) JSONCoercion.parseAndCoerceToNative(content);
             // Merge the data of the two files into dataToStore
             mergeNewValuesWithStoredValues(storedData, data);
-        } catch (FileNotFoundException e1) {
-            ReportExceptionCodes.STORED_FILE_NOT_FOUND.create(e1.getMessage());
-        } catch (InterruptedException e1) {
-            ReportExceptionCodes.UNABLE_TO_GET_FILELOCK.create(e1.getMessage());
+        } catch (FileNotFoundException e) {
+            ReportExceptionCodes.STORED_FILE_NOT_FOUND.create(e);
+        } catch (InterruptedException e) {
+            ReportExceptionCodes.UNABLE_TO_GET_FILELOCK.create(e);
         }
     }
     

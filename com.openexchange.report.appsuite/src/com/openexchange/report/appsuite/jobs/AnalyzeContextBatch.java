@@ -134,7 +134,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
                         break;
                     }
                     if (oxException.similarTo(ReportExceptionCodes.REPORT_GENERATION_CANCELED)) {
-                        LOG.info("Stop execution of report generation due to an user instruction!");
+                        LOG.info("Stop execution of report generation due to an user instruction!" , oxException);
                         contextIds = Collections.emptyList();
                         reportService.abortGeneration(uuid, reportType, "Cancelled report generation based on user interaction.");
                         break;
