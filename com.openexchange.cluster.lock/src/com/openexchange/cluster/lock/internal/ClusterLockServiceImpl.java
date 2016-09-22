@@ -78,7 +78,7 @@ public class ClusterLockServiceImpl implements ClusterLockService {
     /** Defines the threshold for the lock refresh in seconds */
     private static final long REFRESH_LOCK_THRESHOLD = TimeUnit.SECONDS.toNanos(20);
 
-    /** Defines the ttl for a cluster lock in seconds */
+    /** Defines the TTL for a cluster lock in seconds */
     private static final long LOCK_TTL = TimeUnit.SECONDS.toNanos(30);
 
     /**
@@ -217,9 +217,6 @@ public class ClusterLockServiceImpl implements ClusterLockService {
         public void run() {
             try {
                 HazelcastInstance hzInstance = getHazelcastInstance();
-                if (hzInstance == null) {
-                    throw ServiceExceptionCode.absentService(HazelcastInstance.class);
-                }
 
                 IMap<String, Long> clusterLocks = hzInstance.getMap(ClusterLockType.ClusterTaskLocks.name());
                 LOGGER.debug("Refreshing lock for cluster task '{}'", taskName);
