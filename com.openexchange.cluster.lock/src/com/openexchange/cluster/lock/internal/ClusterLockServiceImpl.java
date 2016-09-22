@@ -50,10 +50,8 @@
 package com.openexchange.cluster.lock.internal;
 
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
-import com.hazelcast.core.ILock;
 import com.hazelcast.core.IMap;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
@@ -158,6 +156,10 @@ public class ClusterLockServiceImpl implements ClusterLockService {
                     return t;
                 }
                 LOGGER.debug("Another node is performing the cluster task '{}'. Cluster lock was not acquired.", clusterTask.getTaskName(), retryPolicy.getClass().getSimpleName());
+            } catch (HazelcastInstanceNotActiveException e) {
+                LOGGER.warn("Encountered a {} error. {} will be shut-down!", HazelcastInstanceNotActiveException.class.getSimpleName(), ClusterLockServiceImpl.class, e);
+                unregisterer.propagateNotActive(e);
+                unregisterer.unregister();
             } finally {
                 LOGGER.debug("Releasing cluster lock held by the cluster task '{}'.", clusterTask.getTaskName());
                 if (lockAcquired) {
@@ -173,49 +175,15 @@ public class ClusterLockServiceImpl implements ClusterLockService {
         throw ClusterLockExceptionCodes.UNABLE_TO_ACQUIRE_CLUSTER_LOCK.create(clusterTask.getTaskName());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.ClusterLockService#runTask(com.openexchange.cluster.lock.ClusterTask)
-     */
-    @Override
-    public <T> T runClusterTask(ClusterTask<T> clusterTask, long waitTime) throws OXException {
-        return runClusterTask(clusterTask, waitTime, TimeUnit.SECONDS);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.cluster.lock.ClusterLockService#runClusterTask(com.openexchange.cluster.lock.ClusterTask, long, java.util.concurrent.TimeUnit)
-     */
-    @Override
-    public <T> T runClusterTask(ClusterTask<T> clusterTask, long waitTime, TimeUnit timeUnit) throws OXException {
-        HazelcastInstance hzInstance = getHazelcastInstance();
-        if (hzInstance == null) {
-            throw ServiceExceptionCode.absentService(HazelcastInstance.class);
-        }
-
-        // Acquire the lock
-        ILock lock = hzInstance.getLock(clusterTask.getTaskName());
-        try {
-            if (lock.tryLock(waitTime, timeUnit)) {
-                try {
-                    LOGGER.debug("Cluster lock for cluster task '{}' acquired. Performing...", clusterTask.getTaskName());
-                    return clusterTask.perform();
-                } finally {
-                    LOGGER.debug("Cluster task '{}' completed. Releasing cluster lock.", clusterTask.getTaskName());
-                    lock.unlock();
-                }
-            } else {
-                throw ClusterLockExceptionCodes.UNABLE_TO_ACQUIRE_CLUSTER_LOCK_EXPIRED.create(clusterTask.getTaskName(), waitTime, timeUnit.name().toLowerCase());
-            }
-        } catch (InterruptedException e) {
-            throw ClusterLockExceptionCodes.INTERRUPTED.create(e, clusterTask.getTaskName());
-        }
-    }
-
     ///////////////////////////////////// HELPERS ///////////////////////////////////////
 
+    /**
+     * Returns the {@link HazelcastInstance}. If the instance cannot be returned (i.e. due its absence)
+     * then an {@link OXException} will be thrown
+     * 
+     * @return The {@link HazelcastInstance}
+     * @throws OXException if the {@link HazelcastInstance} is absent
+     */
     private HazelcastInstance getHazelcastInstance() throws OXException {
         HazelcastInstance hazelcastInstance = services.getOptionalService(HazelcastInstance.class);
         if (hazelcastInstance == null) {
@@ -223,20 +191,6 @@ public class ClusterLockServiceImpl implements ClusterLockService {
             throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
         return hazelcastInstance;
-    }
-
-    /**
-     * Handles the {@link HazelcastInstanceNotActiveException}
-     * 
-     * @param e The {@link HazelcastInstanceNotActiveException} to handle
-     * @return A 'SERVICE_UNAVAILABLE' {@link OXException}
-     */
-    private OXException handleNotActiveException(HazelcastInstanceNotActiveException e) {
-        final Logger logger = org.slf4j.LoggerFactory.getLogger(ClusterLockServiceImpl.class);
-        logger.warn("Encountered a {} error. {} will be shut-down!", HazelcastInstanceNotActiveException.class.getSimpleName(), ClusterLockServiceImpl.class);
-        unregisterer.propagateNotActive(e);
-        unregisterer.unregister();
-        return ServiceExceptionCode.absentService(HazelcastInstance.class);
     }
 
     /**

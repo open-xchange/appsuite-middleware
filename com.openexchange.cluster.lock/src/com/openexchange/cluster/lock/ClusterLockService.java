@@ -49,7 +49,6 @@
 
 package com.openexchange.cluster.lock;
 
-import java.util.concurrent.TimeUnit;
 import com.openexchange.cluster.lock.policies.RetryPolicy;
 import com.openexchange.exception.OXException;
 
@@ -103,29 +102,4 @@ public interface ClusterLockService {
      *             of the cluster lock fails
      */
     <T> T runClusterTask(ClusterTask<T> clusterTask, RetryPolicy retryPolicy) throws OXException;
-
-    /**
-     * Runs the specified cluster task while previously acquiring a lock on the entire cluster
-     * for this specific task. The current thread will wait for the specified amount of seconds
-     * to acquire a lock. If the time expires an {@link OXException} will be thrown.
-     * 
-     * @param clusterTask The {@link ClusterTask} to perform
-     * @param waitTime The amount of time to wait in order to acquire a lock
-     * @return {@link T}
-     * @throws OXException if an error is occurred during the execution
-     */
-    <T> T runClusterTask(ClusterTask<T> clusterTask, long waitTime) throws OXException;
-
-    /**
-     * Runs the specified cluster task while previously acquiring a lock on the entire cluster
-     * for this specific task. The current thread will wait for the specified amount of time units
-     * to acquire a lock. If the time expires an {@link OXException} will be thrown.
-     * 
-     * @param clusterTask The {@link ClusterTask} to perform
-     * @param waitTime The amount of time to wait in order to acquire a lock
-     * @param timeUnit The {@link TimeUnit}
-     * @return {@link T}
-     * @throws OXException if an error is occurred during the execution
-     */
-    <T> T runClusterTask(ClusterTask<T> clusterTask, long waitTime, TimeUnit timeUnit) throws OXException;
 }
