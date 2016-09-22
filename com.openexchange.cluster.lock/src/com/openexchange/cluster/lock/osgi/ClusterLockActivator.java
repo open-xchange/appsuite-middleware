@@ -69,6 +69,7 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
+//TODO: use trackers for hz and db cluster lock impls
 public class ClusterLockActivator extends HousekeepingActivator implements Unregisterer {
 
     private ServiceTracker<HazelcastInstance, HazelcastInstance> tracker;
@@ -82,6 +83,7 @@ public class ClusterLockActivator extends HousekeepingActivator implements Unreg
 
     @Override
     protected Class<?>[] getNeededServices() {
+        // TODO: remove hazelcast config service from needed services and put it in the hz tracker
         return new Class<?>[] { HazelcastConfigurationService.class, TimerService.class };
     }
 
@@ -94,6 +96,7 @@ public class ClusterLockActivator extends HousekeepingActivator implements Unreg
 
         if (false == enabled) {
             LOG.warn("{} will be disabled due to disabled Hazelcast services", context.getBundle().getSymbolicName());
+            //TODO: tracker for db cluster lock impl
         } else {
             final BundleContext context = this.context;
             tracker = track(HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {

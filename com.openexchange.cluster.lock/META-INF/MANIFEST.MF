@@ -6,12 +6,15 @@ Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.hazelcast.core,
+ com.openexchange.database,
  com.openexchange.exception,
  com.openexchange.hazelcast.configuration,
  com.openexchange.i18n,
+ com.openexchange.java.util,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.timer,
+ com.openexchange.tools.sql,
  org.osgi.framework,
  org.osgi.util.tracker;version="1.5.1",
  org.slf4j;version="1.7.5"

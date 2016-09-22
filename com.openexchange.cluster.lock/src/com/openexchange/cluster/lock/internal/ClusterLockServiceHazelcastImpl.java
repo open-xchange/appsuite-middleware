@@ -49,44 +49,35 @@
 
 package com.openexchange.cluster.lock.internal;
 
-import java.util.concurrent.TimeUnit;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IMap;
-import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
 import com.openexchange.cluster.lock.policies.RetryPolicy;
 import com.openexchange.cluster.lock.policies.RunOnceRetryPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.TimerService;
 
 /**
  * {@link ClusterLockServiceHazelcastImpl}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ClusterLockServiceHazelcastImpl implements ClusterLockService {
+public class ClusterLockServiceHazelcastImpl extends AbstractClusterLockServiceImpl {
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ClusterLockServiceHazelcastImpl.class);
 
     private final Unregisterer unregisterer;
-    private final ServiceLookup services;
-
-    /** Defines the threshold for the lock refresh in seconds */
-    private static final long REFRESH_LOCK_THRESHOLD = TimeUnit.SECONDS.toNanos(20);
-
-    /** Defines the TTL for a cluster lock in seconds */
-    private static final long LOCK_TTL = TimeUnit.SECONDS.toNanos(30);
 
     /**
-     * Initializes a new {@link ClusterLockServiceHazelcastImpl}.
+     * Initialises a new {@link ClusterLockServiceHazelcastImpl}.
+     * 
+     * @param services The {@link ServiceLookup} instance
+     * @param unregisterer The {@link Unregisterer} instance
      */
     public ClusterLockServiceHazelcastImpl(ServiceLookup services, Unregisterer unregisterer) {
-        super();
-        this.services = services;
+        super(services);
         this.unregisterer = unregisterer;
     }
 
@@ -142,34 +133,13 @@ public class ClusterLockServiceHazelcastImpl implements ClusterLockService {
      */
     @Override
     public <T> T runClusterTask(ClusterTask<T> clusterTask, RetryPolicy retryPolicy) throws OXException {
-        do {
-            // Acquire the lock
-            boolean lockAcquired = acquireClusterLock(clusterTask);
-            ScheduledTimerTask timerTask = null;
-            try {
-                if (lockAcquired) {
-                    LOGGER.debug("Cluster lock for cluster task '{}' acquired with retry policy '{}'", clusterTask.getTaskName(), retryPolicy.getClass().getSimpleName());
-                    TimerService service = services.getService(TimerService.class);
-                    timerTask = service.scheduleAtFixedRate(new RefreshLockTask(clusterTask.getTaskName()), REFRESH_LOCK_THRESHOLD, REFRESH_LOCK_THRESHOLD);
-                    T t = clusterTask.perform();
-                    LOGGER.debug("Cluster task '{}' completed.", clusterTask.getTaskName());
-                    return t;
-                }
-                LOGGER.debug("Another node is performing the cluster task '{}'. Cluster lock was not acquired.", clusterTask.getTaskName(), retryPolicy.getClass().getSimpleName());
-            } catch (HazelcastInstanceNotActiveException e) {
-                LOGGER.warn("Encountered a {} error. {} will be shut-down!", HazelcastInstanceNotActiveException.class.getSimpleName(), ClusterLockServiceHazelcastImpl.class, e);
-                unregisterer.propagateNotActive(e);
-                unregisterer.unregister();
-            } finally {
-                LOGGER.debug("Releasing cluster lock held by the cluster task '{}'.", clusterTask.getTaskName());
-                if (lockAcquired) {
-                    if (timerTask != null) {
-                        timerTask.cancel();
-                    }
-                    releaseClusterLock(clusterTask);
-                }
-            }
-        } while (retryPolicy.isRetryAllowed());
+        try {
+            return runClusterTask(clusterTask, retryPolicy, new RefreshLockTask(clusterTask.getTaskName()));
+        } catch (HazelcastInstanceNotActiveException e) {
+            LOGGER.warn("Encountered a {} error. {} will be shut-down!", HazelcastInstanceNotActiveException.class.getSimpleName(), ClusterLockServiceHazelcastImpl.class, e);
+            unregisterer.propagateNotActive(e);
+            unregisterer.unregister();
+        }
 
         // Failed to acquire lock permanently
         throw ClusterLockExceptionCodes.UNABLE_TO_ACQUIRE_CLUSTER_LOCK.create(clusterTask.getTaskName());
@@ -227,16 +197,5 @@ public class ClusterLockServiceHazelcastImpl implements ClusterLockService {
                 return;
             }
         }
-    }
-
-    /**
-     * Verifies whether the lease time was expired
-     * 
-     * @param timeNow The time now
-     * @param timeThen The time then
-     * @return <code>true</code> if the lease time was expired; <code>false</code> otherwise
-     */
-    private boolean leaseExpired(long timeNow, long timeThen) {
-        return (timeNow - timeThen > LOCK_TTL);
     }
 }

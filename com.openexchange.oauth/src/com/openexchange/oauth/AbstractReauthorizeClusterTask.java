@@ -101,6 +101,24 @@ public abstract class AbstractReauthorizeClusterTask {
     }
 
     /**
+     * Returns the context identifier
+     * 
+     * @return the context identifier
+     */
+    public int getContextId() {
+        return session.getContextId();
+    }
+
+    /**
+     * Returns the user identifier
+     * 
+     * @return the user identifier
+     */
+    public int getUserId() {
+        return session.getUserId();
+    }
+
+    /**
      * Gets the task name.
      * 
      * @return The task name

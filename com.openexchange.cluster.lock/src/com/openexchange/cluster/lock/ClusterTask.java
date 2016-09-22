@@ -59,6 +59,24 @@ import com.openexchange.exception.OXException;
 public interface ClusterTask<T> {
 
     /**
+     * Returns the context identifier for this task if the task is ought to be run for a
+     * specific context Otherwise, the implementation must return <code>-1</code> to indicate
+     * that it's a global task.
+     * 
+     * @return the context identifier or <code>-1</code> for a global task
+     */
+    int getContextId();
+
+    /**
+     * Returns the user identifier for this task if the task is ought to be run for a
+     * specific user. Otherwise, the implementation must return <code>-1</code> to indicate
+     * that it's a global task.
+     * 
+     * @return the user identifier or <code>-1</code> for a global task
+     */
+    int getUserId();
+
+    /**
      * Returns the name of this task
      * 
      * @return the name of this task
