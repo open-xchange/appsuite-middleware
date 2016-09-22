@@ -25,6 +25,7 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       The Web Socket backed transport for Push Notification Service
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
+Requires:      open-xchange-pns-impl >= @OXVERSION@
 
 %description
 The Web Socket backed transport for Push Notification Service
