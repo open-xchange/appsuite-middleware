@@ -84,7 +84,7 @@ public class ContextLoader {
      * @throws SQLException, if the query is incorrect or can not be executed
      * @throws OXException
      */
-    public List<Integer> getAllContextsForSid(Long sid) throws SQLException, OXException {
+    public List<Integer> getAllContextsForSid(long sid) throws SQLException, OXException {
         ArrayList<Integer> result = new ArrayList<>();
         PreparedStatement stmt = null;
         ResultSet sqlResult = null;

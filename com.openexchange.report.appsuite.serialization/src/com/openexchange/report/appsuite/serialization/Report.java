@@ -590,7 +590,7 @@ public class Report implements Serializable {
         }
     }
 
-    public void appendReportParts(OutputStreamWriter osw, File appendingFile, boolean hasNext, String indentation) {
+    private void appendReportParts(OutputStreamWriter osw, File appendingFile, boolean hasNext, String indentation) {
         // load every part-file of the report 
         try (BufferedReader br = new BufferedReader(new FileReader(appendingFile))) {
             String line = br.readLine();
@@ -617,7 +617,7 @@ public class Report implements Serializable {
         }
     }
 
-    public String getIndentation(int level) {
+    private String getIndentation(int level) {
         String result = "";
         for (int i = 0; i < level; i++) {
             result += "  ";

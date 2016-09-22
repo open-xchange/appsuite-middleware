@@ -40,21 +40,21 @@ public class ReportProperties implements Reloadable {
         if (maxChunkSize == null) {
             maxChunkSize = loadIntegerValue(MAX_CHUNK_SIZE, MAX_CHUNK_SIZE_DEFAULT);
         }
-        return maxChunkSize;
+        return maxChunkSize.intValue();
     }
 
     public static int getMaxThreadPoolSize() {
         if (maxThreadPoolSize == null) {
             maxThreadPoolSize = loadIntegerValue(MAX_THREAD_POOL_SIZE, MAX_THREAD_POOL_SIZE_DEFAULT);
         }
-        return maxThreadPoolSize;
+        return maxThreadPoolSize.intValue();
     }
 
     public static int getThreadPriority() {
         if (threadPriority == null) {
             threadPriority = loadIntegerValue(THREAD_PRIORITY, THREAD_PRIORITY_DEFAULT);
         }
-        return threadPriority;
+        return threadPriority.intValue();
     }
 
     private static Integer loadIntegerValue(String key, int defaultValue) {

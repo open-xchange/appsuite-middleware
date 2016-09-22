@@ -51,13 +51,14 @@ package com.openexchange.report.appsuite.management;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.report.appsuite.ReportService;
+import com.openexchange.report.appsuite.internal.LocalReportService;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.report.appsuite.serialization.ReportConfigs;
 
 /**
  * The {@link ReportMXBeanImpl} implements the MXBean interface by delegating all calls to
- * the {@link HazelcastReportService} singleton and wrapping reports as {@link JMXReport} instances
+ * the {@link LocalReportService} singleton and wrapping reports as {@link JMXReport} instances
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>

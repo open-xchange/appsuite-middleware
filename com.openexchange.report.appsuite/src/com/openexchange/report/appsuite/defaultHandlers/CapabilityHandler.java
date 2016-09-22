@@ -50,12 +50,7 @@
 package com.openexchange.report.appsuite.defaultHandlers;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.nio.channels.FileLock;
-import java.nio.channels.OverlappingFileLockException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,11 +63,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Scanner;
-import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
@@ -109,7 +100,6 @@ import com.openexchange.server.ServiceExceptionCode;
 public class CapabilityHandler implements ReportUserHandler, ReportContextHandler, UserReportCumulator, ContextReportCumulator, ReportFinishingTouches {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CapabilityHandler.class);
-    private final int MAX_LOCK_FILE_ATTEMPTS = 20;
 
     @Override
     public boolean appliesTo(String reportType) {
@@ -569,8 +559,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     }
 
     private void addNewValuesToExistingValues(Map<String, Object> existingValues, Map<String, Object> newValues) {
-        Long additionalContexts = 1l;
-        existingValues.put(Report.CONTEXTS, Long.parseLong(String.valueOf(existingValues.get(Report.CONTEXTS))) + additionalContexts);
+        existingValues.put(Report.CONTEXTS, Long.parseLong(String.valueOf(existingValues.get(Report.CONTEXTS))) + 1L);
         for (Map.Entry<String, Object> entry : newValues.entrySet()) {
             if (entry.getValue() instanceof Long) {
                 Long value = (Long) existingValues.get(entry.getKey());

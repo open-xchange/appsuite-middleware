@@ -82,7 +82,7 @@ public interface ReportMXBean {
     public abstract JMXReport[] retrievePendingReports() throws Exception;
 
     /**
-     * Remove the hazelcast markers for the pending report with the given uuid, to make way to start a new report. Useful to cancel crashed reports.
+     * Remove the markers for the pending report with the given uuid, to make way to start a new report. Useful to cancel crashed reports.
      */
     public abstract void flushPending(String uuid, String reportType) throws Exception;
 

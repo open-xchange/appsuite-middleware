@@ -72,7 +72,7 @@ import com.openexchange.user.UserService;
 
 /**
  * The {@link AnalyzeContextBatch} class is the workhorse of the reporting system. It runs the reports on a batch of
- * context ids and is distributed cluster-wide via hazelcasts executor service.
+ * context ids.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>

@@ -1,3 +1,4 @@
+
 package com.openexchange.report.appsuite.storage;
 
 import java.io.File;
@@ -22,9 +23,9 @@ import com.openexchange.report.appsuite.internal.ReportProperties;
 import com.openexchange.report.appsuite.serialization.Report;
 
 public class ChunkingUtilities {
-    
+
     private final static int MAX_LOCK_FILE_ATTEMPTS = 20;
-    
+
     public static void removeAllReportParts(String uuid) {
         File partsFolder = new File(ReportProperties.getStoragePath());
         LinkedList<File> parts = new LinkedList<>((Arrays.asList(partsFolder.listFiles(new FilenameFilter() {
@@ -34,39 +35,37 @@ public class ChunkingUtilities {
                 return name.endsWith(".part");
             }
         }))));
-        
+
         for (File file : parts) {
-            if(file.getName().contains(uuid)) {
+            if (file.getName().contains(uuid)) {
                 file.delete();
             }
         }
     }
-    
+
     public static void storeCapSContentToFiles(String reportUUID, String folderPath, Map<String, Object> data) throws JSONException, IOException {
         String filename = reportUUID + "_" + data.get(Report.CAPABILITIES).hashCode() + ".part";
         File storedDataFile = new File(folderPath + "/" + filename);
         if (storedDataFile.exists()) {
             mergeNewWithStoredData(storedDataFile, data);
         }
-        
+
         try (FileWriter fw = new FileWriter(storedDataFile)) {
             // overwrite the so far stored data
             JSONObject jsonData = (JSONObject) JSONCoercion.coerceToJSON(data);
             fw.write(jsonData.toString(2));
         }
     }
-    
+
     private static void mergeNewWithStoredData(File storedDataFile, Map<String, Object> data) throws IOException {
-        try (RandomAccessFile storedFile = new RandomAccessFile(storedDataFile, "rw"); FileLock fileLock = getFileLock(storedFile)){
+        try (RandomAccessFile storedFile = new RandomAccessFile(storedDataFile, "rw"); FileLock fileLock = getFileLock(storedFile); Scanner sc = new Scanner(storedDataFile)) {
             // unable to get file lock for more then 20 seconds
             if (fileLock == null) {
                 storedFile.close();
                 throw new IOException("Unable to get file lock on file: " + storedDataFile.getAbsolutePath());
             }
             // Load and parse the existing data first into an Own JSONObject
-            Scanner sc = new Scanner(storedDataFile);
             String content = sc.useDelimiter("\\Z").next();
-            sc.close();
             Map<String, Object> storedData = (HashMap<String, Object>) JSONCoercion.parseAndCoerceToNative(content);
             // Merge the data of the two files into dataToStore
             mergeNewValuesWithStoredValues(storedData, data);
@@ -76,7 +75,7 @@ public class ChunkingUtilities {
             ReportExceptionCodes.UNABLE_TO_GET_FILELOCK.create(e);
         }
     }
-    
+
     private static FileLock getFileLock(RandomAccessFile storedFile) throws InterruptedException, IOException {
         FileLock fileLock = null;
         int fileLockAttempts = 0;
@@ -91,7 +90,7 @@ public class ChunkingUtilities {
         }
         return fileLock;
     }
-    
+
     private static void mergeNewValuesWithStoredValues(Map<String, Object> storedCounts, Map<String, Object> additionalCounts) {
         if (storedCounts.get(Report.CONTEXTS) != null && additionalCounts.get(Report.CONTEXTS) != null) {
             Long additionalContexts = Long.parseLong(String.valueOf(storedCounts.get(Report.CONTEXTS)));
@@ -122,5 +121,5 @@ public class ChunkingUtilities {
             }
         }
     }
-    
+
 }
