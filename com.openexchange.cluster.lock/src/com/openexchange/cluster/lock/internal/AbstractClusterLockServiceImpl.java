@@ -75,7 +75,7 @@ abstract class AbstractClusterLockServiceImpl implements ClusterLockService {
     /** Defines the TTL for a cluster lock in seconds */
     static final long LOCK_TTL = TimeUnit.SECONDS.toNanos(30);
 
-    protected ServiceLookup services;
+    protected final ServiceLookup services;
 
     /**
      * Initialises a new {@link AbstractClusterLockServiceImpl}.
@@ -84,6 +84,7 @@ abstract class AbstractClusterLockServiceImpl implements ClusterLockService {
      */
     protected AbstractClusterLockServiceImpl(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     /**
