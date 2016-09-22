@@ -18,6 +18,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.report.appsuite.ReportExceptionCodes;
+import com.openexchange.report.appsuite.internal.ReportProperties;
 import com.openexchange.report.appsuite.serialization.Report;
 
 public class ChunkingUtilities {
@@ -25,8 +26,7 @@ public class ChunkingUtilities {
     private final static int MAX_LOCK_FILE_ATTEMPTS = 20;
     
     public static void removeAllReportParts(String uuid) {
-        // TODO QS-VS: load from properties
-        File partsFolder = new File("load from properties");
+        File partsFolder = new File(ReportProperties.getStoragePath());
         LinkedList<File> parts = new LinkedList<>((Arrays.asList(partsFolder.listFiles(new FilenameFilter() {
 
             @Override
