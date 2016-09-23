@@ -37,11 +37,11 @@ parse_yaml() {
                     printf("%s<br>", $0);
                 } else {
                      if ($1 == "Key"){
-                        $2 = "`" + $2 + "`"
-                        printf("<span style=\"font-weight:normal\">%s</span>", $2);
+                        VALUE = "`" + $2 + "`"
+                        printf("<span style=\"font-weight:normal\">%s</span>", $VALUE);
                      } else if ($1 == "Related") {
-                        $2 = "`" + $2 + "`"
-                        printf("%s", $2);
+                        VALUE = "`" + $2 + "`"
+                        printf("%s", $VALUE);
                      } else {
                         for(i=2;i<=NF;i++){
                           printf("%s ", $i);
