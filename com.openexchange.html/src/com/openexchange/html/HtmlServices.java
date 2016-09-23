@@ -108,7 +108,7 @@ public final class HtmlServices {
             }
         }
 
-        {
+        if (s.indexOf('#') >= 0) {
             for (Matcher m; (m = UNICODE_CHAR.matcher(s)).find();) {
                 StringBuffer sb = new StringBuffer(s.length());
                 do {
