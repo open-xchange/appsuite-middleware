@@ -1,6 +1,6 @@
 array:
   - data:
-      Key: com.openexchange.pns.delayDuration
+      Key: `com.openexchange.pns.delayDuration`
       Description: >
 The time in milliseconds a notification is queued in buffer to possible aggregate
 with similar notifications that arrive during that time
@@ -12,7 +12,7 @@ Default 1000
       Related:
       File: pns.properties
   - data:
-      Key: com.openexchange.pns.timerFrequency
+      Key: `com.openexchange.pns.timerFrequency`
       Description: >
 The frequency/delay in milliseconds when the buffering queue will be checked for due
 notifications (the ones exceeding delayDuration in queue)
@@ -24,7 +24,7 @@ Default 500
       Related:
       File: pns.properties
   - data:
-      Key: com.openexchange.pns.numProcessorThreads
+      Key: `com.openexchange.pns.numProcessorThreads`
       Description: >
 Specifies the number of threads that concurrently handle due notifications that were transferred
 from buffering queue to processing queue.
@@ -36,7 +36,7 @@ Default 10
       Related:
       File: pns.properties
   - data:
-      Key: com.openexchange.pns.maxProcessorTasks
+      Key: `com.openexchange.pns.maxProcessorTasks`
       Description: >
 Specifies the buffer size for due notifications that were transferred from buffering queue to
 processing queue.
@@ -48,7 +48,7 @@ Default 65536
       Related:
       File: pns.properties
   - data:
-      Key: com.openexchange.pns.transport.apn.ios.enabled
+      Key: `com.openexchange.pns.transport.apn.ios.enabled`
       Description: >
 Specifies whether the APNS transport is enabled. That property is responsive to config-cascade
 and reloadable as well.
@@ -73,7 +73,7 @@ Default false
       Related:
       File: pns.properties
   - data:
-      Key: com.openexchange.pns.transport.apn.ios.feedbackQueryInterval
+      Key: `com.openexchange.pns.transport.apn.ios.feedbackQueryInterval`
       Description: >
 Specifies the frequency in milliseconds when to query the Apple feedback service to check for expired
 and/or invalid tokens.
@@ -85,7 +85,7 @@ Default 3600000 (1 hour)
       Related:
       File: pns.properties
   - data:
-      Key: com.openexchange.pns.transport.gcm.enabled
+      Key: `com.openexchange.pns.transport.gcm.enabled`
       Description: >
 Specifies whether the GCM transport is enabled. That property is responsive to config-cascade
 and reloadable as well.
@@ -110,7 +110,7 @@ Default false
       Related:
       File: pns.properties
   - data:
-      Key: com.openexchange.pns.transport.wns.enabled
+      Key: `com.openexchange.pns.transport.wns.enabled`
       Description: >
 Specifies whether the WNS transport is enabled. That property is responsive to config-cascade
 and reloadable as well.
@@ -135,7 +135,7 @@ Default false
       Related:
       File: pns.properties
   - data:
-      Key: com.openexchange.pns.transport.websocket.enabled
+      Key: `com.openexchange.pns.transport.websocket.enabled`
       Description: >
 Specifies whether the Web Socket transport is enabled. That property is responsive to config-cascade
 and reloadable as well.
