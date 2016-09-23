@@ -36,6 +36,7 @@ parse_yaml() {
                 if(multiline=="true"){
                     printf("%s<br>", $0);
                 } else {
+                     if ($1 == "Key"){
                         $2 = "`" + $2 + "`"
                         printf("<span style=\"font-weight:normal\">%s</span>", $2);
                      } else if ($1 == "Related") {
