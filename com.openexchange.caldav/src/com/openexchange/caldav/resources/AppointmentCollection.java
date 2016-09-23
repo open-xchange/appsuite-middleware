@@ -337,6 +337,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             Patches.Outgoing.setOrganizersParticipantStatus(appointment);
             Patches.Outgoing.setSeriesStartAndEnd(factory, appointment);
             Patches.Outgoing.removeImplicitParticipant(getFolder(), appointment);
+            Patches.Outgoing.adjustProposedTimePrefixes(appointment);
         }
         return appointment;
     }
