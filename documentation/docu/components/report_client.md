@@ -509,7 +509,7 @@ Report was finished: Tue Jun 07 11:31:30 CEST 2016
 - **total**: total number of users
 - **admin**: total number of admins
 - **contexts**: total number of contexts
-- **quota**: cumulated quota
+- **quota**: cumulated quota in byte
 
 
 
@@ -970,8 +970,8 @@ Report was finished: Tue May 24 14:41:22 CEST 2016
 **"Context"**: The context Id will be diplayed
 
 * **totals**: Contains values for this context only
-	* **quota**: The quota for this context. User filestores are ignored
-	* **quotaUsage**: The cumulate used quota of all users, except those with an own filestore
+	* **quota**: The quota for this context in byte. User filestores are ignored
+	* **quotaUsage**: The cumulate used quota of all users in byte, except those with an own filestore
 	* **mailQuota**: The total cumulated mail quota of all users
 	* **mailQuotaUsage**: The cumulated used quota of all users
 
@@ -979,8 +979,8 @@ Report was finished: Tue May 24 14:41:22 CEST 2016
 
 * **capabilitySet**: Integer value, which is a reference to the reports capability sets map  
 * **drive**
-	* **quota**: Total quota 
-	* **used-quota**: Used quota by this user
+	* **quota**: Total quota in byte
+	* **used-quota**: Used quota by this user in byte
 	* **file-size-min**: The size of the smallest file
 	* **file-size-max**: The size of the biggest file
 	* **file-size-avg**: Average file size

@@ -55,6 +55,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -211,7 +212,12 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     @Override
     public void merge(ContextReport contextReport, Report report) {
         // Retrieve the quota
+        boolean storeCapS = false;
         long quota = contextReport.get(Report.MACDETAIL_QUOTA, Report.QUOTA, 0l, Long.class);
+        Collection<Object> reportValues = ((Map<String, Object>) report.getNamespace(Report.MACDETAIL)).values();
+        if (reportValues.size() >= ReportProperties.getMaxChunkSize()) {
+            storeCapS = true;
+        }
 
         // Retrieve all capabilities combinations
         Map<String, Object> macdetail = contextReport.getNamespace(Report.MACDETAIL);
@@ -243,7 +249,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             addContextAndUserToDeployment(report, contextReport, quotaSpec);
         }
 
-        if (macdetail.values().size() >= ReportProperties.getMaxChunkSize()) {
+        if (storeCapS) {
             prepareReportForStorageOfContent(report);
             storeAndMergeReportParts(report);
         }
@@ -293,8 +299,8 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         report.setNeedsComposition(true);
         Map<String, Object> reportMacdetail = report.getNamespace(Report.MACDETAIL);
         ArrayList values = new ArrayList(reportMacdetail.values());
-        this.sumClientsInSingleMap(values);
         report.clearNamespace(Report.MACDETAIL);
+        this.sumClientsInSingleMap(values);
         report.set(Report.MACDETAIL, Report.CAPABILITY_SETS, values);
     }
 
@@ -309,11 +315,11 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             addDriveMetricsToReport(report);
         }
         // Merge all stored data into report files, if neccessary
+        this.sumClientsInSingleMap(values);
+
         if (report.isNeedsComposition()) {
             storeAndMergeReportParts(report);
             report.composeReportFromStoredParts(Report.CAPABILITY_SETS, JsonObjectType.ARRAY, Report.MACDETAIL, 1);
-        } else {
-            this.sumClientsInSingleMap(values);
         }
         report.clearNamespace(Report.MACDETAIL);
 
@@ -351,19 +357,18 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
 
         // Get all capability sets
         ArrayList<HashMap<String, Object>> capSets = report.get(Report.MACDETAIL, Report.CAPABILITY_SETS, new ArrayList<>(), ArrayList.class);
+        report.clearNamespace(Report.MACDETAIL);
         // serialize each capability set into a single HashMap and merge the data if a file for the
         // given capability set already exists
         for (HashMap<String, Object> singleCapS : capSets) {
             try {
                 ChunkingUtilities.storeCapSContentToFiles(report.getUUID(), ReportProperties.getStoragePath(), singleCapS);
             } catch (JSONException e) {
-                LOG.error("Error while trying create JSONObject from stored capability-set data. ", e );
+                LOG.error("Error while trying create JSONObject from stored capability-set data. ", e);
             } catch (IOException e) {
-                LOG.error("Error while trying to read stored capability-set data. " , e);
+                LOG.error("Error while trying to read stored capability-set data. ", e);
             }
         }
-        // remove whole capability set content
-        report.clearNamespace(Report.MACDETAIL);
     }
 
     /**
@@ -506,9 +511,9 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
                 driveUserMetrics.put("quota-usage-percent-" + quotaUsage.getKey(), quotaUsage.getValue());
             }
         } catch (final SQLException e) {
-            LOG.error("Unable to execute SQL for drive metric gathering." , e);
+            LOG.error("Unable to execute SQL for drive metric gathering.", e);
         } catch (OXException e) {
-            LOG.error("Unable to gather drive metrics." , e);
+            LOG.error("Unable to gather drive metrics.", e);
         } finally {
             informationService.closeAllDBConnections();
         }

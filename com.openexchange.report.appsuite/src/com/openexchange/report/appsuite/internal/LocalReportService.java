@@ -51,6 +51,7 @@ package com.openexchange.report.appsuite.internal;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
 import org.slf4j.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -164,7 +166,15 @@ public class LocalReportService extends AbstractReportService {
         // Run all applicable cumulators to add the context report results to the global report
         for (ContextReportCumulator cumulator : Services.getContextReportCumulators()) {
             if (cumulator.appliesTo(reportType)) {
-                cumulator.merge(contextReport, report);
+                Collection<Object> reportValues = ((Map<String, Object>) report.getNamespace(Report.MACDETAIL)).values();
+                if (reportValues.size() >= ReportProperties.getMaxChunkSize()) {
+                    synchronized (report) {
+                        cumulator.merge(contextReport, report);
+                    }
+                } else {
+                    cumulator.merge(contextReport, report);
+                }
+
             }
         }
         pendingReports.put(report.getUUID(), report);
@@ -268,9 +278,19 @@ public class LocalReportService extends AbstractReportService {
     }
 
     //--------------------Private helper methods--------------------
-    private void setUpContextAnalyzer(String uuid, List<Integer> allContextIds, Report report) throws OXException {
-        List<List<Integer>> contextsInSameSchema = getContextsInSameSchemas(allContextIds);
-        processAllContexts(report, contextsInSameSchema);
+    private void setUpContextAnalyzer(String uuid, final List<Integer> allContextIds, final Report report) throws OXException {
+        new Thread() {
+
+            public void run() {
+                List<List<Integer>> contextsInSameSchema;
+                try {
+                    contextsInSameSchema = getContextsInSameSchemas(allContextIds);
+                    processAllContexts(report, contextsInSameSchema);
+                } catch (OXException e) {
+                    LOG.error("Unable to strat multithreaded context processing ", e);
+                }
+            };
+        }.start();
     }
 
     private List<List<Integer>> getContextsInSameSchemas(List<Integer> allContextIds) throws OXException {
