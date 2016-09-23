@@ -47,69 +47,29 @@
  *
  */
 
-package com.openexchange.user.json.actions;
+package com.openexchange.html.vulntests;
 
-import java.util.Collection;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import org.junit.Test;
+import com.openexchange.html.AbstractSanitizing;
+import com.openexchange.html.AssertionHelper;
 
 /**
- * {@link UserMeActionFactory} - Factory for user/me component.
+ * {@link Bug48843VulTest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Module(name = "user/me", description = "Provides access to user information.")
-@OAuthModule
-public final class UserMeActionFactory implements AJAXActionServiceFactory {
+public class Bug48843VulTest extends AbstractSanitizing {
 
-    /** The map to store actions. */
-    private final Map<String, AJAXActionService> actions;
-
-    /** The service look-up */
-    private final ServiceLookup services;
-
-    /**
-     * Initializes a new {@link UserActionFactory}.
-     */
-    public UserMeActionFactory(ServiceLookup services) {
+    public Bug48843VulTest() {
         super();
-        this.services = services;
-        actions = initActions();
     }
 
-    @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        if (null == action) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
-        }
-        final AJAXActionService retval = actions.get(action);
-        if (null == retval) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
-        }
-        return retval;
+    @Test
+    public void testHrefSanitizing() {
+        String content = "<!DOCTYPE html>\n" +
+            "<html><head>\n" +
+            "    <meta charset=\"UTF-8\">\n" +
+            "</head><body><p><a href=\"&amp;#0000106&amp;#0000097vascript:alert(1)\">test</a><br/><a href=\"&#0000118bscript:msgbox(1)\">test</a></p></body></html>";
+        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "vascript", "script");
     }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
-
-    /**
-     * Initializes the unmodifiable map to stored actions.
-     *
-     * @return The unmodifiable map with actions stored
-     */
-    private Map<String, AJAXActionService> initActions() {
-        ImmutableMap.Builder<String, AJAXActionService> tmp = ImmutableMap.builder();
-        tmp.put(MeAction.ACTION, new MeAction(services));
-        return tmp.build();
-    }
-
 }

@@ -55,7 +55,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.jump.json.actions.AbstractJumpAction;
@@ -78,9 +78,10 @@ public class JumpActionFactory implements AJAXActionServiceFactory {
      */
     public JumpActionFactory(final ServiceLookup lookup) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractJumpAction>(4, 0.9f, 1);
+        ImmutableMap.Builder<String, AbstractJumpAction> actions = ImmutableMap.builder();
         actions.put("identityToken", new IdentityTokenAction(lookup));
         actions.put("dummy", new DummyEndpointHandlerAction(lookup));
+        this.actions = actions.build();
     }
 
     @Override

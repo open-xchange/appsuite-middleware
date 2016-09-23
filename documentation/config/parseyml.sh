@@ -38,7 +38,7 @@ parse_yaml() {
                 } else {
                      if ($1 == "Key"){
                         printf("<span style=\"font-weight:normal\">%s</span>", $2);
-                     }else {
+                     } else {
                         for(i=2;i<=NF;i++){
                           printf("%s ", $i);
                         }

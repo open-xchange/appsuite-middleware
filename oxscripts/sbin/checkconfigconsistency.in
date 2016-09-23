@@ -139,7 +139,7 @@ if [ -s $ADMINSYSTEMPROPS ]; then
     fi
 fi
 
-if [ -s $ADMINCACHECCF ]; then
+if [ -s $ADMINCACHECCF ] && [ $ADMINCACHECCF != $CACHECCF ]; then
 
     ADMINUDPPORT=$(readProp jcs.auxiliary.LTCP.attributes.UdpDiscoveryPort $ADMINCACHECCF)
     ADMINUDPDISCADDR=$(readProp jcs.auxiliary.LTCP.attributes.UdpDiscoveryAddr $ADMINCACHECCF)

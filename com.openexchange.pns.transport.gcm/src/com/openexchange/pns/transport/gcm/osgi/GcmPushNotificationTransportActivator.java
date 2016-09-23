@@ -58,6 +58,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -124,6 +125,19 @@ public class GcmPushNotificationTransportActivator extends HousekeepingActivator
     @Override
     protected synchronized void startBundle() throws Exception {
         reinit(getService(ConfigurationService.class));
+
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                GcmPushNotificationTransport.invalidateEnabledCache();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return null;
+            }
+        });
     }
 
     @Override
@@ -152,11 +166,6 @@ public class GcmPushNotificationTransportActivator extends HousekeepingActivator
         if (null != optionsProviderRegistration) {
             optionsProviderRegistration.unregister();
             this.optionsProviderRegistration = null;
-        }
-
-        if (!configService.getBoolProperty("com.openexchange.pns.transport.gcm.enabled", false)) {
-            LOG.info("GCM push notification transport is disabled per configuration");
-            return;
         }
 
         Object yaml = configService.getYaml(CONFIGFILE_GCM_OPTIONS);

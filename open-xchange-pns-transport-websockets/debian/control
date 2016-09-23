@@ -2,12 +2,12 @@ Source: open-xchange-pns-transport-websockets
 Section: web
 Priority: optional
 Maintainer: Thorben Betten <thorben.betten@open-xchange.com>
-Build-Depends: debhelper (>= 4.0.0), ant-optional (>= 1.7.0), java7-jdk, open-xchange-core (>= @OXVERSION@)
+Build-Depends: debhelper (>= 4.0.0), ant-optional (>= 1.7.0), java7-jdk, open-xchange-core (>= @OXVERSION@), open-xchange-pns-impl (>= @OXVERSION@)
 Standards-Version: 3.8.4
 Homepage: http://www.open-xchange.com
 
 Package: open-xchange-pns-transport-websockets
 Architecture: all
-Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Pre-Depends: open-xchange-core (>= @OXVERSION@), open-xchange-pns-impl (>= @OXVERSION@)
 Depends: ${misc:Depends}
 Description: The Web Socket backed transport for Push Notification Service

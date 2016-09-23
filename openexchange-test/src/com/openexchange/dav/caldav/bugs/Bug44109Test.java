@@ -55,33 +55,29 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.jackrabbit.webdav.client.methods.DeleteMethod;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
-import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
+import com.openexchange.dav.caldav.ical.SimpleICal.Component;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
-import com.openexchange.groupware.container.ExternalUserParticipant;
-import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
 
 /**
- * {@link Bug46811Test}
+ * {@link Bug44109Test}
  *
- * HTTP 500 when trying to delete change exception moved behind series end
+ * Some event occurrences not displayed in iOS calendar
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.3
  */
-public class Bug46811Test extends CalDAVTest {
+public class Bug44109Test extends CalDAVTest {
 
     private CalendarTestManager manager2;
 
@@ -102,102 +98,109 @@ public class Bug46811Test extends CalDAVTest {
     }
 
     @Test
-	public void testDeleteShiftedException() throws Exception {
+	public void testAddToSeries() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
 		 */
 		SyncToken syncToken = new SyncToken(fetchSyncToken());
 		/*
-		 * create appointment series on server as user b with external organizer x
+		 * create appointment series on server as user b
 		 */
 		String uid = randomUID();
 		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(TimeTools.D("tomorrow in the morning", TimeZone.getTimeZone("Europe/Berlin")));
+		calendar.setTime(TimeTools.D("last week at noon", TimeZone.getTimeZone("Europe/Berlin")));
 	    Appointment appointment = new Appointment();
 	    appointment.setUid(uid);
-	    appointment.setTitle("Bug46811Test");
+	    appointment.setTitle("Bug44109Test");
 	    appointment.setIgnoreConflicts(true);
         appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
 	    appointment.setStartDate(calendar.getTime());
 	    calendar.add(Calendar.HOUR_OF_DAY, 1);
         appointment.setEndDate(calendar.getTime());
-
-        calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        calendar.setTime(appointment.getStartDate());
-        calendar.set(Calendar.HOUR, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.add(Calendar.DATE, 5);
-        appointment.setUntil(calendar.getTime());
-        calendar.add(Calendar.DATE, 1);
-        long exceptionStart = calendar.getTimeInMillis();
-        calendar.add(Calendar.HOUR_OF_DAY, 1);
-        long exceptionEnd = calendar.getTimeInMillis();
-        appointment.setOrganizer("46811@example.com");
-        appointment.addParticipant(new ExternalUserParticipant("46811@example.com"));
         appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
         appointment.setParentFolderID(manager2.getPrivateFolder());
         manager2.insert(appointment);
 		Date clientLastModified = manager2.getLastModification();
         /*
-         * create change exception on server as user b, and invite user a there
+         * create two change exceptions on server as user b, and invite user a there
          */
-		Appointment exception = new Appointment();
-		exception.setTitle("Bug46811Test_edit");
-		exception.setObjectID(appointment.getObjectID());
-        exception.setStartDate(new Date(exceptionStart));
-        exception.setEndDate(new Date(exceptionEnd));
-		exception.setRecurrencePosition(6);
-		exception.setLastModified(clientLastModified);
-		exception.setParentFolderID(appointment.getParentFolderID());
-		exception.setOrganizer("46811@example.com");
-		exception.addParticipant(new ExternalUserParticipant("46811@example.com"));
-		exception.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
-        exception.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
-        manager2.update(exception);
-        clientLastModified = getManager().getLastModification();
+        Appointment exception1 = new Appointment();
+        exception1.setTitle("Bug44109Test_exception1");
+        exception1.setObjectID(appointment.getObjectID());
+        exception1.setRecurrencePosition(3);
+        exception1.setLastModified(clientLastModified);
+        exception1.setParentFolderID(appointment.getParentFolderID());
+        exception1.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
+        exception1.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
+        exception1.setIgnoreConflicts(true);
+        manager2.update(exception1);
+        clientLastModified = manager2.getLastModification();
+        Appointment exception2 = new Appointment();
+        exception2.setTitle("Bug44109Test_exception2");
+        exception2.setObjectID(appointment.getObjectID());
+        exception2.setRecurrencePosition(4);
+        exception2.setLastModified(clientLastModified);
+        exception2.setParentFolderID(appointment.getParentFolderID());
+        exception2.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
+        exception2.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
+        exception2.setIgnoreConflicts(true);
+        manager2.update(exception2);
+        clientLastModified = manager2.getLastModification();
         /*
-         * verify appointment exception on client as user a
+         * verify appointment exceptions on client as user a
          */
         Map<String, String> eTags = syncCollection(syncToken).getETagsStatusOK();
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
         List<ICalResource> calendarData = calendarMultiget(eTags.keySet());
         ICalResource iCalResource = assertContains(uid, calendarData);
-        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
-        assertEquals("SUMMARY wrong", exception.getTitle(), iCalResource.getVEvent().getSummary());
-        String href = iCalResource.getHref();
-        /*
-         * delete the change exception on client as user a
-         */
-        DeleteMethod delete = null;
-        try {
-            delete = new DeleteMethod(getBaseUri() + href);
-            Assert.assertEquals("response code wrong", 204, getWebDAVClient().executeMethod(delete));
-        } finally {
-            release(delete);
-        }
-        /*
-         * try to access the deleted exception again on client as user a
-         */
-        GetMethod get = null;
-        try {
-            get = new GetMethod(getBaseUri() + href);
-            Assert.assertEquals("response code wrong", StatusCodes.SC_NOT_FOUND, getWebDAVClient().executeMethod(get));
-        } finally {
-            release(get);
-        }
-        /*
-         * verify appointment exception on server as user b
-         */
-        Appointment updatedException = manager2.get(exception);
-        assertNotNull(updatedException);
-        assertNotNull(updatedException.getParticipants());
-        for (Participant participant : updatedException.getParticipants()) {
-            if (getClient().getValues().getUserId() == participant.getIdentifier()) {
-                fail("User is still participant");
+        assertEquals("unexpected number of VEVENTs", 2, iCalResource.getVEvents().size());
+        Component vEventException1 = null;
+        Component vEventException2 = null;
+        for (Component vEventComponent : iCalResource.getVEvents()) {
+            if (uid.equals(vEventComponent.getUID()) && exception1.getTitle().equals(vEventComponent.getSummary())) {
+                vEventException1 = vEventComponent;
+            }
+            if (uid.equals(vEventComponent.getUID()) && exception2.getTitle().equals(vEventComponent.getSummary())) {
+                vEventException2 = vEventComponent;
             }
         }
+        assertNotNull("No VEVENT for first occurrence in iCal found", vEventException1);
+        assertNotNull("No VEVENT for second occurrence in iCal found", vEventException2);
+        /*
+         * add user a to the recurrence master event
+         */
+        appointment = manager2.get(appointment);
+        appointment.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
+        appointment.setIgnoreConflicts(true);
+        manager2.update(appointment);
+        /*
+         * verify recurrence on client as user a
+         */
+        eTags = syncCollection(syncToken).getETagsStatusOK();
+        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
+        calendarData = calendarMultiget(eTags.keySet());
+        iCalResource = assertContains(uid, calendarData);
+        assertEquals("unexpected number of VEVENTs", 3, iCalResource.getVEvents().size());
+        Component vEventSeries = null;
+        vEventException1 = null;
+        vEventException2 = null;
+        for (Component vEventComponent : iCalResource.getVEvents()) {
+            if (uid.equals(vEventComponent.getUID()) && appointment.getTitle().equals(vEventComponent.getSummary())) {
+                vEventSeries = vEventComponent;
+            }
+            if (uid.equals(vEventComponent.getUID()) && exception1.getTitle().equals(vEventComponent.getSummary())) {
+                vEventException1 = vEventComponent;
+            }
+            if (uid.equals(vEventComponent.getUID()) && exception2.getTitle().equals(vEventComponent.getSummary())) {
+                vEventException2 = vEventComponent;
+            }
+        }
+        assertNotNull("No VEVENT for recurrence master in iCal found", vEventSeries);
+        assertNotNull("No VEVENT for first occurrence in iCal found", vEventException1);
+        assertNotNull("No VEVENT for second occurrence in iCal found", vEventException2);
 	}
 
 }
+
+

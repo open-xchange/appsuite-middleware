@@ -51,7 +51,7 @@ package com.openexchange.groupware.attach.json;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
@@ -68,9 +68,14 @@ public class AttachmentActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> actions;
 
+    /**
+     * Initializes a new {@link AttachmentActionFactory}.
+     *
+     * @param services The OSGi service look-up
+     */
     public AttachmentActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(8, 0.9f, 1);
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         actions.put("document", new com.openexchange.groupware.attach.json.actions.GetDocumentAction(services));
         actions.put("get", new com.openexchange.groupware.attach.json.actions.GetAction(services));
         actions.put("attach", new com.openexchange.groupware.attach.json.actions.AttachAction(services));
@@ -78,6 +83,7 @@ public class AttachmentActionFactory implements AJAXActionServiceFactory {
         actions.put("updates", new com.openexchange.groupware.attach.json.actions.UpdatesAction(services));
         actions.put("all", new com.openexchange.groupware.attach.json.actions.AllAction(services));
         actions.put("list", new com.openexchange.groupware.attach.json.actions.ListAction(services));
+        this.actions = actions.build();
     }
 
     @Override

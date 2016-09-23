@@ -51,7 +51,7 @@ package com.openexchange.calendar.json;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.calendar.json.actions.AllAction;
@@ -97,7 +97,7 @@ public class AppointmentActionFactory implements AJAXActionServiceFactory {
      */
     public AppointmentActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(15, 0.9f, 1);
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         actions.put("new", new NewAction(services));
         actions.put("update", new UpdateAction(services));
         actions.put("updates", new UpdatesAction(services));
@@ -113,6 +113,7 @@ public class AppointmentActionFactory implements AJAXActionServiceFactory {
         actions.put("copy", new CopyAction(services));
         actions.put("resolveuid", new ResolveUIDAction(services));
         actions.put("getChangeExceptions", new ChangeExceptionsAction(services));
+        this.actions = actions.build();
     }
 
     @Override

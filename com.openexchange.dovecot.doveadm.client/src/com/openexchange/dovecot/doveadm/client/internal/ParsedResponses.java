@@ -94,8 +94,7 @@ public class ParsedResponses implements Iterable<DoveAdmResponse> {
             for (int k = 0; k < numResponses; k++) {
                 JSONArray jResponse = jResponses.getJSONArray(k);
 
-                String optionalIdentifier = jResponse.length() > 2 ? jResponse.optString(3, null) : null;
-
+                String optionalIdentifier = jResponse.length() > 2 ? jResponse.optString(2, null) : null;
                 DoveAdmResponse doveAdmResponse;
                 {
                     String responseType = jResponse.getString(0);

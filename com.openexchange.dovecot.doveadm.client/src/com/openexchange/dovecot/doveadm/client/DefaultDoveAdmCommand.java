@@ -261,6 +261,7 @@ public class DefaultDoveAdmCommand implements DoveAdmCommand {
     private final String command;
     private final ImmutableMap<String, Object> parameters;
     private final String optionalIdentifier;
+    private int hash;
 
     /**
      * Initializes a new {@link DefaultDoveAdmCommand}.
@@ -270,6 +271,7 @@ public class DefaultDoveAdmCommand implements DoveAdmCommand {
         this.command = command;
         this.parameters = parameters;
         this.optionalIdentifier = optionalIdentifier;
+        hash = 0;
     }
 
     @Override
@@ -285,6 +287,70 @@ public class DefaultDoveAdmCommand implements DoveAdmCommand {
     @Override
     public String getOptionalIdentifier() {
         return optionalIdentifier;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = hash;
+        if (result == 0) {
+            int prime = 31;
+            result = 1;
+            result = prime * result + ((command == null) ? 0 : command.hashCode());
+            result = prime * result + ((optionalIdentifier == null) ? 0 : optionalIdentifier.hashCode());
+            result = prime * result + ((parameters == null) ? 0 : parameters.hashCode());
+            hash = result;
+        }
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof DefaultDoveAdmCommand)) {
+            return false;
+        }
+        DefaultDoveAdmCommand other = (DefaultDoveAdmCommand) obj;
+        if (command == null) {
+            if (other.command != null) {
+                return false;
+            }
+        } else if (!command.equals(other.command)) {
+            return false;
+        }
+        if (optionalIdentifier == null) {
+            if (other.optionalIdentifier != null) {
+                return false;
+            }
+        } else if (!optionalIdentifier.equals(other.optionalIdentifier)) {
+            return false;
+        }
+        if (parameters == null) {
+            if (other.parameters != null) {
+                return false;
+            }
+        } else if (!parameters.equals(other.parameters)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(128);
+        sb.append("{");
+        if (command != null) {
+            sb.append("command=").append(command).append(", ");
+        }
+        if (parameters != null) {
+            sb.append("parameters=").append(parameters).append(", ");
+        }
+        if (optionalIdentifier != null) {
+            sb.append("optionalIdentifier=").append(optionalIdentifier);
+        }
+        sb.append("}");
+        return sb.toString();
     }
 
 }

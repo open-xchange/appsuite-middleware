@@ -52,8 +52,8 @@ package com.openexchange.mail.json;
 import java.io.Closeable;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.AJAXState;
@@ -149,44 +149,46 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
      */
     private MailActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractMailAction>(32, 0.9f, 1);
-        actions.put("all", new AllAction(services));
-        actions.put("threadedAll", new SimpleThreadStructureAction(services));
-        actions.put("get", new GetAction(services));
-        actions.put("get_structure", new GetStructureAction(services));
-        actions.put("count", new GetMailCountAction(services));
-        actions.put("copy", new CopyAction(services));
-        actions.put("move_all", new MoveAllAction(services));
-        actions.put("archive", new ArchiveAction(services));
-        actions.put("archive_folder", new ArchiveFolderAction(services));
-        actions.put("reply", new GetReplyAction(services));
-        actions.put("replyall", new GetReplyAllAction(services));
-        actions.put("updates", new GetUpdatesAction(services));
-        actions.put("forward", new GetForwardAction(services));
-        actions.put("bounce", new BounceAction(services));
-        actions.put("resend", new ResendAction(services));
-        actions.put("attachment", new GetAttachmentAction(services));
-        actions.put("attachmentToken", new GetAttachmentTokenAction(services));
-        actions.put("zip_attachments", new GetMultipleAttachmentAction(services));
-        actions.put("zip_messages", new GetMultipleMessagesAction(services));
-        actions.put("saveVersit", new GetVersitAction(services));
+        ImmutableMap.Builder<String, AbstractMailAction> builder = ImmutableMap.builder();
+        builder.put("all", new AllAction(services));
+        builder.put("threadedAll", new SimpleThreadStructureAction(services));
+        builder.put("get", new GetAction(services));
+        builder.put("get_structure", new GetStructureAction(services));
+        builder.put("count", new GetMailCountAction(services));
+        builder.put("copy", new CopyAction(services));
+        builder.put("move_all", new MoveAllAction(services));
+        builder.put("archive", new ArchiveAction(services));
+        builder.put("archive_folder", new ArchiveFolderAction(services));
+        builder.put("reply", new GetReplyAction(services));
+        builder.put("replyall", new GetReplyAllAction(services));
+        builder.put("updates", new GetUpdatesAction(services));
+        builder.put("forward", new GetForwardAction(services));
+        builder.put("bounce", new BounceAction(services));
+        builder.put("resend", new ResendAction(services));
+        builder.put("attachment", new GetAttachmentAction(services));
+        builder.put("attachmentToken", new GetAttachmentTokenAction(services));
+        builder.put("zip_attachments", new GetMultipleAttachmentAction(services));
+        builder.put("zip_messages", new GetMultipleMessagesAction(services));
+        builder.put("saveVersit", new GetVersitAction(services));
 
-        actions.put("list", new ListAction(services));
-        actions.put("search", new SearchAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("delete", new DeleteAction(services));
-        actions.put("transport", new TransportMailAction(services));
-        actions.put("receipt_ack", new ReceiptAckAction(services));
-        actions.put("clear", new ClearAction(services));
-        actions.put("expunge", new ExpungeAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("import", new ImportAction(services));
-        actions.put("edit", new EditAction(services));
-        actions.put("autosave", new AutosaveAction(services));
+        builder.put("list", new ListAction(services));
+        builder.put("search", new SearchAction(services));
+        builder.put("update", new UpdateAction(services));
+        builder.put("delete", new DeleteAction(services));
+        builder.put("transport", new TransportMailAction(services));
+        builder.put("receipt_ack", new ReceiptAckAction(services));
+        builder.put("clear", new ClearAction(services));
+        builder.put("expunge", new ExpungeAction(services));
+        builder.put("new", new NewAction(services));
+        builder.put("import", new ImportAction(services));
+        builder.put("edit", new EditAction(services));
+        builder.put("autosave", new AutosaveAction(services));
 
-        actions.put("all_seen", new AllSeenAction(services));
-        actions.put("resolve_share_reference", new ResolveShareReference(services));
-        actions.put("examine", new ExamineAction(services));
+        builder.put("all_seen", new AllSeenAction(services));
+        builder.put("resolve_share_reference", new ResolveShareReference(services));
+        builder.put("examine", new ExamineAction(services));
+
+        this.actions = builder.build();
     }
 
     @Override

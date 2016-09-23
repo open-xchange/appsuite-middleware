@@ -49,11 +49,14 @@
 
 package com.openexchange.apps.manifests.json;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link ManifestActionFactory}
@@ -63,26 +66,28 @@ import com.openexchange.server.ServiceLookup;
  */
 public class ManifestActionFactory implements AJAXActionServiceFactory {
 
-    private final AJAXActionService all;
-    private final ConfigAction config;
+    private final Map<String, AJAXActionService> actions;
 
     public ManifestActionFactory(ServiceLookup services, ManifestBuilder manifestBuilder) {
         super();
-        all = new AllAction(manifestBuilder);
-        config = new ConfigAction(services, manifestBuilder);
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
+        actions.put("all", new AllAction( manifestBuilder));
+        actions.put("config", new ConfigAction(services, manifestBuilder));
+        this.actions = actions.build();
     }
 
     @Override
     public Collection<?> getSupportedServices() {
-        return Arrays.asList("all", "config");
+        return actions.values();
     }
 
     @Override
-    public AJAXActionService createActionService(String action) {
-        if (action.equals("config")) {
-            return config;
+    public AJAXActionService createActionService(String action) throws OXException {
+        AJAXActionService actionService = actions.get(action);
+        if (null == actionService) {
+            throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(action, "apps/manifests");
         }
-        return all;
+        return actionService;
     }
 
 }
