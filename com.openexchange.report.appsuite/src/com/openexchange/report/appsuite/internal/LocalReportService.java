@@ -287,7 +287,8 @@ public class LocalReportService extends AbstractReportService {
                     contextsInSameSchema = getContextsInSameSchemas(allContextIds);
                     processAllContexts(report, contextsInSameSchema);
                 } catch (OXException e) {
-                    LOG.error("Unable to strat multithreaded context processing ", e);
+                    LOG.error("Unable to strat multithreaded context processing, abort report generation ", e);
+                    abortGeneration(report.getUUID(), report.getType(), "Unable to distribute context processing on multiple threads");
                 }
             };
         }.start();
