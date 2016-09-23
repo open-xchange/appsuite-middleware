@@ -49,6 +49,7 @@
 
 package com.openexchange.find.spi;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.find.AbstractFindRequest;
 import com.openexchange.find.AutocompleteRequest;
@@ -56,6 +57,7 @@ import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
+import com.openexchange.find.facet.FacetInfo;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -92,6 +94,15 @@ public interface ModuleSearchDriver {
      * @return <code>true</code> if valid; otherwise <code>false</code>
      */
     boolean isValidFor(ServerSession session, AbstractFindRequest findRequest) throws OXException;
+
+    /**
+     * Checks if this driver applies to a given {@link ServerSession} and concrete find request.
+     *
+     * @param session The associated session
+     * @param facetInfos The current facet information
+     * @return <code>true</code> if valid; otherwise <code>false</code>
+     */
+    boolean isValidFor(ServerSession session, List<FacetInfo> facetInfos) throws OXException;
 
     /**
      * Gets the driver-specific {@link SearchConfiguration}. May be individual for the
