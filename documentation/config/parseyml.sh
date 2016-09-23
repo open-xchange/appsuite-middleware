@@ -36,20 +36,11 @@ parse_yaml() {
                 if(multiline=="true"){
                     printf("%s<br>", $0);
                 } else {
-                     if ($1 == "Key"){
-                        if ($2 == \\\`*) {
-                          printf("<span style=\"font-weight:normal\">%s</span>", $2);
-                        } else {
-                          $2 = "`" + $2 + "`"
-                          printf("<span style=\"font-weight:normal\">%s</span>", $2);
-                        }
+                        $2 = "`" + $2 + "`"
+                        printf("<span style=\"font-weight:normal\">%s</span>", $2);
                      } else if ($1 == "Related") {
-                        if ($2 == \\\`*) {
-                          printf("%s", $2);
-                        } else {
-                          $2 = "`" + $2 + "`"
-                          printf("%s", $2);
-                        }
+                        $2 = "`" + $2 + "`"
+                        printf("%s", $2);
                      } else {
                         for(i=2;i<=NF;i++){
                           printf("%s ", $i);
