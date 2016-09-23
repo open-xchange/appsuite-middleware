@@ -49,15 +49,11 @@
 
 package com.openexchange.cluster.lock.internal;
 
-
 /**
  * {@link ClusterLockType}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum ClusterLockType {
-
-    ClusterTaskLocks,
-    SingleNodeClusterLocks,
-    PeriodicClusterLocks,
+    ClusterTaskLocks;
 }
