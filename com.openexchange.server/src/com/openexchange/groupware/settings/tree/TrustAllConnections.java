@@ -72,7 +72,6 @@ public final class TrustAllConnections implements PreferencesItemService {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TrustAllConnections.class);
 
-    private static final String USER_ATTRIBUTE_NAME = "trustAllConnections";
     private UserService userService;
     private UserAwareSSLConfigurationService userAwareSSLConfigurationService;
 
@@ -90,7 +89,7 @@ public final class TrustAllConnections implements PreferencesItemService {
      */
     @Override
     public String[] getPath() {
-        return new String[] { USER_ATTRIBUTE_NAME };
+        return new String[] { UserAwareSSLConfigurationService.USER_ATTRIBUTE_NAME };
     }
 
     /**
@@ -105,11 +104,10 @@ public final class TrustAllConnections implements PreferencesItemService {
                 boolean allowedToDefineTrustLevel = userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(user.getId(), ctx.getContextId());
 
                 if (!allowedToDefineTrustLevel) {
-                    LOG.debug("Setting {} has been disabled due to configuration ('com.openexchange.net.ssl.user.configuration.enabled'). The request will be ignored.", USER_ATTRIBUTE_NAME);
+                    LOG.debug("Setting {} has been disabled due to configuration ('com.openexchange.net.ssl.user.configuration.enabled'). The request will be ignored.", UserAwareSSLConfigurationService.USER_ATTRIBUTE_NAME);
                     return;
                 }
-
-                userService.setUserAttribute(USER_ATTRIBUTE_NAME, setting.getSingleValue().toString(), user.getId(), ctx);
+                userAwareSSLConfigurationService.setTrustAll(user.getId(), ctx, Boolean.parseBoolean(setting.getSingleValue().toString()));
             }
 
             @Override
@@ -134,13 +132,8 @@ public final class TrustAllConnections implements PreferencesItemService {
                     return;
                 }
 
-                String userTrustsAll = userService.getUserAttribute(USER_ATTRIBUTE_NAME, user.getId(), ctx);
-
-                if (userTrustsAll == null) {
-                    setting.setSingleValue(Boolean.FALSE);
-                    return;
-                }
-                setting.setSingleValue(userTrustsAll);
+                boolean trustAll = userAwareSSLConfigurationService.isTrustAll(user.getId(), ctx.getContextId());
+                setting.setSingleValue(trustAll);
             }
         };
     }

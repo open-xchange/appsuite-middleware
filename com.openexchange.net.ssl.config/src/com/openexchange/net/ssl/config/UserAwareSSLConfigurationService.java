@@ -49,6 +49,7 @@
 
 package com.openexchange.net.ssl.config;
 
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
@@ -60,8 +61,12 @@ import com.openexchange.osgi.annotation.SingletonService;
 @SingletonService
 public interface UserAwareSSLConfigurationService {
 
+    public static final String USER_ATTRIBUTE_NAME = "trustAllConnections";
+
     boolean isAllowedToDefineTrustLevel(int user, int context);
 
     boolean isTrustAll(int user, int context);
+
+    void setTrustAll(int user, Context context, boolean trustAll);
 
 }

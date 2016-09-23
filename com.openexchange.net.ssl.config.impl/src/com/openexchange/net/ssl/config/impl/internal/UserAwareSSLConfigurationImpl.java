@@ -53,6 +53,7 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.user.UserService;
 
@@ -63,8 +64,6 @@ import com.openexchange.user.UserService;
  * @since v7.8.3
  */
 public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationService {
-
-    private static final String USER_ATTRIBUTE_NAME = "trustAllConnections";
 
     private UserService userService;
 
@@ -115,6 +114,15 @@ public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationS
             org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class).error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, user, context);
         }
         return false;
+    }
+
+    @Override
+    public void setTrustAll(int user, Context context, boolean trustAll) {
+        try {
+            userService.setUserAttribute(USER_ATTRIBUTE_NAME, Boolean.toString(trustAll), user, context);
+        } catch (OXException e) {
+            org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class).error("Unable to set trust level for user {} in context {}", e, USER_ATTRIBUTE_NAME, user, context);
+        }
     }
 
 }
