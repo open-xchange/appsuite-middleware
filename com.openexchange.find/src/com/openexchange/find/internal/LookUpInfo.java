@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,54 +47,56 @@
  *
  */
 
-package com.openexchange.find;
+package com.openexchange.find.internal;
 
 import java.util.List;
-import com.openexchange.exception.OXException;
+import com.openexchange.find.AbstractFindRequest;
 import com.openexchange.find.facet.FacetInfo;
-import com.openexchange.find.spi.ModuleSearchDriver;
-import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * The {@link SearchService} is the entry point to utilize the Find API.
+ * {@link LookUpInfo}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-@SingletonService
-public interface SearchService {
+public class LookUpInfo {
+
+    /** The empty look-up info */
+    public static final LookUpInfo EMPTY = new LookUpInfo(null, null);
+
+    // -----------------------------------------------------------------------
+
+    private final AbstractFindRequest findRequest;
+    private final List<FacetInfo> facetInfos;
 
     /**
-     * Performs an auto-complete request for a given module.
+     * Initializes a new {@link LookUpInfo}.
      *
-     * @param autocompleteRequest The auto-complete search request to execute
-     * @param module The module in which to perform the auto-complete search
-     * @param session The associated session
-     * @return An {@link AutocompleteResult}. Never <code>null</code>.
+     * @param findRequest The associated find request (if any)
+     * @param facetInfos The basic facet information (if any)
      */
-    AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, Module module, ServerSession session) throws OXException;
+    public LookUpInfo(AbstractFindRequest findRequest, List<FacetInfo> facetInfos) {
+        super();
+        this.findRequest = findRequest;
+        this.facetInfos = facetInfos;
+    }
 
     /**
-     * Performs a search request for a given module.
+     * Gets the basic facet information
      *
-     * @param searchRequest The search request to execute
-     * @param module The module in which to perform the search
-     * @param session The associated session
-     * @return A {@link SearchResult}. Never <code>null</code>.
+     * @return The basic facet information or <code>null</code>
      */
-    SearchResult search(SearchRequest searchRequest, Module module, ServerSession session) throws OXException;
+    public List<FacetInfo> getFacetInfos() {
+        return facetInfos;
+    }
 
     /**
-     * Gets the appropriate driver for given module.
+     * Gets the associated find request
      *
-     * @param facetInfos The basic facet information
-     * @param module The module
-     * @param session The associated session
-     * @return The driver
-     * @throws OXException If no suitable driver exists
+     * @return The associated find request or <code>null</code>
      */
-    ModuleSearchDriver getDriver(List<FacetInfo> facetInfos, Module module, ServerSession session) throws OXException;
+    public AbstractFindRequest getFindRequest() {
+        return findRequest;
+    }
 
 }

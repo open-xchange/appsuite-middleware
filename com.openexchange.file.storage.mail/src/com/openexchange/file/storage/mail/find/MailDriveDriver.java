@@ -119,6 +119,7 @@ import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.FacetInfo;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetTypeLookUp;
 import com.openexchange.find.facet.FacetValue;
@@ -281,6 +282,21 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
     @Override
     public boolean isValidFor(ServerSession session, AbstractFindRequest findRequest) throws OXException {
         return delegate().isValidFor(session, findRequest);
+    }
+
+    @Override
+    public boolean isValidFor(ServerSession session, List<FacetInfo> facetInfos) throws OXException {
+        if (null == facetInfos) {
+            return isValidFor(session);
+        }
+
+        for (FacetInfo facetInfo : facetInfos) {
+            if ("account".equals(facetInfo.getType())) {
+                return isMailDriveAccount(facetInfo.getValue());
+            }
+        }
+
+        return delegate().isValidFor(session, facetInfos);
     }
 
     @Override
