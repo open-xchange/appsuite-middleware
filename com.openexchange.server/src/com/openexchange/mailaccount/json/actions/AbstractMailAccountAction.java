@@ -86,6 +86,8 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
+import com.openexchange.mailaccount.json.ActiveProviderDetector;
+import com.openexchange.mailaccount.json.MailAccountActionProvider;
 import com.openexchange.mailaccount.json.MailAccountJsonUtility;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -109,24 +111,47 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
     /** The reference to JSlobStorageRegistry */
     private static final AtomicReference<JSlobStorageRegistry> STORAGE_REGISTRY = new AtomicReference<JSlobStorageRegistry>();
 
+    /** The detector for (other) active provider */
+    private final ActiveProviderDetector activeProviderDetector;
+
     /**
      * Initializes a new {@link AbstractMailAccountAction}.
      */
-    protected AbstractMailAccountAction() {
+    protected AbstractMailAccountAction(ActiveProviderDetector activeProviderDetector) {
         super();
+        this.activeProviderDetector = activeProviderDetector;
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        AJAXRequestResult result = optResultUsing(requestData, session);
+        if (null != result) {
+            return result;
+        }
+
         try {
-            final Object data = requestData.getData();
+            Object data = requestData.getData();
             if (data instanceof JSONValue) {
                 return innerPerform(requestData, session, (JSONValue) data);
             }
             return innerPerform(requestData, session, null);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
+    }
+
+    private AJAXRequestResult optResultUsing(AJAXRequestData requestData, ServerSession session) throws OXException {
+        MailAccountActionProvider activeProvider = null == activeProviderDetector ? null : activeProviderDetector.getActiveProvider(session);
+        if (null == activeProvider) {
+            return null;
+        }
+
+        AJAXActionService actionService = activeProvider.getAction(requestData.getAction());
+        if (null == actionService) {
+            return null;
+        }
+
+        return actionService.perform(requestData, session);
     }
 
     /**

@@ -47,71 +47,25 @@
  *
  */
 
-package com.openexchange.mailaccount.json;
 
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.json.actions.AllAction;
-import com.openexchange.mailaccount.json.actions.DeleteAction;
-import com.openexchange.mailaccount.json.actions.GetAction;
-import com.openexchange.mailaccount.json.actions.GetTreeAction;
-import com.openexchange.mailaccount.json.actions.ListAction;
-import com.openexchange.mailaccount.json.actions.NewAction;
-import com.openexchange.mailaccount.json.actions.UpdateAction;
-import com.openexchange.mailaccount.json.actions.ValidateAction;
-import com.openexchange.session.Session;
+package com.openexchange.mailaccount.json.osgi;
+
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link DefaultMailAccountActionProvider}
+ * {@link OAuthScopeDescription} - Strings describing the OAuth scopes.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.8.3
  */
-public class DefaultMailAccountActionProvider implements MailAccountActionProvider {
+final class OAuthScopeDescription implements LocalizableStrings {
+    // Application 'xyz' requires following permissions:
+    //  - Read all your mail accounts.
+    //  - ...
+    public static final String READ_ONLY = "Read all your mail accounts.";
 
-    private final Map<String, AJAXActionService> actions;
-
-    /**
-     * Initializes a new {@link DefaultMailAccountActionProvider}.
-     */
-    public DefaultMailAccountActionProvider() {
-        super();
-        actions = initActions();
-    }
-
-    @Override
-    public boolean isApplicableFor(Session session) throws OXException {
-        return true;
-    }
-
-    /**
-     * Retrieves a mapping of actions strings to <code>AJAXActionService</code>'s.
-     *
-     * @return The mapping of available action
-     */
-    public Map<String, AJAXActionService> getActions() {
-        return actions;
-    }
-
-    @Override
-    public AJAXActionService getAction(String action) {
-        return null == action ? null : actions.get(action);
-    }
-
-    private Map<String, AJAXActionService> initActions() {
-        ImmutableMap.Builder<String, AJAXActionService> tmp = ImmutableMap.builder();
-        tmp.put(AllAction.ACTION, new AllAction());
-        tmp.put(ListAction.ACTION, new ListAction());
-        tmp.put(GetAction.ACTION, new GetAction());
-        tmp.put(ValidateAction.ACTION, new ValidateAction());
-        tmp.put(DeleteAction.ACTION, new DeleteAction());
-        tmp.put(UpdateAction.ACTION, new UpdateAction());
-        tmp.put(GetTreeAction.ACTION, new GetTreeAction());
-        tmp.put(NewAction.ACTION, new NewAction());
-        return tmp.build();
-    }
-
+    // Application 'xyz' requires following permissions:
+    //  - Create, modify and delete mail accounts.
+    //  - ...
+    public static final String WRITABLE = "Create, modify and delete mail accounts.";
 }

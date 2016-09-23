@@ -82,6 +82,7 @@ import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.TransportAuth;
+import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
 import com.openexchange.mailaccount.utils.MailAccountUtils;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -109,8 +110,8 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
     /**
      * Initializes a new {@link ValidateAction}.
      */
-    public ValidateAction() {
-        super();
+    public ValidateAction(ActiveProviderDetector activeProviderDetector) {
+        super(activeProviderDetector);
     }
 
     @Override
