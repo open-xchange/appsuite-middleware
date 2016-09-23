@@ -1,7 +1,7 @@
 #!/bin/bash
-cd documents/before/
+cd documents/intro/
 pandoc -f markdown -t html5 -o ../html/intro.html --columns=1000 1_introduction.md
-cd ../after
+cd ../appendix
 pandoc -f markdown -t html5 -o ../html/appendix.html --columns=1000 2_column_identifiers.md 3_flags_bitmasks.md 4_mail_filter.md 5_advanced_search.md
 cd ../..
 cp ./tmpl/index_tmpl.html ./html/index.html
