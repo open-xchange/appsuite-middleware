@@ -49,6 +49,8 @@
 
 package com.openexchange.net.ssl.config.impl.internal;
 
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
@@ -68,22 +70,47 @@ public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationS
 
     private ContextService contextService;
 
-    public UserAwareSSLConfigurationImpl(UserService userService, ContextService contextService) {
+    private ConfigViewFactory configViewFactory;
+
+    public UserAwareSSLConfigurationImpl(UserService userService, ContextService contextService, ConfigViewFactory configViewFactory) {
         this.userService = userService;
         this.contextService = contextService;
+        this.configViewFactory = configViewFactory;
     }
 
     @Override
     public boolean isTrustAll(int user, int context) {
-        if ((user <= 0) || (context <= 0) ) {
+        boolean allowedToDefineTrustLevel = isAllowedToDefineTrustLevel(user, context);
+
+        if (!allowedToDefineTrustLevel) {
             return false;
         }
+
         try {
-            String userTrustsAll = this.userService.getUserAttribute(USER_ATTRIBUTE_NAME, user, contextService.getContext(context));
+            String userTrustsAll = this.userService.getUserAttribute(USER_ATTRIBUTE_NAME, user, this.contextService.getContext(context));
             if (userTrustsAll == null) {
                 return false;
             }
             return Boolean.parseBoolean(userTrustsAll);
+        } catch (OXException e) {
+            org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class).error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, user, context);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isAllowedToDefineTrustLevel(int user, int context) {
+        if ((user <= 0) || (context <= 0)) {
+            return false;
+        }
+
+        try {
+            ConfigView view = this.configViewFactory.getView(user, context);
+            Boolean isUserAllowedToDefineTrustlevel = view.property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class).get();
+            if (isUserAllowedToDefineTrustlevel == null) {
+                return false;
+            }
+            return isUserAllowedToDefineTrustlevel.booleanValue();
         } catch (OXException e) {
             org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class).error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, user, context);
         }

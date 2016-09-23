@@ -51,6 +51,7 @@ package com.openexchange.net.ssl.config.impl.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
@@ -72,7 +73,7 @@ public class SSLConfigActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { UserService.class, ContextService.class, ConfigurationService.class };
+        return new Class[] { UserService.class, ContextService.class, ConfigurationService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -90,7 +91,7 @@ public class SSLConfigActivator extends HousekeepingActivator {
             
             registerService(Reloadable.class, new SSLPropertiesReloadable());
 
-            registerService(UserAwareSSLConfigurationService.class, new UserAwareSSLConfigurationImpl(getService(UserService.class), getService(ContextService.class)));
+            registerService(UserAwareSSLConfigurationService.class, new UserAwareSSLConfigurationImpl(getService(UserService.class), getService(ContextService.class), getService(ConfigViewFactory.class)));
             registerService(SSLConfigurationService.class, new SSLConfigurationServiceImpl(getService(ConfigurationService.class)));
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).error("", e);

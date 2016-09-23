@@ -49,8 +49,8 @@
 
 package com.openexchange.groupware.settings;
 
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.groupware.settings.tree.TrustAllConnections;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
@@ -65,7 +65,7 @@ public class PreferencesActivator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-        registerService(PreferencesItemService.class, new TrustAllConnections(getService(UserService.class), getService(ConfigViewFactory.class)), null);
+        registerService(PreferencesItemService.class, new TrustAllConnections(getService(UserService.class), getService(UserAwareSSLConfigurationService.class)), null);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class PreferencesActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ConfigViewFactory.class };
+        return new Class<?>[] { UserService.class, UserAwareSSLConfigurationService.class };
     }
 
 }

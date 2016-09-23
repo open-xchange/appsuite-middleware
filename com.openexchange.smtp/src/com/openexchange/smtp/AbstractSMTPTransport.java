@@ -129,6 +129,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
@@ -651,15 +652,11 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
         } catch (MessagingException e) {
             if (e.getNextException() instanceof javax.net.ssl.SSLHandshakeException) {
-                ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
-                ConfigView config = factory.getView(session.getUserId(), session.getContextId());
-                Boolean userConfigurable = config.get("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class);
-                if (userConfigurable.booleanValue()) {
+                UserAwareSSLConfigurationService userAwareSSLConfigurationService = Services.getService(UserAwareSSLConfigurationService.class);
+                if (userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(session.getUserId(), session.getContextId())) {
                     throw SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(server);
-                } else {
-                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(server);
-                }
-//                throw SMTPExceptionCode.SECURE_CONNECTION_NOT_POSSIBLE.create(e.getNextException(), server, login);
+                } 
+                throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(server);
             }
             throw handleMessagingException(e, smtpConfig);
         }

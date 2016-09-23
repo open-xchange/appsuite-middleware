@@ -31,7 +31,7 @@ array:
       Reloadable: false
       Configcascade_Aware: false
       Related: com.openexchange.net.ssl.custom.truststore.enabled, com.openexchange.net.ssl.custom.truststore.password
-      File: ssl.properties            
+      File: ssl.properties
   - data:
       Key: com.openexchange.net.ssl.custom.truststore.password
       Description: >
@@ -41,7 +41,17 @@ array:
       Reloadable: false
       Configcascade_Aware: false
       Related: com.openexchange.net.ssl.custom.truststore.enabled, com.openexchange.net.ssl.custom.truststore.path
-      File: ssl.properties            
+      File: ssl.properties
+  - data:
+      Key: com.openexchange.net.ssl.hostname.verification.enabled
+      Description: >
+        Defines if the name of the host should be checked while SSL handshaking. If the host name verification fails a connection to the desired host cannot be established even if there is a valid certificate. A host name verifier ensures the host name in the URL to which the client connects matches the host name in the digital certificate that the server sends back as part of the SSL connection.  
+      Default: true
+      Version: 7.8.3
+      Reloadable: false
+      Configcascade_Aware: false
+      Related:
+      File: ssl.properties
   - data:
       Key: com.openexchange.net.ssl.trustlevel
       Description: >
@@ -51,7 +61,7 @@ array:
       Reloadable: true
       Configcascade_Aware: false
       Related:
-      File: ssl.properties            
+      File: ssl.properties
   - data:
       Key: com.openexchange.net.ssl.protocols
       Description: >
@@ -61,7 +71,7 @@ array:
       Reloadable: true
       Configcascade_Aware: false
       Related:
-      File: ssl.properties            
+      File: ssl.properties
   - data:
       Key: com.openexchange.net.ssl.ciphersuites
       Description: >
@@ -71,7 +81,7 @@ array:
       Reloadable: true
       Configcascade_Aware: false
       Related:
-      File: ssl.properties            
+      File: ssl.properties
   - data:
       Key: com.openexchange.net.ssl.whitelist
       Description: >
@@ -81,15 +91,15 @@ array:
       Reloadable: true
       Configcascade_Aware: false
       Related:
-      File: ssl.properties            
+      File: ssl.properties
   - data:
-      Key: com.openexchange.net.ssl.hostname.verification.enabled
+      Key: com.openexchange.net.ssl.user.configuration.enabled
       Description: >
-        Defines if the name of the host should be checked while SSL handshaking. If the host name verification fails a connection to the desired host cannot be established even if there is a valid certificate. A host name verifier ensures the host name in the URL to which the client connects matches the host name in the digital certificate that the server sends back as part of the SSL connection.  
-      Default: true
+        Defines if the user is able to define a more unsecure trust level than it is defined globally the administrator. For instance if 'com.openexchange.net.ssl.trustlevel' is 'none' the user won't be able to use to untrusted connections. If 'com.openexchange.net.ssl.user.configuration.enabled' is 'true' the user will be able to define that he will use untrusted connections.
+      Default: false
       Version: 7.8.3
       Reloadable: true
-      Configcascade_Aware: false
-      Related:
-      File: ssl.properties            
+      Configcascade_Aware: true
+      Related: com.openexchange.net.ssl.trustlevel, JSLob: io.ox/core//trustAllConnections
+      File: ssl.properties
       

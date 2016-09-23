@@ -77,8 +77,6 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionInit;
@@ -125,6 +123,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
@@ -819,14 +818,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                         throw MailExceptionCode.NON_SECURE_DENIED.create(server);
                     }
                     if (SSLHandshakeException.class.isInstance(next)) {
-                        ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
-                        ConfigView view = factory.getView(session.getUserId(), session.getContextId());
-                        Boolean userConfigurable = view.get("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class);
-                        if (userConfigurable.booleanValue()) {
+                        UserAwareSSLConfigurationService userAwareSSLConfigurationService = Services.getService(UserAwareSSLConfigurationService.class);
+                        if (userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(session.getUserId(), session.getContextId())) {
                             throw SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(server);
-                        } else {
-                            throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(server);
-                        }
+                        } 
+                        throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(server);
                     }
                 }
                 throw e;

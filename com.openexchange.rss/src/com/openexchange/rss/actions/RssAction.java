@@ -71,12 +71,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.java.Strings;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.rss.RssExceptionCodes;
 import com.openexchange.rss.RssResult;
@@ -276,14 +275,11 @@ public class RssAction implements AJAXActionService {
             } catch (IOException e) {
                 OXException oxe = null;
                 if (SSLHandshakeException.class.isInstance(e)) {
-                    ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
-                    ConfigView config = factory.getView(session.getUserId(), session.getContextId());
-                    Boolean userConfigurable = config.get("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class);
-                    if (userConfigurable.booleanValue()) {
+                    UserAwareSSLConfigurationService userAwareSSLConfigurationService = Services.getService(UserAwareSSLConfigurationService.class);
+                    if (userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(session.getUserId(), session.getContextId())) {
                         oxe = SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(url.getHost());
-                    } else {
-                        oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(url.getHost());
                     }
+                    oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(url.getHost());
                 } else {
                     oxe = RssExceptionCodes.IO_ERROR.create(e, e.getMessage(), url.toString());
                 }

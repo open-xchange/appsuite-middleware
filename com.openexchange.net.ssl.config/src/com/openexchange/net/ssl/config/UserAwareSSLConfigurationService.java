@@ -60,6 +60,8 @@ import com.openexchange.osgi.annotation.SingletonService;
 @SingletonService
 public interface UserAwareSSLConfigurationService {
 
+    boolean isAllowedToDefineTrustLevel(int user, int context);
+
     boolean isTrustAll(int user, int context);
 
 }
