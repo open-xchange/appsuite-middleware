@@ -50,22 +50,15 @@
 package com.openexchange.folderstorage.database;
 
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.extractIDs;
-import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.getUnsignedInteger;
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.getUserPermissionBits;
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.localizeFolderNames;
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import static com.openexchange.server.impl.OCLPermission.ADMIN_PERMISSION;
 import static com.openexchange.server.impl.OCLPermission.DELETE_ALL_OBJECTS;
 import static com.openexchange.server.impl.OCLPermission.READ_ALL_OBJECTS;
 import static com.openexchange.server.impl.OCLPermission.READ_FOLDER;
 import static com.openexchange.server.impl.OCLPermission.WRITE_ALL_OBJECTS;
-import gnu.trove.ConcurrentTIntObjectHashMap;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntIntMap;
-import gnu.trove.map.hash.TIntIntHashMap;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.Collator;
@@ -125,7 +118,6 @@ import com.openexchange.folderstorage.database.getfolder.SystemPublicFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemRootFolder;
 import com.openexchange.folderstorage.database.getfolder.SystemSharedFolder;
 import com.openexchange.folderstorage.database.getfolder.VirtualListFolder;
-import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.outlook.osgi.Services;
 import com.openexchange.folderstorage.outlook.sql.Delete;
@@ -171,6 +163,13 @@ import com.openexchange.tools.oxfolder.OXFolderSQL;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.ConcurrentTIntObjectHashMap;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntIntMap;
+import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link DatabaseFolderStorage} - The database folder storage.
@@ -685,9 +684,9 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage,
 
             // Cleanse from other folder storage, too
             if (hardDelete) {
-                Delete.hardDeleteFolder(session.getContextId(), Tools.getUnsignedInteger(OutlookFolderStorage.OUTLOOK_TREE_ID), session.getUserId(), folderIdentifier, true, true, con);
+                Delete.hardDeleteFolder(session.getContextId(), getUnsignedInteger(OutlookFolderStorage.OUTLOOK_TREE_ID), session.getUserId(), folderIdentifier, true, true, con);
             } else {
-                Delete.deleteFolder(session.getContextId(), Tools.getUnsignedInteger(OutlookFolderStorage.OUTLOOK_TREE_ID), session.getUserId(), folderIdentifier, true, true, con);
+                Delete.deleteFolder(session.getContextId(), getUnsignedInteger(OutlookFolderStorage.OUTLOOK_TREE_ID), session.getUserId(), folderIdentifier, true, true, con);
             }
 
             List<OXException> warnings = folderManager.getWarnings();

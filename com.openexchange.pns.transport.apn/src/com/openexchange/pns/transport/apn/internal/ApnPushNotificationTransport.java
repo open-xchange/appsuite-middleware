@@ -57,11 +57,17 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.SortableConcurrentList;
 import com.openexchange.osgi.util.RankedService;
@@ -74,6 +80,7 @@ import com.openexchange.pns.PushNotificationField;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.EnabledKey;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.Message;
@@ -113,6 +120,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
 
     // ---------------------------------------------------------------------------------------------------------------
 
+    private final ConfigViewFactory configViewFactory;
     private final PushSubscriptionRegistry subscriptionRegistry;
     private final PushMessageGeneratorRegistry generatorRegistry;
     private final SortableConcurrentList<RankedService<ApnOptionsProvider>> trackedProviders;
@@ -121,8 +129,9 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     /**
      * Initializes a new {@link ApnPushNotificationTransport}.
      */
-    public ApnPushNotificationTransport(PushSubscriptionRegistry subscriptionRegistry, PushMessageGeneratorRegistry generatorRegistry, BundleContext context) {
+    public ApnPushNotificationTransport(PushSubscriptionRegistry subscriptionRegistry, PushMessageGeneratorRegistry generatorRegistry, ConfigViewFactory configViewFactory, BundleContext context) {
         super(context, ApnOptionsProvider.class, null);
+        this.configViewFactory = configViewFactory;
         this.trackedProviders = new SortableConcurrentList<RankedService<ApnOptionsProvider>>();
         this.generatorRegistry = generatorRegistry;
         this.subscriptionRegistry = subscriptionRegistry;
@@ -201,6 +210,50 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     @Override
     public String getId() {
         return ID;
+    }
+
+    private static final Cache<EnabledKey, Boolean> CACHE_AVAILABILITY = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
+
+    /**
+     * Invalidates the <i>enabled cache</i>.
+     */
+    public static void invalidateEnabledCache() {
+        CACHE_AVAILABILITY.invalidateAll();
+    }
+
+    @Override
+    public boolean isEnabled(String topic, String client, int userId, int contextId) throws OXException {
+        EnabledKey key = new EnabledKey(topic, client, userId, contextId);
+        Boolean result = CACHE_AVAILABILITY.getIfPresent(key);
+        if (null == result) {
+            result = Boolean.valueOf(doCheckEnabled(topic, client, userId, contextId));
+            CACHE_AVAILABILITY.put(key, result);
+        }
+        return result.booleanValue();
+    }
+
+    private boolean doCheckEnabled(String topic, String client, int userId, int contextId) throws OXException {
+        ConfigView view = configViewFactory.getView(userId, contextId);
+
+        String basePropertyName = "com.openexchange.pns.transport.apn.ios.enabled";
+
+        ComposedConfigProperty<Boolean> property;
+        property = null == topic || null == client ? null : view.property(basePropertyName + "." + client + "." + topic, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        property = null == client ? null : view.property(basePropertyName + "." + client, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        property = view.property(basePropertyName, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        return false;
     }
 
     @Override

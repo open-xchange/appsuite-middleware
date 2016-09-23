@@ -54,6 +54,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,11 +67,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.json.impl.JSONProtocolHandler;
+import com.openexchange.realtime.json.impl.StanzaProcessor;
 import com.openexchange.realtime.json.impl.StateEntry;
 import com.openexchange.realtime.json.impl.StateManager;
 import com.openexchange.realtime.json.protocol.RTClientState;
 import com.openexchange.realtime.json.util.RTResultFormatter;
 import com.openexchange.realtime.packet.ID;
+import com.openexchange.realtime.packet.Stanza;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -175,10 +181,23 @@ public class SendAction extends RTAction  {
         }
         LOG.debug("Messages arrived in SendAction: {}", objects);
 
-
+        HttpServletRequest servletRequest = request.optHttpServletRequest();
+		String sessionid = null;
+        if (servletRequest != null) {
+	        HttpSession httpSession = servletRequest.getSession();
+	        sessionid = httpSession.getId();
+		}
+        final String jsessionid = sessionid; 
+        
         //handle incoming messages
         List<Long> acknowledgements = new ArrayList<Long>(objects.size());
-        protocolHandler.handleIncomingMessages(id, session, stateEntry, objects, acknowledgements);
+        protocolHandler.handleIncomingMessages(id, session, stateEntry, objects, acknowledgements, new StanzaProcessor() {
+			
+			@Override
+			public void process(Stanza stanza) {
+				 stanza.setChannelAttribute("JSESSIONID", jsessionid);
+			}
+		});
 
         //add resulting acks to response
         final Map<String, Object> resultMap = new HashMap<String, Object>();

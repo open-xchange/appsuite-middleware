@@ -52,6 +52,8 @@ package com.openexchange.google.api.client;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Google2Api;
 import org.scribe.model.Token;
@@ -281,10 +283,26 @@ public class GoogleApiClients {
 
         // Less than 5 minutes to live -> refresh token!
         String refreshToken = googleAccount.getSecret();
-        Token accessToken = scribeOAuthService.getAccessToken(new Token(googleAccount.getToken(), googleAccount.getSecret()), null);
+        Token accessToken;
+        try {
+            accessToken = scribeOAuthService.getAccessToken(new Token(googleAccount.getToken(), googleAccount.getSecret()), null);
+        } catch (org.scribe.exceptions.OAuthException e) {
+            String message = e.getMessage();
+            String errorMsg = parseErrorFrom(message);
+            if (Strings.isEmpty(errorMsg)) {
+                throw OAuthExceptionCodes.OAUTH_ERROR.create(e, message);
+            }
+
+            if ("invalid_grant".equals(e)) {
+                throw OAuthExceptionCodes.OAUTH_PROBLEM_ACCESS_DENIED.create(e, message);
+            }
+            throw OAuthExceptionCodes.OAUTH_ERROR.create(e, errorMsg);
+        }
+
         if (!Strings.isEmpty(accessToken.getSecret())) {
             refreshToken = accessToken.getSecret();
         }
+
         // Update account
         int accountId = googleAccount.getId();
         Map<String, Object> arguments = new HashMap<String, Object>(3);
@@ -294,6 +312,26 @@ public class GoogleApiClients {
 
         // Reload
         return oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+    }
+
+    private static String parseErrorFrom(String message) {
+        if (Strings.isEmpty(message)) {
+            return null;
+        }
+
+        String marker = "Can't extract a token from this: '";
+        int pos = message.indexOf(marker);
+        if (pos < 0) {
+            return null;
+        }
+
+        try {
+            JSONObject jo = new JSONObject(message.substring(pos + marker.length(), message.length() - 1));
+            return jo.optString("error", null);
+        } catch (JSONException e) {
+            // Apparent no JSON response
+            return null;
+        }
     }
 
     /**

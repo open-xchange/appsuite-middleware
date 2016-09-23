@@ -15,6 +15,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -73,6 +75,7 @@ import org.opensaml.xml.encryption.KeyEncryptionParameters;
 import org.opensaml.xml.io.MarshallingException;
 import org.opensaml.xml.schema.XSString;
 import org.opensaml.xml.security.SecurityHelper;
+import org.opensaml.xml.security.SigningUtil;
 import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.security.keyinfo.KeyInfoGeneratorFactory;
 import org.opensaml.xml.signature.Signature;
@@ -91,6 +94,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.SimContext;
 import com.openexchange.groupware.ldap.SimUser;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.saml.SAMLConfig.Binding;
@@ -319,7 +323,7 @@ public class SAMLWebSSOProviderTest {
     }
 
     @Test
-    public void testSPInitiatedLogoutRoundtrip() throws Exception {
+    public void testSPInitiatedLogoutRoundtripPOST() throws Exception {
         /*
          * Create sim session
          */
@@ -372,6 +376,91 @@ public class SAMLWebSSOProviderTest {
 
         SimHttpServletResponse httpResponse = new SimHttpServletResponse();
         provider.handleLogoutResponse(samlResponseRequest, httpResponse, Binding.HTTP_POST);
+        assertCachingDisabledHeaders(httpResponse);
+
+        /*
+         * Assert final logout redirect
+         */
+        Assert.assertEquals(HttpServletResponse.SC_FOUND, httpResponse.getStatus());
+        String location = httpResponse.getHeader("Location");
+        Assert.assertNotNull(location);
+        URI locationURI = new URIBuilder(location).build();
+        Assert.assertEquals(requestHost, locationURI.getHost());
+        Map<String, String> redirectParams = parseURIQuery(locationURI);
+        Assert.assertEquals("samlLogout", redirectParams.get("action"));
+        Assert.assertEquals(session.getSessionID(), redirectParams.get("session"));
+    }
+
+    @Test
+    public void testSPInitiatedLogoutRoundtripREDIRECT() throws Exception {
+        /*
+         * Create sim session
+         */
+        final String sessionIndex = UUIDs.getUnformattedString(UUID.randomUUID());
+        NameID nameID = openSAML.buildSAMLObject(NameID.class);
+        nameID.setFormat(NameID.EMAIL);
+        nameID.setValue("test.user@example.com");
+        final String marshalledNameID = openSAML.marshall(nameID);
+        Session session = sessiondService.addSession(buildAddSessionParameter(new SessionEnhancement() {
+            @Override
+            public void enhanceSession(Session session) {
+                session.setParameter(SAMLSessionParameters.SESSION_INDEX, sessionIndex);
+                session.setParameter(SAMLSessionParameters.SUBJECT_ID, marshalledNameID);
+            }
+        }));
+
+        /*
+         * Trigger LogoutRequest
+         */
+        String requestHost = "webmail.example.com";
+        SimHttpServletRequest logoutHTTPRequest = prepareHTTPRequest("GET", new URIBuilder()
+            .setScheme("https")
+            .setHost(requestHost)
+            .setPath("/appsuite/api/saml/init")
+            .setParameter("flow", "logout")
+            .setParameter("session", session.getSessionID())
+            .build());
+        SimHttpServletResponse logoutHTTPResponse = new SimHttpServletResponse();
+        URI logoutRequestURI = new URI(provider.buildLogoutRequest(logoutHTTPRequest, logoutHTTPResponse, session));
+
+        /*
+         * Validate redirect location
+         */
+        String relayState = parseURIQuery(logoutRequestURI).get("RelayState");
+        Assert.assertNotNull(relayState);
+        SimHttpServletRequest idpHTTPLogoutRequest = prepareHTTPRequest("GET", logoutRequestURI);
+        Assert.assertNull(SignatureHelper.validateURISignature(idpHTTPLogoutRequest, testCredentials.getSPSigningCredential()));
+        LogoutRequest logoutRequest = parseLogoutRequest(idpHTTPLogoutRequest);
+        Assert.assertEquals(marshalledNameID, openSAML.marshall(logoutRequest.getNameID()));
+        Assert.assertEquals(sessionIndex, logoutRequest.getSessionIndexes().get(0).getSessionIndex());
+
+        /*
+         * Build response as URL
+         */
+        LogoutResponse logoutResponse = buildUnsignedLogoutResponse(logoutRequest);
+        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+        Deflater deflater = new Deflater(Deflater.DEFLATED, true);
+        DeflaterOutputStream deflaterStream = new DeflaterOutputStream(bytesOut, deflater);
+        deflaterStream.write(marshall(logoutResponse).getBytes(Charsets.UTF_8));
+        deflaterStream.finish();
+        String encoded = Base64.encodeBytes(bytesOut.toByteArray(), Base64.DONT_BREAK_LINES);
+        URIBuilder redirectLocationBuilder = new URIBuilder()
+            .setScheme("https")
+            .setHost(requestHost)
+            .setPath("/appsuite/api/saml/sls")
+            .setParameter("SAMLResponse", encoded)
+            .setParameter("RelayState", relayState);
+        Credential signingCredential = testCredentials.getIDPSigningCredential();
+        String sigAlg = openSAML.getGlobalSecurityConfiguration().getSignatureAlgorithmURI(signingCredential.getPrivateKey().getAlgorithm());
+        redirectLocationBuilder.setParameter("SigAlg", sigAlg);
+        String rawQuery = redirectLocationBuilder.build().getRawQuery();
+        byte[] rawSignature = SigningUtil.signWithURI(signingCredential, sigAlg, rawQuery.getBytes(Charsets.UTF_8));
+        String signature = Base64.encodeBytes(rawSignature, Base64.DONT_BREAK_LINES);
+        redirectLocationBuilder.setParameter("Signature", signature);
+
+        SimHttpServletRequest samlResponseRequest = prepareHTTPRequest("GET", redirectLocationBuilder.build());
+        SimHttpServletResponse httpResponse = new SimHttpServletResponse();
+        provider.handleLogoutResponse(samlResponseRequest, httpResponse, Binding.HTTP_REDIRECT);
         assertCachingDisabledHeaders(httpResponse);
 
         /*
@@ -715,6 +804,27 @@ public class SAMLWebSSOProviderTest {
         response.setSignature(responseSignature);
         openSAML.marshall(response); // marshalling is necessary for subsequent signing
         Signer.signObject(responseSignature);
+
+        return response;
+    }
+
+    private LogoutResponse buildUnsignedLogoutResponse(LogoutRequest request) throws Exception {
+        LogoutResponse response = openSAML.buildSAMLObject(LogoutResponse.class);
+        response.setDestination(config.getSingleLogoutServiceURL());
+        response.setID(UUIDs.getUnformattedString(UUID.randomUUID()));
+        response.setInResponseTo(request.getID());
+        response.setIssueInstant(new DateTime());
+        response.setVersion(SAMLVersion.VERSION_20);
+
+        Issuer responseIssuer = openSAML.buildSAMLObject(Issuer.class);
+        responseIssuer.setValue(config.getIdentityProviderEntityID());
+        response.setIssuer(responseIssuer);
+
+        Status status = openSAML.buildSAMLObject(Status.class);
+        StatusCode statusCode = openSAML.buildSAMLObject(StatusCode.class);
+        statusCode.setValue(StatusCode.SUCCESS_URI);
+        status.setStatusCode(statusCode);
+        response.setStatus(status);
 
         return response;
     }

@@ -359,7 +359,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         LogoutResponse response = extractLogoutResponse(httpRequest, binding);
         try {
             ValidationStrategy validationStrategy = backend.getValidationStrategy(config, stateManagement);
-            validationStrategy.validateLogoutResponse(response, requestInfo, binding);
+            validationStrategy.validateLogoutResponse(response, httpRequest, requestInfo, binding);
             URI redirectLocationBuilder = new URIBuilder()
                 .setScheme(getRedirectScheme(httpRequest))
                 .setHost(requestInfo.getDomainName())
@@ -887,7 +887,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         try {
             if (binding == Binding.HTTP_REDIRECT) {
                 // bytes are deflated in redirect binding
-                return openSAML.getParserPool().parse(new InflaterInputStream(new ByteArrayInputStream(requestBytes)));
+                return openSAML.getParserPool().parse(new InflaterInputStream(new ByteArrayInputStream(requestBytes), new Inflater(true)));
             } else {
                 return openSAML.getParserPool().parse(new ByteArrayInputStream(requestBytes));
             }

@@ -50,9 +50,8 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
@@ -79,7 +78,7 @@ public class FileActionFactory implements AJAXActionServiceFactory {
      */
     protected FileActionFactory() {
         super();
-        final Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>(24, 0.9f, 1);
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         actions.put("new", new NewAction());
         actions.put("update", new UpdateAction());
         actions.put("delete", new DeleteAction());
@@ -110,7 +109,7 @@ public class FileActionFactory implements AJAXActionServiceFactory {
         actions.put("documentpatch", new DocumentPatchAction());
 
         actions.put("checkname", new CheckNameAction());
-        this.actions = Collections.unmodifiableMap(actions);
+        this.actions = actions.build();
     }
 
     @Override

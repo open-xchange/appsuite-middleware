@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The Open-Xchange Web Sockets bundle taking care of proper capability announcement
+Bundle-SymbolicName: com.openexchange.websockets.cap
+Bundle-Version: 7.8.3
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.capabilities,
+ com.openexchange.config.cascade,
+ com.openexchange.exception,
+ com.openexchange.groupware.ldap,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.session,
+ com.openexchange.tools.session,
+ com.openexchange.websockets,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Bundle-Activator: com.openexchange.websockets.cap.osgi.WebSocketsCapabilityActivator

@@ -116,8 +116,9 @@ CREATE TABLE advertisement_mapping (
     PRIMARY KEY (reseller, package)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
     
-CREATE TABLE advertisement_config (    
+CREATE TABLE advertisement_config (
 	configId int NOT NULL AUTO_INCREMENT,
-    config text NOT NULL,
-    PRIMARY KEY (configId)
+	reseller VARCHAR(128) NOT NULL,
+	config text NOT NULL,
+	PRIMARY KEY (configId)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;

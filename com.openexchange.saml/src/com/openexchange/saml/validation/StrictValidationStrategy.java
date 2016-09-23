@@ -86,6 +86,7 @@ import com.openexchange.saml.validation.ResponseValidators.ResponseDestinationVa
 import com.openexchange.saml.validation.ResponseValidators.ResponseIssuerValidator;
 import com.openexchange.saml.validation.ResponseValidators.ResponseSignatureValidator;
 import com.openexchange.saml.validation.ResponseValidators.ResponseStatusCodeValidator;
+import com.openexchange.saml.validation.ResponseValidators.ResponseURISignatureValidator;
 
 
 /**
@@ -186,8 +187,8 @@ public class StrictValidationStrategy implements ValidationStrategy {
     }
 
     @Override
-    public void validateLogoutResponse(LogoutResponse response, LogoutRequestInfo requestInfo, Binding binding) throws ValidationException {
-        List<ResponseValidator> responseValidators = getLogoutResponseValidators(binding, response, requestInfo);
+    public void validateLogoutResponse(LogoutResponse response, HttpServletRequest httpRequest, LogoutRequestInfo requestInfo, Binding binding) throws ValidationException {
+        List<ResponseValidator> responseValidators = getLogoutResponseValidators(binding, response, httpRequest, requestInfo);
         ValidationError error = validateResponse(response, responseValidators);
         if (error != null) {
             throw error.toValidationException();
@@ -519,28 +520,31 @@ public class StrictValidationStrategy implements ValidationStrategy {
      *
      * @param binding The binding via which the response was received
      * @param response The response
+     * @param httpRequest The servlet request
      * @param requestInfo The request info
      * @return The list of {@link ResponseValidator}s used to the response
      */
-    protected List<ResponseValidator> getLogoutResponseValidators(Binding binding, StatusResponseType response, LogoutRequestInfo requestInfo) {
+    protected List<ResponseValidator> getLogoutResponseValidators(Binding binding, StatusResponseType response, HttpServletRequest httpRequest, LogoutRequestInfo requestInfo) {
         List<ResponseValidator> responseValidators = new LinkedList<ResponseValidator>();
 
         /*
          * The responder MUST authenticate itself to the requester and ensure message integrity, either by signing
          * the message or using a binding-specific mechanism.
          * [profiles 06 - 4.4.4.1p39]
-         */
-        responseValidators.add(new ResponseSignatureValidator(credentialProvider.getValidationCredential(), true));
-
-        /*
+         *
          * If the message is signed, the Destination XML attribute in the root SAML element of the protocol
          * message MUST contain the URL to which the sender has instructed the user agent to deliver the
          * message. The recipient MUST then verify that the value matches the location at which the message has
          * been received.
          * [bindings 05 - 3.4.5.2p19/3.5.5.2p24]
          */
-        boolean allowNullDestination = !((binding == Binding.HTTP_POST || binding == Binding.HTTP_REDIRECT) && response.isSigned());
-        responseValidators.add(new ResponseDestinationValidator(config.getSingleLogoutServiceURL(), allowNullDestination));
+        if (binding == Binding.HTTP_REDIRECT) {
+            responseValidators.add(new ResponseURISignatureValidator(credentialProvider.getValidationCredential(), httpRequest, true));
+            responseValidators.add(new ResponseDestinationValidator(config.getSingleLogoutServiceURL(), httpRequest.getParameter("Signature") == null));
+        } else {
+            responseValidators.add(new ResponseSignatureValidator(credentialProvider.getValidationCredential(), true));
+            responseValidators.add(new ResponseDestinationValidator(config.getSingleLogoutServiceURL(), !response.isSigned()));
+        }
 
         /*
          * The status code of the response must be 'urn:oasis:names:tc:SAML:2.0:status:Success'

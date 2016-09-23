@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,7 +61,6 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
-import com.openexchange.oauth.json.Tools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -96,7 +96,7 @@ public final class DeleteAction extends AbstractOAuthAJAXActionService {
              * Delete account
              */
             final OAuthService oAuthService = getOAuthService();
-            oAuthService.deleteAccount(Tools.getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
+            oAuthService.deleteAccount(getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
         } else if(data instanceof JSONArray) {
             JSONArray jsonArray = (JSONArray) data;
             for (int i = 0; i < jsonArray.length(); i++) {
@@ -110,7 +110,7 @@ public final class DeleteAction extends AbstractOAuthAJAXActionService {
                  * Delete account
                  */
                 final OAuthService oAuthService = getOAuthService();
-                oAuthService.deleteAccount(Tools.getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
+                oAuthService.deleteAccount(getUnsignedInteger(accountId), session.getUserId(), session.getContextId());
                 } catch (JSONException e) {
                     throw AjaxExceptionCodes.JSON_ERROR.create(e);
                 }

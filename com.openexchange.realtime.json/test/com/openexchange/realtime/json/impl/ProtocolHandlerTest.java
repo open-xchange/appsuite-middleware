@@ -205,10 +205,10 @@ public class ProtocolHandlerTest {
     }
 
     private void handle(String message) throws OXException, JSONException {
-        handler.handleIncomingMessages(id, null, new StateEntry(null, null, false), Arrays.asList(new JSONObject(message)), null);
+        handler.handleIncomingMessages(id, null, new StateEntry(null, null, false), Arrays.asList(new JSONObject(message)), null, null);
     }
 
     private void handle(List<JSONObject> stanzas) throws OXException, JSONException {
-        handler.handleIncomingMessages(id, null, new StateEntry(null, null, false), stanzas, null);
+        handler.handleIncomingMessages(id, null, new StateEntry(null, null, false), stanzas, null, null);
     }
 }

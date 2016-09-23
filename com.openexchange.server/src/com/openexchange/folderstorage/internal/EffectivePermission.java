@@ -49,9 +49,6 @@
 
 package com.openexchange.folderstorage.internal;
 
-import gnu.trove.EmptyTIntSet;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -69,6 +66,9 @@ import com.openexchange.groupware.userconfiguration.AllowAllUserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
+import gnu.trove.EmptyTIntSet;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link EffectivePermission} - A read-only permission considering user access restrictions and folder boundaries.
@@ -253,7 +253,7 @@ public final class EffectivePermission implements Permission {
     }
 
     private boolean isNumericId() {
-        return Tools.getUnsignedInteger(folderId) >= 0;
+        return com.openexchange.java.util.Tools.getUnsignedInteger(folderId) >= 0;
     }
 
     private UserPermissionBits getUserPermissionBits() {

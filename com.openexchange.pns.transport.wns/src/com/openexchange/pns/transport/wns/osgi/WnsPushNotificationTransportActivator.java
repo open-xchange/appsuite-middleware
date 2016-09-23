@@ -58,8 +58,10 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushExceptionCodes;
@@ -117,12 +119,25 @@ public class WnsPushNotificationTransportActivator extends HousekeepingActivator
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, PushSubscriptionRegistry.class, PushMessageGeneratorRegistry.class };
+        return new Class<?>[] { ConfigurationService.class, PushSubscriptionRegistry.class, PushMessageGeneratorRegistry.class, ConfigViewFactory.class };
     }
 
     @Override
     protected synchronized void startBundle() throws Exception {
         reinit(getService(ConfigurationService.class));
+
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                WnsPushNotificationTransport.invalidateEnabledCache();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return null;
+            }
+        });
     }
 
     @Override
@@ -153,11 +168,6 @@ public class WnsPushNotificationTransportActivator extends HousekeepingActivator
             this.optionsProviderRegistration = null;
         }
 
-        if (!configService.getBoolProperty("com.openexchange.pns.transport.wns.enabled", false)) {
-            LOG.info("WNS push notification transport is disabled per configuration");
-            return;
-        }
-
         Object yaml = configService.getYaml(CONFIGFILE_WNS_OPTIONS);
         if (null != yaml && Map.class.isInstance(yaml)) {
             Map<String, Object> map = (Map<String, Object>) yaml;
@@ -171,7 +181,7 @@ public class WnsPushNotificationTransportActivator extends HousekeepingActivator
             }
         }
 
-        wnsTransport = new WnsPushNotificationTransport(getService(PushSubscriptionRegistry.class), getService(PushMessageGeneratorRegistry.class), context);
+        wnsTransport = new WnsPushNotificationTransport(getService(PushSubscriptionRegistry.class), getService(PushMessageGeneratorRegistry.class), getService(ConfigViewFactory.class), context);
         wnsTransport.open();
         this.wnsTransport = wnsTransport;
     }

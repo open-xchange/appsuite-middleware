@@ -51,7 +51,7 @@ package com.openexchange.contacts.json;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.contacts.json.actions.AdvancedSearchAction;
@@ -101,7 +101,7 @@ public class ContactActionFactory implements AJAXActionServiceFactory {
 
     public ContactActionFactory(final ServiceLookup serviceLookup) {
         super();
-        actions = new ConcurrentHashMap<String, ContactAction>(15, 0.9f, 1);
+        ImmutableMap.Builder<String, ContactAction> actions = ImmutableMap.builder();
         actions.put("get", new GetAction(serviceLookup));
         actions.put("all", new AllAction(serviceLookup));
         actions.put("list", new ListAction(serviceLookup));
@@ -118,6 +118,7 @@ public class ContactActionFactory implements AJAXActionServiceFactory {
         actions.put("anniversaries", new AnniversariesAction(serviceLookup));
         actions.put("autocomplete", new AutocompleteAction(serviceLookup));
         actions.put("getVcard", new GetVCardAction(serviceLookup));
+        this.actions = actions.build();
     }
 
     @Override

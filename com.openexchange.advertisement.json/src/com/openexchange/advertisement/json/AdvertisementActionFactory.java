@@ -50,8 +50,8 @@
 package com.openexchange.advertisement.json;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
@@ -67,24 +67,26 @@ public class AdvertisementActionFactory implements AJAXActionServiceFactory {
 
     private static final AdvertisementActionFactory SINGLETON = new AdvertisementActionFactory();
 
-    private final Map<String, AJAXActionService> actions;
-
     public static final AdvertisementActionFactory getInstance() {
         return SINGLETON;
     }
 
+    // -----------------------------------------------------------------------------------------------------
+
+    private final Map<String, AJAXActionService> actions;
+
+    /**
+     * Initializes a new {@link AdvertisementActionFactory}.
+     */
     private AdvertisementActionFactory() {
         super();
         actions = initActions();
     }
 
-    /**
-     * @return
-     */
     private Map<String, AJAXActionService> initActions() {
-        final Map<String, AJAXActionService> tmp = new HashMap<>(1);
+        ImmutableMap.Builder<String, AJAXActionService> tmp = ImmutableMap.builder();
         tmp.put(GetConfigAction.ACTION, new GetConfigAction());
-        return tmp;
+        return tmp.build();
     }
 
     @Override

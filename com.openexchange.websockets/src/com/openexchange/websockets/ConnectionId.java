@@ -65,7 +65,7 @@ public class ConnectionId implements Comparable<ConnectionId> {
      * @return The new instance
      */
     public static ConnectionId newInstance(String id) {
-        return new ConnectionId(id);
+        return null == id ? null : new ConnectionId(id);
     }
 
     // ---------------------------------------------------------
@@ -79,7 +79,7 @@ public class ConnectionId implements Comparable<ConnectionId> {
     private ConnectionId(String id) {
         super();
         this.id = id;
-        this.hash = 31 * 1 + ((id == null) ? 0 : id.hashCode());
+        this.hash = id.hashCode();
     }
 
     /**
@@ -101,7 +101,10 @@ public class ConnectionId implements Comparable<ConnectionId> {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof ConnectionId)) {
+        if (null == obj) {
+            return false;
+        }
+        if (obj.getClass() != ConnectionId.class) {
             return false;
         }
         ConnectionId other = (ConnectionId) obj;

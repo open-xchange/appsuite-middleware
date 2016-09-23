@@ -67,7 +67,6 @@ import org.apache.http.auth.AuthScheme;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.AuthState;
 import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -132,7 +131,7 @@ public class HttpDoveAdmEndpointManager {
         }
     }
 
-    private static DefaultHttpClient newHttpClient(int totalConnections, int maxConnectionsPerRoute, int readTimeout, int connectTimeout, String authLogin, String authPassword) {
+    private static DefaultHttpClient newHttpClient(int totalConnections, int maxConnectionsPerRoute, int readTimeout, int connectTimeout) {
         ClientConfig clientConfig = ClientConfig.newInstance()
             .setUserAgent("OX Dovecot Http Client v" + Version.getInstance().getVersionString())
             .setMaxTotalConnections(totalConnections)
@@ -140,20 +139,10 @@ public class HttpDoveAdmEndpointManager {
             .setConnectionTimeout(connectTimeout)
             .setSocketReadTimeout(readTimeout);
 
-        DefaultHttpClient tmp = HttpClients.getHttpClient(clientConfig);
-
-        if (null != authLogin && null != authPassword) {
-            Credentials credentials = new UsernamePasswordCredentials(authLogin, authPassword);
-            tmp.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
-
-            // Add "preemptive-auth" as the first request interceptor
-            tmp.addRequestInterceptor(new PreemptiveAuth(), 0);
-        }
-
-        return tmp;
+        return HttpClients.getHttpClient(clientConfig);
     }
 
-    private static EndpointListing listingFor(String endPoints, EndpointManagerFactory factory, String authLogin, String authPassword, StringBuilder propPrefix, ConfigurationService configService) throws OXException {
+    private static EndpointListing listingFor(String endPoints, EndpointManagerFactory factory, StringBuilder propPrefix, ConfigurationService configService) throws OXException {
         // Parse end-point list
         List<String> l = Arrays.asList(Strings.splitByComma(endPoints.trim()));
 
@@ -167,7 +156,7 @@ public class HttpDoveAdmEndpointManager {
         int connectTimeout = configService.getIntProperty(propPrefix.append("connectTimeout").toString(), 1500);
 
         // Initialize HTTP client for the listing
-        DefaultHttpClient httpClient = newHttpClient(totalConnections, maxConnectionsPerRoute, readTimeout, connectTimeout, authLogin, authPassword);
+        DefaultHttpClient httpClient = newHttpClient(totalConnections, maxConnectionsPerRoute, readTimeout, connectTimeout);
 
         // Setup end-point manager for the listing
         EndpointManager endpointManager = factory.createEndpointManager(l, httpClient, AVAILABILITY_STRATEGY, 60, TimeUnit.SECONDS);
@@ -222,53 +211,38 @@ public class HttpDoveAdmEndpointManager {
      *
      * @param factory The end-point factory to use
      * @param configService The configuration service to read properties from
+     * @return <code>true</code> if at least one valid end-point is specified; otherwise <code>false</code>
      * @throws OXException If initialization fails
      */
-    public void init(EndpointManagerFactory factory, ConfigurationService configService) throws OXException {
+    public boolean init(EndpointManagerFactory factory, ConfigurationService configService) throws OXException {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(HttpDoveAdmEndpointManager.class);
-
-        String authLogin = configService.getProperty("com.openexchange.mailaccount.dovecot.basic-auth.login");
-        String authPassword = configService.getProperty("com.openexchange.mailaccount.dovecot.basic-auth.password");
-        if (null != authLogin) {
-            if (Strings.isEmpty(authLogin)) {
-                authLogin = null;
-            } else {
-                authLogin = authLogin.trim();
-            }
-        }
-        if (null != authPassword) {
-            if (Strings.isEmpty(authLogin)) {
-                authPassword = null;
-            } else {
-                authPassword = authPassword.trim();
-            }
-        }
 
         EnumMap<HttpDoveAdmCall, EndpointListing> endpoints = new EnumMap<HttpDoveAdmCall, EndpointListing>(HttpDoveAdmCall.class);
 
-        String fallBackName = "com.openexchange.mailaccount.dovecot.endpoints";
+        String fallBackName = "com.openexchange.dovecot.doveadm.endpoints";
         EndpointListing fallBackEntry = null;
         for (HttpDoveAdmCall call : HttpDoveAdmCall.values()) {
-            String propName = "com.openexchange.mailaccount.dovecot.endpoints." + call.toString();
+            String propName = "com.openexchange.dovecot.doveadm.endpoints." + call.getName();
             String endPoints = configService.getProperty(propName);
             if (Strings.isEmpty(endPoints)) {
                 if (null == fallBackEntry) {
                     endPoints = configService.getProperty(fallBackName);
                     if (Strings.isEmpty(endPoints)) {
                         // No end-point
-                        logger.info("No Dovecot mail account end-points defined for call {} via property {}", call.toString(), propName);
-                        return;
+                        logger.info("No Dovecot DoceAdm REST interface end-points defined via property {}", propName);
+                        return false;
                     }
 
-                    fallBackEntry = listingFor(endPoints, factory, authLogin, authPassword, new StringBuilder(fallBackName.length() + 1).append(fallBackName).append('.'), configService);
+                    fallBackEntry = listingFor(endPoints, factory, new StringBuilder(fallBackName.length() + 1).append(fallBackName).append('.'), configService);
                 }
                 endpoints.put(call, fallBackEntry);
             } else {
-                endpoints.put(call, listingFor(endPoints, factory, authLogin, authPassword, new StringBuilder(propName.length() + 1).append(propName).append('.'), configService));
+                endpoints.put(call, listingFor(endPoints, factory, new StringBuilder(propName.length() + 1).append(propName).append('.'), configService));
             }
         }
 
         endpointsReference.set(endpoints);
+        return true;
     }
 
     /**

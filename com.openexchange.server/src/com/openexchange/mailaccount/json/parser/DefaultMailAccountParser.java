@@ -51,8 +51,6 @@ package com.openexchange.mailaccount.json.parser;
 
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.toLowerCase;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -64,15 +62,17 @@ import org.json.JSONObject;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Tools;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
-import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.MailAccountFields;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * {@link DefaultMailAccountParser} - Parses a JSON object to a mail account.

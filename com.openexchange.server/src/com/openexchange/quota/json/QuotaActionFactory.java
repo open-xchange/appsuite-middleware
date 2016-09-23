@@ -51,8 +51,8 @@ package com.openexchange.quota.json;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import org.osgi.framework.BundleContext;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
@@ -77,12 +77,13 @@ public class QuotaActionFactory implements AJAXActionServiceFactory {
      */
     public QuotaActionFactory(final ServiceLookup services, final BundleContext context) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(5, 0.9f, 1);
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         GetAction getAction = new com.openexchange.quota.json.actions.GetAction(context);
         actions.put("get", getAction);
         actions.put("GET", getAction);
         actions.put("filestore", new com.openexchange.quota.json.actions.FilestoreAction(services));
         actions.put("mail", new com.openexchange.quota.json.actions.MailAction(services));
+        this.actions = actions.build();
     }
 
     @Override

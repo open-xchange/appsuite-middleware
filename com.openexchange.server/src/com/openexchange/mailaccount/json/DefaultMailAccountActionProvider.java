@@ -49,9 +49,8 @@
 
 package com.openexchange.mailaccount.json;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.json.actions.AllAction;
@@ -103,7 +102,7 @@ public class DefaultMailAccountActionProvider implements MailAccountActionProvid
     }
 
     private Map<String, AJAXActionService> initActions() {
-        Map<String, AJAXActionService> tmp = new HashMap<String, AJAXActionService>();
+        ImmutableMap.Builder<String, AJAXActionService> tmp = ImmutableMap.builder();
         tmp.put(AllAction.ACTION, new AllAction());
         tmp.put(ListAction.ACTION, new ListAction());
         tmp.put(GetAction.ACTION, new GetAction());
@@ -112,7 +111,7 @@ public class DefaultMailAccountActionProvider implements MailAccountActionProvid
         tmp.put(UpdateAction.ACTION, new UpdateAction());
         tmp.put(GetTreeAction.ACTION, new GetTreeAction());
         tmp.put(NewAction.ACTION, new NewAction());
-        return Collections.unmodifiableMap(tmp);
+        return tmp.build();
     }
 
 }

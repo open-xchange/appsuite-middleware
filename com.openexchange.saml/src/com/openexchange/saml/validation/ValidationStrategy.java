@@ -93,10 +93,11 @@ public interface ValidationStrategy {
      * Validates a logout response.
      *
      * @param response The response
+     * @param httpRequest The according servlet request
      * @param requestInfo The request info according to the response
      * @param binding The binding
      * @throws ValidationException If the response validation fails
      */
-    void validateLogoutResponse(LogoutResponse response, LogoutRequestInfo requestInfo, Binding binding) throws ValidationException;
+    void validateLogoutResponse(LogoutResponse response, HttpServletRequest httpRequest, LogoutRequestInfo requestInfo, Binding binding) throws ValidationException;
 
 }

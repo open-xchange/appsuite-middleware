@@ -60,11 +60,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.pns.EnabledKey;
 import com.openexchange.pns.Hits;
-import com.openexchange.pns.KnownTopic;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
 import com.openexchange.pns.PushExceptionCodes;
@@ -88,9 +93,6 @@ import com.openexchange.websockets.WebSocketService;
  */
 public class WebSocketPushNotificationTransport implements PushNotificationTransport, PushSubscriptionProvider {
 
-    /** The topic for all */
-    private static final String ALL = KnownTopic.ALL.getName();
-
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WebSocketPushNotificationTransport.class);
 
     /** The identifier of the Web Socket transport */
@@ -98,60 +100,9 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
 
     private static final String TOKEN_PREFIX = "ws::";
 
-    private static final String ATTR_WS_CLIENT = "ws:client";
-
-    private static volatile Long delayDuration;
-
-    private static long delayDuration(ServiceLookup services) {
-        Long tmp = delayDuration;
-        if (null == tmp) {
-            synchronized (WebSocketPushNotificationTransport.class) {
-                tmp = delayDuration;
-                if (null == tmp) {
-                    int defaultValue = 10000; // 10 seconds
-                    ConfigurationService service = services.getOptionalService(ConfigurationService.class);
-                    if (null == service) {
-                        return defaultValue;
-                    }
-                    tmp = Long.valueOf(service.getIntProperty("com.openexchange.pns.transport.websocket.delayDuration", defaultValue));
-                    delayDuration = tmp;
-                }
-            }
-        }
-        return tmp.longValue();
-    }
-
-    private static volatile Long timerFrequency;
-
-    private static long timerFrequency(ServiceLookup services) {
-        Long tmp = timerFrequency;
-        if (null == tmp) {
-            synchronized (WebSocketPushNotificationTransport.class) {
-                tmp = timerFrequency;
-                if (null == tmp) {
-                    int defaultValue = 2000; // 2 seconds
-                    ConfigurationService service = services.getOptionalService(ConfigurationService.class);
-                    if (null == service) {
-                        return defaultValue;
-                    }
-                    tmp = Long.valueOf(service.getIntProperty("com.openexchange.pns.transport.websocket.timerFrequency", defaultValue));
-                    timerFrequency = tmp;
-                }
-            }
-        }
-        return tmp.longValue();
-    }
-
-    /**
-     * Cleans statically initialized values.
-     */
-    public static void cleanseInits() {
-        delayDuration = null;
-        timerFrequency = null;
-    }
-
     // ---------------------------------------------------------------------------------------------------------------
 
+    private final ConfigViewFactory configViewFactory;
     private final WebSocketToClientResolverRegistry resolvers;
     private final WebSocketService webSocketService;
     private final PushMessageGeneratorRegistry generatorRegistry;
@@ -164,6 +115,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         this.resolvers = resolvers;
         this.webSocketService = services.getService(WebSocketService.class);
         this.generatorRegistry = services.getService(PushMessageGeneratorRegistry.class);
+        this.configViewFactory = services.getService(ConfigViewFactory.class);
     }
 
     /**
@@ -316,6 +268,50 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         return ID;
     }
 
+    private static final Cache<EnabledKey, Boolean> CACHE_AVAILABILITY = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
+
+    /**
+     * Invalidates the <i>enabled cache</i>.
+     */
+    public static void invalidateEnabledCache() {
+        CACHE_AVAILABILITY.invalidateAll();
+    }
+
+    @Override
+    public boolean isEnabled(String topic, String client, int userId, int contextId) throws OXException {
+        EnabledKey key = new EnabledKey(topic, client, userId, contextId);
+        Boolean result = CACHE_AVAILABILITY.getIfPresent(key);
+        if (null == result) {
+            result = Boolean.valueOf(doCheckEnabled(topic, client, userId, contextId));
+            CACHE_AVAILABILITY.put(key, result);
+        }
+        return result.booleanValue();
+    }
+
+    private boolean doCheckEnabled(String topic, String client, int userId, int contextId) throws OXException {
+        ConfigView view = configViewFactory.getView(userId, contextId);
+
+        String basePropertyName = "com.openexchange.pns.transport.websocket.enabled";
+
+        ComposedConfigProperty<Boolean> property;
+        property = null == topic || null == client ? null : view.property(basePropertyName + "." + client + "." + topic, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        property = null == client ? null : view.property(basePropertyName + "." + client, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        property = view.property(basePropertyName, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        return false;
+    }
+
     @Override
     public void transport(PushNotification notification, Collection<PushMatch> matches) throws OXException {
         if (null != notification && null != matches && !matches.isEmpty()) {
@@ -353,7 +349,6 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         int userId = uac.getUserId();
         int contextId = uac.getContextId();
         webSocketService.sendMessage(textMessage, clientAndPathFilter.getPathFilter(), userId, contextId);
-        LOG.info("Sent notification \"{}\" via transport '{}' using path filter \"{}\" to user {} in context {}", notification.getTopic(), ID, clientAndPathFilter.getPathFilter(), I(userId), I(contextId));
     }
 
     private Map<String, ClientAndPathFilter> getResolveResultsFor(Collection<PushMatch> matches) throws OXException {

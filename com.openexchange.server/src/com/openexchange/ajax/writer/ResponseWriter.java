@@ -49,8 +49,22 @@
 
 package com.openexchange.ajax.writer;
 
-import static com.openexchange.ajax.fields.ResponseFields.*;
-import static com.openexchange.ajax.requesthandler.Utils.getUnsignedInteger;
+import static com.openexchange.ajax.fields.ResponseFields.ARGUMENTS;
+import static com.openexchange.ajax.fields.ResponseFields.CONTINUATION;
+import static com.openexchange.ajax.fields.ResponseFields.DATA;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_CATEGORIES;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_CATEGORY;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_CODE;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_DESC;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_ID;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_PARAMS;
+import static com.openexchange.ajax.fields.ResponseFields.ERROR_STACK;
+import static com.openexchange.ajax.fields.ResponseFields.PROBLEMATIC;
+import static com.openexchange.ajax.fields.ResponseFields.TIMESTAMP;
+import static com.openexchange.ajax.fields.ResponseFields.TRUNCATED;
+import static com.openexchange.ajax.fields.ResponseFields.WARNINGS;
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Date;

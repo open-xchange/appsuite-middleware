@@ -53,6 +53,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.util.tracker.ServiceTracker;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
@@ -109,11 +110,8 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
         this.remoteDistributor = remoteDistributor;
 
         WebSocketListenerTracker listenerTracker = new WebSocketListenerTracker(context);
-        track(WebSocketListener.class, listenerTracker);
-        track(HazelcastInstance.class, new HzTracker(remoteDistributor, this, context));
-        openTrackers();
-
-        registerService(CustomPortableFactory.class, new PortableMessageDistributorFactory(), null);
+        ServiceTracker<WebSocketListener, WebSocketListener> st = track(WebSocketListener.class, listenerTracker);
+        st.open();
 
         GrizzlyWebSocketApplication app = this.app;
         if (null == app) {
@@ -127,6 +125,11 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
             long period = GrizzlyWebSocketSessionToucher.getTouchPeriod(getService(ConfigurationService.class));
             sessionToucherTask = getService(TimerService.class).scheduleAtFixedRate(new GrizzlyWebSocketSessionToucher(app), period, period);
         }
+
+        track(HazelcastInstance.class, new HzTracker(remoteDistributor, this, context));
+        openTrackers();
+
+        registerService(CustomPortableFactory.class, new PortableMessageDistributorFactory(), null);
 
         {
             Dictionary<String, Object> props = new Hashtable<>(2);

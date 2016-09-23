@@ -1,0 +1,69 @@
+#! /bin/bash
+### BEGIN INIT INFO
+# Provides:          open-xchange-imageserver
+# Required-Start:    $network $local_fs
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Open-Xchange FileServer
+# Description:       Open-Xchange FileServer - uses a web service to provide imageserver service.
+### END INIT INFO
+
+STARTSCRIPT=/opt/open-xchange/imageserver/sbin/open-xchange-imageserver
+NAME=imageserver
+DESC="Open-Xchange FileServer"
+OXFUNCTIONS=/opt/open-xchange/lib/oxfunctions.sh
+OXCONFIG=/opt/open-xchange/imageserver/etc/process-conf.sh
+
+if [ ! -f $OXFUNCTIONS ]; then
+    echo "$DESC: $OXFUNCTIONS missing, exiting"
+    exit 0
+fi
+if [ ! -f $OXCONFIG ]; then
+    echo "$DESC: $OXCONFIG missing, exiting"
+    exit 0
+fi
+
+. /lib/lsb/init-functions
+. $OXFUNCTIONS
+. $OXCONFIG
+
+case "$1" in
+  start)
+    echo -n "Starting $DESC: "
+    ox_start_daemon $STARTSCRIPT $NAME open-xchange open-xchange
+    echo "$NAME."
+    ;;
+
+  stop)
+    echo -n "Stopping $DESC: "
+
+    pidfile=/var/run/${NAME}.pid
+    test -e $pidfile && read pid < $pidfile
+    ox_stop_daemon $NAME true
+    while ox_is_running $NAME "/opt/open-xchange/imageserver/etc" $pid; do
+          sleep 1
+    done
+    echo "$NAME."
+    ;;
+
+  restart|force-reload)
+    echo -n "Restarting $DESC: "
+        $0 stop
+        $0 start
+    echo "$NAME."
+    ;;
+
+  status)
+    status_of_proc -p /var/run/${NAME}.pid $STARTSCRIPT "$NAME"
+    exit $?
+    ;;
+
+  *)
+    N=/etc/init.d/open-xchange-${NAME}
+    echo "Usage: $N {start|stop|restart|force-reload|status}" >&2
+    exit 1
+    ;;
+esac
+
+exit 0

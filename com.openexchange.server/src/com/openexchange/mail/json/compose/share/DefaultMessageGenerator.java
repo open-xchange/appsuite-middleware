@@ -66,6 +66,7 @@ import java.util.Locale;
 import java.util.Map;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -557,7 +558,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
             Map<String, String> filenameMapping = generateFilenameMapping(items, translator);
             Map<String, String> previewImages = new HashMap<>(cidMapping.size());
             for (String preview : cidMapping.keySet()) {
-                previewImages.put(preview, "<img src=\"cid:" + cidMapping.get(preview) + "\" heigth=200 width=150 />");
+                previewImages.put(preview, "cid:" + cidMapping.get(preview));
             }
             vars.put(VARIABLE_PREVIEW, previewImages);
             vars.put(VARIABLE_FILE_NAMES, filenameMapping);
@@ -665,7 +666,20 @@ public class DefaultMessageGenerator implements MessageGenerator {
         Map<String, String> mapping = new HashMap<>();
         for (Item i : items) {
             String name = i.getName();
-            mapping.put(i.getId(), Strings.isNotEmpty(name) ? StringEscapeUtils.escapeHtml(name) : translator.translate(ShareComposeStrings.DEFAULT_FILE_NAME));
+            if (null == name || Strings.isEmpty(name)) {
+                name = translator.translate(ShareComposeStrings.DEFAULT_FILE_NAME);
+            } else {
+                name = StringEscapeUtils.escapeHtml(name);
+                if (name.length() > 30) {
+                    String base = FilenameUtils.getBaseName(name);
+                    String ext = FilenameUtils.getExtension(name);
+                    name = Strings.abbreviate(base, 25);
+                    if (Strings.isNotEmpty(ext)) {
+                        name = name + ext;
+                    }
+                }
+            }
+            mapping.put(i.getId(), name);
         }
         return mapping;
     }

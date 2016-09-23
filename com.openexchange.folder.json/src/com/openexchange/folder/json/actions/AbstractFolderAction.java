@@ -49,7 +49,7 @@
 
 package com.openexchange.folder.json.actions;
 
-import static com.openexchange.folder.json.Tools.getUnsignedInteger;
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

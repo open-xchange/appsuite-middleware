@@ -54,6 +54,7 @@ import java.lang.reflect.UndeclaredThrowableException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -66,7 +67,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang.StringUtils;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
 import org.glassfish.grizzly.http.Cookies;
 import org.glassfish.grizzly.http.HttpContent;
@@ -117,7 +117,8 @@ import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
  */
 public class GrizzlyWebSocketApplication extends WebSocketApplication {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketApplication.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketApplication.class);
+    private static final Logger WS_LOGGER = org.slf4j.LoggerFactory.getLogger("WEBSOCKET");
 
     private static final String LOCAL_HOST;
     static {
@@ -128,6 +129,15 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             fbHost = "localhost";
         }
         LOCAL_HOST = fbHost;
+    }
+
+    /**
+     * Gets the address of the local host.
+     *
+     * @return The local host's address
+     */
+    public static String getLocalHost() {
+        return LOCAL_HOST;
     }
 
     private static final AtomicReference<GrizzlyWebSocketApplication> APPLICATION_REFERENCE = new AtomicReference<GrizzlyWebSocketApplication>();
@@ -285,6 +295,35 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     }
 
     /**
+     * Closes the Web Socket matching given identifier.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param connectionId The connection identifier
+     * @return <code>true</code> if such a Web Socket was closed; otherwise <code>false</code>
+     */
+    public boolean closeWebSockets(int userId, int contextId, ConnectionId connectionId) {
+        if (null == connectionId) {
+            return false;
+        }
+
+        ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
+        if (null == userSockets) {
+            return false;
+        }
+
+        SessionBoundWebSocket sessionBoundSocket = userSockets.remove(connectionId);
+        if (null == sessionBoundSocket) {
+            return false;
+        }
+
+        sessionBoundSocket.send("session:invalid");
+        closeSocketSafe(sessionBoundSocket);
+        LOGGER.debug("Closed Web Socket ({}) with path \"{}\" for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
+        return true;
+    }
+
+    /**
      * Closes all locally available Web Sockets matching specified path filter expression (if any).
      * <p>
      * In case no path filter expression is given (<code>pathFilter == null</code>), all user-associated Web Sockets are closed.
@@ -305,6 +344,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 sessionBoundSocket.send("session:invalid");
                 closeSocketSafe(sessionBoundSocket);
                 it.remove();
+                LOGGER.debug("Closed Web Socket ({}) with path \"{}\" for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
             }
         }
     }
@@ -332,6 +372,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 sessionBoundSocket.send("session:invalid");
                 closeSocketSafe(sessionBoundSocket);
                 it.remove();
+                LOGGER.debug("Closed Web Socket ({}) with path \"{}\" bound to dropped/removed session {} for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), sessionId, I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
             }
         }
     }
@@ -341,7 +382,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             remoteDistributor.removeWebSocket(webSocket);
             webSocket.close();
         } catch (Exception e) {
-            LOG.error("Failed closing Web Socket () with path {} for user {} in context {}", webSocket.getConnectionId(), webSocket.getPath(), I(webSocket.getUserId()), I(webSocket.getContextId()), e);
+            LOGGER.error("Failed closing Web Socket ({}) with path \"{}\" for user {} in context {}", webSocket.getConnectionId(), webSocket.getPath(), I(webSocket.getUserId()), I(webSocket.getContextId()), e);
         }
     }
 
@@ -350,11 +391,12 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
      *
      * @param message The text message to send
      * @param pathFilter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
+     * @param remote Whether the text message was remotely received; otherwise <code>false</code> for local origin
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public Future<Void> sendToUserAsync(String message, String pathFilter, int userId, int contextId) {
-        SendToUserTask task = new SendToUserTask(message, pathFilter, userId, contextId, this);
+    public Future<Void> sendToUserAsync(String message, String pathFilter, boolean remote, int userId, int contextId) {
+        SendToUserTask task = new SendToUserTask(message, pathFilter, remote, userId, contextId, this);
         return ThreadPools.submitElseExecute(task);
     }
 
@@ -363,22 +405,34 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
      *
      * @param message The text message to send
      * @param pathFilter The optional path to filter by (e.g. <code>"/websockets/push"</code>)
+     * @param remote Whether the text message was remotely received; otherwise <code>false</code> for local origin
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public void sendToUser(final String message, String pathFilter, int userId, int contextId) {
+    public void sendToUser(String message, String pathFilter, boolean remote, int userId, int contextId) {
+        String info = remote ? "remotely received" : "locally created";
+
         ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
-        if (null != userSockets) {
-            for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
-                if (WebSockets.matches(pathFilter, sessionBoundSocket.getPath())) {
-                    try {
-                        sessionBoundSocket.sendMessage(message);
-                        LOG.info("Sent message \"{}\" via Web Socket using path filter \"{}\" to user {} in context {}", new Object() { @Override public String toString(){ return StringUtils.abbreviate(message, 24); }}, pathFilter, userId, contextId);
-                    } catch (OXException e) {
-                        LOG.error("Failed to send message to Web Socket: {}", sessionBoundSocket, e);
-                    }
+        if (null == userSockets || userSockets.isEmpty()) {
+            WS_LOGGER.debug("Found no local Web Sockets to send {} message \"{}\" to user {} in context {}", info, GrizzlyWebSocketUtils.abbreviateMessageArg(message), I(userId), I(contextId));
+            return;
+        }
+
+        boolean any = false;
+        for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
+            if (WebSockets.matches(pathFilter, sessionBoundSocket.getPath())) {
+                any = true;
+                try {
+                    sessionBoundSocket.sendMessage(message);
+                    WS_LOGGER.debug("Sent {} message \"{}\" via Web Socket ({}) using path filter \"{}\" to user {} in context {}", info, GrizzlyWebSocketUtils.abbreviateMessageArg(message), sessionBoundSocket.getConnectionId(), pathFilter, I(userId), I(contextId));
+                } catch (OXException e) {
+                    WS_LOGGER.debug("Failed to send {} message to Web Socket: {}", info, sessionBoundSocket, e);
                 }
             }
+        }
+
+        if (!any) {
+            WS_LOGGER.debug("Found no matching local Web Socket to send {} message \"{}\" using path filter \"{}\" to user {} in context {}", info, GrizzlyWebSocketUtils.abbreviateMessageArg(message), pathFilter, I(userId), I(contextId));
         }
     }
 
@@ -407,20 +461,26 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(userId, contextId));
         if (null == userSockets || userSockets.isEmpty()) {
             // No socket at all
+            WS_LOGGER.debug("Found no local Web Sockets for user {} in context {}", I(userId), I(contextId));
             return false;
         }
 
         if (null == pathFilter) {
             // No filter given
+            WS_LOGGER.debug("Found local Web Socket for user {} in context {}", I(userId), I(contextId));
             return true;
         }
 
         // Check if any satisfies given filter
-        for (SessionBoundWebSocket sessionBoundSocket : userSockets.values()) {
+        List<SessionBoundWebSocket> sockets = new ArrayList<>(userSockets.values());
+        for (SessionBoundWebSocket sessionBoundSocket : sockets) {
             if (WebSockets.matches(pathFilter, sessionBoundSocket)) {
+                WS_LOGGER.debug("Found local Web Socket for user {} in context {} matching filter \"{}\"", I(userId), I(contextId), pathFilter);
                 return true;
             }
         }
+
+        WS_LOGGER.debug("Found no local Web Socket for user {} in context {} matching filter \"{}\". Available Web Sockets: {}", I(userId), I(contextId), pathFilter, sockets);
         return false;
     }
 
@@ -454,33 +514,31 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
      * @param optSession The optional session associated with the socket to close
      */
     public void close(WebSocket socket, Session optSession) {
-        try {
-            if (socket instanceof SessionBoundWebSocket) {
-                boolean found = false;
-                if (null != optSession) {
-                    ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(optSession));
-                    if (null != userSockets) {
-                        for (Iterator<SessionBoundWebSocket> iter = userSockets.values().iterator(); !found && iter.hasNext();) {
-                            if (socket.equals(iter.next())) {
-                                iter.remove();
-                                found = true;
-                            }
-                        }
-                    }
-                } else {
-                    for (Iterator<ConcurrentMap<ConnectionId, SessionBoundWebSocket>> i = openSockets.values().iterator(); !found && i.hasNext();) {
-                        for (Iterator<SessionBoundWebSocket> iter = i.next().values().iterator(); !found && iter.hasNext();) {
-                            if (socket.equals(iter.next())) {
-                                iter.remove();
-                                found = true;
-                            }
+        if (socket instanceof SessionBoundWebSocket) {
+            boolean found = false;
+            if (null != optSession) {
+                ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(UserAndContext.newInstance(optSession));
+                if (null != userSockets) {
+                    for (Iterator<SessionBoundWebSocket> iter = userSockets.values().iterator(); !found && iter.hasNext();) {
+                        if (socket.equals(iter.next())) {
+                            iter.remove();
+                            found = true;
                         }
                     }
                 }
             } else {
-                remove(socket);
+                for (Iterator<ConcurrentMap<ConnectionId, SessionBoundWebSocket>> i = openSockets.values().iterator(); !found && i.hasNext();) {
+                    for (Iterator<SessionBoundWebSocket> iter = i.next().values().iterator(); !found && iter.hasNext();) {
+                        if (socket.equals(iter.next())) {
+                            iter.remove();
+                            found = true;
+                        }
+                    }
+                }
             }
-        } finally {
+            closeSocketSafe((SessionBoundWebSocket) socket);
+        } else {
+            remove(socket);
             socket.close();
         }
     }
@@ -503,11 +561,13 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             }
 
             // Look-up optional connection identifier; generate a new, unique one if absent
+            boolean validateAbsence = true;
             ConnectionId connectionId;
             {
                 String sConId = parameters.getParameter("connection");
                 if (sConId == null) {
                     sConId = com.openexchange.java.util.UUIDs.getUnformattedStringFromRandom();
+                    validateAbsence = false;
                 }
                 connectionId = ConnectionId.newInstance(sConId);
             }
@@ -516,7 +576,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             Session session = checkSession(sessionId, requestPacket, parameters);
 
             // Check if such a Web Socket already exists
-            if (exists(connectionId, session.getUserId(), session.getContextId())) {
+            if (validateAbsence && exists(connectionId, session.getUserId(), session.getContextId())) {
                 throw new HandshakeException("Such a Web Socket connection already exists: " + connectionId);
             }
 
@@ -569,7 +629,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             throw new HandshakeException("No such session: " + sessionId);
         }
         if (!sessionId.equals(session.getSessionID())) {
-            LOG.info("Request's session identifier \"{}\" differs from the one indicated by SessionD service \"{}\".", sessionId, session.getSessionID());
+            LOGGER.info("Request's session identifier \"{}\" differs from the one indicated by SessionD service \"{}\".", sessionId, session.getSessionID());
             throw new HandshakeException("Wrong session: " + sessionId);
         }
 
@@ -577,14 +637,14 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         Context context = getContextFrom(session);
         if (!context.isEnabled()) {
             sessiond.removeSession(sessionId);
-            LOG.info("The context {} associated with session is locked.", Integer.toString(session.getContextId()));
+            LOGGER.info("The context {} associated with session is locked.", Integer.toString(session.getContextId()));
             throw new HandshakeException("Context locked: " + session.getContextId());
         }
 
         // Check user
         User user = getUserFrom(session, context, sessiond);
         if (!user.isMailEnabled()) {
-            LOG.info("User {} in context {} is not activated.", Integer.toString(user.getId()), Integer.toString(session.getContextId()));
+            LOGGER.info("User {} in context {} is not activated.", Integer.toString(user.getId()), Integer.toString(session.getContextId()));
             throw new HandshakeException("Session expired: " + sessionId);
         }
 
@@ -631,7 +691,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
                 // An outdated session; context absent
                 sessiondService.removeSession(sessionId);
-                LOG.info("The context associated with session \"{}\" cannot be found. Obviously an outdated session which is invalidated now.", sessionId);
+                LOGGER.info("The context associated with session \"{}\" cannot be found. Obviously an outdated session which is invalidated now.", sessionId);
                 throw new HandshakeException("Session expired: " + sessionId);
             }
             if (UserExceptionCode.USER_NOT_FOUND.getPrefix().equals(e.getPrefix())) {
@@ -639,7 +699,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 if (UserExceptionCode.USER_NOT_FOUND.getNumber() == code || LdapExceptionCode.USER_NOT_FOUND.getNumber() == code) {
                     // An outdated session; user absent
                     sessiondService.removeSession(sessionId);
-                    LOG.info("The user associated with session \"{}\" cannot be found. Obviously an outdated session which is invalidated now.", sessionId);
+                    LOGGER.info("The user associated with session \"{}\" cannot be found. Obviously an outdated session which is invalidated now.", sessionId);
                     throw new HandshakeException("Session expired: " + sessionId);
                 }
             }
@@ -660,22 +720,24 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 SessionBoundWebSocket sessionBoundSocket = (SessionBoundWebSocket) socket;
 
                 UserAndContext userAndContext = UserAndContext.newInstance(sessionBoundSocket.getUserId(), sessionBoundSocket.getContextId());
-                ConcurrentMap<ConnectionId, SessionBoundWebSocket> sockets = openSockets.get(userAndContext);
-                if (sockets == null) {
-                    sockets = new BoundedConcurrentHashMap<>(MAX_SIZE, 0.9F, 1, MAX_SIZE);
-                    ConcurrentMap<ConnectionId, SessionBoundWebSocket> existing = openSockets.putIfAbsent(userAndContext, sockets);
+                ConcurrentMap<ConnectionId, SessionBoundWebSocket> userSockets = openSockets.get(userAndContext);
+                if (userSockets == null) {
+                    userSockets = new ConcurrentHashMap<>(MAX_SIZE, 0.9F, 1);
+                    ConcurrentMap<ConnectionId, SessionBoundWebSocket> existing = openSockets.putIfAbsent(userAndContext, userSockets);
                     if (existing != null) {
-                        sockets = existing;
+                        userSockets = existing;
                     }
                 }
 
-                try {
-                    if (null != sockets.putIfAbsent(sessionBoundSocket.getConnectionId(), sessionBoundSocket)) {
+                synchronized (userSockets) {
+                    if (userSockets.size() == MAX_SIZE) {
+                        // Max. number of sockets per user exceeded
+                        throw new HandshakeException("Max. number of Web Sockets (" + MAX_SIZE + ") exceeded for user " + userAndContext.getUserId() + " in context " + userAndContext.getContextId());
+                    }
+
+                    if (null != userSockets.putIfAbsent(sessionBoundSocket.getConnectionId(), sessionBoundSocket)) {
                         throw new HandshakeException("Such a Web Socket connection already exists: " + sessionBoundSocket.getConnectionId());
                     }
-                } catch (BoundedConcurrentHashMap.BoundaryExceededException e) {
-                    // Max. number of sockets per user exceeded
-                    throw new HandshakeException("Max. number of Web Sockets (" + e.getMaxSize() + ") exceeded for user " + userAndContext.getUserId() + " in context " + userAndContext.getContextId());
                 }
 
                 synchronized (sessionBoundSocket) {
@@ -688,6 +750,8 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
                 }
 
                 remoteDistributor.addWebSocket(sessionBoundSocket);
+
+                LOGGER.debug("Accepted Web Socket ({}) with path \"{}\" for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
             } else {
                 super.onConnect(socket);
             }
@@ -712,6 +776,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             }
 
             closeSocketSafe(sessionBoundSocket);
+            LOGGER.debug("Closed Web Socket ({}) with path \"{}\" due to connection closure for user {} in context {}.", sessionBoundSocket.getConnectionId(), sessionBoundSocket.getPath(), I(sessionBoundSocket.getUserId()), I(sessionBoundSocket.getContextId()));
         } else {
             super.onClose(socket, frame);
         }

@@ -62,7 +62,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
-import com.openexchange.folderstorage.internal.Tools;
+import com.openexchange.java.util.Tools;
 import com.openexchange.tools.sql.DBUtils;
 
 /**

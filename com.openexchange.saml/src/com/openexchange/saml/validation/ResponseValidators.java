@@ -49,6 +49,7 @@
 
 package com.openexchange.saml.validation;
 
+import javax.servlet.http.HttpServletRequest;
 import org.opensaml.saml2.core.Issuer;
 import org.opensaml.saml2.core.NameIDType;
 import org.opensaml.saml2.core.Status;
@@ -107,6 +108,61 @@ public class ResponseValidators {
                 return error;
             } else if (enforceSignature) {
                 return new ValidationError(ValidationFailedReason.INVALID_SIGNATURE, "Response '" + response.getID() + "' is not signed");
+            }
+
+            return null;
+        }
+    }
+
+    /**
+     * Verifies the signature of a HTTP request URI against the given validation credential.
+     */
+    public static final class ResponseURISignatureValidator implements ResponseValidator {
+
+        private final Credential validationCredential;
+
+        private final HttpServletRequest httpRequest;
+
+        private final boolean enforceSignature;
+
+        /**
+         * @param validationCredential The credential containing a public key to verify the signature
+         * @param httpRequest The servlet request containing the signed request URI
+         * @param enforceSignature Whether validation should fail if response is not signed
+         */
+        public ResponseURISignatureValidator(Credential validationCredential, HttpServletRequest httpRequest, boolean enforceSignature) {
+            super();
+            this.validationCredential = validationCredential;
+            this.httpRequest = httpRequest;
+            this.enforceSignature = enforceSignature;
+        }
+
+        @Override
+        public ValidationError validate(StatusResponseType response) {
+            /*
+             * All SAML protocol request and response messages MAY be signed using XML Signature.
+             * [core 06 - 5.1p70]
+             *
+             *
+             * Any signature on the SAML protocol message, including the <ds:Signature> XML element itself,
+             * MUST be removed. [...]
+             *
+             * If the original SAML protocol message was signed using an XML digital signature, a new signature
+             * covering the encoded data as specified above MUST be attached[...]
+             * [bindings 05 - 3.4.4.1p17]
+             */
+            String signature = httpRequest.getParameter("Signature");
+            if (signature != null) {
+                ValidationError error = SignatureHelper.validateURISignature(httpRequest, validationCredential);
+                if (error == null) {
+                    LOG.debug("Response is signed via request URI and the signature is valid");
+                } else if (error.getThrowable() != null) {
+                    LOG.debug("", error.getThrowable());
+                }
+
+                return error;
+            } else if (enforceSignature) {
+                return new ValidationError(ValidationFailedReason.INVALID_SIGNATURE, "Response '" + response.getID() + "' is not signed via request URI");
             }
 
             return null;

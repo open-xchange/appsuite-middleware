@@ -72,12 +72,11 @@ public class RestClientActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { TimerService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        trackService(TimerService.class);
         registerService(EndpointManagerFactory.class, new EndpointManagerFactoryImpl(this));
 
         // Avoid annoying WARN logging

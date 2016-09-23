@@ -63,12 +63,12 @@ public enum YahooOAuthScope implements OAuthScope {
     contacts_rw("sdct-w", Module.contacts_rw),
     ;
 
-    private String mapping;
-    private Module module;
+    private final String mapping;
+    private final Module module;
 
     /**
      * Initialises a new {@link YahooOAuthScope}.
-     * 
+     *
      * @param mapping The OAuth mapping
      * @param module The {@link Module}
      */
@@ -79,7 +79,7 @@ public enum YahooOAuthScope implements OAuthScope {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
      */
     @Override
@@ -89,7 +89,7 @@ public enum YahooOAuthScope implements OAuthScope {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScope#getModule()
      */
     @Override

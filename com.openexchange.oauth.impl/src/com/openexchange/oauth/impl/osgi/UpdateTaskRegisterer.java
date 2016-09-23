@@ -61,6 +61,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.oauth.impl.internal.groupware.OAuthAddScopeColumnTask;
 import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask;
 import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask2;
+import com.openexchange.oauth.impl.internal.groupware.RenameMigrateLinkedInServiceIdUpdateTask;
 
 /**
  * Is notified about the {@link DatabaseService} and registers then the {@link OAuthCreateTableTask}.
@@ -85,7 +86,7 @@ public final class UpdateTaskRegisterer implements ServiceTrackerCustomizer<Data
 
             @Override
             public Collection<UpdateTaskV2> getUpdateTasks() {
-                return Arrays.asList(((UpdateTaskV2) new OAuthCreateTableTask(dbService)), new OAuthCreateTableTask2(dbService), new OAuthAddScopeColumnTask(dbService));
+                return Arrays.asList(((UpdateTaskV2) new OAuthCreateTableTask(dbService)), new OAuthCreateTableTask2(dbService), new OAuthAddScopeColumnTask(dbService), new RenameMigrateLinkedInServiceIdUpdateTask(dbService));
             }
         }, null);
         return dbService;

@@ -381,8 +381,9 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
                     throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No such catalog entry with \"name\"=\"swift\" and \"type\"=\"object-store\".");
                 }
 
-                List<String> urls = new ArrayList<String>(jEndpoints.length());
-                for (int k = jEndpoints.length(), i = 0; k-- > 0; i++) {
+                int numOfEndpoints = jEndpoints.length();
+                List<String> urls = new ArrayList<String>(numOfEndpoints);
+                for (int k = numOfEndpoints, i = 0; k-- > 0; i++) {
                     JSONObject jEndpoint = jEndpoints.getJSONObject(i);
                     if (sInterface.equals(jEndpoint.optString("interface", null)) && region.equals(jEndpoint.optString("region", null))) {
                         urls.add(jEndpoint.getString("url") + "/" + containerName);
