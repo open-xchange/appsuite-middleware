@@ -116,7 +116,7 @@ abstract class AbstractClusterLockServiceImpl implements ClusterLockService {
                 if (lockAcquired) {
                     LOGGER.debug("Cluster lock for cluster task '{}' acquired with retry policy '{}'", clusterTask.getTaskName(), retryPolicy.getClass().getSimpleName());
                     TimerService service = services.getService(TimerService.class);
-                    timerTask = service.scheduleAtFixedRate(refreshLockTask, REFRESH_LOCK_THRESHOLD, REFRESH_LOCK_THRESHOLD, TimeUnit.SECONDS);
+                    timerTask = service.scheduleAtFixedRate(refreshLockTask, REFRESH_LOCK_THRESHOLD, REFRESH_LOCK_THRESHOLD, TimeUnit.NANOSECONDS);
                     T t = clusterTask.perform();
                     LOGGER.debug("Cluster task '{}' completed.", clusterTask.getTaskName());
                     return t;
