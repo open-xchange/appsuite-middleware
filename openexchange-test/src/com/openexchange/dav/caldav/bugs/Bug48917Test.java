@@ -101,23 +101,23 @@ public class Bug48917Test extends CalDAVTest {
     }
 
     @Test
-	public void testUpdateDetachedOccurrences() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(fetchSyncToken());
-		/*
-		 * create appointment on server as user b
-		 */
-		String uid = randomUID();
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(TimeTools.D("tomorrow at noon", TimeZone.getTimeZone("Europe/Berlin")));
-	    Appointment appointment = new Appointment();
-	    appointment.setUid(uid);
-	    appointment.setTitle("Bug48917Test");
-	    appointment.setIgnoreConflicts(true);
-	    appointment.setStartDate(calendar.getTime());
-	    calendar.add(Calendar.HOUR_OF_DAY, 1);
+    public void testProposeNewTime() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(fetchSyncToken());
+        /*
+         * create appointment on server as user b
+         */
+        String uid = randomUID();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(TimeTools.D("tomorrow at noon", TimeZone.getTimeZone("Europe/Berlin")));
+        Appointment appointment = new Appointment();
+        appointment.setUid(uid);
+        appointment.setTitle("Bug48917Test");
+        appointment.setIgnoreConflicts(true);
+        appointment.setStartDate(calendar.getTime());
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
         appointment.setEndDate(calendar.getTime());
         appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
         appointment.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
@@ -149,7 +149,55 @@ public class Bug48917Test extends CalDAVTest {
         calendarData = calendarMultiget(eTags.keySet());
         iCalResource = assertContains(uid, calendarData);
         assertEquals("Comment wrong", comment, iCalResource.getVEvent().getPropertyValue("X-CALENDARSERVER-PRIVATE-COMMENT"));
-	}
+    }
+
+    @Test
+    public void testOtherAstralSymbolInComment() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(fetchSyncToken());
+        /*
+         * create appointment on server as user b
+         */
+        String uid = randomUID();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(TimeTools.D("tomorrow at noon", TimeZone.getTimeZone("Europe/Berlin")));
+        Appointment appointment = new Appointment();
+        appointment.setUid(uid);
+        appointment.setTitle("Bug48917Test");
+        appointment.setIgnoreConflicts(true);
+        appointment.setStartDate(calendar.getTime());
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
+        appointment.setEndDate(calendar.getTime());
+        appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
+        appointment.setParentFolderID(manager2.getPrivateFolder());
+        manager2.insert(appointment);
+        /*
+         * verify appointment on client as user a
+         */
+        Map<String, String> eTags = syncCollection(syncToken).getETagsStatusOK();
+        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
+        List<ICalResource> calendarData = calendarMultiget(eTags.keySet());
+        ICalResource iCalResource = assertContains(uid, calendarData);
+        /*
+         * "accept" with astral symbol in comment
+         */
+        Property attendee = iCalResource.getVEvent().getAttendee(getClient().getValues().getDefaultAddress());
+        attendee.getAttributes().put("PARTSTAT", "ACCEPT");
+        String comment = "Pile of \uD83D\uDCA9 poo";
+        iCalResource.getVEvent().getProperties().add(new Property("X-CALENDARSERVER-PRIVATE-COMMENT", comment, new HashMap<String, String>()));
+        assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(iCalResource));
+        /*
+         * verify appointment on client as user a
+         */
+        eTags = syncCollection(syncToken).getETagsStatusOK();
+        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
+        calendarData = calendarMultiget(eTags.keySet());
+        iCalResource = assertContains(uid, calendarData);
+        assertEquals("Comment wrong", comment.replaceAll("\uD83D\uDCA9", ""), iCalResource.getVEvent().getPropertyValue("X-CALENDARSERVER-PRIVATE-COMMENT"));
+    }
 
 }
 
