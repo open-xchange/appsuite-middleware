@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,78 +50,70 @@
 package com.openexchange.cluster.lock.osgi;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.cluster.lock.ClusterLockService;
-import com.openexchange.cluster.lock.internal.ClusterLockServiceDatabaseImpl;
+import com.openexchange.cluster.lock.internal.ClusterLockServiceHazelcastImpl;
 import com.openexchange.cluster.lock.internal.Unregisterer;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.timer.TimerService;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ClusterLockActivator}
+ * {@link HazelcastClusterLockServiceTracker}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-//TODO: use trackers for hz and db cluster lock impls
-public class ClusterLockActivator extends HousekeepingActivator implements Unregisterer {
+public class HazelcastClusterLockServiceTracker implements ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> {
 
-    private ServiceTracker<HazelcastInstance, HazelcastInstance> tracker;
+    private BundleContext bundleContext;
+    private ServiceLookup services;
+    private Unregisterer unregisterer;
+    private ServiceRegistration<ClusterLockService> registration;
 
     /**
-     * Initializes a new {@link ClusterLockActivator}.
+     * Initialises a new {@link HazelcastClusterLockServiceTracker}.
      */
-    public ClusterLockActivator() {
+    public HazelcastClusterLockServiceTracker(BundleContext bundleContext, ServiceLookup services, Unregisterer unregisterer) {
         super();
+        this.bundleContext = bundleContext;
+        this.services = services;
+        this.unregisterer = unregisterer;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
+     */
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class, DatabaseService.class, TimerService.class };
+    public HazelcastInstance addingService(ServiceReference<HazelcastInstance> ref) {
+        HazelcastInstance hzInstance = bundleContext.getService(ref);
+        registration = bundleContext.registerService(ClusterLockService.class, new ClusterLockServiceHazelcastImpl(services, unregisterer), null);
+        return hzInstance;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
     @Override
-    protected void startBundle() throws Exception {
-        final HazelcastConfigurationService hzConfigService = getService(HazelcastConfigurationService.class);
-        final boolean enabled = hzConfigService.isEnabled();
+    public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
+        // no-op
+    }
 
-        if (false == enabled) {
-            registerService(ClusterLockService.class, new ClusterLockServiceDatabaseImpl(this));
-        } else {
-            final BundleContext context = this.context;
-            tracker = track(HazelcastInstance.class, new HazelcastClusterLockServiceTracker(context, ClusterLockActivator.this, ClusterLockActivator.this));
-            openTrackers();
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
+    @Override
+    public void removedService(ServiceReference<HazelcastInstance> ref, HazelcastInstance service) {
+        if (registration != null) {
+            registration.unregister();
+            registration = null;
         }
+        bundleContext.ungetService(ref);
     }
-
-    @Override
-    public <S> void registerService(Class<S> clazz, S service) {
-        super.registerService(clazz, service);
-    }
-
-    @Override
-    public <S> void unregisterService(S service) {
-        super.unregisterService(service);
-    }
-
-    @Override
-    public void unregister() {
-        ServiceTracker<HazelcastInstance, HazelcastInstance> tracker = this.tracker;
-        if (null != tracker) {
-            tracker.close();
-            this.tracker = null;
-        }
-    }
-
-    @Override
-    public void propagateNotActive(HazelcastInstanceNotActiveException notActiveException) {
-        final BundleContext context = this.context;
-        if (null != context) {
-            context.registerService(HazelcastInstanceNotActiveException.class, notActiveException, null);
-        }
-    }
-
 }
