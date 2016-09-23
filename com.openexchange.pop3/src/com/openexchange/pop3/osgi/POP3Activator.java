@@ -63,6 +63,7 @@ import com.openexchange.log.audit.AuditLogService;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.pop3.Enabled;
@@ -96,7 +97,8 @@ public final class POP3Activator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             ConfigurationService.class, CacheService.class, UserService.class, MailAccountStorageService.class,
-            ContextService.class, TimerService.class, ConfigViewFactory.class, CapabilityService.class, SSLConfigurationService.class
+            ContextService.class, TimerService.class, ConfigViewFactory.class, CapabilityService.class, SSLConfigurationService.class,
+            UserAwareSSLConfigurationService.class
         };
     }
 
