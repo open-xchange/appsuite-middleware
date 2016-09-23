@@ -31,8 +31,6 @@ Assuming there is already a proxy configuration for Open-Xchange Groupware nodes
         BalancerMember http://ox1.open-xchange.com:8009 timeout=100 smax=0 ttl=60 retry=60 loadfactor=50 keepalive=On route=OX1
         BalancerMember http://ox2.open-xchange.com:8009 timeout=100 smax=0 ttl=60 retry=60 loadfactor=50 keepalive=On route=OX2
         ProxySet stickysession=JSESSIONID|jsessionid scolonpathdelim=On
-        SetEnv proxy-initial-not-pooled
-        SetEnv proxy-sendchunked
     </Proxy>
 ```
 
@@ -45,8 +43,6 @@ Simply add a section for those nodes that are supposed to be accessible by Web S
         BalancerMember ws://ox1.open-xchange.com:8009 timeout=100 smax=0 ttl=60 retry=60 loadfactor=50 keepalive=On route=OX1
         BalancerMember ws://ox2.open-xchange.com:8009 timeout=100 smax=0 ttl=60 retry=60 loadfactor=50 keepalive=On route=OX2
         ProxySet stickysession=JSESSIONID|jsessionid scolonpathdelim=On
-        SetEnv proxy-initial-not-pooled
-        SetEnv proxy-sendchunked
     </Proxy>
 ```
 
