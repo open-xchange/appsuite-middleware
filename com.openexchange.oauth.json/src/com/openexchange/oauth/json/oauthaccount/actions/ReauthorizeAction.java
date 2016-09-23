@@ -182,5 +182,25 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
             // By now it doesn't matter which interaction type is passed
             oauthService.updateAccount(Integer.parseInt(accountId), serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId(), scopes);
         }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.openexchange.cluster.lock.ClusterTask#getContextId()
+         */
+        @Override
+        public int getContextId() {
+            return session.getContextId();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.openexchange.cluster.lock.ClusterTask#getUserId()
+         */
+        @Override
+        public int getUserId() {
+            return session.getUserId();
+        }
     }
 }
