@@ -71,6 +71,44 @@ public final class Arrays {
     }
 
     /**
+     * Concatenates the specifies arrays.
+     *
+     * @param a The first array
+     * @param b The second array
+     * @return The resulting array
+     */
+    public static int[] concatenate(int[] a, int[] b) {
+        if (a == null) {
+            return clone(b);
+        }
+
+        if (b == null) {
+            return clone(a);
+        }
+
+        int[] c = new int[a.length + b.length];
+        System.arraycopy(a, 0, c, 0, a.length);
+        System.arraycopy(b, 0, c, a.length, b.length);
+        return c;
+    }
+
+    /**
+     * Clones specified array
+     *
+     * @param data The array to clone
+     * @return The cloned array
+     */
+    public static int[] clone(int[] data) {
+        if (data == null) {
+            return null;
+        }
+
+        int[] copy = new int[data.length];
+        System.arraycopy(data, 0, copy, 0, data.length);
+        return copy;
+    }
+
+    /**
      * Searches the given int value in the int array.
      *
      * @param array int array tested for containing the search parameter.
