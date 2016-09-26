@@ -72,19 +72,27 @@ public class PlainPasswordProvider implements AutoCloseable {
 
     private final AtomicReference<ByteBuffer> plainPasswordRef;
     private final int size;
+    private final char[] plainPassword;
 
     /**
      * Initializes a new {@link PlainPasswordProvider}.
      */
-    public PlainPasswordProvider(String plainPassword) {
+    public PlainPasswordProvider(String plainPassword, boolean useDirectByteBuffer) {
         super();
-        byte[] bytes = toBytes(plainPassword.toCharArray());
-        ByteBuffer byteBuffer = obtainDirectByteBuffer(bytes.length);
-        byteBuffer.mark();
-        byteBuffer.put(bytes, 0, bytes.length);
-        byteBuffer.reset();
-        plainPasswordRef = new AtomicReference<ByteBuffer>(byteBuffer);
-        size = bytes.length;
+        if (useDirectByteBuffer) {
+            byte[] bytes = toBytes(plainPassword.toCharArray());
+            ByteBuffer byteBuffer = obtainDirectByteBuffer(bytes.length);
+            byteBuffer.mark();
+            byteBuffer.put(bytes, 0, bytes.length);
+            byteBuffer.reset();
+            plainPasswordRef = new AtomicReference<ByteBuffer>(byteBuffer);
+            size = bytes.length;
+            this.plainPassword = null;
+        } else {
+            this.plainPassword = plainPassword.toCharArray();
+            plainPasswordRef = null;
+            size = 0;
+        }
     }
 
     /**
@@ -93,14 +101,14 @@ public class PlainPasswordProvider implements AutoCloseable {
      * @return The plain password
      */
     public Password getPassword() {
-        char[] plainPw = getCharsFromBuffer();
+        char[] plainPw = getChars();
         return null == plainPw ? null : new Password(plainPw, Password.Type.PLAIN);
     }
 
-    private char[] getCharsFromBuffer() {
+    private char[] getChars() {
         ByteBuffer byteBuffer = plainPasswordRef.get();
         if (null == byteBuffer) {
-            return null;
+            return clone(this.plainPassword);
         }
 
         byte[] bytes = new byte[size];
@@ -134,6 +142,16 @@ public class PlainPasswordProvider implements AutoCloseable {
     }
 
     // -------------------------------------------- Helpers ------------------------------------------------------
+
+    private static char[] clone(char[] data) {
+        if (data == null) {
+            return null;
+        }
+
+        char[] copy = new char[data.length];
+        System.arraycopy(data, 0, copy, 0, data.length);
+        return copy;
+    }
 
     static ByteBuffer obtainDirectByteBuffer(int size) {
         return ByteBuffer.allocateDirect(size);

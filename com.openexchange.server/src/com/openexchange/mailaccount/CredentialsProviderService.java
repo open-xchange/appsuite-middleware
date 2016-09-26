@@ -77,16 +77,18 @@ public interface CredentialsProviderService {
      * @param accountId The account identifier
      * @param session The session
      * @return The credentials for mail access or <code>null</code>
+     * @throws OXException If credential for mail access cannot be returned
      */
-    Credentials getMailCredentials(int accountId, Session session);
+    Credentials getMailCredentials(int accountId, Session session) throws OXException;
 
     /**
-     * Gets the credentials for transport.
+     * Gets the credentials for mail transport.
      *
      * @param accountId The account identifier
      * @param session The session
-     * @return The credentials for transport or <code>null</code>
+     * @return The credentials for mail transport or <code>null</code>
+     * @throws OXException If credential for mail transport cannot be returned
      */
-    Credentials getTransportCredentials(int accountId, Session session);
+    Credentials getTransportCredentials(int accountId, Session session) throws OXException;
 
 }
