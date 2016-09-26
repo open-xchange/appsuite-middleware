@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,27 +47,26 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.mailaccount.json;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * 
- * {@link LockCleaningFolderStorage}
+ * {@link ActiveProviderDetector} - The the best fitting active provider for a given session.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface LockCleaningFolderStorage {
+public interface ActiveProviderDetector {
 
     /**
-     * Cleans all locks for objects within the given folder for the given users
-     * 
-     * @param folder The folder
-     * @param userIds An array of user ids to clean
-     * @param storageParameters The storage parameters
-     * @throws OXException in case cleaning fails
+     * Gets the applicable action provider
+     *
+     * @param session The session to check by
+     * @return The action provider to use
+     * @throws OXException If action provider cannot be returned
      */
-    public void cleanLocksFor(Folder folder, int userIds[], final StorageParameters storageParameters) throws OXException;
+    MailAccountActionProvider getActiveProvider(ServerSession session) throws OXException;
 
 }

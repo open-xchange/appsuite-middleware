@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,27 +47,56 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.find.internal;
 
-import com.openexchange.exception.OXException;
+import java.util.List;
+import com.openexchange.find.AbstractFindRequest;
+import com.openexchange.find.facet.FacetInfo;
 
 /**
- * 
- * {@link LockCleaningFolderStorage}
+ * {@link LookUpInfo}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface LockCleaningFolderStorage {
+public class LookUpInfo {
+
+    /** The empty look-up info */
+    public static final LookUpInfo EMPTY = new LookUpInfo(null, null);
+
+    // -----------------------------------------------------------------------
+
+    private final AbstractFindRequest findRequest;
+    private final List<FacetInfo> facetInfos;
 
     /**
-     * Cleans all locks for objects within the given folder for the given users
-     * 
-     * @param folder The folder
-     * @param userIds An array of user ids to clean
-     * @param storageParameters The storage parameters
-     * @throws OXException in case cleaning fails
+     * Initializes a new {@link LookUpInfo}.
+     *
+     * @param findRequest The associated find request (if any)
+     * @param facetInfos The basic facet information (if any)
      */
-    public void cleanLocksFor(Folder folder, int userIds[], final StorageParameters storageParameters) throws OXException;
+    public LookUpInfo(AbstractFindRequest findRequest, List<FacetInfo> facetInfos) {
+        super();
+        this.findRequest = findRequest;
+        this.facetInfos = facetInfos;
+    }
+
+    /**
+     * Gets the basic facet information
+     *
+     * @return The basic facet information or <code>null</code>
+     */
+    public List<FacetInfo> getFacetInfos() {
+        return facetInfos;
+    }
+
+    /**
+     * Gets the associated find request
+     *
+     * @return The associated find request or <code>null</code>
+     */
+    public AbstractFindRequest getFindRequest() {
+        return findRequest;
+    }
 
 }

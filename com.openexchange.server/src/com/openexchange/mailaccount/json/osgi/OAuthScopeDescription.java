@@ -47,27 +47,25 @@
  *
  */
 
-package com.openexchange.folderstorage;
 
-import com.openexchange.exception.OXException;
+package com.openexchange.mailaccount.json.osgi;
+
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * 
- * {@link LockCleaningFolderStorage}
+ * {@link OAuthScopeDescription} - Strings describing the OAuth scopes.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface LockCleaningFolderStorage {
+final class OAuthScopeDescription implements LocalizableStrings {
+    // Application 'xyz' requires following permissions:
+    //  - Read all your mail accounts.
+    //  - ...
+    public static final String READ_ONLY = "Read all your mail accounts.";
 
-    /**
-     * Cleans all locks for objects within the given folder for the given users
-     * 
-     * @param folder The folder
-     * @param userIds An array of user ids to clean
-     * @param storageParameters The storage parameters
-     * @throws OXException in case cleaning fails
-     */
-    public void cleanLocksFor(Folder folder, int userIds[], final StorageParameters storageParameters) throws OXException;
-
+    // Application 'xyz' requires following permissions:
+    //  - Create, modify and delete mail accounts.
+    //  - ...
+    public static final String WRITABLE = "Create, modify and delete mail accounts.";
 }

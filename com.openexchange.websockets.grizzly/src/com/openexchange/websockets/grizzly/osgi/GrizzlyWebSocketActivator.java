@@ -56,6 +56,9 @@ import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
@@ -96,7 +99,7 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, WebApplicationService.class, SessiondService.class, TimerService.class, ThreadPoolService.class,
-            ContextService.class, UserService.class};
+            ContextService.class, UserService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -128,6 +131,19 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
 
         track(HazelcastInstance.class, new HzTracker(remoteDistributor, this, context));
         openTrackers();
+
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                GrizzlyWebSocketApplication.invalidateEnabledCache();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return null;
+            }
+        });
 
         registerService(CustomPortableFactory.class, new PortableMessageDistributorFactory(), null);
 

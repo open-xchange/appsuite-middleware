@@ -55,7 +55,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -84,8 +83,37 @@ import gnu.trove.map.hash.TIntObjectHashMap;
  */
 public class Patches {
 
+    /** The external representation of the prefix used for private comments denoting a new time proposal */
+    private static final String COMMENT_PROPOSAL_PREFIX_EXTERNAL = "\u200B\uD83D\uDDD3\u200B ";
+
+    /** The internal representation of the prefix used for private comments denoting a new time proposal */
+    private static final String COMMENT_PROPOSAL_PREFIX_INTERNAL = "\u200B\u0e4f\u200B ";
+
     private Patches() {
     	// prevent instantiation
+    }
+
+    /**
+     * Replaces the representation of the prefix used for private comments denoting a new time proposal with another one
+     *
+     * @param appointment The appointment to patch
+     * @param The prefix to replace
+     * @param The replacement prefix
+     */
+    private static void patchPrivateComments(Appointment appointment, String prefix, String replacement) {
+        Participant[] participants = appointment.getParticipants();
+        if (null == participants || 0 == participants.length) {
+            return;
+        }
+        for (Participant participant : participants) {
+            if (Participant.USER == participant.getType() && UserParticipant.class.isInstance(participant)) {
+                UserParticipant userParticipant = (UserParticipant) participant;
+                String message = userParticipant.getConfirmMessage();
+                if (null != message && message.startsWith(prefix)) {
+                    userParticipant.setConfirmMessage(replacement + message.substring(prefix.length()));
+                }
+            }
+        }
     }
 
     /**
@@ -364,6 +392,15 @@ public class Patches {
             }
         }
 
+        /**
+         * Replaces the external representation of the prefix used for private comments denoting a new time proposal to the internal one.
+         *
+         * @param appointment The appointment to adjust prior saving
+         */
+        public static void adjustProposedTimePrefixes(Appointment appointment) {
+            patchPrivateComments(appointment, COMMENT_PROPOSAL_PREFIX_EXTERNAL, COMMENT_PROPOSAL_PREFIX_INTERNAL);
+        }
+
     }
 
     /**
@@ -374,8 +411,6 @@ public class Patches {
      * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
      */
     public static final class Outgoing {
-
-        private static final Pattern EMPTY_RDATE = Pattern.compile("^RDATE:\\r\\n", Pattern.MULTILINE);
 
         private Outgoing() {
         	// prevent instantiation
@@ -610,6 +645,15 @@ public class Patches {
                     appointment.removeOrganizerId();
                 }
             }
+        }
+
+        /**
+         * Replaces the internal representation of the prefix used for private comments denoting a new time proposal to the external one.
+         *
+         * @param appointment The appointment to adjust prior serialization
+         */
+        public static void adjustProposedTimePrefixes(Appointment appointment) {
+            patchPrivateComments(appointment, COMMENT_PROPOSAL_PREFIX_INTERNAL, COMMENT_PROPOSAL_PREFIX_EXTERNAL);
         }
 
     }

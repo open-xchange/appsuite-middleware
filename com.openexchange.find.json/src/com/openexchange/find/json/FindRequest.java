@@ -70,6 +70,7 @@ import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.contacts.ContactsFacetType;
 import com.openexchange.find.drive.DriveFacetType;
 import com.openexchange.find.facet.ActiveFacet;
+import com.openexchange.find.facet.FacetInfo;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetTypeLookUp;
 import com.openexchange.find.facet.Filter;
@@ -262,25 +263,36 @@ public class FindRequest {
         }
 
         try {
-            Module module = requireModule();
-            FacetTypeLookUp facetTypeLookUp = getFacetTypeLookUp(module);
             final int length = jFacets.length();
-            List<ActiveFacet> facets = new ArrayList<ActiveFacet>(length);
+
+            List<FacetInfo> facetInfos = new ArrayList<>(length);
             for (int i = 0; i < length; i++) {
                 JSONObject jFacet = jFacets.getJSONObject(i);
                 String jType = jFacet.getString("facet");
+                String valueId = getValueId(jFacet.optString("value", null));
+                facetInfos.add(new FacetInfo(jType, valueId));
+            }
+
+            Module module = requireModule();
+            FacetTypeLookUp facetTypeLookUp = getFacetTypeLookUp(module, facetInfos);
+
+            List<ActiveFacet> facets = new ArrayList<ActiveFacet>(length);
+            for (int i = 0; i < length; i++) {
+                FacetInfo facetInfo = facetInfos.get(i);
+                String jType = facetInfo.getType();
                 FacetType type = facetTypeLookUp.facetTypeFor(jType);
                 if (type == null) {
                     throw FindExceptionCode.UNSUPPORTED_FACET.create(jType, module.getIdentifier());
                 }
 
-                String valueId = getValueId(jFacet.optString("value", null));
+                String valueId = facetInfo.getValue();
                 if (valueId == null) {
                     // ignore invalid facets
                     continue;
                 }
 
                 Filter filter;
+                JSONObject jFacet = jFacets.getJSONObject(i);
                 JSONObject jFilter = jFacet.optJSONObject("filter");
                 if (jFilter == null || jFilter == JSONObject.NULL) {
                     filter = Filter.NO_FILTER;
@@ -297,8 +309,8 @@ public class FindRequest {
         }
     }
 
-    private FacetTypeLookUp getFacetTypeLookUp(Module module) throws OXException {
-        ModuleSearchDriver driver = searchServiceProvider.getSearchService().getDriver(module, session);
+    private FacetTypeLookUp getFacetTypeLookUp(Module module, List<FacetInfo> facetInfos) throws OXException {
+        ModuleSearchDriver driver = searchServiceProvider.getSearchService().getDriver(facetInfos, module, session);
         return driver instanceof FacetTypeLookUp ? new FallbackFacetTypeLookUp((FacetTypeLookUp) driver, module) : DefaultFacetTypeLookUp.getInstanceFor(module);
     }
 

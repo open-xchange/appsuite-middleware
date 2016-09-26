@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,27 +47,28 @@
  *
  */
 
-package com.openexchange.folderstorage;
+package com.openexchange.mailaccount.json;
 
-import com.openexchange.exception.OXException;
 
 /**
- * 
- * {@link LockCleaningFolderStorage}
+ * {@link MailAccountOAuthConstants}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface LockCleaningFolderStorage {
+public class MailAccountOAuthConstants {
 
     /**
-     * Cleans all locks for objects within the given folder for the given users
-     * 
-     * @param folder The folder
-     * @param userIds An array of user ids to clean
-     * @param storageParameters The storage parameters
-     * @throws OXException in case cleaning fails
+     * Initializes a new {@link MailAccountOAuthConstants}.
      */
-    public void cleanLocksFor(Folder folder, int userIds[], final StorageParameters storageParameters) throws OXException;
+    private MailAccountOAuthConstants() {
+        super();
+    }
+
+    /** The OAuth scope granting read-only permission */
+    public static final String OAUTH_READ_SCOPE = "read_mailaccounts";
+
+    /** The OAuth scope granting write permission */
+    public static final String OAUTH_WRITE_SCOPE = "write_mailaccounts";
 
 }

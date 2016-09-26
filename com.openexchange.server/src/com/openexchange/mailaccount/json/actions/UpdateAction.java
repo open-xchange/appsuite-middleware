@@ -89,9 +89,12 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.TransportAuth;
+import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.json.MailAccountFields;
+import com.openexchange.mailaccount.json.MailAccountOAuthConstants;
 import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
 import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -103,6 +106,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(method = RequestMethod.PUT, name = "update", description = "Update a mail account", parameters = { @Parameter(name = "session", description = "A session ID previously obtained from the login module.") }, requestBody = "A JSON object identifiying (field ID is present) and describing the account to update. See mail account data.", responseDescription = "A JSON object representing the updated mail account. See mail account data.")
+@OAuthAction(MailAccountOAuthConstants.OAUTH_WRITE_SCOPE)
 public final class UpdateAction extends AbstractMailAccountAction implements MailAccountFields {
 
     public static final String ACTION = AJAXServlet.ACTION_UPDATE;
@@ -110,25 +114,25 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
     /**
      * Initializes a new {@link UpdateAction}.
      */
-    public UpdateAction() {
-        super();
+    public UpdateAction(ActiveProviderDetector activeProviderDetector) {
+        super(activeProviderDetector);
     }
 
     private static final EnumSet<Attribute> DEFAULT = EnumSet.of(Attribute.ARCHIVE_FULLNAME_LITERAL, Attribute.ARCHIVE_LITERAL, Attribute.CONFIRMED_HAM_FULLNAME_LITERAL, Attribute.CONFIRMED_HAM_LITERAL, Attribute.CONFIRMED_SPAM_FULLNAME_LITERAL, Attribute.CONFIRMED_SPAM_LITERAL, Attribute.DRAFTS_FULLNAME_LITERAL, Attribute.DRAFTS_LITERAL, Attribute.SENT_FULLNAME_LITERAL, Attribute.SENT_LITERAL, Attribute.SPAM_FULLNAME_LITERAL, Attribute.SPAM_LITERAL, Attribute.TRASH_FULLNAME_LITERAL, Attribute.TRASH_LITERAL);
 
-    private static final Set<Attribute> WEBMAIL_ALLOWED = EnumSet.of(   Attribute.ID_LITERAL, 
-                                                                        Attribute.PERSONAL_LITERAL, 
-                                                                        Attribute.REPLY_TO_LITERAL, 
-                                                                        Attribute.UNIFIED_INBOX_ENABLED_LITERAL, 
-                                                                        Attribute.ARCHIVE_LITERAL, 
-                                                                        Attribute.ARCHIVE_FULLNAME_LITERAL, 
-                                                                        Attribute.SENT_LITERAL, 
-                                                                        Attribute.SENT_FULLNAME_LITERAL, 
-                                                                        Attribute.TRASH_LITERAL, 
-                                                                        Attribute.TRASH_FULLNAME_LITERAL, 
-                                                                        Attribute.SPAM_LITERAL, 
-                                                                        Attribute.SPAM_FULLNAME_LITERAL, 
-                                                                        Attribute.DRAFTS_LITERAL, 
+    private static final Set<Attribute> WEBMAIL_ALLOWED = EnumSet.of(   Attribute.ID_LITERAL,
+                                                                        Attribute.PERSONAL_LITERAL,
+                                                                        Attribute.REPLY_TO_LITERAL,
+                                                                        Attribute.UNIFIED_INBOX_ENABLED_LITERAL,
+                                                                        Attribute.ARCHIVE_LITERAL,
+                                                                        Attribute.ARCHIVE_FULLNAME_LITERAL,
+                                                                        Attribute.SENT_LITERAL,
+                                                                        Attribute.SENT_FULLNAME_LITERAL,
+                                                                        Attribute.TRASH_LITERAL,
+                                                                        Attribute.TRASH_FULLNAME_LITERAL,
+                                                                        Attribute.SPAM_LITERAL,
+                                                                        Attribute.SPAM_FULLNAME_LITERAL,
+                                                                        Attribute.DRAFTS_LITERAL,
                                                                         Attribute.DRAFTS_FULLNAME_LITERAL);
 
     @Override

@@ -54,6 +54,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.codec.net.URLCodec;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
@@ -74,6 +76,8 @@ public final class HtmlServices {
     private HtmlServices() {
         super();
     }
+
+    private static final Pattern UNICODE_CHAR = Pattern.compile("&(?:amp;)?#0*([1-9][0-9]+)", Pattern.CASE_INSENSITIVE);
 
     /**
      * Does URL decoding until fully decoded
@@ -102,6 +106,18 @@ public final class HtmlServices {
                         k = false;
                     }
                 } while (k && (pos = s.indexOf('%')) >= 0 && pos < s.length() - 1);
+            }
+        }
+
+        if (s.indexOf('#') >= 0) {
+            for (Matcher m; (m = UNICODE_CHAR.matcher(s)).find();) {
+                StringBuffer sb = new StringBuffer(s.length());
+                do {
+                    char c = (char) Integer.parseInt(m.group(1));
+                    m.appendReplacement(sb, String.valueOf(c));
+                } while (m.find());
+                m.appendTail(sb);
+                s = sb.toString();
             }
         }
 
@@ -169,7 +185,7 @@ public final class HtmlServices {
         return (mimeType.startsWith("image/") && mimeType.indexOf("svg") < 0) ? Result.ALLOW : Result.DENY;
     }
 
-    private static final String[] UNSAFE_TOKENS = { "javascript:", "vbscript:", "vascript:", "<script" };
+    private static final String[] UNSAFE_TOKENS = { "javascript:", "vbscript:", "<script" };
 
     /**
      * Checks if specified URL String is safe or not.

@@ -47,86 +47,40 @@
  *
  */
 
-package com.openexchange.mailaccount.json.factory;
+package com.openexchange.mailaccount.json.osgi;
 
-import java.util.Collection;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.SortableConcurrentList;
-import com.openexchange.mailaccount.json.DefaultMailAccountActionProvider;
+import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.json.MailAccountActionProvider;
 import com.openexchange.osgi.util.RankedService;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
- * {@link TrackingMailAccountActionFactory}
+ * {@link MailAccountActionProviderTracker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.8.3
  */
-public class TrackingMailAccountActionFactory implements ServiceTrackerCustomizer<MailAccountActionProvider, MailAccountActionProvider>, AJAXActionServiceFactory, AJAXActionService {
+public class MailAccountActionProviderTracker implements ServiceTrackerCustomizer<MailAccountActionProvider, MailAccountActionProvider>, ActiveProviderDetector {
 
     private final BundleContext context;
-    private final DefaultMailAccountActionProvider defaultProvider;
     private final SortableConcurrentList<RankedService<MailAccountActionProvider>> trackedProviders;
 
     /**
-     * Initializes a new {@link TrackingMailAccountActionFactory}.
+     * Initializes a new {@link MailAccountActionProviderTracker}.
      */
-    public TrackingMailAccountActionFactory(DefaultMailAccountActionProvider defaultProvider, BundleContext context) {
+    public MailAccountActionProviderTracker(BundleContext context) {
         super();
         this.context = context;
-        this.defaultProvider = defaultProvider;
-        SortableConcurrentList<RankedService<MailAccountActionProvider>> trackedProviders = new SortableConcurrentList<RankedService<MailAccountActionProvider>>();
-        trackedProviders.add(new RankedService<MailAccountActionProvider>(defaultProvider, 0));
-        this.trackedProviders = trackedProviders;
+        this.trackedProviders = new SortableConcurrentList<RankedService<MailAccountActionProvider>>();
     }
 
     @Override
-    public Collection<?> getSupportedServices() {
-        // Assume the default provider dictates available actions
-        return defaultProvider.getActions().values();
-    }
-
-    @Override
-    public AJAXActionService createActionService(String action) throws OXException {
-        // This instance as delegating AJAXActionService instance
-        return this;
-    }
-
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String action = requestData.getAction();
-        if (null == action) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create("null");
-        }
-
-        // Determine suitable provider & grab the associated action-serving service
-        MailAccountActionProvider provider = getActiveProvider(session);
-        AJAXActionService actionService = provider.getAction(action);
-        if (null == actionService) {
-            // Grab the one from default provider
-            if (defaultProvider != provider) {
-                actionService = defaultProvider.getAction(action);
-            }
-
-            if (null == actionService) {
-                throw AjaxExceptionCodes.UNKNOWN_ACTION.create( action);
-            }
-        }
-
-        return actionService.perform(requestData, session);
-    }
-
-    private MailAccountActionProvider getActiveProvider(ServerSession session) throws OXException {
+    public MailAccountActionProvider getActiveProvider(ServerSession session) throws OXException {
         for (RankedService<MailAccountActionProvider> rankedService : trackedProviders) {
             MailAccountActionProvider provider = rankedService.service;
             if (provider.isApplicableFor(session)) {
@@ -134,7 +88,7 @@ public class TrackingMailAccountActionFactory implements ServiceTrackerCustomize
             }
         }
 
-        return defaultProvider;
+        return null;
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------------

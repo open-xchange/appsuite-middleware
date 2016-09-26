@@ -78,6 +78,7 @@ public abstract class ComparedPermissions<P, GP extends P> {
     private List<P> addedGroups;
     private List<P> removedGuests;
     private List<P> removedUsers;
+    private List<P> modifiedUsers;
     private Map<Integer, P> modifiedGuests;
     private boolean hasChanges;
 
@@ -126,6 +127,7 @@ public abstract class ComparedPermissions<P, GP extends P> {
             removedGuests = Collections.emptyList();
             removedUsers = Collections.emptyList();
             modifiedGuests = Collections.emptyMap();
+            modifiedUsers = Collections.emptyList();
             hasChanges = false;
             return;
         } else {
@@ -135,6 +137,7 @@ public abstract class ComparedPermissions<P, GP extends P> {
             addedGroups = new LinkedList<>();
             removedGuests = new LinkedList<>();
             removedUsers = new LinkedList<>();
+            modifiedUsers = new LinkedList<>();
             modifiedGuests = new LinkedHashMap<>();
         }
 
@@ -235,6 +238,12 @@ public abstract class ComparedPermissions<P, GP extends P> {
             removedUsers.add(oldUsers.get(removed));
         }
 
+        for (Integer id : newUsers.keySet()) {
+            if (oldUsers.containsKey(id)) {
+                modifiedUsers.add(newUsers.get(id));
+            }
+        }
+
         hasChanges = permissionsChanged;
     }
 
@@ -281,10 +290,17 @@ public abstract class ComparedPermissions<P, GP extends P> {
     }
 
     /**
-     * @return <code>true</code> if guest permissions have been removed
+     * @return <code>true</code> if user permissions have been removed
      */
     public boolean hasRemovedUsers() {
         return !removedUsers.isEmpty();
+    }
+
+    /**
+     * @return <code>true</code> if user permissions have been modified
+     */
+    public boolean hasModifiedUsers() {
+        return !modifiedUsers.isEmpty();
     }
 
     /**
@@ -345,6 +361,13 @@ public abstract class ComparedPermissions<P, GP extends P> {
      */
     public List<P> getRemovedUserPermissions() {
         return removedUsers;
+    }
+
+    /**
+     * @return A list of modified user permissions; never <code>null</code>
+     */
+    public List<P> getModifiedUserPermissions() {
+        return modifiedUsers;
     }
 
     /**

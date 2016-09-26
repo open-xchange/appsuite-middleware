@@ -267,7 +267,7 @@ public abstract class OXFolderManager {
     /**
      * Removes all file locks within this folder for the given users.
      *
-     * @param fo The folder object at least containing the ID of the folder.
+     * @param folder The folder object at least containing the ID of the folder.
      * @param userIds The ids of the users holding the locks
      * @throws OXException
      */

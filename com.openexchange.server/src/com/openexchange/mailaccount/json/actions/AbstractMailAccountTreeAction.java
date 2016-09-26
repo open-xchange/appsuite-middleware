@@ -57,6 +57,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.json.writer.FolderWriter;
+import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -71,8 +72,8 @@ public abstract class AbstractMailAccountTreeAction extends AbstractMailAccountA
     /**
      * Initializes a new {@link AbstractMailAccountTreeAction}.
      */
-    protected AbstractMailAccountTreeAction() {
-        super();
+    protected AbstractMailAccountTreeAction(ActiveProviderDetector activeProviderDetector) {
+        super(activeProviderDetector);
     }
 
     protected static JSONObject actionValidateTree0(final MailAccess<?, ?> mailAccess, final ServerSession session) throws JSONException {
