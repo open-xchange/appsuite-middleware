@@ -141,7 +141,7 @@ public class RssAction implements AJAXActionService {
 
         try {
             List<URL> urls = getUrls(request);
-            feeds = getAcceptedFeeds(urls, warnings, session);
+            feeds = getAcceptedFeeds(urls, warnings);
         } catch (IllegalArgumentException | MalformedURLException e) {
             throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, e.getMessage());
         } catch (JSONException e) {
@@ -253,7 +253,7 @@ public class RssAction implements AJAXActionService {
      * @return {@link List} of {@link SyndFeed}s that have been accepted for further processing
      * @throws OXException
      */
-    protected List<SyndFeed> getAcceptedFeeds(List<URL> urls, List<OXException> warnings, ServerSession session) throws OXException {
+    protected List<SyndFeed> getAcceptedFeeds(List<URL> urls, List<OXException> warnings) throws OXException {
         List<SyndFeed> feeds = new LinkedList<SyndFeed>();
 
         for (URL url : urls) {
@@ -275,10 +275,6 @@ public class RssAction implements AJAXActionService {
             } catch (IOException e) {
                 OXException oxe = null;
                 if (SSLHandshakeException.class.isInstance(e)) {
-                    UserAwareSSLConfigurationService userAwareSSLConfigurationService = Services.getService(UserAwareSSLConfigurationService.class);
-                    if (userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(session.getUserId(), session.getContextId())) {
-                        oxe = SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(url.getHost());
-                    }
                     oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(url.getHost());
                 } else {
                     oxe = RssExceptionCodes.IO_ERROR.create(e, e.getMessage(), url.toString());

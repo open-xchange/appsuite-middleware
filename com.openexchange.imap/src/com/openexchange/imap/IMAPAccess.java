@@ -123,7 +123,6 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
@@ -818,10 +817,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                         throw MailExceptionCode.NON_SECURE_DENIED.create(server);
                     }
                     if (SSLHandshakeException.class.isInstance(next)) {
-                        UserAwareSSLConfigurationService userAwareSSLConfigurationService = Services.getService(UserAwareSSLConfigurationService.class);
-                        if (userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(session.getUserId(), session.getContextId())) {
-                            throw SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(server);
-                        } 
                         throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(server);
                     }
                 }

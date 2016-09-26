@@ -66,15 +66,12 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.rss.RssExceptionCodes;
 import com.openexchange.rss.osgi.Services;
 import com.openexchange.rss.util.RssProperties;
 import com.openexchange.rss.util.TimoutHttpURLFeedFetcher;
 import com.openexchange.test.mock.MockUtils;
-import com.openexchange.tools.session.ServerSession;
 import com.sun.syndication.feed.synd.SyndFeed;
 import com.sun.syndication.feed.synd.SyndFeedImpl;
 import com.sun.syndication.fetcher.FetcherException;
@@ -98,15 +95,6 @@ public class RssActionTest {
     @Mock
     private TimoutHttpURLFeedFetcher fetcher;
 
-    @Mock
-    private ConfigViewFactory configViewFactory;
-
-    @Mock
-    private ConfigView configView;
-
-    @Mock
-    private ServerSession session;
-
     List<URL> urls = new ArrayList<>();
 
     List<OXException> warnings = new ArrayList<>();
@@ -114,19 +102,11 @@ public class RssActionTest {
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(Services.class);
-        PowerMockito.mockStatic(ConfigViewFactory.class);
         Mockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
         Mockito.when(Services.getService(ConfigurationService.class)).thenReturn(configurationService);
-        Mockito.when(Services.getService(ConfigViewFactory.class)).thenReturn(configViewFactory);
-        Mockito.when(Services.optService(ConfigViewFactory.class)).thenReturn(configViewFactory);
         Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.blacklist", RssProperties.HOST_BLACKLIST_DEFAULT)).thenReturn(RssProperties.HOST_BLACKLIST_DEFAULT);
         Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports", RssProperties.PORT_WHITELIST_DEFAULT)).thenReturn(RssProperties.PORT_WHITELIST_DEFAULT);
         Mockito.when(configurationService.getProperty(RssProperties.SCHEMES_KEY, RssProperties.SCHEMES_DEFAULT)).thenReturn(RssProperties.SCHEMES_DEFAULT);
-        Mockito.when(configViewFactory.getView()).thenReturn(configView);
-        Mockito.when(configViewFactory.getView(Mockito.anyInt(), Mockito.anyInt())).thenReturn(configView);
-        Mockito.when(configView.get("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class)).thenReturn(Boolean.TRUE);
-        Mockito.when(session.getUserId()).thenReturn(0);
-        Mockito.when(session.getContextId()).thenReturn(0);
 
         action = new RssAction();
         MockitoAnnotations.initMocks(this);
@@ -137,7 +117,7 @@ public class RssActionTest {
     // tests bug 45402: SSRF at RSS feeds
     @Test
     public void testGetAcceptedFeeds_emptyURLs_returnNoWarningAndNoFeed() throws OXException {
-        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings, session);
+        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
 
         assertEquals(0, acceptedFeedsFromUrls.size());
         assertEquals(0, warnings.size());
@@ -147,7 +127,7 @@ public class RssActionTest {
     @Test
     public void testGetAcceptedFeeds_localhostURL_returnWarning() throws OXException, MalformedURLException {
         urls.add(new URL("http://localhost:80"));
-        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings, session);
+        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
 
         assertEquals(0, acceptedFeedsFromUrls.size());
         assertEquals(1, warnings.size());
@@ -157,7 +137,7 @@ public class RssActionTest {
     @Test
     public void testGetAcceptedFeeds_localhostOnly_returnWarning() throws OXException, MalformedURLException {
         urls.add(new URL("http://localhost"));
-        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings, session);
+        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
 
         assertEquals(0, acceptedFeedsFromUrls.size());
         assertEquals(1, warnings.size());
@@ -169,7 +149,7 @@ public class RssActionTest {
         urls.add(new URL("http://localhost:80"));
         urls.add(new URL("http://guteStube.com"));
 
-        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings, session);
+        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
 
         assertEquals(1, acceptedFeedsFromUrls.size());
         assertEquals(1, warnings.size());
@@ -185,7 +165,7 @@ public class RssActionTest {
         syndFeedImpl.setUri(guteStube.toString());
         Mockito.when(fetcher.retrieveFeed(guteStube)).thenReturn(syndFeedImpl);
 
-        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings, session);
+        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
 
         assertEquals(guteStube.toString(), acceptedFeedsFromUrls.get(0).getUri());
     }
@@ -197,7 +177,7 @@ public class RssActionTest {
         urls.add(localhost);
         urls.add(new URL("http://guteStube.com"));
 
-        action.getAcceptedFeeds(urls, warnings, session);
+        action.getAcceptedFeeds(urls, warnings);
 
         assertTrue(RssExceptionCodes.RSS_CONNECTION_ERROR.create(localhost.toString()).similarTo(warnings.get(0)));
     }
@@ -208,7 +188,7 @@ public class RssActionTest {
         urls.add(new URL("http://localhost:80"));
         urls.add(new URL("http://guteStube.com:77"));
 
-        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings, session);
+        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
 
         assertEquals(0, acceptedFeedsFromUrls.size());
         assertEquals(2, warnings.size());
@@ -220,7 +200,7 @@ public class RssActionTest {
         urls.add(new URL("http://localhost:80/this/is/nice"));
         urls.add(new URL("http://guteStube.com:77/tritt/mich.rss"));
 
-        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings, session);
+        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
 
         assertEquals(0, acceptedFeedsFromUrls.size());
         assertEquals(2, warnings.size());
@@ -246,7 +226,7 @@ public class RssActionTest {
         urls.add(new URL("https://127.0.0.1/this/is/secured/never/nice/too"));
         urls.add(new URL("https://127.0.0.1/this/is/secured/never/nice/too/asFile.xml"));
 
-        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings, session);
+        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
 
         assertEquals(6, acceptedFeedsFromUrls.size());
         assertEquals(10, warnings.size());
@@ -262,7 +242,7 @@ public class RssActionTest {
         urls.add(new URL("file://tollerLaden.de/"));
         urls.add(new URL("mailto://tollerLaden.de/this/is/"));
 
-        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings, session);
+        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
 
         assertEquals(0, acceptedFeedsFromUrls.size());
         assertEquals(6, warnings.size());
@@ -285,7 +265,7 @@ public class RssActionTest {
         //        urls.add(new URL("news://tollerLaden.de/this/is/never/nice/too/asFile.xml"));
         //        urls.add(new URL("feed://tollerLaden.de/this/is/never/nice/too/asFile.xml"));
 
-        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings, session);
+        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
 
         assertEquals(4, acceptedFeedsFromUrls.size());
         assertEquals(6, warnings.size());

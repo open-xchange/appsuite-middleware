@@ -82,7 +82,6 @@ import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.POP3Provider;
@@ -463,10 +462,6 @@ public final class POP3StoreConnector {
                 final Exception nested = e.getNextException();
                 if (nested != null) {
                     if (SSLHandshakeException.class.isInstance(nested)) {
-                        UserAwareSSLConfigurationService userAwareSSLConfigurationService = POP3ServiceRegistry.getServiceRegistry().getService(UserAwareSSLConfigurationService.class);
-                        if (userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(session.getUserId(), session.getContextId())) {
-                            throw SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(server);
-                        } 
                         throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(server);
                     }
                     if (nested instanceof IOException) {

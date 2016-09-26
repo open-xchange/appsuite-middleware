@@ -129,7 +129,6 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
@@ -652,10 +651,6 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
         } catch (MessagingException e) {
             if (e.getNextException() instanceof javax.net.ssl.SSLHandshakeException) {
-                UserAwareSSLConfigurationService userAwareSSLConfigurationService = Services.getService(UserAwareSSLConfigurationService.class);
-                if (userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(session.getUserId(), session.getContextId())) {
-                    throw SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(server);
-                } 
                 throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(server);
             }
             throw handleMessagingException(e, smtpConfig);

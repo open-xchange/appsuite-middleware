@@ -57,20 +57,16 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.rss.osgi.Services;
 import com.openexchange.rss.util.RssProperties;
 import com.openexchange.rss.util.TimoutHttpURLFeedFetcher;
 import com.openexchange.test.mock.MockUtils;
-import com.openexchange.tools.session.ServerSession;
 import com.sun.syndication.feed.synd.SyndFeed;
 
 /**
@@ -91,15 +87,6 @@ public class RssActionTestReconfiguredPortsAndHosts {
 
     List<URL> urls = new ArrayList<>();
 
-    @Mock
-    private ConfigViewFactory configViewFactory;
-
-    @Mock
-    private ConfigView configView;
-
-    @Mock
-    private ServerSession session;
-
     List<OXException> warnings = new ArrayList<>();
 
     @Before
@@ -107,16 +94,6 @@ public class RssActionTestReconfiguredPortsAndHosts {
         PowerMockito.mockStatic(Services.class);
         Mockito.when(Services.optService(ConfigurationService.class)).thenReturn(configurationService);
         Mockito.when(Services.getService(ConfigurationService.class)).thenReturn(configurationService);
-        Mockito.when(Services.getService(ConfigViewFactory.class)).thenReturn(configViewFactory);
-        Mockito.when(Services.optService(ConfigViewFactory.class)).thenReturn(configViewFactory);
-        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.blacklist", RssProperties.HOST_BLACKLIST_DEFAULT)).thenReturn(RssProperties.HOST_BLACKLIST_DEFAULT);
-        Mockito.when(configurationService.getProperty("com.openexchange.messaging.rss.feed.whitelist.ports", RssProperties.PORT_WHITELIST_DEFAULT)).thenReturn(RssProperties.PORT_WHITELIST_DEFAULT);
-        Mockito.when(configurationService.getProperty(RssProperties.SCHEMES_KEY, RssProperties.SCHEMES_DEFAULT)).thenReturn(RssProperties.SCHEMES_DEFAULT);
-        Mockito.when(configViewFactory.getView()).thenReturn(configView);
-        Mockito.when(configViewFactory.getView(Mockito.anyInt(), Mockito.anyInt())).thenReturn(configView);
-        Mockito.when(configView.get("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class)).thenReturn(Boolean.TRUE);
-        Mockito.when(session.getUserId()).thenReturn(0);
-        Mockito.when(session.getContextId()).thenReturn(0);
 
         action = new RssAction();
 
@@ -147,7 +124,7 @@ public class RssActionTestReconfiguredPortsAndHosts {
         urls.add(new URL("https://127.0.0.1/this/is/secured/never/nice/too"));
         urls.add(new URL("https://127.0.0.1/this/is/secured/never/nice/too/asFile.xml"));
 
-        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings, session);
+        List<SyndFeed> acceptedFeedsFromUrls = action.getAcceptedFeeds(urls, warnings);
 
         assertEquals(16, acceptedFeedsFromUrls.size());
         assertEquals(0, warnings.size());
