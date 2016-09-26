@@ -76,6 +76,8 @@ import com.openexchange.framework.request.RequestContext;
 import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.log.LogProperties;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -228,6 +230,14 @@ public class DefaultDispatcher implements Dispatcher {
                         ((AJAXExceptionHandler) customizer).exceptionOccurred(requestData, e, session);
                     } catch (Exception x) {
                         // Discard. Not our problem, we need to get on with this!
+                    }
+                }
+            }
+            if (SSLExceptionCode.PREFIX.equals(e.getPrefix())) {
+                UserAwareSSLConfigurationService userAwareSSLConfigurationService = ServerServiceRegistry.getInstance().getService(UserAwareSSLConfigurationService.class);
+                if (null != userAwareSSLConfigurationService) {
+                    if (userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(session.getUserId(), session.getContextId())) {
+                        throw SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(e.getDisplayArgs()[0]);
                     }
                 }
             }

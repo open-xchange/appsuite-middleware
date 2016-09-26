@@ -53,6 +53,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.net.ssl.SSLHandshakeException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -66,6 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -125,6 +127,9 @@ public class YahooClient {
         } catch (org.scribe.exceptions.OAuthException e) {
             // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
             Throwable cause = e.getCause();
+            if (SSLHandshakeException.class.isInstance(cause)) {
+                throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create("social.yahooapis.com");
+            }
             if (cause instanceof java.net.SocketTimeoutException) {
                 // A socket timeout
                 throw OAuthExceptionCodes.CONNECT_ERROR.create(cause, new Object[0]);

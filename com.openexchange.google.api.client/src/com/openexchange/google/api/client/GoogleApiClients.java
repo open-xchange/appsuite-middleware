@@ -53,6 +53,7 @@ package com.openexchange.google.api.client;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.net.ssl.SSLHandshakeException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
@@ -70,6 +71,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.services.Services;
 import com.openexchange.java.Strings;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.OAuthAccount;
@@ -148,6 +150,9 @@ public class GoogleApiClients {
                 if (e.getMessage().indexOf("\"invalid_grant\"") >= 0) {
                     // Refresh token in use is invalid/expired
                     throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, defaultAccount.getDisplayName(), defaultAccount.getId());
+                }
+                if (null != e.getCause() && SSLHandshakeException.class.isInstance(e.getCause())) {
+                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create("www.googleapis.com");
                 }
                 throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
             }

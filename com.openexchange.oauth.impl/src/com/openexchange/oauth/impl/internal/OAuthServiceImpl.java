@@ -65,6 +65,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.net.ssl.SSLHandshakeException;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import org.scribe.builder.ServiceBuilder;
@@ -79,6 +80,7 @@ import org.scribe.builder.api.TwitterApi;
 import org.scribe.builder.api.VkontakteApi;
 import org.scribe.builder.api.XingApi;
 import org.scribe.builder.api.YahooApi;
+import org.scribe.exceptions.OAuthConnectionException;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
@@ -93,6 +95,7 @@ import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
 import com.openexchange.oauth.OAuthAccount;
@@ -525,6 +528,17 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             return account;
         } catch (final OXException x) {
+            if (null != x.getCause() && OAuthConnectionException.class.isInstance(x.getCause()) && null != x.getCause().getCause() && SSLHandshakeException.class.isInstance(x.getCause().getCause())) {
+                String url = (String) arguments.get(OAuthConstants.ARGUMENT_AUTH_URL);
+                if (Strings.isNotEmpty(url)) {
+                    try {
+                        url = new URI(url).getHost();
+                    } catch (URISyntaxException e) {
+                        // will not happen here
+                    }
+                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(url);
+                }
+            }
             throw x;
         }
     }
