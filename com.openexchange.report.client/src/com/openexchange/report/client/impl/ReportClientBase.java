@@ -899,10 +899,9 @@ public class ReportClientBase extends AbstractJMXTools {
                         System.out.println("  \"" + string + "\" : " + data.get(string) + ",");
                     } else if (string.equals("macdetail") || string.equals("oxaas")) {
                         Report.printStoredReportContentToConsole((String) report.get("storageFolderPath"), (String) report.get("uuid"));
-                        System.out.print(",");
                     } else {
                         JSONObject obj = (JSONObject) data.get(string);
-                        System.out.println("  " + string + " : " + obj.toString(2, 1) + ",");
+                        System.out.println("  \"" + string + "\" : " + obj.toString(2, 1) + ",");
                     }
                 }
                 System.out.println("}");
