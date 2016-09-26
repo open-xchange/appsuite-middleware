@@ -72,6 +72,13 @@ public final class Arrays {
 
     /**
      * Concatenates the specifies arrays.
+     * <pre>
+     *   int[] a = {1,2,3};
+     *   int[] b = {4,5,6};
+     *   int[] c = concatenate(a, b);
+     *   System.out.println(Arrays.toString(c))
+     * </pre>
+     * Outputs: <code>{1,2,3,4,5,6}</code>
      *
      * @param a The first array
      * @param b The second array
