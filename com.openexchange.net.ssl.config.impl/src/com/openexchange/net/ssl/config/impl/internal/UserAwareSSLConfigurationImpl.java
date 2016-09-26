@@ -78,50 +78,59 @@ public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationS
     }
 
     @Override
-    public boolean isTrustAll(int user, int context) {
-        boolean allowedToDefineTrustLevel = isAllowedToDefineTrustLevel(user, context);
+    public boolean isTrustAll(int userId, int contextId) {
+        boolean allowedToDefineTrustLevel = isAllowedToDefineTrustLevel(userId, contextId);
 
         if (!allowedToDefineTrustLevel) {
             return false;
         }
 
         try {
-            String userTrustsAll = this.userService.getUserAttribute(USER_ATTRIBUTE_NAME, user, this.contextService.getContext(context));
+            String userTrustsAll = this.userService.getUserAttribute(USER_ATTRIBUTE_NAME, userId, this.contextService.getContext(contextId));
             if (userTrustsAll == null) {
                 return false;
             }
             return Boolean.parseBoolean(userTrustsAll);
         } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class).error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, user, context);
+            org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class).error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, userId, contextId);
         }
         return false;
     }
 
     @Override
-    public boolean isAllowedToDefineTrustLevel(int user, int context) {
-        if ((user <= 0) || (context <= 0)) {
+    public boolean isAllowedToDefineTrustLevel(int userId, int contextId) {
+        if ((userId <= 0) || (contextId <= 0)) {
             return false;
         }
 
         try {
-            ConfigView view = this.configViewFactory.getView(user, context);
+            ConfigView view = this.configViewFactory.getView(userId, contextId);
             Boolean isUserAllowedToDefineTrustlevel = view.property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class).get();
             if (isUserAllowedToDefineTrustlevel == null) {
                 return false;
             }
             return isUserAllowedToDefineTrustlevel.booleanValue();
         } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class).error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, user, context);
+            org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class).error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, userId, contextId);
         }
         return false;
     }
 
     @Override
-    public void setTrustAll(int user, Context context, boolean trustAll) {
+    public void setTrustAll(int userId, Context context, boolean trustAll) {
+        if (context == null) {
+            return;
+        }
+        boolean allowedToDefineTrustLevel = isAllowedToDefineTrustLevel(userId, context.getContextId());
+
+        if (!allowedToDefineTrustLevel) {
+            return;
+        }
+
         try {
-            userService.setUserAttribute(USER_ATTRIBUTE_NAME, Boolean.toString(trustAll), user, context);
+            userService.setUserAttribute(USER_ATTRIBUTE_NAME, Boolean.toString(trustAll), userId, context);
         } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class).error("Unable to set trust level for user {} in context {}", e, USER_ATTRIBUTE_NAME, user, context);
+            org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class).error("Unable to set trust level for user {} in context {}", e, USER_ATTRIBUTE_NAME, userId, context);
         }
     }
 

@@ -68,8 +68,8 @@ public class SSLConfigurationServiceImpl implements SSLConfigurationService {
     }
 
     @Override
-    public boolean isWhitelisted(String... hostNames) {
-        return SSLProperties.isWhitelisted(hostNames);
+    public boolean isWhitelisted(String hostName) {
+        return SSLProperties.isWhitelisted(hostName);
     }
 
     @Override

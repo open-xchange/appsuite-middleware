@@ -61,12 +61,37 @@ import com.openexchange.osgi.annotation.SingletonService;
 @SingletonService
 public interface UserAwareSSLConfigurationService {
 
+    /**
+     * Name of the user attribute the configuration made by the user is handled for.
+     */
     public static final String USER_ATTRIBUTE_NAME = "trustAllConnections";
 
-    boolean isAllowedToDefineTrustLevel(int user, int context);
+    /**
+     * Returns if the user is allowed to define the trust level for external connections.
+     * 
+     * @param userId The id of the user to check
+     * @param contextId The id of the context the user is associated to
+     * @return <code>true</code> if the user is allowed to define the trust level; otherwise <code>false</code>
+     */
+    boolean isAllowedToDefineTrustLevel(int userId, int contextId);
 
-    boolean isTrustAll(int user, int context);
+    /**
+     * Returns if the given user configured to trust all external connections.
+     * 
+     * @see #setTrustAll(int, Context, boolean)
+     * @param userId The id of the user to check
+     * @param contextId The id of the context the user is associated to
+     * @return <code>true</code> if the user has configured to trust all connections; otherwise <code>false</code>
+     */
+    boolean isTrustAll(int userId, int contextId);
 
-    void setTrustAll(int user, Context context, boolean trustAll);
+    /**
+     * Sets if the given user would like to trust all external connections without taking the server configuration into account.
+     * 
+     * @param userId The id of the user to check
+     * @param contextId The context the user is associated to
+     * @param trustAll <code>true</code> to set if the user would like to trust all connections; otherwise <code>false</code>
+     */
+    void setTrustAll(int userId, Context context, boolean trustAll);
 
 }

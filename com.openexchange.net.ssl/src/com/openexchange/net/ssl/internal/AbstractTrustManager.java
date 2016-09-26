@@ -107,8 +107,12 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
             }
         }
 
-        if (Services.getService(SSLConfigurationService.class).isWhitelisted(hosts.toArray(new String[0]))) {
-            return;
+        String[] hostsArray = hosts.toArray(new String[0]);
+        SSLConfigurationService sslConfigurationService = Services.getService(SSLConfigurationService.class);
+        for (String lHost : hostsArray) {
+            if (sslConfigurationService.isWhitelisted(lHost)) {
+                return;
+            }
         }
 
         this.trustManager.checkServerTrusted(chain, authType);
