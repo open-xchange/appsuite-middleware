@@ -130,38 +130,43 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         init();
     }
 
+    /**
+     * Initializes the timer task that periodically flushes the cache UIDLs.
+     * <p>
+     * Set mode to {@link Mode#RE_INIT RE_INIT}
+     */
     private void initTimerTask() {
-        final ClearMapsRunnable cmr = new ClearMapsRunnable(uidl2pair, pair2uidl, lock, mode);
-        final TimerService timerService = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class);
-        final ScheduledTimerTask timerTask =
-            timerService.scheduleWithFixedDelay(
-                cmr,
-                SessionCacheProperties.SCHEDULED_TASK_DELAY,
-                SessionCacheProperties.SCHEDULED_TASK_DELAY);
+        ClearMapsRunnable cmr = new ClearMapsRunnable(uidl2pair, pair2uidl, lock, mode);
+        TimerService timerService = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class);
+        ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(cmr, SessionCacheProperties.SCHEDULED_TASK_DELAY, SessionCacheProperties.SCHEDULED_TASK_DELAY);
         cmr.setTimerTask(timerTask);
         mode.set(Mode.RE_INIT);
     }
 
+    /**
+     * Initializes/refills the UIDL cache.
+     * <p>
+     * Set mode to {@link Mode#NONE NONE}
+     *
+     * @throws OXException
+     */
     private void init() throws OXException {
-        if (Mode.RE_INIT == mode.get()) {
-            final Map<String, FullnameUIDPair> all = delegatee.getAllUIDLs();
-            final int size = all.size();
-            final Iterator<Entry<String, FullnameUIDPair>> iter = all.entrySet().iterator();
-            for (int i = 0; i < size; i++) {
-                final Entry<String, FullnameUIDPair> entry = iter.next();
-                pair2uidl.put(entry.getValue(), entry.getKey());
-                uidl2pair.put(entry.getKey(), entry.getValue());
-            }
-            mode.set(Mode.NONE);
+        Map<String, FullnameUIDPair> all = delegatee.getAllUIDLs();
+        Iterator<Entry<String, FullnameUIDPair>> iter = all.entrySet().iterator();
+        for (int i = all.size(); i-- > 0;) {
+            final Entry<String, FullnameUIDPair> entry = iter.next();
+            pair2uidl.put(entry.getValue(), entry.getKey());
+            uidl2pair.put(entry.getKey(), entry.getValue());
         }
+        mode.set(Mode.NONE);
     }
 
     private void checkInit() throws OXException {
         final Mode m = mode.get();
         if (Mode.START_TIMER == m) {
             initTimerTask();
-        }
-        if (Mode.RE_INIT == m) {
+            init();
+        } else if (Mode.RE_INIT == m) {
             init();
         }
     }
@@ -297,18 +302,13 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
     private static final class ClearMapsRunnable implements Runnable {
 
         private final Map<String, FullnameUIDPair> tuidl2pair;
-
         private final Map<FullnameUIDPair, String> tpair2uidl;
-
         private final Lock tLock;
-
         private final AtomicReference<Mode> tmode;
-
         private volatile ScheduledTimerTask timerTask;
-
         private int countEmptyRuns;
 
-        public ClearMapsRunnable(final Map<String, FullnameUIDPair> tuidl2pair, final Map<FullnameUIDPair, String> tpair2uidl, final Lock tLock, final AtomicReference<Mode> tmode) {
+        ClearMapsRunnable(Map<String, FullnameUIDPair> tuidl2pair, Map<FullnameUIDPair, String> tpair2uidl, Lock tLock, AtomicReference<Mode> tmode) {
             super();
             this.tLock = tLock;
             this.tuidl2pair = tuidl2pair;
