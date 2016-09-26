@@ -57,6 +57,8 @@ import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
 import com.openexchange.mailaccount.Constants;
+import com.openexchange.mailaccount.CredentialsProviderRegistry;
+import com.openexchange.mailaccount.CredentialsProviderService;
 import com.openexchange.mailaccount.json.MailAccountActionProvider;
 import com.openexchange.mailaccount.json.MailAccountOAuthConstants;
 import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
@@ -90,6 +92,10 @@ public final class MailAccountJSONActivator extends AJAXModuleActivator {
 
         MailAccountActionProviderTracker providerTracker = new MailAccountActionProviderTracker(context);
         track(MailAccountActionProvider.class, providerTracker);
+
+        CredentialsProviderTracker credentialsProviderTracker = new CredentialsProviderTracker(context);
+        track(CredentialsProviderService.class, credentialsProviderTracker);
+        CredentialsProviderRegistry.getInstance().applyListing(credentialsProviderTracker);
 
         track(JSlobStorageRegistry.class, new ServiceTrackerCustomizer<JSlobStorageRegistry, JSlobStorageRegistry>() {
 
@@ -129,6 +135,12 @@ public final class MailAccountJSONActivator extends AJAXModuleActivator {
                 return capabilities.contains(Permission.MULTIPLE_MAIL_ACCOUNTS.getCapabilityName());
             }
         });
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        CredentialsProviderRegistry.getInstance().applyListing(null);
+        super.stopBundle();
     }
 
 }

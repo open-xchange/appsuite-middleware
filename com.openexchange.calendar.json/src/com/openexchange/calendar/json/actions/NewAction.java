@@ -100,6 +100,9 @@ public final class NewAction extends AppointmentAction {
     @Override
     protected AJAXRequestResult perform(final AppointmentAJAXRequest req) throws OXException, JSONException {
         final JSONObject jData = req.getData();
+        if (null == jData) {
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+        }
         final TimeZone timeZone;
         {
             final String timeZoneId = req.getParameter(AJAXServlet.PARAMETER_TIMEZONE);
