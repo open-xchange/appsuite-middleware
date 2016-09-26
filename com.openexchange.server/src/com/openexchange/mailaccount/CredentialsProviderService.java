@@ -63,12 +63,13 @@ public interface CredentialsProviderService {
     /**
      * Checks if this provider is appropriate for given arguments
      *
+     * @param forMailAccess <code>true</code> if credentials are supposed to be determined for mail access; otherwise <code>false</code> for transport
      * @param accountId The account identifier
      * @param session The session
      * @return <code>true</code> if this provider handles given session's account; otherwise <code>false</code>
      * @throws OXException If check fails
      */
-    boolean isApplicableFor(int accountId, Session session) throws OXException;
+    boolean isApplicableFor(boolean forMailAccess, int accountId, Session session) throws OXException;
 
     /**
      * Gets the login.

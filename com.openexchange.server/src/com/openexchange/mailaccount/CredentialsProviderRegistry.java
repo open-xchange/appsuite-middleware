@@ -88,19 +88,20 @@ public class CredentialsProviderRegistry {
     /**
      * Determines the appropriate credentials provider for specified arguments.
      *
+     * @param forMailAccess <code>true</code> if credentials are supposed to be determined for mail access; otherwise <code>false</code> for transport
      * @param accountId The account identifier
      * @param session The session
      * @return The appropriate credentials provider or <code>null</code>
      * @throws OXException If appropriate credentials provider cannot be returned due to an error
      */
-    public CredentialsProviderService optCredentialsProviderFor(int accountId, Session session) throws OXException {
+    public CredentialsProviderService optCredentialsProviderFor(boolean forMailAccess, int accountId, Session session) throws OXException {
         ServiceListing<CredentialsProviderService> serviceListing = providers.get();
         if (null == serviceListing) {
             return null;
         }
 
         for (CredentialsProviderService credentialsProvider : serviceListing) {
-            if (credentialsProvider.isApplicableFor(accountId, session)) {
+            if (credentialsProvider.isApplicableFor(forMailAccess, accountId, session)) {
                 return credentialsProvider;
             }
         }

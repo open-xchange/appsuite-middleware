@@ -713,7 +713,7 @@ public abstract class MailConfig {
                 mailConfig.password = sessionPassword;
             }
         } else {
-            CredentialsProviderService credentialsProvider = CredentialsProviderRegistry.getInstance().optCredentialsProviderFor(account.getId(), session);
+            CredentialsProviderService credentialsProvider = CredentialsProviderRegistry.getInstance().optCredentialsProviderFor(account.isMailAccount(), account.getId(), session);
             if (null == credentialsProvider) {
                 int oAuthAccontId = assumeXOauth2For(account);
                 if (oAuthAccontId >= 0) {
