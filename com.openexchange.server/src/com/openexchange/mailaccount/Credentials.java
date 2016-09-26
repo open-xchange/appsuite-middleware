@@ -49,40 +49,35 @@
 
 package com.openexchange.mailaccount;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.mail.api.AuthType;
 
 /**
- * {@link CredentialsProviderService}
+ * {@link Credentials}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface CredentialsProviderService {
+public interface Credentials {
 
     /**
-     * Checks if this provider is appropriate for given arguments
+     * Gets the login.
      *
-     * @param forMailAccess <code>true</code> if credentials are supposed to be determined for mail access; otherwise <code>false</code> for transport
-     * @param accountId The account identifier
-     * @param session The session
-     * @return <code>true</code> if this provider handles given session's account; otherwise <code>false</code>
-     * @throws OXException If check fails
+     * @return The login
      */
-    boolean isApplicableFor(boolean forMailAccess, int accountId, Session session) throws OXException;
+    String getLogin();
 
     /**
-     * Gets the credentials for mail access.
+     * Gets the password.
      *
-     * @return The credentials for mail access
+     * @return The password
      */
-    Credentials getMailCredentials();
+    Password getPassword();
 
     /**
-     * Gets the credentials for transport.
+     * Gets the auth type.
      *
-     * @return The credentials for transport
+     * @return The auth type
      */
-    Credentials getTransportCredentials();
+    AuthType getAuthType();
 
 }
