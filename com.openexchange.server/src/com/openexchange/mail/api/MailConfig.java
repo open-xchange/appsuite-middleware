@@ -722,11 +722,11 @@ public abstract class MailConfig {
                 applyPasswordAndAuthType(mailConfig, session, account);
             } else {
                 if (account.isMailAccount()) {
-                    if (false == applyCredentials(mailConfig, credentialsProvider.getMailCredentials())) {
+                    if (false == applyCredentials(mailConfig, credentialsProvider.getMailCredentials(account.getId(), session))) {
                         applyPasswordAndAuthType(mailConfig, session, account);
                     }
                 } else {
-                    if (false == applyCredentials(mailConfig, credentialsProvider.getTransportCredentials())) {
+                    if (false == applyCredentials(mailConfig, credentialsProvider.getTransportCredentials(account.getId(), session))) {
                         applyPasswordAndAuthType(mailConfig, session, account);
                     }
                 }
@@ -736,24 +736,30 @@ public abstract class MailConfig {
     }
 
     private static boolean applyCredentials(MailConfig mailConfig, Credentials credentials) {
-        String login = credentials.getLogin();
-        if (Strings.isEmpty(login)) {
-            return false;
-        }
-
-        Password pw = credentials.getPassword();
-        if (null == pw) {
+        if (null == credentials) {
             return false;
         }
 
         try {
-            mailConfig.login = saneLogin(login);
-            mailConfig.password = new String(pw.getPassword());
-            AuthType authType = credentials.getAuthType();
-            mailConfig.authType = null == authType ? AuthType.LOGIN : authType;
-            return true;
+            String login = credentials.getLogin();
+            if (Strings.isEmpty(login)) {
+                return false;
+            }
+            Password pw = credentials.getPassword();
+            if (null == pw) {
+                return false;
+            }
+            try {
+                mailConfig.login = saneLogin(login);
+                mailConfig.password = new String(pw.getPassword());
+                AuthType authType = credentials.getAuthType();
+                mailConfig.authType = null == authType ? AuthType.LOGIN : authType;
+                return true;
+            } finally {
+                Streams.close(pw);
+            }
         } finally {
-            Streams.close(pw);
+            Streams.close(credentials);
         }
     }
 

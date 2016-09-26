@@ -74,15 +74,19 @@ public interface CredentialsProviderService {
     /**
      * Gets the credentials for mail access.
      *
-     * @return The credentials for mail access
+     * @param accountId The account identifier
+     * @param session The session
+     * @return The credentials for mail access or <code>null</code>
      */
-    Credentials getMailCredentials();
+    Credentials getMailCredentials(int accountId, Session session);
 
     /**
      * Gets the credentials for transport.
      *
-     * @return The credentials for transport
+     * @param accountId The account identifier
+     * @param session The session
+     * @return The credentials for transport or <code>null</code>
      */
-    Credentials getTransportCredentials();
+    Credentials getTransportCredentials(int accountId, Session session);
 
 }

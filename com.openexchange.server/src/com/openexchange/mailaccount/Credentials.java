@@ -52,12 +52,12 @@ package com.openexchange.mailaccount;
 import com.openexchange.mail.api.AuthType;
 
 /**
- * {@link Credentials}
+ * {@link Credentials} - Provides credential for either mail access or mail transport.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface Credentials {
+public interface Credentials extends AutoCloseable {
 
     /**
      * Gets the login.

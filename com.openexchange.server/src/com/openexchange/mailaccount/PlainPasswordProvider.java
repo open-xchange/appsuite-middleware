@@ -94,11 +94,15 @@ public class PlainPasswordProvider implements AutoCloseable {
      */
     public Password getPassword() {
         char[] plainPw = getCharsFromBuffer();
-        return new Password(plainPw, Password.Type.PLAIN);
+        return null == plainPw ? null : new Password(plainPw, Password.Type.PLAIN);
     }
 
     private char[] getCharsFromBuffer() {
         ByteBuffer byteBuffer = plainPasswordRef.get();
+        if (null == byteBuffer) {
+            return null;
+        }
+
         byte[] bytes = new byte[size];
         byteBuffer.get(bytes, 0, size);
         byteBuffer.reset();
