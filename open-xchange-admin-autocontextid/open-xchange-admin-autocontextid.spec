@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 9
+%define        ox_release 10
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -74,6 +74,8 @@ done
 %config(noreplace) /opt/open-xchange/etc/mysql/*
 
 %changelog
+* Mon Sep 19 2016 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2016-09-08 (3580)
 * Mon Sep 05 2016 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2016-09-12 (3547)
 * Mon Aug 22 2016 Jan Bauerdick <jan.bauerdick@open-xchange.com>
