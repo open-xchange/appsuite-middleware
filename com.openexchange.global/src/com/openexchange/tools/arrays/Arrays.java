@@ -71,7 +71,7 @@ public final class Arrays {
     }
 
     /**
-     * Concatenates the specifies arrays.
+     * Concatenates the specified arrays.
      * <pre>
      *   int[] a = {1,2,3};
      *   int[] b = {4,5,6};
@@ -122,15 +122,13 @@ public final class Arrays {
      * @param search this int is tested if the array contains it.
      * @return <code>true</code> if the array contains the int value.
      */
-    public static boolean contains(final int[] array, final int search) {
-        boolean found = false;
-        for (final int test : array) {
-            if (test == search) {
-                found = true;
-                break;
+    public static boolean contains(int[] array, int search) {
+        for (int i = array.length; i-- > 0;) {
+            if (array[i] == search) {
+                return true;
             }
         }
-        return found;
+        return false;
     }
 
     public static int[] addUniquely(final int[] toExtend, final int... other) {
