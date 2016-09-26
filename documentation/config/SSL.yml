@@ -55,7 +55,7 @@ array:
   - data:
       Key: com.openexchange.net.ssl.trustlevel
       Description: >
-        Defines which level of trust should be considered for potentially secure connections (e. g. https). The default value 'none' says that no connection will be trusted. You can switch this setting to 'all' so that every connection will be trusted (which isn't suggested by Open-Xchange). 
+        Defines which level of trust should be considered for potentially secure connections (e. g. https). The default value 'none' means that no connection will be trusted and a SSLSocketFactory that checks certificates (and host names) will be used. You can switch this setting to 'all' so that every connection will be trusted (which isn't suggested by Open-Xchange). In that case a so called TrustAllSSLSocketFactory will be used.
       Default: none
       Version: 7.8.3
       Reloadable: true
@@ -65,8 +65,8 @@ array:
   - data:
       Key: com.openexchange.net.ssl.protocols
       Description: >
-        Defines the protocols that will become supported for SSL communication. If the server does not support one of the mentioned protocols the SSL handshake will fail.  
-      Default: SSLv3, TLSv1.2
+        Defines the protocols that will become supported for SSL communication. If the server does not support one of the mentioned protocols the SSL handshake will fail.
+      Default: TLSv1, TLSv1.1, TLSv1.2
       Version: 7.8.3
       Reloadable: true
       Configcascade_Aware: false
@@ -75,8 +75,8 @@ array:
   - data:
       Key: com.openexchange.net.ssl.ciphersuites
       Description: >
-        Defines the cipher suites that will become supported for SSL communication. If the server does not support one of the mentioned suites the SSL handshake will fail.  
-      Default: TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, TLS_ECDHE_ECDSA_WITH_RC4_128_SHA, TLS_ECDHE_RSA_WITH_RC4_128_SHA, SSL_RSA_WITH_RC4_128_SHA, TLS_ECDH_ECDSA_WITH_RC4_128_SHA, TLS_ECDH_RSA_WITH_RC4_128_SHA, TLS_ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_ECDSA_WITH_3DES_EDE_CBC_SHA, TLS_ECDH_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_RSA_WITH_3DES_EDE_CBC_SHA, SSL_DHE_DSS_WITH_3DES_EDE_CBC_SHA, SSL_RSA_WITH_RC4_128_MD5, TLS_EMPTY_RENEGOTIATION_INFO_SCSV
+        Defines the cipher suites that will become supported for SSL communication. If the server does not support one of the mentioned suites the SSL handshake will fail.
+      Default: TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, TLS_EMPTY_RENEGOTIATION_INFO_SCSV
       Version: 7.8.3
       Reloadable: true
       Configcascade_Aware: false
