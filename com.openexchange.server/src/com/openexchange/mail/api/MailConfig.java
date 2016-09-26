@@ -69,6 +69,7 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailConfigException;
@@ -81,9 +82,12 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.Account;
+import com.openexchange.mailaccount.CredentialsProviderRegistry;
+import com.openexchange.mailaccount.CredentialsProviderService;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.Password;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.server.ServiceExceptionCode;
@@ -709,28 +713,46 @@ public abstract class MailConfig {
                 mailConfig.password = sessionPassword;
             }
         } else {
-            int oAuthAccontId = assumeXOauth2For(account);
-            if (oAuthAccontId >= 0) {
-                // Do the XOAUTH2 dance...
-                OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
-                if (null == oauthService) {
-                    throw ServiceExceptionCode.absentService(OAuthService.class);
-                }
+            CredentialsProviderService credentialsProvider = CredentialsProviderRegistry.getInstance().optCredentialsProviderFor(account.getId(), session);
+            if (null == credentialsProvider) {
+                int oAuthAccontId = assumeXOauth2For(account);
+                if (oAuthAccontId >= 0) {
+                    // Do the XOAUTH2 dance...
+                    OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
+                    if (null == oauthService) {
+                        throw ServiceExceptionCode.absentService(OAuthService.class);
+                    }
 
-                OAuthAccount oAuthAccount = oauthService.getAccount(oAuthAccontId, session, session.getUserId(), session.getContextId());
-                mailConfig.password = oAuthAccount.getToken();
-                mailConfig.authType = AuthType.OAUTH;
-            } else {
-                String mailAccountPassword = account.getPassword();
-                if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
-                    // Set to empty string
-                    mailConfig.password = "";
+                    OAuthAccount oAuthAccount = oauthService.getAccount(oAuthAccontId, session, session.getUserId(), session.getContextId());
+                    mailConfig.password = oAuthAccount.getToken();
+                    mailConfig.authType = AuthType.OAUTH;
                 } else {
-                    // Mail account's password
-                    if (account.isMailAccount()) {
-                        mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), ((MailAccount) account).getMailServer());
+                    String mailAccountPassword = account.getPassword();
+                    if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
+                        // Set to empty string
+                        mailConfig.password = "";
                     } else {
-                        mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), account.getTransportServer());
+                        // Mail account's password
+                        String server = account.isMailAccount() ? ((MailAccount) account).getMailServer() : account.getTransportServer();
+                        mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), server);
+                    }
+                }
+            } else {
+                if (account.isMailAccount()) {
+                    mailConfig.login = saneLogin(credentialsProvider.getLogin());
+                    Password pw = credentialsProvider.getPassword();
+                    try {
+                        mailConfig.password = new String(pw.getPassword());
+                    } finally {
+                        Streams.close(pw);
+                    }
+                } else {
+                    mailConfig.login = saneLogin(credentialsProvider.getTransportLogin());
+                    Password pw = credentialsProvider.getTransportPassword();
+                    try {
+                        mailConfig.password = new String(pw.getPassword());
+                    } finally {
+                        Streams.close(pw);
                     }
                 }
             }
