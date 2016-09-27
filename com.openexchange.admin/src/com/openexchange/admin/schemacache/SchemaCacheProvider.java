@@ -50,7 +50,6 @@
 package com.openexchange.admin.schemacache;
 
 import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.schemacache.inmemory.InMemorySchemaCache;
 
 /**
@@ -88,9 +87,8 @@ public class SchemaCacheProvider {
      * Gets the schema cache
      *
      * @return The schema cache
-     * @throws StorageException If schema cache cannot be returned
      */
-    public SchemaCache getSchemaCache() throws StorageException {
+    public SchemaCache getSchemaCache() {
         SchemaCache schemaCache = cacheReference.get();
         if (null == schemaCache) {
             synchronized (this) {
