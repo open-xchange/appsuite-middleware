@@ -187,6 +187,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.uadetector"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.user.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.utils"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.upload"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.version"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.xml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,javapns.notification.management"/>

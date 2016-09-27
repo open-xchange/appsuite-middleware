@@ -2772,40 +2772,30 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         {
             String value = (String)parser.getOptionValue(mail_folder_drafts_nameOption);
             if (null != value) {
-                // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
                 usr.setMail_folder_drafts_name(value);
             }
         }
         {
             String value = (String)parser.getOptionValue(mail_folder_sent_nameOption);
             if (null != value) {
-                // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
                 usr.setMail_folder_sent_name(value);
             }
         }
         {
             String value = (String)parser.getOptionValue(mail_folder_spam_nameOption);
             if (null != value) {
-                // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
                 usr.setMail_folder_spam_name(value);
             }
         }
         {
             String value = (String)parser.getOptionValue(mail_folder_trash_nameOption);
             if (null != value) {
-                // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
                 usr.setMail_folder_trash_name(value);
             }
         }
         {
             String value = (String)parser.getOptionValue(mail_folder_archive_full_nameOption);
             if (null != value) {
-                // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
                 usr.setMail_folder_archive_full_name(value);
             }
         }

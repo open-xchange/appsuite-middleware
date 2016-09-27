@@ -49,8 +49,8 @@
 
 package com.openexchange.smtp.dataobjects;
 
-import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.UploadFileMailPart;
 

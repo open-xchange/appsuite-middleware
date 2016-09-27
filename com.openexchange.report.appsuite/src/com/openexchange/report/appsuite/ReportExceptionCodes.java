@@ -63,7 +63,8 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public enum ReportExceptionCodes implements OXExceptionCode {
     REPORT_GENERATION_CANCELED("Report generation cancelled by an user.", Category.CATEGORY_USER_INPUT, 1),
-    UNABLE_TO_RETRIEVE_LOCK("Unable to retrieve lock.", Category.CATEGORY_ERROR, 2);
+    UNABLE_TO_RETRIEVE_LOCK("Unable to retrieve lock.", Category.CATEGORY_ERROR, 2),
+    UNABLE_TO_RETRIEVE_ALL_CONTEXT_IDS("Unable to get all context ids for a schema", Category.CATEGORY_ERROR, 3);
 
     /**
      * (Log) Message of the exception.

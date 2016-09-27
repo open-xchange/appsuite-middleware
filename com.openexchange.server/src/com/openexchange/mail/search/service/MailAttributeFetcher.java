@@ -49,12 +49,14 @@
 
 package com.openexchange.mail.search.service;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -72,6 +74,7 @@ import com.openexchange.mail.search.SentDateTerm;
 import com.openexchange.mail.search.SizeTerm;
 import com.openexchange.mail.search.SubjectTerm;
 import com.openexchange.mail.search.ToTerm;
+import com.openexchange.mail.search.UserFlagTerm;
 import com.openexchange.search.SearchAttributeFetcher;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 
@@ -200,6 +203,37 @@ public final class MailAttributeFetcher implements SearchAttributeFetcher<MailMe
                 } catch (final NumberFormatException e) {
                     throw new IllegalArgumentException("Unsupported value for flag search: " + operation);
                 }
+            }
+
+        });
+        m.put("user_flags", new AttributeGetter() {
+
+            private boolean isArray(Object aObject) {
+                // Too slow: return aObject.getClass().isArray();
+                return (null != aObject && '[' == aObject.getClass().getName().charAt(0));
+            }
+
+            @Override
+            public Object getObject(final MailMessage candidate) {
+                return candidate.getUserFlags();
+            }
+
+            @Override
+            public SearchTerm<?> getSearchTerm(final SingleOperation operation, final Object constant) {
+                if (SingleOperation.EQUALS != operation) {
+                    throw new IllegalArgumentException("Unsupported operation for flag search: " + operation);
+                }
+                if (constant instanceof String) {
+                    return new UserFlagTerm(Strings.splitByComma(constant.toString()), true);
+                }
+                if (constant instanceof Collection) {
+                    Collection<String> col = (Collection<String>) constant;
+                    return new UserFlagTerm(col.toArray(new String[col.size()]), true);
+                }
+                if (isArray(constant)) {
+                    return new UserFlagTerm((String[]) constant, true);
+                }
+                throw new IllegalArgumentException("Unsupported constant type: " + constant.getClass().getName());
             }
 
         });
