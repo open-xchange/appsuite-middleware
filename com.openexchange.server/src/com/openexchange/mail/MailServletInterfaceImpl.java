@@ -3164,6 +3164,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             boolean settingsAllowAppendToSend = !usm.isNoCopyIntoStandardSentFolder();
 
             // State variables
+            OXException failedAppend2Sent = null;
             OXException oxError = null;
             boolean first = true;
             String messageId = null;
@@ -3235,6 +3236,27 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         }
                     }
 
+                    if (settingsAllowAppendToSend && composedMail.isAppendToSentFolder()) {
+                        /*
+                         * If mail identifier and folder identifier is already available, assume it has already been stored in Sent folder
+                         */
+                        if (null != sentMail.getMailId() && null != sentMail.getFolder()) {
+                            ids.add(new MailPath(accountId, sentMail.getFolder(), sentMail.getMailId()).toString());
+                        } else {
+                            ids.add(append2SentFolder(sentMail).toString());
+                        }
+                    }
+
+                    // Append to Sent folder (prior to possible deletion of referenced mails)
+                    if (first && settingsAllowAppendToSend && null != mailToAppend) {
+                        try {
+                            mailToAppend.setHeader("Message-ID", messageId);
+                            ids.add(append2SentFolder(mailToAppend).toString());
+                        } catch (OXException e) {
+                            failedAppend2Sent = e;
+                        }
+                    }
+
                     // Check for a reply/forward
                     if (first) {
                         try {
@@ -3284,17 +3306,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             mailAccess.addWarnings(Collections.singletonList(MailExceptionCode.FLAG_FAIL.create(e, new Object[0])));
                         }
                     }
-
-                    if (settingsAllowAppendToSend && composedMail.isAppendToSentFolder()) {
-                        /*
-                         * If mail identifier and folder identifier is already available, assume it has already been stored in Sent folder
-                         */
-                        if (null != sentMail.getMailId() && null != sentMail.getFolder()) {
-                            ids.add(new MailPath(accountId, sentMail.getFolder(), sentMail.getMailId()).toString());
-                        } else {
-                            ids.add(append2SentFolder(sentMail).toString());
-                        }
-                    }
                 } catch (OXException e) {
                     if (!mailSent) {
                         throw e;
@@ -3312,10 +3323,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 first = false;
             }
 
-            // Append to Sent folder
-            if (settingsAllowAppendToSend && null != mailToAppend) {
-                mailToAppend.setHeader("Message-ID", messageId);
-                ids.add(append2SentFolder(mailToAppend).toString());
+            if (null != failedAppend2Sent) {
+                throw failedAppend2Sent;
             }
 
             if (null != oxError) {
