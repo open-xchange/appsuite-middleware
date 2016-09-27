@@ -333,6 +333,15 @@ public final class SieveTextFilter {
     }
 
     /**
+     * Writes an empty script
+     * 
+     * @return The empty script
+     */
+    public String writeEmptyScript() {
+        return FIRST_LINE + new Date().toString();
+    }
+
+    /**
      * Here we have to strip off the require line because this line should not be edited by the client
      *
      * @param rules list of rules

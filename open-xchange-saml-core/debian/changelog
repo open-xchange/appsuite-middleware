@@ -1,3 +1,9 @@
+open-xchange-saml-core (7.8.1-22) stable; urgency=medium
+
+  * Build for patch 2016-09-26 (3571)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 20 Sep 2016 14:30:59 +0200
+
 open-xchange-saml-core (7.8.1-21) stable; urgency=medium
 
   * Build for patch 2016-09-12 (3546)
