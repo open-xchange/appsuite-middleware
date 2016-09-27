@@ -69,8 +69,19 @@ public interface SessiondMBean {
      * @param contextId The context ID
      * @return The number of removed sessions belonging to the user or <code>-1</code> if an error occurred
      */
-    @MBeanMethodAnnotation (description="Clears all sessions belonging to the user identified by given user ID in specified context", parameters={"userId", "contextId"}, parameterDescriptions={"The user identifier", "The context identifier"})
+    @MBeanMethodAnnotation (description="Clears all sessions on running node belonging to the user identified by given user ID in specified context", parameters={"userId", "contextId"}, parameterDescriptions={"The user identifier", "The context identifier"})
     int clearUserSessions(int userId, int contextId);
+
+    /**
+     * Clears all sessions from cluster belonging to the user identified by given user ID in specified context
+     *
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @return The number of removed sessions belonging to the user or <code>-1</code> if an error occurred
+     * @throws MBeanException If operation fails
+     */
+    @MBeanMethodAnnotation (description="Clears all sessions from cluster on running node belonging to the user identified by given user ID in specified context", parameters={"userId", "contextId"}, parameterDescriptions={"The user identifier", "The context identifier"})
+    void clearUserSessionsGlobally(int userId, int contextId) throws MBeanException;
 
     /**
      * Gets the number of short-term sessions associated with specified user.
