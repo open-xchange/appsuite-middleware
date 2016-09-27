@@ -62,6 +62,9 @@ import java.util.TimeZone;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.compat.Appointment2Event;
+import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.service.EntityResolver;
@@ -353,38 +356,54 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
      * @param event The event to adjust
      * @return The (possibly adjusted) event reference
      */
-    private static Event adjustAfterLoad(Event event) {
+    private static Event adjustAfterLoad(Event event) throws OXException {
         if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
             /*
-             * drop recurrence information for change exceptions
+             * extract series pattern and "absolute duration" / "recurrence calculator" field
              */
-            if (event.getId() != event.getSeriesId()) {
-                event.removeRecurrenceRule();
-            } else {
+            String value = event.getRecurrenceRule();
+            int idx = value.indexOf('~');
+            int absoluteDuration = Integer.parseInt(value.substring(0, idx));
+            String databasePattern = value.substring(idx + 1);
+            String timeZone = null != event.getStartTimeZone() ? event.getStartTimeZone() : "UTC";
+            boolean allDay = event.isAllDay();
+            /*
+             * convert legacy series pattern into proper recurrence rule
+             */
+            SeriesPattern seriesPattern = new SeriesPattern(databasePattern, timeZone, allDay);
+            String recurrenceRule = Recurrence.getRecurrenceRule(seriesPattern);
+            if (CalendarUtils.isSeriesMaster(event)) {
                 /*
-                 * extract series pattern and "absolute duration" / "recurrence calculator" field
+                 * apply recurrence rule & adjust the recurrence master's actual start- and enddate
                  */
-                String value = event.getRecurrenceRule();
-                int idx = value.indexOf('~');
-                int absoluteDuration = Integer.parseInt(value.substring(0, idx));
-                String databasePattern = value.substring(idx + 1);
-                String timeZone = null != event.getStartTimeZone() ? event.getStartTimeZone() : "UTC";
-                boolean allDay = event.isAllDay();
-                /*
-                 * convert legacy series pattern into proper recurrence rule
-                 */
-                SeriesPattern seriesPattern = new SeriesPattern(databasePattern, timeZone, allDay);
-                String recurrenceRule = Recurrence.getRecurrenceRule(seriesPattern);
                 event.setRecurrenceRule(recurrenceRule);
-                /*
-                 * adjust the recurrence master's actual start- and enddate
-                 */
                 Period seriesPeriod = new Period(event);
                 Period masterPeriod = Recurrence.getRecurrenceMasterPeriod(seriesPeriod, absoluteDuration);
                 event.setStartDate(masterPeriod.getStartDate());
                 event.setEndDate(masterPeriod.getEndDate());
+                /*
+                 * transform legacy "recurrence date positions" for exceptions to recurrence ids
+                 */
+                if (event.containsDeleteExceptionDates() && null != event.getDeleteExceptionDates()) {
+                    event.setDeleteExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceRule, new Date(seriesPattern.getSeriesStart().longValue()), seriesPattern.getTimeZone(), allDay, event.getDeleteExceptionDates()));
+                }
+                if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
+                    event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceRule, new Date(seriesPattern.getSeriesStart().longValue()), seriesPattern.getTimeZone(), allDay, event.getChangeExceptionDates()));
+                }
+            } else if (CalendarUtils.isSeriesException(event)) {
+                /*
+                 * drop recurrence information for change exceptions
+                 */
+                //                event.removeRecurrenceRule(); // better keep?
+                /*
+                 * transform exception's legacy "recurrence date position" to recurrence ids
+                 */
+                if (event.containsRecurrenceId() && null != event.getRecurrenceId()) {
+                    event.setRecurrenceId(Appointment2Event.getRecurrenceID(recurrenceRule, new Date(seriesPattern.getSeriesStart().longValue()), seriesPattern.getTimeZone(), allDay, event.getRecurrenceId()));
+                }
             }
         }
+
         return event;
     }
 
@@ -427,6 +446,19 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         if (event.containsCreated() && null != event.getCreated()) {
             event.setCreated(new Date((event.getCreated().getTime() / 1000) * 1000));
         }
+        /*
+         * transform recurrence ids to legacy "recurrence date positions" (UTC dates with truncated time fraction)
+         */
+        if (event.containsRecurrenceId() && null != event.getRecurrenceId()) {
+            event.setRecurrenceId(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId()));
+        }
+        if (event.containsDeleteExceptionDates()) {
+            event.setDeleteExceptionDates(Event2Appointment.getRecurrenceDatePositions(event.getDeleteExceptionDates()));
+        }
+        if (event.containsChangeExceptionDates()) {
+            event.setChangeExceptionDates(Event2Appointment.getRecurrenceDatePositions(event.getChangeExceptionDates()));
+        }
+
         return event;
     }
 

@@ -50,6 +50,7 @@
 package com.openexchange.chronos.compat;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -57,6 +58,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.CalendarUserType;
@@ -67,6 +69,7 @@ import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.Trigger.Related;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 
 /**
@@ -309,6 +312,33 @@ public class Event2Appointment {
     }
 
     /**
+     * Gets the formerly used recurrence position, i.e. the 1-based, sequential position in the series where the original occurrence
+     * would have been.
+     *
+     * @param recurrenceRule The recurrence rule
+     * @param seriesStart The start-date of the series, i.e. the actual start-date of the series master
+     * @param timeZone The timezone to consider, or <code>null</code> for <i>floating</i> dates
+     * @param allDay <code>true</code> for an "all-day" event series, <code>false</code>, otherwise
+     * @param recurrenceId The recurrence identifier, i.e. the date where the original occurrence would have been
+     * @return The recurrence position
+     */
+    public static int getRecurrencePosition(String recurrenceRule, Date seriesStart, TimeZone timeZone, boolean allDay, Date recurrenceId) throws OXException {
+        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceRule, seriesStart.getTime(), timeZone, allDay);
+        int position = 0;
+        while (iterator.hasNext()) {
+            long nextMillis = iterator.nextMillis();
+            position++;
+            if (nextMillis == recurrenceId.getTime()) {
+                return position;
+            }
+            if (nextMillis > recurrenceId.getTime()) {
+                break;
+            }
+        }
+        throw OXException.general("recurrence id not in series: " + recurrenceId);
+    }
+
+    /**
      * Gets the formerly used recurrence date position, i.e. the date where the original occurrence would have been, as UTC date with
      * truncated time fraction.
      *
@@ -320,17 +350,22 @@ public class Event2Appointment {
     }
 
     /**
-     * Gets the 1-based numerical position within the recurring series.
+     * Gets the formerly used recurrence date positions for a list of recurrence IDs, i.e. the date where the original occurrence would
+     * have been, as UTC date with truncated time fraction.
      *
-     * @param recurrenceId The recurrence identifier, i.e. the date where the original occurrence would have been
-     * @return The legacy recurrence position
+     * @param recurrenceIDs The recurrence identifiers, i.e. the dates where the original occurrence would have been
+     * @return The corresponding list of legacy recurrence date position
      */
-    //    public static int getRecurrencePosition(String recurrenceRule, Date recurrenceId) {
-    //
-    //
-    //
-    //        return 1;
-    //    }
+    public static List<Date> getRecurrenceDatePositions(List<Date> recurrenceIDs) {
+        if (null == recurrenceIDs) {
+            return null;
+        }
+        List<Date> recurrenceDatePositions = new ArrayList<Date>(recurrenceIDs.size());
+        for (Date recurrenceID : recurrenceIDs) {
+            recurrenceDatePositions.add(getRecurrenceDatePosition(recurrenceID));
+        }
+        return recurrenceDatePositions;
+    }
 
     /**
      * Parses a trigger duration string.

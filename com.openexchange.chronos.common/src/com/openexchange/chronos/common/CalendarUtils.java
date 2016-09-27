@@ -269,12 +269,14 @@ public class CalendarUtils {
      * Initializes a new calendar in a specific timezone and sets the initial time.
      *
      * @param timeZone The timezone to use for the calendar
-     * @param time The initial time to set
+     * @param time The initial time to set, or <code>null</code> to intialize with the default time
      * @return A new calendar instance
      */
     public static Calendar initCalendar(TimeZone timeZone, Date time) {
         Calendar calendar = GregorianCalendar.getInstance(timeZone);
-        calendar.setTime(time);
+        if (null != time) {
+            calendar.setTime(time);
+        }
         return calendar;
     }
 

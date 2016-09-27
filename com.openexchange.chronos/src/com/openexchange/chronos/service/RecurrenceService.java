@@ -66,7 +66,7 @@ public interface RecurrenceService {
      * Calculates the expanded instances of a recurring event with optional boundaries and an optional limit.
      * If no limit is given an internal limit kicks in avoiding an endless calculation.
      * If no boundaries are given the calculation starts with the first occurrence and lasts until the end of the series.
-     * 
+     *
      * @param master The master event containing all necessary information like recurrence rule, star and end date, timezones etc.
      * @param start The left side boundary for the calculation. Optional, can be null.
      * @param end The right side boundary for the calculation. Optional, can be null.
@@ -74,12 +74,12 @@ public interface RecurrenceService {
      * @return
      */
     public Iterator<Event> calculateInstances(Event master, Calendar start, Calendar end, Integer limit);
-    
+
     /**
      * Calculates the expanded instances of a recurring event with optional boundaries and an optional limit.
      * If no limit is given an internal limit kicks in avoiding an endless calculation.
      * If no boundaries are given the calculation starts with the first occurrence and lasts until the end of the series.
-     * 
+     *
      * @param master The master event containing all necessary information like recurrence rule, star and end date, timezones etc.
      * @param start The left side boundary for the calculation. Optional, can be null.
      * @param end The right side boundary for the calculation. Optional, can be null.
@@ -100,7 +100,7 @@ public interface RecurrenceService {
 
     /**
      * Calculates a 1-based recurrence position for a given reccurence date position of a recurring event.
-     * 
+     *
      * @param master The master event containing all necessary information like recurrence rule, star and end date, timezones etc.
      * @param datePosition The date position. Must match a start date.
      * @return The Position of the given datePosition. 1-based. 0 if not found or out of boundaries.

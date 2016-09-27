@@ -552,7 +552,8 @@ public class CalendarReader {
         TimeZone timeZone = getTimeZone(session);
         Calendar fromCalendar = null == from ? null : initCalendar(timeZone, from);
         Calendar untilCalendar = null == until ? null : initCalendar(timeZone, until);
-        return Services.getService(RecurrenceService.class).calculateInstances(masterEvent, fromCalendar, untilCalendar, null);
+        return Services.getService(RecurrenceService.class).calculateInstancesRespectExceptions(masterEvent, fromCalendar, untilCalendar, null, null);
+        //        return Services.getService(RecurrenceService.class).calculateInstances(masterEvent, fromCalendar, untilCalendar, null);
     }
 
     protected UserizedFolder getFolder(int folderID) throws OXException {

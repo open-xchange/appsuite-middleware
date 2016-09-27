@@ -105,7 +105,7 @@ public class Utils {
     static final List<EventField> MANDATORY_FIELDS = Arrays.asList(
         EventField.ID, EventField.SERIES_ID, EventField.PUBLIC_FOLDER_ID, EventField.LAST_MODIFIED, EventField.CREATED_BY,
         EventField.CLASSIFICATION, EventField.PUBLIC_FOLDER_ID, EventField.ALL_DAY, EventField.START_DATE, EventField.END_DATE,
-        EventField.START_TIMEZONE, EventField.RECURRENCE_RULE
+        EventField.START_TIMEZONE, EventField.RECURRENCE_RULE, EventField.CHANGE_EXCEPTION_DATES, EventField.DELETE_EXCEPTION_DATES
     );
 
     /** The event fields that are also available if an event's classification is not {@link Classification#PUBLIC} */

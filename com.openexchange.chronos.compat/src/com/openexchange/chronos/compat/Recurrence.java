@@ -243,6 +243,32 @@ public class Recurrence {
     }
 
     /**
+     * Initializes a new recurrence iterator for a specific recurrence rule.
+     *
+     * @param recurrenceRule The recurrence rule
+     * @param seriesStart The start-date of the series, i.e. the actual start-date of the series master
+     * @param timeZone The timezone to consider, or <code>null</code> for <i>floating</i> dates
+     * @param allDay <code>true</code> for an "all-day" event series, <code>false</code>, otherwise
+     * @return The recurrence rule iterator
+     */
+    static RecurrenceRuleIterator getRecurrenceIterator(String recurrenceRule, long seriesStart, TimeZone timeZone, boolean allDay) throws OXException {
+        RecurrenceRule rrule = null;
+        try {
+            rrule = new RecurrenceRule(recurrenceRule);
+        } catch (InvalidRecurrenceRuleException e) {
+            throw new OXException(e);
+        }
+        DateTime start;
+        if (allDay) {
+            start = new DateTime(TimeZone.getTimeZone("UTC"), seriesStart).toAllDay();
+        } else {
+            start = new DateTime(timeZone, seriesStart);
+        }
+        return rrule.iterator(start);
+    }
+
+
+    /**
      * Gets the recurrence rule appropriate for the supplied series pattern.
      *
      * @param seriesPattern The legacy, pipe-separated series pattern, e.g. <code>t|1|i|1|s|1313388000000|e|1313625600000|o|4|</code>

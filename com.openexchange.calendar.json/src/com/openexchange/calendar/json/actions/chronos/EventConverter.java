@@ -51,7 +51,6 @@ package com.openexchange.calendar.json.actions.chronos;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -68,7 +67,6 @@ import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
@@ -258,22 +256,28 @@ public class EventConverter {
             event.setSeriesId(appointment.getRecurrenceID());
         }
         String recurrenceRule = null;
+        SeriesPattern seriesPattern = null;
         if (appointment.containsRecurrenceType()) {
             if (0 == appointment.getRecurrenceType()) {
                 event.setRecurrenceRule(null);
             } else {
                 SeriesPattern originalPattern = null != originalEventID ? loadSeriesPattern(session, originalEventID) : null;
-                recurrenceRule = Appointment2Event.getRecurrenceRule(getSeriesPattern(session, appointment, originalPattern));
+                seriesPattern = getSeriesPattern(session, appointment, originalPattern);
+                recurrenceRule = Appointment2Event.getRecurrenceRule(seriesPattern);
                 event.setRecurrenceRule(recurrenceRule);
             }
         }
-        if (appointment.containsRecurrenceDatePosition()) {
-            //TODO
-            event.setRecurrenceId(Appointment2Event.getRecurrenceId(recurrenceRule, appointment.getRecurrenceDatePosition()));
-        }
-        if (appointment.containsRecurrencePosition()) {
-            //TODO
-            event.setRecurrenceId(Appointment2Event.getRecurrenceId(recurrenceRule, appointment.getRecurrencePosition()));
+        if (appointment.containsRecurrenceDatePosition() || appointment.containsRecurrencePosition()) {
+            if (null == seriesPattern) {
+                seriesPattern = loadSeriesPattern(session, originalEventID);
+                recurrenceRule = Appointment2Event.getRecurrenceRule(seriesPattern);
+            }
+            Date seriesStart = new Date(seriesPattern.getSeriesStart().longValue());
+            if (appointment.containsRecurrenceDatePosition()) {
+                event.setRecurrenceId(Appointment2Event.getRecurrenceID(recurrenceRule, seriesStart, seriesPattern.getTimeZone(), seriesPattern.isFullTime(), appointment.getRecurrenceDatePosition()));
+            } else if (appointment.containsRecurrencePosition()) {
+                event.setRecurrenceId(Appointment2Event.getRecurrenceID(recurrenceRule, seriesStart, seriesPattern.getTimeZone(), seriesPattern.isFullTime(), appointment.getRecurrencePosition()));
+            }
         }
         if (appointment.containsChangeExceptions()) {
             //TODO - UTC dates -> original start time of occurrence?
@@ -409,14 +413,23 @@ public class EventConverter {
             // TODO:
             // provide master event in resolved recurrence?
             // provide needed info for calculation in resolved recurrence?
-
             Event masterEvent = getEvent(session, masterID, fields);
-            Calendar recurrenceIdCalendar = CalendarUtils.initCalendar(TimeZone.getTimeZone(masterEvent.getStartTimeZone()), event.getRecurrenceId());
-            int position = services.getService(RecurrenceService.class).calculateRecurrencePosition(masterEvent, recurrenceIdCalendar);
-            appointment.setRecurrencePosition(position);
             appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId()));
+            appointment.setRecurrencePosition(Event2Appointment.getRecurrencePosition(
+                masterEvent.getRecurrenceRule(), masterEvent.getStartDate(), TimeZone.getTimeZone(masterEvent.getTimeZone()), masterEvent.isAllDay(), event.getRecurrenceId()));
         }
-        SeriesPattern pattern = Event2Appointment.getSeriesPattern(event.getRecurrenceRule(), event.getStartDate(), event.getStartTimeZone(), event.isAllDay());
+        SeriesPattern pattern = null;
+        if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
+            if (CalendarUtils.isSeriesMaster(event)) {
+                pattern = Event2Appointment.getSeriesPattern(event.getRecurrenceRule(), event.getStartDate(), event.getStartTimeZone(), event.isAllDay());
+            } else {
+                EventID masterID = new EventID(userizedEvent.getFolderId(), event.getSeriesId());
+                EventField[] fields = { EventField.RECURRENCE_RULE, EventField.ALL_DAY, EventField.START_DATE, EventField.START_TIMEZONE, EventField.END_DATE, EventField.END_TIMEZONE
+                };
+                Event masterEvent = getEvent(session, masterID, fields);
+                pattern = Event2Appointment.getSeriesPattern(masterEvent.getRecurrenceRule(), masterEvent.getStartDate(), masterEvent.getStartTimeZone(), masterEvent.isAllDay());
+            }
+        }
         if (null != pattern) {
             if (SeriesPattern.MONTHLY_2.equals(pattern.getType())) {
                 appointment.setRecurrenceType(SeriesPattern.MONTHLY_1.intValue());
@@ -427,14 +440,6 @@ public class EventConverter {
             }
             if (null != pattern.getSeriesStart()) {
                 appointment.setRecurringStart(pattern.getSeriesStart().longValue());
-            }
-            if (null != event.getChangeExceptionDates()) {
-                // TODO: original start date -> utc date
-                appointment.setChangeExceptions(event.getChangeExceptionDates());
-            }
-            if (null != event.getDeleteExceptionDates()) {
-                // TODO: original start date -> utc date
-                appointment.setDeleteExceptions(event.getDeleteExceptionDates());
             }
             if (null != pattern.getDaysOfWeek()) {
                 appointment.setDays(pattern.getDaysOfWeek());
@@ -453,6 +458,13 @@ public class EventConverter {
                 appointment.setOccurrence(pattern.getOccurrences());
             }
         }
+        if (null != event.getChangeExceptionDates()) {
+            appointment.setChangeExceptions(Event2Appointment.getRecurrenceDatePositions(event.getChangeExceptionDates()));
+        }
+        if (null != event.getDeleteExceptionDates()) {
+            appointment.setDeleteExceptions(Event2Appointment.getRecurrenceDatePositions(event.getDeleteExceptionDates()));
+        }
+
         //appointment.setNotification(false);
         //appointment.setRecurrenceCalculator(0);
         if (event.containsAttendees()) {
@@ -729,12 +741,21 @@ public class EventConverter {
      */
     private Event getEvent(CalendarSession session, EventID eventID, EventField... fields) throws OXException {
         EventField[] oldFields = session.get(CalendarParameters.PARAMETER_FIELDS, EventField[].class);
+        Boolean oldRecurrenceMaster = session.get(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.class);
+        Date oldRangeStart = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
+        Date oldRangeEnd = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
         try {
-            session.set(CalendarParameters.PARAMETER_FIELDS, fields);
+            session.set(CalendarParameters.PARAMETER_FIELDS, oldFields);
+            session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.TRUE);
+            session.set(CalendarParameters.PARAMETER_RANGE_START, null);
+            session.set(CalendarParameters.PARAMETER_RANGE_END, null);
             UserizedEvent event = session.getCalendarService().getEvent(session, eventID.getFolderID(), eventID.getObjectID());
             return null != event ? event.getEvent() : null;
         } finally {
             session.set(CalendarParameters.PARAMETER_FIELDS, oldFields);
+            session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, oldRecurrenceMaster);
+            session.set(CalendarParameters.PARAMETER_RANGE_START, oldRangeStart);
+            session.set(CalendarParameters.PARAMETER_RANGE_END, oldRangeEnd);
         }
     }
 
