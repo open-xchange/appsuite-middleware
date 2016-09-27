@@ -87,7 +87,6 @@ public class RecurrenceIterator implements Iterator<Event> {
      * @param start The left side boundary for the calculation. Optional, can be null.
      * @param end The right side boundary for the calculation. Optional, can be null.
      * @param limit The maximum number of calculated instances. Optional, can be null.
-     * @param changeExceptions Change excpetions to be respected. If null or empty, chnage exceptions are not taken into account. There is no check if the provided changeExceptions match the change exceptions dates of the event.
      * @param ignoreExceptions Determines if exceptions should be ignored. If true, all occurrences are calculated as if no exceptions exist. Note: This does not add change exceptions. See {@link ChangeExceptionAwareRecurrenceIterator}
      */
     public RecurrenceIterator(Event master, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) {
@@ -232,8 +231,7 @@ public class RecurrenceIterator implements Iterator<Event> {
 
     @Override
     public void remove() {
-        // TODO Auto-generated method stub
-
+        throw new UnsupportedOperationException("remove");
     }
 
 }

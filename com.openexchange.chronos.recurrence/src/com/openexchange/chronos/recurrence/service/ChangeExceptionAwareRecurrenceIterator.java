@@ -69,8 +69,8 @@ public class ChangeExceptionAwareRecurrenceIterator implements Iterator<Event> {
     private RecurrenceIterator inner;
     private Map<Date, Event> changeExceptions;
     private Iterator<Date> changeIterator;
-    private Date nextChange;
-    private Event nextCalculated;
+    private Date changeLookahead;
+    private Event regularLookahead;
     private Event next;
     private Calendar start;
     private Calendar end;
@@ -107,7 +107,7 @@ public class ChangeExceptionAwareRecurrenceIterator implements Iterator<Event> {
             while (changeIterator.hasNext()) {
                 Date tmp = changeIterator.next();
                 if (this.changeExceptions.get(tmp).getEndDate().after(start.getTime())) {
-                    nextChange = tmp;
+                    changeLookahead = tmp;
                     break;
                 }
             }
@@ -139,57 +139,57 @@ public class ChangeExceptionAwareRecurrenceIterator implements Iterator<Event> {
             return;
         }
 
-        if (inner.hasNext() && nextCalculated == null) {
+        if (inner.hasNext() && regularLookahead == null) {
             // Get lookahead for regular occurrences
-            nextCalculated = inner.next();
+            regularLookahead = inner.next();
         }
 
-        if (changeIterator.hasNext() && nextChange == null) {
+        if (changeIterator.hasNext() && changeLookahead == null) {
             // Get lookahead for change exceptions
-            nextChange = changeIterator.next();
+            changeLookahead = changeIterator.next();
         }
 
-        if (nextCalculated == null && nextChange == null) {
+        if (regularLookahead == null && changeLookahead == null) {
             // Nothing left
             next = null;
             return;
         }
 
-        if (nextChange == null) {
+        if (changeLookahead == null) {
             // No more change exceptions, continue with regular occurrences
-            next = nextCalculated;
-            nextCalculated = null;
+            next = regularLookahead;
+            regularLookahead = null;
             count++;
             return;
         }
 
-        if (nextCalculated == null) {
+        if (regularLookahead == null) {
             // No more regular occurrences, continue with change exceptions
-            Event candidate = changeExceptions.get(nextChange);
+            Event candidate = changeExceptions.get(changeLookahead);
             if (end != null && !candidate.getStartDate().before(end.getTime())) {
                 // Right boundary reached
                 next = null;
                 return;
             } else {
                 next = candidate;
-                nextChange = null;
+                changeLookahead = null;
                 count++;
                 return;
             }
         }
 
         // Determine correct order. Change exception wins on equal.
-        if (nextCalculated.getStartDate().before(nextChange)) {
-            next = nextCalculated;
-            nextCalculated = null;
+        if (regularLookahead.getStartDate().before(changeLookahead)) {
+            next = regularLookahead;
+            regularLookahead = null;
         } else {
-            Event candidate = changeExceptions.get(nextChange);
+            Event candidate = changeExceptions.get(changeLookahead);
             if (end != null && !candidate.getStartDate().before(end.getTime())) {
-                next = nextCalculated;
-                nextCalculated = null;
+                next = regularLookahead;
+                regularLookahead = null;
             } else {
                 next = candidate;
-                nextChange = null;
+                changeLookahead = null;
             }
         }
         count++;
@@ -197,8 +197,7 @@ public class ChangeExceptionAwareRecurrenceIterator implements Iterator<Event> {
 
     @Override
     public void remove() {
-        // TODO Auto-generated method stub
-
+        throw new UnsupportedOperationException("remove");
     }
 
 }
