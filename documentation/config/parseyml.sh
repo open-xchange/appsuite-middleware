@@ -65,7 +65,7 @@ insert_yaml(){
     local tmp
     tmp="$(cat $1 | parse_yaml $1)"
     cat $2 | awk -F "mail" -v tmp="$tmp" '{
-            printf("%s\r", $0);
+            printf("%s\n", $0);
             if ($0 ~ /## '$3'/){
                print ""
                print tmp;
