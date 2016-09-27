@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,71 +47,61 @@
  *
  */
 
-package com.openexchange.mailaccount.json;
-
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.json.actions.AllAction;
-import com.openexchange.mailaccount.json.actions.DeleteAction;
-import com.openexchange.mailaccount.json.actions.GetAction;
-import com.openexchange.mailaccount.json.actions.GetTreeAction;
-import com.openexchange.mailaccount.json.actions.ListAction;
-import com.openexchange.mailaccount.json.actions.NewAction;
-import com.openexchange.mailaccount.json.actions.UpdateAction;
-import com.openexchange.mailaccount.json.actions.ValidateAction;
-import com.openexchange.session.Session;
+package com.openexchange.find.facet;
 
 /**
- * {@link DefaultMailAccountActionProvider}
+ * {@link FacetInfo} - Provides basic information for a denoted facet.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.8.3
  */
-public class DefaultMailAccountActionProvider implements MailAccountActionProvider {
+public class FacetInfo {
 
-    private final Map<String, AJAXActionService> actions;
-
-    /**
-     * Initializes a new {@link DefaultMailAccountActionProvider}.
-     */
-    public DefaultMailAccountActionProvider() {
-        super();
-        actions = initActions();
-    }
-
-    @Override
-    public boolean isApplicableFor(Session session) throws OXException {
-        return true;
-    }
+    private final String type;
+    private final String value;
 
     /**
-     * Retrieves a mapping of actions strings to <code>AJAXActionService</code>'s.
+     * Initializes a new {@link FacetInfo}.
      *
-     * @return The mapping of available action
+     * @param type The identifier of the facet type
+     * @param value The value
      */
-    public Map<String, AJAXActionService> getActions() {
-        return actions;
+    public FacetInfo(String type, String value) {
+        super();
+        this.type = type;
+        this.value = value;
+    }
+
+    /**
+     * Gets the type identifier
+     *
+     * @return The type identifier
+     */
+    public String getType() {
+        return type;
+    }
+
+    /**
+     * Gets the value
+     *
+     * @return The value
+     */
+    public String getValue() {
+        return value;
     }
 
     @Override
-    public AJAXActionService getAction(String action) {
-        return null == action ? null : actions.get(action);
-    }
-
-    private Map<String, AJAXActionService> initActions() {
-        ImmutableMap.Builder<String, AJAXActionService> tmp = ImmutableMap.builder();
-        tmp.put(AllAction.ACTION, new AllAction());
-        tmp.put(ListAction.ACTION, new ListAction());
-        tmp.put(GetAction.ACTION, new GetAction());
-        tmp.put(ValidateAction.ACTION, new ValidateAction());
-        tmp.put(DeleteAction.ACTION, new DeleteAction());
-        tmp.put(UpdateAction.ACTION, new UpdateAction());
-        tmp.put(GetTreeAction.ACTION, new GetTreeAction());
-        tmp.put(NewAction.ACTION, new NewAction());
-        return tmp.build();
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("{");
+        if (type != null) {
+            builder.append("type=").append(type).append(", ");
+        }
+        if (value != null) {
+            builder.append("value=").append(value);
+        }
+        builder.append("]");
+        return builder.toString();
     }
 
 }

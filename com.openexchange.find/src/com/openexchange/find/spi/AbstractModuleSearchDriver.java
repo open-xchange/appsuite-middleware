@@ -72,6 +72,7 @@ import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.ExclusiveFacet;
 import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.FacetInfo;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Facets;
@@ -101,6 +102,11 @@ public abstract class AbstractModuleSearchDriver implements ModuleSearchDriver {
 
     @Override
     public boolean isValidFor(ServerSession session, AbstractFindRequest findRequest) throws OXException {
+        return isValidFor(session);
+    }
+
+    @Override
+    public boolean isValidFor(ServerSession session, List<FacetInfo> facetInfos) throws OXException {
         return isValidFor(session);
     }
 

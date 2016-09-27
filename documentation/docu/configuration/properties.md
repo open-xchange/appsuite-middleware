@@ -154,21 +154,7 @@ If you would like to add a reference to another property use the following appro
 ---
 
 
-## OAuth 
-
-| Key | <span style="font-weight:normal">com.openexchange.oauth.modules.enabled.[oauth_provider]</span> |
-|:----------------|:--------|
-| __Description__ |         A comma seperated list of enabled oauth modules. <br>        This list can be configured for each individual oauth provider. <br>        To identify the oauth provider replace [oauth_provider] with the last part of the provider id.<br>        E.g. com.openexchange.oauth.google -> com.openexchange.oauth.modules.enabled.google<br>        Available modules are:<br>         -mail<br>         -calendar_ro<br>         -contacts_ro<br>         -calendar<br>         -contacts<br>         -drive<br>         -generic <br> |
-| __Default__ | null  |
-| __Version__ | 7.8.3  |
-| __Reloadable__ | true  |
-| __Configcascade Aware__ | true  |
-| __File__ | oauth.properties  |
-
----
-
-
-## Pns 
+## PushNotificationService 
 
 | Key | <span style="font-weight:normal">com.openexchange.pns.delayDuration</span> |
 |:----------------|:--------|
@@ -220,7 +206,7 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexchange.pns.transport.apn.ios.enabled</span> |
 |:----------------|:--------|
-| __Description__ | Specifies whether the APNS transport is enabled. That property is responsive to config-cascade<br>and reloadable as well.<br><br>Moreover, an even finer-grained decision is possible to be configured as a certain transport<br>is checked for availability providing user, context, client and topic.<br>Hence, it is possible to  specify:<br><br>com.openexchange.pns.transport.apn.ios.enabled + ("." + <client>)? + ("." + <topic>)?<br><br>com.openexchange.pns.transport.apn.ios.enabled.open-xchange-appsuite.ox:mail:new=true<br>com.openexchange.pns.transport.apn.ios.enabled.open-xchange-appsuite.ox:calendar:new=false<br><br>That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications<br>via APNS, but not for "new appointment".<br><br> |
+| __Description__ | Specifies whether the APNS transport is enabled. That property is responsive to config-cascade<br>and reloadable as well.<br><br>Moreover, an even finer-grained decision is possible to be configured as a certain transport<br>is checked for availability providing user, context, client and topic.<br>Hence, it is possible to  specify:<br><br>com.openexchange.pns.transport.apn.ios.enabled + ("." + {client})? + ("." + {topic})?<br><br>com.openexchange.pns.transport.apn.ios.enabled.open-xchange-appsuite.ox:mail:new=true<br>com.openexchange.pns.transport.apn.ios.enabled.open-xchange-appsuite.ox:calendar:new=false<br><br>That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications<br>via APNS, but not for "new appointment".<br><br> |
 | __Default__ | false  |
  |
 | __Default__ | false  |
@@ -244,7 +230,7 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexchange.pns.transport.gcm.enabled</span> |
 |:----------------|:--------|
-| __Description__ | Specifies whether the GCM transport is enabled. That property is responsive to config-cascade<br>and reloadable as well.<br><br>Moreover, an even finer-grained decision is possible to be configured as a certain transport<br>is checked for availability providing user, context, client and topic.<br>Hence, it is possible to  specify:<br><br>com.openexchange.pns.transport.gcm.enabled + ("." + <client>)? + ("." + <topic>)?<br><br>com.openexchange.pns.transport.gcm.enabled.open-xchange-appsuite.ox:mail:new=true<br>com.openexchange.pns.transport.gcm.enabled.open-xchange-appsuite.ox:calendar:new=false<br><br>That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications<br>via GCM, but not for "new appointment".<br><br> |
+| __Description__ | Specifies whether the GCM transport is enabled. That property is responsive to config-cascade<br>and reloadable as well.<br><br>Moreover, an even finer-grained decision is possible to be configured as a certain transport<br>is checked for availability providing user, context, client and topic.<br>Hence, it is possible to  specify:<br><br>com.openexchange.pns.transport.gcm.enabled + ("." + {client})? + ("." + {topic})?<br><br>com.openexchange.pns.transport.gcm.enabled.open-xchange-appsuite.ox:mail:new=true<br>com.openexchange.pns.transport.gcm.enabled.open-xchange-appsuite.ox:calendar:new=false<br><br>That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications<br>via GCM, but not for "new appointment".<br><br> |
 | __Default__ | false  |
  |
 | __Default__ | false  |
@@ -256,7 +242,7 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexchange.pns.transport.wns.enabled</span> |
 |:----------------|:--------|
-| __Description__ | Specifies whether the WNS transport is enabled. That property is responsive to config-cascade<br>and reloadable as well.<br><br>Moreover, an even finer-grained decision is possible to be configured as a certain transport<br>is checked for availability providing user, context, client and topic.<br>Hence, it is possible to  specify:<br><br>com.openexchange.pns.transport.wns.enabled + ("." + <client>)? + ("." + <topic>)?<br><br>com.openexchange.pns.transport.wns.enabled.open-xchange-appsuite.ox:mail:new=true<br>com.openexchange.pns.transport.wns.enabled.open-xchange-appsuite.ox:calendar:new=false<br><br>That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications<br>via WNS, but not for "new appointment".<br><br> |
+| __Description__ | Specifies whether the WNS transport is enabled. That property is responsive to config-cascade<br>and reloadable as well.<br><br>Moreover, an even finer-grained decision is possible to be configured as a certain transport<br>is checked for availability providing user, context, client and topic.<br>Hence, it is possible to  specify:<br><br>com.openexchange.pns.transport.wns.enabled + ("." + {client})? + ("." + {topic})?<br><br>com.openexchange.pns.transport.wns.enabled.open-xchange-appsuite.ox:mail:new=true<br>com.openexchange.pns.transport.wns.enabled.open-xchange-appsuite.ox:calendar:new=false<br><br>That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications<br>via WNS, but not for "new appointment".<br><br> |
 | __Default__ | false  |
  |
 | __Default__ | false  |
@@ -268,13 +254,14 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexchange.pns.transport.websocket.enabled</span> |
 |:----------------|:--------|
-| __Description__ | Specifies whether the Web Socket transport is enabled. That property is responsive to config-cascade<br>and reloadable as well.<br><br>Moreover, an even finer-grained decision is possible to be configured as a certain transport<br>is checked for availability providing user, context, client and topic.<br>Hence, it is possible to  specify:<br><br>com.openexchange.pns.transport.websocket.enabled + ("." + <client>)? + ("." + <topic>)?<br><br>com.openexchange.pns.transport.websocket.enabled.open-xchange-appsuite.ox:mail:new=true<br>com.openexchange.pns.transport.websocket.enabled.open-xchange-appsuite.ox:calendar:new=false<br><br>That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications<br>via Web Socket, but not for "new appointment".<br><br> |
+| __Description__ | Specifies whether the Web Socket transport is enabled. That property is responsive to config-cascade<br>and reloadable as well.<br><br>Moreover, an even finer-grained decision is possible to be configured as a certain transport<br>is checked for availability providing user, context, client and topic.<br>Hence, it is possible to  specify:<br><br>com.openexchange.pns.transport.websocket.enabled + ("." + {client})? + ("." + {topic})?<br><br>com.openexchange.pns.transport.websocket.enabled.open-xchange-appsuite.ox:mail:new=true<br>com.openexchange.pns.transport.websocket.enabled.open-xchange-appsuite.ox:calendar:new=false<br><br>That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications<br>via Web Socket, but not for "new appointment".<br><br> |
 | __Default__ | false  |
  |
 | __Default__ | false  |
 | __Version__ | 7.8.3  |
 | __Reloadable__ | true  |
 | __Configcascade Aware__ | true  |
+| __Related__ | com.openexchange.websockets.enabled  |
 | __File__ | pns.properties  |
 
 ---

@@ -99,11 +99,13 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.participants.ConfirmableParticipant;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
@@ -558,18 +560,25 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             /*
              * provide the current users confirmation message
              */
+            String privateComment = null;
             Participant[] participants = appointment.getParticipants();
             if (null != participants && 0 < participants.length) {
-                /*
-                 * set current users confirmation message
-                 */
                 for (Participant participant : participants) {
                     if (Participant.USER == participant.getType() && participant.getIdentifier() == factory.getSession().getUserId()) {
-                        appointment.setProperty("com.openexchange.data.conversion.ical.participants.privateComment", ((UserParticipant) participant).getConfirmMessage());
+                        privateComment = ((UserParticipant) participant).getConfirmMessage();
                         break;
                     }
                 }
             }
+            if (Strings.isEmpty(privateComment) && null != appointment.getUsers()) {
+                for (UserParticipant user : appointment.getUsers()) {
+                    if (user.getIdentifier() == factory.getSession().getUserId()) {
+                        privateComment = user.getConfirmMessage();
+                        break;
+                    }
+                }
+            }
+            appointment.setProperty("com.openexchange.data.conversion.ical.participants.privateComment", privateComment);
         }
     }
 
@@ -981,6 +990,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     }
                 }
             }
+            Patches.Incoming.adjustProposedTimePrefixes(updatedAppointment);
         }
     }
 
@@ -1390,12 +1400,54 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
 
     private static boolean replaceIncorrectString(IncorrectString incorrectString, CalendarDataObject calendarObject, String replacement) {
         Object value = calendarObject.get(incorrectString.getId());
-        if (null != value && String.class.isInstance(value)) {
+        if (null == value) {
+            return false;
+        }
+        if (String.class.isInstance(value)) {
             String stringValue = (String) value;
             String replacedString = stringValue.replaceAll(incorrectString.getIncorrectString(), replacement);
             if (false == stringValue.equals(replacedString)) {
                 calendarObject.set(incorrectString.getId(), replacedString);
                 return true;
+            }
+        }
+        if (Participant[].class.isInstance(value)) {
+            boolean hasReplaced = false;
+            for (Participant participant : (Participant[]) value) {
+                hasReplaced |= replaceIncorrectString(incorrectString, participant, replacement);
+            }
+            return hasReplaced;
+        }
+        return false;
+    }
+
+    private static boolean replaceIncorrectString(IncorrectString incorrectString, Participant participant, String replacement) {
+        String displayName = participant.getDisplayName();
+        if (null != displayName) {
+            String replacedString = displayName.replaceAll(incorrectString.getIncorrectString(), replacement);
+            if (false == displayName.equals(replacedString)) {
+                participant.setDisplayName(replacedString);
+                return true;
+            }
+        }
+        if (UserParticipant.class.isInstance(participant)) {
+            String confirmMessage = ((UserParticipant) participant).getConfirmMessage();
+            if (null != confirmMessage) {
+                String replacedString = confirmMessage.replaceAll(incorrectString.getIncorrectString(), replacement);
+                if (false == confirmMessage.equals(replacedString)) {
+                    ((UserParticipant) participant).setConfirmMessage(replacedString);
+                    return true;
+                }
+            }
+        }
+        if (ConfirmableParticipant.class.isInstance(participant)) {
+            String message = ((ConfirmableParticipant) participant).getMessage();
+            if (null != message) {
+                String replacedString = message.replaceAll(incorrectString.getIncorrectString(), replacement);
+                if (false == message.equals(replacedString)) {
+                    ((ConfirmableParticipant) participant).setMessage(replacedString);
+                    return true;
+                }
             }
         }
         return false;

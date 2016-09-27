@@ -65,6 +65,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
@@ -82,9 +83,14 @@ import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.glassfish.grizzly.websockets.WebSocketException;
 import org.glassfish.grizzly.websockets.WebSocketListener;
 import org.slf4j.Logger;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.context.ContextService;
@@ -575,6 +581,11 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             // Get and verify session
             Session session = checkSession(sessionId, requestPacket, parameters);
 
+            // Check if enabled for given session
+            if (false == isEnabledFor(session)) {
+                throw new HandshakeException("Web Sockets not allowed for user " + session.getUserId() + " in context " + session.getContextId());
+            }
+
             // Check if such a Web Socket already exists
             if (validateAbsence && exists(connectionId, session.getUserId(), session.getContextId())) {
                 throw new HandshakeException("Such a Web Socket connection already exists: " + connectionId);
@@ -602,6 +613,44 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             // Handle Handshake error
             handleHandshakeException(e, handler, requestPacket);
             throw e;
+        }
+    }
+
+    private static final Cache<UserAndContext, Boolean> CACHE_AVAILABILITY = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
+
+    /**
+     * Invalidates the <i>enabled cache</i>.
+     */
+    public static void invalidateEnabledCache() {
+        CACHE_AVAILABILITY.invalidateAll();
+    }
+
+    private boolean isEnabledFor(Session session) {
+        UserAndContext key = UserAndContext.newInstance(session);
+        Boolean result = CACHE_AVAILABILITY.getIfPresent(key);
+        if (null == result) {
+            result = Boolean.valueOf(doCheckEnabled(session));
+            CACHE_AVAILABILITY.put(key, result);
+        }
+        return result.booleanValue();
+    }
+
+    private boolean doCheckEnabled(Session session) {
+        try {
+            ConfigViewFactory configViewFactory = services.getOptionalService(ConfigViewFactory.class);
+            if (null == configViewFactory) {
+                throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+            }
+
+            ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
+            ComposedConfigProperty<Boolean> property = view.property("com.openexchange.websockets.enabled", boolean.class);
+            if (null == property || !property.isDefined()) {
+                return false;
+            }
+
+            return property.get().booleanValue();
+        } catch (OXException e) {
+            throw new HandshakeException(e.getPlainLogMessage());
         }
     }
 

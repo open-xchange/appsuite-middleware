@@ -57,6 +57,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
@@ -126,6 +127,19 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
         registerService(PushClientChecker.class, new WebSocketClientPushClientChecker(resolverTracker), props);
 
         reinit();
+
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                WebSocketPushNotificationTransport.invalidateEnabledCache();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return null;
+            }
+        });
     }
 
     @Override

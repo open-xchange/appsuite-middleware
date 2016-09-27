@@ -51,7 +51,7 @@ package com.openexchange.tasks.json;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
@@ -84,13 +84,14 @@ public class TaskActionFactory implements AJAXActionServiceFactory {
 
     public static final String OAUTH_WRITE_SCOPE = "write_tasks";
 
-    private final Map<String, TaskAction> actions = new ConcurrentHashMap<String, TaskAction>(10, 0.9f, 1);
+    private final Map<String, TaskAction> actions;
 
     /**
      * Initializes a new {@link TaskActionFactory}.
      */
     public TaskActionFactory(final ServiceLookup serviceLookup) {
         super();
+        ImmutableMap.Builder<String, TaskAction> actions = ImmutableMap.builder();
         actions.put("all", new AllAction(serviceLookup));
         actions.put("confirm", new ConfirmAction(serviceLookup));
         actions.put("copy", new CopyAction(serviceLookup));
@@ -101,6 +102,7 @@ public class TaskActionFactory implements AJAXActionServiceFactory {
         actions.put("search", new SearchAction(serviceLookup));
         actions.put("update", new UpdateAction(serviceLookup));
         actions.put("updates", new UpdatesAction(serviceLookup));
+        this.actions = actions.build();
     }
 
     @Override

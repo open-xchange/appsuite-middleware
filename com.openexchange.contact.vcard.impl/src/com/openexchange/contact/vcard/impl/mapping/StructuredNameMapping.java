@@ -85,23 +85,17 @@ public class StructuredNameMapping extends AbstractMapping {
             property.getAdditionalNames().clear();
             String middleName = contact.getMiddleName();
             if (false == Strings.isEmpty(middleName)) {
-                for (String additional : Strings.splitByWhitespaces(middleName)) {
-                    property.getAdditionalNames().add(additional);
-                }
+                property.getAdditionalNames().add(middleName);
             }
             property.getPrefixes().clear();
             String title = contact.getTitle();
             if (false == Strings.isEmpty(title)) {
-                for (String prefix : Strings.splitByWhitespaces(title)) {
-                    property.getPrefixes().add(prefix);
-                }
+                property.getPrefixes().add(title);
             }
             property.getSuffixes().clear();
             String suffix = contact.getSuffix();
             if (false == Strings.isEmpty(suffix)) {
-                for (String value : Strings.splitByWhitespaces(suffix)) {
-                    property.getSuffixes().add(value);
-                }
+                property.getSuffixes().add(suffix);
             }
         } else if (null != property) {
             vCard.removeProperty(property);

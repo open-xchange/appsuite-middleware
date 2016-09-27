@@ -19,6 +19,11 @@ Below are illustrations of the supported message flows. For reasons of clarity s
 ![SP-initiated login flow](SAML_login_flow.png "SP-initiated login flow")
 
 
+## IdP-initiated Login
+
+![IdP-initiated login flow](SAML_idp_login_flow.png "IdP-initiated login flow")
+
+
 ## SP-initiated Logout
 
 ![SP-initiated logout flow](SAML_sp_logout_flow.png "SP-initiated logout flow")
@@ -75,3 +80,14 @@ The frontend plugin `open-xchange-appsuite-saml` is deactivated by default. In o
         samlLogin: true
 
 **Please note:** Make sure to use spaces to indent, not tabs!
+
+### IdP Configuration
+
+Unsolicited responses or IdP-initiated login does support additional parameters carried by the *RelayState*. These parameters can either be handled by a custom SAML Backend or must be in the following form. A base64 encoded string that may hold any of the following key-values, split by `:` where each key uses a `=` split from its value:
+
+* domain
+* loginpath
+* client
+
+Example `domain=example.com:client=specialClient`
+Encoded RelayState = `ZG9tYWluPWV4YW1wbGUuY29tOmNsaWVudD1zcGVjaWFsQ2xpZW50`

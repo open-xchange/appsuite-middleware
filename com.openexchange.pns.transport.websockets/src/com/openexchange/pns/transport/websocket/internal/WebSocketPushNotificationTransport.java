@@ -60,11 +60,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.pns.EnabledKey;
 import com.openexchange.pns.Hits;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.Message;
@@ -264,8 +268,27 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
         return ID;
     }
 
+    private static final Cache<EnabledKey, Boolean> CACHE_AVAILABILITY = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
+
+    /**
+     * Invalidates the <i>enabled cache</i>.
+     */
+    public static void invalidateEnabledCache() {
+        CACHE_AVAILABILITY.invalidateAll();
+    }
+
     @Override
     public boolean isEnabled(String topic, String client, int userId, int contextId) throws OXException {
+        EnabledKey key = new EnabledKey(topic, client, userId, contextId);
+        Boolean result = CACHE_AVAILABILITY.getIfPresent(key);
+        if (null == result) {
+            result = Boolean.valueOf(doCheckEnabled(topic, client, userId, contextId));
+            CACHE_AVAILABILITY.put(key, result);
+        }
+        return result.booleanValue();
+    }
+
+    private boolean doCheckEnabled(String topic, String client, int userId, int contextId) throws OXException {
         ConfigView view = configViewFactory.getView(userId, contextId);
 
         String basePropertyName = "com.openexchange.pns.transport.websocket.enabled";

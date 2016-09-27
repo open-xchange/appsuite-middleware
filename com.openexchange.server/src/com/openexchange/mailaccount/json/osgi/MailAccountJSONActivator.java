@@ -53,12 +53,18 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
 import com.openexchange.mailaccount.Constants;
-import com.openexchange.mailaccount.json.DefaultMailAccountActionProvider;
+import com.openexchange.mailaccount.CredentialsProviderRegistry;
+import com.openexchange.mailaccount.CredentialsProviderService;
 import com.openexchange.mailaccount.json.MailAccountActionProvider;
+import com.openexchange.mailaccount.json.MailAccountOAuthConstants;
 import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
-import com.openexchange.mailaccount.json.factory.TrackingMailAccountActionFactory;
+import com.openexchange.mailaccount.json.factory.MailAccountActionFactory;
+import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
+import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 
 
 /**
@@ -84,10 +90,12 @@ public final class MailAccountJSONActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         final BundleContext context = this.context;
 
-        DefaultMailAccountActionProvider defaultProvider = new DefaultMailAccountActionProvider();
+        MailAccountActionProviderTracker providerTracker = new MailAccountActionProviderTracker(context);
+        track(MailAccountActionProvider.class, providerTracker);
 
-        TrackingMailAccountActionFactory actionFactory = new TrackingMailAccountActionFactory(defaultProvider, context);
-        track(MailAccountActionProvider.class, actionFactory);
+        CredentialsProviderTracker credentialsProviderTracker = new CredentialsProviderTracker(context);
+        track(CredentialsProviderService.class, credentialsProviderTracker);
+        CredentialsProviderRegistry.getInstance().applyListing(credentialsProviderTracker);
 
         track(JSlobStorageRegistry.class, new ServiceTrackerCustomizer<JSlobStorageRegistry, JSlobStorageRegistry>() {
 
@@ -111,8 +119,28 @@ public final class MailAccountJSONActivator extends AJAXModuleActivator {
         });
         openTrackers();
 
-        registerModule(actionFactory, Constants.getModule());
-        registerService(DefaultMailAccountActionProvider.class, defaultProvider);
+        registerModule(new MailAccountActionFactory(providerTracker), Constants.getModule());
+
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(MailAccountOAuthConstants.OAUTH_READ_SCOPE, OAuthScopeDescription.READ_ONLY) {
+
+            @Override
+            public boolean canBeGranted(CapabilitySet capabilities) {
+                return capabilities.contains(Permission.MULTIPLE_MAIL_ACCOUNTS.getCapabilityName());
+            }
+        });
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(MailAccountOAuthConstants.OAUTH_WRITE_SCOPE, OAuthScopeDescription.WRITABLE) {
+
+            @Override
+            public boolean canBeGranted(CapabilitySet capabilities) {
+                return capabilities.contains(Permission.MULTIPLE_MAIL_ACCOUNTS.getCapabilityName());
+            }
+        });
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        CredentialsProviderRegistry.getInstance().applyListing(null);
+        super.stopBundle();
     }
 
 }

@@ -51,7 +51,7 @@ package com.openexchange.filemanagement.json;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
@@ -75,11 +75,12 @@ public class ManagedFileActionFactory implements AJAXActionServiceFactory {
      */
     public ManagedFileActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(4, 0.9f, 1);
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         actions.put("keepalive", new com.openexchange.filemanagement.json.actions.KeepaliveAction());
         actions.put("get", new com.openexchange.filemanagement.json.actions.GetAction());
         actions.put("new", new com.openexchange.filemanagement.json.actions.NewAction());
         actions.put("range", new com.openexchange.filemanagement.json.actions.RangeAction());
+        this.actions = actions.build();
     }
 
     @Override

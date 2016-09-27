@@ -72,6 +72,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.find.AbstractFindRequest;
 import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
+import com.openexchange.find.facet.FacetInfo;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.find.spi.SearchConfiguration;
 import com.openexchange.java.Strings;
@@ -107,18 +108,24 @@ public class SearchDriverManager implements ServiceTrackerCustomizer<ModuleSearc
      *
      * @param session The users session.
      * @param module The module to check.
-     * @param findRequest The find request, or <code>null</code> if not relevant
+     * @param lookUpInfo The look-up information, or {@link LookUpInfo#EMPTY} if not relevant
      * @param failOnMissingPermission Whether to throw an exception if the user is not even allowed
      * to search within the given module. If <code>false</code>, <code>null</code> is returned in that case.
      * @return The driver or <code>null</code> if no valid one is available.
      */
-    public ModuleSearchDriver determineDriver(ServerSession session, Module module, AbstractFindRequest findRequest, boolean failOnMissingPermission) throws OXException {
+    public ModuleSearchDriver determineDriver(ServerSession session, Module module, LookUpInfo lookUpInfo, boolean failOnMissingPermission) throws OXException {
         ModuleSearchDriver determined = null;
         if (hasModulePermission(session, module)) {
             SortedSet<ComparableDriver> drivers = driversByModule.get(module);
             if (drivers != null) {
+                AbstractFindRequest findRequest = lookUpInfo.getFindRequest();
+                List<FacetInfo> facetInfos = lookUpInfo.getFacetInfos();
                 for (ComparableDriver driver : drivers) {
-                    if (null == findRequest ? driver.getDriver().isValidFor(session) : driver.getDriver().isValidFor(session, findRequest)) {
+                    if (null != findRequest && driver.getDriver().isValidFor(session, findRequest)) {
+                        determined = driver.getDriver();
+                        break;
+                    }
+                    if (null == facetInfos ? driver.getDriver().isValidFor(session) : driver.getDriver().isValidFor(session, facetInfos)) {
                         determined = driver.getDriver();
                         break;
                     }
@@ -141,7 +148,7 @@ public class SearchDriverManager implements ServiceTrackerCustomizer<ModuleSearc
     public List<ModuleSearchDriver> determineDrivers(ServerSession session) throws OXException {
         List<ModuleSearchDriver> drivers = new LinkedList<ModuleSearchDriver>();
         for (Module module : Module.values()) {
-            ModuleSearchDriver driver = determineDriver(session, module, null, false);
+            ModuleSearchDriver driver = determineDriver(session, module, LookUpInfo.EMPTY, false);
             if (driver != null) {
                 drivers.add(driver);
             }
