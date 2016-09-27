@@ -51,6 +51,7 @@ package com.openexchange.calendar.json.actions.chronos;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -60,12 +61,14 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
@@ -327,7 +330,7 @@ public class EventConverter {
      * @param userizedEvent The userized event to convert
      * @return The appointment
      */
-    public static Appointment getAppointment(UserizedEvent userizedEvent) {
+    public Appointment getAppointment(CalendarSession session, UserizedEvent userizedEvent) throws OXException {
         Event event = userizedEvent.getEvent();
         Appointment appointment = new Appointment();
         if (event.containsId()) {
@@ -398,9 +401,20 @@ public class EventConverter {
             appointment.setRecurrenceID(event.getSeriesId());
         }
         if (event.containsRecurrenceId()) {
-            //TODO
-            appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceRule(), event.getRecurrenceId()));
-            appointment.setRecurrencePosition(Event2Appointment.getRecurrencePosition(event.getRecurrenceRule(), event.getRecurrenceId()));
+            EventID masterID = new EventID(userizedEvent.getFolderId(), event.getSeriesId());
+            EventField [] fields = {
+                EventField.RECURRENCE_RULE, EventField.ALL_DAY, EventField.START_DATE, EventField.START_TIMEZONE,
+                EventField.END_DATE, EventField.END_TIMEZONE
+            };
+            // TODO:
+            // provide master event in resolved recurrence?
+            // provide needed info for calculation in resolved recurrence?
+
+            Event masterEvent = getEvent(session, masterID, fields);
+            Calendar recurrenceIdCalendar = CalendarUtils.initCalendar(TimeZone.getTimeZone(masterEvent.getStartTimeZone()), event.getRecurrenceId());
+            int position = services.getService(RecurrenceService.class).calculateRecurrencePosition(masterEvent, recurrenceIdCalendar);
+            appointment.setRecurrencePosition(position);
+            appointment.setRecurrenceDatePosition(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId()));
         }
         SeriesPattern pattern = Event2Appointment.getSeriesPattern(event.getRecurrenceRule(), event.getStartDate(), event.getStartTimeZone(), event.isAllDay());
         if (null != pattern) {
@@ -660,7 +674,9 @@ public class EventConverter {
                     userParticipant.setConfirm(Event2Appointment.getConfirm(attendee.getPartStat()));
                     userParticipant.setConfirmMessage(attendee.getComment());
                     userParticipant.setDisplayName(attendee.getCn());
-                    userParticipant.setEmailAddress(Event2Appointment.getEMailAddress(attendee.getUri()));
+                    if (null != attendee.getUri() && attendee.getUri().toLowerCase().startsWith("mailto:")) {
+                        userParticipant.setEmailAddress(Event2Appointment.getEMailAddress(attendee.getUri()));
+                    }
                     users.add(userParticipant);
                     if (null == attendee.getMember()) {
                         participants.add(userParticipant);

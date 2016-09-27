@@ -1179,7 +1179,7 @@ public class Event {
 
     /**
      * Returns the Start of the event as Calendar with appropriate TimeZone.
-     * 
+     *
      * @return The Start of the event
      */
     public Calendar getStart() {
@@ -1190,7 +1190,7 @@ public class Event {
 
     /**
      * Returns the End of the event as Calendar with appropriate TimeZone.
-     * 
+     *
      * @return The End of the event
      */
     public Calendar getEnd() {
@@ -1201,7 +1201,7 @@ public class Event {
 
     /**
      * Sets the timezone of the start and end date.
-     * 
+     *
      * @param timeZone The timezone
      */
     public void setTimeZone(String timeZone) {
@@ -1211,7 +1211,7 @@ public class Event {
 
     /**
      * Returns the start timezone, ignoring whatever the end timezone ist.
-     * 
+     *
      * @return The start timezon
      */
     public String getTimeZone() {
@@ -1228,7 +1228,7 @@ public class Event {
 
     /**
      * Gets a value indicating whether the start and end timezone are set or not.
-     * 
+     *
      * @return
      */
     public boolean containsTimeZone() {
@@ -1309,6 +1309,9 @@ public class Event {
         if (containsSequence()) {
             clone.setSequence(getSequence());
         }
+        if (containsSeriesId()) {
+            clone.setSeriesId(getSeriesId());
+        }
         if (containsStartDate()) {
             clone.setStartDate(getStartDate());
         }
@@ -1331,6 +1334,9 @@ public class Event {
     }
 
     private <T> List<T> cloneList(List<T> list) {
+        if (null == list) {
+            return null;
+        }
         List<T> retval = new ArrayList<T>();
         retval.addAll(list);
         return retval;

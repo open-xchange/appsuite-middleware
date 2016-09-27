@@ -131,7 +131,7 @@ public class ChangeExceptionsAction extends ChronosAction {
         int folderID = request.checkInt(AJAXServlet.PARAMETER_FOLDERID);
         int objectID = request.checkInt(AJAXServlet.PARAMETER_ID);
         List<UserizedEvent> events = session.getCalendarService().getChangeExceptions(session, folderID, objectID);
-        return getAppointmentResultWithTimestamp(events);
+        return getAppointmentResultWithTimestamp(session, events);
     }
 
 }

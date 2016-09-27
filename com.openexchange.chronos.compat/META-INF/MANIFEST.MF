@@ -7,6 +7,7 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.ajax.fileholder,
  com.openexchange.chronos,
+ com.openexchange.chronos.common,
  com.openexchange.exception,
  com.openexchange.groupware.calendar,
  com.openexchange.groupware.container,

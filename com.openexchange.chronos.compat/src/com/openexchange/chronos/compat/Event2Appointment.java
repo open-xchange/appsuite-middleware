@@ -66,6 +66,7 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.Trigger.Related;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.java.Strings;
 
 /**
@@ -314,10 +315,8 @@ public class Event2Appointment {
      * @param recurrenceId The recurrence identifier, i.e. the date where the original occurrence would have been
      * @return The legacy recurrence date position
      */
-    public static Date getRecurrenceDatePosition(String recurrenceRule, Date recurrenceId) {
-
-        // TODO
-        return recurrenceId;
+    public static Date getRecurrenceDatePosition(Date recurrenceId) {
+        return CalendarUtils.truncateTime(recurrenceId, TimeZone.getTimeZone("UTC"));
     }
 
     /**
@@ -326,10 +325,12 @@ public class Event2Appointment {
      * @param recurrenceId The recurrence identifier, i.e. the date where the original occurrence would have been
      * @return The legacy recurrence position
      */
-    public static int getRecurrencePosition(String recurrenceRule, Date recurrenceId) {
-
-        return 1;
-    }
+    //    public static int getRecurrencePosition(String recurrenceRule, Date recurrenceId) {
+    //
+    //
+    //
+    //        return 1;
+    //    }
 
     /**
      * Parses a trigger duration string.

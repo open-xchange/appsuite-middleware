@@ -179,11 +179,11 @@ public abstract class ChronosAction extends AppointmentAction {
 
     protected abstract AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException;
 
-    protected static AJAXRequestResult getAppointmentResultWithTimestamp(List<UserizedEvent> events) {
+    protected AJAXRequestResult getAppointmentResultWithTimestamp(CalendarSession session, List<UserizedEvent> events) throws OXException {
         Date timestamp = new Date(0L);
         List<Appointment> appointments = new ArrayList<Appointment>(events.size());
         for (UserizedEvent event : events) {
-            appointments.add(EventConverter.getAppointment(event));
+            appointments.add(getEventConverter().getAppointment(session, event));
             timestamp = getLatestModified(timestamp, event);
         }
         return new AJAXRequestResult(appointments, timestamp, "appointment");
@@ -197,18 +197,18 @@ public abstract class ChronosAction extends AppointmentAction {
         return null != lastModified2 && lastModified2.after(lastModified1) ? lastModified2 : lastModified1;
     }
 
-    protected static AJAXRequestResult getAppointmentDeltaResultWithTimestamp(List<UserizedEvent> newAndModifiedEvents, List<UserizedEvent> deletedEvents) {
+    protected AJAXRequestResult getAppointmentDeltaResultWithTimestamp(CalendarSession session, List<UserizedEvent> newAndModifiedEvents, List<UserizedEvent> deletedEvents) throws OXException {
         Date timestamp = new Date(0L);
         CollectionDelta<Appointment> delta = new CollectionDelta<Appointment>();
         if (null != newAndModifiedEvents) {
             for (UserizedEvent event : newAndModifiedEvents) {
-                delta.addNewOrModified(EventConverter.getAppointment(event));
+                delta.addNewOrModified(getEventConverter().getAppointment(session, event));
                 timestamp = getLatestModified(timestamp, event);
             }
         }
         if (null != deletedEvents) {
             for (UserizedEvent event : deletedEvents) {
-                Appointment appointment = EventConverter.getAppointment(event);
+                Appointment appointment = getEventConverter().getAppointment(session, event);
                 appointment.setMarker(Marker.ID_ONLY);
                 delta.addDeleted(appointment);
                 timestamp = getLatestModified(timestamp, event);

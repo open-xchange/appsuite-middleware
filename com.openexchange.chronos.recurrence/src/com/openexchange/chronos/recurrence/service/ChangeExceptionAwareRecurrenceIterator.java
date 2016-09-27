@@ -195,4 +195,10 @@ public class ChangeExceptionAwareRecurrenceIterator implements Iterator<Event> {
         count++;
     }
 
+    @Override
+    public void remove() {
+        // TODO Auto-generated method stub
+
+    }
+
 }

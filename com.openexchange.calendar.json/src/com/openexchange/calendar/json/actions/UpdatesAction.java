@@ -313,7 +313,7 @@ public final class UpdatesAction extends ChronosAction {
                 deletedEvents = null;
             }
         }
-        AJAXRequestResult deltaResult = getAppointmentDeltaResultWithTimestamp(newAndModifiedEvents, deletedEvents);
+        AJAXRequestResult deltaResult = getAppointmentDeltaResultWithTimestamp(session, newAndModifiedEvents, deletedEvents);
         if (null == deltaResult.getTimestamp() || deltaResult.getTimestamp().before(since)) {
             deltaResult.setTimestamp(since);
         }

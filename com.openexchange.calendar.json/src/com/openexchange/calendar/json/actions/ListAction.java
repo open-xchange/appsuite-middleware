@@ -298,7 +298,7 @@ public final class ListAction extends ChronosAction {
         requireParameters(session, CalendarParameters.PARAMETER_FIELDS);
         List<EventID> requestedIDs = parseRequestedIDs(request);
         List<UserizedEvent> events = session.getCalendarService().getEvents(session, requestedIDs);
-        return getAppointmentResultWithTimestamp(events);
+        return getAppointmentResultWithTimestamp(session, events);
     }
 
 }

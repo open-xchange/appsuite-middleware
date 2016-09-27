@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.service;
 
+import java.util.Date;
+
 /**
  * {@link EventID}
  *
@@ -59,17 +61,30 @@ public class EventID {
 
     private final int folderID;
     private final int objectID;
+    private final Date recurrenceID;
 
     /**
      * Initializes a new {@link EventID}.
-     * 
+     *
      * @param folderID The folder ID
      * @param objectID The object ID
      */
     public EventID(int folderID, int objectID) {
+        this(folderID, objectID, null);
+    }
+
+    /**
+     * Initializes a new {@link EventID}.
+     *
+     * @param folderID The folder ID
+     * @param objectID The object ID
+     * @param recurrenceID The recurrence ID
+     */
+    public EventID(int folderID, int objectID, Date recurrenceID) {
         super();
         this.folderID = folderID;
         this.objectID = objectID;
+        this.recurrenceID = recurrenceID;
     }
 
     public int getFolderID() {
@@ -80,12 +95,21 @@ public class EventID {
         return objectID;
     }
 
+    public Date getRecurrenceID() {
+        return recurrenceID;
+    }
+
+    public String toString1() {
+        return "EventID [folderID=" + folderID + ", objectID=" + objectID + "]";
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + folderID;
         result = prime * result + objectID;
+        result = prime * result + ((recurrenceID == null) ? 0 : recurrenceID.hashCode());
         return result;
     }
 
@@ -102,12 +126,17 @@ public class EventID {
             return false;
         if (objectID != other.objectID)
             return false;
+        if (recurrenceID == null) {
+            if (other.recurrenceID != null)
+                return false;
+        } else if (!recurrenceID.equals(other.recurrenceID))
+            return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "EventID [folderID=" + folderID + ", objectID=" + objectID + "]";
+        return null == recurrenceID ? "EventID [folderID=" + folderID + ", objectID=" + objectID + "]" : "EventID [folderID=" + folderID + ", objectID=" + objectID + ", recurrenceID=" + recurrenceID + "]";
     }
 
 }

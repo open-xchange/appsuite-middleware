@@ -226,7 +226,7 @@ public final class NewAppointmentsSearchAction extends ChronosAction {
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         requireParameters(session, CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END);
         List<UserizedEvent> events = session.getCalendarService().getEventsOfUser(session);
-        return getAppointmentResultWithTimestamp(events);
+        return getAppointmentResultWithTimestamp(session, events);
     }
 
 }

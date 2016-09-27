@@ -82,7 +82,7 @@ public class RecurrenceIterator implements Iterator<Event> {
 
     /**
      * Initializes a new {@link RecurrenceIterator}.
-     * 
+     *
      * @param master The master event containing all necessary information like recurrence rule, star and end date, timezones etc.
      * @param start The left side boundary for the calculation. Optional, can be null.
      * @param end The right side boundary for the calculation. Optional, can be null.
@@ -204,8 +204,11 @@ public class RecurrenceIterator implements Iterator<Event> {
     private Event getInstance() {
         // TODO:
         Event retval = master.clone();
-        retval.removeId();
-        retval.removeRecurrenceRule();
+
+        retval.setRecurrenceId(new Date(next));
+
+        //        retval.removeId();
+        //        retval.removeRecurrenceRule();
         retval.removeDeleteExceptionDates();
         retval.removeChangeExceptionDates();
         retval.setStartDate(new Date(next));
@@ -225,6 +228,12 @@ public class RecurrenceIterator implements Iterator<Event> {
 
     private boolean isException(long start) {
         return exceptionDates.contains(new Date(start));
+    }
+
+    @Override
+    public void remove() {
+        // TODO Auto-generated method stub
+
     }
 
 }

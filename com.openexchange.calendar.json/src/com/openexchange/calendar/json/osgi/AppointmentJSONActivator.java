@@ -56,6 +56,7 @@ import com.openexchange.calendar.json.converters.AppointmentIcalResultConverter;
 import com.openexchange.calendar.json.converters.AppointmentResultConverter;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -72,7 +73,10 @@ import com.openexchange.user.UserService;
  */
 public class AppointmentJSONActivator extends AJAXModuleActivator {
 
-    private static final Class<?>[] NEEDED = new Class[] { CalendarService.class, UserService.class, CalendarCollectionService.class, AppointmentSqlFactoryService.class, ICalEmitter.class };
+    private static final Class<?>[] NEEDED = new Class[] { 
+        CalendarService.class, UserService.class, CalendarCollectionService.class, AppointmentSqlFactoryService.class, ICalEmitter.class,
+        RecurrenceService.class
+    };
 
     @Override
     protected Class<?>[] getNeededServices() {

@@ -355,7 +355,7 @@ public final class AllAction extends ChronosAction {
         } else {
             events = session.getCalendarService().getEventsOfUser(session);
         }
-        return getAppointmentResultWithTimestamp(events);
+        return getAppointmentResultWithTimestamp(session, events);
     }
 
 }
