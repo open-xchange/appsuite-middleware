@@ -1123,6 +1123,8 @@ public final class SessionHandler {
          * Change password in current session
          */
         final SessionImpl currentSession = sessionControl.getSession();
+        int userId = currentSession.getUserId();
+        int contextId = currentSession.getContextId();
         currentSession.setPassword(newPassword);
         final SessionStorageService sessionStorage = Services.optService(SessionStorageService.class);
         if (null != sessionStorage && useSessionStorage(currentSession)) {
@@ -1150,27 +1152,9 @@ public final class SessionHandler {
             }
         }
         /*
-         * Invalidate all further user sessions in session storage if needed
+         * Invalidate all further user sessions known on remote cluster members
          */
-        if (null != sessionStorage) {
-            Task<Void> c = new AbstractTask<Void>() {
-
-                @Override
-                public Void call() throws Exception {
-                    Session[] sessions = sessionStorage.getUserSessions(currentSession.getUserId(), currentSession.getContextId());
-                    if (null != sessions && 0 < sessions.length) {
-                        for (Session session : sessions) {
-                            String otherSessionID = session.getSessionID();
-                            if (null != otherSessionID && false == otherSessionID.equals(sessionid)) {
-                                sessionStorage.removeSession(otherSessionID);
-                            }
-                        }
-                    }
-                    return null;
-                }
-            };
-            submitAndIgnoreRejection(c);
-        }
+        removeRemoteUserSessions(userId, contextId);
     }
 
     /**

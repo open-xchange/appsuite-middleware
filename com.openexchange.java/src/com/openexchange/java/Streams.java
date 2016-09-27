@@ -499,6 +499,59 @@ public class Streams {
     }
 
     /**
+     * Safely closes specified {@link Closeable} instance.
+     *
+     * @param toClose The {@link Closeable} instance
+     */
+    public static void close(final AutoCloseable toClose) {
+        if (null != toClose) {
+            try {
+                toClose.close();
+            } catch (final Exception e) {
+                // Ignore
+            }
+        }
+    }
+
+    /**
+     * Safely closes specified {@link Closeable} instances.
+     *
+     * @param closeables The {@link Closeable} instances
+     */
+    public static void close(final AutoCloseable... closeables) {
+        if (null != closeables) {
+            for (final AutoCloseable toClose : closeables) {
+                if (null != toClose) {
+                    try {
+                        toClose.close();
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Safely closes specified {@link Closeable} instances.
+     *
+     * @param closeables The {@link Closeable} instances
+     */
+    public static void closeAutoCloseables(final Collection<? extends AutoCloseable> closeables) {
+        if (null != closeables) {
+            for (final AutoCloseable toClose : closeables) {
+                if (null != toClose) {
+                    try {
+                        toClose.close();
+                    } catch (final Exception e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Safely flushes specified {@link Flushable} instance.
      *
      * @param toFlush The {@link Flushable} instance
