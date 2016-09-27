@@ -469,7 +469,7 @@ public abstract class OXUtilStorageInterface {
      * @return The schema name.
      * @throws StorageException
      */
-    public abstract Database createSchema(Integer optDBId) throws StorageException;
+    public abstract Database createScheme(Integer optDBId) throws StorageException;
 
     /**
      * Determine the next database to use depending on database weight factor. Each database should be equal full according to their weight.

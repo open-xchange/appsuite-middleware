@@ -2720,7 +2720,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     @Override
-    public Database createSchema(Integer optDBId) throws StorageException {
+    public Database createScheme(Integer optDBId) throws StorageException {
 
         Connection configCon = null;
         try {

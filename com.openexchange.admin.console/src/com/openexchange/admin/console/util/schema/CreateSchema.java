@@ -107,7 +107,7 @@ public class CreateSchema extends BasicCommandlineOptions {
         String id_str = (String) parser.getOptionValue(optDBIdOption);
         Integer id = Strings.isEmpty(id_str) ? null : Integer.valueOf(id_str);
         OXUtilInterface oxUtil = (OXUtilInterface) Naming.lookup(RMI_HOSTNAME + OXUtilInterface.RMI_NAME);
-        Database db = oxUtil.createSchema(creds, id);
+        Database db = oxUtil.createScheme(creds, id);
 
 
         if(null!= parser.getOptionValue(this.csvOutputOption)){

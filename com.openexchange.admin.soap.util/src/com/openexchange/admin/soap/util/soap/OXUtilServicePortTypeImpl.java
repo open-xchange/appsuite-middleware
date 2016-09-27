@@ -993,4 +993,32 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
         soapDatabase.setUrl(database.getUrl());
         return soapDatabase;
     }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#createScheme(com.openexchange.admin.soap.util.dataobjects.Credentials)
+     */
+    @Override
+    public Database createScheme(Credentials auth, Integer optDBId) throws StorageException_Exception, InvalidCredentialsException_Exception, RemoteException_Exception {
+        com.openexchange.admin.rmi.dataobjects.Database result;
+        try {
+            result = getUtilInterface().createScheme(soap2Credentials(auth), optDBId);
+            return database2Soap(result);
+        } catch (final RemoteException e) {
+            com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();
+            com.openexchange.admin.soap.util.rmi.RemoteException value = new com.openexchange.admin.soap.util.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            fd.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), fd, e);
+        } catch (final InvalidCredentialsException e) {
+            com.openexchange.admin.soap.util.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.util.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.util.exceptions.InvalidCredentialsException();
+            fd.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
+        } catch (final StorageException e) {
+            com.openexchange.admin.soap.util.soap.StorageException fd = new com.openexchange.admin.soap.util.soap.StorageException();
+            com.openexchange.admin.soap.util.exceptions.StorageException value = new com.openexchange.admin.soap.util.exceptions.StorageException();
+            fd.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), fd, e);
+        }
+    }
 }

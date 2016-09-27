@@ -226,4 +226,14 @@ public interface OXUtilServicePortType {
         @WebParam(partName = "parameters", name = "unregisterDatabase", targetNamespace = "http://soap.admin.openexchange.com")
         UnregisterDatabase parameters
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;
+
+    @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
+    @Action(input = "urn:createScheme", output = "urn:createSchemeResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:createSchemeStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:createSchemeInvalidCredentialsException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:createSchemeRemoteException")})
+    @RequestWrapper(localName = "createScheme", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.util.soap.CreateScheme")
+    @WebMethod(action = "urn:createScheme")
+    @ResponseWrapper(localName = "createSchemeResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.util.soap.CreateSchemeResponse")
+    public com.openexchange.admin.soap.util.dataobjects.Database createScheme(
+        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com") com.openexchange.admin.soap.util.dataobjects.Credentials auth,
+        @WebParam(name = "optDBId", targetNamespace = "http://soap.admin.openexchange.com") java.lang.Integer optDBId
+    ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;
 }

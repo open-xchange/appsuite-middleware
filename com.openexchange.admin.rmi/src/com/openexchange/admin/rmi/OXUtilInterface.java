@@ -572,5 +572,5 @@ public interface OXUtilInterface extends Remote {
      * @throws StorageException
      * @throws InvalidCredentialsException
      */
-    public Database createSchema(final Credentials credentials, Integer optDBId) throws RemoteException, StorageException, InvalidCredentialsException;
+    public Database createScheme(final Credentials credentials, Integer optDBId) throws RemoteException, StorageException, InvalidCredentialsException;
 }
