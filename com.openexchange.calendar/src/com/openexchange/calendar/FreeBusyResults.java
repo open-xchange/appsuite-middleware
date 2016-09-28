@@ -100,6 +100,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     private int fid;
     private int colorLabel;
     private String title;
+    private String location;
     private RecurringResultsInterface rrs;
     private boolean has_next;
     private final boolean show_details;
@@ -206,6 +207,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 sa = rs.getInt(5);
                 cdao.setShownAs(sa);
                 title = rs.getString(6);
+                location = rs.getString(19);
                 fid = rs.getInt(7);
                 pflag = rs.getInt(8);
                 if (!rs.wasNull()) {
@@ -315,6 +317,7 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
         if (show_details) {
             if (checkPermissions()) {
                 cdao.setTitle(title);
+                cdao.setLocation(location);
                 cdao.setParentFolderID(readFolderId);
                 cdao.setLabel(colorLabel);
                 cdao.setCategories(categories);
