@@ -50,7 +50,7 @@
 
 package com.openexchange.oauth.linkedin;
 
-import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.oauth.scope.OAuthScope;
 
 /**
@@ -59,18 +59,18 @@ import com.openexchange.oauth.scope.OAuthScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum LinkedInOAuthScope implements OAuthScope {
-    contacts_ro("r_basicprofile r_emailaddress", Module.contacts_ro);
+    contacts_ro("r_basicprofile r_emailaddress", OXScope.contacts_ro);
 
     private final String mapping;
-    private final Module module;
+    private final OXScope module;
 
     /**
      * Initialises a new {@link LinkedInOAuthScope}.
      *
      * @param mapping The OAuth mapping
-     * @param module The {@link Module}
+     * @param module The {@link OXScope}
      */
-    private LinkedInOAuthScope(String mapping, Module module) {
+    private LinkedInOAuthScope(String mapping, OXScope module) {
         this.mapping = mapping;
         this.module = module;
     }
@@ -81,7 +81,7 @@ public enum LinkedInOAuthScope implements OAuthScope {
      * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
      */
     @Override
-    public String getMapping() {
+    public String getProviderScopes() {
         return mapping;
     }
 
@@ -91,7 +91,7 @@ public enum LinkedInOAuthScope implements OAuthScope {
      * @see com.openexchange.oauth.scope.OAuthScope#getModule()
      */
     @Override
-    public Module getModule() {
+    public OXScope getOXScope() {
         return module;
     }
 }

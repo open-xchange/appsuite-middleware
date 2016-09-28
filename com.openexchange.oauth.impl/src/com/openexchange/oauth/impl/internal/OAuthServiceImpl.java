@@ -112,7 +112,7 @@ import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.impl.services.Services;
-import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.secret.SecretEncryptionFactoryService;
@@ -201,7 +201,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                     }
                     String scopes = rs.getString(6);
                     if (!Strings.isEmpty(scopes)) {
-                        Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), Module.valuesOf(scopes));
+                        Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
                         account.setEnabledScopes(enabledScopes);
                     }
                     accounts.add(account);
@@ -251,7 +251,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 }
                 account.setMetaData(registry.getService(serviceMetaData, user, contextId));
                 String scopes = rs.getString(5);
-                Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), Module.valuesOf(scopes));
+                Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
                 account.setEnabledScopes(enabledScopes);
                 accounts.add(account);
             } while (rs.next());
@@ -702,7 +702,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
             account.setMetaData(registry.getService(rs.getString(4), user, contextId));
             String scopes = rs.getString(5);
-            Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), Module.valuesOf(scopes));
+            Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
             account.setEnabledScopes(enabledScopes);
             return account;
         } catch (final SQLException e) {
@@ -895,7 +895,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         }
 
         // Add requested scopes
-        String mappings = OAuthUtil.scopeMappingsToString(scopes);
+        String mappings = OAuthUtil.providerScopesToString(scopes);
         if (!Strings.isEmpty(mappings)) {
             serviceBuilder.scope(mappings);
         }

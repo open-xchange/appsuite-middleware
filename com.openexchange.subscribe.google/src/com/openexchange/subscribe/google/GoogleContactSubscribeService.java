@@ -83,7 +83,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
@@ -355,10 +355,10 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
         try {
             contactFeed = contactsService.getFeed(query, ContactFeed.class);
         } catch (AuthenticationException e) {
-            throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), Module.contacts_ro.getDisplayName());
+            throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), OXScope.contacts_ro.getDisplayName());
         } catch (NullPointerException e) {
             if (e.getMessage().equals("No authentication header information")) {
-                throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), Module.contacts_ro.getDisplayName());
+                throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), OXScope.contacts_ro.getDisplayName());
             }
             throw e;
         }

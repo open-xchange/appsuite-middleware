@@ -136,7 +136,7 @@ public class SQLStructure {
                     String[] scopes = new String[enabledScopes.size()];
                     int index = 0;
                     for (OAuthScope s : enabledScopes){ 
-                        scopes[index++] = s.getModule().name();
+                        scopes[index++] = s.getOXScope().name();
                     }
                     return Strings.concat(" ", scopes);
                 default:
