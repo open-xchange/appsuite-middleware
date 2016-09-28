@@ -61,12 +61,12 @@ public interface OAuthScope {
      * 
      * @return the mapping of this {@link OAuthScope}
      */
-    String getMapping();
+    String getProviderScopes();
 
     /**
      * Returns the {@link OXScope} of this {@link OAuthScope}
      * 
      * @return the {@link OXScope} of this {@link OAuthScope}
      */
-    OXScope getModule();
+    OXScope getOXScope();
 }

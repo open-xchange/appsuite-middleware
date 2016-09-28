@@ -104,7 +104,7 @@ public class OAuthScopeConfigurationService {
         List<String> enabledScopes = Arrays.asList(Strings.splitByComma(enabledModulesStr));
         
         for (OAuthScope availableScope : availableScopes) {
-            if (enabledScopes.contains(availableScope.getModule().name())) {
+            if (enabledScopes.contains(availableScope.getOXScope().name())) {
                 result.add(availableScope);
             }
         }
