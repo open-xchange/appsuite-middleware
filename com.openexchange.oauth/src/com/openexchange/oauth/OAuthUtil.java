@@ -72,7 +72,7 @@ public final class OAuthUtil {
     /**
      * Parses the specified {@link Set} with {@link OAuthScope}s and returns
      * the OAuth provider-specific mappings ({@link OAuthScope#getProviderScopes()})
-     * as a space separated string. Duplicate OAuth provider-specific scopes will only be 
+     * as a space separated string. Duplicate OAuth provider-specific scopes will only be
      * present once in the returned string.
      * 
      * @param scopes The {@link OAuthScope}s

@@ -47,53 +47,24 @@
  *
  */
 
-package com.openexchange.oauth.yahoo;
-
-import com.openexchange.oauth.scope.OAuthScope;
-import com.openexchange.oauth.scope.OXScope;
+package com.openexchange.jolokia.restrictor;
 
 /**
- * {@link YahooOAuthScope}
+ * 
+ * {@link OXRestrictorLocalhost} - Access from localhost only. All operations allowed
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.8.3
  */
-public enum YahooOAuthScope implements OAuthScope {
-    mail("mail-x", OXScope.mail),
-    contacts_ro("sdct-r", OXScope.contacts_ro),
-    contacts("sdct-w", OXScope.contacts),
-    ;
+public class OXRestrictorLocalhost extends OXRestrictor {
 
-    private final String mapping;
-    private final OXScope module;
-
-    /**
-     * Initialises a new {@link YahooOAuthScope}.
-     *
-     * @param mapping The OAuth mapping
-     * @param module The {@link OXScope}
-     */
-    private YahooOAuthScope(String mapping, OXScope module) {
-        this.mapping = mapping;
-        this.module = module;
+    public OXRestrictorLocalhost() {
+        super();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
-     */
     @Override
-    public String getProviderScopes() {
-        return mapping;
+    public boolean isRemoteAccessAllowed(String... pHostOrAddress) {
+        return false;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.oauth.scope.OAuthScope#getModule()
-     */
-    @Override
-    public OXScope getOXScope() {
-        return module;
-    }
 }

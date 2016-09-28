@@ -52,10 +52,8 @@ package com.openexchange.oauth.impl.internal;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -112,9 +110,9 @@ import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.impl.services.Services;
-import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.secret.SecretEncryptionStrategy;
@@ -201,9 +199,10 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                         LOG.debug("{}", e.getMessage(), e);
                     }
                     String scopes = rs.getString(6);
-                    Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
-                    account.setEnabledScopes(enabledScopes);
-
+                    if (!Strings.isEmpty(scopes)) {
+                        Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
+                        account.setEnabledScopes(enabledScopes);
+                    }
                     accounts.add(account);
                 } catch (final OXException e) {
                     if (!OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.equals(e)) {
@@ -412,14 +411,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
 
     private boolean isDeferrerAvailable(final DeferringURLService ds, final int userId, final int contextId) {
         return null != ds && ds.isDeferrerURLAvailable(userId, contextId);
-    }
-
-    private static String urlEncode(final String s) {
-        try {
-            return URLEncoder.encode(s, "ISO-8859-1");
-        } catch (final UnsupportedEncodingException e) {
-            return s;
-        }
     }
 
     @Override
