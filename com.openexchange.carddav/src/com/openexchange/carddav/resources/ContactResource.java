@@ -87,7 +87,7 @@ import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
- * {@link ContactResource2}
+ * {@link ContactResource}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
