@@ -63,8 +63,8 @@ public enum OXScope {
     mail("Mail", false),
     calendar_ro("Calendars (Read Only)", true),
     contacts_ro("Contacts (Read Only)", true),
-    calendar("Calendars (Read/Write)", false),
-    contacts("Contacts (Read/Write)", false),
+    calendar("Calendars", false),
+    contacts("Contacts", false),
     drive("Drive", true),
     generic("", true);
 
