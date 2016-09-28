@@ -115,7 +115,7 @@ public class AbortComposeHandler extends AbstractComposeHandler<AbortComposeCont
         ComposedMailMessage composeMessage = createRegularComposeMessage(context);
         DelegatingComposedMailMessage transportMessage = new DelegatingComposedMailMessage(composeMessage);
         transportMessage.setAppendToSentFolder(false);
-        return new DefaultComposeTransportResult(Collections.<ComposedMailMessage> singletonList(transportMessage), composeMessage);
+        return new DefaultComposeTransportResult(Collections.<ComposedMailMessage> singletonList(transportMessage), composeMessage, true);
     }
 
     @Override

@@ -75,4 +75,11 @@ public interface ComposeTransportResult {
      */
     ComposedMailMessage getSentMessage();
 
+    /**
+     * Signals whether first transport message is equal to the message representation that is supposed to be saved into standard Sent folder.
+     *
+     * @return <code>true</code> if transport is equal to sent version; otherwise <code>false</code>
+     */
+    boolean isTransportEqualToSent();
+
 }
