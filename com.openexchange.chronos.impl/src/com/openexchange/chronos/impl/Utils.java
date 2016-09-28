@@ -67,6 +67,7 @@ import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ResourceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -442,7 +443,11 @@ public class Utils {
         if (false == includePrivate && isClassifiedFor(event, session.getUser().getId())) {
             return true;
         }
-        if (false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
+//        if (false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
+//            return true;
+//        }
+        if ((false == CalendarUtils.isSeriesMaster(event) || false == isResolveOccurrences(session)) && 
+            false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
             return true;
         }
         return false;

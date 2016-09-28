@@ -395,11 +395,13 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                  * drop recurrence information for change exceptions
                  */
                 //                event.removeRecurrenceRule(); // better keep?
+                event.setRecurrenceRule(recurrenceRule);
                 /*
-                 * transform exception's legacy "recurrence date position" to recurrence ids
+                 * transform change exception's legacy "recurrence date position" to recurrence id & apply actual recurrence id
                  */
-                if (event.containsRecurrenceId() && null != event.getRecurrenceId()) {
-                    event.setRecurrenceId(Appointment2Event.getRecurrenceID(recurrenceRule, new Date(seriesPattern.getSeriesStart().longValue()), seriesPattern.getTimeZone(), allDay, event.getRecurrenceId()));
+                if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
+                    event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceRule, new Date(seriesPattern.getSeriesStart().longValue()), seriesPattern.getTimeZone(), allDay, event.getChangeExceptionDates()));
+                    event.setRecurrenceId(event.getChangeExceptionDates().get(0));
                 }
             }
         }

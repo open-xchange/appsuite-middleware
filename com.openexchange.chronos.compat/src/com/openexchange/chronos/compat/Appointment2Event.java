@@ -305,14 +305,12 @@ public class Appointment2Event {
      * @return The recurrence identifier, or <code>null</code> if no matching recurrence identifier was found
      */
     public static Date getRecurrenceID(String recurrenceRule, Date seriesStart, TimeZone timeZone, boolean allDay, int recurrencePosition) throws OXException {
-        Calendar calendar = CalendarUtils.initCalendar(TimeZone.getTimeZone("UTC"), seriesStart);
         RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceRule, seriesStart.getTime(), timeZone, allDay);
         int position = 0;
         while (iterator.hasNext()) {
             long nextMillis = iterator.nextMillis();
-            if (position++ == recurrencePosition) {
-                calendar.setTimeInMillis(nextMillis);
-                return CalendarUtils.truncateTime(calendar).getTime();
+            if (++position == recurrencePosition) {
+                return new Date(nextMillis);
             }
         }
         return null;

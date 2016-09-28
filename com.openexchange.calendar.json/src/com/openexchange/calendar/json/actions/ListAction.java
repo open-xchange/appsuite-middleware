@@ -52,6 +52,7 @@ package com.openexchange.calendar.json.actions;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -293,10 +294,30 @@ public final class ListAction extends ChronosAction {
         }
     }
 
+    private static final Set<String> REQUIRED_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_COLUMNS
+    );
+
+    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_RECURRENCE_MASTER, AJAXServlet.PARAMETER_TIMEZONE
+    );
+
+    @Override
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
+    }
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
+
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
-        requireParameters(session, CalendarParameters.PARAMETER_FIELDS);
-        List<EventID> requestedIDs = parseRequestedIDs(request);
+        if (false == session.contains(CalendarParameters.PARAMETER_RECURRENCE_MASTER)) {
+            session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.FALSE);
+        }
+        List<EventID> requestedIDs = parseRequestedIDs(session, request);
         List<UserizedEvent> events = session.getCalendarService().getEvents(session, requestedIDs);
         return getAppointmentResultWithTimestamp(session, events);
     }

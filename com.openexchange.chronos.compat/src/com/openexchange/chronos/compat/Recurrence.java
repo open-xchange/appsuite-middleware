@@ -70,6 +70,7 @@ import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.Period;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
@@ -124,15 +125,25 @@ public class Recurrence {
      * @return The actual start- and end-date of the recurrence master, wrapped into a {@link Period} structure
      */
     public static Period getRecurrenceMasterPeriod(Period seriesPeriod, int absoluteDuration) {
-        // TODO: bestimmt immer noch falsch
-        Calendar calendar = GregorianCalendar.getInstance(TimeZones.UTC);
-        calendar.setTime(seriesPeriod.getStartDate());
+        /*
+         * determine "date" fraction of series start
+         */
+        Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, seriesPeriod.getStartDate());
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH);
         int date = calendar.get(Calendar.DATE);
         Date startDate = calendar.getTime();
+        /*
+         * apply same "date" fraction to series end
+         */
         calendar.setTime(seriesPeriod.getEndDate());
         calendar.set(year, month, date);
+        /*
+         * adjust end date considering absolute duration
+         */
+        if (calendar.getTime().before(startDate)) {
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+        }
         calendar.add(Calendar.DAY_OF_YEAR, absoluteDuration);
         Date endDate = calendar.getTime();
         return new Period(startDate, endDate, seriesPeriod.isAllDay());

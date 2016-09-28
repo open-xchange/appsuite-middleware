@@ -324,8 +324,18 @@ public class CalendarReader {
                 continue; //TODO check; see com.openexchange.ajax.appointment.NewListTest.testRemovedObjectHandling()
                 //                throw OXException.notFound(eventID.toString()); //TODO
             }
-            //TODO: specific occurrence?
-            orderedEvents.add(event);
+            if (null != eventID.getRecurrenceID() && isSeriesMaster(event.getEvent())) {
+                TimeZone timeZone = getTimeZone(session);
+                Calendar fromCalendar = initCalendar(timeZone, eventID.getRecurrenceID());
+                Iterator<Event> iterator = Services.getService(RecurrenceService.class).calculateInstancesRespectExceptions(event.getEvent(), fromCalendar, null, I(1), null);
+                if (false == iterator.hasNext()) {
+                    continue; // TODO check
+                }
+                Event occurrence = iterator.next();
+                orderedEvents.add(getUserizedEvent(occurrence, event.getFolderId(), event.getAlarms()));
+            } else {
+                orderedEvents.add(event);
+            }
         }
         return orderedEvents;
     }

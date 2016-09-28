@@ -51,6 +51,7 @@ package com.openexchange.calendar.json.actions;
 
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.Set;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -120,6 +121,13 @@ public final class GetAction extends ChronosAction {
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
         }
+    }
+
+    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(AJAXServlet.PARAMETER_TIMEZONE);
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
     }
 
     @Override

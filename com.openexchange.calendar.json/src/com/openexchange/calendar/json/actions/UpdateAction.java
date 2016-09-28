@@ -51,6 +51,7 @@ package com.openexchange.calendar.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.Date;
+import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -159,9 +160,22 @@ public final class UpdateAction extends ChronosAction {
         return new AJAXRequestResult(jsonResponseObj, timestamp, "json");
     }
 
+    private static final Set<String> REQUIRED_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(AJAXServlet.PARAMETER_TIMESTAMP);
+
+    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(AJAXServlet.PARAMETER_TIMEZONE);
+
+    @Override
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
+    }
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
+
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
-        requireParameters(session, CalendarParameters.PARAMETER_TIMESTAMP);
         EventID eventID = new EventID(request.checkInt(AJAXServlet.PARAMETER_INFOLDER), request.checkInt(AJAXServlet.PARAMETER_ID));
         JSONObject jsonObject = request.getData();
         CalendarDataObject appointment = new CalendarDataObject();

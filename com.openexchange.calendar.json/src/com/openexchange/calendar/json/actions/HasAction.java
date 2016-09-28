@@ -51,6 +51,7 @@ package com.openexchange.calendar.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.util.Date;
+import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -119,9 +120,27 @@ public final class HasAction extends ChronosAction {
         return new AJAXRequestResult(jsonResponseArray, "json");
     }
 
+    private static final Set<String> REQUIRED_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_START, AJAXServlet.PARAMETER_END
+    );
+
+    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_TIMEZONE
+    );
+
+    @Override
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
+    }
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
+
+
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
-        requireParameters(session, CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END);
         Date from = session.get(CalendarParameters.PARAMETER_RANGE_START, Date.class);
         Date until = session.get(CalendarParameters.PARAMETER_RANGE_END, Date.class);
         boolean[] hasEventsArray = session.getCalendarService().hasEventsBetween(session, from, until);

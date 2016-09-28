@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -203,10 +204,26 @@ public final class SearchAction extends ChronosAction {
         }
     }
 
+    private static final Set<String> REQUIRED_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_COLUMNS
+    );
+
+    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_TIMEZONE, AJAXServlet.PARAMETER_SORT, AJAXServlet.PARAMETER_ORDER, AJAXServlet.LEFT_HAND_LIMIT, AJAXServlet.RIGHT_HAND_LIMIT
+    );
+
+    @Override
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
+    }
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
+
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
-        session.set(CalendarParameters.PARAMETER_RANGE_START, null);
-        session.set(CalendarParameters.PARAMETER_RANGE_END, null);
         JSONObject jsonObject = request.getData();
         int[] folderIDs = jsonObject.has(AJAXServlet.PARAMETER_INFOLDER) ? new int[] { jsonObject.getInt(AJAXServlet.PARAMETER_INFOLDER) } : null;
         String pattern = jsonObject.optString(SearchFields.PATTERN);

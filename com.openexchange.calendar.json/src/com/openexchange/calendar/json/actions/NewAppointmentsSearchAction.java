@@ -55,6 +55,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -222,9 +223,26 @@ public final class NewAppointmentsSearchAction extends ChronosAction {
         }
     }
 
+    private static final Set<String> REQUIRED_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_COLUMNS, AJAXServlet.PARAMETER_START, AJAXServlet.PARAMETER_END
+    );
+
+    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_TIMEZONE, AJAXServlet.PARAMETER_SORT, AJAXServlet.PARAMETER_ORDER, AJAXServlet.PARAMETER_LIMIT
+    );
+
+    @Override
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
+    }
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
+
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
-        requireParameters(session, CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END);
         List<UserizedEvent> events = session.getCalendarService().getEventsOfUser(session);
         return getAppointmentResultWithTimestamp(session, events);
     }

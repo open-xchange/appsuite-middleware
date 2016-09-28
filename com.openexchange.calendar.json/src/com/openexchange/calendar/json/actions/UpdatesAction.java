@@ -52,6 +52,7 @@ package com.openexchange.calendar.json.actions;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -280,8 +281,32 @@ public final class UpdatesAction extends ChronosAction {
         }
     }
 
+    private static final Set<String> REQUIRED_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_COLUMNS, AJAXServlet.PARAMETER_TIMESTAMP
+    );
+
+    //    {action=updates, columns=1, start=1475043687797, end=1538122887797, showPrivate=true, recurrence_master=true, timestamp=1317198087797, ignore=deleted, sort=201, order=asc, timezone=UTC, session=f95184c1c11d4826b0ec25c86c6970d8}
+    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_START, AJAXServlet.PARAMETER_END,
+        AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS, AJAXServlet.PARAMETER_RECURRENCE_MASTER,
+        AJAXServlet.PARAMETER_TIMEZONE, AJAXServlet.PARAMETER_SORT, AJAXServlet.PARAMETER_ORDER
+    );
+
+    @Override
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
+    }
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
+
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
+        if (false == session.contains(CalendarParameters.PARAMETER_RECURRENCE_MASTER)) {
+            session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.FALSE);
+        }
         Date since = request.checkDate(AJAXServlet.PARAMETER_TIMESTAMP);
         String ignore = request.getParameter(AJAXServlet.PARAMETER_IGNORE);
         boolean ignoreUpdated = null != ignore && ignore.contains("changed");
@@ -301,7 +326,12 @@ public final class UpdatesAction extends ChronosAction {
                 deletedEvents = null;
             }
         } else {
-            requireParameters(session, CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END);
+            if (false == session.contains(CalendarParameters.PARAMETER_RANGE_START)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_START);
+            }
+            if (false == session.contains(CalendarParameters.PARAMETER_RANGE_END)) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_END);
+            }
             if (false == ignoreUpdated) {
                 newAndModifiedEvents = session.getCalendarService().getUpdatedEventsOfUser(session, since);
             } else {

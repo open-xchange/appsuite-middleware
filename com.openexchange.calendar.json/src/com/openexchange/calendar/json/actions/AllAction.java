@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
@@ -345,9 +346,30 @@ public final class AllAction extends ChronosAction {
         }
     }
 
+    private static final Set<String> REQUIRED_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_COLUMNS, AJAXServlet.PARAMETER_START, AJAXServlet.PARAMETER_END
+    );
+
+    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(
+        AJAXServlet.PARAMETER_SHOW_PRIVATE_APPOINTMENTS, AJAXServlet.PARAMETER_RECURRENCE_MASTER,
+        AJAXServlet.PARAMETER_TIMEZONE, AJAXServlet.PARAMETER_SORT, AJAXServlet.PARAMETER_ORDER
+    );
+
+    @Override
+    protected Set<String> getRequiredParameters() {
+        return REQUIRED_PARAMETERS;
+    }
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
+
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
-        requireParameters(session, CalendarParameters.PARAMETER_FIELDS, CalendarParameters.PARAMETER_RANGE_START, CalendarParameters.PARAMETER_RANGE_END);
+        if (false == session.contains(CalendarParameters.PARAMETER_RECURRENCE_MASTER)) {
+            session.set(CalendarParameters.PARAMETER_RECURRENCE_MASTER, Boolean.FALSE);
+        }
         int folderID = request.getFolderId();
         List<UserizedEvent> events;
         if (0 < folderID) {
