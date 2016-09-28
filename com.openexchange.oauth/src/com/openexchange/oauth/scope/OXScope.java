@@ -88,6 +88,9 @@ public enum OXScope {
      * @throws OXException if the specified string cannot be resolved to a valid {@link OXScope}
      */
     public static final OXScope[] valuesOf(String string) throws OXException {
+        if (Strings.isEmpty(string)) {
+            return new OXScope[0];
+        }
         List<OXScope> list = new ArrayList<>();
         String[] split = Strings.splitByWhitespaces(string);
         for (String s : split) {
