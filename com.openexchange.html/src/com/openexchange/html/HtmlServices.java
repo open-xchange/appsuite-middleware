@@ -52,16 +52,13 @@ package com.openexchange.html;
 import static com.openexchange.java.Strings.isEmpty;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.concurrent.Callable;
+import net.htmlparser.jericho.HTMLElementName;
 import org.apache.commons.codec.net.URLCodec;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.internal.WhitelistedSchemes;
 import com.openexchange.html.osgi.Services;
-import com.openexchange.html.tools.HTMLUtils;
 
 
 /**
@@ -77,8 +74,6 @@ public final class HtmlServices {
     private HtmlServices() {
         super();
     }
-
-    private static final Set<String> NOT_ALLOWED = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("%3c", "%3e", "%22")));
 
     /**
      * Does URL decoding until fully decoded
@@ -118,33 +113,100 @@ public final class HtmlServices {
      * Checks if specified URL String is safe or not.
      *
      * @param val The URL String to check
+     * @param tagName The name of the tag
      * @return <code>true</code> if safe; otherwise <code>false</code>
      */
-    public static boolean isNonJavaScriptURL(final String val) {
-        return isNonJavaScriptURL(val, new String[0]);
+    public static boolean isNonJavaScriptURL(String val, String tagName) {
+        return isNonJavaScriptURL(val, tagName, new String[0]);
     }
 
-    private static final String[] UNSAFE_TOKENS = {"javascript:", "vbscript:", "data:text/html", "<script"};
+    private static final String DATA_TOKEN = "data:";
+
+    /**
+     * Checks if specified value is an acceptable data URI.
+     *
+     * @param value The value to check
+     * @param condition The optional condition that is supposed to be satisfied
+     * @return <code>Result.NEUTRAL</code> if given value is no data URI, <code>Result.ALLOW</code> if acceptable; otherwise <code>Result.DENY</code> if not
+     */
+    public static Result isAcceptableDataUri(String value, Callable<Boolean> condition) {
+        String val = value.trim();
+        if (false == val.startsWith(DATA_TOKEN)) {
+            // No data URI at all
+            return Result.NEUTRAL;
+        }
+
+        // Assume data URL  data:[<media type>][;base64],<data>
+        //            E.g. "data:image/jpg;base64,/9j/7gAOQWRvYmUAZMAAAAAB/..."
+
+        // Check condition (if any)
+        if (null != condition) {
+            try {
+                if (false == Boolean.TRUE.equals(condition.call())) {
+                    // Condition not satisfied
+                    return Result.DENY;
+                }
+            } catch (Exception e) {
+                org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(HtmlServices.class);
+                logger.error("Failed to check condition", e);
+                return Result.DENY;
+            }
+        }
+
+        int dataPos = DATA_TOKEN.length();
+        int commaPos = val.indexOf(',', dataPos);
+        if (commaPos < 0) {
+            // Impossible to parse MIME type. Deny.
+            return Result.DENY;
+        }
+
+        // Allow for image only
+        int endPos = val.indexOf(';', dataPos);
+        if (endPos < 0) {
+            endPos = commaPos;
+        }
+        String mimeType = val.substring(dataPos, endPos).trim();
+        return (mimeType.startsWith("image/") && mimeType.indexOf("svg") < 0) ? Result.ALLOW : Result.DENY;
+    }
+
+    private static final String[] UNSAFE_TOKENS = { "javascript:", "vbscript:", "<script" };
 
     /**
      * Checks if specified URL String is safe or not.
      *
      * @param val The URL String to check
+     * @param tagName The name of the tag
      * @param more More tokens to look for
      * @return <code>true</code> if safe; otherwise <code>false</code>
      */
-    public static boolean isNonJavaScriptURL(final String val, final String... more) {
+    public static boolean isNonJavaScriptURL(String val, final String tagName, String... more) {
         if (null == val) {
             return false;
         }
 
+        // Check for acceptable data URI inside <img> tag
         String lc = asciiLowerCase(fullUrlDecode(val.trim()));
+        {
+            Callable<Boolean> condition = new Callable<Boolean>() {
+
+                @Override
+                public Boolean call() throws Exception {
+                    return Boolean.valueOf(HTMLElementName.IMG == tagName || "img".equals(tagName));
+                }
+            };
+            if (Result.DENY == isAcceptableDataUri(val, condition)) {
+                return false;
+            }
+        }
+
+        // Check basic unsafe tokens
         for (String unsafeToken : UNSAFE_TOKENS) {
             if (lc.indexOf(unsafeToken) >= 0) {
                 return false;
             }
         }
 
+        // Check additionally specified unsafe tokens
         if (null != more && more.length > 0) {
             for (final String token : more) {
                 if (lc.indexOf(asciiLowerCase(token)) >= 0) {
@@ -152,36 +214,8 @@ public final class HtmlServices {
                 }
             }
         }
-        if (lc.indexOf("%") < 0) {
-            return true;
-        }
-        for (final String notAllowed : NOT_ALLOWED) {
-            if (lc.indexOf(notAllowed) >= 0) {
-                return false;
-            }
-        }
-        lc = HTMLUtils.decodeUrl(val, null);
-        if (lc.indexOf("javascript:") >= 0 || lc.indexOf("vbscript:") >= 0) {
-            return false;
-        }
-        if (null != more && more.length > 0) {
-            for (final String token : more) {
-                if (lc.indexOf(asciiLowerCase(token)) >= 0) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
 
-    /**
-     * Checks if specified URL String is unsafe or not.
-     *
-     * @param val The URL String to check
-     * @return <code>true</code> if unsafe; otherwise <code>false</code>
-     */
-    public static boolean isJavaScriptURL(final String val) {
-        return !isNonJavaScriptURL(val);
+        return true;
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------- //
@@ -190,9 +224,10 @@ public final class HtmlServices {
      * Checks given possible URI it is safe being appended/inserted to HTML content.
      *
      * @param possibleUrl The possible URI to check
+     * @param tagName The name of the tag
      * @return <code>true</code> if safe; otherwise <code>false</code>
      */
-    public static boolean isSafe(String possibleUrl) {
+    public static boolean isSafe(String possibleUrl, String tagName) {
         if (null == possibleUrl) {
             return true;
         }
@@ -203,7 +238,7 @@ public final class HtmlServices {
             uri = new URI(possibleUrl.trim());
         } catch (URISyntaxException x) {
             // At least check for common attack vectors
-            return isNonJavaScriptURL(possibleUrl);
+            return isNonJavaScriptURL(possibleUrl, tagName);
         }
 
         // Get URI's scheme and compare against possible whitelist
@@ -216,14 +251,14 @@ public final class HtmlServices {
         List<String> schemes = WhitelistedSchemes.getWhitelistedSchemes();
         if (schemes.isEmpty()) {
             // No allowed schemes specified
-            return isNonJavaScriptURL(possibleUrl);
+            return isNonJavaScriptURL(possibleUrl, tagName);
         }
 
         String lc = asciiLowerCase(scheme);
         for (String s : schemes) {
             if (lc.equals(s)) {
                 // Matches an allowed scheme
-                return isNonJavaScriptURL(possibleUrl);
+                return isNonJavaScriptURL(possibleUrl, tagName);
             }
         }
 
