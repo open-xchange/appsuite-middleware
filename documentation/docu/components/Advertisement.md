@@ -170,7 +170,7 @@ Empty response with HTTP status code 204.
 
 ### Delete configuration by reseller and package
 
-DELETE /advertisement/v1/config/package1
+DELETE /advertisement/v1/config/package
 
 **Params:**
 
