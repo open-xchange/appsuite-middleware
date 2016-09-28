@@ -49,7 +49,7 @@
 
 package com.openexchange.oauth.msliveconnect;
 
-import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.oauth.scope.OAuthScope;
 
 /**
@@ -58,23 +58,23 @@ import com.openexchange.oauth.scope.OAuthScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum MSLiveConnectOAuthScope implements OAuthScope {
-    mail("wl.imap", Module.mail),
-    calendar_ro("wl.calendars", Module.calendar_ro),
-    calendar_rw("wl.calendars_update", Module.calendar_rw),
-    contacts_ro("wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses", Module.contacts_ro),
-    contacts_rw("wl.contacts_create wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses", Module.contacts_rw),
-    drive("wl.skydrive wl.skydrive_update", Module.drive);
+    mail("wl.imap", OXScope.mail),
+    calendar_ro("wl.calendars", OXScope.calendar_ro),
+    calendar_rw("wl.calendars_update", OXScope.calendar_rw),
+    contacts_ro("wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses", OXScope.contacts_ro),
+    contacts_rw("wl.contacts_create wl.contacts_birthday wl.contacts_photos wl.contacts_emails wl.photos wl.postal_addresses", OXScope.contacts_rw),
+    drive("wl.skydrive wl.skydrive_update", OXScope.drive);
 
     private final String mapping;
-    private final Module module;
+    private final OXScope module;
 
     /**
      * Initialises a new {@link MSLiveConnectOAuthScope}.
      *
      * @param mapping The OAuth mapping
-     * @param module The {@link Module}
+     * @param module The {@link OXScope}
      */
-    private MSLiveConnectOAuthScope(String mapping, Module module) {
+    private MSLiveConnectOAuthScope(String mapping, OXScope module) {
         this.mapping = mapping;
         this.module = module;
     }
@@ -95,7 +95,7 @@ public enum MSLiveConnectOAuthScope implements OAuthScope {
      * @see com.openexchange.oauth.scope.OAuthScope#getModule()
      */
     @Override
-    public Module getModule() {
+    public OXScope getModule() {
         return module;
     }
 }

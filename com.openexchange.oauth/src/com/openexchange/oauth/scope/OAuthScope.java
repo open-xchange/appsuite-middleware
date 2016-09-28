@@ -64,9 +64,9 @@ public interface OAuthScope {
     String getMapping();
 
     /**
-     * Returns the {@link Module} of this {@link OAuthScope}
+     * Returns the {@link OXScope} of this {@link OAuthScope}
      * 
-     * @return the {@link Module} of this {@link OAuthScope}
+     * @return the {@link OXScope} of this {@link OAuthScope}
      */
-    Module getModule();
+    OXScope getModule();
 }

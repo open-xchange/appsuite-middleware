@@ -89,7 +89,7 @@ import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
-import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -298,6 +298,6 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
             return scopeRegistry.getLegacyScopes(API.resolveFromServiceId(serviceId));
         }
         // Get the scopes
-        return scopeRegistry.getAvailableScopes(API.resolveFromServiceId(serviceId), Module.valuesOf(scope));
+        return scopeRegistry.getAvailableScopes(API.resolveFromServiceId(serviceId), OXScope.valuesOf(scope));
     }
 }

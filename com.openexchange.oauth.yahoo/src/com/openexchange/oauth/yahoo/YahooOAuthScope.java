@@ -49,7 +49,7 @@
 
 package com.openexchange.oauth.yahoo;
 
-import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.oauth.scope.OAuthScope;
 
 /**
@@ -58,21 +58,21 @@ import com.openexchange.oauth.scope.OAuthScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum YahooOAuthScope implements OAuthScope {
-    mail("mail-x", Module.mail),
-    contacts_ro("sdct-r", Module.contacts_ro),
-    contacts_rw("sdct-w", Module.contacts_rw),
+    mail("mail-x", OXScope.mail),
+    contacts_ro("sdct-r", OXScope.contacts_ro),
+    contacts_rw("sdct-w", OXScope.contacts_rw),
     ;
 
     private final String mapping;
-    private final Module module;
+    private final OXScope module;
 
     /**
      * Initialises a new {@link YahooOAuthScope}.
      *
      * @param mapping The OAuth mapping
-     * @param module The {@link Module}
+     * @param module The {@link OXScope}
      */
-    private YahooOAuthScope(String mapping, Module module) {
+    private YahooOAuthScope(String mapping, OXScope module) {
         this.mapping = mapping;
         this.module = module;
     }
@@ -93,7 +93,7 @@ public enum YahooOAuthScope implements OAuthScope {
      * @see com.openexchange.oauth.scope.OAuthScope#getModule()
      */
     @Override
-    public Module getModule() {
+    public OXScope getModule() {
         return module;
     }
 }
