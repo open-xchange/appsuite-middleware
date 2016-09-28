@@ -50,8 +50,9 @@
 package com.openexchange.jolokia.osgi;
 
 import javax.servlet.ServletException;
-import org.jolokia.osgi.JolokiaAuthenticatedHttpContext;
-import org.jolokia.osgi.JolokiaHttpContext;
+import org.jolokia.osgi.security.BasicAuthenticationHttpContext;
+import org.jolokia.osgi.security.BasicAuthenticator;
+import org.jolokia.osgi.security.DefaultHttpContext;
 import org.jolokia.osgi.servlet.JolokiaServlet;
 import org.osgi.framework.BundleActivator;
 import org.osgi.service.http.HttpContext;
@@ -59,6 +60,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.jolokia.JolokiaConfig;
+import com.openexchange.jolokia.http.OXJolokiaServlet;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -122,9 +124,9 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
             stopBundle();
             return;
         }
-        
+
         // Create servlet instance
-        JolokiaServlet jolServlet = new JolokiaServlet(context, jolokiaConfig.getRestrictor());
+        JolokiaServlet jolServlet = new OXJolokiaServlet(context, jolokiaConfig.getRestrictor());
         try {
             LOG.info("Registering jolokia servlet.");
             String usedServletName = jolokiaConfig.getServletName();
@@ -172,10 +174,10 @@ public class CustomJolokiaBundleActivator extends HousekeepingActivator {
             final String user = myConfig.getUser();
             final String password = myConfig.getPassword();
             if (user.equalsIgnoreCase("")) {
-                 jolokiaHttpContext = new JolokiaHttpContext();
-             } else {
-                 jolokiaHttpContext = new JolokiaAuthenticatedHttpContext(user, password);
-             }
+                jolokiaHttpContext = new DefaultHttpContext();
+            } else {
+                jolokiaHttpContext = new BasicAuthenticationHttpContext("jolokia", new BasicAuthenticator(user, password));
+            }
         }
         return jolokiaHttpContext;
     }
