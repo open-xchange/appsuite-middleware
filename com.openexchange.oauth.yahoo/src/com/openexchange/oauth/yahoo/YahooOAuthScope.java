@@ -83,7 +83,7 @@ public enum YahooOAuthScope implements OAuthScope {
      * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
      */
     @Override
-    public String getMapping() {
+    public String getProviderScopes() {
         return mapping;
     }
 
@@ -93,7 +93,7 @@ public enum YahooOAuthScope implements OAuthScope {
      * @see com.openexchange.oauth.scope.OAuthScope#getModule()
      */
     @Override
-    public OXScope getModule() {
+    public OXScope getOXScope() {
         return module;
     }
 }

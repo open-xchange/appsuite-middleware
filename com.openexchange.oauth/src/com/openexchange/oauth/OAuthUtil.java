@@ -69,7 +69,7 @@ import com.openexchange.session.Session;
 public final class OAuthUtil {
 
     /**
-     * Parses the specified {@link OAuthScope}s and returns the mappings ({@link OAuthScope#getMapping()}) as a space separated string
+     * Parses the specified {@link OAuthScope}s and returns the mappings ({@link OAuthScope#getProviderScopes()}) as a space separated string
      * 
      * @param scopes The {@link OAuthScope}s
      * @return a space separated string with all {@link OAuthScope}s in the specified {@link Set}
@@ -80,14 +80,14 @@ public final class OAuthUtil {
         }
         StringBuilder builder = new StringBuilder();
         for (OAuthScope scope : scopes) {
-            builder.append(scope.getMapping()).append(" ");
+            builder.append(scope.getProviderScopes()).append(" ");
         }
         builder.setLength(builder.length() - 1);
         return builder.toString();
     }
 
     /**
-     * Parses the specified {@link OAuthScope}s and returns the mappings ({@link OAuthScope#getModule()}) as a space separated string
+     * Parses the specified {@link OAuthScope}s and returns the mappings ({@link OAuthScope#getOXScope()}) as a space separated string
      * 
      * @param scopes The {@link OAuthScope}s
      * @return a space separated string with all {@link OAuthScope}s in the specified {@link Set}
@@ -98,7 +98,7 @@ public final class OAuthUtil {
         }
         StringBuilder builder = new StringBuilder();
         for (OAuthScope scope : scopes) {
-            builder.append(scope.getModule()).append(" ");
+            builder.append(scope.getOXScope()).append(" ");
         }
         builder.setLength(builder.length() - 1);
         return builder.toString();
@@ -107,6 +107,7 @@ public final class OAuthUtil {
     /**
      * Builds the 'init' call-back URL for the given {@link OAuthAccount}
      * 
+     * @param account The {@link OAuthAccount}
      * @param session The session
      * @param account The {@link OAuthAccount}
      * @return the 'init' call-back URL for the given {@link OAuthAccount}

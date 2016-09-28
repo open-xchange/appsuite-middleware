@@ -174,7 +174,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
         Set<OAuthScope> scopes = registry.get(api);
         Set<OAuthScope> legacyScopes = new HashSet<>();
         for (OAuthScope scope : scopes) {
-            if (scope.getModule().isLegacy()) {
+            if (scope.getOXScope().isLegacy()) {
                 legacyScopes.add(scope);
             }
         }
@@ -207,7 +207,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
     public OAuthScope getScope(API api, OXScope module) throws OXException {
         Set<OAuthScope> availableScopes = getAvailableScopes(api);
         for (OAuthScope scope : availableScopes) {
-            if (scope.getModule().equals(module)) {
+            if (scope.getOXScope().equals(module)) {
                 return scope;
             }
         }
