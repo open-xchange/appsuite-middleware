@@ -250,7 +250,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             ComposedMailMessage composeMessage = createRegularComposeMessage(context);
             DelegatingComposedMailMessage transportMessage = new DelegatingComposedMailMessage(composeMessage);
             transportMessage.setAppendToSentFolder(false);
-            return new DefaultComposeTransportResult(Collections.<ComposedMailMessage> singletonList(transportMessage), composeMessage);
+            return new DefaultComposeTransportResult(Collections.<ComposedMailMessage> singletonList(transportMessage), composeMessage, true);
         }
 
         // Get the basic source message
@@ -381,7 +381,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             attachmentsControl.commit();
             rollback = false;
 
-            return new DefaultComposeTransportResult(transportMessages, sentMessage);
+            return new DefaultComposeTransportResult(transportMessages, sentMessage, false);
         } finally {
             if (null != attachmentsControl) {
                 if (rollback) {
