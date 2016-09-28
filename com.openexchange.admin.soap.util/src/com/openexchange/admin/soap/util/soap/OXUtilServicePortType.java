@@ -228,11 +228,11 @@ public interface OXUtilServicePortType {
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
-    @Action(input = "urn:createScheme", output = "urn:createSchemeResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:createSchemeStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:createSchemeInvalidCredentialsException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:createSchemeRemoteException")})
-    @RequestWrapper(localName = "createScheme", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.util.soap.CreateScheme")
-    @WebMethod(action = "urn:createScheme")
-    @ResponseWrapper(localName = "createSchemeResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.util.soap.CreateSchemeResponse")
-    public com.openexchange.admin.soap.util.dataobjects.Database createScheme(
+    @Action(input = "urn:createSchema", output = "urn:createSchemaResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:createSchemaStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:createSchemaInvalidCredentialsException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:createSchemaRemoteException")})
+    @RequestWrapper(localName = "createSchema", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.util.soap.CreateSchema")
+    @WebMethod(action = "urn:createSchema")
+    @ResponseWrapper(localName = "createSchemaResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.util.soap.CreateSchemaResponse")
+    public com.openexchange.admin.soap.util.dataobjects.Database createSchema(
         @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com") com.openexchange.admin.soap.util.dataobjects.Credentials auth,
         @WebParam(name = "optDBId", targetNamespace = "http://soap.admin.openexchange.com") java.lang.Integer optDBId
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, RemoteException_Exception;

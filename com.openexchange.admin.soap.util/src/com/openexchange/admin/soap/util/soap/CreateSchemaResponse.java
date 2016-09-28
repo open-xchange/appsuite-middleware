@@ -80,8 +80,8 @@ import com.openexchange.admin.soap.util.dataobjects.Database;
 @XmlType(name = "", propOrder = {
     "_return"
 })
-@XmlRootElement(name = "createSchemeResponse")
-public class CreateSchemeResponse {
+@XmlRootElement(name = "createSchemaResponse")
+public class CreateSchemaResponse {
 
 
     @XmlElement(name = "return", nillable = true)

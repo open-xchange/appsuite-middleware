@@ -679,10 +679,10 @@ public class OXUtil extends OXCommonImpl implements OXUtilInterface {
     }
 
     @Override
-    public Database createScheme(Credentials credentials, Integer optDBId) throws RemoteException, StorageException, InvalidCredentialsException {
+    public Database createSchema(Credentials credentials, Integer optDBId) throws RemoteException, StorageException, InvalidCredentialsException {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
         basicauth.doAuthentication(auth);
-        return oxutil.createScheme(optDBId);
+        return oxutil.createSchema(optDBId);
     }
 
 }

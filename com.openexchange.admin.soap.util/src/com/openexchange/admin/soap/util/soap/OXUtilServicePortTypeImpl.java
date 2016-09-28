@@ -998,10 +998,10 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
      * @see com.openexchange.admin.soap.util.soap.OXUtilServicePortType#createScheme(com.openexchange.admin.soap.util.dataobjects.Credentials)
      */
     @Override
-    public Database createScheme(Credentials auth, Integer optDBId) throws StorageException_Exception, InvalidCredentialsException_Exception, RemoteException_Exception {
+    public Database createSchema(Credentials auth, Integer optDBId) throws StorageException_Exception, InvalidCredentialsException_Exception, RemoteException_Exception {
         com.openexchange.admin.rmi.dataobjects.Database result;
         try {
-            result = getUtilInterface().createScheme(soap2Credentials(auth), optDBId);
+            result = getUtilInterface().createSchema(soap2Credentials(auth), optDBId);
             return database2Soap(result);
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.util.soap.RemoteException fd = new com.openexchange.admin.soap.util.soap.RemoteException();

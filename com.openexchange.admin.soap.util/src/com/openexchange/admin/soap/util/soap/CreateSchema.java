@@ -82,8 +82,8 @@ import com.openexchange.admin.soap.util.dataobjects.Credentials;
 @XmlType(name = "", propOrder = {
     "auth", "optDBId"
 })
-@XmlRootElement(name = "createScheme")
-public class CreateScheme {
+@XmlRootElement(name = "createSchema")
+public class CreateSchema {
 
     @XmlElement(nillable = true)
     protected Credentials auth;
