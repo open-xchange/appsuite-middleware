@@ -124,7 +124,8 @@ public class OXRestrictor extends AllowAllRestrictor {
     @Override
     public boolean isOperationAllowed(ObjectName pName, String pOperation) {
         // Look up munin script specific case.
-        if (pOperation.equals(MEMORYCACHECOUNT) && pName.getCanonicalName().equals(CACHINGOBJECTNAME)) {
+
+        if (MEMORYCACHECOUNT.equals(pOperation) && (pName != null) && CACHINGOBJECTNAME.equals(pName.getCanonicalName())) {
             return true;
         }
         return false;
