@@ -98,6 +98,7 @@ public class CapabilityHandlerTest {
     public void reset() {
         restoreDefaultForComposureTests();
         cleanUpDataForLocks();
+        this.eService.shutdown();
     }
     //-------------------Tests-------------------
 
@@ -478,26 +479,6 @@ public class CapabilityHandlerTest {
     }
 
     //-------------------Helpers-------------------
-    private ServiceLookup initServiceForTest1() {
-        return new ServiceLookup() {
-
-            @Override
-            public <S> S getService(Class<? extends S> clazz) {
-                if (clazz == ConfigurationService.class) {
-                    ConfigurationService mockedConfig = PowerMockito.mock(ConfigurationService.class);
-                    PowerMockito.when(mockedConfig.getProperty("com.openexchange.cloudplugins.dovecot.contextChunks")).thenReturn("100");
-                    return (S) mockedConfig;
-                }
-                return null;
-            }
-
-            @Override
-            public <S> S getOptionalService(Class<? extends S> clazz) {
-                // TODO Auto-generated method stub
-                return null;
-            }
-        };
-    }
     
     private void initWrongDataForLocks() {
         try {

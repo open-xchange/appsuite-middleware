@@ -8,16 +8,16 @@ import com.openexchange.config.Reloadables;
 
 public class ReportProperties implements Reloadable {
 
-    private static String STORAGE_PATH = "com.openexchange.report.serialization.fileStorage";
+    private static String STORAGE_PATH = "com.openexchange.report.appsuite.fileStorage";
     private static String STORAGE_PATH_DEFAULT = "/tmp";
 
-    private static String MAX_CHUNK_SIZE = "com.openexchange.report.serialization.maxChunkSize";
+    private static String MAX_CHUNK_SIZE = "com.openexchange.report.appsuite.maxChunkSize";
     private static int MAX_CHUNK_SIZE_DEFAULT = 200;
 
-    private static String MAX_THREAD_POOL_SIZE = "com.openexchange.report.serialization.maxThreadPoolSize";
+    private static String MAX_THREAD_POOL_SIZE = "com.openexchange.report.appsuite.maxThreadPoolSize";
     private static int MAX_THREAD_POOL_SIZE_DEFAULT = 20;
 
-    private static String THREAD_PRIORITY = "com.openexchange.report.serialization.threadPriority";
+    private static String THREAD_PRIORITY = "com.openexchange.report.appsuite.threadPriority";
     private static int THREAD_PRIORITY_DEFAULT = 1;
 
     private static String storagePath;
