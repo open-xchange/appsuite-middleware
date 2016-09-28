@@ -66,8 +66,7 @@ public enum Module {
     calendar_rw("Calendars (Read/Write)", false),
     contacts_rw("Contacts (Read/Write)", false),
     drive("Drive", true),
-    generic("", true),
-    offline("Offline Access", true);
+    generic("", true);
 
     private static final String modules = Strings.concat(", ", (Object[]) Module.values());
     private final boolean isLegacy;
