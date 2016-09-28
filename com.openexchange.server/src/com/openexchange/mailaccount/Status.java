@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,56 +47,58 @@
  *
  */
 
-package com.openexchange.mail.autoconfig.sources;
+package com.openexchange.mailaccount;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Strings;
-import com.openexchange.mail.autoconfig.Autoconfig;
 
 /**
- * {@link OutlookComConfigSource} - The static config source for <code>outlook.com</code>.
- * <p>
- * See <a href="http://windows.microsoft.com/en-US/windows/outlook/send-receive-from-app">http://windows.microsoft.com/en-US/windows/outlook/send-receive-from-app<a>
+ * {@link Status} - An enumeration for statues for a mail account.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.0
+ * @since v7.8.3
  */
-public class OutlookComConfigSource extends StaticConfigSource {
+public enum Status {
 
     /**
-     * Initializes a new {@link OutlookComConfigSource}.
+     * The "OK" status. All fine.
      */
-    public OutlookComConfigSource() {
-        super(new DomainFilter() {
+    OK("ok"),
+    /**
+     * Referenced account currently carries invalid credentials and is therefore unable to connect. Credentials are supposed to be corrected by user.
+     */
+    INVALID_CREDENTIALS("invalid_credentials")
 
-            @Override
-            public boolean accept(final String emailDomain) {
-                return null != emailDomain && "outlook.com".equals(Strings.toLowerCase(emailDomain.trim()));
+    ;
+
+    private final String name;
+
+    private Status(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Gets the name
+     *
+     * @return The name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Gets the status for given name
+     *
+     * @param name The status' name
+     * @return The status or <code>null</code>
+     */
+    public static Status statusFor(String name) {
+        if (null == name) {
+            return null;
+        }
+        for (Status s : Status.values()) {
+            if (name.equalsIgnoreCase(s.name)) {
+                return s;
             }
-        });
+        }
+        return null;
     }
-
-    @Override
-    protected Autoconfig getStaticAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context, boolean forceSecure, boolean isOAuth) throws OXException {
-        final Autoconfig autoconfig = new Autoconfig();
-        // IMAP
-        autoconfig.setMailPort(993);
-        autoconfig.setMailProtocol("imap");
-        autoconfig.setMailSecure(true);
-        autoconfig.setMailStartTls(forceSecure);
-        autoconfig.setMailServer("imap-mail.outlook.com");
-        autoconfig.setMailOAuth(isOAuth);
-        // Transport
-        autoconfig.setTransportPort(25);
-        autoconfig.setTransportProtocol("smtp");
-        autoconfig.setTransportSecure(false);
-        autoconfig.setTransportStartTls(forceSecure);
-        autoconfig.setTransportServer("smtp-mail.outlook.com");
-        autoconfig.setUsername(emailLocalPart + '@' + emailDomain);
-        autoconfig.setTransportOAuth(isOAuth);
-        return autoconfig;
-    }
-
 }

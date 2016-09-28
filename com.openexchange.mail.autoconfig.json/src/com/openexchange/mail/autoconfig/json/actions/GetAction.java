@@ -70,6 +70,8 @@ public class GetAction extends AutoconfigAction {
 
     private static final String FORCE_SECURE = "force_secure";
 
+    private static final String OAUTH = "oauth";
+
     /**
      * Initializes a new {@link GetAction}.
      *
@@ -85,10 +87,14 @@ public class GetAction extends AutoconfigAction {
         String password = request.getParameter(PASSWORD, String.class);
         boolean forceSecure = true;
         if (request.containsParameter(FORCE_SECURE)) {
-            forceSecure = request.getParameter(FORCE_SECURE, Boolean.class);
+            forceSecure = request.getParameter(FORCE_SECURE, Boolean.class).booleanValue();
+        }
+        boolean isOAuth = false;
+        if (request.containsParameter(OAUTH)) {
+            isOAuth = request.getParameter(OAUTH, Boolean.class).booleanValue();
         }
         AutoconfigService autoconfigService = getAutoconfigService();
-        Autoconfig autoconfig = autoconfigService.getConfig(mail, password, session.getUser(), session.getContext(), forceSecure);
+        Autoconfig autoconfig = autoconfigService.getConfig(mail, password, session.getUser(), session.getContext(), forceSecure, isOAuth);
         return new AJAXRequestResult(autoconfig, "autoconfig");
     }
 

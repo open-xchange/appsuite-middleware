@@ -92,11 +92,11 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
 
     @Override
     public Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context) throws OXException {
-        return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true);
+        return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true, false);
     }
 
     @Override
-    public Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context, boolean forceSecure) throws OXException {
+    public Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context, boolean forceSecure, boolean isOAuth) throws OXException {
         URL url;
         {
             String sUrl = new StringBuilder("http://autoconfig.").append(emailDomain).append("/mail/config-v1.1.xml").toString();
@@ -153,7 +153,7 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
                     return null;
                 }
             }
-            
+
             Header contentType = rsp.getFirstHeader("Content-Type");
             if (!contentType.getValue().contains("text/xml")) {
                 LOG.warn("Could not retrieve config XML from autoconfig server. The response's content type is not of 'text/xml'.");
@@ -166,6 +166,8 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             replaceUsername(autoconfig, emailLocalPart, emailDomain);
             autoconfig.setMailStartTls(forceSecure);
             autoconfig.setTransportStartTls(forceSecure);
+            autoconfig.setMailOAuth(isOAuth);
+            autoconfig.setTransportOAuth(isOAuth);
             return autoconfig;
         } catch (ClientProtocolException e) {
             LOG.warn("Could not retrieve config XML.", e);

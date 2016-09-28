@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,56 +47,59 @@
  *
  */
 
-package com.openexchange.mail.autoconfig.sources;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Strings;
-import com.openexchange.mail.autoconfig.Autoconfig;
+package com.openexchange.mail.api;
 
 /**
- * {@link OutlookComConfigSource} - The static config source for <code>outlook.com</code>.
- * <p>
- * See <a href="http://windows.microsoft.com/en-US/windows/outlook/send-receive-from-app">http://windows.microsoft.com/en-US/windows/outlook/send-receive-from-app<a>
+ * {@link AuthInfo} - Provides authentication information; such as login, password and authentication type.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.4.0
+ * @since v7.8.3
  */
-public class OutlookComConfigSource extends StaticConfigSource {
+public class AuthInfo {
+
+    private final String login;
+    private final String password;
+    private final AuthType authType;
 
     /**
-     * Initializes a new {@link OutlookComConfigSource}.
+     * Initializes a new {@link AuthInfo}.
+     *
+     * @param login The login string
+     * @param password The password or OAuth token
+     * @param authType The authentication type
      */
-    public OutlookComConfigSource() {
-        super(new DomainFilter() {
-
-            @Override
-            public boolean accept(final String emailDomain) {
-                return null != emailDomain && "outlook.com".equals(Strings.toLowerCase(emailDomain.trim()));
-            }
-        });
+    public AuthInfo(String login, String password, AuthType authType) {
+        super();
+        this.login = login;
+        this.password = password;
+        this.authType = null == authType ? AuthType.LOGIN : authType;
     }
 
-    @Override
-    protected Autoconfig getStaticAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context, boolean forceSecure, boolean isOAuth) throws OXException {
-        final Autoconfig autoconfig = new Autoconfig();
-        // IMAP
-        autoconfig.setMailPort(993);
-        autoconfig.setMailProtocol("imap");
-        autoconfig.setMailSecure(true);
-        autoconfig.setMailStartTls(forceSecure);
-        autoconfig.setMailServer("imap-mail.outlook.com");
-        autoconfig.setMailOAuth(isOAuth);
-        // Transport
-        autoconfig.setTransportPort(25);
-        autoconfig.setTransportProtocol("smtp");
-        autoconfig.setTransportSecure(false);
-        autoconfig.setTransportStartTls(forceSecure);
-        autoconfig.setTransportServer("smtp-mail.outlook.com");
-        autoconfig.setUsername(emailLocalPart + '@' + emailDomain);
-        autoconfig.setTransportOAuth(isOAuth);
-        return autoconfig;
+    /**
+     * Gets the login
+     *
+     * @return The login
+     */
+    public String getLogin() {
+        return login;
+    }
+
+    /**
+     * Gets the password
+     *
+     * @return The password
+     */
+    public String getPassword() {
+        return password;
+    }
+
+    /**
+     * Gets the authentication type
+     *
+     * @return The authentication type
+     */
+    public AuthType getAuthType() {
+        return authType;
     }
 
 }
