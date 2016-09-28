@@ -62,6 +62,7 @@ import com.openexchange.conversion.servlet.ConversionAJAXRequest;
 import com.openexchange.conversion.servlet.ConversionServletExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -96,6 +97,9 @@ public final class ConvertAction extends AbstractConversionAction {
          * Check for data source in JSON body
          */
         final JSONObject jsonBody = req.getData();
+        if(jsonBody==null){
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
         if (!jsonBody.has(JSON_DATASOURCE) || jsonBody.isNull(JSON_DATASOURCE)) {
             throw ConversionServletExceptionCode.MISSING_PARAM.create(JSON_DATASOURCE);
         }
