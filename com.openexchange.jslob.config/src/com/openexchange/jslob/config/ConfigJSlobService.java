@@ -1229,9 +1229,7 @@ public final class ConfigJSlobService implements JSlobService {
             }
             // Lastly, let's add configurability.
             boolean writable = jSlobEntry.isWritable(session);
-            if (!writable) {
-                jMetaData.put("configurable", Boolean.valueOf(writable));
-            }
+            jMetaData.put("configurable", Boolean.valueOf(writable));
             if (jMetaData.length() > 0) {
                 addValueByPath(path, jMetaData, jsonJSlob.getMetaObject());
             }

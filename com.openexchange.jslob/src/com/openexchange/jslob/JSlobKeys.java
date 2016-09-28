@@ -47,35 +47,27 @@
  *
  */
 
-package com.openexchange.groupware.settings;
-
-import com.openexchange.groupware.settings.tree.TrustAllConnections;
-import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+package com.openexchange.jslob;
 
 /**
- * 
- * {@link PreferencesActivator}
+ * {@link JSlobKeys} - holding all available JSlob keys
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class PreferencesActivator extends HousekeepingActivator {
+public class JSlobKeys {
 
-    @Override
-    public void startBundle() throws Exception {
-        registerService(PreferencesItemService.class, new TrustAllConnections(getService(UserService.class), getService(UserAwareSSLConfigurationService.class)), null);
-    }
+    public static final String CORE = "io.ox/core";
 
-    @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
-    }
+    public static final String FOLDER = "io.ox/folder";
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, UserAwareSSLConfigurationService.class };
-    }
+    public static final String MAIL = "io.ox/mail";
 
+    public static final String CALENDAR = "io.ox/calendar";
+
+    public static final String TASKS = "io.ox/tasks";
+
+    public static final String CONTACTS = "io.ox/contacts";
+
+    public static final String FILES = "io.ox/files";
 }

@@ -53,12 +53,14 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.jslob.JSlobEntry;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.net.ssl.config.impl.internal.SSLConfigurationServiceImpl;
 import com.openexchange.net.ssl.config.impl.internal.SSLProperties;
 import com.openexchange.net.ssl.config.impl.internal.SSLPropertiesReloadable;
 import com.openexchange.net.ssl.config.impl.internal.UserAwareSSLConfigurationImpl;
+import com.openexchange.net.ssl.config.impl.jslob.AcceptUntrustedCertificatesJSLobEntry;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
@@ -91,8 +93,13 @@ public class SSLConfigActivator extends HousekeepingActivator {
             
             registerService(Reloadable.class, new SSLPropertiesReloadable());
 
-            registerService(UserAwareSSLConfigurationService.class, new UserAwareSSLConfigurationImpl(getService(UserService.class), getService(ContextService.class), getService(ConfigViewFactory.class)));
+            ContextService contextService = getService(ContextService.class);
+            UserAwareSSLConfigurationService userAwareSSLConfigurationImpl = new UserAwareSSLConfigurationImpl(getService(UserService.class), contextService, getService(ConfigViewFactory.class));
+
+            registerService(UserAwareSSLConfigurationService.class, userAwareSSLConfigurationImpl);
             registerService(SSLConfigurationService.class, new SSLConfigurationServiceImpl(getService(ConfigurationService.class)));
+            
+            registerService(JSlobEntry.class, new AcceptUntrustedCertificatesJSLobEntry(contextService, userAwareSSLConfigurationImpl));
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).error("", e);
             throw e;

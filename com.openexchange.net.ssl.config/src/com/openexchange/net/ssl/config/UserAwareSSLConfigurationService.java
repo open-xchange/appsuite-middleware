@@ -64,7 +64,7 @@ public interface UserAwareSSLConfigurationService {
     /**
      * Name of the user attribute the configuration made by the user is handled for.
      */
-    public static final String USER_ATTRIBUTE_NAME = "trustAllConnections";
+    public static final String USER_ATTRIBUTE_NAME = "acceptUntrustedCertificates";
 
     /**
      * Returns if the user is allowed to define the trust level for external connections.

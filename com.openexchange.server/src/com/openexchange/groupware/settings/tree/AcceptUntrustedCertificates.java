@@ -63,14 +63,14 @@ import com.openexchange.user.UserService;
 
 /**
  * 
- * {@link TrustAllConnections}
+ * {@link AcceptUntrustedCertificates}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public final class TrustAllConnections implements PreferencesItemService {
+public final class AcceptUntrustedCertificates implements PreferencesItemService {
 
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TrustAllConnections.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AcceptUntrustedCertificates.class);
 
     private UserService userService;
     private UserAwareSSLConfigurationService userAwareSSLConfigurationService;
@@ -78,7 +78,7 @@ public final class TrustAllConnections implements PreferencesItemService {
     /**
      * Default constructor.
      */
-    public TrustAllConnections(UserService userService, UserAwareSSLConfigurationService userAwareSSLConfigurationService) {
+    public AcceptUntrustedCertificates(UserService userService, UserAwareSSLConfigurationService userAwareSSLConfigurationService) {
         super();
         this.userService = userService;
         this.userAwareSSLConfigurationService = userAwareSSLConfigurationService;
