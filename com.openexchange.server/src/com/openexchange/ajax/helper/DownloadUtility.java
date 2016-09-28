@@ -211,7 +211,7 @@ public final class DownloadUtility {
                     sz = tmp.length;
                     in = new ByteArrayRandomAccess(tmp);
                 }
-            } else if (contentType.startsWith("text/xml")) {
+            } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "xml") || fileNameImpliesXml(fileName)) {
                 /*
                  * XML content requested for download...
                  */
@@ -511,6 +511,10 @@ public final class DownloadUtility {
 
     private static boolean fileNameImpliesSvg(final String fileName) {
         return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("svg") >= 0;
+    }
+
+    private static boolean fileNameImpliesXml(final String fileName) {
+        return null != fileName && MimeType2ExtMap.getContentType(fileName).indexOf("xml") >= 0;
     }
 
     /**
