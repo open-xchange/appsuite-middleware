@@ -50,58 +50,59 @@
 package com.openexchange.jslob.config.osgi;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.jslob.ConfigTreeEquivalent;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
+import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlobEntry;
-import com.openexchange.jslob.JSlobService;
-import com.openexchange.jslob.config.ConfigJSlobReloadable;
-import com.openexchange.jslob.config.ConfigJSlobService;
 import com.openexchange.jslob.config.JSlobEntryRegistry;
-import com.openexchange.jslob.shared.SharedJSlobService;
-import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link ConfigJSlobActivator}
+ * {@link JSlobEntryTracker} - Tracks registered {@link JSlobEntry} instances.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class ConfigJSlobActivator extends HousekeepingActivator {
+public class JSlobEntryTracker implements ServiceTrackerCustomizer<JSlobEntry, JSlobEntry> {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(JSlobEntryTracker.class);
+
+    private final JSlobEntryRegistry jSlobEntryRegistry;
+    private final BundleContext context;
 
     /**
-     * Initializes a new {@link ConfigJSlobActivator}.
+     * Initializes a new {@link JSlobEntryTracker}.
      */
-    public ConfigJSlobActivator() {
+    public JSlobEntryTracker(JSlobEntryRegistry jSlobEntryRegistry, BundleContext context) {
         super();
+        this.jSlobEntryRegistry = jSlobEntryRegistry;
+        this.context = context;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { JSlobStorageRegistry.class, ConfigViewFactory.class, SessiondService.class, ConfigurationService.class, EventAdmin.class };
+    public JSlobEntry addingService(ServiceReference<JSlobEntry> reference) {
+        JSlobEntry jSlobEntry = context.getService(reference);
+        try {
+            if (jSlobEntryRegistry.addJSlobEntry(jSlobEntry)) {
+                return jSlobEntry;
+            }
+        } catch (OXException e) {
+            LOG.error("Failed to register JSlob entry", e);
+        }
+
+        context.ungetService(reference);
+        return null;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        final BundleContext context = this.context;
-
-        // Registry for JSlobEntry instances
-        JSlobEntryRegistry jSlobEntryRegistry = new JSlobEntryRegistry();
-        track(JSlobEntry.class, new JSlobEntryTracker(jSlobEntryRegistry, context));
-
-        // The JSlob service
-        final ConfigJSlobService service = new ConfigJSlobService(jSlobEntryRegistry, this);
-
-        // More trackers
-        track(SharedJSlobService.class, new SharedJSlobServiceTracker(context, service));
-        track(ConfigTreeEquivalent.class, new ConfigTreeEquivalentTracker(service, context));
-        openTrackers();
-
-        // Register services
-        registerService(JSlobService.class, service);
-        registerService(Reloadable.class, new ConfigJSlobReloadable(service));
+    public void modifiedService(ServiceReference<JSlobEntry> reference, JSlobEntry jSlobEntry) {
+        // Don't care
     }
+
+    @Override
+    public void removedService(ServiceReference<JSlobEntry> reference, JSlobEntry jSlobEntry) {
+        jSlobEntryRegistry.removeJSlobEntry(jSlobEntry);
+        context.ungetService(reference);
+    }
+
 }

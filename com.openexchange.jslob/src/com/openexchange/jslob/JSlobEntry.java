@@ -49,8 +49,9 @@
 
 package com.openexchange.jslob;
 
-import java.util.List;
 import java.util.Map;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link JSlobEntry} - A dynamically registerable JSlob entry.
@@ -61,35 +62,70 @@ import java.util.Map;
 public interface JSlobEntry {
 
     /**
+     * Gets this entry's key.
+     * <pre>
+     *   io.ox/files//folder/pictures
+     *   ^^^^^^^^^^
+     *  The key portion
+     * </pre>
+     *
+     * @return The key
+     */
+    String getKey();
+
+    /**
      * Gets this entry's path.
+     * <pre>
+     *   io.ox/files//folder/pictures
+     *                ^^^^^^^^^^^^^^
+     *                The path portion
+     * </pre>
      *
      * @return The path
      */
-    List<JSONPathElement> getPath();
+    String getPath();
 
     /**
-     * Signals whether this entry is writable or read-only.
+     * Signals whether this entry is writable or read-only for session-associated user.
      *
+     * @param session The session providing user data
      * @return <code>true</code> if writable; otherwise read-only
+     * @throws OXException If writable/read-only behavior cannot be checked
      */
-    boolean isWritable();
+    boolean isWritable(Session session) throws OXException;
 
     /**
-     * Gets the value.
+     * Gets the value suitable for session-associated user.
      * <p>
      * The value can be a Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object.
      *
+     * @param session The session providing user data
      * @return The value
+     * @throws OXException If value cannot be returned
      */
-    Object getValue();
+    Object getValue(Session sessiond) throws OXException;
 
     /**
-     * Gets further meta-data associated with this entry.
+     * Sets the value for session-associated user.
+     * <p>
+     * The value can be a Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object.
+     *
+     * @param value The new value to apply
+     * @param session The session providing user data
+     * @return The value
+     * @throws OXException If value cannot be set
+     */
+    void setValue(Object value, Session sessiond) throws OXException;
+
+    /**
+     * Gets further meta-data from this entry suitable for session-associated user.
      * <p>
      * Values can be a Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object.
      *
+     * @param session The session providing user data
      * @return The optional meta-data
+     * @throws OXException If meta-data cannot be returned
      */
-    Map<String, Object> metadata();
+    Map<String, Object> metadata(Session session) throws OXException;
 
 }

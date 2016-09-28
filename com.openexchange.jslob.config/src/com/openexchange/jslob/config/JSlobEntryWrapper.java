@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,61 +47,55 @@
  *
  */
 
-package com.openexchange.jslob.config.osgi;
+package com.openexchange.jslob.config;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.service.event.EventAdmin;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.jslob.ConfigTreeEquivalent;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.jslob.JSONPathElement;
 import com.openexchange.jslob.JSlobEntry;
-import com.openexchange.jslob.JSlobService;
-import com.openexchange.jslob.config.ConfigJSlobReloadable;
-import com.openexchange.jslob.config.ConfigJSlobService;
-import com.openexchange.jslob.config.JSlobEntryRegistry;
-import com.openexchange.jslob.shared.SharedJSlobService;
-import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
 
 /**
- * {@link ConfigJSlobActivator}
+ * {@link JSlobEntryWrapper} - a wrapper for a JSlob entry also providing the parsed path.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class ConfigJSlobActivator extends HousekeepingActivator {
+final class JSlobEntryWrapper {
+
+    /** The JSlob entry */
+    private final JSlobEntry jSlobEntry;
+
+    /** The parsed path */
+    private final List<JSONPathElement> parsedPath;
 
     /**
-     * Initializes a new {@link ConfigJSlobActivator}.
+     * Initializes a new {@link JSlobEntryWrapper}.
+     *
+     * @param jSlobEntry The entry to wrap
+     * @throws OXException If path cannot be parsed
      */
-    public ConfigJSlobActivator() {
+    public JSlobEntryWrapper(JSlobEntry jSlobEntry) throws OXException {
         super();
+        this.jSlobEntry = jSlobEntry;
+        this.parsedPath = JSONPathElement.parsePath(jSlobEntry.getPath());
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { JSlobStorageRegistry.class, ConfigViewFactory.class, SessiondService.class, ConfigurationService.class, EventAdmin.class };
+    /**
+     * Gets the parsed path
+     *
+     * @return The parsed path
+     */
+    public List<JSONPathElement> getParsedPath() {
+        return parsedPath;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        final BundleContext context = this.context;
-
-        // Registry for JSlobEntry instances
-        JSlobEntryRegistry jSlobEntryRegistry = new JSlobEntryRegistry();
-        track(JSlobEntry.class, new JSlobEntryTracker(jSlobEntryRegistry, context));
-
-        // The JSlob service
-        final ConfigJSlobService service = new ConfigJSlobService(jSlobEntryRegistry, this);
-
-        // More trackers
-        track(SharedJSlobService.class, new SharedJSlobServiceTracker(context, service));
-        track(ConfigTreeEquivalent.class, new ConfigTreeEquivalentTracker(service, context));
-        openTrackers();
-
-        // Register services
-        registerService(JSlobService.class, service);
-        registerService(Reloadable.class, new ConfigJSlobReloadable(service));
+    /**
+     * Gets the wrapped JSlob entry.
+     *
+     * @return The wrapped entry
+     */
+    public JSlobEntry getJSlobEntry() {
+        return jSlobEntry;
     }
+
 }
