@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.jsieve.export;
 
 import java.io.StringReader;
@@ -124,7 +125,7 @@ public final class SieveTextFilter {
             this.require = require;
             flaggedRules = flagged;
             rules = new ArrayList<Rule>();
-            for(List<Rule> list : flaggedRules.values()) {
+            for (List<Rule> list : flaggedRules.values()) {
                 rules.addAll(list);
             }
         }
@@ -143,6 +144,7 @@ public final class SieveTextFilter {
     }
 
     public class RuleListAndNextUid {
+
         private final ArrayList<Rule> rulelist;
 
         private final int nextuid;
@@ -181,6 +183,7 @@ public final class SieveTextFilter {
     }
 
     public class NextUidAndError {
+
         private final int nextuid;
 
         private final boolean error;
@@ -320,6 +323,15 @@ public final class SieveTextFilter {
     }
 
     /**
+     * Writes an empty script
+     * 
+     * @return The empty script
+     */
+    public String writeEmptyScript() {
+        return FIRST_LINE + new Date().toString();
+    }
+
+    /**
      * Here we have to strip off the require line because this line should not be edited by the client
      *
      * @param rules list of rules
@@ -372,7 +384,6 @@ public final class SieveTextFilter {
         }
         return retval;
     }
-
 
     /**
      * This method goes through all Rules and adds a fitting line number
@@ -500,7 +511,7 @@ public final class SieveTextFilter {
                 final String errortext = ruleComment.getErrortext();
                 if (null != errortext) {
                     final String errormsg = rightrule.getErrormsg();
-                    rightrule.setErrormsg(null != errormsg ? errormsg + CRLF + errortext: errortext);
+                    rightrule.setErrormsg(null != errormsg ? errormsg + CRLF + errortext : errortext);
                     if (handleRuleError(wholetext, commentedtext, ruleComment, rightrule)) {
                         erroradded = true;
                     }
@@ -619,9 +630,9 @@ public final class SieveTextFilter {
                     String errortext = null;
                     final List<String> flaglist = Arrays.asList(flags.split(","));
                     for (final String flag : flaglist) {
-                        final String illegal = flag.replaceAll(LEGAL_FLAG_CHARS,"");
-                        if( illegal.length() > 0 ) {
-                            final String error = "Illegal chars inside flags: \""+illegal+"\"";
+                        final String illegal = flag.replaceAll(LEGAL_FLAG_CHARS, "");
+                        if (illegal.length() > 0) {
+                            final String error = "Illegal chars inside flags: \"" + illegal + "\"";
                             if (null != errortext) {
                                 errortext += CRLF + error;
                             } else {
@@ -764,7 +775,7 @@ public final class SieveTextFilter {
                 i++;
             } else if (dontparse && c == '\\') {
                 //Ignore next char
-                i+=2;
+                i += 2;
             } else if (!commentremoved && !comment && c == '"') {
                 // The comment flag is important because otherwise
                 // you could struggle about '"' in comments
@@ -780,8 +791,7 @@ public final class SieveTextFilter {
                 i++;
             } else if (!dontparse && !nextchar && newline && c == '#') {
                 // Only delete chars at the beginning of a line
-                if ((i == 0 || sb.charAt(i - 1) == '\n') && ((i + COMMENT_TAG.length()) <  sb.length()) &&
-                        COMMENT_TAG.equals(sb.substring(i, i + COMMENT_TAG.length()))) {
+                if ((i == 0 || sb.charAt(i - 1) == '\n') && ((i + COMMENT_TAG.length()) < sb.length()) && COMMENT_TAG.equals(sb.substring(i, i + COMMENT_TAG.length()))) {
                     sb.delete(i, i + COMMENT_TAG.length());
                 }
                 commentremoved = true;
@@ -910,12 +920,12 @@ public final class SieveTextFilter {
      * for the commented rules and one for the uncommented
      *
      * @param totalrules
-     *                A list containing all rules
+     *            A list containing all rules
      * @param noncommented
-     *                The list which will contain all non-commented rules
-     *                afterwards
+     *            The list which will contain all non-commented rules
+     *            afterwards
      * @param commented
-     *                The list which will contain all commented rules afterwards
+     *            The list which will contain all commented rules afterwards
      */
     private void splitRules(final ArrayList<Rule> totalrules, final ArrayList<Rule> noncommented, final ArrayList<Rule> commented) {
         // First clear the two output lists

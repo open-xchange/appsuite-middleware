@@ -256,7 +256,7 @@ public final class HtmlServiceImpl implements HtmlService {
             int lastMatch = 0;
             while (m.find()) {
                 final String url = m.group();
-                if (HtmlServices.isSafe(url)) {
+                if (HtmlServices.isSafe(url, null)) {
                     final int startOpeningPos = m.start();
                     targetBuilder.append(content.substring(lastMatch, startOpeningPos));
                     sb.setLength(0);
@@ -535,7 +535,7 @@ public final class HtmlServiceImpl implements HtmlService {
             html = processDownlevelRevealedConditionalComments(html);
             html = dropDoubleAccents(html);
             html = dropSlashedTags(html);
-            
+
             // Repetitive sanitizing until no further replacement/changes performed
             final boolean[] sanitized = new boolean[] { true };
             while (sanitized[0]) {
@@ -1285,7 +1285,7 @@ public final class HtmlServiceImpl implements HtmlService {
         html = sb.toString();
         return html;
     }
-    
+
     private final static Pattern SRC_ATTRIBUTE_PATTERN = Pattern.compile("(src= *\"[^\"]*\")|(src= *'[^']*')", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private static String sanitizeAttributes(String html) {
@@ -1303,8 +1303,8 @@ public final class HtmlServiceImpl implements HtmlService {
                     replace = replace.replace(">", "&gt;");
                     retval = html.replace(attribute, replace);
                 }
-                    
-            } while (m.find()); 
+
+            } while (m.find());
         }
         return retval;
     }
