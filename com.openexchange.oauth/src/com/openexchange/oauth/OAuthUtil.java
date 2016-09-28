@@ -73,7 +73,7 @@ public final class OAuthUtil {
      * @param scopes The {@link OAuthScope}s
      * @return a space separated string with all {@link OAuthScope}s in the specified {@link Set}
      */
-    public static final String scopeMappingsToString(Set<OAuthScope> scopes) {
+    public static final String providerScopesToString(Set<OAuthScope> scopes) {
         if (scopes.isEmpty()) {
             return "";
         }
@@ -91,7 +91,7 @@ public final class OAuthUtil {
      * @param scopes The {@link OAuthScope}s
      * @return a space separated string with all {@link OAuthScope}s in the specified {@link Set}
      */
-    public static final String scopeModulesToString(Set<OAuthScope> scopes) {
+    public static final String oxScopesToString(Set<OAuthScope> scopes) {
         if (scopes.isEmpty()) {
             return "";
         }
@@ -123,7 +123,7 @@ public final class OAuthUtil {
         builder.append("&serviceId=").append(account.getAPI().getFullName());
         builder.append("&id=").append(account.getId());
         builder.append('&').append(OAuthConstants.ARGUMENT_DISPLAY_NAME).append('=').append(urlEncode(account.getDisplayName()));
-        builder.append("&scopes=").append(urlEncode(OAuthUtil.scopeModulesToString(account.getEnabledScopes())));
+        builder.append("&scopes=").append(urlEncode(OAuthUtil.oxScopesToString(account.getEnabledScopes())));
 
         return builder.toString();
     }
