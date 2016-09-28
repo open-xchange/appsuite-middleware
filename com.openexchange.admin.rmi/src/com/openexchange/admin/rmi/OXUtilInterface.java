@@ -561,4 +561,16 @@ public interface OXUtilInterface extends Remote {
      */
     public void unregisterFilestore(final Filestore store, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException;
 
+
+    /**
+     * Creates a new schema in the given database if possible. In case the optDBId is null the best suitable DB is selected automatically.
+     *
+     * @param credentials Credentials for authenticating against server.
+     * @param optDBId Optional database identifier. In case the optDBId is null the best suitable database is selected automatically.
+     * @return The {@link Database} for the new schema.
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     */
+    public Database createSchema(final Credentials credentials, Integer optDBId) throws RemoteException, StorageException, InvalidCredentialsException;
 }

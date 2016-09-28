@@ -47,78 +47,64 @@
  *
  */
 
-package com.openexchange.oauth.scope;
+package com.openexchange.admin.soap.util.soap;
 
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import com.openexchange.admin.soap.util.dataobjects.Database;
 
 /**
- * {@link OXScope} - Defines the AppSuite's available scopes/features
+ * <p>Java-Klasse f\u00fcr anonymous complex type.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+ *
+ * <pre>
+ * &lt;complexType>
+ *   &lt;complexContent>
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       &lt;sequence>
+ *         &lt;element name="return" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Database" maxOccurs="unbounded" minOccurs="0"/>
+ *       &lt;/sequence>
+ *     &lt;/restriction>
+ *   &lt;/complexContent>
+ * &lt;/complexType>
+ * </pre>
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.3
  */
-public enum OXScope {
-    mail("Mail", false),
-    calendar_ro("Calendars (Read Only)", true),
-    contacts_ro("Contacts (Read Only)", true),
-    calendar("Calendars", false),
-    contacts("Contacts", false),
-    drive("Drive", true),
-    generic("", true);
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "", propOrder = {
+    "_return"
+})
+@XmlRootElement(name = "createSchemaResponse")
+public class CreateSchemaResponse {
 
-    private static final String modules = Strings.concat(", ", (Object[]) OXScope.values());
-    private final boolean isLegacy;
-    private final String displayName;
 
-    /**
-     * Initialises a new {@link OXScope}.
-     */
-    private OXScope(String displayName, boolean isLegacy) {
-        this.displayName = displayName;
-        this.isLegacy = isLegacy;
-    }
+    @XmlElement(name = "return", nillable = true)
+    protected Database _return;
+
 
     /**
-     * Resolves the specified space separated string of {@link OXScope}s to an array of {@link OXScope} values
-     * 
-     * @param string A space separated String containing the {@link OXScope} strings
-     * @return An array with the resolved {@link OXScope} values
-     * @throws OXException if the specified string cannot be resolved to a valid {@link OXScope}
-     */
-    public static final OXScope[] valuesOf(String string) throws OXException {
-        if (Strings.isEmpty(string)) {
-            return new OXScope[0];
-        }
-        List<OXScope> list = new ArrayList<>();
-        String[] split = Strings.splitByWhitespaces(string);
-        for (String s : split) {
-            try {
-                list.add(valueOf(s));
-            } catch (IllegalArgumentException e) {
-                throw OAuthScopeExceptionCodes.CANNOT_RESOLVE_MODULE.create(s, modules);
-            }
-        }
-
-        return list.toArray(new OXScope[list.size()]);
-    }
-
-    /**
-     * Gets the isLegacy
+     * Gets the _return
      *
-     * @return The isLegacy
+     * @return The _return
      */
-    public boolean isLegacy() {
-        return isLegacy;
+    public Database getReturn() {
+        return _return;
     }
 
+
     /**
-     * Gets the displayName
+     * Sets the _return
      *
-     * @return The displayName
+     * @param _return The _return to set
      */
-    public String getDisplayName() {
-        return displayName;
+    public void setReturn(Database _return) {
+        this._return = _return;
     }
+
 }

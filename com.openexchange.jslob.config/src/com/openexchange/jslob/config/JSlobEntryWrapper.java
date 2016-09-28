@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,78 +47,55 @@
  *
  */
 
-package com.openexchange.oauth.scope;
+package com.openexchange.jslob.config;
 
-import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
+import com.openexchange.jslob.JSONPathElement;
+import com.openexchange.jslob.JSlobEntry;
 
 /**
- * {@link OXScope} - Defines the AppSuite's available scopes/features
+ * {@link JSlobEntryWrapper} - a wrapper for a JSlob entry also providing the parsed path.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public enum OXScope {
-    mail("Mail", false),
-    calendar_ro("Calendars (Read Only)", true),
-    contacts_ro("Contacts (Read Only)", true),
-    calendar("Calendars", false),
-    contacts("Contacts", false),
-    drive("Drive", true),
-    generic("", true);
+final class JSlobEntryWrapper {
 
-    private static final String modules = Strings.concat(", ", (Object[]) OXScope.values());
-    private final boolean isLegacy;
-    private final String displayName;
+    /** The JSlob entry */
+    private final JSlobEntry jSlobEntry;
+
+    /** The parsed path */
+    private final List<JSONPathElement> parsedPath;
 
     /**
-     * Initialises a new {@link OXScope}.
-     */
-    private OXScope(String displayName, boolean isLegacy) {
-        this.displayName = displayName;
-        this.isLegacy = isLegacy;
-    }
-
-    /**
-     * Resolves the specified space separated string of {@link OXScope}s to an array of {@link OXScope} values
-     * 
-     * @param string A space separated String containing the {@link OXScope} strings
-     * @return An array with the resolved {@link OXScope} values
-     * @throws OXException if the specified string cannot be resolved to a valid {@link OXScope}
-     */
-    public static final OXScope[] valuesOf(String string) throws OXException {
-        if (Strings.isEmpty(string)) {
-            return new OXScope[0];
-        }
-        List<OXScope> list = new ArrayList<>();
-        String[] split = Strings.splitByWhitespaces(string);
-        for (String s : split) {
-            try {
-                list.add(valueOf(s));
-            } catch (IllegalArgumentException e) {
-                throw OAuthScopeExceptionCodes.CANNOT_RESOLVE_MODULE.create(s, modules);
-            }
-        }
-
-        return list.toArray(new OXScope[list.size()]);
-    }
-
-    /**
-     * Gets the isLegacy
+     * Initializes a new {@link JSlobEntryWrapper}.
      *
-     * @return The isLegacy
+     * @param jSlobEntry The entry to wrap
+     * @throws OXException If path cannot be parsed
      */
-    public boolean isLegacy() {
-        return isLegacy;
+    public JSlobEntryWrapper(JSlobEntry jSlobEntry) throws OXException {
+        super();
+        this.jSlobEntry = jSlobEntry;
+        this.parsedPath = JSONPathElement.parsePath(jSlobEntry.getPath());
     }
 
     /**
-     * Gets the displayName
+     * Gets the parsed path
      *
-     * @return The displayName
+     * @return The parsed path
      */
-    public String getDisplayName() {
-        return displayName;
+    public List<JSONPathElement> getParsedPath() {
+        return parsedPath;
     }
+
+    /**
+     * Gets the wrapped JSlob entry.
+     *
+     * @return The wrapped entry
+     */
+    public JSlobEntry getJSlobEntry() {
+        return jSlobEntry;
+    }
+
 }

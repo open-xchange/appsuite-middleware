@@ -47,78 +47,34 @@
  *
  */
 
-package com.openexchange.oauth.scope;
+package com.openexchange.jolokia.log;
 
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
+import org.jolokia.util.LogHandler;
+import com.openexchange.log.Slf4jLogger;
 
 /**
- * {@link OXScope} - Defines the AppSuite's available scopes/features
+ * 
+ * Implements {@link LogHandler} to log Jolokia messages with {@link Slf4jLogger}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.8.3
  */
-public enum OXScope {
-    mail("Mail", false),
-    calendar_ro("Calendars (Read Only)", true),
-    contacts_ro("Contacts (Read Only)", true),
-    calendar("Calendars", false),
-    contacts("Contacts", false),
-    drive("Drive", true),
-    generic("", true);
+public class OXJolokiaLogHandler implements LogHandler {
 
-    private static final String modules = Strings.concat(", ", (Object[]) OXScope.values());
-    private final boolean isLegacy;
-    private final String displayName;
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXJolokiaLogHandler.class);
 
-    /**
-     * Initialises a new {@link OXScope}.
-     */
-    private OXScope(String displayName, boolean isLegacy) {
-        this.displayName = displayName;
-        this.isLegacy = isLegacy;
+    @Override
+    public void debug(String mesage) {
+        LOG.debug(mesage);
     }
 
-    /**
-     * Resolves the specified space separated string of {@link OXScope}s to an array of {@link OXScope} values
-     * 
-     * @param string A space separated String containing the {@link OXScope} strings
-     * @return An array with the resolved {@link OXScope} values
-     * @throws OXException if the specified string cannot be resolved to a valid {@link OXScope}
-     */
-    public static final OXScope[] valuesOf(String string) throws OXException {
-        if (Strings.isEmpty(string)) {
-            return new OXScope[0];
-        }
-        List<OXScope> list = new ArrayList<>();
-        String[] split = Strings.splitByWhitespaces(string);
-        for (String s : split) {
-            try {
-                list.add(valueOf(s));
-            } catch (IllegalArgumentException e) {
-                throw OAuthScopeExceptionCodes.CANNOT_RESOLVE_MODULE.create(s, modules);
-            }
-        }
-
-        return list.toArray(new OXScope[list.size()]);
+    @Override
+    public void error(String message, Throwable t) {
+        LOG.error(message, t);
     }
 
-    /**
-     * Gets the isLegacy
-     *
-     * @return The isLegacy
-     */
-    public boolean isLegacy() {
-        return isLegacy;
-    }
-
-    /**
-     * Gets the displayName
-     *
-     * @return The displayName
-     */
-    public String getDisplayName() {
-        return displayName;
+    @Override
+    public void info(String message) {
+        LOG.info(message);
     }
 }

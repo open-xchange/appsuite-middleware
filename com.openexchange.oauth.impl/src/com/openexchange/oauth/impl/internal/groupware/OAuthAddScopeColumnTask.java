@@ -147,10 +147,9 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
     }
 
     private enum Scope {
-
         BOXCOM(API.BOX_COM.getFullName(), OXScope.drive),
         DROPBOX(API.DROPBOX.getFullName(), OXScope.drive),
-        GOOGLE(API.GOOGLE.getFullName(), OXScope.calendar_ro, OXScope.contacts_ro, OXScope.drive, OXScope.offline),
+        GOOGLE(API.GOOGLE.getFullName(), OXScope.calendar_ro, OXScope.contacts_ro, OXScope.drive),
         MSLIVE_CONNECT(API.MS_LIVE_CONNECT.getFullName(), OXScope.calendar_ro, OXScope.contacts_ro, OXScope.drive),
         LINKEDIN(API.LINKEDIN.getFullName(), OXScope.contacts_ro),
         VKONTAKTE(API.VKONTAKTE.getFullName(), OXScope.contacts_ro),

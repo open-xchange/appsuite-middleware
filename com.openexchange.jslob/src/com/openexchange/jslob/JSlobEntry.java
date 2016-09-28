@@ -47,78 +47,85 @@
  *
  */
 
-package com.openexchange.oauth.scope;
+package com.openexchange.jslob;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
+import com.openexchange.session.Session;
 
 /**
- * {@link OXScope} - Defines the AppSuite's available scopes/features
+ * {@link JSlobEntry} - A dynamically registerable JSlob entry.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public enum OXScope {
-    mail("Mail", false),
-    calendar_ro("Calendars (Read Only)", true),
-    contacts_ro("Contacts (Read Only)", true),
-    calendar("Calendars", false),
-    contacts("Contacts", false),
-    drive("Drive", true),
-    generic("", true);
-
-    private static final String modules = Strings.concat(", ", (Object[]) OXScope.values());
-    private final boolean isLegacy;
-    private final String displayName;
+public interface JSlobEntry {
 
     /**
-     * Initialises a new {@link OXScope}.
-     */
-    private OXScope(String displayName, boolean isLegacy) {
-        this.displayName = displayName;
-        this.isLegacy = isLegacy;
-    }
-
-    /**
-     * Resolves the specified space separated string of {@link OXScope}s to an array of {@link OXScope} values
-     * 
-     * @param string A space separated String containing the {@link OXScope} strings
-     * @return An array with the resolved {@link OXScope} values
-     * @throws OXException if the specified string cannot be resolved to a valid {@link OXScope}
-     */
-    public static final OXScope[] valuesOf(String string) throws OXException {
-        if (Strings.isEmpty(string)) {
-            return new OXScope[0];
-        }
-        List<OXScope> list = new ArrayList<>();
-        String[] split = Strings.splitByWhitespaces(string);
-        for (String s : split) {
-            try {
-                list.add(valueOf(s));
-            } catch (IllegalArgumentException e) {
-                throw OAuthScopeExceptionCodes.CANNOT_RESOLVE_MODULE.create(s, modules);
-            }
-        }
-
-        return list.toArray(new OXScope[list.size()]);
-    }
-
-    /**
-     * Gets the isLegacy
+     * Gets this entry's key.
+     * <pre>
+     *   io.ox/files//folder/pictures
+     *   ^^^^^^^^^^
+     *  The key portion
+     * </pre>
      *
-     * @return The isLegacy
+     * @return The key
      */
-    public boolean isLegacy() {
-        return isLegacy;
-    }
+    String getKey();
 
     /**
-     * Gets the displayName
+     * Gets this entry's path.
+     * <pre>
+     *   io.ox/files//folder/pictures
+     *                ^^^^^^^^^^^^^^
+     *                The path portion
+     * </pre>
      *
-     * @return The displayName
+     * @return The path
      */
-    public String getDisplayName() {
-        return displayName;
-    }
+    String getPath();
+
+    /**
+     * Signals whether this entry is writable or read-only for session-associated user.
+     *
+     * @param session The session providing user data
+     * @return <code>true</code> if writable; otherwise read-only
+     * @throws OXException If writable/read-only behavior cannot be checked
+     */
+    boolean isWritable(Session session) throws OXException;
+
+    /**
+     * Gets the value suitable for session-associated user.
+     * <p>
+     * The value can be a Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object.
+     *
+     * @param session The session providing user data
+     * @return The value
+     * @throws OXException If value cannot be returned
+     */
+    Object getValue(Session sessiond) throws OXException;
+
+    /**
+     * Sets the value for session-associated user.
+     * <p>
+     * The value can be a Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object.
+     *
+     * @param value The new value to apply
+     * @param session The session providing user data
+     * @return The value
+     * @throws OXException If value cannot be set
+     */
+    void setValue(Object value, Session sessiond) throws OXException;
+
+    /**
+     * Gets further meta-data from this entry suitable for session-associated user.
+     * <p>
+     * Values can be a Boolean, Double, Integer, JSONArray, JSONObject, Long, or String, or the JSONObject.NULL object.
+     *
+     * @param session The session providing user data
+     * @return The optional meta-data
+     * @throws OXException If meta-data cannot be returned
+     */
+    Map<String, Object> metadata(Session session) throws OXException;
+
 }

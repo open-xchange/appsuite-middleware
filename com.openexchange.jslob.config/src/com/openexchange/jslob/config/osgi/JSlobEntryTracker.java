@@ -47,78 +47,62 @@
  *
  */
 
-package com.openexchange.oauth.scope;
+package com.openexchange.jslob.config.osgi;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
+import com.openexchange.jslob.JSlobEntry;
+import com.openexchange.jslob.config.JSlobEntryRegistry;
 
 /**
- * {@link OXScope} - Defines the AppSuite's available scopes/features
+ * {@link JSlobEntryTracker} - Tracks registered {@link JSlobEntry} instances.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public enum OXScope {
-    mail("Mail", false),
-    calendar_ro("Calendars (Read Only)", true),
-    contacts_ro("Contacts (Read Only)", true),
-    calendar("Calendars", false),
-    contacts("Contacts", false),
-    drive("Drive", true),
-    generic("", true);
+public class JSlobEntryTracker implements ServiceTrackerCustomizer<JSlobEntry, JSlobEntry> {
 
-    private static final String modules = Strings.concat(", ", (Object[]) OXScope.values());
-    private final boolean isLegacy;
-    private final String displayName;
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(JSlobEntryTracker.class);
+
+    private final JSlobEntryRegistry jSlobEntryRegistry;
+    private final BundleContext context;
 
     /**
-     * Initialises a new {@link OXScope}.
+     * Initializes a new {@link JSlobEntryTracker}.
      */
-    private OXScope(String displayName, boolean isLegacy) {
-        this.displayName = displayName;
-        this.isLegacy = isLegacy;
+    public JSlobEntryTracker(JSlobEntryRegistry jSlobEntryRegistry, BundleContext context) {
+        super();
+        this.jSlobEntryRegistry = jSlobEntryRegistry;
+        this.context = context;
     }
 
-    /**
-     * Resolves the specified space separated string of {@link OXScope}s to an array of {@link OXScope} values
-     * 
-     * @param string A space separated String containing the {@link OXScope} strings
-     * @return An array with the resolved {@link OXScope} values
-     * @throws OXException if the specified string cannot be resolved to a valid {@link OXScope}
-     */
-    public static final OXScope[] valuesOf(String string) throws OXException {
-        if (Strings.isEmpty(string)) {
-            return new OXScope[0];
-        }
-        List<OXScope> list = new ArrayList<>();
-        String[] split = Strings.splitByWhitespaces(string);
-        for (String s : split) {
-            try {
-                list.add(valueOf(s));
-            } catch (IllegalArgumentException e) {
-                throw OAuthScopeExceptionCodes.CANNOT_RESOLVE_MODULE.create(s, modules);
+    @Override
+    public JSlobEntry addingService(ServiceReference<JSlobEntry> reference) {
+        JSlobEntry jSlobEntry = context.getService(reference);
+        try {
+            if (jSlobEntryRegistry.addJSlobEntry(jSlobEntry)) {
+                return jSlobEntry;
             }
+        } catch (OXException e) {
+            LOG.error("Failed to register JSlob entry", e);
         }
 
-        return list.toArray(new OXScope[list.size()]);
+        context.ungetService(reference);
+        return null;
     }
 
-    /**
-     * Gets the isLegacy
-     *
-     * @return The isLegacy
-     */
-    public boolean isLegacy() {
-        return isLegacy;
+    @Override
+    public void modifiedService(ServiceReference<JSlobEntry> reference, JSlobEntry jSlobEntry) {
+        // Don't care
     }
 
-    /**
-     * Gets the displayName
-     *
-     * @return The displayName
-     */
-    public String getDisplayName() {
-        return displayName;
+    @Override
+    public void removedService(ServiceReference<JSlobEntry> reference, JSlobEntry jSlobEntry) {
+        jSlobEntryRegistry.removeJSlobEntry(jSlobEntry);
+        context.ungetService(reference);
     }
+
 }

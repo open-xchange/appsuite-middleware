@@ -297,6 +297,7 @@ public final class NewAction extends AbstractMailAction {
             ComposeTransportResult transportResult = composeHandler.createTransportResult(composeRequest);
             List<? extends ComposedMailMessage> composedMails = transportResult.getTransportMessages();
             ComposedMailMessage sentMessage = transportResult.getSentMessage();
+            boolean transportEqualToSent = transportResult.isTransportEqualToSent();
 
             if (newMessageId) {
                 for (ComposedMailMessage composedMail : composedMails) {
@@ -431,7 +432,7 @@ public final class NewAction extends AbstractMailAction {
 
             HttpServletRequest servletRequest = request.optHttpServletRequest();
             String remoteAddress = null == servletRequest ? request.getRemoteAddress() : servletRequest.getRemoteAddr();
-            List<String> ids = mailInterface.sendMessages(composedMails, sentMessage, sendType, accountId, usm, new MtaStatusInfo(), remoteAddress);
+            List<String> ids = mailInterface.sendMessages(composedMails, sentMessage, transportEqualToSent, sendType, accountId, usm, new MtaStatusInfo(), remoteAddress);
             msgIdentifier = null == ids || ids.isEmpty() ? null : ids.get(0);
 
             // Apply composition space state(s)

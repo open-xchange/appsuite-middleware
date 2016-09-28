@@ -47,78 +47,68 @@
  *
  */
 
-package com.openexchange.oauth.scope;
+package com.openexchange.admin.schemacache;
 
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.admin.schemacache.inmemory.InMemorySchemaCache;
 
 /**
- * {@link OXScope} - Defines the AppSuite's available scopes/features
+ * {@link SchemaCacheProvider} - The provider for a {@link SchemaCache} instance.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public enum OXScope {
-    mail("Mail", false),
-    calendar_ro("Calendars (Read Only)", true),
-    contacts_ro("Contacts (Read Only)", true),
-    calendar("Calendars", false),
-    contacts("Contacts", false),
-    drive("Drive", true),
-    generic("", true);
+public class SchemaCacheProvider {
 
-    private static final String modules = Strings.concat(", ", (Object[]) OXScope.values());
-    private final boolean isLegacy;
-    private final String displayName;
+    private static final SchemaCacheProvider INSTANCE = new SchemaCacheProvider();
 
     /**
-     * Initialises a new {@link OXScope}.
+     * Gets the instance
+     *
+     * @return The instance
      */
-    private OXScope(String displayName, boolean isLegacy) {
-        this.displayName = displayName;
-        this.isLegacy = isLegacy;
+    public static SchemaCacheProvider getInstance() {
+        return INSTANCE;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------
+
+    private final AtomicReference<SchemaCache> cacheReference;
+
+    /**
+     * Initializes a new {@link SchemaCacheProvider}.
+     */
+    private SchemaCacheProvider() {
+        super();
+        cacheReference = new AtomicReference<SchemaCache>();
     }
 
     /**
-     * Resolves the specified space separated string of {@link OXScope}s to an array of {@link OXScope} values
-     * 
-     * @param string A space separated String containing the {@link OXScope} strings
-     * @return An array with the resolved {@link OXScope} values
-     * @throws OXException if the specified string cannot be resolved to a valid {@link OXScope}
+     * Gets the schema cache
+     *
+     * @return The schema cache
      */
-    public static final OXScope[] valuesOf(String string) throws OXException {
-        if (Strings.isEmpty(string)) {
-            return new OXScope[0];
-        }
-        List<OXScope> list = new ArrayList<>();
-        String[] split = Strings.splitByWhitespaces(string);
-        for (String s : split) {
-            try {
-                list.add(valueOf(s));
-            } catch (IllegalArgumentException e) {
-                throw OAuthScopeExceptionCodes.CANNOT_RESOLVE_MODULE.create(s, modules);
+    public SchemaCache getSchemaCache() {
+        SchemaCache schemaCache = cacheReference.get();
+        if (null == schemaCache) {
+            synchronized (this) {
+                schemaCache = cacheReference.get();
+                if (null == schemaCache) {
+                    schemaCache = new InMemorySchemaCache(-1L);
+                    cacheReference.set(schemaCache);
+                }
             }
         }
-
-        return list.toArray(new OXScope[list.size()]);
+        return schemaCache;
     }
 
     /**
-     * Gets the isLegacy
+     * Optionally gets the schema cache (if already initialized).
      *
-     * @return The isLegacy
+     * @return The schema cache or <code>null</code>
      */
-    public boolean isLegacy() {
-        return isLegacy;
+    public SchemaCache optSchemaCache() {
+        return cacheReference.get();
     }
 
-    /**
-     * Gets the displayName
-     *
-     * @return The displayName
-     */
-    public String getDisplayName() {
-        return displayName;
-    }
 }

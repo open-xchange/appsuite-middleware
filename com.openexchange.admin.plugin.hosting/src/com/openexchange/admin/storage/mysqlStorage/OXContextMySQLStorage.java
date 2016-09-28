@@ -65,7 +65,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -77,7 +76,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
-import javax.mail.internet.idn.IDNA;
 import com.openexchange.admin.exceptions.TargetDatabaseException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -155,17 +153,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     private int CONTEXTS_PER_SCHEMA = 1;
 
-    private static final int UNIT_CONTEXT = 1;
-
-    private static final int UNIT_USER = 2;
-
     private final String selectionCriteria = "cid";
 
     private final int criteriaType = Types.INTEGER;
 
     // private Object criteriaMatch = null;
-
-    private final int USE_UNIT;
 
     private final OXContextMySQLStorageCommon contextCommon;
 
@@ -176,29 +168,17 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      */
     public OXContextMySQLStorage() {
         super();
-        PropertyHandlerExtended prop = cache.getProperties();
-        this.prop = prop;
+        this.prop = cache.getProperties();;
         contextCommon = new OXContextMySQLStorageCommon();
-        int USE_UNIT = UNIT_CONTEXT;
         try {
             this.CONTEXTS_PER_SCHEMA = Integer.parseInt(prop.getProp("CONTEXTS_PER_SCHEMA", "1"));
             if (this.CONTEXTS_PER_SCHEMA <= 0) {
                 throw new OXContextException("CONTEXTS_PER_SCHEMA MUST BE > 0");
             }
 
-            final String unit = prop.getProp("CREATE_CONTEXT_USE_UNIT", "context");
-            if (unit.trim().toLowerCase().equals("context")) {
-                USE_UNIT = UNIT_CONTEXT;
-            } else if (unit.trim().toLowerCase().equals("user")) {
-                USE_UNIT = UNIT_USER;
-            } else {
-                USE_UNIT = UNIT_CONTEXT;
-                LOG.warn("unknown unit {}, using context", unit);
-            }
         } catch (final OXContextException e) {
             LOG.error("Error init", e);
         }
-        this.USE_UNIT = USE_UNIT;
     }
 
     @Override
@@ -322,14 +302,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
             if (null != cacheService) {
                 try {
-                    Cache cache = cacheService.getCache("MailAccount");
-                    cache.clear();
+                    cacheService.getCache("MailAccount").clear();;
                 } catch (final Exception e) {
                     LOG.error("", e);
                 }
                 try {
-                    Cache cache = cacheService.getCache("Capabilities");
-                    cache.invalidateGroup(ctx.getId().toString());
+                    cacheService.getCache("Capabilities").invalidateGroup(ctx.getId().toString());
                 } catch (final Exception e) {
                     LOG.error("", e);
                 }
@@ -1154,7 +1132,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             final Database db;
             try {
                 if (null == dbId || i(dbId) <= 0) {
-                    db = getNextDBHandleByWeight(configCon);
+                    db = OXUtilStorageInterface.getInstance().getNextDBHandleByWeight(configCon);
                 } else {
                     db = OXToolStorageInterface.getInstance().loadDatabaseById(i(dbId));
                     if (db.getMaxUnits().intValue() <= 0) {
@@ -1164,9 +1142,10 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
             } catch (SQLException e) {
                 throw new StorageException(e.getMessage(), e);
-            } catch (OXContextException e) {
+            } catch (StorageException e) {
                 LOG.error(e.getMessage(), e);
-                throw new StorageException(e.getMessage());
+                throw new StorageException("Unable to create context: "+e.getMessage());
+//                throw new StorageException(e.getMessage());
             }
 
             // Two separate try-catch blocks are necessary because roll-back only works after starting a transaction.
@@ -1675,12 +1654,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private void enableContextBackAfterError(final Context ctx) throws StorageException {
-        LOG.error("Try enabling context {} back again!", ctx.getId());
-        enable(ctx);
-        LOG.error("Context {} enabled back again!", ctx.getId());
-    }
-
     private void fillTargetDatabase(List<TableObject> sorted_tables, Connection target_ox_db_con, Connection ox_db_connection, Object criteriaMatch) throws SQLException {
         // do the inserts for all tables!
         StringBuilder prep_sql = new StringBuilder();
@@ -1960,13 +1933,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw sql;
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
-            try {
-                if (null != con_write) {
-                    con_write.rollback();
-                }
-            } catch (final SQLException ec) {
-                LOG.error("Error rollback configdb connection", ec);
-            }
             throw e;
         } finally {
             closePreparedStatement(stmt);
@@ -2018,13 +1984,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             throw sql;
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
-            try {
-                if (null != con_write) {
-                    con_write.rollback();
-                }
-            } catch (final SQLException ec) {
-                LOG.error("Error rollback configdb connection", ec);
-            }
             throw e;
         } finally {
             closePreparedStatement(stmt);
@@ -2035,165 +1994,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     LOG.error("Error pushing configdb connection to pool!", exp);
                 }
             }
-        }
-    }
-
-    /**
-     * Determine the next database to use depending on database weight factor. Each database should be equal full according to their weight.
-     * Additionally check each master for availability.
-     *
-     * @param con
-     * @return Database handle containing information about database
-     * @throws SQLException
-     * @throws OXContextException
-     */
-    private Database getNextDBHandleByWeight(final Connection con) throws SQLException, OXContextException {
-        List<DatabaseHandle> list = loadDatabases(con);
-        int totalUnits = 0;
-        int totalWeight = 0;
-        for (final DatabaseHandle db : list) {
-            totalUnits += db.getCount();
-            totalWeight += i(db.getClusterWeight());
-        }
-        list = removeFull(list);
-        if (list.isEmpty()) {
-            throw new OXContextException("The new context could not be created. The maximum number of contexts in every database cluster has been reached. Use register-, create- or change database to resolve the problem.");
-        }
-        Collections.sort(list, Collections.reverseOrder(new DBWeightComparator(totalUnits, totalWeight)));
-        final Iterator<DatabaseHandle> iter = list.iterator();
-        DatabaseHandle retval = null;
-        while (null == retval && iter.hasNext()) {
-            DatabaseHandle db = iter.next();
-            int dbPoolId = i(db.getId());
-            try {
-                final Connection dbCon = cache.getWRITEConnectionForPoolId(dbPoolId, null);
-                cache.pushWRITEConnectionForPoolId(dbPoolId, dbCon);
-                retval = db;
-            } catch (final PoolException e) {
-                LOG.error("", e);
-            }
-        }
-        if (null == retval) {
-            throw new OXContextException("The new context could not be created. All not full databases can not be connected to.");
-        }
-        return retval;
-    }
-
-    private List<DatabaseHandle> removeFull(final List<DatabaseHandle> list) {
-        final List<DatabaseHandle> retval = new ArrayList<DatabaseHandle>();
-        for (final DatabaseHandle db : list) {
-            final int maxUnit = i(db.getMaxUnits());
-            if (maxUnit == -1 || (maxUnit != 0 && db.getCount() < maxUnit)) {
-                retval.add(db);
-            }
-        }
-        return retval;
-    }
-
-    private List<DatabaseHandle> loadDatabases(final Connection con) throws SQLException, OXContextException {
-        final List<DatabaseHandle> retval = new ArrayList<DatabaseHandle>();
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT db_pool_id,url,driver,login,password,name,read_db_pool_id,weight,max_units FROM db_pool JOIN db_cluster ON write_db_pool_id=db_pool_id");
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                final DatabaseHandle db = new DatabaseHandle();
-                int pos = 1;
-                db.setId(I(rs.getInt(pos++)));
-                db.setUrl(rs.getString(pos++));
-                db.setDriver(rs.getString(pos++));
-                db.setLogin(rs.getString(pos++));
-                db.setPassword(rs.getString(pos++));
-                db.setName(rs.getString(pos++));
-                final int slaveId = rs.getInt(pos++);
-                if (slaveId > 0) {
-                    db.setRead_id(I(slaveId));
-                }
-                db.setClusterWeight(I(rs.getInt(pos++)));
-                db.setMaxUnits(I(rs.getInt(pos++)));
-                retval.add(db);
-            }
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-        }
-        for (final DatabaseHandle db : retval) {
-            final int db_count = countUnits(db, con);
-            db.setCount(db_count);
-        }
-        return retval;
-    }
-
-    /**
-     * count the number of contexts (or users) on the given database
-     *
-     * @param db
-     * @param configdb_con
-     * @return number of units (contexts/user depending on settings)
-     * @throws SQLException
-     * @throws OXContextException
-     */
-    private int countUnits(final DatabaseHandle db, final Connection configdb_con) throws SQLException, OXContextException {
-        PreparedStatement ps = null;
-        PreparedStatement ppool = null;
-        try {
-            int count = 0;
-
-            final int pool_id = db.getId().intValue();
-
-            if (this.USE_UNIT == UNIT_CONTEXT) {
-                ps = configdb_con.prepareStatement("SELECT COUNT(server_id) FROM context_server2db_pool WHERE write_db_pool_id=?");
-                ps.setInt(1, pool_id);
-                final ResultSet rsi = ps.executeQuery();
-
-                if (!rsi.next()) {
-                    throw new OXContextException("Unable to count contextsof db_pool_id=" + pool_id);
-                }
-                count = rsi.getInt("COUNT(server_id)");
-                rsi.close();
-                ps.close();
-            } else if (this.USE_UNIT == UNIT_USER) {
-                ppool = configdb_con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE write_db_pool_id=?");
-                ppool.setInt(1, pool_id);
-                final ResultSet rpool = ppool.executeQuery();
-                while (rpool.next()) {
-                    final String schema = rpool.getString("db_schema");
-                    ResultSet rsi = null;
-                    try {
-                        Connection rcon = AdminCacheExtended.getSimpleSqlConnection(IDNA.toASCII(db.getUrl()) + schema, db.getLogin(), db.getPassword(), db.getDriver());
-                        ps = rcon.prepareStatement("SELECT COUNT(id) FROM user");
-
-                        rsi = ps.executeQuery();
-                        if (!rsi.next()) {
-                            throw new OXContextException("Unable to count users of db_pool_id=" + pool_id);
-                        }
-                        count += rsi.getInt("COUNT(id)");
-                        rcon.close();
-                        ps.close();
-                        rsi = null;
-                        rcon = null;
-                    } catch (final ClassNotFoundException e) {
-                        LOG.error("Error counting users of db pool", e);
-                        throw new OXContextException(e.toString());
-                    } finally {
-                        if (null != rsi) {
-                            try {
-                                rsi.close();
-                            } catch (Exception e) { /* ignore */
-                            }
-                        }
-                    }
-                }
-                rpool.close();
-                LOG.debug("***** found {} users on {}", count, pool_id);
-            } else {
-                throw new OXContextException("UNKNOWN UNIT TO COUNT: " + this.USE_UNIT);
-            }
-
-            return count;
-        } finally {
-            closePreparedStatement(ps);
-            closePreparedStatement(ppool);
         }
     }
 

@@ -47,78 +47,84 @@
  *
  */
 
-package com.openexchange.oauth.scope;
+package com.openexchange.jslob.config;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
+import com.openexchange.jslob.JSlobEntry;
 
 /**
- * {@link OXScope} - Defines the AppSuite's available scopes/features
+ * {@link JSlobEntryRegistry}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public enum OXScope {
-    mail("Mail", false),
-    calendar_ro("Calendars (Read Only)", true),
-    contacts_ro("Contacts (Read Only)", true),
-    calendar("Calendars", false),
-    contacts("Contacts", false),
-    drive("Drive", true),
-    generic("", true);
+public class JSlobEntryRegistry {
 
-    private static final String modules = Strings.concat(", ", (Object[]) OXScope.values());
-    private final boolean isLegacy;
-    private final String displayName;
+    private final ConcurrentMap<String, Map<String, JSlobEntryWrapper>> registry;
 
     /**
-     * Initialises a new {@link OXScope}.
+     * Initializes a new {@link JSlobEntryRegistry}.
      */
-    private OXScope(String displayName, boolean isLegacy) {
-        this.displayName = displayName;
-        this.isLegacy = isLegacy;
+    public JSlobEntryRegistry() {
+        super();
+        registry = new ConcurrentHashMap<>(16, 0.9F, 1);
     }
 
     /**
-     * Resolves the specified space separated string of {@link OXScope}s to an array of {@link OXScope} values
-     * 
-     * @param string A space separated String containing the {@link OXScope} strings
-     * @return An array with the resolved {@link OXScope} values
-     * @throws OXException if the specified string cannot be resolved to a valid {@link OXScope}
+     * Adds the given JSlob entry
+     *
+     * @param jSlobEntry
+     * @return <code>true</code> if successfully added; otherwise <code>false</code>
+     * @throws OXException If entry's path cannot be parsed
      */
-    public static final OXScope[] valuesOf(String string) throws OXException {
-        if (Strings.isEmpty(string)) {
-            return new OXScope[0];
+    public synchronized boolean addJSlobEntry(JSlobEntry jSlobEntry) throws OXException {
+        if (null == jSlobEntry) {
+            return false;
         }
-        List<OXScope> list = new ArrayList<>();
-        String[] split = Strings.splitByWhitespaces(string);
-        for (String s : split) {
-            try {
-                list.add(valueOf(s));
-            } catch (IllegalArgumentException e) {
-                throw OAuthScopeExceptionCodes.CANNOT_RESOLVE_MODULE.create(s, modules);
+
+        JSlobEntryWrapper wrapper = new JSlobEntryWrapper(jSlobEntry);
+
+        ConcurrentMap<String, JSlobEntryWrapper> entries = (ConcurrentMap<String, JSlobEntryWrapper>) registry.get(jSlobEntry.getKey());
+        if (null == entries) {
+            ConcurrentMap<String, JSlobEntryWrapper> newMap = new ConcurrentHashMap<>(4, 0.9F, 1);
+            entries = (ConcurrentMap<String, JSlobEntryWrapper>) registry.putIfAbsent(jSlobEntry.getKey(), newMap);
+            if (null == entries) {
+                entries = newMap;
             }
         }
 
-        return list.toArray(new OXScope[list.size()]);
+        return null == entries.putIfAbsent(jSlobEntry.getPath(), wrapper);
     }
 
     /**
-     * Gets the isLegacy
+     * Removes the given JSlob entry
      *
-     * @return The isLegacy
+     * @param jSlobEntry
      */
-    public boolean isLegacy() {
-        return isLegacy;
+    public synchronized void removeJSlobEntry(JSlobEntry jSlobEntry) {
+        if (null == jSlobEntry) {
+            return;
+        }
+
+        ConcurrentMap<String, JSlobEntryWrapper> entries = (ConcurrentMap<String, JSlobEntryWrapper>) registry.get(jSlobEntry.getKey());
+        if (null != entries) {
+            boolean removed = null != entries.remove(jSlobEntry.getPath());
+            if (removed && entries.isEmpty()) {
+                registry.remove(jSlobEntry.getKey());
+            }
+        }
     }
 
     /**
-     * Gets the displayName
+     * Gets the currently available registered JSlob entries.
      *
-     * @return The displayName
+     * @return The available JSlob entries;
      */
-    public String getDisplayName() {
-        return displayName;
+    public Map<String, Map<String, JSlobEntryWrapper>> getAvailableJSlobEntries() {
+        return registry;
     }
+
 }

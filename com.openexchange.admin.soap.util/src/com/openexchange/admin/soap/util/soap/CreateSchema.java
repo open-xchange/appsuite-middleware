@@ -47,78 +47,88 @@
  *
  */
 
-package com.openexchange.oauth.scope;
+package com.openexchange.admin.soap.util.soap;
 
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import com.openexchange.admin.soap.util.dataobjects.Credentials;
 
 /**
- * {@link OXScope} - Defines the AppSuite's available scopes/features
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * <p>Java-Klasse f\u00fcr anonymous complex type.
+ *
+ * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+ *
+ * <pre>
+ * &lt;complexType>
+ *   &lt;complexContent>
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       &lt;sequence>
+ *         &lt;element name="auth" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}Credentials" minOccurs="0"/>
+ *         &lt;element name="optDBId" type="Integer" minOccurs="0"/>
+ *       &lt;/sequence>
+ *     &lt;/restriction>
+ *   &lt;/complexContent>
+ * &lt;/complexType>
+ * </pre>
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.3
  */
-public enum OXScope {
-    mail("Mail", false),
-    calendar_ro("Calendars (Read Only)", true),
-    contacts_ro("Contacts (Read Only)", true),
-    calendar("Calendars", false),
-    contacts("Contacts", false),
-    drive("Drive", true),
-    generic("", true);
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "", propOrder = {
+    "auth", "optDBId"
+})
+@XmlRootElement(name = "createSchema")
+public class CreateSchema {
 
-    private static final String modules = Strings.concat(", ", (Object[]) OXScope.values());
-    private final boolean isLegacy;
-    private final String displayName;
+    @XmlElement(nillable = true)
+    protected Credentials auth;
 
-    /**
-     * Initialises a new {@link OXScope}.
-     */
-    private OXScope(String displayName, boolean isLegacy) {
-        this.displayName = displayName;
-        this.isLegacy = isLegacy;
-    }
+    @XmlElement(nillable = true)
+    protected Integer optDBId;
+
 
     /**
-     * Resolves the specified space separated string of {@link OXScope}s to an array of {@link OXScope} values
-     * 
-     * @param string A space separated String containing the {@link OXScope} strings
-     * @return An array with the resolved {@link OXScope} values
-     * @throws OXException if the specified string cannot be resolved to a valid {@link OXScope}
-     */
-    public static final OXScope[] valuesOf(String string) throws OXException {
-        if (Strings.isEmpty(string)) {
-            return new OXScope[0];
-        }
-        List<OXScope> list = new ArrayList<>();
-        String[] split = Strings.splitByWhitespaces(string);
-        for (String s : split) {
-            try {
-                list.add(valueOf(s));
-            } catch (IllegalArgumentException e) {
-                throw OAuthScopeExceptionCodes.CANNOT_RESOLVE_MODULE.create(s, modules);
-            }
-        }
-
-        return list.toArray(new OXScope[list.size()]);
-    }
-
-    /**
-     * Gets the isLegacy
+     * Gets the auth
      *
-     * @return The isLegacy
+     * @return The auth
      */
-    public boolean isLegacy() {
-        return isLegacy;
+    protected Credentials getAuth() {
+        return auth;
     }
 
+
     /**
-     * Gets the displayName
+     * Sets the auth
      *
-     * @return The displayName
+     * @param auth The auth to set
      */
-    public String getDisplayName() {
-        return displayName;
+    protected void setAuth(Credentials auth) {
+        this.auth = auth;
     }
+
+
+    /**
+     * Gets the optDBId
+     *
+     * @return The optDBId
+     */
+    protected Integer getOptDBId() {
+        return optDBId;
+    }
+
+
+    /**
+     * Sets the optDBId
+     *
+     * @param optDBId The optDBId to set
+     */
+    protected void setOptDBId(Integer optDBId) {
+        this.optDBId = optDBId;
+    }
+
 }

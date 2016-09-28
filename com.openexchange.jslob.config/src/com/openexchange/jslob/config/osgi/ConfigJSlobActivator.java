@@ -55,9 +55,11 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.jslob.JSlobEntry;
 import com.openexchange.jslob.JSlobService;
 import com.openexchange.jslob.config.ConfigJSlobReloadable;
 import com.openexchange.jslob.config.ConfigJSlobService;
+import com.openexchange.jslob.config.JSlobEntryRegistry;
 import com.openexchange.jslob.shared.SharedJSlobService;
 import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -85,12 +87,20 @@ public final class ConfigJSlobActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         final BundleContext context = this.context;
-        final ConfigJSlobService service = new ConfigJSlobService(this);
-        // Trackers
+
+        // Registry for JSlobEntry instances
+        JSlobEntryRegistry jSlobEntryRegistry = new JSlobEntryRegistry();
+        track(JSlobEntry.class, new JSlobEntryTracker(jSlobEntryRegistry, context));
+
+        // The JSlob service
+        final ConfigJSlobService service = new ConfigJSlobService(jSlobEntryRegistry, this);
+
+        // More trackers
         track(SharedJSlobService.class, new SharedJSlobServiceTracker(context, service));
         track(ConfigTreeEquivalent.class, new ConfigTreeEquivalentTracker(service, context));
         openTrackers();
-        // Register service
+
+        // Register services
         registerService(JSlobService.class, service);
         registerService(Reloadable.class, new ConfigJSlobReloadable(service));
     }

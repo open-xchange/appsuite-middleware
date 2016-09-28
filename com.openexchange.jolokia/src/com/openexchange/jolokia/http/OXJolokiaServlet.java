@@ -47,78 +47,66 @@
  *
  */
 
-package com.openexchange.oauth.scope;
+package com.openexchange.jolokia.http;
 
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import org.apache.felix.http.base.internal.handler.ServletConfigImpl;
+import org.jolokia.config.ConfigKey;
+import org.jolokia.osgi.servlet.JolokiaServlet;
+import org.jolokia.restrictor.Restrictor;
+import org.osgi.framework.BundleContext;
+import com.openexchange.jolokia.log.OXJolokiaLogHandler;
+
 
 /**
- * {@link OXScope} - Defines the AppSuite's available scopes/features
+ * 
+ * Extends {@link JolokiaServlet} to add {@link OXJolokiaLogHandler} as Jolokias default logger
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:daniel.becker@open-xchange.com">Daniel Becker</a>
+ * @since v7.8.3
  */
-public enum OXScope {
-    mail("Mail", false),
-    calendar_ro("Calendars (Read Only)", true),
-    contacts_ro("Contacts (Read Only)", true),
-    calendar("Calendars", false),
-    contacts("Contacts", false),
-    drive("Drive", true),
-    generic("", true);
-
-    private static final String modules = Strings.concat(", ", (Object[]) OXScope.values());
-    private final boolean isLegacy;
-    private final String displayName;
+public class OXJolokiaServlet extends JolokiaServlet {
 
     /**
-     * Initialises a new {@link OXScope}.
+     * serialVersionUID
      */
-    private OXScope(String displayName, boolean isLegacy) {
-        this.displayName = displayName;
-        this.isLegacy = isLegacy;
+    private static final long serialVersionUID = 4743473900278611090L;
+
+    public OXJolokiaServlet() {
+        this(null);
     }
 
-    /**
-     * Resolves the specified space separated string of {@link OXScope}s to an array of {@link OXScope} values
-     * 
-     * @param string A space separated String containing the {@link OXScope} strings
-     * @return An array with the resolved {@link OXScope} values
-     * @throws OXException if the specified string cannot be resolved to a valid {@link OXScope}
-     */
-    public static final OXScope[] valuesOf(String string) throws OXException {
-        if (Strings.isEmpty(string)) {
-            return new OXScope[0];
-        }
-        List<OXScope> list = new ArrayList<>();
-        String[] split = Strings.splitByWhitespaces(string);
-        for (String s : split) {
-            try {
-                list.add(valueOf(s));
-            } catch (IllegalArgumentException e) {
-                throw OAuthScopeExceptionCodes.CANNOT_RESOLVE_MODULE.create(s, modules);
+    public OXJolokiaServlet(BundleContext pContext) {
+        this(pContext, null);
+    }
+
+    public OXJolokiaServlet(BundleContext pContext, Restrictor pRestrictor) {
+        super(pContext, pRestrictor);
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public void init(ServletConfig pServletConfig) throws ServletException {
+        Map<String, String> map = new HashMap<String, String>();
+        Enumeration e = pServletConfig.getInitParameterNames(); // Get servlet config
+        while (e.hasMoreElements()) {
+            String keyS = (String) e.nextElement();
+            ConfigKey key = ConfigKey.getGlobalConfigKey(keyS);
+            if (key != null) {
+                map.put(keyS, pServletConfig.getInitParameter(keyS)); // Put known attributes into map
             }
         }
+        
+        // Add the OXJolokiaLogHandler to map
+        map.put(ConfigKey.LOGHANDLER_CLASS.toString(), OXJolokiaLogHandler.class.getName());
 
-        return list.toArray(new OXScope[list.size()]);
+        // Generate new servlet config and let Jolokia do its work 
+        ServletConfigImpl servletConfigWithOXLogger = new ServletConfigImpl(pServletConfig.getServletName(), pServletConfig.getServletContext(), map);
+        super.init(servletConfigWithOXLogger);
     }
 
-    /**
-     * Gets the isLegacy
-     *
-     * @return The isLegacy
-     */
-    public boolean isLegacy() {
-        return isLegacy;
-    }
-
-    /**
-     * Gets the displayName
-     *
-     * @return The displayName
-     */
-    public String getDisplayName() {
-        return displayName;
-    }
 }
