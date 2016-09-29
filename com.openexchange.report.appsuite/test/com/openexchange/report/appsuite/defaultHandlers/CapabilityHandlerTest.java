@@ -85,8 +85,8 @@ public class CapabilityHandlerTest {
         MockitoAnnotations.initMocks(this);
         PowerMockito.mockStatic(Services.class);
         PowerMockito.when(Services.getService(ConfigurationService.class)).thenReturn(configService);
-        Mockito.when(configService.getProperty("com.openexchange.report.serialization.fileStorage", "/tmp")).thenReturn(REPORT_PATH);
-        Mockito.when(configService.getIntProperty("com.openexchange.report.serialization.maxChunkSize", 200)).thenReturn(200);
+        Mockito.when(configService.getProperty("com.openexchange.report.appsuite.fileStorage", "/tmp")).thenReturn(REPORT_PATH);
+        Mockito.when(configService.getIntProperty("com.openexchange.report.appsuite.maxChunkSize", 200)).thenReturn(200);
         this.contextReport = initContextReport(2);
         this.initReport("default");
         this.initReportForStorage();
