@@ -70,6 +70,8 @@ public class Autoconfig {
     private String source;
     private boolean mailStartTls;
     private boolean transportStartTls;
+    private boolean mailOAuth;
+    private boolean transportOAuth;
 
     /**
      * Initializes a new ranked {@link Autoconfig}.
@@ -258,20 +260,76 @@ public class Autoconfig {
         this.username = username;
     }
 
+    /**
+     * Checks if STARTTLS is required for mail access.
+     *
+     * @return <code>true</code> if STARTTLS is required; otherwise <code>false</code>
+     */
     public boolean isMailStartTls() {
         return mailStartTls;
     }
 
+    /**
+     * Sets if STARTTLS is required for mail access.
+     *
+     * @param mailStartTls <code>true</code> if STARTTLS is required; otherwise <code>false</code>
+     */
     public void setMailStartTls(boolean mailStartTls) {
         this.mailStartTls = mailStartTls;
     }
 
+    /**
+     * Checks if STARTTLS is required for mail transport
+     *
+     * @return <code>true</code> if STARTTLS is required; otherwise <code>false</code>
+     */
     public boolean isTransportStartTls() {
         return transportStartTls;
     }
 
+    /**
+     * Sets if STARTTLS is required for mail transport.
+     *
+     * @param transportStartTls <code>true</code> if STARTTLS is required; otherwise <code>false</code>
+     */
     public void setTransportStartTls(boolean transportStartTls) {
         this.transportStartTls = transportStartTls;
+    }
+
+    /**
+     * Marks mail password as OAuth token and thus XOAUTH2 is supposed to be performed for authentication.
+     *
+     * @return <code>true</code> OAuth-wise mail access; otherwise <code>false</code>
+     */
+    public boolean isMailOAuth() {
+        return mailOAuth;
+    }
+
+    /**
+     * Sets whether mail password is an OAuth token and thus XOAUTH2 is supposed to be performed for authentication.
+     *
+     * @param mailOAuth <code>true</code> to mark mail password as OAuth token
+     */
+    public void setMailOAuth(boolean mailOAuth) {
+        this.mailOAuth = mailOAuth;
+    }
+
+    /**
+     * Marks transport password as OAuth token and thus XOAUTH2 is supposed to be performed for authentication.
+     *
+     * @return <code>true</code> OAuth-wise mail transport; otherwise <code>false</code>
+     */
+    public boolean isTransportOAuth() {
+        return transportOAuth;
+    }
+
+    /**
+     * Sets whether transport password is an OAuth token and thus XOAUTH2 is supposed to be performed for authentication.
+     *
+     * @param transportOAuth <code>true</code> to mark transport password as OAuth token
+     */
+    public void setTransportOAuth(boolean transportOAuth) {
+        this.transportOAuth = transportOAuth;
     }
 
     @Override

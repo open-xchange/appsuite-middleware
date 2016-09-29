@@ -62,7 +62,7 @@ import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaDataRegistry;
 import com.openexchange.oauth.json.Services;
-import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
 
@@ -107,7 +107,7 @@ public class AccountParser {
             Iterator<Object> scopesIterator = enabledScopesArray.iterator();
             while (scopesIterator.hasNext()) {
                 String scope = (String) scopesIterator.next();
-                enabledScopes.add(scopeRegistry.getScope(api, Module.valueOf(scope)));
+                enabledScopes.add(scopeRegistry.getScope(api, OXScope.valueOf(scope)));
             }
         }
 

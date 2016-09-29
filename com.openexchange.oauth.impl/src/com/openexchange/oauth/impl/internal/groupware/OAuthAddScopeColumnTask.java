@@ -67,7 +67,7 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
@@ -148,25 +148,25 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
 
     private enum Scope {
 
-        BOXCOM(API.BOX_COM.getFullName(), Module.drive),
-        DROPBOX(API.DROPBOX.getFullName(), Module.drive),
-        GOOGLE(API.GOOGLE.getFullName(), Module.calendar_ro, Module.contacts_ro, Module.drive, Module.offline),
-        MSLIVE_CONNECT(API.MS_LIVE_CONNECT.getFullName(), Module.calendar_ro, Module.contacts_ro, Module.drive),
-        LINKEDIN(API.LINKEDIN.getFullName(), Module.contacts_ro),
-        VKONTAKTE(API.VKONTAKTE.getFullName(), Module.contacts_ro),
-        XING(API.XING.getFullName(), Module.contacts_ro),
-        YAHOO(API.YAHOO.getFullName(), Module.contacts_ro),
-        TWITTER(API.TWITTER.getFullName(), Module.generic),
+        BOXCOM(API.BOX_COM.getFullName(), OXScope.drive),
+        DROPBOX(API.DROPBOX.getFullName(), OXScope.drive),
+        GOOGLE(API.GOOGLE.getFullName(), OXScope.calendar_ro, OXScope.contacts_ro, OXScope.drive),
+        MSLIVE_CONNECT(API.MS_LIVE_CONNECT.getFullName(), OXScope.calendar_ro, OXScope.contacts_ro, OXScope.drive),
+        LINKEDIN(API.LINKEDIN.getFullName(), OXScope.contacts_ro),
+        VKONTAKTE(API.VKONTAKTE.getFullName(), OXScope.contacts_ro),
+        XING(API.XING.getFullName(), OXScope.contacts_ro),
+        YAHOO(API.YAHOO.getFullName(), OXScope.contacts_ro),
+        TWITTER(API.TWITTER.getFullName(), OXScope.generic),
         ;
 
         private String scope;
 
         private String serviceId;
 
-        Scope(String serviceId, Module... modules) {
+        Scope(String serviceId, OXScope... modules) {
             this.serviceId = serviceId;
             StringBuilder builder = new StringBuilder();
-            for (Module m : modules) {
+            for (OXScope m : modules) {
                 builder.append(m.name()).append(" ");
             }
             if (builder.length() > 0) {

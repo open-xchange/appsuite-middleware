@@ -57,10 +57,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.jolokia.config.ConfigKey;
 import org.jolokia.restrictor.Restrictor;
 import org.jolokia.restrictor.RestrictorFactory;
-import org.jolokia.restrictor.RestrictorFactoryForLocalhost;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.jolokia.osgi.Services;
+import com.openexchange.jolokia.restrictor.OXRestrictor;
+import com.openexchange.jolokia.restrictor.OXRestrictorLocalhost;
 import com.openexchange.server.Initialization;
 
 /**
@@ -128,12 +129,12 @@ public class JolokiaConfig implements Initialization {
         // jolokia properties
         this.jolokiaServletName = configService.getProperty("com.openexchange.jolokia.servlet.name", "/monitoring/jolokia");
         this.jolokiaStart = configService.getBoolProperty("com.openexchange.jolokia.start", false);
-        this.user = configService.getProperty("com.openexchange.jolokia.user","");
-        this.password = configService.getProperty("com.openexchange.jolokia.password","");
+        this.user = configService.getProperty("com.openexchange.jolokia.user", "");
+        this.password = configService.getProperty("com.openexchange.jolokia.password", "");
         this.restrictToLocalhost = configService.getBoolProperty("com.openexchange.jolokia.restrict.to.localhost", true);
 
         // only allow Jolokia to be started if user and password are set by admin
-        if (jolokiaStart){
+        if (jolokiaStart) {
             if (!(null != user && user.length() != 0)) {
                 LOG.warn("No user set by com.openexchange.jolokia.user, Jolokia will not start");
                 jolokiaStart = false;
@@ -144,21 +145,26 @@ public class JolokiaConfig implements Initialization {
             }
         }
 
-
         File xmlConfigFile = configService.getFileByName("jolokia-access.xml");
         if (null != xmlConfigFile) {
             try {
-                restrictor =  RestrictorFactory.lookupPolicyRestrictor(xmlConfigFile.toURI().toURL().toString());
+                restrictor = RestrictorFactory.lookupPolicyRestrictor(xmlConfigFile.toURI().toURL().toString());
             } catch (RuntimeException e) {
                 LOG.warn("Error loading configuration from file {}", xmlConfigFile.getAbsolutePath(), e);
             } catch (IOException e) {
                 LOG.warn("Error loading configuration from file {}", xmlConfigFile.getAbsolutePath(), e);
             }
         } else if (restrictToLocalhost) {
-            restrictor = RestrictorFactoryForLocalhost.createPolicyRestrictor();
+            restrictor = new OXRestrictorLocalhost();
         }
 
-
+        /*
+         * MW207 Instead of a default Restrictor used by Jolokia an own OXRestrictor is used.
+         * In case no XML file is found/usable or service is not permitted to localhost OXRestrictor will be used
+         */
+        if (null == restrictor) {
+            restrictor = new OXRestrictor(!restrictToLocalhost);
+        }
 
         final String maxObjects = configService.getProperty("com.openexchange.jolokia.maxObjects", "0");
         if (null != maxObjects) {
@@ -169,7 +175,6 @@ public class JolokiaConfig implements Initialization {
         if (null != maxDepth) {
             pConfig.put(ConfigKey.MAX_DEPTH.getKeyValue(), maxDepth);
         }
-
 
     }
 

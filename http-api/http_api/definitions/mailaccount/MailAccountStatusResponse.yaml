@@ -1,0 +1,9 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: object
+    description: |
+      A JSON object providing the status information for a mail account; such as "ok" or "invalid_credentials"
+  warnings:
+      $ref: "#/definitions/CommonResponse"

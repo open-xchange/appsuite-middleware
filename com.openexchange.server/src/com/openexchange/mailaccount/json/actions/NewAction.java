@@ -141,6 +141,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             availableAttributes.remove(Attribute.TRANSPORT_PASSWORD_LITERAL);
             accountDescription.setTransportLogin(null);
             accountDescription.setTransportPassword(null);
+            accountDescription.setTransportOAuthId(-1);
         }
 
         checkNeededFields(accountDescription);

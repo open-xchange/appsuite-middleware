@@ -351,6 +351,8 @@ MailAccountDeletionResponse:
   $ref: ./mailaccount/MailAccountDeletionResponse.yaml
 MailAccountValidationResponse:
   $ref: ./mailaccount/MailAccountValidationResponse.yaml
+MailAccountStatusResponse:
+  $ref: ./mailaccount/MailAccountStatusResponse.yaml
 # Module: autoconfig
 AutoConfigResponse:
   $ref: ./autoconfig/AutoConfigResponse.yaml

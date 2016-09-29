@@ -490,7 +490,7 @@ public abstract class MailServletInterface implements Closeable {
     /**
      * Sends messages.
      */
-    public abstract List<String> sendMessages(List<? extends ComposedMailMessage> transportMails, ComposedMailMessage sentMail, ComposeType sendType, int accountId, UserSettingMail optUserSetting, MtaStatusInfo statusInfo, String remoteAddress) throws OXException;
+    public abstract List<String> sendMessages(List<? extends ComposedMailMessage> transportMails, ComposedMailMessage sentMail, boolean transportEqualToSent, ComposeType sendType, int accountId, UserSettingMail optUserSetting, MtaStatusInfo statusInfo, String remoteAddress) throws OXException;
 
     /**
      * Appends given messages to given folder.

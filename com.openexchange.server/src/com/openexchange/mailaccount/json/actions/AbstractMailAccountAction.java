@@ -348,7 +348,8 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
             int accountId = accountDescription.getId();
             MailAccess<?, ?> mailAccess = accountId >= 0 ? mailProvider.createNewMailAccess(session, accountId) : mailProvider.createNewMailAccess(session);
             mailConfig = mailAccess.getMailConfig();
-            // Set login and password
+            // Set auth-type, login and password
+            mailConfig.setAuthType(accountDescription.getAuthType());
             mailConfig.setLogin(accountDescription.getLogin());
             mailConfig.setPassword(accountDescription.getPassword());
             // Set server and port

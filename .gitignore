@@ -222,3 +222,4 @@ com.openexchange.nosql.cassandra/build
 com.openexchange.file.storage/doc
 http-api/build
 http-api/codegen/*/clients
+documentation/docu/configuration/properties.md

@@ -178,7 +178,7 @@ public class PhotoResource extends DAVResource {
      * @param targetDimension The target dimension, or <code>null</code> to skip scaling
      * @return The scaled image data, or <code>null</code> if no scaling needed or scaling failed
      */
-    private TransformedImage scaleImageIfNeeded(byte[] imageBytes, String formatName, Dimension targetDimension) throws OXException {
+    private TransformedImage scaleImageIfNeeded(byte[] imageBytes, String formatName, Dimension targetDimension) {
         if (null == imageBytes || null == targetDimension || 1 > targetDimension.getWidth() || 1 > targetDimension.getHeight()) {
             return null;
         }
