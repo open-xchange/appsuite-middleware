@@ -27,10 +27,8 @@ div.heading h3:before {
   content: none;
 }
 
-#flexDiv {
-  display:flex;
-  height: 100%;
-  width: 70%;
+div#toc {
+  max-height: 100vh;
 }
 
 #tocDiv {
@@ -38,7 +36,7 @@ div.heading h3:before {
   background-color: #F5F5F5;
   border-right: 1px solid #DDDDDD;
   height:100vh;
-  overflow-y: overlay;
+  overflow-y: auto;
   position: fixed;
   left: 0;
   top: 0;
@@ -84,29 +82,31 @@ div.heading h3:before {
 }
 
 h1#tocHeading {
-  position: fixed;
-  margin-left: 1em;
+  padding-left: 10px;
+  background: #275885;
+  color: white;
 }
 
 ul.tocList {
-  position: fixed;
   left: 0em;
   top: 2em;
-  margin: auto;
-  margin-left: auto;
-  margin-right: auto;
-  padding: 20px;
-  max-width: 250px;
-  list-style-type: circle;
+  margin: none;
+  margin-left: none;
+  margin-right: none;
+  max-width: 300px;
+  list-style-type: none;
   font-family: "Droid Sans", sans-serif;
   list-style-position: inside;
+  border-top: 1px solid #DDDDDD;
 }
 
 ul.tocList2 {
   margin-left: 20px;
-  list-style-type: circle;
+  list-style-type: none;
   font-family: "Droid Sans", sans-serif;
   list-style-position: inside;
+  display: none;
+  border-top: 1px solid #DDDDDD;
 }
 
 ol.tocChapterList {
@@ -125,10 +125,13 @@ ol.tocChapterList li{
 }
 
 li.hideItem {
+  background-color: #F5F5F5;
   display: none;
   padding: 1px;
   font-weight: bold;
   color: #0088CC;
+  border-left: 1px solid #DDDDDD;
+  border-bottom: 1px solid #DDDDDD;
 }
 
 h1 {
@@ -288,20 +291,82 @@ button.oxButton {
 }
 
 li.tocItem {
+  
+  font-weight: bold;
+  color: #0088CC;
+  border-bottom: 1px solid #DDDDDD;
+}
+
+li.tocItem:hover {
+ background-color: #E5E5E5;
+}
+
+li.tocItemInline {
   padding: 1px;
   font-weight: bold;
   color: #0088CC;
 }
 
+a.tocATagInline {
+  text-decoration: none;
+  color: #0088CC;
+  cursor: auto;
+}
+
+a.tocATagInline:hover {
+  color: #1199DD;
+  text-decoration: underline;
+}
+
+
+
+li.hideItem:hover {
+ background-color: #E5E5E5;
+}
+
+li.tocTable:hover {
+  background-color: inherit;
+}
+
+li.tocTable {
+  display: inline-table;
+  width: 300px;
+}
+
 a.tocATag {
+  padding: 10px;
+  display: block;
   text-decoration: none;
   color: #0088CC;
   cursor: auto;
 }
 
 a.tocATag:hover {
-  color: #1199DD;
-  text-decoration: underline;
+  /**color: #1199DD;**/
+}
+
+a.tocATagHide {
+  padding: 5px;
+  display: block;
+  text-decoration: none;
+  color: #0088CC;
+  cursor: auto;
+}
+
+a.tocATagHide:hover {
+  
+}
+
+
+
+a.tocATagCell {
+  display: table-cell;
+  min-width: 220px;
+  background-color: #F5F5F5;
+}
+
+a.tocATagCell:hover {
+  background-color: #E5E5E5;
 }
 
 a.tocPlusTag {
@@ -309,11 +374,17 @@ a.tocPlusTag {
   text-decoration: none;
   color: #0088CC;
   cursor: auto;
-  padding-left: 5px;
+  /** padding-left: 5px; **/
+  text-align:center;
+  border-left: 1px solid #E5E5E5;
+  min-width: 60px;
+  background-color: #F5F5F5;
 }
 
 a.tocPlusTag:hover {
   color: #1199DD;
+  border-left: 1px solid white;
+  background-color: #E5E5E5;
 }
 
 .oxNormalDiv pre {
@@ -1163,7 +1234,7 @@ a.tocPlusTag:hover {
   text-decoration: none;
 }
 .swagger-section .swagger-ui-wrap ul#resources li.resource ul.endpoints li.endpoint ul.operations li.operation div.heading ul.options li a .markdown p {
-  color: inherit;
+  color: black;
   padding: 0;
   line-height: inherit;
 }

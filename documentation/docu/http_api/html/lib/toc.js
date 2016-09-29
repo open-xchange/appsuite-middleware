@@ -19,11 +19,11 @@ function generateRequestTOC() {
 		var node = document.createElement("li");
 		node.className = 'hideItem';
 		var aTag = createLink("#resource_" + tagName, tagName);
-		aTag.className = 'tocATag';
+		aTag.className = 'tocATagHide';
 		subtoc.appendChild(node).appendChild(aTag);
 		
 	}
-	document.getElementById("expandRequestToc").style.display="inline";
+	document.getElementById("expandRequestToc").style.display="table-cell";
 }
 
 function generateTOC(toc) {
@@ -46,18 +46,23 @@ function generateTOC(toc) {
 
 	// insert OX HTTP API Node
 	var node = document.createElement("li");
-	node.className = 'tocItem';
+	node.className = 'tocItem tocTable';
 	node.id = "API_ITEM"
 	var aTag = createLink("#API-Title" , "OX HTTP API");
-	aTag.className = 'tocATag';
+	aTag.className = 'tocATag tocATagCell';
 	var tmpNode = mainToc.appendChild(node);
-	tmpNode.appendChild(aTag);	
 
-	var plusTag = createLink("#" , "[+]");
+	var nodeTable = document.createElement("div");
+	nodeTable.className = 'tocTable';
+	nodeTable.id = "API_ITEM_TABLE"
+	tmpNode.appendChild(nodeTable);	
+	nodeTable.appendChild(aTag);	
+
+	var plusTag = createLink("#" , "&#x25BC;");
 	plusTag.id = "expandRequestToc";
 	plusTag.onclick = function(){toggleRequestTOC()};
 	plusTag.className = 'tocPlusTag';
-	tmpNode.appendChild(plusTag);
+	nodeTable.appendChild(plusTag);
 	
 	var headers2 = $('#after_insert_div h1');
 
@@ -89,9 +94,9 @@ function generateChapterTOC(chapter) {
 		var tocName = headers[i].innerHTML;
 		var tocID = headers[i].id;
 		var node = document.createElement("li");
-		node.className = 'tocItem';
+		node.className = 'tocItemInline';
 		var aTag = createLink("#" + tocID, tocName);
-		aTag.className = 'tocATag';
+		aTag.className = 'tocATagInline';
 		mainToc.appendChild(node).appendChild(aTag);	
 	}
 }
@@ -134,21 +139,30 @@ function toggleAll(show) {
 
 var show=true;
 function toggleRequestTOC(){
+	var parent;
 	var items = document.querySelectorAll(".hideItem");
 	if(show){
 		for(var i=0; i<items.length; ++i){
+			if(parent==null){
+				parent = items[i].parentElement;
+				parent.style.display = 'block';
+			}
 			items[i].style.display = 'list-item';
 		}
 
 		var aTag = document.getElementById("expandRequestToc");
-		aTag.innerHTML = "[-]";
+		aTag.innerHTML = "&#x25B2;";
 		show=false;
 	} else {
 		for(var i=0; i<items.length; ++i){
+			if(parent==null){
+				parent = items[i].parentElement;
+				parent.style.display = 'none';
+			}
 			items[i].style.display = 'none';
 		}
 		var aTag = document.getElementById("expandRequestToc");
-		aTag.innerHTML = "[+]";
+		aTag.innerHTML = "&#x25BC;";
 		show=true;
 	}
 }
