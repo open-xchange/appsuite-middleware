@@ -763,8 +763,24 @@ public abstract class MailConfig {
         }
     }
 
-    private static void applyPasswordAndAuthType(final MailConfig mailConfig, final Session session, final Account account) throws OXException {
-        int oAuthAccontId = assumeXOauth2For(account);
+    private static void applyPasswordAndAuthType(MailConfig mailConfig, Session session, Account account) throws OXException {
+        AuthInfo authInfo = determinePasswordAndAuthType(mailConfig.login, session, account, account.isMailAccount());
+        mailConfig.password = authInfo.getPassword();
+        mailConfig.authType = authInfo.getAuthType();
+    }
+
+    /**
+     * Determines given account's password and authentication type.
+     *
+     * @param login The login to assume
+     * @param session The session to check by
+     * @param account The account
+     * @param forMailAccess <code>true</code> to resolve for mail access; otherwise <code>false</code> for mail transport
+     * @return The authentication information
+     * @throws OXException If authentication information cannot be resolved
+     */
+    public static AuthInfo determinePasswordAndAuthType(String login, Session session, Account account, boolean forMailAccess) throws OXException {
+        int oAuthAccontId = assumeXOauth2For(account, forMailAccess);
         if (oAuthAccontId >= 0) {
             // Do the XOAUTH2 dance...
             OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
@@ -773,29 +789,30 @@ public abstract class MailConfig {
             }
 
             OAuthAccount oAuthAccount = oauthService.getAccount(oAuthAccontId, session, session.getUserId(), session.getContextId());
-            mailConfig.password = oAuthAccount.getToken();
-            mailConfig.authType = AuthType.OAUTH;
-        } else {
-            String mailAccountPassword = account.getPassword();
-            if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
-                // Set to empty string
-                mailConfig.password = "";
-            } else {
-                // Mail account's password
-                String server = account.isMailAccount() ? ((MailAccount) account).getMailServer() : account.getTransportServer();
-                mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), server);
-            }
+            return new AuthInfo(login, oAuthAccount.getToken(), AuthType.OAUTH);
         }
+
+        String mailAccountPassword = account.getPassword();
+        if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
+            // Advertise empty string
+            return new AuthInfo(login, "", AuthType.LOGIN);
+        }
+
+        // Mail account's password
+        String server = forMailAccess ? ((MailAccount) account).getMailServer() : account.getTransportServer();
+        String password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), server);
+        return new AuthInfo(login, password, AuthType.LOGIN);
     }
 
     /**
      * Checks whether XOAUTH2 authentication is assumed for specified account.
      *
      * @param account The account to check
+     * @param forMailAccess <code>true</code> to resolve for mail access; otherwise <code>false</code> for mail transport
      * @return The verified identifier of the associated OAuth account or <code>-1</code>
      */
-    protected static int assumeXOauth2For(Account account) {
-        if (account.isMailAccount()) {
+    protected static int assumeXOauth2For(Account account, boolean forMailAccess) {
+        if (forMailAccess) {
             MailAccount mailAccount = (MailAccount) account;
             if (false == mailAccount.isMailOAuthAble()) {
                 return -1;
@@ -1093,6 +1110,15 @@ public abstract class MailConfig {
      */
     public void setPassword(final String password) {
         this.password = password;
+    }
+
+    /**
+     * Sets the authentication type.
+     *
+     * @param authType The authentication type to set
+     */
+    public void setAuthType(AuthType authType) {
+        this.authType = authType;
     }
 
     /**

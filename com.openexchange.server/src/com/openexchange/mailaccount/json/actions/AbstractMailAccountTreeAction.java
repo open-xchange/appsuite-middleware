@@ -65,7 +65,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractMailAccountTreeAction extends AbstractMailAccountAction {
+public abstract class AbstractMailAccountTreeAction extends AbstractValidateMailAccountAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailAccountTreeAction.class);
 

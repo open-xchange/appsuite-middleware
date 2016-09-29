@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.AuthType;
 import com.openexchange.tools.net.URIDefaults;
 import com.openexchange.tools.net.URIParser;
 import com.openexchange.tools.net.URITools;
@@ -115,12 +116,16 @@ public final class MailAccountDescription implements Serializable {
     private Map<String, String> transportProperties;
     private int mailOAuthId;
     private int transportOAuthId;
+    private AuthType authType;
+    private AuthType transportAuthType;
 
     /**
      * Initializes a new {@link MailAccountDescription}.
      */
     public MailAccountDescription() {
         super();
+        authType = AuthType.LOGIN;
+        transportAuthType = null;
         properties = new HashMap<String, String>(4);
         transportProperties = new HashMap<String, String>(4);
         transportAuth = TransportAuth.MAIL;
@@ -149,6 +154,15 @@ public final class MailAccountDescription implements Serializable {
      */
     public String getLogin() {
         return login;
+    }
+
+    /**
+     * Gets the authentication type.
+     *
+     * @return The authentication type
+     */
+    public AuthType getAuthType() {
+        return authType;
     }
 
     /**
@@ -215,6 +229,15 @@ public final class MailAccountDescription implements Serializable {
      */
     public void setLogin(final String login) {
         this.login = login;
+    }
+
+    /**
+     * Sets the authentication type.
+     *
+     * @param authType The authentication type to set
+     */
+    public void setAuthType(AuthType authType) {
+        this.authType = authType;
     }
 
     /**
@@ -877,6 +900,15 @@ public final class MailAccountDescription implements Serializable {
     }
 
     /**
+     * Gets the transport authentication type.
+     *
+     * @return The transport authentication type
+     */
+    public AuthType getTransportAuthType() {
+        return transportAuthType;
+    }
+
+    /**
      * Sets the optional transport login.
      *
      * @param transportLogin The optional transport login
@@ -892,6 +924,15 @@ public final class MailAccountDescription implements Serializable {
      */
     public void setTransportPassword(final String transportPassword) {
         this.transportPassword = transportPassword;
+    }
+
+    /**
+     * Sets the optional transport authentication type.
+     *
+     * @param transportAuthType The optional transport authentication type
+     */
+    public void setTransportAuthType(AuthType transportAuthType) {
+        this.transportAuthType = transportAuthType;
     }
 
     /**
