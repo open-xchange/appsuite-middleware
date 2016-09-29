@@ -55,7 +55,7 @@ import org.junit.runners.Suite.SuiteClasses;
 /**
  * {@link UnitTests}
  *
- * @author <a href="mailto:firstname.lastname@open-xchange.com">Vitali Sjablow</a>
+ * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
  * @since v7.8.3
  */
 @RunWith(Suite.class)
