@@ -320,6 +320,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public char getDefaultSeparator(Session session) throws OXException {
+        return delegate.getDefaultSeparator(session);
+    }
+
+    @Override
     public MailAccount getDefaultMailAccount(int userId, int contextId) throws OXException {
         CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
