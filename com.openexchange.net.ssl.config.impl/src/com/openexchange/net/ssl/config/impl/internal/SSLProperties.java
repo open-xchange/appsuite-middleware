@@ -96,7 +96,7 @@ public enum SSLProperties {
 
     static final String TRUST_LEVEL_KEY = "com.openexchange.net.ssl.trustlevel";
 
-    static final String TRUST_LEVEL_DEFAULT = "none";
+    static final String TRUST_LEVEL_DEFAULT = "all";
 
     private static volatile TrustLevel trustLevel;
 
@@ -109,7 +109,7 @@ public enum SSLProperties {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
                         org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.net.ssl.trustlevel'.");
-                        return TrustLevel.find(TRUST_LEVEL_DEFAULT);
+                        return TrustLevel.TRUST_ALL;
                     }
                     String prop = service.getProperty(TRUST_LEVEL_KEY, TRUST_LEVEL_DEFAULT);
                     tmp = TrustLevel.find(prop);

@@ -59,7 +59,7 @@ public enum TrustLevel {
 
     TRUST_ALL("all"),
 
-    TRUST_NONE("none");
+    TRUST_RESTRICTED("restricted");
 
     private String level;
 
@@ -77,7 +77,7 @@ public enum TrustLevel {
                 return v;
             }
         }
-        org.slf4j.LoggerFactory.getLogger(TrustLevel.class).error("The defined log level '{}' is invalid. Please use '{}' or '{}'. Will fall back to default: trust 'none'.", abbr, TRUST_ALL.level, TRUST_NONE.level);
-        return TrustLevel.TRUST_NONE;
+        org.slf4j.LoggerFactory.getLogger(TrustLevel.class).error("The defined log level '{}' is invalid. Please use '{}' or '{}'. Will fall back to default: trust 'all'.", abbr, TRUST_ALL.level, TRUST_RESTRICTED.level);
+        return TrustLevel.TRUST_ALL;
     }
 }

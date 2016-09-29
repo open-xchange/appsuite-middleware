@@ -55,8 +55,8 @@ array:
   - data:
       Key: com.openexchange.net.ssl.trustlevel
       Description: >
-        Defines which level of trust should be considered for potentially secure connections (e. g. https). The default value 'none' means that no connection will be trusted and a SSLSocketFactory that checks certificates (and host names) will be used. You can switch this setting to 'all' so that every connection will be trusted (which isn't suggested by Open-Xchange). In that case a so called TrustAllSSLSocketFactory will be used.
-      Default: none
+        Defines which level of trust should be considered for potentially secure connections (e. g. https). The default value 'all' means that all certificates will be trusted and a SSLSocketFactory that does not check certificates (and host names) will be used. You can switch this setting to 'restricted' so that every certificate provided by the defined endpoint will be validated trusted.
+      Default: all
       Version: 7.8.3
       Reloadable: true
       Configcascade_Aware: false
@@ -95,7 +95,7 @@ array:
   - data:
       Key: com.openexchange.net.ssl.user.configuration.enabled
       Description: >
-        Defines if the user is able to define a more unsecure trust level than it is defined globally the administrator. For instance if 'com.openexchange.net.ssl.trustlevel' is 'none' the user won't be able to use to untrusted connections. If 'com.openexchange.net.ssl.user.configuration.enabled' is 'true' the user will be able to define that he will use untrusted connections.
+        Defines if the user is able to define a more unsecure trust level than it is defined globally the administrator. For instance if 'com.openexchange.net.ssl.trustlevel' is 'restricted' the user won't be able to use untrusted connections (invalid certificates provided by the endpoint). If 'com.openexchange.net.ssl.user.configuration.enabled' is 'true' the user will be able to define that he will use untrusted connections.
       Default: false
       Version: 7.8.3
       Reloadable: true

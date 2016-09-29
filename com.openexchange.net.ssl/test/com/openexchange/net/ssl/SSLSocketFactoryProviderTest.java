@@ -107,8 +107,8 @@ public class SSLSocketFactoryProviderTest {
     }
 
     @Test
-    public void testGetDefault_trustLevelNoneAndNoUserInLogProperties_returnTrustedFactory() {
-        Mockito.when(this.sslConfigurationService.getTrustLevel()).thenReturn(TrustLevel.TRUST_NONE);
+    public void testGetDefault_trustLevelRestrictedAndNoUserInLogProperties_returnTrustedFactory() {
+        Mockito.when(this.sslConfigurationService.getTrustLevel()).thenReturn(TrustLevel.TRUST_RESTRICTED);
         Mockito.when(this.userAwareSSLConfigurationService.isTrustAll(Matchers.anyInt(), Matchers.anyInt())).thenReturn(Boolean.FALSE.booleanValue());
 
         SSLSocketFactory socketFactory = SSLSocketFactoryProvider.getDefault();
@@ -117,8 +117,8 @@ public class SSLSocketFactoryProviderTest {
     }
 
     @Test
-    public void testGetDefault_trustLevelNoneUserIdNotAvailable_returnTrustedFactory() {
-        Mockito.when(this.sslConfigurationService.getTrustLevel()).thenReturn(TrustLevel.TRUST_NONE);
+    public void testGetDefault_trustLevelRestrictedUserIdNotAvailable_returnTrustedFactory() {
+        Mockito.when(this.sslConfigurationService.getTrustLevel()).thenReturn(TrustLevel.TRUST_RESTRICTED);
         Mockito.when(LogProperties.get(LogProperties.Name.SESSION_USER_ID)).thenReturn("-1");
 
         SSLSocketFactory socketFactory = SSLSocketFactoryProvider.getDefault();
@@ -127,8 +127,8 @@ public class SSLSocketFactoryProviderTest {
     }
 
     @Test
-    public void testGetDefault_trustLevelNoneContextIdNotAvailable_returnTrustedFactory() {
-        Mockito.when(this.sslConfigurationService.getTrustLevel()).thenReturn(TrustLevel.TRUST_NONE);
+    public void testGetDefault_trustLevelRestrictedContextIdNotAvailable_returnTrustedFactory() {
+        Mockito.when(this.sslConfigurationService.getTrustLevel()).thenReturn(TrustLevel.TRUST_RESTRICTED);
         Mockito.when(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID)).thenReturn("-1");
 
         SSLSocketFactory socketFactory = SSLSocketFactoryProvider.getDefault();
@@ -137,8 +137,8 @@ public class SSLSocketFactoryProviderTest {
     }
 
     @Test
-    public void testGetDefault_trustLevelNoneButUserWithTrustAllConfig_returnTrustAllFactory() {
-        Mockito.when(this.sslConfigurationService.getTrustLevel()).thenReturn(TrustLevel.TRUST_NONE);
+    public void testGetDefault_trustLevelRestrictedButUserWithTrustAllConfig_returnTrustAllFactory() {
+        Mockito.when(this.sslConfigurationService.getTrustLevel()).thenReturn(TrustLevel.TRUST_RESTRICTED);
         Mockito.when(this.userAwareSSLConfigurationService.isTrustAll(Matchers.anyInt(), Matchers.anyInt())).thenReturn(Boolean.FALSE.booleanValue());
         Mockito.when(LogProperties.get(LogProperties.Name.SESSION_USER_ID)).thenReturn("307");
         Mockito.when(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID)).thenReturn("1");
