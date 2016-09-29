@@ -85,9 +85,12 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.CompositionSpaces;
+import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -152,8 +155,6 @@ public final class NewAction extends AbstractMailAction {
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
-        final AJAXRequestData request = req.getRequest();
-        final List<OXException> warnings = new ArrayList<OXException>();
         try {
             long maxSize;
             long maxFileSize;
@@ -180,6 +181,10 @@ public final class NewAction extends AbstractMailAction {
                     }
                 }
             }
+
+            AJAXRequestData request = req.getRequest();
+            List<OXException> warnings = new ArrayList<OXException>();
+
             if (request.hasUploads(maxFileSize, maxSize) || request.getParameter(UPLOAD_FORMFIELD_MAIL) != null) {
                 return performWithUploads(req, request, warnings);
             }
@@ -491,7 +496,14 @@ public final class NewAction extends AbstractMailAction {
         }
     }
 
-    private AJAXRequestResult performWithoutUploads(final MailRequest req, final List<OXException> warnings) throws OXException, MessagingException, JSONException {
+    /**
+     * Performs sending a data block.
+     *
+     * @param req The mail request
+     * @param warnings The warnings to fill
+     * @return The request result
+     */
+    protected AJAXRequestResult performWithoutUploads(final MailRequest req, final List<OXException> warnings) throws OXException, MessagingException, JSONException {
         /*
          * Non-POST
          */
@@ -613,6 +625,38 @@ public final class NewAction extends AbstractMailAction {
                 accId = MailAccount.DEFAULT_ID;
             }
             accountId = accId;
+        }
+        /*
+         * Check for OAuth request
+         */
+        if (isOAuthRequest(request)) {
+            if (MailAccount.DEFAULT_ID == accountId) {
+                PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource();
+                switch (passwordSource) {
+                    case GLOBAL: {
+                        // Just for convenience
+                        String masterPassword = MailProperties.getInstance().getMasterPassword();
+                        if (masterPassword == null) {
+                            throw MailConfigException.create("Property \"com.openexchange.mail.masterPassword\" not set");
+                        }
+                        break;
+                    }
+                    case SESSION:
+                        // Fall-through
+                    default: {
+                        if (null == session.getPassword()) {
+                            throw MailExceptionCode.MISSING_CONNECT_PARAM.create("password");
+                        }
+                        break;
+                    }
+                }
+            } else {
+                if (null == session.getPassword()) {
+                    // Deny for now.
+                    // ( Might be possible to check SecretService if a proper secret is determineable although no password available )
+                    throw MailExceptionCode.MISSING_CONNECT_PARAM.create("password");
+                }
+            }
         }
         /*
          * Missing "folder" element indicates to send given message via default mail account

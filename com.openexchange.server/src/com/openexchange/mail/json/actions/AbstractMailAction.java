@@ -69,6 +69,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXRequestResultPostProcessor;
 import com.openexchange.ajax.requesthandler.AJAXState;
+import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.OXException;
@@ -377,6 +378,16 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      */
     protected static AJAXRequestResult getJSONNullResult() {
         return RESULT_JSON_NULL;
+    }
+
+    /**
+     * Check whether the given request is made via OAuth.
+     *
+     * @param request The request
+     * @return <code>true</code> if so
+     */
+    protected boolean isOAuthRequest(AJAXRequestData request) {
+        return request.containsProperty(OAuthConstants.PARAM_OAUTH_ACCESS);
     }
 
     /**
