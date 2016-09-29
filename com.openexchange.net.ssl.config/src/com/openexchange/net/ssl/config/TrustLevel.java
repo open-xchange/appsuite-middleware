@@ -77,6 +77,7 @@ public enum TrustLevel {
                 return v;
             }
         }
-        return null;
+        org.slf4j.LoggerFactory.getLogger(TrustLevel.class).error("The defined log level '{}' is invalid. Please use '{}' or '{}'. Will fall back to default: trust 'none'.", abbr, TRUST_ALL.level, TRUST_NONE.level);
+        return TrustLevel.TRUST_NONE;
     }
 }
