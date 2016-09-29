@@ -732,7 +732,6 @@ public abstract class MailConfig {
                 }
             }
         }
-        mailConfig.doCustomParsing(account, session);
     }
 
     private static boolean applyCredentials(MailConfig mailConfig, Credentials credentials) {
@@ -767,6 +766,7 @@ public abstract class MailConfig {
         AuthInfo authInfo = determinePasswordAndAuthType(mailConfig.login, session, account, account.isMailAccount());
         mailConfig.password = authInfo.getPassword();
         mailConfig.authType = authInfo.getAuthType();
+        mailConfig.doCustomParsing(account, session);
     }
 
     /**
