@@ -124,6 +124,15 @@ public class Period {
         return (endDate.getTime() - startDate.getTime()) / TimeUnit.DAYS.toMillis(1L);
     }
 
+    /**
+     * Gets the duration of this period in milliseconds.
+     *
+     * @return The duration in milliseconds
+     */
+    public long getDuration() {
+        return endDate.getTime() - startDate.getTime();
+    }
+
     @Override
     public String toString() {
         return "Period [startDate=" + startDate + ", endDate=" + endDate + ", allDay=" + allDay + "]";

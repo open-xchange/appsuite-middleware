@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,28 @@
  *
  */
 
-package com.openexchange.chronos.service;
+package com.openexchange.chronos.exception;
 
-import java.util.List;
-import com.openexchange.chronos.Event;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link DeleteResult}
+ * {@link CalendarExceptionMessages}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface DeleteResult extends CalendarResult {
+public class CalendarExceptionMessages implements LocalizableStrings {
+
+    public static final String EVENT_NOT_FOUND_MSG = "The requested event was not found.";
+
+    public static final String NO_PERMISSION_MSG = "The operation could not be completed due to insufficient permissions.";
+
+    public static final String CONCURRENT_MODIFICATION_MSG = "The operation could not be completed due to a concurrent modification. Please reload the data and try again.";
 
     /**
-     * Gets the deleted event.
-     *
-     * @return The event
+     * Initializes a new {@link CalendarExceptionMessages}.
      */
-    Event getDeletedEvent();
-
-    /**
-     * Gets a value indicating whether the delete operation resulted in an event update instead of a deletion.
-     *
-     * @return <code>true</code> if the result represents an update, <code>false</code>, otherwise
-     */
-    boolean wasUpdate();
-
-    /**
-     * Returns the update result view in case the delete operation resulted in an event update instead of a deletion, i.e.
-     * {@link #wasUpdate()} is <code>true</code>.
-     *
-     * @return The corresponding update result, or <code>null</code> if not available
-     */
-    UpdateResult asUpdate();
-
-    List<DeleteResult> getNestedResults();
-
+    private CalendarExceptionMessages() {
+        super();
+    }
 }

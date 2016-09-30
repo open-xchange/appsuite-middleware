@@ -293,7 +293,7 @@ public class CalendarServiceImpl implements CalendarService {
             protected Map<EventID, DeleteResult> execute(CalendarWriter writer) throws OXException {
                 Map<EventID, DeleteResult> results = new HashMap<EventID, DeleteResult>(eventIDs.size());
                 for (EventID eventID : eventIDs) {
-                    results.put(eventID, writer.deleteEvent(eventID.getFolderID(), eventID.getObjectID(), clientTimestamp));
+                    results.put(eventID, writer.deleteEvent(eventID, clientTimestamp));
                 }
                 return results;
             }

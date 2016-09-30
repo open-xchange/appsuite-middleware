@@ -50,9 +50,12 @@
 package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.impl.Utils.i;
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
@@ -76,23 +79,24 @@ public class Check {
      * @param requiredReadPermission The required read object permission, or {@link Permission#NO_PERMISSIONS} if none required
      * @param requiredWritePermission The required write object permission, or {@link Permission#NO_PERMISSIONS} if none required
      * @param requiredDeletePermission The required delete object permission, or {@link Permission#NO_PERMISSIONS} if none required
+     * @throws OXException {@link CalendarExceptionCodes#NO_READ_PERMISSION}, {@link CalendarExceptionCodes#NO_WRITE_PERMISSION}, {@link CalendarExceptionCodes#NO_DELETE_PERMISSION}
      */
     public static void requireCalendarPermission(UserizedFolder folder, int requiredFolderPermission, int requiredReadPermission, int requiredWritePermission, int requiredDeletePermission) throws OXException {
         if (false == CalendarContentType.class.isInstance(folder.getContentType())) {
-            throw new OXException();
+            throw CalendarExceptionCodes.NO_READ_PERMISSION.create(I(folder.getContext().getContextId()), I(folder.getUser().getId()), I(i(folder)));
         }
         Permission ownPermission = folder.getOwnPermission();
         if (ownPermission.getFolderPermission() < requiredFolderPermission) {
-            throw new OXException();
+            throw CalendarExceptionCodes.NO_READ_PERMISSION.create(I(folder.getContext().getContextId()), I(folder.getUser().getId()), I(i(folder)));
         }
         if (ownPermission.getReadPermission() < requiredReadPermission) {
-            throw new OXException();
+            throw CalendarExceptionCodes.NO_READ_PERMISSION.create(I(folder.getContext().getContextId()), I(folder.getUser().getId()), I(i(folder)));
         }
         if (ownPermission.getWritePermission() < requiredWritePermission) {
-            throw new OXException();
+            throw CalendarExceptionCodes.NO_WRITE_PERMISSION.create(I(folder.getContext().getContextId()), I(folder.getUser().getId()), I(i(folder)));
         }
         if (ownPermission.getDeletePermission() < requiredDeletePermission) {
-            throw new OXException();
+            throw CalendarExceptionCodes.NO_DELETE_PERMISSION.create(I(folder.getContext().getContextId()), I(folder.getUser().getId()), I(i(folder)));
         }
     }
 
@@ -113,11 +117,11 @@ public class Check {
      *
      * @param event The event to check the timestamp against
      * @param clientTimestampp The client timestamp
-     * @throws OXException If the check fails
+     * @throws OXException {@link CalendarExceptionCodes#CONCURRENT_MODIFICATION}
      */
     public static void requireUpToDateTimestamp(Event event, long clientTimestampp) throws OXException {
         if (event.getLastModified().getTime() > clientTimestampp) {
-            throw new OXException();
+            throw CalendarExceptionCodes.CONCURRENT_MODIFICATION.create(I(event.getId()), L(clientTimestampp), L(event.getLastModified().getTime()));
         }
     }
 
@@ -127,17 +131,17 @@ public class Check {
      *
      * @param event The event to check
      * @param folder The folder where the event should appear in
-     * @throws OXException If the check fails
+     * @throws OXException {@link CalendarExceptionCodes#EVENT_NOT_FOUND_IN_FOLDER}
      */
     public static void eventIsInFolder(Event event, UserizedFolder folder) throws OXException {
         if (PublicType.getInstance().equals(folder.getType())) {
             if (event.getPublicFolderId() != i(folder)) {
-                throw OXException.general("Event folder != requested folder"); //TODO
+                throw CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(I(i(folder)), I(event.getId()));
             }
         } else {
             Attendee userAttendee = CalendarUtils.find(event.getAttendees(), folder.getCreatedBy());
             if (null == userAttendee || userAttendee.getFolderID() != i(folder)) {
-                throw OXException.general("Event folder != requested folder"); //TODO
+                throw CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER.create(I(i(folder)), I(event.getId()));
             }
         }
     }

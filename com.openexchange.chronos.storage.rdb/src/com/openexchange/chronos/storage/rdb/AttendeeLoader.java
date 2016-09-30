@@ -145,7 +145,7 @@ public class AttendeeLoader {
     private int findGroupID(List<Attendee> internalAttendees, int member) throws OXException {
         for (Attendee internalAttendee : filter(internalAttendees, Boolean.TRUE, CalendarUserType.GROUP)) {
             int[] members = entityResolver.getGroupMembers(internalAttendee.getEntity());
-            if (0 < Arrays.binarySearch(members, member)) {
+            if (0 <= Arrays.binarySearch(members, member)) {
                 return internalAttendee.getEntity();
             }
         }
@@ -163,7 +163,7 @@ public class AttendeeLoader {
                     attendees.add(entityResolver.applyEntityData(userAttendee));
                 } else {
                     int groupID = findGroupID(internalAttendees, userAttendee.getEntity());
-                    if (0 < groupID) {
+                    if (-1 != groupID) {
                         userAttendee.setMember(ResourceId.forGroup(contextID, groupID));
                         attendees.add(entityResolver.applyEntityData(userAttendee));
                     }

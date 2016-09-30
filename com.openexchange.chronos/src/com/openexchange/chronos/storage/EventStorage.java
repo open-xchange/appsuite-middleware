@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage;
 
+import java.util.Date;
 import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -73,6 +74,16 @@ public interface EventStorage {
      * @return The event
      */
     Event loadEvent(int objectID, EventField[] fields) throws OXException;
+
+    /**
+     * Loads a specific exception from a recurring event series.
+     *
+     * @param seriesID The object identifier of the event to load
+     * @param recurrenceID The recurrence identifier of the exception to load
+     * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
+     * @return The event exception
+     */
+    Event loadException(int seriesID, Date recurrenceID, EventField[] fields) throws OXException;
 
     /**
      * Searches for events.

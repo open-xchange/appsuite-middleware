@@ -326,7 +326,7 @@ public class CalendarUtils {
         List<Attendee> filteredAttendees = new ArrayList<Attendee>(attendees.size());
         for (Attendee attendee : attendees) {
             if (null == cuType || cuType.equals(attendee.getCuType())) {
-                if (null == internal || internal.equals(Boolean.valueOf(0 < attendee.getEntity()))) {
+                if (null == internal || internal.equals(Boolean.valueOf(0 <= attendee.getEntity()))) {
                     filteredAttendees.add(attendee);
                 }
             }

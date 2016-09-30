@@ -737,10 +737,13 @@ public class EventConverter {
      */
     private SeriesPattern loadSeriesPattern(CalendarSession session, EventID eventID) throws OXException {
         EventField [] recurrenceFields = {
-            EventField.RECURRENCE_RULE, EventField.ALL_DAY, EventField.START_DATE, EventField.START_TIMEZONE,
-            EventField.END_DATE, EventField.END_TIMEZONE
+            EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.ALL_DAY, 
+            EventField.START_DATE, EventField.START_TIMEZONE, EventField.END_DATE, EventField.END_TIMEZONE
         };
         Event event = getEvent(session, eventID, recurrenceFields);
+        if (event.getSeriesId() != event.getId()) {
+            event = getEvent(session, new EventID(eventID.getFolderID(), event.getSeriesId()), recurrenceFields);
+        }
         return Event2Appointment.getSeriesPattern(event.getRecurrenceRule(), event.getStartDate(), event.getStartTimeZone(), event.isAllDay());
     }
 

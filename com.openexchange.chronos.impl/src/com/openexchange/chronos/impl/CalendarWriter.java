@@ -134,66 +134,8 @@ public class CalendarWriter extends CalendarReader {
         return updateAttendee(getFolder(folderID), objectID, attendee);
     }
 
-    public DeleteResultImpl deleteEvent(int folderID, int objectID, long clientTimestamp) throws OXException {
-        return deleteEvent(getFolder(folderID), objectID, clientTimestamp);
-    }
-
-    protected DeleteResultImpl deleteEvent(UserizedFolder folder, int objectID, long clientTimestamp) throws OXException {
-        /*
-         * load original event data
-         */
-        Event originalEvent = readAdditionalEventData(storage.getEventStorage().loadEvent(objectID, null), null);
-        if (null == originalEvent) {
-            throw OXException.notFound(String.valueOf(objectID));//TODO
-        }
-        /*
-         * check current session user's permissions
-         */
-        Check.eventIsInFolder(originalEvent, folder);
-        if (session.getUser().getId() != originalEvent.getCreatedBy()) {
-            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
-        } else {
-            requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
-        }
-        requireUpToDateTimestamp(originalEvent, clientTimestamp);
-        /*
-         * determine deletion mode
-         */
-        Date now = new Date();
-        User calendarUser = getCalendarUser(folder);
-        List<Attendee> userAttendees = filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL);
-        if (isOrganizer(originalEvent, calendarUser.getId()) || 1 == userAttendees.size() && calendarUser.getId() == userAttendees.get(0).getEntity()) {
-            /*
-             * deletion by organizer / last user attendee
-             */
-            storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, now, calendarUser.getId()));
-            storage.getAttendeeStorage().insertTombstoneAttendees(objectID, AttendeeMapper.getInstance().getTombstones(originalEvent.getAttendees()));
-            storage.getAlarmStorage().deleteAlarms(objectID);
-            storage.getEventStorage().deleteEvent(objectID);
-            storage.getAttendeeStorage().deleteAttendees(objectID);
-            return new DeleteResultImpl(session, calendarUser, i(folder), originalEvent, now);
-        } else if (contains(userAttendees, calendarUser.getId())) {
-            /*
-             * deletion as one of the user attendees
-             */
-            //TODO: set to ParticipationStatus.DECLINED ? or remove attendee ?
-            Attendee originalAttendee = find(userAttendees, calendarUser.getId());
-            storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, now, calendarUser.getId()));
-            storage.getAttendeeStorage().insertTombstoneAttendee(objectID, originalAttendee);
-            storage.getAttendeeStorage().deleteAttendees(objectID, Collections.singletonList(originalAttendee));
-            storage.getAlarmStorage().deleteAlarms(objectID, calendarUser.getId());
-            Event eventUpdate = new Event();
-            eventUpdate.setId(objectID);
-            Consistency.setModified(now, eventUpdate, calendarUser.getId());
-            storage.getEventStorage().updateEvent(eventUpdate);
-            Event updatedEvent = readAdditionalEventData(storage.getEventStorage().loadEvent(objectID, null), null);
-            return new DeleteResultImpl(session, calendarUser, i(folder), originalEvent, updatedEvent);
-        } else {
-            /*
-             * deletion as ?
-             */
-            throw OXException.general("unsupported deletion");
-        }
+    public DeleteResultImpl deleteEvent(EventID eventID, long clientTimestamp) throws OXException {
+        return DeleteOperation.prepare(storage, session, getFolder(eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), clientTimestamp);
     }
 
     private CreateResultImpl insertEvent(UserizedFolder folder, UserizedEvent userizedEvent) throws OXException {

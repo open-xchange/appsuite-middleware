@@ -49,7 +49,9 @@
 
 package com.openexchange.chronos.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.DeleteResult;
@@ -66,6 +68,7 @@ import com.openexchange.groupware.ldap.User;
 public class DeleteResultImpl extends UpdateResultImpl implements DeleteResult {
 
     private final Date timestamp;
+    private final List<DeleteResult> nestedResults;
 
     /**
      * Initializes a new {@link DeleteResultImpl} for a delete operation that resulted in an event update.
@@ -77,8 +80,23 @@ public class DeleteResultImpl extends UpdateResultImpl implements DeleteResult {
      * @param updatedEvent The updated event
      */
     public DeleteResultImpl(CalendarSession session, User calendarUser, int originalFolderID, Event originalEvent, Event updatedEvent) throws OXException {
+        this(session, calendarUser, originalFolderID, originalEvent, updatedEvent, new ArrayList<DeleteResult>());
+    }
+
+    /**
+     * Initializes a new {@link DeleteResultImpl} for a delete operation that resulted in an event update.
+     *
+     * @param session The calendar session
+     * @param calendarUser The actual calendar user
+     * @param originalFolderID The original folder identifier
+     * @param originalEvent The original event
+     * @param updatedEvent The updated event
+     * @param nestedResults A list of nested delete results
+     */
+    public DeleteResultImpl(CalendarSession session, User calendarUser, int originalFolderID, Event originalEvent, Event updatedEvent, List<DeleteResult> nestedResults) throws OXException {
         super(session, calendarUser, originalFolderID, originalEvent, originalFolderID, updatedEvent);
         this.timestamp = null;
+        this.nestedResults = null != nestedResults ? new ArrayList<DeleteResult>(nestedResults) : new ArrayList<DeleteResult>();
     }
 
     /**
@@ -91,8 +109,28 @@ public class DeleteResultImpl extends UpdateResultImpl implements DeleteResult {
      * @param timestamp The updated timestamp of the deleted event
      */
     public DeleteResultImpl(CalendarSession session, User calendarUser, int originalFolderID, Event originalEvent, Date timestamp) throws OXException {
+        this(session, calendarUser, originalFolderID, originalEvent, timestamp, new ArrayList<DeleteResult>());
+    }
+
+    /**
+     * Initializes a new {@link DeleteResultImpl}.
+     *
+     * @param session The calendar session
+     * @param calendarUser The actual calendar user
+     * @param originalFolderID The original folder identifier
+     * @param originalEvent The original event
+     * @param timestamp The updated timestamp of the deleted event
+     * @param nestedResults A list of nested delete results, or <code>null</code> if there are none
+     */
+    public DeleteResultImpl(CalendarSession session, User calendarUser, int originalFolderID, Event originalEvent, Date timestamp, List<DeleteResult> nestedResults) throws OXException {
         super(session, calendarUser, originalFolderID, originalEvent, originalFolderID, null);
         this.timestamp = timestamp;
+        this.nestedResults = null != nestedResults ? new ArrayList<DeleteResult>(nestedResults) : new ArrayList<DeleteResult>();
+    }
+
+    public DeleteResultImpl addNestedResult(DeleteResult result) {
+        nestedResults.add(result);
+        return this;
     }
 
     @Override
@@ -113,6 +151,11 @@ public class DeleteResultImpl extends UpdateResultImpl implements DeleteResult {
     @Override
     public UpdateResult asUpdate() {
         return wasUpdate() ? this : null;
+    }
+
+    @Override
+    public List<DeleteResult> getNestedResults() {
+        return nestedResults;
     }
 
 }

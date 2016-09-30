@@ -142,6 +142,20 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     @Override
+    public Event loadException(int seriesID, Date recurrenceID, EventField[] fields) throws OXException {
+        long recurrenceDatePosition = Event2Appointment.getRecurrenceDatePosition(recurrenceID).getTime();
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return selectException(connection, context.getContextId(), seriesID, recurrenceDatePosition, fields);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
     public int nextObjectID() throws OXException {
         Connection connection = null;
         try {
@@ -275,6 +289,24 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, contextID);
             stmt.setInt(2, objectID);
+            ResultSet resultSet = logExecuteQuery(stmt);
+            if (resultSet.next()) {
+                return readEvent(resultSet, mappedFields, null);
+            }
+        }
+        return null;
+    }
+
+    private static Event selectException(Connection connection, int contextID, int seriesID, long recurrenceDatePosition, EventField[] fields) throws SQLException, OXException {
+        EventField[] mappedFields = EventMapper.getInstance().getMappedFields(fields);
+        String sql = new StringBuilder()
+            .append("SELECT ").append(EventMapper.getInstance().getColumns(mappedFields)).append(" FROM prg_dates ")
+            .append("WHERE cid=? AND intfield02=? AND field08=? AND intfield01<>intfield02;")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, seriesID);
+            stmt.setString(3, String.valueOf(recurrenceDatePosition));
             ResultSet resultSet = logExecuteQuery(stmt);
             if (resultSet.next()) {
                 return readEvent(resultSet, mappedFields, null);
