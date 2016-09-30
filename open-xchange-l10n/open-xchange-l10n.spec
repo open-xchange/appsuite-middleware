@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 22
+%define        ox_release 23
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -664,6 +664,8 @@ done
 /opt/open-xchange/i18n/*en_GB*
 
 %changelog
+* Fri Sep 30 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2016-10-10 (3596)
 * Tue Sep 20 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-09-26 (3571)
 * Mon Sep 05 2016 Marcus Klein <marcus.klein@open-xchange.com>
