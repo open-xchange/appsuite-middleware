@@ -54,6 +54,7 @@ import java.util.List;
 import javax.mail.MessagingException;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.json.MailOAuthConstants;
@@ -70,6 +71,7 @@ import com.openexchange.server.ServiceLookup;
  * @since v7.8.3
  */
 @OAuthAction(MailOAuthConstants.OAUTH_SEND_DATA)
+@DispatcherNotes( preferStream = true )
 public class SendDataAction extends AbstractMailAction {
 
     private final NewAction delegate;

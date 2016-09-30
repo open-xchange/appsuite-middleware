@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.actions;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -69,6 +70,7 @@ import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.documentation.RequestMethod;
@@ -134,6 +136,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "flags", optional=true, description = "In case the mail should be stored with status \"read\" (e.g. mail has been read already in the client inbox), the parameter \"flags\" has to be included. If no \"folder\" parameter is specified, this parameter must not be included. For infos about mail flags see Detailed mail data spec.")
 }, requestBody = "The MIME Data Block.",
 responseDescription = "Object ID of the newly created/moved mail.")
+@DispatcherNotes( preferStream = true )
 public final class NewAction extends AbstractMailAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewAction.class);
@@ -528,11 +531,11 @@ public final class NewAction extends AbstractMailAction {
             }
         }
 
-        // Get rfc822 bytes and create corresponding mail message
+        // Get RFC822 bytes and create corresponding mail message
         QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), false);
         PutNewMailData data;
         {
-            MimeMessage message = MimeMessageUtility.newMimeMessage(Streams.newByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().requireData())), true);
+            MimeMessage message = loadMimeMessageFrom(req);
             message.removeHeader("x-original-headers");
             if (newMessageId) {
                 message.removeHeader("Message-ID");
@@ -572,6 +575,25 @@ public final class NewAction extends AbstractMailAction {
         AJAXRequestResult result = new AJAXRequestResult(responseData, "json");
         result.addWarnings(warnings);
         return result;
+    }
+
+    private MimeMessage loadMimeMessageFrom(final MailRequest req) throws OXException {
+        HttpServletRequest httpRequest = req.getRequest().optHttpServletRequest();
+        if (null == httpRequest) {
+            return MimeMessageUtility.newMimeMessage(Streams.newByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().requireData())), true);
+        }
+
+        Object requestBody = req.getRequest().getData();
+        if (null != requestBody) {
+            return MimeMessageUtility.newMimeMessage(Streams.newByteArrayInputStream(Charsets.toAsciiBytes((String) requestBody)), true);
+        }
+
+        // Not yet loaded
+        try {
+            return MimeMessageUtility.newMimeMessage(httpRequest.getInputStream(), true);
+        } catch (IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
     }
 
     private interface PutNewMailData {
