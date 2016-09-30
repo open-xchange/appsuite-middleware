@@ -130,6 +130,23 @@ If you would like to add a reference to another property use the following appro
 ---
 
 
+## Grizzly 
+
+| Key | <span style="font-weight:normal">com.openexchange.http.grizzly.wsTimeoutMillis</span> |
+|:----------------|:--------|
+| __Description__ | Specifies the Web Socket timeout in milliseconds<br> |
+| __Default__ | is 900000 (15 Minutes).  |
+ |
+| __Default__ | 900000  |
+| __Version__ | 7.8.3  |
+| __Reloadable__ | false  |
+| __Configcascade Aware__ | false  |
+| __Related__ | com.openexchange.websockets.enabled  |
+| __File__ | grizzly.properties  |
+
+---
+
+
 ## Mail 
 
 | Key | <span style="font-weight:normal">com.openexchange.mail.useStaticDefaultFolders</span> |
