@@ -1,3 +1,9 @@
+open-xchange-subscribe (7.8.2-12) stable; urgency=medium
+
+  * Build for patch 2016-10-10 (3597)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 30 Sep 2016 16:31:42 +0200
+
 open-xchange-subscribe (7.8.2-11) stable; urgency=medium
 
   * Build for patch 2016-09-26 (3572)
