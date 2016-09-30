@@ -79,6 +79,8 @@ public enum PushNotificationField {
     MAIL_UNREAD("unread"),
     /** The key providing the mail path; type is <code>java.lang.String</code> */
     MAIL_PATH("cid"),
+    /** The teaser for the mail text; type is <code>java.lang.String</code> */
+    MAIL_TEASER("teaser"),
 
     // -------------------------------- Calendar-related fields ----------------------------
     /** The title of an appointment; type is <code>java.lang.String</code> */
