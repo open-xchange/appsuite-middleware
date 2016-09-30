@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.chronos,
  com.openexchange.chronos.common,
  com.openexchange.chronos.compat,
+ com.openexchange.chronos.exception,
  com.openexchange.chronos.service,
  com.openexchange.chronos.storage,
  com.openexchange.config,

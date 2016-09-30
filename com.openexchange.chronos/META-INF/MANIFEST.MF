@@ -26,5 +26,6 @@ Import-Package: com.openexchange.ajax.fileholder,
  org.osgi.service.event,
  org.slf4j
 Export-Package: com.openexchange.chronos,
+ com.openexchange.chronos.exception,
  com.openexchange.chronos.service,
  com.openexchange.chronos.storage
