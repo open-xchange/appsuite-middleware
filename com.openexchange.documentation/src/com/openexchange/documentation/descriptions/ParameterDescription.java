@@ -56,7 +56,9 @@ import com.openexchange.documentation.Type;
  *
  * @see com.openexchange.documentation.annotations.Parameter
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @deprecated Never used & obsolete, therefore <b>to be removed with v7.10.0</b>. See <a href="../../../../../http-api/readme.md">http-api/readme.md</a> for details about API documentation.
  */
+@Deprecated
 public interface ParameterDescription extends Description {
 
 	/**
