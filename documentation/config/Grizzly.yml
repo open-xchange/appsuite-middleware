@@ -2,7 +2,7 @@ array:
   - data:
       Key: com.openexchange.http.grizzly.wsTimeoutMillis
       Description: >
-Specifies the Web Sokcet timeout in milliseconds
+Specifies the Web Socket timeout in milliseconds
 Default is 900000 (15 Minutes).
       Default: 900000
       Version: 7.8.3
