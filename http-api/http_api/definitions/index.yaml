@@ -192,6 +192,8 @@ ResolveShareReferenceResponse:
   $ref: ./mail/ResolveShareReferenceResponse.yaml
 ExamineResponse:
  $ref: ./mail/ExamineResponse.yaml
+PutAttachmentBody:
+ $ref: ./mail/PutAttachmentBody.yaml
 # Module: groups
 GroupData:
   $ref: ./groups/GroupData.yaml

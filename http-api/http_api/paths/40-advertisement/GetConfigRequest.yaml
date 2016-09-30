@@ -1,6 +1,6 @@
 /advertisement?action=get:
   put:
-    operationId: getConfig
+    operationId: getAdvertisementConfig
     tags: 
       - advertisement
     summary: Retrieves the advertisement configuration
