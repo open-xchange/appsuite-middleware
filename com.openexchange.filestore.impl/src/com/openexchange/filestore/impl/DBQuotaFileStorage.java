@@ -61,8 +61,10 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -90,6 +92,36 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
 
     private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(QuotaFileStorage.class);
 
+    private static final ServiceListing<QuotaFileStorageListener> EMPTY_LISTENERS = new ServiceListing<QuotaFileStorageListener>() {
+
+        @Override
+        public Iterator<QuotaFileStorageListener> iterator() {
+            return new Iterator<QuotaFileStorageListener>() {
+
+                @Override
+                public boolean hasNext() {
+                    return false;
+                }
+
+                @Override
+                public QuotaFileStorageListener next() {
+                    throw new NoSuchElementException();
+                }
+
+                @Override
+                public void remove() {
+                    // Ignore
+                }
+
+            };
+        }
+
+        @Override
+        public List<QuotaFileStorageListener> getServiceList() {
+            return Collections.emptyList();
+        }
+    };
+
     private final int contextId;
     private final transient FileStorage fileStorage;
     private final long quota;
@@ -111,7 +143,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
      */
     public DBQuotaFileStorage(int contextId, int ownerId, long quota, FileStorage fs, URI uri, ServiceListing<QuotaFileStorageListener> listeners) throws OXException {
         super();
-        this.listeners = listeners;
+        this.listeners = null == listeners ? EMPTY_LISTENERS : listeners;
         if (fs == null) {
             throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
         }
