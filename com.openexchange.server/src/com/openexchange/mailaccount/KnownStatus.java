@@ -50,28 +50,60 @@
 package com.openexchange.mailaccount;
 
 import java.util.Locale;
+import com.openexchange.i18n.tools.StringHelper;
 
 /**
- * {@link Status} - Represents a status for a mail account.
+ * {@link KnownStatus} - An enumeration for known statuses for a mail account.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface Status {
+public enum KnownStatus implements Status {
 
     /**
-     * Gets the identifier; such as "ok" or "invalid_credentials"
-     *
-     * @return The identifier
+     * The "OK" status. All fine.
      */
-    String getId();
+    OK("ok", KnownStatusMessage.MESSAGE_OK),
+    /**
+     * Referenced account currently carries invalid credentials and is therefore unable to connect. Credentials are supposed to be corrected by user.
+     */
+    INVALID_CREDENTIALS("invalid_credentials", KnownStatusMessage.MESSAGE_INVALID_CREDENTIALS),
+
+    ;
+
+    private final String id;
+    private final String message;
+
+    private KnownStatus(String id, String message) {
+        this.id = id;
+        this.message = message;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getMessage(Locale locale) {
+        return StringHelper.valueOf(null == locale ? Locale.US : locale).getString(message);
+    }
 
     /**
-     * Gets the accompanying human-readable message (optional) for given locale.
+     * Gets the status for given identifier
      *
-     * @param locale The locale
-     * @return The human-readable message or <code>null</code>
+     * @param identifier The status' identifier
+     * @return The status or <code>null</code>
      */
-    String getMessage(Locale locale);
-
+    public static Status statusFor(String identifier) {
+        if (null == identifier) {
+            return null;
+        }
+        for (KnownStatus s : KnownStatus.values()) {
+            if (identifier.equalsIgnoreCase(s.id)) {
+                return s;
+            }
+        }
+        return null;
+    }
 }

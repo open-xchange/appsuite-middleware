@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,29 +49,28 @@
 
 package com.openexchange.mailaccount;
 
-import java.util.Locale;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link Status} - Represents a status for a mail account.
+ * {@link KnownStatusMessage}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public interface Status {
+public class KnownStatusMessage implements LocalizableStrings {
 
     /**
-     * Gets the identifier; such as "ok" or "invalid_credentials"
-     *
-     * @return The identifier
+     * Initializes a new {@link KnownStatusMessage}.
      */
-    String getId();
+    private KnownStatusMessage() {
+        super();
+    }
 
-    /**
-     * Gets the accompanying human-readable message (optional) for given locale.
-     *
-     * @param locale The locale
-     * @return The human-readable message or <code>null</code>
-     */
-    String getMessage(Locale locale);
+    // The message advertising that everything is fine with checked account
+    public static final String MESSAGE_OK = "All fine";
+
+    // The message advertising that authentication against referenced mail account does not work or stopped working
+    public static final String MESSAGE_INVALID_CREDENTIALS = "The entered credential or authentication information does not work or are no longer accepted by provider. Please change them.";
 
 }
