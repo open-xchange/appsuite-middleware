@@ -58,8 +58,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -71,7 +73,9 @@ import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
+import com.openexchange.filestore.QuotaFileStorageListener;
 import com.openexchange.filestore.impl.osgi.Services;
+import com.openexchange.osgi.ServiceListing;
 
 /**
  * {@link DBQuotaFileStorage} - Delegates file storage operations to associated {@link FileStorage} instance while accounting quota in
@@ -91,6 +95,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
     private final long quota;
     private final int ownerId;
     private final URI uri;
+    private final ServiceListing<QuotaFileStorageListener> listeners;
 
     /**
      * Initializes a new {@link DBQuotaFileStorage} for an owner.
@@ -101,10 +106,12 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
      * @param quota The assigned quota
      * @param fs The file storage associated with the owner
      * @param uri The URI that fully qualifies this file storage
+     * @param listeners The quota listeners
      * @throws OXException If initialization fails
      */
-    public DBQuotaFileStorage(int contextId, int ownerId, long quota, FileStorage fs, URI uri) throws OXException {
+    public DBQuotaFileStorage(int contextId, int ownerId, long quota, FileStorage fs, URI uri, ServiceListing<QuotaFileStorageListener> listeners) throws OXException {
         super();
+        this.listeners = listeners;
         if (fs == null) {
             throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
         }
@@ -136,18 +143,19 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         if (!deleted) {
             return false;
         }
-        decUsage(fileSize);
+        decUsage(identifier, fileSize);
         return true;
     }
 
     /**
      * Increases the quota usage.
      *
+     * @param id The identifier of the associated file
      * @param usage The value by which the quota is supposed to be increased
      * @return <code>true</code> if quota is exceeded; otherwise <code>false</code>
      * @throws OXException If a database error occurs
      */
-    protected boolean incUsage(long usage) throws OXException {
+    protected boolean incUsage(String id, long usage) throws OXException {
         DatabaseService db = getDatabaseService();
         Connection con = db.getWritable(contextId);
 
@@ -174,8 +182,22 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             final long newUsage = oldUsage + usage;
             final long quota = this.quota;
             if ((quota == 0) || (quota > 0 && newUsage > quota)) {
+                // Advertise exceeded quota to listeners
+                for (QuotaFileStorageListener listener : listeners) {
+                    try {
+                        listener.onQuotaExceeded(id, usage, oldUsage, quota, ownerId, contextId);
+                    } catch (Exception e) {
+                        LOGGER.warn("", e);
+                    }
+                }
                 return true;
             }
+
+            // Advertise usage increment to listeners
+            for (QuotaFileStorageListener listener : listeners) {
+                listener.onUsageIncrement(id, usage, oldUsage, quota, ownerId, contextId);
+            }
+
             ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=? AND user=?");
             ustmt.setLong(1, newUsage);
             ustmt.setInt(2, contextId);
@@ -207,10 +229,22 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
     /**
      * Decreases the QuotaUsage.
      *
+     * @param id The identifier of the associated file
      * @param usage by that the Quota has to be decreased
      * @throws OXException
      */
-    protected void decUsage(long usage) throws OXException {
+    protected void decUsage(String id, long usage) throws OXException {
+        decUsage(Collections.singletonList(id), usage);
+    }
+
+    /**
+     * Decreases the QuotaUsage.
+     *
+     * @param ids The identifiers of the associated files
+     * @param usage by that the Quota has to be decreased
+     * @throws OXException
+     */
+    protected void decUsage(List<String> ids, long usage) throws OXException {
         DatabaseService db = getDatabaseService();
         Connection con = db.getWritable(contextId);
 
@@ -242,6 +276,15 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
                 newUsage = 0;
                 final OXException e = QuotaFileStorageExceptionCodes.QUOTA_UNDERRUN.create(I(ownerId), I(contextId));
                 LOGGER.error("", e);
+            }
+
+            // Advertise usage increment to listeners
+            for (QuotaFileStorageListener listener : listeners) {
+                try {
+                    listener.onUsageDecrement(ids, usage, oldUsage, quota, ownerId, contextId);
+                } catch (Exception e) {
+                    LOGGER.warn("", e);
+                }
             }
 
             ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=? AND user=?");
@@ -299,7 +342,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         for (Long fileSize : fileSizes.values()) {
             sum += fileSize.longValue();
         }
-        decUsage(sum);
+        decUsage(Arrays.asList(identifiers), sum);
         return set;
     }
 
@@ -354,7 +397,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
             String retval = file;
 
             // Check against quota limitation
-            boolean full = incUsage(fileStorage.getFileSize(file));
+            boolean full = incUsage(file, fileStorage.getFileSize(file));
             if (full) {
                 throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
             }
@@ -488,7 +531,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         boolean notFoundError = false;
         try {
             newSize = fileStorage.appendToFile(is, name, offset);
-            if (incUsage(newSize - offset)) {
+            if (incUsage(name, newSize - offset)) {
                 throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
             }
         } catch (final OXException e) {
