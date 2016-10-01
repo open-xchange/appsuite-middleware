@@ -818,7 +818,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             FilenameValidationUtils.checkName(document.getFileName());
         }
 
-        if (FileStorageFileAccess.NEW == document.getId()) {
+        if (isNewFile(document)) {
             /*
              * create new file, determine target file storage
              */
@@ -938,7 +938,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             session, serviceID, accountID, newFolderID.toUniqueID(), newId, document.getFileName()));
         return newId;
     }
-
 
     /**
      * Moves a file to a folder located in a different file storage.
@@ -1082,15 +1081,20 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             @Override
             protected SaveResult callInTransaction(final FileStorageFileAccess access) throws OXException {
                 ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(session, access, document, modifiedColumns);
+                /*
+                 * check for encrypted file
+                 */
+                markAsEncryptedIfAppropriate(document, modifiedColumns);
+                /*
+                 * save file dependent on parameters and storage's capabilities
+                 */
                 IDTuple result;
-                if (ignoreVersion && FileStorageFileAccess.NEW != document.getId() &&
-                    FileStorageTools.supports(access, FileStorageCapability.IGNORABLE_VERSION)) {
+                if (ignoreVersion && isNoNewFile(document) && FileStorageTools.supports(access, FileStorageCapability.IGNORABLE_VERSION)) {
                     /*
                      * save and don't increment the version number
                      */
-                    result = ((FileStorageIgnorableVersionFileAccess) access).saveDocument(
-                        document, data, sequenceNumber, modifiedColumns, ignoreVersion);
-                } else if (tryAddVersion && FileStorageFileAccess.NEW == document.getId()) {
+                    result = ((FileStorageIgnorableVersionFileAccess) access).saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion);
+                } else if (tryAddVersion && isNewFile(document)) {
                     /*
                      * try to add file version
                      */
@@ -1115,6 +1119,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 saveResult.setAddedPermissions(ShareHelper.collectAddedObjectPermissions(comparedPermissions, session));
                 return saveResult;
             }
+
         });
     }
 
@@ -1915,6 +1920,76 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         } finally {
             SearchIterators.close(iter);
         }
+    }
+
+    /**
+     * Checks if given file meta-data is <i><b>not</b></i> a new file to create.
+     *
+     * @param document The file meta-data to check
+     * @return <code>true</code> if file meta-data is not a new file; otherwise <code>false</code>
+     */
+    protected static boolean isNoNewFile(File document) {
+        return (null != document) && (FileStorageFileAccess.NEW == document.getId());
+    }
+
+    /**
+     * Checks if given file meta-data is a new file to create.
+     *
+     * @param document The file meta-data to check
+     * @return <code>true</code> if file meta-data is a new file; otherwise <code>false</code>
+     */
+    protected static boolean isNewFile(File document) {
+        return (null != document) && (FileStorageFileAccess.NEW == document.getId());
+    }
+
+    /**
+     * Checks of passed file meta-data hints to an encrypted file.
+     * <ul>
+     * <li>MIME type is equal to <code>"application/pgp-encrypted"</code> or
+     * <li>File name ends with <code>".pgp"</code> extension
+     * </ul>
+     *
+     * @param document The file meta-data to check
+     * @return <code>true</code> if given file meta-data hints to an encrypted file; otherwise <code>false</code>
+     */
+    protected static boolean isEncryptedFile(File document) {
+        return (null != document) && ("application/pgp-encrypted".equalsIgnoreCase(document.getFileMIMEType()) || (Strings.isNotEmpty(document.getFileName()) && Strings.toLowerCase(document.getFileName()).endsWith(".pgp")));
+    }
+
+    private static final String METADATA_KEY_ENCRYPTED = "Encrypted";
+
+    /**
+     * Marks given file meta-data as encrypted {@link #isEncryptedFile(File) if appropriate}.
+     *
+     * @param document The file meta-data to check
+     * @param modifiedColumns The specified modified columns so far
+     * @return <code>true</code> if file meta-data was marked as encrypted; otherwise <code>false</code>
+     * @see #isEncryptedFile(File)
+     */
+    protected static boolean markAsEncryptedIfAppropriate(File document, List<Field> modifiedColumns) {
+        if (isEncryptedFile(document)) {
+            Map<String, Object> meta = document.getMeta();
+            if (null == meta) {
+                meta = new java.util.LinkedHashMap<>(2);
+                meta.put(METADATA_KEY_ENCRYPTED, Boolean.TRUE);
+                document.setMeta(meta);
+
+                if (null != modifiedColumns && false == modifiedColumns.contains(File.Field.META)) {
+                    modifiedColumns.add(File.Field.META);
+                }
+
+                return true;
+            } else if (!meta.containsKey(METADATA_KEY_ENCRYPTED)) {
+                meta.put(METADATA_KEY_ENCRYPTED, Boolean.TRUE);
+
+                if (null != modifiedColumns && false == modifiedColumns.contains(File.Field.META)) {
+                    modifiedColumns.add(File.Field.META);
+                }
+
+                return true;
+            }
+        }
+        return false;
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------
