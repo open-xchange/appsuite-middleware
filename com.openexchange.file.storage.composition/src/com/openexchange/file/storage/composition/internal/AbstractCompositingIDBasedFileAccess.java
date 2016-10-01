@@ -1084,7 +1084,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 /*
                  * check for encrypted file
                  */
-                markAsEncryptedIfAppropriate(document, modifiedColumns);
+                if (FileStorageTools.supports(access, FileStorageCapability.EXTENDED_METADATA)) {
+                    markAsEncryptedIfAppropriate(document, modifiedColumns);
+                }
                 /*
                  * save file dependent on parameters and storage's capabilities
                  */
