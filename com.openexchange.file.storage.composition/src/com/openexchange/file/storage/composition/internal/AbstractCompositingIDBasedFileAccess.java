@@ -1931,7 +1931,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
      * @return <code>true</code> if file meta-data is not a new file; otherwise <code>false</code>
      */
     protected static boolean isNoNewFile(File document) {
-        return (null != document) && (FileStorageFileAccess.NEW == document.getId());
+        return (null != document) && (FileStorageFileAccess.NEW != document.getId());
     }
 
     /**
