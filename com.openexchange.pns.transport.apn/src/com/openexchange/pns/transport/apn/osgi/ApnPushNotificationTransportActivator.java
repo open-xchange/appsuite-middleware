@@ -198,6 +198,7 @@ public class ApnPushNotificationTransportActivator extends HousekeepingActivator
                     Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
                     dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(785));
                     optionsProviderRegistration = context.registerService(ApnOptionsProvider.class, new DefaultApnOptionsProvider(options), dictionary);
+                    this.optionsProviderRegistration = optionsProviderRegistration;
                 }
             }
         }

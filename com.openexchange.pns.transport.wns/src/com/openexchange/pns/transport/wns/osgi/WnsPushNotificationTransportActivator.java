@@ -177,6 +177,7 @@ public class WnsPushNotificationTransportActivator extends HousekeepingActivator
                     Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
                     dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(785));
                     optionsProviderRegistration = context.registerService(WnsOptionsProvider.class, new DefaultWnsOptionsProvider(options), dictionary);
+                    this.optionsProviderRegistration = optionsProviderRegistration;
                 }
             }
         }
