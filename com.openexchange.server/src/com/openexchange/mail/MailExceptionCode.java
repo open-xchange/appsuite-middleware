@@ -574,7 +574,16 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * Authentication type "%1$s" is not supported by server %2$s
      */
-    AUTH_TYPE_NOT_SUPPORTED("Authentication type \"%1$s\" is not supported by server %2$s", MailExceptionStrings.AUTH_TYPE_NOT_SUPPORTED_MSG, CATEGORY_CONFIGURATION, 108)
+    AUTH_TYPE_NOT_SUPPORTED("Authentication type \"%1$s\" is not supported by server %2$s", MailExceptionStrings.AUTH_TYPE_NOT_SUPPORTED_MSG, CATEGORY_CONFIGURATION, 108),
+    /**
+     * An account status response providing no information for a user
+     */
+    ACCOUNT_STATUS("Account status is \"%1$s\".", CATEGORY_SERVICE_DOWN, 109),
+    /**
+     * An account status response providing information for a user. Account status is "%1$s". User info: %2$s
+     */
+    ACCOUNT_STATUS_WITH_INFO("Account status is \"%1$s\". User info: %2$s", MailExceptionStrings.ACCOUNT_STATUS_WITH_INFO_MSG, ACCOUNT_STATUS.getCategory(), ACCOUNT_STATUS.getNumber()), // Yapp, same error code
+
     ;
 
     private static final String PREFIX = "MSG";

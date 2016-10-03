@@ -224,4 +224,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // The authentication type selected for a certain mail/transport account is not supported; e.g. user wants to authenticate via OAuth, but IMAP server does not support AUTH=XOAUTH2 capability
     public static final String AUTH_TYPE_NOT_SUPPORTED_MSG = "The selected authentication type is not supported by server %2$s";
 
+    // Something is wrong with a subscribed E-Mail account; e.g. invalid credentials. Example: "Please check your mail account: The entered credentials are wrong"
+    public static final String ACCOUNT_STATUS_WITH_INFO_MSG = "Please check your mail account: %2$s";
+
 }
