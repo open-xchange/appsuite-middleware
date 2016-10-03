@@ -49,11 +49,16 @@ public class ProtocolException extends Exception {
 
     private static final long serialVersionUID = -4360500807971797439L;
 
+    private final String responseCode;
+    private final ResponseCode knownResponseCode;
+
     /**
      * Constructs a ProtocolException with no detail message.
      */
     public ProtocolException() {
 	super();
+	responseCode = null;
+	knownResponseCode = null;
     }
 
     /**
@@ -63,6 +68,8 @@ public class ProtocolException extends Exception {
      */
     public ProtocolException(String message) {
 	super(message);
+    responseCode = null;
+    knownResponseCode = null;
     }
 
     /**
@@ -74,6 +81,8 @@ public class ProtocolException extends Exception {
      */
     public ProtocolException(String message, Throwable cause) {
 	super(message, cause);
+    responseCode = null;
+    knownResponseCode = null;
     }
 
     /**
@@ -84,6 +93,41 @@ public class ProtocolException extends Exception {
     public ProtocolException(Response r) {
 	super(r.toString());
 	response = r;
+
+	String responseCode = null;
+	String s = r.getRest();    // get the text after the response
+	if (s.startsWith("[")) {   // a response code
+	    int i = s.indexOf(']');
+        if (i > 0) {
+            responseCode = s.substring(0, i + 1);
+        }
+	}
+	this.responseCode = responseCode;
+	this.knownResponseCode = ResponseCode.responseCodeFor(responseCode);
+    }
+
+    /**
+     * Gets the response code from offending Response object.
+     * <p>
+     * E.g. <code>"NO [INUSE] Mailbox in use"</code>; response code is <code>[INUSE]</code>.
+     *
+     * @return The response code or <code>null</code>
+     * @see #getKnownResponseCode()
+     */
+    public String getResponseCode() {
+        return responseCode;
+    }
+
+    /**
+     * Gets the known response code (according to <a href="https://tools.ietf.org/html/rfc5530">RFC 5530</a>) from offending Response object.
+     * <p>
+     * <b>Note:</b> Even if this method returns <code>null</code>, there might nevertheless be a response code available. Check {@link #getResponseCode()} for evidence.
+     *
+     * @return The known response code or <code>null</code>
+     * @see #getResponseCode()
+     */
+    public ResponseCode getKnownResponseCode() {
+        return knownResponseCode;
     }
 
     /**

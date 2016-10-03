@@ -106,6 +106,7 @@ import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
 import com.openexchange.mail.json.compose.internal.ComposeHandlerRegistryImpl;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.transport.config.TransportReloadable;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
@@ -216,6 +217,10 @@ public final class MailJSONActivator extends AJAXModuleActivator {
             composeHandlerRegisty = new ComposeHandlerRegistryImpl(tracker);
         }
 
+        MimeMailExceptionHandlerTracker exceptionHandlerTracker = new MimeMailExceptionHandlerTracker(context);
+        rememberTracker(exceptionHandlerTracker);
+        MimeMailException.setExceptionHandlers(exceptionHandlerTracker);
+
         openTrackers();
 
         registerService(ComposeHandlerRegistry.class, composeHandlerRegisty);
@@ -284,6 +289,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
+        MimeMailException.unsetExceptionHandlers();
         ServerServiceRegistry.getInstance().removeService(ComposeHandlerRegistry.class);
         DefaultMailAttachmentStorageRegistry.dropInstance();
         MailActionFactory.releaseActionFactory();
