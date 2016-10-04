@@ -181,7 +181,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
             // Acquire account manager
             FileStorageAccountManager accountManager = getAccountManager();
             OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
-            OAuthAccessRegistry registry = registryService.get(API.BOX_COM.getFullName());
+            OAuthAccessRegistry registry = registryService.get(api.getFullName());
             for (FileStorageAccount deleteMe : toDelete) {
                 accountManager.deleteAccount(deleteMe, session);
                 LOG.info("Deleted {} file storage account with id {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), api.getShortName(), deleteMe.getId(), user, cid);
