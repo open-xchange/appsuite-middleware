@@ -52,10 +52,12 @@ package com.openexchange.file.storage.oauth;
 import static com.openexchange.file.storage.SecretAwareFileStorageAccountManager.newInstanceFor;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
@@ -130,6 +132,16 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
     @Override
     public DynamicFormDescription getFormDescription() {
         return formDescription;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.FileStorageService#getSecretProperties()
+     */
+    @Override
+    public Set<String> getSecretProperties() {
+        return Collections.emptySet();
     }
 
     /*

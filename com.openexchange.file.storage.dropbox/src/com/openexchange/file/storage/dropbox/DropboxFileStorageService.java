@@ -49,8 +49,6 @@
 
 package com.openexchange.file.storage.dropbox;
 
-import java.util.Collections;
-import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -94,11 +92,6 @@ public final class DropboxFileStorageService extends AbstractOAuthFileStorageSer
     @Override
     public String getDisplayName() {
         return "Dropbox File Storage Service";
-    }
-
-    @Override
-    public Set<String> getSecretProperties() {
-        return Collections.emptySet();
     }
 
     @Override

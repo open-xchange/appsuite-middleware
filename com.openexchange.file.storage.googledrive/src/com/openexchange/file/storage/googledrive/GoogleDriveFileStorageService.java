@@ -49,8 +49,6 @@
 
 package com.openexchange.file.storage.googledrive;
 
-import java.util.Collections;
-import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageAccount;
@@ -91,11 +89,6 @@ public final class GoogleDriveFileStorageService extends AbstractOAuthFileStorag
     @Override
     public String getDisplayName() {
         return "Google Drive File Storage Service";
-    }
-
-    @Override
-    public Set<String> getSecretProperties() {
-        return Collections.emptySet();
     }
 
     @Override
