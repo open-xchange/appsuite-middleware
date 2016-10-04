@@ -56,6 +56,7 @@ As last step, there needs to be a `ProxyPass` directive for the `socket.io` path
     ProxyPass /socket.io balancer://oxcluster_ws/socket.io
 ```
 
+**Please note:**
 As a Web Socket is made cluster-wide accessible, Hazelcast is used to manage the orchestration and management of Web Sockets in the cluster. If Hazelcast is not installed, inter node communication is not supported.
 
 ## Installation
