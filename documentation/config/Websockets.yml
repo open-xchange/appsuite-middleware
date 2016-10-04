@@ -4,8 +4,7 @@ array:
       Description: >
 The main switch to enable/disable Web Sockets. That property is responsive to config-cascade
 and reloadable as well.
-Default is false.
-      Default: false
+      Default: true
       Version: 7.8.3
       Reloadable: true
       Configcascade_Aware: true
