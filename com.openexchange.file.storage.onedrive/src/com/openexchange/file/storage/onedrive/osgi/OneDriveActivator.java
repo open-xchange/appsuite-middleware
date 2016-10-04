@@ -58,8 +58,9 @@ import org.slf4j.Logger;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.onedrive.access.OneDriveEventHandler;
+import com.openexchange.file.storage.oauth.OAuthFileStorageAccountEventHandler;
 import com.openexchange.mime.MimeTypeMap;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
@@ -106,7 +107,7 @@ public final class OneDriveActivator extends HousekeepingActivator {
              */
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
-            registerService(EventHandler.class, new OneDriveEventHandler(), serviceProperties);
+            registerService(EventHandler.class, new OAuthFileStorageAccountEventHandler(this, API.MS_LIVE_CONNECT), serviceProperties);
         } catch (final Exception e) {
             logger.error("", e);
             throw e;

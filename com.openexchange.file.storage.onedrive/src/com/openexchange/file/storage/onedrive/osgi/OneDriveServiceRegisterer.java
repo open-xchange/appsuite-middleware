@@ -99,7 +99,7 @@ public final class OneDriveServiceRegisterer implements ServiceTrackerCustomizer
                 /*
                  * Try to create Microsoft OneDrive service
                  */
-                service = OneDriveFileStorageService.newInstance();
+                service = new OneDriveFileStorageService(Services.getServices());
                 this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
                 this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
                 this.service = service;
@@ -113,7 +113,7 @@ public final class OneDriveServiceRegisterer implements ServiceTrackerCustomizer
                     compositeProvider = new CompositeFileStorageAccountManagerProvider();
                     compositeProvider.addProvider(this.provider);
                     unregisterService(null);
-                    service = OneDriveFileStorageService.newInstance(compositeProvider);
+                    service = new OneDriveFileStorageService(Services.getServices(), compositeProvider);
                     this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
                     this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
                     this.service = service;
