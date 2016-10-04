@@ -207,6 +207,15 @@ public abstract class AbstractOAuthFileStorage implements AccountAware, OAuthAcc
     }
 
     /**
+     * Returns the {@link CompositeFileStorageAccountManagerProvider}
+     * 
+     * @return the {@link CompositeFileStorageAccountManagerProvider}
+     */
+    public CompositeFileStorageAccountManagerProvider getCompositeAccountManager() {
+        return compositeAccountManager;
+    }
+
+    /**
      * Retrieves the {@link FileStorageAccount} with the specified identifier for the specified {@link Session}
      * 
      * @param session The {@link Session}
