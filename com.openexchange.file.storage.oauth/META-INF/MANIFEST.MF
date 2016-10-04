@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange File Storage OAuth Bundle
+Bundle-SymbolicName: com.openexchange.file.storage.oauth
+Bundle-Version: 7.8.3
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.datatypes.genericonf,
+ com.openexchange.exception,
+ com.openexchange.file.storage,
+ com.openexchange.i18n,
+ com.openexchange.oauth,
+ com.openexchange.oauth.access,
+ com.openexchange.server,
+ com.openexchange.session,
+ org.slf4j;version="1.7.5"
