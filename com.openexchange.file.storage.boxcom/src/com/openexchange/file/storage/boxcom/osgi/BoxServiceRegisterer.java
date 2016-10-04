@@ -58,6 +58,8 @@ import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.BoxFileStorageService;
+import com.openexchange.file.storage.boxcom.Services;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 
 /**
@@ -99,7 +101,7 @@ public final class BoxServiceRegisterer implements ServiceTrackerCustomizer<File
                 /*
                  * Try to create Box.com service
                  */
-                service = BoxFileStorageService.newInstance();
+                service = new BoxFileStorageService(Services.getServices());
                 this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
                 this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
                 this.service = service;
@@ -113,7 +115,7 @@ public final class BoxServiceRegisterer implements ServiceTrackerCustomizer<File
                     compositeProvider = new CompositeFileStorageAccountManagerProvider();
                     compositeProvider.addProvider(this.provider);
                     unregisterService(null);
-                    service = BoxFileStorageService.newInstance(compositeProvider);
+                    service = new BoxFileStorageService(Services.getServices(), compositeProvider);
                     this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
                     this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
                     this.service = service;
