@@ -237,28 +237,7 @@ public class MimeMailException extends OXException {
             }
             if ((e instanceof javax.mail.AuthenticationFailedException) || ((toLowerCase(e.getMessage(), "").indexOf(ERR_AUTH_FAILED) != -1))) {
                 // Authentication failed
-                if (null != mailConfig && MailAccount.DEFAULT_ID == mailConfig.getAccountId()) {
-                    return MimeMailExceptionCode.LOGIN_FAILED.create(e, mailConfig.getServer(), mailConfig.getLogin());
-                }
-                if ((e.getMessage() != null) && ERR_TMP.equals(com.openexchange.java.Strings.toLowerCase(e.getMessage()))) {
-                    return MimeMailExceptionCode.LOGIN_FAILED.create(
-                        e,
-                        mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
-                            mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
-                }
-                if (null != mailConfig && null != session) {
-                    return MimeMailExceptionCode.INVALID_CREDENTIALS_EXT.create(
-                        e,
-                        mailConfig.getServer(),
-                        mailConfig.getLogin(),
-                        Integer.valueOf(session.getUserId()),
-                        Integer.valueOf(session.getContextId()),
-                        e.getMessage());
-                }
-                return MimeMailExceptionCode.INVALID_CREDENTIALS.create(
-                    e,
-                    mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
-                        e.getMessage());
+                return handleAuthenticationFailedException(e, mailConfig, session);
             } else if (e instanceof javax.mail.FolderClosedException) {
                 final Folder f = ((javax.mail.FolderClosedException) e).getFolder();
                 if (null != mailConfig && null != session) {
@@ -603,57 +582,9 @@ public class MimeMailException extends OXException {
             case ALREADYEXISTS:
                 return MailExceptionCode.DUPLICATE_FOLDER_SIMPLE.create(pe, new Object[0]);
             case AUTHENTICATIONFAILED:
-                {
-                    // Authentication failed
-                    if (null != mailConfig && MailAccount.DEFAULT_ID == mailConfig.getAccountId()) {
-                        return MimeMailExceptionCode.LOGIN_FAILED.create(pe, mailConfig.getServer(), mailConfig.getLogin());
-                    }
-                    if ((pe.getMessage() != null) && ERR_TMP.equals(com.openexchange.java.Strings.toLowerCase(pe.getMessage()))) {
-                        return MimeMailExceptionCode.LOGIN_FAILED.create(
-                            pe,
-                            mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
-                                mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
-                    }
-                    if (null != mailConfig && null != session) {
-                        return MimeMailExceptionCode.INVALID_CREDENTIALS_EXT.create(
-                            pe,
-                            mailConfig.getServer(),
-                            mailConfig.getLogin(),
-                            Integer.valueOf(session.getUserId()),
-                            Integer.valueOf(session.getContextId()),
-                            pe.getMessage());
-                    }
-                    return MimeMailExceptionCode.INVALID_CREDENTIALS.create(
-                        pe,
-                        mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
-                            pe.getMessage());
-                }
+                return handleAuthenticationFailedException(pe, mailConfig, session);
             case AUTHORIZATIONFAILED:
-                {
-                    // Authentication failed
-                    if (null != mailConfig && MailAccount.DEFAULT_ID == mailConfig.getAccountId()) {
-                        return MimeMailExceptionCode.LOGIN_FAILED.create(pe, mailConfig.getServer(), mailConfig.getLogin());
-                    }
-                    if ((pe.getMessage() != null) && ERR_TMP.equals(com.openexchange.java.Strings.toLowerCase(pe.getMessage()))) {
-                        return MimeMailExceptionCode.LOGIN_FAILED.create(
-                            pe,
-                            mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
-                                mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
-                    }
-                    if (null != mailConfig && null != session) {
-                        return MimeMailExceptionCode.INVALID_CREDENTIALS_EXT.create(
-                            pe,
-                            mailConfig.getServer(),
-                            mailConfig.getLogin(),
-                            Integer.valueOf(session.getUserId()),
-                            Integer.valueOf(session.getContextId()),
-                            pe.getMessage());
-                    }
-                    return MimeMailExceptionCode.INVALID_CREDENTIALS.create(
-                        pe,
-                        mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
-                            pe.getMessage());
-                }
+                return handleAuthenticationFailedException(pe, mailConfig, session);
             case CANNOT:
                 return MailExceptionCode.INVALID_FOLDER_NAME_SIMPLE.create(pe, pe.getResponseRest());
             case CLIENTBUG:
@@ -663,31 +594,7 @@ public class MimeMailException extends OXException {
             case CORRUPTION:
                 break;
             case EXPIRED:
-                {
-                    // Authentication failed
-                    if (null != mailConfig && MailAccount.DEFAULT_ID == mailConfig.getAccountId()) {
-                        return MimeMailExceptionCode.LOGIN_FAILED.create(pe, mailConfig.getServer(), mailConfig.getLogin());
-                    }
-                    if ((pe.getMessage() != null) && ERR_TMP.equals(com.openexchange.java.Strings.toLowerCase(pe.getMessage()))) {
-                        return MimeMailExceptionCode.LOGIN_FAILED.create(
-                            pe,
-                            mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
-                                mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
-                    }
-                    if (null != mailConfig && null != session) {
-                        return MimeMailExceptionCode.INVALID_CREDENTIALS_EXT.create(
-                            pe,
-                            mailConfig.getServer(),
-                            mailConfig.getLogin(),
-                            Integer.valueOf(session.getUserId()),
-                            Integer.valueOf(session.getContextId()),
-                            pe.getMessage());
-                    }
-                    return MimeMailExceptionCode.INVALID_CREDENTIALS.create(
-                        pe,
-                        mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
-                            pe.getMessage());
-                }
+                return handleAuthenticationFailedException(pe, mailConfig, session);
             case EXPUNGEISSUED:
                 break;
             case INUSE:
@@ -735,6 +642,32 @@ public class MimeMailException extends OXException {
         }
 
         return null;
+    }
+
+    private static OXException handleAuthenticationFailedException(Exception authenticationFailedException, MailConfig mailConfig, Session session) {
+        // Authentication failed
+        if (null != mailConfig && MailAccount.DEFAULT_ID == mailConfig.getAccountId()) {
+            return MimeMailExceptionCode.LOGIN_FAILED.create(authenticationFailedException, mailConfig.getServer(), mailConfig.getLogin());
+        }
+        if ((authenticationFailedException.getMessage() != null) && ERR_TMP.equals(com.openexchange.java.Strings.toLowerCase(authenticationFailedException.getMessage()))) {
+            return MimeMailExceptionCode.LOGIN_FAILED.create(
+                authenticationFailedException,
+                mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
+                    mailConfig == null ? STR_EMPTY : mailConfig.getLogin());
+        }
+        if (null != mailConfig && null != session) {
+            return MimeMailExceptionCode.INVALID_CREDENTIALS_EXT.create(
+                authenticationFailedException,
+                mailConfig.getServer(),
+                mailConfig.getLogin(),
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId()),
+                authenticationFailedException.getMessage());
+        }
+        return MimeMailExceptionCode.INVALID_CREDENTIALS.create(
+            authenticationFailedException,
+            mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
+                authenticationFailedException.getMessage());
     }
 
     /**
