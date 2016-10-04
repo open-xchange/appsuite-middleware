@@ -149,6 +149,9 @@ case "${BNAME}" in
     "changedatabase")
     ACTION="util.database.ChangeDatabase"
     ;;
+    "createschema")
+    ACTION="util.schema.CreateSchema"
+    ;;
     "getschemaname")
     ACTION="context.GetSchemaName"
     ;;

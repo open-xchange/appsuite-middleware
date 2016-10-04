@@ -82,6 +82,18 @@ public final class SessiondMBeanImpl extends AnnotatedStandardMBean implements S
     }
 
     @Override
+    public void clearUserSessionsGlobally(int userId, int contextId) throws MBeanException {
+        try {
+            SessionHandler.removeUserSessionsGlobal(userId, contextId);
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(SessiondMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    @Override
     public int getNumberOfUserSessons(int userId, int contextId) throws MBeanException {
         return SessionHandler.getNumOfUserSessions(userId, contextId, false);
     }

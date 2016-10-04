@@ -86,9 +86,12 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Tools;
 import com.openexchange.mailaccount.TransportAuth;
+import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.json.MailAccountFields;
+import com.openexchange.mailaccount.json.MailAccountOAuthConstants;
 import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
 import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -101,6 +104,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, requestBody = "A JSON object describing the new account to create. See mail account data.",
     responseDescription = "A JSON object representing the inserted mail account. See mail account data.")
+@OAuthAction(MailAccountOAuthConstants.OAUTH_WRITE_SCOPE)
 public final class NewAction extends AbstractMailAccountAction implements MailAccountFields {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(NewAction.class);
@@ -110,8 +114,8 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
     /**
      * Initializes a new {@link NewAction}.
      */
-    public NewAction() {
-        super();
+    public NewAction(ActiveProviderDetector activeProviderDetector) {
+        super(activeProviderDetector);
     }
 
     @Override
@@ -137,6 +141,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             availableAttributes.remove(Attribute.TRANSPORT_PASSWORD_LITERAL);
             accountDescription.setTransportLogin(null);
             accountDescription.setTransportPassword(null);
+            accountDescription.setTransportOAuthId(-1);
         }
 
         checkNeededFields(accountDescription);

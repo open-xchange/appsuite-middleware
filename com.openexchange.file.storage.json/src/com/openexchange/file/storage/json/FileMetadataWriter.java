@@ -101,8 +101,9 @@ public class FileMetadataWriter {
         /*
          * serialize regular fields
          */
-        final JsonFieldHandler handler = new JsonFieldHandler(request);
-        JSONObject jsonObject = File.Field.inject(getJsonHandler(file, handler), new JSONObject());
+        JSONObject jsonObject = new JSONObject();
+        final JsonFieldHandler handler = new JsonFieldHandler(request, jsonObject);
+        jsonObject = File.Field.inject(getJsonHandler(file, handler), jsonObject);
         /*
          * render additional fields if available
          */
@@ -134,7 +135,7 @@ public class FileMetadataWriter {
          * serialize regular fields
          */
         JSONObject jsonObject = new JSONObject();
-        FileFieldHandler jsonHandler = getJsonHandler(file, new JsonFieldHandler(request));
+        FileFieldHandler jsonHandler = getJsonHandler(file, new JsonFieldHandler(request, jsonObject));
         for (Field field : fields) {
             field.handle(jsonHandler, jsonObject);
         }

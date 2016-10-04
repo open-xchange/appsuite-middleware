@@ -82,10 +82,11 @@ public interface ConfigSource {
      * @param password The associated password
      * @param user The associated user
      * @param context The associated context
-     * @param forceSecure True if secure connection should be forced
+     * @param forceSecure <code>true</code> if a secure connection should be enforced; otherwise <code>false</code> to also allow plain ones
+     * @param isOAuth <code>true</code> to mark passed password as an OAuth token (and thus performing XOAUTH2 authentication mechanism); otherwise <code>false</code> for a regular password
      * @return An {@code Autoconfig} instance or <code>null</code> if generation fails.
      * @throws OXException If operation fails for any reason
      */
-    Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context, boolean forceSecure) throws OXException;
+    Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context, boolean forceSecure, boolean isOAuth) throws OXException;
 
 }

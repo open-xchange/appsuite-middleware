@@ -246,9 +246,9 @@ public enum ContactExceptionCodes implements DisplayableOXExceptionCode {
     NO_CHANGE_PERMISSION("You are not allowed to modify contact %1$d in context %2$d.", ContactExceptionMessages.NO_CHANGE_PERMISSION_DISPLAY,
             Category.CATEGORY_PERMISSION_DENIED, 176),
 
-    /** An E-Mail address is mandatory for external distribution list members. Please add a valid E-Mail address. */
+    /** An E-Mail address is mandatory for external distribution list members. Please add a valid E-Mail address to the contact \"%1$s\". */
     EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS("An E-Mail address is mandatory for external distribution list members. Please add a valid"
-        + " E-Mail address.", ContactExceptionMessages.EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS_DISPLAY, Category.CATEGORY_USER_INPUT, 177),
+        + " E-Mail address to the contact \"%1$s\".", ContactExceptionMessages.EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS_DISPLAY, Category.CATEGORY_USER_INPUT, 177),
 
     /** The object identifier is mandatory for distribution list members referencing existing contacts. */
     OBJECT_ID_MANDATORY_FOR_REFERENCED_MEMBERS("The object identifier is mandatory for distribution list members referencing"

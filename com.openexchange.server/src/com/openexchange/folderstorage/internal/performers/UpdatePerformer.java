@@ -56,7 +56,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.bouncycastle.util.Arrays;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.folderstorage.Folder;
@@ -399,7 +398,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                                         }
                                     }
 
-                                    int[] merged = Arrays.concatenate(userIdRemoved, userIdModified);
+                                    int[] merged = com.openexchange.tools.arrays.Arrays.concatenate(userIdRemoved, userIdModified);
                                     ((LockCleaningFolderStorage) realStorage).cleanLocksFor(folder, merged, storageParameters);
                                 }
                             }

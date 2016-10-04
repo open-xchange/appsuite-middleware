@@ -92,11 +92,11 @@ public class Guess extends AbstractConfigSource {
 
     @Override
     public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException {
-        return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true);
+        return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true, false);
     }
 
     @Override
-    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context, boolean forceSecure) throws OXException {
+    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context, boolean forceSecure, boolean isOAuth) throws OXException {
         ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
         ComposedConfigProperty<Boolean> property = view.property("com.openexchange.mail.autoconfig.allowGuess", boolean.class);
@@ -109,14 +109,14 @@ public class Guess extends AbstractConfigSource {
         Autoconfig config = new Autoconfig();
 
         final Map<String, Object> properties = new HashMap<String, Object>(2);
-        boolean imapSuccess = fillProtocol(URIDefaults.IMAP, emailLocalPart, emailDomain, password, config, properties, forceSecure);
+        boolean imapSuccess = fillProtocol(URIDefaults.IMAP, emailLocalPart, emailDomain, password, config, properties, forceSecure, isOAuth);
         boolean generalSuccess = imapSuccess;
         if (!imapSuccess) {
-            generalSuccess = fillProtocol(URIDefaults.POP3, emailLocalPart, emailDomain, password, config, properties, forceSecure) || generalSuccess;
+            generalSuccess = fillProtocol(URIDefaults.POP3, emailLocalPart, emailDomain, password, config, properties, forceSecure, isOAuth) || generalSuccess;
         }
 
         boolean preGeneralSuccess = generalSuccess;
-        generalSuccess = fillProtocol(URIDefaults.SMTP, emailLocalPart, emailDomain, password, config, properties, forceSecure) || generalSuccess;
+        generalSuccess = fillProtocol(URIDefaults.SMTP, emailLocalPart, emailDomain, password, config, properties, forceSecure, isOAuth) || generalSuccess;
 
         if (properties.containsKey("smtp.auth-supported")) {
             final Boolean smtpAuthSupported = (Boolean) properties.get("smtp.auth-supported");
@@ -131,13 +131,13 @@ public class Guess extends AbstractConfigSource {
         return generalSuccess ? config : null;
     }
 
-    private boolean fillProtocol(URIDefaults protocol, String emailLocalPart, String emailDomain, String password, Autoconfig config, Map<String, Object> properties, boolean forceSecure) {
+    private boolean fillProtocol(URIDefaults protocol, String emailLocalPart, String emailDomain, String password, Autoconfig config, Map<String, Object> properties, boolean forceSecure, boolean isOAuth) {
         Object[] guessedHost = guessHost(protocol, emailDomain);
         if (guessedHost != null) {
             String host = (String) guessedHost[0];
             boolean secure = (Boolean) guessedHost[1];
             Integer port = (Integer) guessedHost[2];
-            String login = guessLogin(protocol, host, port.intValue(), secure, forceSecure, emailLocalPart, emailDomain, password, properties);
+            String login = guessLogin(protocol, host, port.intValue(), secure, forceSecure, isOAuth, emailLocalPart, emailDomain, password, properties);
             if (login == null) {
                 return false;
             }
@@ -156,25 +156,27 @@ public class Guess extends AbstractConfigSource {
             }
             config.setMailStartTls(forceSecure);
             config.setTransportStartTls(forceSecure);
+            config.setMailOAuth(isOAuth);
+            config.setTransportOAuth(isOAuth);
             return true;
         }
         return false;
     }
 
-    private String guessLogin(URIDefaults protocol, String host, int port, boolean secure, boolean requireTls, String emailLocalPart, String emailDomain, String password, Map<String, Object> properties) {
+    private String guessLogin(URIDefaults protocol, String host, int port, boolean secure, boolean requireTls, boolean isOAuth, String emailLocalPart, String emailDomain, String password, Map<String, Object> properties) {
         List<String> logins = Arrays.asList(emailLocalPart, emailLocalPart+"@"+emailDomain);
 
         for (String login : logins) {
             if (protocol == URIDefaults.IMAP) {
-                if (MailValidator.validateImap(host, port, secure, requireTls, login, password)) {
+                if (MailValidator.validateImap(host, port, secure, requireTls, isOAuth, login, password)) {
                     return login;
                 }
             } else if (protocol == URIDefaults.POP3) {
-                if (MailValidator.validatePop3(host, port, secure, requireTls, login, password)) {
+                if (MailValidator.validatePop3(host, port, secure, requireTls, isOAuth, login, password)) {
                     return login;
                 }
             } else if (protocol == URIDefaults.SMTP) {
-                if (MailValidator.validateSmtp(host, port, secure, requireTls, login, password, properties)) {
+                if (MailValidator.validateSmtp(host, port, secure, requireTls, isOAuth, login, password, properties)) {
                     return login;
                 }
             }

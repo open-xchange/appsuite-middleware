@@ -3152,12 +3152,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public String sendMessage(ComposedMailMessage composedMail, ComposeType type, int accountId, UserSettingMail optUserSetting, MtaStatusInfo statusInfo, String remoteAddress) throws OXException {
-        List<String> ids = sendMessages(Collections.singletonList(composedMail), null, type, accountId, optUserSetting, statusInfo, remoteAddress);
+        List<String> ids = sendMessages(Collections.singletonList(composedMail), null, false, type, accountId, optUserSetting, statusInfo, remoteAddress);
         return null == ids || ids.isEmpty() ? null : ids.get(0);
     }
 
     @Override
-    public List<String> sendMessages(List<? extends ComposedMailMessage> transportMails, ComposedMailMessage mailToAppend, ComposeType type, int accountId, UserSettingMail optUserSetting, MtaStatusInfo statusInfo, String remoteAddress) throws OXException {
+    public List<String> sendMessages(List<? extends ComposedMailMessage> transportMails, ComposedMailMessage mailToAppend, boolean transportEqualToSent, ComposeType type, int accountId, UserSettingMail optUserSetting, MtaStatusInfo statusInfo, String remoteAddress) throws OXException {
         // Initialize
         initConnection(isTransportOnly(accountId) ? MailAccount.DEFAULT_ID : accountId);
         MailTransport transport = MailTransport.getInstance(session, accountId);
@@ -3168,6 +3168,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             boolean settingsAllowAppendToSend = !usm.isNoCopyIntoStandardSentFolder();
 
             // State variables
+            OXException failedAppend2Sent = null;
             OXException oxError = null;
             boolean first = true;
             String messageId = null;
@@ -3239,6 +3240,34 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         }
                     }
 
+                    if (settingsAllowAppendToSend && composedMail.isAppendToSentFolder()) {
+                        // If mail identifier and folder identifier is already available, assume it has already been stored in Sent folder
+                        if (null != sentMail.getMailId() && null != sentMail.getFolder()) {
+                            ids.add(new MailPath(accountId, sentMail.getFolder(), sentMail.getMailId()).toString());
+                        } else {
+                            ids.add(append2SentFolder(sentMail).toString());
+                        }
+                    }
+
+                    // Append to Sent folder (prior to possible deletion of referenced mails)
+                    if (first && settingsAllowAppendToSend && null != mailToAppend) {
+                        // If mail identifier and folder identifier is already available, assume it has already been stored in Sent folder
+                        if (transportEqualToSent) {
+                            if (null != sentMail.getMailId() && null != sentMail.getFolder()) {
+                                ids.add(new MailPath(accountId, sentMail.getFolder(), sentMail.getMailId()).toString());
+                            } else {
+                                ids.add(append2SentFolder(sentMail).toString());
+                            }
+                        } else {
+                            try {
+                                mailToAppend.setHeader("Message-ID", messageId);
+                                ids.add(append2SentFolder(mailToAppend).toString());
+                            } catch (OXException e) {
+                                failedAppend2Sent = e;
+                            }
+                        }
+                    }
+
                     // Check for a reply/forward
                     if (first) {
                         try {
@@ -3288,17 +3317,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             mailAccess.addWarnings(Collections.singletonList(MailExceptionCode.FLAG_FAIL.create(e, new Object[0])));
                         }
                     }
-
-                    if (settingsAllowAppendToSend && composedMail.isAppendToSentFolder()) {
-                        /*
-                         * If mail identifier and folder identifier is already available, assume it has already been stored in Sent folder
-                         */
-                        if (null != sentMail.getMailId() && null != sentMail.getFolder()) {
-                            ids.add(new MailPath(accountId, sentMail.getFolder(), sentMail.getMailId()).toString());
-                        } else {
-                            ids.add(append2SentFolder(sentMail).toString());
-                        }
-                    }
                 } catch (OXException e) {
                     if (!mailSent) {
                         throw e;
@@ -3316,10 +3334,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 first = false;
             }
 
-            // Append to Sent folder
-            if (settingsAllowAppendToSend && null != mailToAppend) {
-                mailToAppend.setHeader("Message-ID", messageId);
-                ids.add(append2SentFolder(mailToAppend).toString());
+            if (null != failedAppend2Sent) {
+                throw failedAppend2Sent;
             }
 
             if (null != oxError) {

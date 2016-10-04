@@ -11,3 +11,6 @@
         description: |
           'The configuration as a JSON object or in case of errors the responsible fields in the
           response are filled (see [Error handling](#error-handling)).'
+        schema: 
+           type: string
+

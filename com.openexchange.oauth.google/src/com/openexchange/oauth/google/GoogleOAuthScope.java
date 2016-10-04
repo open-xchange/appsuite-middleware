@@ -49,7 +49,7 @@
 
 package com.openexchange.oauth.google;
 
-import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.oauth.scope.OAuthScope;
 
 /**
@@ -58,24 +58,23 @@ import com.openexchange.oauth.scope.OAuthScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum GoogleOAuthScope implements OAuthScope {
-    mail("https://mail.google.com/", Module.mail),
-    calendar_ro("https://www.googleapis.com/auth/calendar.readonly", Module.calendar_ro),
-    contacts_ro("https://www.googleapis.com/auth/contacts.readonly", Module.contacts_ro),
-    calendar_rw("https://www.googleapis.com/auth/calendar", Module.calendar_rw),
-    contacts_rw("https://www.googleapis.com/auth/contacts", Module.contacts_rw),
-    drive("https://www.googleapis.com/auth/drive", Module.drive),
-    offline("offline", Module.offline);
+    mail("https://mail.google.com/ offline", OXScope.mail),
+    calendar_ro("https://www.googleapis.com/auth/calendar.readonly offline", OXScope.calendar_ro),
+    contacts_ro("https://www.googleapis.com/auth/contacts.readonly offline", OXScope.contacts_ro),
+    calendar("https://www.googleapis.com/auth/calendar offline", OXScope.calendar),
+    contacts("https://www.googleapis.com/auth/contacts offline", OXScope.contacts),
+    drive("https://www.googleapis.com/auth/drive offline", OXScope.drive);
 
     private final String mapping;
-    private final Module module;
+    private final OXScope module;
 
     /**
      * Initialises a new {@link GoogleOAuthScope}.
      *
      * @param mapping The OAuth mapping
-     * @param module The {@link Module}
+     * @param module The {@link OXScope}
      */
-    private GoogleOAuthScope(String mapping, Module module) {
+    private GoogleOAuthScope(String mapping, OXScope module) {
         this.mapping = mapping;
         this.module = module;
     }
@@ -86,7 +85,7 @@ public enum GoogleOAuthScope implements OAuthScope {
      * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
      */
     @Override
-    public String getMapping() {
+    public String getProviderScopes() {
         return mapping;
     }
 
@@ -96,7 +95,7 @@ public enum GoogleOAuthScope implements OAuthScope {
      * @see com.openexchange.oauth.scope.OAuthScope#getModule()
      */
     @Override
-    public Module getModule() {
+    public OXScope getOXScope() {
         return module;
     }
 }

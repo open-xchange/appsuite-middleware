@@ -82,7 +82,6 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.requesthandler.converters.cover.Mp3CoverExtractor;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
@@ -301,7 +300,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             ComposedMailMessage composeMessage = createRegularComposeMessage(context);
             DelegatingComposedMailMessage transportMessage = new DelegatingComposedMailMessage(composeMessage);
             transportMessage.setAppendToSentFolder(false);
-            return new DefaultComposeTransportResult(Collections.<ComposedMailMessage> singletonList(transportMessage), composeMessage);
+            return new DefaultComposeTransportResult(Collections.<ComposedMailMessage> singletonList(transportMessage), composeMessage, true);
         }
 
         // Get the basic source message
@@ -438,7 +437,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             attachmentsControl.commit();
             rollback = false;
 
-            return new DefaultComposeTransportResult(transportMessages, sentMessage);
+            return new DefaultComposeTransportResult(transportMessages, sentMessage, false);
         } finally {
             if (null != attachmentsControl) {
                 if (rollback) {
@@ -479,14 +478,13 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         ImageTransformationService transformationService = ServerServiceRegistry.getInstance().getService(ImageTransformationService.class);
         IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class);
         ThreadPoolService threadPoolService = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-        ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         boolean documentPreviewEnabled = false;
         int timeout = 500;
         String templatePath = null;
-        if (null != configurationService) {
-            documentPreviewEnabled = configurationService.getBoolProperty("com.openexchange.mail.compose.share.documentPreviewEnabled", false);
-            timeout = configurationService.getIntProperty("com.openexchange.mail.compose.share.preview.timeout", 500);
-            templatePath = configurationService.getProperty("com.openexchange.templating.path");
+        {
+            documentPreviewEnabled = Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.documentPreviewEnabled", false, session);
+            timeout = Utilities.getIntFromProperty("com.openexchange.mail.compose.share.preview.timeout", Integer.valueOf(500), session).intValue();
+            templatePath = Utilities.getValueFromProperty("com.openexchange.templating.path", null, session);
         }
         if (null == items || items.isEmpty() || null == previewService || null == transformationService || null == fileAccessFactory || null == threadPoolService) {
             return java.util.Collections.emptyMap();

@@ -78,12 +78,12 @@ public interface OAuthScopeRegistry {
     void registerScopes(API api, OAuthScope... scopes);
 
     /**
-     * Unregisters the {@link OAuthScope} that is associated with the specified {@link Module} and OAuth {@link API}
+     * Unregisters the {@link OAuthScope} that is associated with the specified {@link OXScope} and OAuth {@link API}
      * 
      * @param api The OAuth {@link API}
-     * @param module The {@link Module}
+     * @param module The {@link OXScope}
      */
-    void unregisterScope(API api, Module module);
+    void unregisterScope(API api, OXScope module);
 
     /**
      * Unregisters all {@link OAuthScope}s that are associated with the specified OAuth {@link API}
@@ -110,10 +110,10 @@ public interface OAuthScopeRegistry {
      * <p>Returns an unmodifiable {@link Set} with all available legacy {@link OAuthScope}s of the specified OAuth {@link API}.</p>
      * <p>The legacy scopes include:</p>
      * <ul>
-     * <li>{@link Module#drive}</li>
-     * <li>{@link Module#calendar_ro}</li>
-     * <li>{@link Module#contacts_ro}</li>
-     * <li>{@link Module#generic}</li>
+     * <li>{@link OXScope#drive}</li>
+     * <li>{@link OXScope#calendar_ro}</li>
+     * <li>{@link OXScope#contacts_ro}</li>
+     * <li>{@link OXScope#generic}</li>
      * </ul>
      * 
      * @param api The OAuth {@link API} for which to get all available {@link OAuthScope}s
@@ -124,23 +124,23 @@ public interface OAuthScopeRegistry {
 
     /**
      * Returns an unmodifiable {@link Set} with all available {@link OAuthScope}s that are associated with the specified
-     * OAuth {@link API} and {@link Module}. If there is no {@link OAuthScope} associated with one of the specified
-     * OAuth {@link API} and {@link Module}s, an {@link OXException} will be thrown
+     * OAuth {@link API} and {@link OXScope}. If there is no {@link OAuthScope} associated with one of the specified
+     * OAuth {@link API} and {@link OXScope}s, an {@link OXException} will be thrown
      * 
      * @param api The OAuth {@link API}
-     * @param modules The {@link Module}s
+     * @param modules The {@link OXScope}s
      * @return An unmodifiable {@link Set} with all available {@link OAuthScope}s
-     * @throws OXException if there is no {@link OAuthScope} associated with the specified OAuth {@link API} and {@link Module}
+     * @throws OXException if there is no {@link OAuthScope} associated with the specified OAuth {@link API} and {@link OXScope}
      */
-    Set<OAuthScope> getAvailableScopes(API api, Module... modules) throws OXException;
+    Set<OAuthScope> getAvailableScopes(API api, OXScope... modules) throws OXException;
 
     /**
-     * Returns the {@link OAuthScope} associated with the specified {@link API} and {@link Module}
+     * Returns the {@link OAuthScope} associated with the specified {@link API} and {@link OXScope}
      * 
      * @param api The {@link API}
-     * @param module The {@link Module}
-     * @return the {@link OAuthScope} associated with the specified {@link API} and {@link Module}
-     * @throws OXException if there is no {@link OAuthScope} associated with the specified OAuth {@link API} and {@link Module}
+     * @param module The {@link OXScope}
+     * @return the {@link OAuthScope} associated with the specified {@link API} and {@link OXScope}
+     * @throws OXException if there is no {@link OAuthScope} associated with the specified OAuth {@link API} and {@link OXScope}
      */
-    OAuthScope getScope(API api, Module module) throws OXException;
+    OAuthScope getScope(API api, OXScope module) throws OXException;
 }

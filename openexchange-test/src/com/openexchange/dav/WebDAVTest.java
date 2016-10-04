@@ -114,6 +114,8 @@ import com.openexchange.oauth.provider.rmi.client.ClientDto;
  */
 public abstract class WebDAVTest {
 
+    private static final boolean AUTODISCOVER_AUTH = false;
+
     protected static final int TIMEOUT = 10000;
 
     private List<FolderObject> foldersToCleanUp;
@@ -142,6 +144,12 @@ public abstract class WebDAVTest {
     public String authMethod;
 
     protected static Iterable<Object[]> availableAuthMethods() {
+        if (false == AUTODISCOVER_AUTH) {
+            List<Object[]> authMethods = new ArrayList<>(2);
+            authMethods.add(new Object[] { AUTH_METHOD_BASIC });
+            authMethods.add(new Object[] { AUTH_METHOD_OAUTH });
+            return authMethods;
+        }
         List<Object[]> authMethods = new ArrayList<Object[]>(2);
         PropFindMethod propFind = null;
         try {

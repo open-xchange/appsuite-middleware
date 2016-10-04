@@ -102,11 +102,11 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
 
     @Override
     public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException {
-        return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true);
+        return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true, false);
     }
 
     @Override
-    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context, boolean forceSecure) throws OXException {
+    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context, boolean forceSecure, boolean isOAuth) throws OXException {
         ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
 
@@ -123,7 +123,7 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
         {
             Autoconfig autoconfig = autoConfigCache.getIfPresent(sUrl);
             if (null != autoconfig) {
-                return generateIndividualAutoconfig(emailLocalPart, emailDomain, autoconfig, forceSecure);
+                return generateIndividualAutoconfig(emailLocalPart, emailDomain, autoconfig, forceSecure, isOAuth);
             }
         }
 
@@ -166,7 +166,7 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
             ClientConfig clientConfig = new AutoconfigParser().getConfig(rsp.getEntity().getContent());
             Autoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
             autoConfigCache.put(sUrl, autoconfig);
-            return generateIndividualAutoconfig(emailLocalPart, emailDomain, autoconfig, forceSecure);
+            return generateIndividualAutoconfig(emailLocalPart, emailDomain, autoconfig, forceSecure, isOAuth);
         } catch (ClientProtocolException e) {
             LOG.warn("Could not retrieve config XML.", e);
             return null;
@@ -181,12 +181,14 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
         }
     }
 
-    private Autoconfig generateIndividualAutoconfig(String emailLocalPart, String emailDomain, Autoconfig autoconfig, boolean forceSecure) {
+    private Autoconfig generateIndividualAutoconfig(String emailLocalPart, String emailDomain, Autoconfig autoconfig, boolean forceSecure, boolean isOAuth) {
         IndividualAutoconfig retval = new IndividualAutoconfig(autoconfig);
         retval.setUsername(autoconfig.getUsername());
         replaceUsername(retval, emailLocalPart, emailDomain);
         retval.setMailStartTls(forceSecure);
         retval.setTransportStartTls(forceSecure);
+        retval.setMailOAuth(isOAuth);
+        retval.setTransportOAuth(isOAuth);
         return retval;
     }
 

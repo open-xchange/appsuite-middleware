@@ -58,7 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OAuthScopeExceptionCodes;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
@@ -115,7 +115,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
      * @see com.openexchange.oauth.scope.OAuthScopeRegistry#unregisterScope(com.openexchange.oauth.API, com.openexchange.oauth.scope.Module)
      */
     @Override
-    public void unregisterScope(API api, Module module) {
+    public void unregisterScope(API api, OXScope module) {
         try {
             OAuthScope scope = getScope(api, module);
 
@@ -174,7 +174,7 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
         Set<OAuthScope> scopes = registry.get(api);
         Set<OAuthScope> legacyScopes = new HashSet<>();
         for (OAuthScope scope : scopes) {
-            if (scope.getModule().isLegacy()) {
+            if (scope.getOXScope().isLegacy()) {
                 legacyScopes.add(scope);
             }
         }
@@ -190,9 +190,9 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
      * @see com.openexchange.oauth.scope.OAuthScopeRegistry#getAvailableScopes(com.openexchange.oauth.API, com.openexchange.oauth.scope.Module[])
      */
     @Override
-    public Set<OAuthScope> getAvailableScopes(API api, Module... modules) throws OXException {
+    public Set<OAuthScope> getAvailableScopes(API api, OXScope... modules) throws OXException {
         Set<OAuthScope> availableScopes = new HashSet<>(modules.length);
-        for (Module module : modules) {
+        for (OXScope module : modules) {
             availableScopes.add(getScope(api, module));
         }
         return Collections.unmodifiableSet(availableScopes);
@@ -204,10 +204,10 @@ public class OAuthScopeRegistryImpl implements OAuthScopeRegistry {
      * @see com.openexchange.oauth.scope.OAuthScopeRegistry#getScope(com.openexchange.oauth.API, com.openexchange.oauth.scope.Module)
      */
     @Override
-    public OAuthScope getScope(API api, Module module) throws OXException {
+    public OAuthScope getScope(API api, OXScope module) throws OXException {
         Set<OAuthScope> availableScopes = getAvailableScopes(api);
         for (OAuthScope scope : availableScopes) {
-            if (scope.getModule().equals(module)) {
+            if (scope.getOXScope().equals(module)) {
                 return scope;
             }
         }

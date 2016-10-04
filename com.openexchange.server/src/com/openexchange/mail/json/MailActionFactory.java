@@ -95,9 +95,11 @@ import com.openexchange.mail.json.actions.ReceiptAckAction;
 import com.openexchange.mail.json.actions.ResendAction;
 import com.openexchange.mail.json.actions.ResolveShareReference;
 import com.openexchange.mail.json.actions.SearchAction;
+import com.openexchange.mail.json.actions.SendDataAction;
 import com.openexchange.mail.json.actions.SimpleThreadStructureAction;
 import com.openexchange.mail.json.actions.TransportMailAction;
 import com.openexchange.mail.json.actions.UpdateAction;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -106,6 +108,7 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Module(name = "mail", description = "Used to access mail data. When mails are stored on an IMAP server, some functionality is not available due to restrictions of the IMAP protocol. Such functionality is marked with \"not IMAP\".")
+@OAuthModule
 public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHandler, MailActionConstants {
 
     private static final AtomicReference<MailActionFactory> INSTANCE_REFERENCE = new AtomicReference<MailActionFactory>();
@@ -179,7 +182,9 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         builder.put("receipt_ack", new ReceiptAckAction(services));
         builder.put("clear", new ClearAction(services));
         builder.put("expunge", new ExpungeAction(services));
-        builder.put("new", new NewAction(services));
+        NewAction newAction = new NewAction(services);
+        builder.put("new", newAction);
+        builder.put("send_data", new SendDataAction(newAction, services));
         builder.put("import", new ImportAction(services));
         builder.put("edit", new EditAction(services));
         builder.put("autosave", new AutosaveAction(services));

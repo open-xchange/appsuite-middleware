@@ -63,26 +63,29 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface AutoconfigService {
 
     /**
-     * Tries to generate an Autoconfig Object just with the given mail address.
-     * @param email
-     * @param password
-     * @param user
-     * @param context
-     * @return An autoconfig Object if generation was successfull, null otherwise.
-     * @throws OXException
+     * Tries to generate an auto-config result just with the given mail address.
+     *
+     * @param email The E-Mail address
+     * @param password The password
+     * @param user The user
+     * @param context The context
+     * @return An auto-config result if generation was successful, <code>null</code> otherwise
+     * @throws OXException If determining auto-config result causes an error
      */
-    public Autoconfig getConfig(String email, String password, User user, Context context) throws OXException;
+    Autoconfig getConfig(String email, String password, User user, Context context) throws OXException;
 
     /**
-     * Tries to generate an Autoconfig Object just with the given mail address.
-     * 
-     * @param email
-     * @param password
-     * @param user
-     * @param context
-     * @param forceSecure
-     * @return An autoconfig Object if generation was successfull, null otherwise.
-     * @throws OXException
+     * Tries to generate an auto-config result just with the given mail address.
+     *
+     * @param email The E-Mail address
+     * @param password The password
+     * @param user The user
+     * @param context The context
+     * @param forceSecure <code>true</code> if a secure connection should be enforced; otherwise <code>false</code> to also allow plain ones
+     * @param isOAuth <code>true</code> to mark passed password as an OAuth token (and thus performing XOAUTH2 authentication mechanism); otherwise <code>false</code> for a regular password
+     * @return An auto-config result if generation was successful, <code>null</code> otherwise
+     * @throws OXException If determining auto-config result causes an error
      */
-    public Autoconfig getConfig(String email, String password, User user, Context context, boolean forceSecure) throws OXException;
+    Autoconfig getConfig(String email, String password, User user, Context context, boolean forceSecure, boolean isOAuth) throws OXException;
+
 }

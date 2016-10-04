@@ -56,8 +56,8 @@ import javax.servlet.Filter;
 import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.OXHttpServer;
+import org.glassfish.grizzly.http.server.OXServerConfiguration;
 import org.glassfish.grizzly.http.server.OXTCPNIOTransportFilter;
-import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
@@ -143,9 +143,10 @@ public class GrizzlyActivator extends HousekeepingActivator {
              */
             final OXHttpServer grizzly = new OXHttpServer();
 
-            ServerConfiguration serverConfiguration = grizzly.getServerConfiguration();
+            OXServerConfiguration serverConfiguration = (OXServerConfiguration) grizzly.getServerConfiguration();
             serverConfiguration.setMaxRequestParameters(grizzlyConfig.getMaxRequestParameters());
             serverConfiguration.setAllowPayloadForUndefinedHttpMethods(true);
+            serverConfiguration.setWsTimeoutMillis(grizzlyConfig.getWsTimeoutMillis());
 
             final NetworkListener networkListener = new NetworkListener("http-listener", grizzlyConfig.getHttpHost(), grizzlyConfig.getHttpPort());
 

@@ -54,10 +54,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.framework.request.RequestContext;
 import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
 
@@ -69,36 +71,53 @@ import com.openexchange.session.Session;
 public final class OAuthUtil {
 
     /**
-     * Parses the specified {@link OAuthScope}s and returns the mappings ({@link OAuthScope#getMapping()}) as a space separated string
+     * Parses the specified {@link Set} with {@link OAuthScope}s and returns
+     * the OAuth provider-specific mappings ({@link OAuthScope#getProviderScopes()})
+     * as a space separated string. Duplicate OAuth provider-specific scopes will only be 
+     * present once in the returned string.
      * 
      * @param scopes The {@link OAuthScope}s
      * @return a space separated string with all {@link OAuthScope}s in the specified {@link Set}
      */
-    public static final String scopeMappingsToString(Set<OAuthScope> scopes) {
-        if (scopes.isEmpty()) {
-            return "";
-        }
-        StringBuilder builder = new StringBuilder();
+    public static final String providerScopesToString(Set<OAuthScope> scopes) {
+        Set<String> strings = new HashSet<>();
         for (OAuthScope scope : scopes) {
-            builder.append(scope.getMapping()).append(" ");
+            String[] split = Strings.splitByWhitespaces(scope.getProviderScopes());
+            for (String s : split) {
+                strings.add(s);
+            }
         }
-        builder.setLength(builder.length() - 1);
-        return builder.toString();
+        return setToString(strings);
     }
 
     /**
-     * Parses the specified {@link OAuthScope}s and returns the mappings ({@link OAuthScope#getModule()}) as a space separated string
+     * Parses the specified {@link Set} with {@link OAuthScope}s and returns
+     * the ({@link OAuthScope#getOXScope()}) as a whitespace separated string
      * 
      * @param scopes The {@link OAuthScope}s
      * @return a space separated string with all {@link OAuthScope}s in the specified {@link Set}
      */
-    public static final String scopeModulesToString(Set<OAuthScope> scopes) {
-        if (scopes.isEmpty()) {
+    public static final String oxScopesToString(Set<OAuthScope> scopes) {
+        Set<String> strings = new HashSet<>();
+        for (OAuthScope scope : scopes) {
+            strings.add(scope.getOXScope().name());
+        }
+        return setToString(strings);
+    }
+
+    /**
+     * Creates a whitespace separated list of strings out of the specified {@link Set}
+     * 
+     * @param strings The {@link Set} with the strings
+     * @return a whitespace separated list of strings
+     */
+    private static final String setToString(Set<String> strings) {
+        if (strings.isEmpty()) {
             return "";
         }
         StringBuilder builder = new StringBuilder();
-        for (OAuthScope scope : scopes) {
-            builder.append(scope.getModule()).append(" ");
+        for (String string : strings) {
+            builder.append(string).append(" ");
         }
         builder.setLength(builder.length() - 1);
         return builder.toString();
@@ -107,6 +126,7 @@ public final class OAuthUtil {
     /**
      * Builds the 'init' call-back URL for the given {@link OAuthAccount}
      * 
+     * @param account The {@link OAuthAccount}
      * @param session The session
      * @param account The {@link OAuthAccount}
      * @return the 'init' call-back URL for the given {@link OAuthAccount}
@@ -124,8 +144,8 @@ public final class OAuthUtil {
         builder.append("&serviceId=").append(account.getAPI().getFullName());
         builder.append("&id=").append(account.getId());
         builder.append('&').append(OAuthConstants.ARGUMENT_DISPLAY_NAME).append('=').append(urlEncode(account.getDisplayName()));
-        builder.append("&scopes=").append(urlEncode(OAuthUtil.scopeModulesToString(account.getEnabledScopes())));
         builder.append("&session=").append(session.getSessionID());
+        builder.append("&scopes=").append(urlEncode(OAuthUtil.oxScopesToString(account.getEnabledScopes())));
 
         return builder.toString();
     }
