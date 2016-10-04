@@ -207,6 +207,27 @@ public abstract class AbstractOAuthFileStorage implements AccountAware, OAuthAcc
     }
 
     /**
+     * Retrieves the {@link FileStorageAccount} with the specified identifier for the specified {@link Session}
+     * 
+     * @param session The {@link Session}
+     * @param accountId The account identifier
+     * @return The {@link FileStorageAccount}
+     * @throws OXException if an error is occurred
+     */
+    protected FileStorageAccount getAccountAccess(Session session, String accountId) throws OXException {
+        final FileStorageAccount account;
+        {
+            final CompositeFileStorageAccountManagerProvider compositeAccountManager = this.compositeAccountManager;
+            if (null == compositeAccountManager) {
+                account = getAccountManager0().getAccount(accountId, session);
+            } else {
+                account = compositeAccountManager.getAccountManager(accountId, session).getAccount(accountId, session);
+            }
+        }
+        return account;
+    }
+
+    /**
      * Gets the accounts
      * 
      * @param session
