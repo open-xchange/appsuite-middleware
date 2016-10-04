@@ -62,7 +62,7 @@ import com.openexchange.chronos.EventField;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface UpdateResult extends CalendarResult, ItemUpdate<Event, EventField> {
+public interface UpdateResult extends ItemUpdate<Event, EventField> {
 
     /**
      * Gets the identifier of the folder the event has been moved into.

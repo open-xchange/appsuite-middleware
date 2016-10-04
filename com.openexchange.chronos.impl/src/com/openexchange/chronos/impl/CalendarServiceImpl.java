@@ -57,12 +57,10 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.impl.session.DefaultCalendarSession;
 import com.openexchange.chronos.service.CalendarHandler;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.CreateResult;
-import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceSet;
@@ -219,79 +217,61 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public CreateResult createEvent(CalendarSession session, final UserizedEvent event) throws OXException {
+    public CalendarResult createEvent(CalendarSession session, final UserizedEvent event) throws OXException {
         /*
-         * insert event
+         * insert event & notify handlers
          */
-        CreateResultImpl result = new WriteOperation<CreateResultImpl>(session) {
+        return notifyHandlers(new WriteOperation<CalendarResult>(session) {
 
             @Override
-            protected CreateResultImpl execute(CalendarWriter writer) throws OXException {
+            protected CalendarResult execute(CalendarWriter writer) throws OXException {
                 return writer.insertEvent(event);
             }
-        }.execute();
-        /*
-         * notify handlers
-         */
-        for (CalendarHandler handler : calendarHandlers) {
-            handler.eventCreated(result);
-        }
-        return result;
+        }.execute());
     }
 
     @Override
-    public UpdateResult updateEvent(CalendarSession session, final EventID eventID, final UserizedEvent event) throws OXException {
+    public CalendarResult updateEvent(CalendarSession session, final EventID eventID, final UserizedEvent event) throws OXException {
         /*
-         * update event
+         * update event & notify handlers
          */
         Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
         final long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
-        UpdateResultImpl result = new WriteOperation<UpdateResultImpl>(session) {
+        return notifyHandlers(new WriteOperation<CalendarResult>(session) {
 
             @Override
-            protected UpdateResultImpl execute(CalendarWriter writer) throws OXException {
+            protected CalendarResult execute(CalendarWriter writer) throws OXException {
                 return writer.updateEvent(eventID, event, clientTimestamp);
             }
-        }.execute();
-        /*
-         * notify handlers
-         */
-        for (CalendarHandler handler : calendarHandlers) {
-            handler.eventUpdated(result);
-        }
-        return result;
+        }.execute());
     }
 
     @Override
-    public UpdateResult updateAttendee(CalendarSession session, final int folderID, final int objectID, final Attendee attendee) throws OXException {
+    public CalendarResult updateAttendee(CalendarSession session, final int folderID, final int objectID, final Attendee attendee) throws OXException {
         /*
-         * update event
+         * update attendee & notify handlers
          */
-        UpdateResultImpl result = new WriteOperation<UpdateResultImpl>(session) {
+        return notifyHandlers(new WriteOperation<CalendarResult>(session) {
 
             @Override
-            protected UpdateResultImpl execute(CalendarWriter writer) throws OXException {
+            protected CalendarResult execute(CalendarWriter writer) throws OXException {
                 return writer.updateAttendee(folderID, objectID, attendee);
             }
-        }.execute();
-        /*
-         * notify handlers
-         */
-        for (CalendarHandler handler : calendarHandlers) {
-            handler.eventUpdated(result);
-        }
-        return result;
+        }.execute());
     }
 
     @Override
-    public Map<EventID, DeleteResult> deleteEvents(CalendarSession session, final List<EventID> eventIDs) throws OXException {
+    public Map<EventID, CalendarResult> deleteEvents(CalendarSession session, final List<EventID> eventIDs) throws OXException {
+        /*
+         * delete events
+         */
         Long clientTimestampValue = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
         final long clientTimestamp = null != clientTimestampValue ? clientTimestampValue.longValue() : -1L;
-        Map<EventID, DeleteResult> results = new WriteOperation<Map<EventID, DeleteResult>>(session) {
+        Map<EventID, CalendarResult> results = new WriteOperation<Map<EventID, CalendarResult>>(session) {
 
             @Override
-            protected Map<EventID, DeleteResult> execute(CalendarWriter writer) throws OXException {
-                Map<EventID, DeleteResult> results = new HashMap<EventID, DeleteResult>(eventIDs.size());
+            protected Map<EventID, CalendarResult> execute(CalendarWriter writer) throws OXException {
+                Map<EventID, CalendarResult> results = new HashMap<EventID, CalendarResult>(eventIDs.size());
                 for (EventID eventID : eventIDs) {
                     results.put(eventID, writer.deleteEvent(eventID, clientTimestamp));
                 }
@@ -301,18 +281,17 @@ public class CalendarServiceImpl implements CalendarService {
         /*
          * notify handlers
          */
-        for (DeleteResult result : results.values()) {
-            if (result.wasUpdate()) {
-                for (CalendarHandler handler : calendarHandlers) {
-                    handler.eventUpdated(result.asUpdate());
-                }
-            } else {
-                for (CalendarHandler handler : calendarHandlers) {
-                    handler.eventDeleted(result);
-                }
-            }
+        for (CalendarResult result : results.values()) {
+            notifyHandlers(result);
         }
         return results;
+    }
+
+    private CalendarResult notifyHandlers(CalendarResult result) {
+        for (CalendarHandler handler : calendarHandlers) {
+            handler.handle(result);
+        }
+        return result;
     }
 
 }

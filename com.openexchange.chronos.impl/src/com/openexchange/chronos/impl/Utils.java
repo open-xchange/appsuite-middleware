@@ -351,7 +351,7 @@ public class Utils {
      * @param folder The folder to get the identifier for
      * @return The folder identifier
      */
-    static int i(UserizedFolder folder) throws OXException {
+    public static int i(UserizedFolder folder) throws OXException {
         try {
             return Integer.parseInt(folder.getID());
         } catch (NumberFormatException e) {
@@ -446,7 +446,7 @@ public class Utils {
 //        if (false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
 //            return true;
 //        }
-        if ((false == CalendarUtils.isSeriesMaster(event) || false == isResolveOccurrences(session)) && 
+        if ((false == CalendarUtils.isSeriesMaster(event) || false == isResolveOccurrences(session)) &&
             false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
             return true;
         }
@@ -524,7 +524,7 @@ public class Utils {
      * @param folder The folder to get the calendar user for
      * @return The calendar user
      */
-    static User getCalendarUser(UserizedFolder folder) throws OXException {
+    public static User getCalendarUser(UserizedFolder folder) throws OXException {
         if (SharedType.getInstance().equals(folder.getType())) {
             return Services.getService(UserService.class).getUser(folder.getCreatedBy(), folder.getContext());
         }

@@ -66,8 +66,8 @@ import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.CreateResult;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -177,8 +177,13 @@ public final class NewAction extends ChronosAction {
         }
         session.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
         UserizedEvent event = getEventConverter().getEvent(session, appointment, null);
-        CreateResult result = session.getCalendarService().createEvent(session, event);
-        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, result.getCreatedEvent().getId()), result.getTimestamp(), "json");
+        CalendarResult result = session.getCalendarService().createEvent(session, event);
+
+        if (null != result.getCreations() && 0 < result.getCreations().size()) {
+            int id = result.getCreations().get(0).getCreatedEvent().getId();
+            return new AJAXRequestResult(new JSONObject().put(DataFields.ID, id), result.getTimestamp(), "json");
+        }
+        return null; //TODO: conflicts
     }
 
 }

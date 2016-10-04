@@ -77,6 +77,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.service.CalendarHandler;
+import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.CreateResult;
@@ -122,41 +123,52 @@ public class AlarmTriggerHandler implements CalendarHandler {
     }
 
     @Override
-    public void eventCreated(CreateResult result) {
+    public void handle(CalendarResult result) {
+        for (CreateResult creation : result.getCreations()) {
+            handleCreation(result.getSession(), creation);
+        }
+        for (UpdateResult update : result.getUpdates()) {
+            handleUpdate(result.getSession(), result.getCalendarUser().getId(), update);
+        }
+        for (DeleteResult deletion : result.getDeletions()) {
+            handleDeletion(result.getSession(), deletion);
+        }
+    }
+
+    private void handleCreation(CalendarSession session, CreateResult result) {
         try {
             List<Attendee> userAttendees = filter(result.getCreatedEvent().getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL);
-            List<ReminderTrigger> triggers = prepareTriggers(result.getSession(), result.getCreatedEvent(), userAttendees);
+            List<ReminderTrigger> triggers = prepareTriggers(session, result.getCreatedEvent(), userAttendees);
             if (0 < triggers.size()) {
-                insertTriggers(result.getSession().getContext(), triggers);
+                insertTriggers(session.getContext(), triggers);
             }
         } catch (OXException e) {
             LOG.error("Error handling alarm triggers for created event {}:{} ", result.getCreatedEvent(), e.getMessage(), e);
         }
     }
 
-    @Override
-    public void eventUpdated(UpdateResult result) {
+    public void handleUpdate(CalendarSession session, int calendarUserID, UpdateResult result) {
         try {
             if (result.containsAnyChangeOf(TRIGGER_RELATED_EVENT_FIELDS)) {
                 /*
                  * date/time-related property changed; re-create triggers of all actual attendees & remove triggers for deleted attendees
                  */
                 List<Attendee> newAttendees = filter(result.getUpdate().getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL);
-                Map<Integer, List<ReminderTrigger>> triggersPerUser = prepareTriggersPerUser(result.getSession(), result.getUpdate(), newAttendees);
+                Map<Integer, List<ReminderTrigger>> triggersPerUser = prepareTriggersPerUser(session, result.getUpdate(), newAttendees);
                 for (Attendee originalAttendee : filter(result.getOriginal().getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
                     if (false == triggersPerUser.containsKey(I(originalAttendee.getEntity()))) {
                         triggersPerUser.put(I(originalAttendee.getEntity()), Collections.<ReminderTrigger> emptyList());
                     }
                 }
                 if (0 < triggersPerUser.size()) {
-                    replaceTriggers(result.getSession().getContext(), result.getUpdate().getId(), triggersPerUser);
+                    replaceTriggers(session.getContext(), result.getUpdate().getId(), triggersPerUser);
                 }
             } else {
                 if (false == result.getAttendeeUpdates().isEmpty()) {
                     /*
                      * attendees changed; adjust triggers based on attendee updates
                      */
-                    adjustTriggers(result.getSession(), result.getUpdate(), result.getAttendeeUpdates());
+                    adjustTriggers(session, result.getUpdate(), result.getAttendeeUpdates());
                 }
                 if (false == result.getAlarmUpdates().isEmpty()) {
                     /*
@@ -164,16 +176,16 @@ public class AlarmTriggerHandler implements CalendarHandler {
                      */
                     //TODO: selective update
                     Map<Integer, List<ReminderTrigger>> triggersPerUser;
-                    Attendee userAttendee = find(result.getUpdate().getAttendees(), result.getCalendarUser().getId());
+                    Attendee userAttendee = find(result.getUpdate().getAttendees(), calendarUserID);
                     if (null != userAttendee) {
-                        triggersPerUser = prepareTriggersPerUser(result.getSession(), result.getUpdate(), Collections.singletonList(userAttendee));
+                        triggersPerUser = prepareTriggersPerUser(session, result.getUpdate(), Collections.singletonList(userAttendee));
                     } else {
                         triggersPerUser = new HashMap<Integer, List<ReminderTrigger>>();
                     }
                     if (false == triggersPerUser.containsKey(I(userAttendee.getEntity()))) {
                         triggersPerUser.put(I(userAttendee.getEntity()), Collections.<ReminderTrigger> emptyList());
                     }
-                    replaceTriggers(result.getSession().getContext(), result.getUpdate().getId(), triggersPerUser);
+                    replaceTriggers(session.getContext(), result.getUpdate().getId(), triggersPerUser);
                 }
             }
         } catch (OXException e) {
@@ -181,10 +193,9 @@ public class AlarmTriggerHandler implements CalendarHandler {
         }
     }
 
-    @Override
-    public void eventDeleted(DeleteResult result) {
+    public void handleDeletion(CalendarSession session, DeleteResult result) {
         try {
-            deleteTriggers(result.getSession().getContext(), result.getDeletedEvent().getId());
+            deleteTriggers(session.getContext(), result.getDeletedEvent().getId());
         } catch (OXException e) {
             LOG.error("Error handling alarm triggers for deleted event {}:{} ", result.getDeletedEvent(), e.getMessage(), e);
         }

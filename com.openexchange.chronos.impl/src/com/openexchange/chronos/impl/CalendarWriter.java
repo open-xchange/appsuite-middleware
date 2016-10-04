@@ -75,7 +75,6 @@ import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmField;
 import com.openexchange.chronos.Attendee;
@@ -83,6 +82,11 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.impl.osgi.Services;
+import com.openexchange.chronos.operation.CalendarResultImpl;
+import com.openexchange.chronos.operation.CreateOperation;
+import com.openexchange.chronos.operation.DeleteOperation;
+import com.openexchange.chronos.operation.UpdateResultImpl;
+import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.EventID;
@@ -93,7 +97,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.Strings;
 
 /**
  * {@link CalendarWriter}
@@ -122,63 +125,23 @@ public class CalendarWriter extends CalendarReader {
         super(session, storage);
     }
 
-    public CreateResultImpl insertEvent(UserizedEvent event) throws OXException {
-        return insertEvent(getFolder(event.getFolderId()), event);
+    public CalendarResult insertEvent(UserizedEvent event) throws OXException {
+        return CreateOperation.prepare(storage, session, getFolder(event.getFolderId())).perform(event.getEvent(), event.getAlarms());
     }
 
-    public UpdateResultImpl updateEvent(EventID eventID, UserizedEvent event, long clientTimestamp) throws OXException {
+    public CalendarResult updateEvent(EventID eventID, UserizedEvent event, long clientTimestamp) throws OXException {
         return updateEvent(getFolder(eventID.getFolderID()), eventID.getObjectID(), event, clientTimestamp);
     }
 
-    public UpdateResultImpl updateAttendee(int folderID, int objectID, Attendee attendee) throws OXException {
+    public CalendarResult updateAttendee(int folderID, int objectID, Attendee attendee) throws OXException {
         return updateAttendee(getFolder(folderID), objectID, attendee);
     }
 
-    public DeleteResultImpl deleteEvent(EventID eventID, long clientTimestamp) throws OXException {
+    public CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException {
         return DeleteOperation.prepare(storage, session, getFolder(eventID.getFolderID())).perform(eventID.getObjectID(), eventID.getRecurrenceID(), clientTimestamp);
     }
 
-    private CreateResultImpl insertEvent(UserizedFolder folder, UserizedEvent userizedEvent) throws OXException {
-        requireCalendarPermission(folder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
-        Event event = userizedEvent.getEvent();
-        User calendarUser = getCalendarUser(folder);
-        Date now = new Date();
-        Consistency.setCreated(now, event, calendarUser.getId());
-        Consistency.setModified(now, event, session.getUser().getId());
-        if (null == event.getOrganizer()) {
-            Consistency.setOrganizer(event, calendarUser, session.getUser());
-        }
-        Consistency.setTimeZone(event, calendarUser);
-        Consistency.adjustAllDayDates(event);
-        event.setSequence(0);
-        if (Strings.isNotEmpty(event.getUid())) {
-            if (0 < resolveUid(event.getUid())) {
-                throw OXException.general("Duplicate uid"); //TODO
-            }
-        } else {
-            event.setUid(UUID.randomUUID().toString());
-        }
-        event.setPublicFolderId(PublicType.getInstance().equals(folder.getType()) ? i(folder) : 0);
-        /*
-         * assign new object identifier
-         */
-        int objectID = storage.nextObjectID();
-        event.setId(objectID);
-        if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
-            event.setSeriesId(objectID);
-        }
-        /*
-         * insert event, attendees & alarms of user
-         */
-        storage.getEventStorage().insertEvent(event);
-        storage.getAttendeeStorage().insertAttendees(objectID, new AttendeeHelper(session, folder, null, event.getAttendees()).getAttendeesToInsert());
-        if (userizedEvent.containsAlarms() && null != userizedEvent.getAlarms() && 0 < userizedEvent.getAlarms().size()) {
-            storage.getAlarmStorage().insertAlarms(objectID, calendarUser.getId(), userizedEvent.getAlarms());
-        }
-        return new CreateResultImpl(session, calendarUser, i(folder), readAdditionalEventData(storage.getEventStorage().loadEvent(objectID, null), null));
-    }
-
-    private UpdateResultImpl updateEvent(UserizedFolder folder, int objectID, UserizedEvent userizedEvent, long clientTimestamp) throws OXException {
+    private CalendarResult updateEvent(UserizedFolder folder, int objectID, UserizedEvent userizedEvent, long clientTimestamp) throws OXException {
         /*
          * load original event data
          */
@@ -287,9 +250,10 @@ public class CalendarWriter extends CalendarReader {
             alarmUpdates = updateAlarms(objectID, calendarUser, userizedEvent.getAlarms());
         }
         Event updatedEvent = readAdditionalEventData(storage.getEventStorage().loadEvent(objectID, null), null);
-        UpdateResultImpl result = new UpdateResultImpl(session, calendarUser, originalFolderID, originalEvent, updatedFolderID, updatedEvent);
-        result.setAlarmUpdates(alarmUpdates);
-        return result;
+
+        UpdateResultImpl updateResult = new UpdateResultImpl(originalEvent, updatedFolderID, updatedEvent);
+        updateResult.setAlarmUpdates(alarmUpdates);
+        return new CalendarResultImpl(session, calendarUser, originalFolderID).applyTimestamp(now).addUpdate(updateResult);
     }
 
     /**
@@ -475,7 +439,7 @@ public class CalendarWriter extends CalendarReader {
         throw OXException.general("unsupported move");
     }
 
-    private UpdateResultImpl updateAttendee(UserizedFolder folder, int objectID, Attendee attendee) throws OXException {
+    private CalendarResultImpl updateAttendee(UserizedFolder folder, int objectID, Attendee attendee) throws OXException {
         /*
          * load original event data & target attendee
          */
@@ -508,7 +472,8 @@ public class CalendarWriter extends CalendarReader {
         AttendeeField[] updatedFields = AttendeeMapper.getInstance().getAssignedFields(attendeeUpdate);
         if (0 == updatedFields.length) {
             // TODO or throw?
-            return new UpdateResultImpl(session, calendarUser, i(folder), originalEvent, i(folder), originalEvent);
+            return new CalendarResultImpl(session, calendarUser, i(folder)).applyTimestamp(originalEvent.getLastModified()).addUpdate(
+                new UpdateResultImpl(originalEvent, i(folder), originalEvent));
         }
         for (AttendeeField field : AttendeeMapper.getInstance().getAssignedFields(attendeeUpdate)) {
             switch (field) {
@@ -560,7 +525,8 @@ public class CalendarWriter extends CalendarReader {
         Consistency.setModified(now, eventUpdate, session.getUser().getId());
         storage.getEventStorage().updateEvent(eventUpdate);
         Event updatedEvent = readAdditionalEventData(storage.getEventStorage().loadEvent(objectID, null), null);
-        return new UpdateResultImpl(session, calendarUser, i(folder), originalEvent, i(folder), updatedEvent);
+        return new CalendarResultImpl(session, calendarUser, i(folder)).applyTimestamp(now).addUpdate(
+            new UpdateResultImpl(originalEvent, i(folder), updatedEvent));
     }
 
 }

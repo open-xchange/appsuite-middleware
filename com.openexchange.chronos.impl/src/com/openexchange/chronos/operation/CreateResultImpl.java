@@ -47,51 +47,34 @@
  *
  */
 
-package com.openexchange.chronos.impl;
+package com.openexchange.chronos.operation;
 
-import com.openexchange.chronos.service.CalendarResult;
-import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.service.CreateResult;
 
 /**
- * {@link AbstractCalendarResult}
+ * {@link CreateResultImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public abstract class AbstractCalendarResult implements CalendarResult {
+public class CreateResultImpl implements CreateResult {
 
-    protected final CalendarSession session;
-    protected final User calendarUser;
-    protected final int folderID;
+    private final Event createdEvent;
 
     /**
-     * Initializes a new {@link AbstractCalendarResult}.
+     * Initializes a new {@link CreateResultImpl}.
      *
-     * @param session The calendar session
-     * @param calendarUser The actual calendar user
-     * @param folderID The identifier of the folder the event has been created in.
+     * @param createdEvent The created event
      */
-    protected AbstractCalendarResult(CalendarSession session, User calendarUser, int folderID) {
+    public CreateResultImpl(Event createdEvent) {
         super();
-        this.session = session;
-        this.calendarUser = calendarUser;
-        this.folderID = folderID;
+        this.createdEvent = createdEvent;
     }
 
     @Override
-    public CalendarSession getSession() {
-        return session;
-    }
-
-    @Override
-    public User getCalendarUser() {
-        return calendarUser;
-    }
-
-    @Override
-    public int getFolderID() {
-        return folderID;
+    public Event getCreatedEvent() {
+        return createdEvent;
     }
 
 }

@@ -47,9 +47,8 @@
  *
  */
 
-package com.openexchange.chronos.impl;
+package com.openexchange.chronos.operation;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.chronos.Alarm;
@@ -58,12 +57,15 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.impl.AbstractCollectionUpdate;
+import com.openexchange.chronos.impl.AlarmMapper;
+import com.openexchange.chronos.impl.AttendeeMapper;
+import com.openexchange.chronos.impl.DefaultItemUpdate;
+import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.service.CollectionUpdate;
 import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link UpdateResultImpl}
@@ -71,7 +73,7 @@ import com.openexchange.groupware.ldap.User;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class UpdateResultImpl extends AbstractCalendarResult implements UpdateResult {
+public class UpdateResultImpl implements UpdateResult {
 
     private final int updatedFolderID;
     private final ItemUpdate<Event, EventField> itemUpdate;
@@ -82,15 +84,12 @@ public class UpdateResultImpl extends AbstractCalendarResult implements UpdateRe
     /**
      * Initializes a new {@link UpdateResultImpl}.
      *
-     * @param session The calendar session
-     * @param calendarUser The actual calendar user
-     * @param originalFolderID The original folder identifier
      * @param originalEvent The original event
      * @param updatedFolderID The updated folder identifier, or the original folder identifier if no move took place
      * @param updatedEvent The updated event
      */
-    public UpdateResultImpl(CalendarSession session, User calendarUser, int originalFolderID, Event originalEvent, int updatedFolderID, Event updatedEvent) throws OXException {
-        super(session, calendarUser, originalFolderID);
+    public UpdateResultImpl(Event originalEvent, int updatedFolderID, Event updatedEvent) throws OXException {
+        super();
         this.itemUpdate = new DefaultItemUpdate<Event, EventField>(EventMapper.getInstance(), originalEvent, updatedEvent);
         this.updatedFolderID = updatedFolderID;
         setAttendeeUpdates(null != originalEvent ? originalEvent.getAttendees() : null, null != updatedEvent ? updatedEvent.getAttendees() : null);
@@ -108,11 +107,6 @@ public class UpdateResultImpl extends AbstractCalendarResult implements UpdateRe
     public UpdateResultImpl setAttendeeUpdates(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
         this.attendeeUpdates = AttendeeMapper.getInstance().getAttendeeUpdate(originalAttendees, updatedAttendees);
         return this;
-    }
-
-    @Override
-    public Date getTimestamp() {
-        return getUpdate().getLastModified();
     }
 
     @Override

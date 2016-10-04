@@ -90,13 +90,13 @@ public interface CalendarService {
 
     List<UserizedEvent> getEventsOfUser(CalendarSession session) throws OXException;
 
-    CreateResult createEvent(CalendarSession session, UserizedEvent event) throws OXException;
+    CalendarResult createEvent(CalendarSession session, UserizedEvent event) throws OXException;
 
-    UpdateResult updateEvent(CalendarSession session, EventID eventID, UserizedEvent event) throws OXException;
+    CalendarResult updateEvent(CalendarSession session, EventID eventID, UserizedEvent event) throws OXException;
 
-    UpdateResult updateAttendee(CalendarSession session, int folderID, int objectID, Attendee attendee) throws OXException;
+    CalendarResult updateAttendee(CalendarSession session, int folderID, int objectID, Attendee attendee) throws OXException;
 
-    Map<EventID, DeleteResult> deleteEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
+    Map<EventID, CalendarResult> deleteEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
 
     List<UserizedEvent> getUpdatedEventsInFolder(CalendarSession session, int folderID, Date updatedSince) throws OXException;
 

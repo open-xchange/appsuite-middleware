@@ -66,8 +66,8 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
+import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -175,9 +175,9 @@ public final class DeleteAction extends ChronosAction {
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         List<EventID> requestedIDs = parseRequestedIDs(session, request);
-        Map<EventID, DeleteResult> results = session.getCalendarService().deleteEvents(session, requestedIDs);
+        Map<EventID, CalendarResult> results = session.getCalendarService().deleteEvents(session, requestedIDs);
         Date timestamp = new Date(0L);
-        for (DeleteResult result : results.values()) {
+        for (CalendarResult result : results.values()) {
             timestamp = getLatestModified(timestamp, result.getTimestamp());
         }
         return new AJAXRequestResult(new JSONArray(0), timestamp, "json");

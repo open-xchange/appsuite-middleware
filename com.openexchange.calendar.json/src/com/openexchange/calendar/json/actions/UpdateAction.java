@@ -66,9 +66,9 @@ import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.service.CalendarParameters;
+import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
-import com.openexchange.chronos.service.UpdateResult;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -188,8 +188,14 @@ public final class UpdateAction extends ChronosAction {
         session.set(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.valueOf(appointment.getIgnoreConflicts()));
 
         UserizedEvent event = getEventConverter().getEvent(session, appointment, eventID);
-        UpdateResult result = session.getCalendarService().updateEvent(session, eventID, event);
-        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, result.getUpdate().getId()), result.getTimestamp(), "json");
+        CalendarResult result = session.getCalendarService().updateEvent(session, eventID, event);
+
+        if (null != result.getUpdates() && 0 < result.getUpdates().size()) {
+            int id = result.getUpdates().get(0).getUpdate().getId();
+            return new AJAXRequestResult(new JSONObject().put(DataFields.ID, id), result.getTimestamp(), "json");
+        }
+        return null; //TODO: conflicts
+        //        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, result.getUpdate().getId()), result.getTimestamp(), "json");
     }
 
 }

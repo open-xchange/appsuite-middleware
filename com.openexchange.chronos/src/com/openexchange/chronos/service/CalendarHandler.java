@@ -58,24 +58,10 @@ package com.openexchange.chronos.service;
 public interface CalendarHandler {
 
     /**
-     * Invoked after an event has been created.
+     * Handles the result of a calendar operation.
      *
-     * @param result The result holding information about the created event
+     * @param result The calendar result
      */
-    void eventCreated(CreateResult result);
-
-    /**
-     * Invoked after an event has been update.
-     *
-     * @param result The result holding information about the updated event
-     */
-    void eventUpdated(UpdateResult result);
-
-    /**
-     * Invoked after an event has been deleted.
-     *
-     * @param result The result holding information about the deleted event
-     */
-    void eventDeleted(DeleteResult result);
+    void handle(CalendarResult result);
 
 }

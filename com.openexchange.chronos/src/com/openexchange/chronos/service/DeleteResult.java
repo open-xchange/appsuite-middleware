@@ -49,7 +49,6 @@
 
 package com.openexchange.chronos.service;
 
-import java.util.List;
 import com.openexchange.chronos.Event;
 
 /**
@@ -58,7 +57,7 @@ import com.openexchange.chronos.Event;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface DeleteResult extends CalendarResult {
+public interface DeleteResult {
 
     /**
      * Gets the deleted event.
@@ -66,22 +65,5 @@ public interface DeleteResult extends CalendarResult {
      * @return The event
      */
     Event getDeletedEvent();
-
-    /**
-     * Gets a value indicating whether the delete operation resulted in an event update instead of a deletion.
-     *
-     * @return <code>true</code> if the result represents an update, <code>false</code>, otherwise
-     */
-    boolean wasUpdate();
-
-    /**
-     * Returns the update result view in case the delete operation resulted in an event update instead of a deletion, i.e.
-     * {@link #wasUpdate()} is <code>true</code>.
-     *
-     * @return The corresponding update result, or <code>null</code> if not available
-     */
-    UpdateResult asUpdate();
-
-    List<DeleteResult> getNestedResults();
 
 }

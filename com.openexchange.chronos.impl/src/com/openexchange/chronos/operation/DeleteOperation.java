@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.chronos.impl;
+package com.openexchange.chronos.operation;
 
 import static com.openexchange.chronos.common.CalendarUtils.find;
 import static com.openexchange.chronos.common.CalendarUtils.isOrganizer;
@@ -55,7 +55,6 @@ import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
 import static com.openexchange.chronos.impl.Check.requireUpToDateTimestamp;
-import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.folderstorage.Permission.DELETE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.DELETE_OWN_OBJECTS;
@@ -70,15 +69,15 @@ import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
-import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.Period;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.AttendeeMapper;
+import com.openexchange.chronos.impl.Check;
+import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.DeleteResult;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.groupware.ldap.User;
 
 /**
  * {@link DeleteOperation}
@@ -86,7 +85,7 @@ import com.openexchange.groupware.ldap.User;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DeleteOperation {
+public class DeleteOperation extends AbstractOperation {
 
     /**
      * Prepares a delete operation.
@@ -100,12 +99,6 @@ public class DeleteOperation {
         return new DeleteOperation(storage, session, folder);
     }
 
-    private final CalendarSession session;
-    private final CalendarStorage storage;
-    private final User calendarUser;
-    private final UserizedFolder folder;
-    private final Date timestamp;
-
     /**
      * Initializes a new {@link DeleteOperation}.
      *
@@ -114,24 +107,18 @@ public class DeleteOperation {
      * @param folder The calendar folder representing the current view on the events
      */
     private DeleteOperation(CalendarStorage storage, CalendarSession session, UserizedFolder folder) throws OXException {
-        super();
-        this.folder = folder;
-        this.calendarUser = getCalendarUser(folder);
-        this.session = session;
-        this.timestamp = new Date();
-        this.storage = storage;
+        super(storage, session, folder);
     }
 
     /**
      * Performs the deletion of an event.
      *
-     * @param folder The calendar folder representing the current view on the events
      * @param objectID The identifier of the event to delete
      * @param recurrenceID The recurrence identifier of the occurrence to delete, or <code>null</code> if no specific occurrence is targeted
      * @param clientTimestamp The client timestamp to catch concurrent modifications
-     * @return The delete result
+     * @return The result
      */
-    public DeleteResultImpl perform(int objectID, Date recurrenceID, long clientTimestamp) throws OXException {
+    public CalendarResultImpl perform(int objectID, Date recurrenceID, long clientTimestamp) throws OXException {
         /*
          * load original event data & attendees
          */
@@ -147,28 +134,30 @@ public class DeleteOperation {
         }
         requireUpToDateTimestamp(originalEvent, clientTimestamp);
         if (null == recurrenceID) {
-            return deleteEvent(originalEvent);
+            deleteEvent(originalEvent);
         } else {
-            return deleteRecurrence(originalEvent, recurrenceID);
+            deleteRecurrence(originalEvent, recurrenceID);
         }
+        return result;
     }
 
     /**
      * Deletes a single event.
      *
      * @param originalEvent The original event to delete
-     * @return The delete result
+     * @return The result
      */
-    private DeleteResultImpl deleteEvent(Event originalEvent) throws OXException {
+    private void deleteEvent(Event originalEvent) throws OXException {
         if (isOrganizer(originalEvent, calendarUser.getId())) {
             /*
              * deletion as organizer
              */
             if (isSeriesException(originalEvent)) {
-                return deleteException(originalEvent);
+                deleteException(originalEvent);
             } else {
-                return delete(originalEvent);
+                delete(originalEvent);
             }
+            return;
         }
         Attendee userAttendee = find(originalEvent.getAttendees(), calendarUser.getId());
         if (null != userAttendee) {
@@ -176,10 +165,11 @@ public class DeleteOperation {
              * deletion as attendee
              */
             if (isSeriesException(originalEvent)) {
-                return deleteException(originalEvent, userAttendee);
+                deleteException(originalEvent, userAttendee);
             } else {
-                return delete(originalEvent, userAttendee);
+                delete(originalEvent, userAttendee);
             }
+            return;
         }
         /*
          * no delete permissions, otherwise
@@ -191,9 +181,9 @@ public class DeleteOperation {
      * Deletes a specific recurrence of a recurring event.
      *
      * @param originalEvent The original exception event, or the targeted series master event
-     * @return The delete result
+     * @return The result
      */
-    private DeleteResultImpl deleteRecurrence(Event originalEvent, Date recurrenceID) throws OXException {
+    private void deleteRecurrence(Event originalEvent, Date recurrenceID) throws OXException {
         if (isOrganizer(originalEvent, calendarUser.getId())) {
             /*
              * deletion as organizer
@@ -203,18 +193,20 @@ public class DeleteOperation {
                     /*
                      * deletion of existing change exception
                      */
-                    return deleteException(loadExceptionData(originalEvent.getId(), recurrenceID));
+                    deleteException(loadExceptionData(originalEvent.getId(), recurrenceID));
                 } else {
                     /*
                      * creation of new delete exception
                      */
-                    return addDeleteExceptionDate(originalEvent, recurrenceID);
+                    addDeleteExceptionDate(originalEvent, recurrenceID);
                 }
+                return;
             } else if (isSeriesException(originalEvent)) {
                 /*
                  * deletion of existing change exception
                  */
-                return deleteException(originalEvent);
+                deleteException(originalEvent);
+                return;
             }
             /*
              * unsupported, otherwise
@@ -231,18 +223,20 @@ public class DeleteOperation {
                     /*
                      * deletion of existing change exception
                      */
-                    return deleteException(loadExceptionData(originalEvent.getId(), recurrenceID), userAttendee);
+                    deleteException(loadExceptionData(originalEvent.getId(), recurrenceID), userAttendee);
                 } else {
                     /*
                      * creation of new delete exception
                      */
-                    return deleteFromRecurrence(originalEvent, recurrenceID, userAttendee);
+                    deleteFromRecurrence(originalEvent, recurrenceID, userAttendee);
                 }
+                return;
             } else if (isSeriesException(originalEvent)) {
                 /*
                  * deletion of existing change exception
                  */
-                return deleteException(originalEvent, userAttendee);
+                deleteException(originalEvent, userAttendee);
+                return;
             }
             /*
              * unsupported, otherwise
@@ -271,13 +265,14 @@ public class DeleteOperation {
      * </ul>
      *
      * @param originalEvent The original event to delete
-     * @return The delete result
      */
-    private DeleteResultImpl delete(Event originalEvent) throws OXException {
+    private void delete(Event originalEvent) throws OXException {
         /*
          * recursively delete any existing event exceptions
          */
-        List<DeleteResult> nestedResults = isSeriesMaster(originalEvent) ? deleteExceptions(originalEvent.getSeriesId(), originalEvent.getChangeExceptionDates()) : null;
+        if (isSeriesMaster(originalEvent)) {
+            deleteExceptions(originalEvent.getSeriesId(), originalEvent.getChangeExceptionDates());
+        }
         /*
          * delete event data from storage
          */
@@ -287,7 +282,7 @@ public class DeleteOperation {
         storage.getAlarmStorage().deleteAlarms(id);
         storage.getEventStorage().deleteEvent(id);
         storage.getAttendeeStorage().deleteAttendees(id);
-        return new DeleteResultImpl(session, calendarUser, i(folder), originalEvent, timestamp, nestedResults);
+        result.addDeletion(new DeleteResultImpl(originalEvent));
     }
 
     /**
@@ -306,14 +301,15 @@ public class DeleteOperation {
      *
      * @param originalEvent The original event to delete
      * @param originalAttendee The original attendee to delete
-     * @return The delete result
      */
-    private DeleteResultImpl delete(Event originalEvent, Attendee originalAttendee) throws OXException {
+    private void delete(Event originalEvent, Attendee originalAttendee) throws OXException {
         /*
          * recursively delete any existing event exceptions for this attendee
          */
         int userID = originalAttendee.getEntity();
-        List<DeleteResult> nestedResults = isSeriesMaster(originalEvent) ? deleteExceptions(originalEvent.getSeriesId(), originalEvent.getChangeExceptionDates(), userID) : null;
+        if (isSeriesMaster(originalEvent)) {
+            deleteExceptions(originalEvent.getSeriesId(), originalEvent.getChangeExceptionDates(), userID);
+        }
         /*
          * delete event data from storage for this attendee
          */
@@ -329,8 +325,7 @@ public class DeleteOperation {
         eventUpdate.setId(objectID);
         Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
         storage.getEventStorage().updateEvent(eventUpdate);
-        Event updatedEvent = loadEventData(objectID);
-        return new DeleteResultImpl(session, calendarUser, i(folder), originalEvent, updatedEvent, nestedResults);
+        result.addUpdate(new UpdateResultImpl(originalEvent, i(folder), loadEventData(objectID)));
     }
 
     /**
@@ -340,17 +335,14 @@ public class DeleteOperation {
      *
      * @param seriesID The series identifier
      * @param recurrenceIDs The recurrence identifiers of the change exceptions to delete
-     * @return The delete results, or <code>null</code> if there are none
+     * @return The results, or <code>null</code> if there are none
      */
-    private List<DeleteResult> deleteExceptions(int seriesID, List<Date> recurrenceIDs) throws OXException {
+    private void deleteExceptions(int seriesID, List<Date> recurrenceIDs) throws OXException {
         if (null != recurrenceIDs && 0 < recurrenceIDs.size()) {
-            List<DeleteResult> results = new ArrayList<DeleteResult>(recurrenceIDs.size());
             for (Event originalExceptionEvent : loadExceptionData(seriesID, recurrenceIDs)) {
-                results.add(delete(originalExceptionEvent));
+                delete(originalExceptionEvent);
             }
-            return results;
         }
-        return null;
     }
 
     /**
@@ -362,20 +354,16 @@ public class DeleteOperation {
      * @param seriesID The series identifier
      * @param recurrenceIDs The recurrence identifiers of the change exceptions to delete
      * @param userID The identifier of the user attendee to delete
-     * @return The delete results, or <code>null</code> if there are none
      */
-    private List<DeleteResult> deleteExceptions(int seriesID, List<Date> recurrenceIDs, int userID) throws OXException {
+    private void deleteExceptions(int seriesID, List<Date> recurrenceIDs, int userID) throws OXException {
         if (null != recurrenceIDs && 0 < recurrenceIDs.size()) {
-            List<DeleteResult> results = new ArrayList<DeleteResult>(recurrenceIDs.size());
             for (Event originalExceptionEvent : loadExceptionData(seriesID, recurrenceIDs)) {
                 Attendee originalUserAttendee = find(originalExceptionEvent.getAttendees(), userID);
                 if (null != originalUserAttendee) {
-                    results.add(delete(originalExceptionEvent, originalUserAttendee));
+                    delete(originalExceptionEvent, originalUserAttendee);
                 }
             }
-            return results;
         }
-        return null;
     }
 
     /**
@@ -384,9 +372,8 @@ public class DeleteOperation {
      *
      * @param originalMasterEvent The original series master event
      * @param recurrenceID The recurrence identifier of the occurrence to add
-     * @return The update result (wrapped in a delete result)
      */
-    private DeleteResultImpl addDeleteExceptionDate(Event originalMasterEvent, Date recurrenceID) throws OXException {
+    private void addDeleteExceptionDate(Event originalMasterEvent, Date recurrenceID) throws OXException {
         Event eventUpdate = new Event();
         eventUpdate.setId(originalMasterEvent.getId());
         List<Date> deleteExceptionDates = new ArrayList<Date>();
@@ -407,7 +394,7 @@ public class DeleteOperation {
         Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
         storage.getEventStorage().updateEvent(eventUpdate);
         Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
-        return new DeleteResultImpl(session, calendarUser, i(folder), originalMasterEvent, updatedMasterEvent);
+        result.addUpdate(new UpdateResultImpl(originalMasterEvent, i(folder), updatedMasterEvent));
     }
 
     /**
@@ -429,6 +416,7 @@ public class DeleteOperation {
         eventUpdate.setChangeExceptionDates(changeExceptionDates);
         Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
         storage.getEventStorage().updateEvent(eventUpdate);
+        result.addUpdate(new UpdateResultImpl(originalMasterEvent, i(folder), loadEventData(originalMasterEvent.getId())));
     }
 
     /**
@@ -436,22 +424,18 @@ public class DeleteOperation {
      * includes adjusting the master event's change- and delete exception date arrays.
      *
      * @param originalExceptionEvent The original exception event
-     * @return The delete result
      */
-    private DeleteResultImpl deleteException(Event originalExceptionEvent) throws OXException {
+    private void deleteException(Event originalExceptionEvent) throws OXException {
         /*
          * delete the exception
          */
         int seriesID = originalExceptionEvent.getSeriesId();
         Date recurrenceID = originalExceptionEvent.getRecurrenceId();
-        DeleteResultImpl result = delete(originalExceptionEvent);
+        delete(originalExceptionEvent);
         /*
          * update the series master accordingly
          */
-        Event originalMasterEvent = loadEventData(seriesID);
-        DeleteResult nestedResult = addDeleteExceptionDate(originalMasterEvent, recurrenceID);
-        result.addNestedResult(nestedResult);
-        return result;
+        addDeleteExceptionDate(loadEventData(seriesID), recurrenceID);
     }
 
     /**
@@ -460,14 +444,13 @@ public class DeleteOperation {
      *
      * @param originalExceptionEvent The original exception event
      * @param originalAttendee The original attendee to delete
-     * @return The delete result
      */
-    private DeleteResultImpl deleteException(Event originalExceptionEvent, Attendee originalAttendee) throws OXException {
+    private void deleteException(Event originalExceptionEvent, Attendee originalAttendee) throws OXException {
         /*
          * delete the attendee in the exception
          */
         int seriesID = originalExceptionEvent.getSeriesId();
-        DeleteResultImpl result = delete(originalExceptionEvent, originalAttendee);
+        delete(originalExceptionEvent, originalAttendee);
         /*
          * 'touch' the series master accordingly
          */
@@ -476,9 +459,7 @@ public class DeleteOperation {
         eventUpdate.setId(originalMasterEvent.getId());
         Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
         storage.getEventStorage().updateEvent(eventUpdate);
-        Event updatedMasterEvent = loadEventData(seriesID);
-        result.addNestedResult(new DeleteResultImpl(session, calendarUser, i(folder), originalMasterEvent, updatedMasterEvent));
-        return result;
+        result.addUpdate(new UpdateResultImpl(originalMasterEvent, i(folder), loadEventData(seriesID)));
     }
 
     /**
@@ -489,9 +470,8 @@ public class DeleteOperation {
      * @param originalExceptionEvent The original series master event
      * @param recurrenceID The original series master event
      * @param recurrenceID The recurrence identifier of the occurrence to remove the attendee for
-     * @return The delete result
      */
-    private DeleteResultImpl deleteFromRecurrence(Event originalMasterEvent, Date recurrenceID, Attendee originalAttendee) throws OXException {
+    private void deleteFromRecurrence(Event originalMasterEvent, Date recurrenceID, Attendee originalAttendee) throws OXException {
         /*
          * create new exception event
          */
@@ -512,56 +492,11 @@ public class DeleteOperation {
                 storage.getAlarmStorage().insertAlarms(exceptionEvent.getId(), userID, entry.getValue());
             }
         }
+        result.addCreation(new CreateResultImpl(loadEventData(exceptionEvent.getId())));
         /*
          * track new change exception date in master
          */
         addChangeExceptionDate(originalMasterEvent, recurrenceID);
-        Event updatedMasterEvent = loadEventData(originalMasterEvent.getId());
-        //TODO: nested result for new exception? or return result as "update", and use master as nested?
-        return new DeleteResultImpl(session, calendarUser, i(folder), originalMasterEvent, updatedMasterEvent);
     }
-
-    private Event prepareException(Event originalMasterEvent, Date recurrenceID) throws OXException {
-        Event exceptionEvent = new Event();
-        EventMapper.getInstance().copy(originalMasterEvent, exceptionEvent, EventField.values());
-        exceptionEvent.setId(storage.nextObjectID());
-        exceptionEvent.setRecurrenceId(recurrenceID);
-        exceptionEvent.setChangeExceptionDates(Collections.singletonList(recurrenceID));
-        exceptionEvent.setStartDate(recurrenceID);
-        exceptionEvent.setEndDate(new Date(recurrenceID.getTime() + new Period(originalMasterEvent).getDuration()));
-        Consistency.setCreated(timestamp, exceptionEvent, calendarUser.getId());
-        Consistency.setModified(timestamp, exceptionEvent, session.getUser().getId());
-        return exceptionEvent;
-    }
-
-    private Event loadEventData(int id) throws OXException {
-        Event event = storage.getEventStorage().loadEvent(id, null);
-        if (null == event) {
-            throw CalendarExceptionCodes.EVENT_NOT_FOUND.create(I(id));
-        }
-        event.setAttendees(storage.getAttendeeStorage().loadAttendees(event.getId()));
-        event.setAttachments(storage.getAttachmentStorage().loadAttachments(event.getId()));
-        return event;
-    }
-
-    private List<Event> loadExceptionData(int seriesID, List<Date> recurrenceIDs) throws OXException {
-        List<Event> exceptions = new ArrayList<Event>();
-        if (null != recurrenceIDs && 0 < recurrenceIDs.size()) {
-            for (Date recurrenceID : recurrenceIDs) {
-                exceptions.add(loadExceptionData(seriesID, recurrenceID));
-            }
-        }
-        return exceptions;
-    }
-
-    private Event loadExceptionData(int seriesID, Date recurrenceID) throws OXException {
-        Event excpetion = storage.getEventStorage().loadException(seriesID, recurrenceID, null);
-        if (null == excpetion) {
-            throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(seriesID), String.valueOf(recurrenceID));
-        }
-        excpetion.setAttendees(storage.getAttendeeStorage().loadAttendees(excpetion.getId()));
-        excpetion.setAttachments(storage.getAttachmentStorage().loadAttachments(excpetion.getId()));
-        return excpetion;
-    }
-
+    
 }

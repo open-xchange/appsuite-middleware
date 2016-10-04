@@ -57,7 +57,7 @@ import com.openexchange.chronos.Event;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CreateResult extends CalendarResult {
+public interface CreateResult {
 
     /**
      * Gets the created event.
