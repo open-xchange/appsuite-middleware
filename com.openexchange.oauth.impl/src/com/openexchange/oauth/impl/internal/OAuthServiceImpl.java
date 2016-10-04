@@ -552,6 +552,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             deleteAccount(accountId, user, contextId, con);
             con.commit(); // COMMIT
             committed = true;
+            LOG.info("Deleted OAuth account with id '{}' for user '{}' in context '{}'", accountId, user, contextId);
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
@@ -578,6 +579,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             stmt.setInt(2, user);
             stmt.setInt(3, accountId);
             stmt.executeUpdate();
+            LOG.info("Deleted OAuth account with id '{}' for user '{}' in context '{}'", accountId, user, contextId);
             deleteListenerRegistry.triggerOnAfterDeletion(accountId, properties, user, contextId, con);
             /*
              * Post folder event

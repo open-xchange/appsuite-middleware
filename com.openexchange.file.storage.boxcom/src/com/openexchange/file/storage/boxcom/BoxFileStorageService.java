@@ -197,8 +197,11 @@ public final class BoxFileStorageService implements AccountAware, OAuthAccountDe
             OAuthAccessRegistry registry = registryService.get(API.BOX_COM.getFullName());
             for (FileStorageAccount deleteMe : toDelete) {
                 accountManager.deleteAccount(deleteMe, session);
-                registry.purgeUserAccess(session.getContextId(), session.getUserId());
-                LOG.info("Deleted Box.com account with ID {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), oauthAccountId, user, cid);
+                LOG.info("Deleted Box.com file storage account with id {} as OAuth account {} was deleted for user {} in context {}", deleteMe.getId(), oauthAccountId, user, cid);
+                boolean purged = registry.purgeUserAccess(session.getContextId(), session.getUserId());
+                if (purged) {
+                    LOG.info("Removed Box.com OAuth accesses from registry for the deleted OAuth account with id '{}' for user '{}' in context '{}'", deleteMe.getId(), user, cid);
+                }
             }
 
         } catch (Exception e) {
