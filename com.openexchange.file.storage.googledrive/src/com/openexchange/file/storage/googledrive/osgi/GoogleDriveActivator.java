@@ -59,8 +59,9 @@ import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.googledrive.access.GoogleDriveEventHandler;
+import com.openexchange.file.storage.oauth.OAuthFileStorageAccountEventHandler;
 import com.openexchange.mime.MimeTypeMap;
+import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -107,7 +108,7 @@ public final class GoogleDriveActivator extends HousekeepingActivator {
              */
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
-            registerService(EventHandler.class, new GoogleDriveEventHandler(), serviceProperties);
+            registerService(EventHandler.class, new OAuthFileStorageAccountEventHandler(this, API.GOOGLE), serviceProperties);
         } catch (final Exception e) {
             logger.error("", e);
             throw e;

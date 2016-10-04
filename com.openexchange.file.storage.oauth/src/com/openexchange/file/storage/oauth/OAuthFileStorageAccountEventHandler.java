@@ -62,6 +62,7 @@ import com.openexchange.sessiond.SessiondEventConstants;
 /**
  * {@link OAuthFileStorageAccountEventHandler}
  *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public class OAuthFileStorageAccountEventHandler implements EventHandler {
