@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,42 +47,50 @@
  *
  */
 
-package com.openexchange.groupware.filestore.osgi;
+package com.openexchange.groupware.filestore;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import com.openexchange.filestore.FileStorageInfoService;
-import com.openexchange.groupware.filestore.FileStorageInfoServiceImpl;
+import java.net.URI;
+import com.openexchange.filestore.FileStorageInfo;
+
 
 /**
- * {@link FilestoreActivator}
+ * {@link FileStorageInfoImpl}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class FilestoreActivator implements BundleActivator {
+public class FileStorageInfoImpl implements FileStorageInfo {
 
-    private ServiceRegistration<FileStorageInfoService> registration;
+    private final Filestore filestore;
 
     /**
-     * Initializes a new {@link FilestoreActivator}.
+     * Initializes a new {@link FileStorageInfoImpl}.
+     *
+     * @param filestore The filestore instance
      */
-    public FilestoreActivator() {
+    public FileStorageInfoImpl(Filestore filestore) {
         super();
+        this.filestore = filestore;
     }
 
     @Override
-    public synchronized void start(final BundleContext context) throws Exception {
-        registration = context.registerService(FileStorageInfoService.class, new FileStorageInfoServiceImpl(), null);
+    public int getId() {
+        return filestore.getId();
     }
 
     @Override
-    public synchronized void stop(final BundleContext context) throws Exception {
-        ServiceRegistration<FileStorageInfoService> registration = this.registration;
-        if (null != registration) {
-            this.registration = null;
-            registration.unregister();
-        }
+    public long getMaxContext() {
+        return filestore.getMaxContext();
+    }
+
+    @Override
+    public long getSize() {
+        return filestore.getSize();
+    }
+
+    @Override
+    public URI getUri() {
+        return filestore.getUri();
     }
 
 }
