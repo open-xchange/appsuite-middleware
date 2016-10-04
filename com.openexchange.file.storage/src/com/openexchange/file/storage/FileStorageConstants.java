@@ -74,4 +74,7 @@ public interface FileStorageConstants {
      */
     static final SearchIterator<File> EMPTY_ITER = SearchIteratorAdapter.emptyIterator();
 
+    /** The meta-data key that holds encrypted information; type if java.lang.Boolean */
+    public static final String METADATA_KEY_ENCRYPTED = "Encrypted";
+
 }
