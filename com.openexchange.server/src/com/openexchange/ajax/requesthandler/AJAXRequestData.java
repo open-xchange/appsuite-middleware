@@ -216,6 +216,9 @@ public class AJAXRequestData {
     /** The maximum allowed size of a complete request or <code>-1</code> */
     private long maxUploadSize = -1L;
 
+    /** Internal flag to remember whether request body has already been loaded (if any) */
+    private boolean requestBodyLoaded;
+
     /**
      * Initializes a new {@link AJAXRequestData}.
      *
@@ -288,6 +291,7 @@ public class AJAXRequestData {
         copy.userAgent = userAgent;
         copy.serverPort = serverPort;
         copy.prefix = prefix;
+        copy.requestBodyLoaded = requestBodyLoaded;
 
         /*
          * Not sure about following members, therefore leave to null
@@ -674,6 +678,24 @@ public class AJAXRequestData {
      */
     public void setETag(final @Nullable String eTag) {
         this.eTag = eTag;
+    }
+
+    /**
+     * Checks whether request body was already attempted being loaded.
+     *
+     * @return <code>true</code> if loaded; otherwise <code>false</code>
+     */
+    boolean isRequestBodyLoaded() {
+        return requestBodyLoaded;
+    }
+
+    /**
+     * Sets the whether request body was already attempted being loaded.
+     *
+     * @param requestBodyLoaded <code>true</code> if loaded; otherwise <code>false</code>
+     */
+    void setRequestBodyLoaded(boolean requestBodyLoaded) {
+        this.requestBodyLoaded = requestBodyLoaded;
     }
 
     /**
@@ -1165,6 +1187,15 @@ public class AJAXRequestData {
      */
     public void setUploadStreamProvider(final @Nullable InputStreamProvider uploadStreamProvider) {
         this.uploadStreamProvider = uploadStreamProvider;
+    }
+
+    /**
+     * Checks if this request data has an upload stream provider set.
+     *
+     * @return <code>true</code> if an upload stream provider is available; otherwise <code>false</code>
+     */
+    public boolean hasUploadStreamProvider() {
+        return null != this.uploadStreamProvider;
     }
 
     /**

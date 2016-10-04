@@ -241,6 +241,15 @@ public interface MailAccountStorageService {
     String getDefaultFolderPrefix(Session session) throws OXException;
 
     /**
+     * Gets the separator character of the default mail account belonging to specified user in given context.
+     *
+     * @param session The session
+     * @return The separator character
+     * @throws OXException If the separator character cannot be returned
+     */
+    char getDefaultSeparator(Session session) throws OXException;
+
+    /**
      * Updates mail account's value taken specified {@code MailAccountDescription} instance.
      *
      * @param mailAccount TThe {@code MailAccountDescription} instance to read from

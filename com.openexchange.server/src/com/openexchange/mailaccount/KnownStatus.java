@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,55 +47,63 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler;
+package com.openexchange.mailaccount;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.util.Locale;
+import com.openexchange.i18n.tools.StringHelper;
 
 /**
- * {@link DispatcherNotes} - The action annotation provides the default format for an {@link AJAXActionService}.
+ * {@link KnownStatus} - An enumeration for known statuses for a mail account.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface DispatcherNotes {
+public enum KnownStatus implements Status {
 
     /**
-     * Gets the default format.
+     * The "OK" status. All fine.
+     */
+    OK("ok", KnownStatusMessage.MESSAGE_OK),
+    /**
+     * Referenced account currently carries invalid credentials and is therefore unable to connect. Credentials are supposed to be corrected by user.
+     */
+    INVALID_CREDENTIALS("invalid_credentials", KnownStatusMessage.MESSAGE_INVALID_CREDENTIALS),
+
+    ;
+
+    private final String id;
+    private final String message;
+
+    private KnownStatus(String id, String message) {
+        this.id = id;
+        this.message = message;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getMessage(Locale locale) {
+        return StringHelper.valueOf(null == locale ? Locale.US : locale).getString(message);
+    }
+
+    /**
+     * Gets the status for given identifier
      *
-     * @return The default format
+     * @param identifier The status' identifier
+     * @return The status or <code>null</code>
      */
-    String defaultFormat() default "apiResponse";
-
-    /**
-     * Indicates whether this action allows falling back to the public session cookie for session retrieval. This is useful
-     * if you don't want varying URLs between sessions. The trade-off is less stability for your requests in problematic infrastructures.
-     * @return Whether to allow access using the fallback session or not
-     */
-    boolean allowPublicSession() default false;
-
-    /**
-     * Indicates whether this action allows authentication via public session identifier.
-     * @return Whether to allow authentication via public session identifier or not
-     */
-    boolean publicSessionAuth() default false;
-
-    /**
-     * Indicates that this action may be called without a session
-     * @return whether to allow access to this action without a session
-     */
-	boolean noSession() default false;
-
-	/**
-     * Indicates whether this action is allowed to miss the associated secret cookie, because it is meant as a callback.
-     * @return Whether to allow access without secret
-     */
-	boolean noSecretCallback() default false;
-
-	/**
-     * Indicates whether this action prefers reading/parsing request body stream by itself.
-     * @return Whether to prefer reading/parsing request body stream by itself
-     */
-    boolean preferStream() default false;
+    public static Status statusFor(String identifier) {
+        if (null == identifier) {
+            return null;
+        }
+        for (KnownStatus s : KnownStatus.values()) {
+            if (identifier.equalsIgnoreCase(s.id)) {
+                return s;
+            }
+        }
+        return null;
+    }
 }

@@ -47,48 +47,28 @@
  *
  */
 
-package com.openexchange.documentation.json.actions;
+package com.openexchange.mail.json.osgi;
 
-import org.json.JSONArray;
-import org.json.JSONException;
+import org.osgi.framework.BundleContext;
+import com.openexchange.mail.mime.MimeMailExceptionHandler;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.DocumentationRegistry;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.documentation.descriptions.ModuleDescription;
-import com.openexchange.documentation.json.DocumentationAJAXRequest;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ModulesAction}
+ * {@link MimeMailExceptionHandlerTracker} - Tracks {@link MimeMailExceptionHandler} instances and sorts them by service ranking.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-@Action(method = RequestMethod.GET, name = "modules", description = "Get the descriptions of all modules.", parameters = {
-		@Parameter(name = "session", description = "A session ID previously obtained from the login module.")
-}, responseDescription = "An array containing objects of all module descriptions.")
-public final class ModulesAction extends DocumentationAction {
+public class MimeMailExceptionHandlerTracker extends RankingAwareNearRegistryServiceTracker<MimeMailExceptionHandler> {
 
     /**
-     * Initializes a new {@link ModulesAction}.
+     * Initializes a new {@link MimeMailExceptionHandlerTracker}.
      *
-     * @param services The service look-up
+     * @param context The bundle context
      */
-    public ModulesAction(final ServiceLookup services) {
-        super(services);
-    }
-
-    @Override
-    protected AJAXRequestResult perform(final DocumentationAJAXRequest request) throws OXException, JSONException {
-        final DocumentationRegistry registry = super.getRegistry();
-        final JSONArray jsonArray = new JSONArray();
-        for (final ModuleDescription module : registry.getModules()) {
-        	jsonArray.put(super.write(module));
-        }
-        return new AJAXRequestResult(jsonArray, "json");
+    public MimeMailExceptionHandlerTracker(BundleContext context) {
+        super(context, MimeMailExceptionHandler.class);
     }
 
 }

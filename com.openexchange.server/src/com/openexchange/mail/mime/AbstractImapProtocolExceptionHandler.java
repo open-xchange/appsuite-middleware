@@ -47,62 +47,54 @@
  *
  */
 
-package com.openexchange.documentation.osgi;
+package com.openexchange.mail.mime;
 
-import org.osgi.framework.Constants;
-import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import com.openexchange.documentation.AnnotatedServices;
-import com.openexchange.documentation.DescriptionFactory;
-import com.openexchange.documentation.DocumentationRegistry;
-import com.openexchange.documentation.descriptions.ModuleDescription;
-import com.openexchange.documentation.internal.DefaultDescriptionFactory;
-import com.openexchange.documentation.internal.DefaultDocumentationRegistry;
-import com.openexchange.documentation.internal.DocumentationProcessor;
-import com.openexchange.osgi.HousekeepingActivator;
+import javax.mail.Folder;
+import javax.mail.MessagingException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.MailConfig;
+import com.openexchange.session.Session;
+import com.sun.mail.iap.ProtocolException;
+
 
 /**
- * {@link DocumentationActivator}
+ * {@link AbstractImapProtocolExceptionHandler} - The abstract handler for {@link com.sun.mail.iap.ProtocolException IMAP protocol exceptions}.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class DocumentationActivator extends HousekeepingActivator {
-
-    private final String[] TRACKED_CLASSES = {
-        AnnotatedServices.class.getName(),
-        ModuleDescription.class.getName(),
-        "com.openexchange.ajax.requesthandler.AJAXActionServiceFactory"
-    };
+public abstract class AbstractImapProtocolExceptionHandler implements MimeMailExceptionHandler {
 
     /**
-     * Initializes a new {@link DocumentationActivator}.
+     * Initializes a new {@link AbstractImapProtocolExceptionHandler}.
      */
-    public DocumentationActivator() {
+    protected AbstractImapProtocolExceptionHandler() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-    	final DefaultDocumentationRegistry registry = new DefaultDocumentationRegistry();
-    	final DefaultDescriptionFactory factory = new DefaultDescriptionFactory();
-    	final DocumentationProcessor processor = new DocumentationProcessor(registry, factory);
-    	super.track(constructFilter(), new DocumentationListener(processor));
-    	super.openTrackers();
-    	super.registerService(DocumentationRegistry.class, registry);
-    	super.registerService(DescriptionFactory.class, factory);
-    }
-
-    private Filter constructFilter() throws InvalidSyntaxException {
-        final StringBuilder stringBuilder = new StringBuilder("(|");
-        for (final String className : TRACKED_CLASSES) {
-            stringBuilder.append('(').append(Constants.OBJECTCLASS).append('=').append(className).append(')');
+    public OXException handle(MessagingException me, MailConfig mailConfig, Session session, Folder folder) {
+        if (null == me) {
+            return null;
         }
-        stringBuilder.append(')');
-        return context.createFilter(stringBuilder.toString());
+
+        Exception nextException = me.getNextException();
+        if (!(nextException instanceof com.sun.mail.iap.ProtocolException)) {
+            return null;
+        }
+
+        return handleProtocolException((com.sun.mail.iap.ProtocolException) nextException, mailConfig, session, folder);
     }
+
+    /**
+     * Handles given IMAP protocol exception.
+     *
+     * @param protocolException The IMAP protocol exception to handle
+     * @param mailConfig The optional mail config
+     * @param session The optional session
+     * @param folder The optional folder
+     * @return The handled exception or <code>null</code>
+     */
+    protected abstract OXException handleProtocolException(ProtocolException protocolException, MailConfig mailConfig, Session session, Folder folder);
+
 }

@@ -47,55 +47,30 @@
  *
  */
 
-package com.openexchange.documentation.json;
+package com.openexchange.mailaccount;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
-import com.openexchange.documentation.json.actions.ContainerAction;
-import com.openexchange.documentation.json.actions.ContainersAction;
-import com.openexchange.documentation.json.actions.ModuleAction;
-import com.openexchange.documentation.json.actions.ModulesAction;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link DocumentationActionFactory}
+ * {@link KnownStatusMessage}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-@Module(name = "documentation", description = "Provides access to the documentation subsystem.")
-public class DocumentationActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions;
+public class KnownStatusMessage implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link DocumentationActionFactory}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link KnownStatusMessage}.
      */
-    public DocumentationActionFactory(final ServiceLookup services) {
+    private KnownStatusMessage() {
         super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("modules", new ModulesAction(services));
-        actions.put("module", new ModuleAction(services));
-        actions.put("containers", new ContainersAction(services));
-        actions.put("container", new ContainerAction(services));
-        this.actions = actions.build();
     }
 
-    @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
-    }
+    // The message advertising that everything is fine with checked account
+    public static final String MESSAGE_OK = "All fine";
 
-	@Override
-	public Collection<? extends AJAXActionService> getSupportedServices() {
-        return Collections.unmodifiableCollection(actions.values());
-	}
+    // The message advertising that authentication against referenced mail account does not work or stopped working
+    public static final String MESSAGE_INVALID_CREDENTIALS = "The entered credential or authentication information does not work or are no longer accepted by provider. Please change them.";
 
 }

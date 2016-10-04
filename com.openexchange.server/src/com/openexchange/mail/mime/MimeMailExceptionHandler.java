@@ -47,38 +47,31 @@
  *
  */
 
-package com.openexchange.documentation.osgi;
+package com.openexchange.mail.mime;
 
-import org.osgi.framework.ServiceReference;
-import com.openexchange.documentation.internal.DocumentationProcessor;
-import com.openexchange.osgi.SimpleRegistryListener;
+import javax.mail.Folder;
+import javax.mail.MessagingException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.MailConfig;
+import com.openexchange.session.Session;
 
 /**
- * {@link DocumentationListener} - Recognizes services with documentation annotations.
+ * {@link MimeMailExceptionHandler} - A handler for certain MIME mail exceptions.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class DocumentationListener implements SimpleRegistryListener<Object> {
-
-	private final DocumentationProcessor processor;
+public interface MimeMailExceptionHandler {
 
     /**
-     * Initializes a new {@link DocumentationListener}.
+     * Handles given exception.
+     *
+     * @param me The exception to handle
+     * @param mailConfig The optional mail configuration of the affected user
+     * @param session The optional session of the affected user
+     * @param folder The optional folder involved with failed operation
+     * @return An appropriate {@link OXException} instance or <code>null</code>
      */
-    public DocumentationListener(final DocumentationProcessor processor) {
-        super();
-        this.processor = processor;
-    }
-
-    @Override
-    public void added(ServiceReference<Object> ref, Object service) {
-        this.processor.add(service);
-    }
-
-    @Override
-    public void removed(ServiceReference<Object> ref, Object service) {
-        this.processor.remove(service);
-
-    }
+    OXException handle(MessagingException me, MailConfig mailConfig, Session session, Folder folder);
 
 }

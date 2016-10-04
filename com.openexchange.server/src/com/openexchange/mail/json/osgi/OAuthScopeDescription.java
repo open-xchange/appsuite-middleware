@@ -47,44 +47,21 @@
  *
  */
 
-package com.openexchange.documentation.json.actions;
 
-import org.json.JSONException;
+package com.openexchange.mail.json.osgi;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.DocumentationRegistry;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.documentation.json.DocumentationAJAXRequest;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link ContainerAction}
+ * {@link OAuthScopeDescription} - Strings describing the OAuth scopes.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-@Action(method = RequestMethod.GET, name = "container", description = "Get a container's description.", parameters = {
-		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-		@Parameter(name = "name", description = "The name of the container.")
-}, responseDescription = "An object containing the requested container's description.")
-public final class ContainerAction extends DocumentationAction {
-
-    /**
-     * Initializes a new {@link ContainerAction}.
-     *
-     * @param services The service look-up
-     */
-    public ContainerAction(final ServiceLookup services) {
-        super(services);
-    }
-
-    @Override
-    protected AJAXRequestResult perform(final DocumentationAJAXRequest request) throws OXException, JSONException {
-        final DocumentationRegistry registry = super.getRegistry();
-        return new AJAXRequestResult(super.write(registry.getContainer(request.checkParameter("name"))));
-    }
+final class OAuthScopeDescription implements LocalizableStrings {
+    // Application 'xyz' requires following permissions:
+    //  - Send RFC822 data using primary account's transport. This requires master authentication to be active.
+    //  - ...
+    public static final String SEND_DATA = "Send RFC822 data using primary account's transport. This requires master authentication to be active.";
 
 }

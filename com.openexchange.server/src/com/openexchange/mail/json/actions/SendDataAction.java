@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,55 +47,57 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler;
+package com.openexchange.mail.json.actions;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
+import javax.mail.MessagingException;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.json.MailOAuthConstants;
+import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link DispatcherNotes} - The action annotation provides the default format for an {@link AJAXActionService}.
+ * {@link SendDataAction}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface DispatcherNotes {
+@OAuthAction(MailOAuthConstants.OAUTH_SEND_DATA)
+@DispatcherNotes( preferStream = true )
+public class SendDataAction extends AbstractMailAction {
+
+    private final NewAction delegate;
 
     /**
-     * Gets the default format.
+     * Initializes a new {@link SendDataAction}.
      *
-     * @return The default format
+     * @param services The OSGi service look-up
      */
-    String defaultFormat() default "apiResponse";
+    public SendDataAction(NewAction delegate, ServiceLookup services) {
+        super(services);
+        this.delegate = delegate;
+    }
 
-    /**
-     * Indicates whether this action allows falling back to the public session cookie for session retrieval. This is useful
-     * if you don't want varying URLs between sessions. The trade-off is less stability for your requests in problematic infrastructures.
-     * @return Whether to allow access using the fallback session or not
-     */
-    boolean allowPublicSession() default false;
+    @Override
+    protected AJAXRequestResult perform(MailRequest req) throws OXException, JSONException {
+        try {
+            List<OXException> warnings = new ArrayList<OXException>();
+            return delegate.performWithoutUploads(req, warnings);
+        } catch (final JSONException e) {
+            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (final RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
 
-    /**
-     * Indicates whether this action allows authentication via public session identifier.
-     * @return Whether to allow authentication via public session identifier or not
-     */
-    boolean publicSessionAuth() default false;
-
-    /**
-     * Indicates that this action may be called without a session
-     * @return whether to allow access to this action without a session
-     */
-	boolean noSession() default false;
-
-	/**
-     * Indicates whether this action is allowed to miss the associated secret cookie, because it is meant as a callback.
-     * @return Whether to allow access without secret
-     */
-	boolean noSecretCallback() default false;
-
-	/**
-     * Indicates whether this action prefers reading/parsing request body stream by itself.
-     * @return Whether to prefer reading/parsing request body stream by itself
-     */
-    boolean preferStream() default false;
 }

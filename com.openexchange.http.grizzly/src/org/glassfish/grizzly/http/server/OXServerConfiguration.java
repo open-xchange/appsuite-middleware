@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,35 +47,44 @@
  *
  */
 
-package com.openexchange.documentation.json.osgi;
+package org.glassfish.grizzly.http.server;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.documentation.DocumentationRegistry;
-import com.openexchange.documentation.json.DocumentationActionFactory;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 /**
- * {@link DocumentationJSONActivator}
+ * {@link OXServerConfiguration}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class DocumentationJSONActivator extends AJAXModuleActivator {
+public class OXServerConfiguration extends ServerConfiguration {
+
+    private long wsTimeoutMillis;
 
     /**
-     * Initializes a new {@link DocumentationJSONActivator}.
+     * Initializes a new {@link OXServerConfiguration}.
+     *
+     * @param instance The HTTT server instance
      */
-    public DocumentationJSONActivator() {
-        super();
+    public OXServerConfiguration(HttpServer instance) {
+        super(instance);
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DocumentationRegistry.class };
+    /**
+     * Sets the Web Socket timeout in milliseconds
+     *
+     * @param wsTimeoutMillis The timeout to set
+     */
+    public void setWsTimeoutMillis(long wsTimeoutMillis) {
+        this.wsTimeoutMillis = wsTimeoutMillis;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-    	super.registerModule(new DocumentationActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "documentation");
+    /**
+     * Gets the Web Socket timeout in milliseconds
+     *
+     * @return The timeout
+     */
+    public long getWsTimeoutMillis() {
+        return wsTimeoutMillis;
     }
 
 }

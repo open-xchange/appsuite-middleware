@@ -177,6 +177,7 @@ public class GcmPushNotificationTransportActivator extends HousekeepingActivator
                     Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
                     dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(785));
                     optionsProviderRegistration = context.registerService(GcmOptionsProvider.class, new DefaultGcmOptionsProvider(options), dictionary);
+                    this.optionsProviderRegistration = optionsProviderRegistration;
                 }
             }
         }

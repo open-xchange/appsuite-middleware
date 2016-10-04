@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,57 +47,61 @@
  *
  */
 
-package com.openexchange.documentation;
+package com.openexchange.filestore;
 
-import java.util.Collection;
-import com.openexchange.documentation.descriptions.ContainerDescription;
-import com.openexchange.documentation.descriptions.ModuleDescription;
+import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link DocumentationRegistry} - Provides access to descriptions for modules and containers.
+ * {@link QuotaFileStorageListener}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.3
  */
-@SingletonService
-public interface DocumentationRegistry {
+public interface QuotaFileStorageListener {
 
     /**
-     * Gets the module descriptions contained in this registry.
+     * Called right before the usage is about to be incremented.
+     * <p>
+     * <b>Note</b>: This call-back occurs if increment does not violate quota limitation.<br>
+     * Otherwise {@link #onQuotaExceeded()} is called.
      *
-     * @return the module descriptions
-     * @throws OXException If module descriptions cannot be returned
+     * @param id The identifier of the file in storage causing the usage increment
+     * @param toIncrement The value to increment
+     * @param currentUsage The current quota usage
+     * @param quota The quota limit
+     * @param userId The (optional) user identifier or <code>0</code> (zero) if storage is not user-specific
+     * @param contextId The context identifier
+     * @throws OXException If increment must not occur and operation is supposed to be aborted
      */
-	Collection<ModuleDescription> getModules() throws OXException;
+    void onUsageIncrement(String id, long toIncrement, long currentUsage, long quota, int userId, int contextId) throws OXException;
 
     /**
-     * Gets the module description associated with given name.
+     * Called right before the usage is about to be decremented.
+     * <p>
+     * <b>Note</b>: This call-back should not throw an exception.
      *
-     * @param name The name of the module description
-     * @return the module description associated with given name
-     * @throws OXException if module description cannot be returned
+     * @param ids The identifiers of the files in storage causing the usage decrement
+     * @param toDecrement The value to decrement
+     * @param currentUsage The current quota usage
+     * @param quota The quota limit
+     * @param userId The (optional) user identifier or <code>0</code> (zero) if storage is not user-specific
+     * @param contextId The context identifier
      */
-	ModuleDescription getModule(String name) throws OXException;
+    void onUsageDecrement(List<String> ids, long toDecrement, long currentUsage, long quota, int userId, int contextId);
 
     /**
-     * Gets the container descriptions contained in this registry.
+     * Called in case a quota increment exceeds the quota limit and the operation is about to be aborted.
+     * <p>
+     * <b>Note</b>: This call-back should not throw an exception.
      *
-     * @return the container descriptions
-     * @throws OXException if container descriptions cannot be returned
+     * @param id The identifier of the file in storage causing the exceeded quota
+     * @param toIncrement The value that exceeded the quota limit
+     * @param currentUsage The current quota usage
+     * @param quota The quota limit
+     * @param userId The (optional) user identifier or <code>0</code> (zero) if storage is not user-specific
+     * @param contextId The context identifier
      */
-	Collection<ContainerDescription> getContainers() throws OXException;
-
-    /**
-     * Gets the container description associated with given name.
-     *
-     * @param name the name of the container description
-     * @return the container description associated with given name
-     * @throws OXException if container description cannot be returned
-     */
-	ContainerDescription getContainer(String name) throws OXException;
+    void onQuotaExceeded(String id, long toIncrement, long currentUsage, long quota, int userId, int contextId);
 
 }

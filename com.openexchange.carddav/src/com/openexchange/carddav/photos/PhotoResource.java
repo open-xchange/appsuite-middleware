@@ -77,6 +77,8 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 public class PhotoResource extends DAVResource {
 
     private final Contact contact;
+    
+    private byte[] photoData;
 
     /**
      * Initializes a new {@link PhotoResource}.
@@ -111,8 +113,8 @@ public class PhotoResource extends DAVResource {
 
     @Override
     public Long getLength() throws WebdavProtocolException {
-        byte[] image = contact.getImage1();
-        return null == image ? 0L : Long.valueOf(image.length);
+        byte[] image = getPhotoData();
+        return null == image ? 0L : image.length;
     }
 
     @Override
@@ -132,22 +134,28 @@ public class PhotoResource extends DAVResource {
 
     @Override
     public InputStream getBody() throws WebdavProtocolException {
-        TransformedImage transformedImage = null;
-        try {
-             transformedImage = scaleImageIfNeeded(contact.getImage1(), contact.getImageContentType(), getPhotoScaleDimension());
-             if (null != transformedImage) {
-                 byte[] imageData = transformedImage.getImageData();
-                 if (null != imageData) {
-                     return Streams.newByteArrayInputStream(imageData);
-                 }
-             }
-        } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(PhotoResource.class).warn("Error getting scaled contact image", e);
-        } finally {
-            Streams.close(transformedImage);
-        }
-        byte[] image = contact.getImage1();
+        byte[] image = getPhotoData();
         return null == image ? Streams.EMPTY_INPUT_STREAM : Streams.newByteArrayInputStream(image);
+    }
+    
+    private byte[] getPhotoData() {
+        if (null == photoData && null != contact.getImage1()) {
+            TransformedImage transformedImage = null;
+            try {
+                 transformedImage = scaleImageIfNeeded(contact.getImage1(), contact.getImageContentType(), getPhotoScaleDimension());
+                 if (null != transformedImage) {
+                     photoData = transformedImage.getImageData();
+                 }
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(PhotoResource.class).warn("Error getting scaled contact image", e);
+            } finally {
+                Streams.close(transformedImage);
+            }
+        }
+        if (null == photoData) {
+            photoData = contact.getImage1();
+        }        
+        return photoData;
     }
 
     private Dimension getPhotoScaleDimension () {

@@ -1144,6 +1144,18 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
+    @Override
+    public char getDefaultSeparator(Session session) throws OXException {
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            mailAccess = MailAccess.getInstance(session);
+            mailAccess.connect(false);
+            return mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
+        } finally {
+            MailAccess.closeInstance(mailAccess, false);
+        }
+    }
+
     public MailAccount getDefaultMailAccount(final int userId, final int contextId, final Connection con) throws OXException {
         return getMailAccount(MailAccount.DEFAULT_ID, userId, contextId, con);
     }
@@ -2299,7 +2311,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             if (!result.next()) {
                 throw MailAccountExceptionCodes.NOT_FOUND.create(I(accountId), I(userId), I(contextId));
             }
-            
+
             transportAccount.setName(result.getString(1));
             transportAccount.setId(result.getInt(2));
             transportAccount.parseTransportServerURL(result.getString(3));

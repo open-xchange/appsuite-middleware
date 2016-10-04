@@ -151,9 +151,7 @@ com.openexchange.pns.transport.websocket.enabled.open-xchange-appsuite.ox:calend
 
 That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications
 via Web Socket, but not for "new appointment".
-
-Default false
-      Default: false
+      Default: true
       Version: 7.8.3
       Reloadable: true
       Configcascade_Aware: true

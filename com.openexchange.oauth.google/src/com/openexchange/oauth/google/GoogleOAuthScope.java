@@ -58,12 +58,12 @@ import com.openexchange.oauth.scope.OAuthScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum GoogleOAuthScope implements OAuthScope {
-    mail("https://mail.google.com/ offline", OXScope.mail),
-    calendar_ro("https://www.googleapis.com/auth/calendar.readonly offline", OXScope.calendar_ro),
-    contacts_ro("https://www.googleapis.com/auth/contacts.readonly offline", OXScope.contacts_ro),
-    calendar("https://www.googleapis.com/auth/calendar offline", OXScope.calendar),
-    contacts("https://www.googleapis.com/auth/contacts offline", OXScope.contacts),
-    drive("https://www.googleapis.com/auth/drive offline", OXScope.drive);
+    mail("https://mail.google.com/", OXScope.mail),
+    calendar_ro("https://www.googleapis.com/auth/calendar.readonly", OXScope.calendar_ro),
+    contacts_ro("https://www.googleapis.com/auth/contacts.readonly", OXScope.contacts_ro),
+    calendar("https://www.googleapis.com/auth/calendar", OXScope.calendar),
+    contacts("https://www.googleapis.com/auth/contacts", OXScope.contacts),
+    drive("https://www.googleapis.com/auth/drive", OXScope.drive);
 
     private final String mapping;
     private final OXScope module;

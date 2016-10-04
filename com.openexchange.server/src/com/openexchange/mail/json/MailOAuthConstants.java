@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,44 +47,25 @@
  *
  */
 
-package com.openexchange.documentation.json.actions;
-
-import org.json.JSONException;
-
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.DocumentationRegistry;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.documentation.json.DocumentationAJAXRequest;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+package com.openexchange.mail.json;
 
 
 /**
- * {@link ModuleAction}
+ * {@link MailOAuthConstants}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-@Action(method = RequestMethod.GET, name = "module", description = "Get a module's description.", parameters = {
-		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-		@Parameter(name = "name", description = "The name of the module.")
-}, responseDescription = "An object containing the requested module's description.")
-public final class ModuleAction extends DocumentationAction {
+public class MailOAuthConstants {
 
     /**
-     * Initializes a new {@link ModuleAction}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link MailOAuthConstants}.
      */
-    public ModuleAction(final ServiceLookup services) {
-        super(services);
+    private MailOAuthConstants() {
+        super();
     }
 
-    @Override
-    protected AJAXRequestResult perform(final DocumentationAJAXRequest request) throws OXException, JSONException {
-        final DocumentationRegistry registry = super.getRegistry();
-        return new AJAXRequestResult(super.write(registry.getModule(request.checkParameter("name"))));
-    }
+    /** The OAuth scope granting permission to send a RFC822 data block via primary account's transport*/
+    public static final String OAUTH_SEND_DATA = "send_data";
 
 }
