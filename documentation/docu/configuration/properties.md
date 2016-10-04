@@ -271,10 +271,8 @@ If you would like to add a reference to another property use the following appro
 ---
 | Key | <span style="font-weight:normal">com.openexchange.pns.transport.websocket.enabled</span> |
 |:----------------|:--------|
-| __Description__ | Specifies whether the Web Socket transport is enabled. That property is responsive to config-cascade<br>and reloadable as well.<br><br>Moreover, an even finer-grained decision is possible to be configured as a certain transport<br>is checked for availability providing user, context, client and topic.<br>Hence, it is possible to  specify:<br><br>com.openexchange.pns.transport.websocket.enabled + ("." + {client})? + ("." + {topic})?<br><br>com.openexchange.pns.transport.websocket.enabled.open-xchange-appsuite.ox:mail:new=true<br>com.openexchange.pns.transport.websocket.enabled.open-xchange-appsuite.ox:calendar:new=false<br><br>That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications<br>via Web Socket, but not for "new appointment".<br><br> |
-| __Default__ | false  |
- |
-| __Default__ | false  |
+| __Description__ | Specifies whether the Web Socket transport is enabled. That property is responsive to config-cascade<br>and reloadable as well.<br><br>Moreover, an even finer-grained decision is possible to be configured as a certain transport<br>is checked for availability providing user, context, client and topic.<br>Hence, it is possible to  specify:<br><br>com.openexchange.pns.transport.websocket.enabled + ("." + {client})? + ("." + {topic})?<br><br>com.openexchange.pns.transport.websocket.enabled.open-xchange-appsuite.ox:mail:new=true<br>com.openexchange.pns.transport.websocket.enabled.open-xchange-appsuite.ox:calendar:new=false<br><br>That allows the client "open-xchange-appsuite" (App Suite UI) to receive "new mail" notifications<br>via Web Socket, but not for "new appointment".<br> |
+| __Default__ | true  |
 | __Version__ | 7.8.3  |
 | __Reloadable__ | true  |
 | __Configcascade Aware__ | true  |
@@ -303,9 +301,7 @@ If you would like to add a reference to another property use the following appro
 | Key | <span style="font-weight:normal">com.openexchange.websockets.enabled</span> |
 |:----------------|:--------|
 | __Description__ | The main switch to enable/disable Web Sockets. That property is responsive to config-cascade<br>and reloadable as well.<br> |
-| __Default__ | is false.  |
- |
-| __Default__ | false  |
+| __Default__ | true  |
 | __Version__ | 7.8.3  |
 | __Reloadable__ | true  |
 | __Configcascade Aware__ | true  |
