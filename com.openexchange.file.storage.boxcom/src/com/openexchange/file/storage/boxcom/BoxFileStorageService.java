@@ -55,7 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CompositeFileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.oauth.AbstractOAuthFileStorage;
+import com.openexchange.file.storage.oauth.AbstractOAuthFileStorageService;
 import com.openexchange.oauth.API;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -65,7 +65,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class BoxFileStorageService extends AbstractOAuthFileStorage {
+public final class BoxFileStorageService extends AbstractOAuthFileStorageService {
 
     private static final String SERVICE_ID = BoxConstants.ID;
 

@@ -59,7 +59,6 @@ import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.BoxFileStorageService;
 import com.openexchange.file.storage.boxcom.Services;
-import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 
 /**

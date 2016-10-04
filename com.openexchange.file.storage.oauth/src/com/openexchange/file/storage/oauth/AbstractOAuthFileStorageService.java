@@ -76,14 +76,14 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
- * {@link AbstractOAuthFileStorage}
+ * {@link AbstractOAuthFileStorageService}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public abstract class AbstractOAuthFileStorage implements AccountAware, OAuthAccountDeleteListener {
+public abstract class AbstractOAuthFileStorageService implements AccountAware, OAuthAccountDeleteListener {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractOAuthFileStorage.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractOAuthFileStorageService.class);
 
     private final DynamicFormDescription formDescription;
     private final ServiceLookup services;
@@ -93,24 +93,24 @@ public abstract class AbstractOAuthFileStorage implements AccountAware, OAuthAcc
     private volatile CompositeFileStorageAccountManagerProvider compositeAccountManager;
 
     /**
-     * Initialises a new {@link AbstractOAuthFileStorage}.
+     * Initialises a new {@link AbstractOAuthFileStorageService}.
      * 
      * @param services The {@link ServiceLookup} instance
      * @param api The {@link API}
      * @param compositeFileStorageAccountManagerProvider The {@link CompositeFileStorageAccountManagerProvider}
      */
-    public AbstractOAuthFileStorage(ServiceLookup services, API api, CompositeFileStorageAccountManagerProvider compositeFileStorageAccountManagerProvider) {
+    public AbstractOAuthFileStorageService(ServiceLookup services, API api, CompositeFileStorageAccountManagerProvider compositeFileStorageAccountManagerProvider) {
         this(services, api);
         compositeAccountManager = compositeFileStorageAccountManagerProvider;
     }
 
     /**
-     * Initialises a new {@link AbstractOAuthFileStorage}.
+     * Initialises a new {@link AbstractOAuthFileStorageService}.
      * 
      * @param services The {@link ServiceLookup} instance
      * @param api The {@link API}
      */
-    public AbstractOAuthFileStorage(ServiceLookup services, API api) {
+    public AbstractOAuthFileStorageService(ServiceLookup services, API api) {
         super();
         this.services = services;
         this.api = api;
