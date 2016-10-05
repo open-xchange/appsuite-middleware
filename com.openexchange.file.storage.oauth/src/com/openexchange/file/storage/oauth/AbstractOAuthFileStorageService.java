@@ -101,6 +101,8 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
      * 
      * @param services The {@link ServiceLookup} instance
      * @param api The {@link API}
+     * @param displayName The display name of the service
+     * @param serviceId The service identifier
      * @param compositeFileStorageAccountManagerProvider The {@link CompositeFileStorageAccountManagerProvider}
      */
     protected AbstractOAuthFileStorageService(ServiceLookup services, API api, String displayName, String serviceId, CompositeFileStorageAccountManagerProvider compositeFileStorageAccountManagerProvider) {
@@ -113,6 +115,8 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
      * 
      * @param services The {@link ServiceLookup} instance
      * @param api The {@link API}
+     * @param displayName The display name of the service
+     * @param serviceId The service identifier
      */
     protected AbstractOAuthFileStorageService(ServiceLookup services, API api, String displayName, String serviceId) {
         super();
