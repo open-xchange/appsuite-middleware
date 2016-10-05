@@ -56,6 +56,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
+import com.openexchange.filestore.DatabaseAccessService;
 import com.openexchange.filestore.FileStorage2EntitiesResolver;
 import com.openexchange.filestore.FileStorageInfoService;
 import com.openexchange.filestore.FileStorageService;
@@ -78,6 +79,7 @@ public class FileStorageActivator implements BundleActivator {
     private TrackingFileStorageUnregisterListenerRegistry listenerRegistry;
     private ServiceRegistration<FileStorageUnregisterListenerRegistry> listenerRegistryRegistration;
     private ServiceTracker<FileStorageInfoService, FileStorageInfoService> infoTracker;
+    private ServiceTracker<DatabaseAccessService, DatabaseAccessService> dbTracker;
 
     /**
      * Initializes a new {@link FileStorageActivator}.
@@ -98,6 +100,9 @@ public class FileStorageActivator implements BundleActivator {
             ServiceTracker<FileStorageInfoService, FileStorageInfoService> infoTracker = new ServiceTracker<FileStorageInfoService, FileStorageInfoService>(context, FileStorageInfoService.class, new InfoTrackerCustomizer(context));
             this.infoTracker = infoTracker;
 
+            ServiceTracker<DatabaseAccessService, DatabaseAccessService> dbTracker = new ServiceTracker<DatabaseAccessService, DatabaseAccessService>(context, DatabaseAccessService.class, new DatabaseAccessTrackerCustomizer(context));
+            this.dbTracker = dbTracker;
+
             ServiceTracker<FileStorage2EntitiesResolver, FileStorage2EntitiesResolver> resolverTracker = new ServiceTracker<FileStorage2EntitiesResolver, FileStorage2EntitiesResolver>(context, FileStorage2EntitiesResolver.class, new ResolverTrackerCustomizer(context));
             this.resolverTracker = resolverTracker;
 
@@ -107,6 +112,7 @@ public class FileStorageActivator implements BundleActivator {
             fsTracker.open();
             qfsTracker.open();
             infoTracker.open();
+            dbTracker.open();
             resolverTracker.open();
             listenerRegistry.open();
 
@@ -143,6 +149,12 @@ public class FileStorageActivator implements BundleActivator {
             if (null != infoTracker) {
                 infoTracker.close();
                 this.infoTracker = null;
+            }
+
+            ServiceTracker<DatabaseAccessService, DatabaseAccessService> dbTracker = this.dbTracker;
+            if (null != dbTracker) {
+                dbTracker.close();
+                this.dbTracker = null;
             }
 
             ServiceTracker<FileStorage2EntitiesResolver, FileStorage2EntitiesResolver> resolverTracker = this.resolverTracker;
@@ -245,6 +257,35 @@ public class FileStorageActivator implements BundleActivator {
         @Override
         public void removedService(ServiceReference<FileStorageInfoService> reference, FileStorageInfoService service) {
             FileStorages.setFileStorageInfoService(null);
+            context.ungetService(reference);
+        }
+
+    }
+
+    private static class DatabaseAccessTrackerCustomizer implements ServiceTrackerCustomizer<DatabaseAccessService, DatabaseAccessService> {
+
+        private final BundleContext context;
+
+        DatabaseAccessTrackerCustomizer(final BundleContext context) {
+            this.context = context;
+        }
+
+        @Override
+        public DatabaseAccessService addingService(ServiceReference<DatabaseAccessService> reference) {
+            DatabaseAccessService service = context.getService(reference);
+            FileStorages.setDatabaseAccessService(service);
+            return service;
+        }
+
+        @Override
+        public void modifiedService(ServiceReference<DatabaseAccessService> reference, DatabaseAccessService service) {
+            // Nothing to do here
+
+        }
+
+        @Override
+        public void removedService(ServiceReference<DatabaseAccessService> reference, DatabaseAccessService service) {
+            FileStorages.setDatabaseAccessService(null);
             context.ungetService(reference);
         }
 

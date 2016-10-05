@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.filestore;
 
+import java.net.URI;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageInfo;
 import com.openexchange.filestore.FileStorageInfoService;
@@ -72,6 +73,12 @@ public class FileStorageInfoServiceImpl implements FileStorageInfoService {
     @Override
     public FileStorageInfo getFileStorageInfo(int fileStorageId) throws OXException {
         Filestore filestore = FilestoreStorage.getInstance().getFilestore(fileStorageId);
+        return new FileStorageInfoImpl(filestore);
+    }
+
+    @Override
+    public FileStorageInfo getFileStorageIdFor(URI uri) throws OXException {
+        Filestore filestore = FilestoreStorage.getInstance().getFilestore(uri);
         return new FileStorageInfoImpl(filestore);
     }
 

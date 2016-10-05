@@ -62,8 +62,6 @@ import com.openexchange.tools.sql.DBUtils;
 
 public class RdbFilestoreStorage extends FilestoreStorage {
 
-    private static final String SELECT = "SELECT uri, size, max_context FROM filestore WHERE id = ?";
-
     @Override
     public Filestore getFilestore(int id) throws OXException {
         Connection con = DBPool.pickup();
@@ -83,7 +81,7 @@ public class RdbFilestoreStorage extends FilestoreStorage {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SELECT);
+            stmt = con.prepareStatement("SELECT uri, size, max_context FROM filestore WHERE id = ?");
             stmt.setInt(1,id);
             result = stmt.executeQuery();
             if (!result.next()) {
@@ -108,5 +106,59 @@ public class RdbFilestoreStorage extends FilestoreStorage {
         } finally {
             DBUtils.closeSQLStuff(result, stmt);
         }
+    }
+
+    @Override
+    public Filestore getFilestore(URI uri) throws OXException {
+        Connection con = DBPool.pickup();
+        try {
+            return getFilestore(con, uri);
+        } finally {
+            DBPool.closeReaderSilent(con);
+        }
+    }
+
+    /**
+     * Gets the file store for given URI using specified connection.
+     *
+     * @param con The connection to use
+     * @param uri The URI to resolve
+     * @return The associated file store
+     * @throws OXException If file store cannot be resolved
+     */
+    public Filestore getFilestore(Connection con, URI uri) throws OXException {
+        if (null == con) {
+            return getFilestore(uri);
+        }
+
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT id, uri, size, max_context FROM filestore WHERE (? LIKE CONCAT(uri, '%'))");
+            stmt.setString(1, uri.toString());
+            result = stmt.executeQuery();
+            if (!result.next()) {
+                throw FilestoreExceptionCodes.NO_SUCH_FILESTORE.create(uri);
+            }
+
+            FilestoreImpl filestore = new FilestoreImpl();
+            filestore.setId(result.getInt(1));
+            String tmp = null;
+            try {
+                tmp = result.getString("uri");
+                filestore.setUri(new URI(tmp));
+            } catch (final URISyntaxException e) {
+                throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, tmp);
+            }
+
+            filestore.setSize(result.getLong("size"));
+            filestore.setMaxContext(result.getLong("max_context"));
+            return filestore;
+        } catch (final SQLException e) {
+            throw FilestoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(result, stmt);
+        }
+
     }
 }

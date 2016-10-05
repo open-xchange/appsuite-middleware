@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,34 +49,58 @@
 
 package com.openexchange.filestore;
 
-import java.net.URI;
+import java.sql.Connection;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link FileStorageInfoService} - The service that provides {@link FileStorageInfo} instances.
+ * {@link DatabaseAccess} - A database access for file storages.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-@SingletonService
-public interface FileStorageInfoService {
+public interface DatabaseAccess {
 
     /**
-     * Resolves specified URI to the appropriate file storage info
+     * Checks existence for given tables and creates each of them, which does not yet exist.
      *
-     * @param uri The URI to resolve
-     * @return The associated file storage info
-     * @throws OXException If file storage info cannot be resolved
+     * @param tables The tables to create
+     * @throws OXException If tables cannot be created
      */
-    FileStorageInfo getFileStorageIdFor(URI uri) throws OXException;
+    void createIfAbsent(DatabaseTable... tables) throws OXException;
+
+    // ------------------------------------------------------------------------------
 
     /**
-     * Gets the file storage info for specified identifier.
+     * Acquires a read-only connection.
      *
-     * @param fileStorageId The file storage identifier
-     * @return The provisioning information from associated file storage
-     * @throws OXException If file storage information cannot be returned
+     * @return A read-only connection
+     * @throws OXException If a read-only connection cannot be established
      */
-    FileStorageInfo getFileStorageInfo(int fileStorageId) throws OXException;
+    Connection acquireReadOnly() throws OXException;
+
+    /**
+     * Releases a previously acquired read-only connection.
+     *
+     * @param con The read-only connection to release
+     */
+    void releaseReadOnly(Connection con);
+
+    // ------------------------------------------------------------------------------
+
+    /**
+     * Acquires a read-write connection.
+     *
+     * @return A read-write connection
+     * @throws OXException If a read-write connection cannot be established
+     */
+    Connection acquireWritable() throws OXException;
+
+    /**
+     * Releases a previously acquired read-write connection.
+     *
+     * @param con The read-write connection to release
+     * @param forReading <code>true</code> if read-write connection was only used for reading and no modification was performed; otherwise <code>false</code>
+     */
+    void releaseWritable(Connection con, boolean forReading);
+
 }

@@ -68,6 +68,15 @@ public abstract class FilestoreStorage {
     public abstract Filestore getFilestore(Connection con, int id) throws OXException;
 
     /**
+     * Gets the associated file store for given URI
+     *
+     * @param uri The URI to resolve
+     * @returnThe file store
+     * @throws OXException If file store cannot be resolved
+     */
+    public abstract Filestore getFilestore(URI uri) throws OXException;
+
+    /**
      * Convenience method for generating the context specific file store location.
      * <pre>
      * &lt;filestore-uri&gt; + "/" + &lt;context-appendix&gt;

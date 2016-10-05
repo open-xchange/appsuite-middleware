@@ -137,6 +137,28 @@ public final class FileStorages {
 
     // -------------------------------------------------------------------------------------------------------------------------
 
+    private static final AtomicReference<DatabaseAccessService> DB_ACCESS_REF = new AtomicReference<DatabaseAccessService>();
+
+    /**
+     * Sets the database access service.
+     *
+     * @param dbAccessService The database access service
+     */
+    public static void setDatabaseAccessService(DatabaseAccessService dbAccessService) {
+        DB_ACCESS_REF.set(dbAccessService);
+    }
+
+    /**
+     * Gets the database access service.
+     *
+     * @return The database access service or <code>null</code> if absent
+     */
+    public static DatabaseAccessService getDatabaseAccessService() {
+        return DB_ACCESS_REF.get();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------
+
     private static final AtomicReference<FileStorageService> FS_REF = new AtomicReference<FileStorageService>();
 
     /**

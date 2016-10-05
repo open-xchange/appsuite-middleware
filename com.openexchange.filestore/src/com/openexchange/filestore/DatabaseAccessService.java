@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -49,34 +49,27 @@
 
 package com.openexchange.filestore;
 
-import java.net.URI;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link FileStorageInfoService} - The service that provides {@link FileStorageInfo} instances.
+ * {@link DatabaseAccessService} - A registry for database access providers.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
 @SingletonService
-public interface FileStorageInfoService {
+public interface DatabaseAccessService extends DatabaseAccessProvider {
 
     /**
-     * Resolves specified URI to the appropriate file storage info
+     * Gets the database access for specified arguments.
      *
-     * @param uri The URI to resolve
-     * @return The associated file storage info
-     * @throws OXException If file storage info cannot be resolved
+     * @param fileStorageId The identifier of the file storage
+     * @param prefix The prefix in use
+     * @return The best-ranked database access or <code>null</code>
+     * @throws OXException If access cannot be determined
      */
-    FileStorageInfo getFileStorageIdFor(URI uri) throws OXException;
+    @Override
+    DatabaseAccess getAccessFor(int fileStorageId, String prefix) throws OXException;
 
-    /**
-     * Gets the file storage info for specified identifier.
-     *
-     * @param fileStorageId The file storage identifier
-     * @return The provisioning information from associated file storage
-     * @throws OXException If file storage information cannot be returned
-     */
-    FileStorageInfo getFileStorageInfo(int fileStorageId) throws OXException;
 }

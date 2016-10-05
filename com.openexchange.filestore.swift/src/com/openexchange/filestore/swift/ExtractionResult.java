@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,36 +47,91 @@
  *
  */
 
-package com.openexchange.filestore;
-
-import java.net.URI;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+package com.openexchange.filestore.swift;
 
 /**
- * {@link FileStorageInfoService} - The service that provides {@link FileStorageInfo} instances.
+ * {@link ExtractionResult} - The result for extracting association/path information from Swift URI.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-@SingletonService
-public interface FileStorageInfoService {
+public class ExtractionResult {
+
+    private final int contextId;
+    private final int userId;
+    private final Association association;
+    private final String prefix;
 
     /**
-     * Resolves specified URI to the appropriate file storage info
-     *
-     * @param uri The URI to resolve
-     * @return The associated file storage info
-     * @throws OXException If file storage info cannot be resolved
+     * Initializes a new {@link ExtractionResult}.
      */
-    FileStorageInfo getFileStorageIdFor(URI uri) throws OXException;
+    public ExtractionResult(int userId, int contextId) {
+        super();
+        StringBuilder sb = new StringBuilder(32).append(contextId).append("ctx");
+        if (userId > 0) {
+            sb.append(userId).append("user");
+        }
+        sb.append("store");
+        prefix = sb.toString();
+        this.userId = userId;
+        this.contextId = contextId;
+        this.association = Association.CONTEXT_AND_USER;
+    }
 
     /**
-     * Gets the file storage info for specified identifier.
-     *
-     * @param fileStorageId The file storage identifier
-     * @return The provisioning information from associated file storage
-     * @throws OXException If file storage information cannot be returned
+     * Initializes a new {@link ExtractionResult}.
      */
-    FileStorageInfo getFileStorageInfo(int fileStorageId) throws OXException;
+    public ExtractionResult(String prefix) {
+        super();
+        this.prefix = prefix;
+        contextId = -1;
+        userId = -1;
+        this.association = Association.CUSTOM;
+    }
+
+    /**
+     * Checks if this extraction result has a context/user association
+     *
+     * @return <code>true</code> for context/user association; otherwise <code>false</code>
+     */
+    public boolean hasContextUserAssociation() {
+        return Association.CONTEXT_AND_USER == association;
+    }
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier or <code>-1</code> if not set
+     */
+    public int getContextId() {
+        return contextId;
+    }
+
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier or <code>-1</code> if not set
+     */
+    public int getUserId() {
+        return userId;
+    }
+
+    /**
+     * Gets the association
+     *
+     * @return The association
+     */
+    public Association getAssociation() {
+        return association;
+    }
+
+    /**
+     * Gets the prefix
+     *
+     * @return The prefix
+     */
+    public String getPrefix() {
+        return prefix;
+    }
+
 }

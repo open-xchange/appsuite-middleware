@@ -47,73 +47,40 @@
  *
  */
 
-package com.openexchange.groupware.filestore;
+package com.openexchange.filestore.impl;
 
-import static com.openexchange.java.Autoboxing.I;
-import java.net.URI;
-import java.sql.Connection;
-import com.openexchange.caching.Cache;
-import com.openexchange.caching.CacheService;
+import org.osgi.framework.BundleContext;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.filestore.DatabaseAccess;
+import com.openexchange.filestore.DatabaseAccessProvider;
+import com.openexchange.filestore.DatabaseAccessService;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
-public class CachingFilestoreStorage extends FilestoreStorage {
+/**
+ * {@link DatabaseAccessServiceImpl}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
+ */
+public class DatabaseAccessServiceImpl extends RankingAwareNearRegistryServiceTracker<DatabaseAccessProvider> implements DatabaseAccessService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CachingFilestoreStorage.class);
-    private static final String REGION_NAME = "Filestore";
-
-    private final FilestoreStorage delegate;
-
-    public CachingFilestoreStorage(final FilestoreStorage fs) {
-        this.delegate = fs;
+    /**
+     * Initializes a new {@link DatabaseAccessServiceImpl}.
+     */
+    public DatabaseAccessServiceImpl(BundleContext context) {
+        super(context, DatabaseAccessProvider.class);
     }
 
     @Override
-    public Filestore getFilestore(final int id) throws OXException {
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        if (cacheService == null) {
-            return delegate.getFilestore(id);
-        }
-        final Cache cache = cacheService.getCache(REGION_NAME);
-        final Object object = cache.get(I(id));
-        if (object instanceof Filestore) {
-            return (Filestore) object;
-        }
-        final Filestore filestore = delegate.getFilestore(id);
-        cache.put(I(id), filestore, false);
-        return filestore;
-    }
-
-    @Override
-    public Filestore getFilestore(URI uri) throws OXException {
-        return delegate.getFilestore(uri);
-    }
-
-    @Override
-    public Filestore getFilestore(final Connection con, final int id) throws OXException {
-        final CacheService service = ServerServiceRegistry.getInstance().getService(CacheService.class);
-        Cache filestoreCache = null;
-        if (service != null) {
-            try {
-                filestoreCache = service.getCache(REGION_NAME);
-            } catch (final OXException e) {
-                LOG.error("", e);
+    public DatabaseAccess getAccessFor(int fileStorageId, String prefix) throws OXException {
+        DatabaseAccess databaseAccess = null;
+        for (DatabaseAccessProvider provider : this) {
+            databaseAccess = provider.getAccessFor(fileStorageId, prefix);
+            if (null != databaseAccess) {
+                return databaseAccess;
             }
         }
-        Filestore retval = null;
-        if (null != filestoreCache) {
-            retval = (Filestore) filestoreCache.get(I(id));
-        }
-        if (null == retval) {
-            retval = delegate.getFilestore(con, id);
-            if (null != filestoreCache) {
-                try {
-                    filestoreCache.put(I(id), retval, false);
-                } catch (final OXException e) {
-                    LOG.error("", e);
-                }
-            }
-        }
-        return retval;
+        return null;
     }
+
 }
