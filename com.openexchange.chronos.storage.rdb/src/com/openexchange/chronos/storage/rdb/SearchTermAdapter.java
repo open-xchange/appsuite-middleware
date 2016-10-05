@@ -66,6 +66,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
@@ -342,6 +343,8 @@ public class SearchTermAdapter {
             parameters.add(Long.valueOf(((Date) value).getTime()));
         } else if (ParticipationStatus.class.isInstance(value) && Types.INTEGER == sqlType) {
             parameters.add(Event2Appointment.getConfirm((ParticipationStatus) value));
+        } else if (Transp.class.isInstance(value) && Types.INTEGER == sqlType) {
+            parameters.add(Integer.valueOf(Event2Appointment.getShownAs((Transp) value)));
         } else {
             // default
             parameters.add(value);
