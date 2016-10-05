@@ -62,12 +62,14 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.AuthInfo;
+import com.openexchange.mailaccount.Status;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.Status;
+import com.openexchange.mailaccount.KnownStatus;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.json.MailAccountFields;
@@ -118,8 +120,14 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
             List<OXException> warnings = new LinkedList<>();
             Boolean valid = actionValidateBoolean(mailAccount, session, false, warnings, false);
 
-            Status status = valid.booleanValue() ? Status.OK : Status.INVALID_CREDENTIALS;
-            return new AJAXRequestResult(new JSONObject(1).put("status", status.getName()), "json").addWarnings(warnings);
+            Status status = valid.booleanValue() ? KnownStatus.OK : KnownStatus.INVALID_CREDENTIALS;
+            String message = status.getMessage(session.getUser().getLocale());
+
+            JSONObject jStatus = new JSONObject(2).put("status", status.getId());
+            if (Strings.isNotEmpty(message)) {
+                jStatus.put("message", message);
+            }
+            return new AJAXRequestResult(jStatus, "json").addWarnings(warnings);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

@@ -47,57 +47,21 @@
  *
  */
 
-package com.openexchange.documentation;
 
-import java.util.Collection;
-import com.openexchange.documentation.descriptions.ContainerDescription;
-import com.openexchange.documentation.descriptions.ModuleDescription;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+package com.openexchange.mail.json.osgi;
+
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link DocumentationRegistry} - Provides access to descriptions for modules and containers.
+ * {@link OAuthScopeDescription} - Strings describing the OAuth scopes.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.3
  */
-@SingletonService
-public interface DocumentationRegistry {
-
-    /**
-     * Gets the module descriptions contained in this registry.
-     *
-     * @return the module descriptions
-     * @throws OXException If module descriptions cannot be returned
-     */
-	Collection<ModuleDescription> getModules() throws OXException;
-
-    /**
-     * Gets the module description associated with given name.
-     *
-     * @param name The name of the module description
-     * @return the module description associated with given name
-     * @throws OXException if module description cannot be returned
-     */
-	ModuleDescription getModule(String name) throws OXException;
-
-    /**
-     * Gets the container descriptions contained in this registry.
-     *
-     * @return the container descriptions
-     * @throws OXException if container descriptions cannot be returned
-     */
-	Collection<ContainerDescription> getContainers() throws OXException;
-
-    /**
-     * Gets the container description associated with given name.
-     *
-     * @param name the name of the container description
-     * @return the container description associated with given name
-     * @throws OXException if container description cannot be returned
-     */
-	ContainerDescription getContainer(String name) throws OXException;
+final class OAuthScopeDescription implements LocalizableStrings {
+    // Application 'xyz' requires following permissions:
+    //  - Send RFC822 data using primary account's transport. This requires master authentication to be active.
+    //  - ...
+    public static final String SEND_DATA = "Send RFC822 data using primary account's transport. This requires master authentication to be active.";
 
 }

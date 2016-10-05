@@ -49,56 +49,29 @@
 
 package com.openexchange.mailaccount;
 
+import java.util.Locale;
 
 /**
- * {@link Status} - An enumeration for statues for a mail account.
+ * {@link Status} - Represents a status for a mail account.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public enum Status {
+public interface Status {
 
     /**
-     * The "OK" status. All fine.
-     */
-    OK("ok"),
-    /**
-     * Referenced account currently carries invalid credentials and is therefore unable to connect. Credentials are supposed to be corrected by user.
-     */
-    INVALID_CREDENTIALS("invalid_credentials")
-
-    ;
-
-    private final String name;
-
-    private Status(String name) {
-        this.name = name;
-    }
-
-    /**
-     * Gets the name
+     * Gets the identifier; such as "ok" or "invalid_credentials"
      *
-     * @return The name
+     * @return The identifier
      */
-    public String getName() {
-        return name;
-    }
+    String getId();
 
     /**
-     * Gets the status for given name
+     * Gets the accompanying human-readable message (optional) for given locale.
      *
-     * @param name The status' name
-     * @return The status or <code>null</code>
+     * @param locale The locale
+     * @return The human-readable message or <code>null</code>
      */
-    public static Status statusFor(String name) {
-        if (null == name) {
-            return null;
-        }
-        for (Status s : Status.values()) {
-            if (name.equalsIgnoreCase(s.name)) {
-                return s;
-            }
-        }
-        return null;
-    }
+    String getMessage(Locale locale);
+
 }

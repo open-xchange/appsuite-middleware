@@ -41,7 +41,10 @@
 package com.sun.mail.iap;
 
 /**
+ * Thrown in case {@link Response#isBAD()} returns <code>true</code>.
+ *
  * @author John Mani
+ * @see com.sun.mail.iap.Protocol#handleResult(Response)
  */
 
 public class ConnectionException extends ProtocolException {

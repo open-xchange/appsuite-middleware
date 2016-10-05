@@ -47,38 +47,30 @@
  *
  */
 
-package com.openexchange.documentation.osgi;
+package com.openexchange.mailaccount;
 
-import org.osgi.framework.ServiceReference;
-import com.openexchange.documentation.internal.DocumentationProcessor;
-import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link DocumentationListener} - Recognizes services with documentation annotations.
+ * {@link KnownStatusMessage}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class DocumentationListener implements SimpleRegistryListener<Object> {
-
-	private final DocumentationProcessor processor;
+public class KnownStatusMessage implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link DocumentationListener}.
+     * Initializes a new {@link KnownStatusMessage}.
      */
-    public DocumentationListener(final DocumentationProcessor processor) {
+    private KnownStatusMessage() {
         super();
-        this.processor = processor;
     }
 
-    @Override
-    public void added(ServiceReference<Object> ref, Object service) {
-        this.processor.add(service);
-    }
+    // The message advertising that everything is fine with checked account
+    public static final String MESSAGE_OK = "All fine";
 
-    @Override
-    public void removed(ServiceReference<Object> ref, Object service) {
-        this.processor.remove(service);
-
-    }
+    // The message advertising that authentication against referenced mail account does not work or stopped working
+    public static final String MESSAGE_INVALID_CREDENTIALS = "The entered credential or authentication information does not work or are no longer accepted by provider. Please change them.";
 
 }

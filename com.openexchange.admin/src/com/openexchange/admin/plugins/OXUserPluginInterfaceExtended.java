@@ -47,44 +47,22 @@
  *
  */
 
-package com.openexchange.documentation.json.actions;
+package com.openexchange.admin.plugins;
 
-import org.json.JSONException;
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.User;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.DocumentationRegistry;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.documentation.json.DocumentationAJAXRequest;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-
-
-/**
- * {@link ModuleAction}
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- */
-@Action(method = RequestMethod.GET, name = "module", description = "Get a module's description.", parameters = {
-		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-		@Parameter(name = "name", description = "The name of the module.")
-}, responseDescription = "An object containing the requested module's description.")
-public final class ModuleAction extends DocumentationAction {
+public interface OXUserPluginInterfaceExtended extends OXUserPluginInterface {
 
     /**
-     * Initializes a new {@link ModuleAction}.
+     * Invoked before a user is actually changed.
      *
-     * @param services The service look-up
+     * @param ctx The associated context
+     * @param usrdata The data of the user to change
+     * @param auth The authentication information
+     * @throws PluginException If plug-in call fails and change is supposed to be aborted
      */
-    public ModuleAction(final ServiceLookup services) {
-        super(services);
-    }
-
-    @Override
-    protected AJAXRequestResult perform(final DocumentationAJAXRequest request) throws OXException, JSONException {
-        final DocumentationRegistry registry = super.getRegistry();
-        return new AJAXRequestResult(super.write(registry.getModule(request.checkParameter("name"))));
-    }
+    public void beforeChange(final Context ctx, final User usrdata, final Credentials auth) throws PluginException;
 
 }

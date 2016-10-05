@@ -57,6 +57,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import com.openexchange.filestore.FileStorage2EntitiesResolver;
+import com.openexchange.filestore.FileStorageInfoService;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorageUnregisterListenerRegistry;
 import com.openexchange.filestore.FileStorages;
@@ -71,11 +72,12 @@ import com.openexchange.filestore.QuotaFileStorageService;
  */
 public class FileStorageActivator implements BundleActivator {
 
-    private volatile ServiceTracker<FileStorageService, FileStorageService> fsTracker;
-    private volatile ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker;
-    private volatile ServiceTracker<FileStorage2EntitiesResolver, FileStorage2EntitiesResolver> resolverTracker;
-    private volatile TrackingFileStorageUnregisterListenerRegistry listenerRegistry;
-    private volatile ServiceRegistration<FileStorageUnregisterListenerRegistry> listenerRegistryRegistration;
+    private ServiceTracker<FileStorageService, FileStorageService> fsTracker;
+    private ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker;
+    private ServiceTracker<FileStorage2EntitiesResolver, FileStorage2EntitiesResolver> resolverTracker;
+    private TrackingFileStorageUnregisterListenerRegistry listenerRegistry;
+    private ServiceRegistration<FileStorageUnregisterListenerRegistry> listenerRegistryRegistration;
+    private ServiceTracker<FileStorageInfoService, FileStorageInfoService> infoTracker;
 
     /**
      * Initializes a new {@link FileStorageActivator}.
@@ -85,13 +87,16 @@ public class FileStorageActivator implements BundleActivator {
     }
 
     @Override
-    public void start(BundleContext context) throws Exception {
+    public synchronized void start(BundleContext context) throws Exception {
         try {
             ServiceTracker<FileStorageService, FileStorageService> fsTracker = new ServiceTracker<FileStorageService, FileStorageService>(context, FileStorageService.class, new FSTrackerCustomizer(context));
             this.fsTracker = fsTracker;
 
             ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker = new ServiceTracker<QuotaFileStorageService, QuotaFileStorageService>(context, QuotaFileStorageService.class, new QFSTrackerCustomizer(context));
             this.qfsTracker = qfsTracker;
+
+            ServiceTracker<FileStorageInfoService, FileStorageInfoService> infoTracker = new ServiceTracker<FileStorageInfoService, FileStorageInfoService>(context, FileStorageInfoService.class, new InfoTrackerCustomizer(context));
+            this.infoTracker = infoTracker;
 
             ServiceTracker<FileStorage2EntitiesResolver, FileStorage2EntitiesResolver> resolverTracker = new ServiceTracker<FileStorage2EntitiesResolver, FileStorage2EntitiesResolver>(context, FileStorage2EntitiesResolver.class, new ResolverTrackerCustomizer(context));
             this.resolverTracker = resolverTracker;
@@ -101,6 +106,7 @@ public class FileStorageActivator implements BundleActivator {
 
             fsTracker.open();
             qfsTracker.open();
+            infoTracker.open();
             resolverTracker.open();
             listenerRegistry.open();
 
@@ -113,7 +119,7 @@ public class FileStorageActivator implements BundleActivator {
     }
 
     @Override
-    public void stop(BundleContext context) throws Exception {
+    public synchronized void stop(BundleContext context) throws Exception {
         try {
             ServiceRegistration<FileStorageUnregisterListenerRegistry> listenerRegistryRegistration = this.listenerRegistryRegistration;
             if (null != listenerRegistryRegistration) {
@@ -131,6 +137,12 @@ public class FileStorageActivator implements BundleActivator {
             if (null != qfsTracker) {
                 qfsTracker.close();
                 this.qfsTracker = null;
+            }
+
+            ServiceTracker<FileStorageInfoService, FileStorageInfoService> infoTracker = this.infoTracker;
+            if (null != infoTracker) {
+                infoTracker.close();
+                this.infoTracker = null;
             }
 
             ServiceTracker<FileStorage2EntitiesResolver, FileStorage2EntitiesResolver> resolverTracker = this.resolverTracker;
@@ -204,6 +216,35 @@ public class FileStorageActivator implements BundleActivator {
         @Override
         public void removedService(ServiceReference<QuotaFileStorageService> reference, QuotaFileStorageService service) {
             FileStorages.setQuotaFileStorageService(null);
+            context.ungetService(reference);
+        }
+
+    }
+
+    private static class InfoTrackerCustomizer implements ServiceTrackerCustomizer<FileStorageInfoService, FileStorageInfoService> {
+
+        private final BundleContext context;
+
+        InfoTrackerCustomizer(final BundleContext context) {
+            this.context = context;
+        }
+
+        @Override
+        public FileStorageInfoService addingService(ServiceReference<FileStorageInfoService> reference) {
+            FileStorageInfoService service = context.getService(reference);
+            FileStorages.setFileStorageInfoService(service);
+            return service;
+        }
+
+        @Override
+        public void modifiedService(ServiceReference<FileStorageInfoService> reference, FileStorageInfoService service) {
+            // Nothing to do here
+
+        }
+
+        @Override
+        public void removedService(ServiceReference<FileStorageInfoService> reference, FileStorageInfoService service) {
+            FileStorages.setFileStorageInfoService(null);
             context.ungetService(reference);
         }
 

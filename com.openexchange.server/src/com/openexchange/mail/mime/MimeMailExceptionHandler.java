@@ -47,35 +47,31 @@
  *
  */
 
-package com.openexchange.documentation.json.osgi;
+package com.openexchange.mail.mime;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.documentation.DocumentationRegistry;
-import com.openexchange.documentation.json.DocumentationActionFactory;
-import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
+import javax.mail.Folder;
+import javax.mail.MessagingException;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.api.MailConfig;
+import com.openexchange.session.Session;
 
 /**
- * {@link DocumentationJSONActivator}
+ * {@link MimeMailExceptionHandler} - A handler for certain MIME mail exceptions.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class DocumentationJSONActivator extends AJAXModuleActivator {
+public interface MimeMailExceptionHandler {
 
     /**
-     * Initializes a new {@link DocumentationJSONActivator}.
+     * Handles given exception.
+     *
+     * @param me The exception to handle
+     * @param mailConfig The optional mail configuration of the affected user
+     * @param session The optional session of the affected user
+     * @param folder The optional folder involved with failed operation
+     * @return An appropriate {@link OXException} instance or <code>null</code>
      */
-    public DocumentationJSONActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DocumentationRegistry.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-    	super.registerModule(new DocumentationActionFactory(new ExceptionOnAbsenceServiceLookup(this)), "documentation");
-    }
+    OXException handle(MessagingException me, MailConfig mailConfig, Session session, Folder folder);
 
 }

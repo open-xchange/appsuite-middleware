@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,48 +47,25 @@
  *
  */
 
-package com.openexchange.documentation.json.actions;
+package com.openexchange.filestore.impl.osgi;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.DocumentationRegistry;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.documentation.descriptions.ContainerDescription;
-import com.openexchange.documentation.json.DocumentationAJAXRequest;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import org.osgi.framework.BundleContext;
+import com.openexchange.filestore.QuotaFileStorageListener;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
 /**
- * {@link ContainersAction}
+ * {@link QuotaFileStorageListenerTracker} - Tracks registered {@link QuotaFileStorageListener} instances.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-@Action(method = RequestMethod.GET, name = "containers", description = "Get the descriptions of all containers.", parameters = {
-		@Parameter(name = "session", description = "A session ID previously obtained from the login module.")
-}, responseDescription = "An array containing objects of all container descriptions.")
-public final class ContainersAction extends DocumentationAction {
+public class QuotaFileStorageListenerTracker extends RankingAwareNearRegistryServiceTracker<QuotaFileStorageListener> {
 
     /**
-     * Initializes a new {@link ContainersAction}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link QuotaFileStorageListenerTracker}.
      */
-    public ContainersAction(final ServiceLookup services) {
-        super(services);
-    }
-
-    @Override
-    protected AJAXRequestResult perform(final DocumentationAJAXRequest request) throws OXException, JSONException {
-        final DocumentationRegistry registry = super.getRegistry();
-        final JSONArray jsonArray = new JSONArray();
-        for (final ContainerDescription container : registry.getContainers()) {
-        	jsonArray.put(super.write(container));
-        }
-        return new AJAXRequestResult(jsonArray, "json");
+    public QuotaFileStorageListenerTracker(BundleContext context) {
+        super(context, QuotaFileStorageListener.class);
     }
 
 }

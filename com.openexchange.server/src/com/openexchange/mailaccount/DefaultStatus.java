@@ -47,70 +47,38 @@
  *
  */
 
-package com.openexchange.documentation.json;
+package com.openexchange.mailaccount;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import java.util.Locale;
 
 /**
- * {@link DocumentationAJAXRequest}
+ * {@link DefaultStatus} - The default immutable status implementation.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class DocumentationAJAXRequest {
+public class DefaultStatus implements Status {
 
-    private final ServerSession session;
-    private final AJAXRequestData request;
+    private final String identifier;
+    private final String message;
 
     /**
-     * Initializes a new {@link DocumentationAJAXRequest}.
-     *
-     * @param session The session
-     * @param request The request
+     * Initializes a new {@link DefaultStatus}.
      */
-    public DocumentationAJAXRequest(final AJAXRequestData request, final ServerSession session) {
+    public DefaultStatus(String identifier, String message) {
         super();
-        this.request = request;
-        this.session = session;
+        this.identifier = identifier;
+        this.message = message;
     }
 
-    /**
-     * Gets the value associated with specified parameter name.
-     *
-     * @param name The name
-     * @return The value
-     * @throws OXException If parameter is absent
-     */
-    public String checkParameter(final String name) throws OXException {
-        return request.checkParameter(name);
+    @Override
+    public String getId() {
+        return identifier;
     }
 
-    /**
-     * Gets the value associated with specified parameter name.
-     *
-     * @param name The name
-     * @return The value or <code>null</code> if absent
-     */
-    public String getParameter(final String name) {
-        return request.getParameter(name);
+    @Override
+    public String getMessage(Locale locale) {
+        return message;
     }
 
-    /**
-     * Gets the request.
-     *
-     * @return The request
-     */
-    public AJAXRequestData getRequest() {
-        return request;
-    }
-
-    /**
-     * Gets the session.
-     *
-     * @return The session
-     */
-    public ServerSession getSession() {
-        return session;
-    }
 }

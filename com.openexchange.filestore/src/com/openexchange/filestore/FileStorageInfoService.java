@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,44 +47,26 @@
  *
  */
 
-package com.openexchange.documentation.json.actions;
+package com.openexchange.filestore;
 
-import org.json.JSONException;
-
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.DocumentationRegistry;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.documentation.json.DocumentationAJAXRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
-
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link ContainerAction}
+ * {@link FileStorageInfoService} - The service that provides {@link FileStorageInfo} instances.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-@Action(method = RequestMethod.GET, name = "container", description = "Get a container's description.", parameters = {
-		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-		@Parameter(name = "name", description = "The name of the container.")
-}, responseDescription = "An object containing the requested container's description.")
-public final class ContainerAction extends DocumentationAction {
+@SingletonService
+public interface FileStorageInfoService {
 
     /**
-     * Initializes a new {@link ContainerAction}.
+     * Gets the file storage info for specified identifier.
      *
-     * @param services The service look-up
+     * @param fileStorageId The file storage identifier
+     * @return The provisioning information from associated file storage
+     * @throws OXException If file storage information cannot be returned
      */
-    public ContainerAction(final ServiceLookup services) {
-        super(services);
-    }
-
-    @Override
-    protected AJAXRequestResult perform(final DocumentationAJAXRequest request) throws OXException, JSONException {
-        final DocumentationRegistry registry = super.getRegistry();
-        return new AJAXRequestResult(super.write(registry.getContainer(request.checkParameter("name"))));
-    }
-
+    FileStorageInfo getFileStorageInfo(int fileStorageId) throws OXException;
 }

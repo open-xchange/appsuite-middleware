@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,55 +47,25 @@
  *
  */
 
-package com.openexchange.documentation.json;
+package com.openexchange.mail.json;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import com.google.common.collect.ImmutableMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
-import com.openexchange.documentation.json.actions.ContainerAction;
-import com.openexchange.documentation.json.actions.ContainersAction;
-import com.openexchange.documentation.json.actions.ModuleAction;
-import com.openexchange.documentation.json.actions.ModulesAction;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link DocumentationActionFactory}
+ * {@link MailOAuthConstants}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-@Module(name = "documentation", description = "Provides access to the documentation subsystem.")
-public class DocumentationActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AJAXActionService> actions;
+public class MailOAuthConstants {
 
     /**
-     * Initializes a new {@link DocumentationActionFactory}.
-     *
-     * @param services The service look-up
+     * Initializes a new {@link MailOAuthConstants}.
      */
-    public DocumentationActionFactory(final ServiceLookup services) {
+    private MailOAuthConstants() {
         super();
-        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
-        actions.put("modules", new ModulesAction(services));
-        actions.put("module", new ModuleAction(services));
-        actions.put("containers", new ContainersAction(services));
-        actions.put("container", new ContainerAction(services));
-        this.actions = actions.build();
     }
 
-    @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
-    }
-
-	@Override
-	public Collection<? extends AJAXActionService> getSupportedServices() {
-        return Collections.unmodifiableCollection(actions.values());
-	}
+    /** The OAuth scope granting permission to send a RFC822 data block via primary account's transport*/
+    public static final String OAUTH_SEND_DATA = "send_data";
 
 }
