@@ -16,3 +16,5 @@ Import-Package: com.openexchange.exception,
 Export-Package: com.openexchange.oauth,
  com.openexchange.oauth.access,
  com.openexchange.oauth.scope
+Bundle-ClassPath: .
+

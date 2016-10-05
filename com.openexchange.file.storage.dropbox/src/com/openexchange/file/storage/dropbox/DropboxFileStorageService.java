@@ -72,6 +72,7 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
+import com.openexchange.file.storage.dropbox.access.DropboxAccountAccess;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.access.OAuthAccessRegistry;

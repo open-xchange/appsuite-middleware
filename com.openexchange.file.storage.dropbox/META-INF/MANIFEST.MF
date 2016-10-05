@@ -5,7 +5,12 @@ Bundle-SymbolicName: com.openexchange.file.storage.dropbox
 Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.ajax.container,
+Import-Package: com.dropbox.core,
+ com.dropbox.core.v2,
+ com.dropbox.core.v2.auth,
+ com.dropbox.core.v2.files,
+ com.dropbox.core.v2.users,
+ com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.config,
  com.openexchange.datatypes.genericonf,
@@ -94,7 +99,5 @@ Import-Package: com.openexchange.ajax.container,
  org.scribe.services,
  org.scribe.utils,
  org.slf4j
-Bundle-ClassPath: lib/dropbox-java-sdk-1.5.3.jar,
- lib/json_simple-1.1.jar,
- .
+Bundle-ClassPath: .
 Bundle-Activator: com.openexchange.file.storage.dropbox.osgi.DropboxActivator

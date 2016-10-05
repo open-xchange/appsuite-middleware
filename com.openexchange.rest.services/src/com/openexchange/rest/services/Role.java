@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,45 +47,39 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox.auth;
+package com.openexchange.rest.services;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import com.dropbox.client2.session.AccessTokenPair;
-import com.dropbox.client2.session.AppKeyPair;
-import com.dropbox.client2.session.WebAuthSession;
-
+import javax.annotation.security.RolesAllowed;
 
 /**
- * {@link TrustAllWebAuthSession}
+ * {@link Role}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public final class TrustAllWebAuthSession extends WebAuthSession {
+public enum Role {
 
     /**
-     * Initializes a new {@link TrustAllWebAuthSession}.
+     * The role identifier for {@link RolesAllowed} annotation signaling to perform basic-auth.
+     * <p>
+     * Properties <code>"com.openexchange.rest.services.basic-auth.login"</code> and <code>"com.openexchange.rest.services.basic-auth.password"</code> are required to be set.
      */
-    public TrustAllWebAuthSession(AppKeyPair appKeyPair, AccessType type) {
-        super(appKeyPair, type);
+    BASIC_AUTHENTICATED("Basic-Authenticated"),
+
+    ;
+
+    private final String id;
+
+    private Role(String id) {
+        this.id = id;
     }
 
     /**
-     * Initializes a new {@link TrustAllWebAuthSession}.
+     * Gets the role identifier.
+     *
+     * @return The role identifier
      */
-    public TrustAllWebAuthSession(AppKeyPair appKeyPair, AccessType type, AccessTokenPair accessTokenPair) {
-        super(appKeyPair, type, accessTokenPair);
+    public String getId() {
+        return id;
     }
-
-    @Override
-    public synchronized HttpClient getHttpClient() {
-        final HttpClient httpClient = super.getHttpClient();
-        final ClientConnectionManager connectionManager = httpClient.getConnectionManager();
-        final SchemeRegistry schemeRegistry = connectionManager.getSchemeRegistry();
-        schemeRegistry.register(new Scheme("https", new EasySSLSocketFactory(), 443));
-        return httpClient;
-    }
-
 }

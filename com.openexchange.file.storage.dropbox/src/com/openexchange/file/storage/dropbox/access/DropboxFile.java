@@ -47,58 +47,50 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox;
+package com.openexchange.file.storage.dropbox.access;
 
 import static com.openexchange.file.storage.dropbox.Utils.normalizeFolderId;
 import java.util.Date;
-import com.dropbox.client2.DropboxAPI.Entry;
-import com.openexchange.exception.OXException;
+import com.dropbox.core.v2.files.FileMetadata;
 import com.openexchange.file.storage.DefaultFile;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.java.Strings;
+import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.mime.MimeTypeMap;
 
 /**
  * {@link DropboxFile}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class DropboxFile extends DefaultFile {
+public class DropboxFile extends DefaultFile {
 
     private final long sequenceNumber;
 
     /**
-     * Initializes a new {@link DropboxFile}.
-     *
-     * @param entry The dropbox entry representing the file
-     * @param userID The identifier of the user to use as created-/modified-by information
-     * @throws OXException
+     * Initialises a new {@link DropboxFile}.
+     * 
+     * @param metadata The {@link FileMetadata} of the Dropbox file
+     * @param userId The identifier of the user to use as created/modified-by information
      */
-    public DropboxFile(Entry entry, int userID) throws OXException {
+    public DropboxFile(FileMetadata metadata, int userid) {
         super();
-        if (entry.isDir) {
-            throw FileStorageExceptionCodes.NOT_A_FILE.create(DropboxConstants.ID, entry.path);
-        }
-        String parentPath = entry.parentPath();
-        setId(entry.fileName());
-        setFolderId("/".equals(parentPath) ? FileStorageFolder.ROOT_FULLNAME : normalizeFolderId(parentPath));
-        setCreatedBy(userID);
-        setModifiedBy(userID);
-        Date modified = Utils.parseDate(entry.modified);
-        Date clientModified = Utils.parseDate(entry.clientMtime);
-        setCreated(null == clientModified ? modified : clientModified);
-        setLastModified(null == clientModified ? modified : clientModified);
-        sequenceNumber = null != modified ? modified.getTime() : 0;
-        setVersion(entry.rev);
+        setId(metadata.getName());
+        setFolderId(extractFolderId(metadata.getPathDisplay()));
+        setCreatedBy(userid);
+        setModifiedBy(userid);
+        Date clientModified = metadata.getClientModified();
+        Date serverModified = metadata.getServerModified();
+        setCreated(null == clientModified ? serverModified : clientModified);
+        setLastModified(null == clientModified ? serverModified : clientModified);
+        sequenceNumber = null != serverModified ? serverModified.getTime() : 0;
+        setVersion(metadata.getRev());
         setIsCurrentVersion(true);
         setNumberOfVersions(1);
-        setFileSize(entry.bytes);
-        setFileMIMEType(Strings.isEmpty(entry.mimeType) ?
-            DropboxServices.getService(MimeTypeMap.class).getContentType(entry.fileName()) : entry.mimeType);
-        setFileName(entry.fileName());
-        setTitle(entry.fileName());
+        setFileSize(metadata.getSize());
+        setFileMIMEType(DropboxServices.getService(MimeTypeMap.class).getContentType(metadata.getName()));
+        setFileName(metadata.getName());
+        setTitle(metadata.getName());
     }
 
     /**
@@ -110,15 +102,35 @@ public final class DropboxFile extends DefaultFile {
         return new IDTuple(getFolderId(), getId());
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.DefaultFile#getSequenceNumber()
+     */
     @Override
     public long getSequenceNumber() {
         return 0 != this.sequenceNumber ? sequenceNumber : super.getSequenceNumber();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.AbstractFile#toString()
+     */
     @Override
     public String toString() {
         String folder = normalizeFolderId(getFolderId());
         return null == folder ? '/' + getId() : folder + '/' + getId();
     }
 
+    /**
+     * Extracts the folder from the specified full path
+     * 
+     * @param path The full path to extract the parent folder
+     * @return The extracted parent folder
+     */
+    private String extractFolderId(String path) {
+        int lastIndex = path.lastIndexOf('/');
+        return path.substring(0, lastIndex);
+    }
 }

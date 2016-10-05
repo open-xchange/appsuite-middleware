@@ -47,17 +47,12 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox;
+package com.openexchange.file.storage.dropbox.access;
 
 import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import com.dropbox.client2.DropboxAPI.Entry;
-import com.dropbox.client2.RESTUtility;
-import com.openexchange.exception.OXException;
+import com.dropbox.core.v2.files.FolderMetadata;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
@@ -67,28 +62,32 @@ import com.openexchange.file.storage.TypeAware;
  * {@link DropboxFolder}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class DropboxFolder extends DefaultFileStorageFolder implements TypeAware {
+public class DropboxFolder extends DefaultFileStorageFolder implements TypeAware {
 
     private FileStorageFolderType type;
 
     /**
-     * Initializes a new {@link DropboxFolder}.
-     *
-     * @param entry The dropbox entry representing the folder
-     * @param userID The identifier of the user to use as created-/modified-by information
-     * @param accountDisplayName The display name of the dropbox account
-     * @throws OXException
+     * Initialises a new {@link DropboxFolder}.
+     * 
+     * @param metadata The {@link FolderMetadata} representing a Dropbox folder
+     * @param userId the user identifier
+     * @param accountDisplayName The display name of the Dropbox account
      */
-    public DropboxFolder(Entry entry, int userID, String accountDisplayName) throws OXException {
-        this(userID);
-        parseDirEntry(entry, accountDisplayName);
+    public DropboxFolder(FolderMetadata metadata, int userId, String accountDisplayName, boolean hasSubFolders) {
+        this(userId);
+        parseMetadata(metadata, accountDisplayName);
+        setSubfolders(hasSubFolders);
+        setSubscribedSubfolders(hasSubFolders);
     }
 
     /**
-     * Initializes a new {@link DropboxFolder}.
+     * Initialises a new {@link DropboxFolder}.
+     * 
+     * @param userId the user identifier
      */
-    public DropboxFolder(final int userId) {
+    public DropboxFolder(int userId) {
         super();
         type = FileStorageFolderType.NONE;
         holdsFiles = true;
@@ -106,6 +105,38 @@ public final class DropboxFolder extends DefaultFileStorageFolder implements Typ
         modifiedBy = userId;
     }
 
+    /**
+     * Parses the specified {@link FolderMetadata}
+     * 
+     * @param metadata The {@link FolderMetadata} to parse
+     * @param accountDisplayName The account's display name
+     */
+    private void parseMetadata(FolderMetadata metadata, String accountDisplayName) {
+        if (metadata == null) {
+            return;
+        }
+        String path = metadata.getPathDisplay();
+        id = path;
+
+        if ("".equals(path)) {
+            rootFolder = true;
+            id = FileStorageFolder.ROOT_FULLNAME;
+            setParentId(null);
+            setName(null == accountDisplayName ? "" : accountDisplayName);
+        } else {
+            rootFolder = false;
+            final int pos = path.lastIndexOf('/');
+            setParentId(pos < 0 ? FileStorageFolder.ROOT_FULLNAME : path.substring(0, pos));
+            setName(pos < 0 ? path : path.substring(pos + 1));
+        }
+        b_rootFolder = true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.TypeAware#getType()
+     */
     @Override
     public FileStorageFolderType getType() {
         return type;
@@ -122,72 +153,13 @@ public final class DropboxFolder extends DefaultFileStorageFolder implements Typ
         return this;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString() {
         return id == null ? super.toString() : id;
     }
-
-    /**
-     * Parses specified Dropbox entry.
-     *
-     * @param entry The Dropbox entry denoting the directory
-     * @param accountDisplayName The account'S display name
-     * @throws OXException If parsing Dropbox entry fails
-     */
-    public DropboxFolder parseDirEntry(final com.dropbox.client2.DropboxAPI.Entry entry, String accountDisplayName) throws OXException {
-        if (null != entry) {
-            try {
-                final String path = entry.path;
-                id = path;
-                {
-                    if ("/".equals(path)) {
-                        rootFolder = true;
-                        id = FileStorageFolder.ROOT_FULLNAME;
-                        setParentId(null);
-                        setName(null == accountDisplayName ? entry.root : accountDisplayName);
-                    } else {
-                        rootFolder = false;
-                        final int pos = path.lastIndexOf('/');
-                        setParentId(pos < 0 ? FileStorageFolder.ROOT_FULLNAME : path.substring(0, pos));
-                        setName(pos < 0 ? path : path.substring(pos + 1));
-                    }
-                    b_rootFolder = true;
-                }
-                {
-                    final String modified = entry.modified;
-                    if (null != modified) {
-                        final Date date;
-                        synchronized (RESTUtility.class) {
-                            date = RESTUtility.parseDate(modified);
-                        }
-                        creationDate = new Date(date.getTime());
-                        lastModifiedDate = new Date(date.getTime());
-                    }
-                }
-                {
-                    final boolean hasSubfolders = hasSubfolder(entry);
-                    setSubfolders(hasSubfolders);
-                    setSubscribedSubfolders(hasSubfolders);
-                }
-            } catch (final RuntimeException e) {
-                throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            }
-        }
-        return this;
-    }
-
-    private boolean hasSubfolder(com.dropbox.client2.DropboxAPI.Entry entry) {
-        List<com.dropbox.client2.DropboxAPI.Entry> contents = entry.contents;
-        if (contents == null || contents.isEmpty()) {
-            return false;
-        }
-
-        for (com.dropbox.client2.DropboxAPI.Entry subEntry : contents) {
-            if (subEntry.isDir) {
-                return true;
-            }
-        }
-        return false;
-    }
-
 }
