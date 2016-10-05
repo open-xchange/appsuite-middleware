@@ -56,7 +56,12 @@ import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.internal.ClusterLockServiceDatabaseImpl;
 import com.openexchange.cluster.lock.internal.Unregisterer;
+import com.openexchange.cluster.lock.internal.groupware.ClusterLockCreateTableTask;
+import com.openexchange.cluster.lock.internal.groupware.CreateClusterLockTable;
+import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
@@ -66,7 +71,6 @@ import com.openexchange.timer.TimerService;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-//TODO: use trackers for hz and db cluster lock impls
 public class ClusterLockActivator extends HousekeepingActivator implements Unregisterer {
 
     private ServiceTracker<HazelcastInstance, HazelcastInstance> tracker;
@@ -89,6 +93,8 @@ public class ClusterLockActivator extends HousekeepingActivator implements Unreg
         final boolean enabled = hzConfigService.isEnabled();
 
         if (false == enabled) {
+            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ClusterLockCreateTableTask(this)));
+            registerService(CreateTableService.class, new CreateClusterLockTable(), null);
             registerService(ClusterLockService.class, new ClusterLockServiceDatabaseImpl(this));
         } else {
             final BundleContext context = this.context;
