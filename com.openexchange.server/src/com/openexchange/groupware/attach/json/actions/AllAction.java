@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.attach.json.actions;
 
+import org.json.JSONException;
 import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.AttachmentParser.UnknownColumnException;
@@ -128,11 +129,11 @@ public final class AllAction extends AbstractAttachmentAction {
     }
 
     private JSONValue all(final ServerSession session, final int folderId, final int attachedId, final int moduleId, final AttachmentField[] fields, final AttachmentField sort, final int order) throws OXException {
-
         SearchIterator<AttachmentMetadata> iter = null;
-
+        boolean rollback = false;
         try {
             ATTACHMENT_BASE.startTransaction();
+            rollback = true;
 
             final Context ctx = session.getContext();
             final User user = session.getUser();
@@ -152,14 +153,14 @@ public final class AllAction extends AbstractAttachmentAction {
             aWriter.endTimedResult();
             // w.flush();
             ATTACHMENT_BASE.commit();
+            rollback = false;
             return w.getObject();
-        } catch (final Throwable t) {
-            rollback();
-            if (t instanceof OXException) {
-                throw (OXException) t;
-            }
-            throw new OXException(t);
+        } catch (JSONException e) {
+            throw new OXException(e);
         } finally {
+            if (rollback) {
+                rollback();
+            }
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {

@@ -130,7 +130,7 @@ public final class EventQueue {
                         shutdownLock.unlock();
                     }
                 }
-            } catch (final Throwable t) {
+            } catch (final Exception t) {
                 LOG.error("", t);
             }
         }
@@ -297,7 +297,7 @@ public final class EventQueue {
         }
     }
 
-    protected static void callEvent(final List<EventObject> al) {
+    static void callEvent(final List<EventObject> al) {
         for (int a = 0; a < al.size(); a++) {
             event(al.get(a));
         }
@@ -305,11 +305,11 @@ public final class EventQueue {
         al.clear();
     }
 
-    protected static void event(final EventObject eventObj) {
+    static void event(final EventObject eventObj) {
         event(eventObj, false);
     }
 
-    protected static void event(final EventObject eventObj, final boolean noDelay) {
+    static void event(final EventObject eventObj, final boolean noDelay) {
         if (null == eventObj) {
             LOG.warn("Skipping null event", new Throwable());
             return;
@@ -336,7 +336,7 @@ public final class EventQueue {
         }
     }
 
-    protected static void appointment(final EventObject eventObj, final List<AppointmentEventInterface> appointmentEventList) {
+    static void appointment(final EventObject eventObj, final List<AppointmentEventInterface> appointmentEventList) {
         if (appointmentEventList.isEmpty()) {
             return;
         }
@@ -348,7 +348,7 @@ public final class EventQueue {
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
                     next.appointmentCreated(appointment, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -357,7 +357,7 @@ public final class EventQueue {
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
                     next.appointmentModified(appointment, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -366,7 +366,7 @@ public final class EventQueue {
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
                     next.appointmentDeleted(appointment, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -375,7 +375,7 @@ public final class EventQueue {
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
                     next.appointmentAccepted(appointment, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -384,7 +384,7 @@ public final class EventQueue {
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
                     next.appointmentDeclined(appointment, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -393,7 +393,7 @@ public final class EventQueue {
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
                     next.appointmentTentativelyAccepted(appointment, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -415,7 +415,7 @@ public final class EventQueue {
             for (final ContactEventInterface next : contactEventList) {
                 try {
                     next.contactCreated(contact, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -424,7 +424,7 @@ public final class EventQueue {
             for (final ContactEventInterface next : contactEventList) {
                 try {
                     next.contactModified(contact, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -433,7 +433,7 @@ public final class EventQueue {
             for (final ContactEventInterface next : contactEventList) {
                 try {
                     next.contactDeleted(contact, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -455,7 +455,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskCreated(task, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -464,7 +464,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskModified(task, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -473,7 +473,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskDeleted(task, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -482,7 +482,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskAccepted(task, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -491,7 +491,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskDeclined(task, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -500,7 +500,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskTentativelyAccepted(task, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -522,7 +522,7 @@ public final class EventQueue {
             for (final FolderEventInterface next : folderEventList) {
                 try {
                     next.folderCreated(folderObject, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -531,7 +531,7 @@ public final class EventQueue {
             for (final FolderEventInterface next : folderEventList) {
                 try {
                     next.folderModified(folderObject, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
@@ -540,7 +540,7 @@ public final class EventQueue {
             for (final FolderEventInterface next : folderEventList) {
                 try {
                     next.folderDeleted(folderObject, session);
-                } catch (final Throwable t) {
+                } catch (final Exception t) {
                     LOG.error("", t);
                 }
             }
