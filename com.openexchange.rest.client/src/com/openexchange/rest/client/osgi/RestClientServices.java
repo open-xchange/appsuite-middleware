@@ -49,53 +49,68 @@
 
 package com.openexchange.rest.client.osgi;
 
-import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
-import com.openexchange.rest.client.endpointpool.internal.EndpointManagerFactoryImpl;
-import com.openexchange.timer.TimerService;
-
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link RestClientActivator}
+ * {@link RestClientServices}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8.2
  */
-public class RestClientActivator extends HousekeepingActivator {
-
-    /**
-     * Initializes a new {@link RestClientActivator}.
-     */
-    public RestClientActivator() {
+public final class RestClientServices {
+    
+    private static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
+    
+    private RestClientServices() {
         super();
     }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TimerService.class, SSLConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        RestClientServices.setServices(this);
-        registerService(EndpointManagerFactory.class, new EndpointManagerFactoryImpl(this));
-
-        // Avoid annoying WARN logging
-        //System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.client.protocol.ResponseProcessCookies", "fatal");
-    }
     
-    @Override
-    protected void stopBundle() throws Exception {
-        try {
-            // Clean-up
-            cleanUp();
-            // Clear service registry
-            RestClientServices.setServices(null);
-        } catch (final Exception e) {
-            org.slf4j.LoggerFactory.getLogger(RestClientActivator.class).error("", e);
-            throw e;
+    /**
+     * Sets the {@link ServiceLookup} reference.
+     *
+     * @param services The reference
+     */
+    public static void setServices(final ServiceLookup services) {
+        SERVICES.set(services);
+    }
+
+    /**
+     * Gets the {@link ServiceLookup} reference.
+     *
+     * @return The reference
+     */
+    public static ServiceLookup getServices() {
+        return SERVICES.get();
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("ServiceLookup is absent. Check bundle activator.");
         }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * Gets the optional service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            return null;
+        }
+        return serviceLookup.getOptionalService(clazz);
     }
 
 }

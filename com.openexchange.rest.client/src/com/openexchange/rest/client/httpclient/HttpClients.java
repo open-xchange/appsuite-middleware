@@ -94,6 +94,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.TextUtils;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.rest.client.osgi.RestClientServices;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
@@ -151,7 +152,7 @@ public final class HttpClients {
      */
     public static DefaultHttpClient getHttpClient(final ClientConfig config) {
         javax.net.ssl.SSLSocketFactory f = SSLSocketFactoryProvider.getDefault();
-        SSLConfigurationService sslConfig = ServerServiceRegistry.getInstance().getService(SSLConfigurationService.class);
+        SSLConfigurationService sslConfig = RestClientServices.getService(SSLConfigurationService.class);
         final SchemeRegistry schemeRegistry = new SchemeRegistry();
         schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
         schemeRegistry.register(new Scheme("https", 443, new SSLSocketFactory(f, sslConfig.getSupportedCipherSuites(), sslConfig.getSupportedProtocols(), new StrictHostnameVerifier())));
