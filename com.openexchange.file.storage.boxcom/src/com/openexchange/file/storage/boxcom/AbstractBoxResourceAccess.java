@@ -98,36 +98,6 @@ public abstract class AbstractBoxResourceAccess {
         return closure.perform(this, boxAccess, session);
     }
 
-    //    /**
-    //     * Checks if given typed object denotes a file
-    //     *
-    //     * @param typedObject The typed object to check
-    //     * @return <code>true</code> if typed object denotes a file; otherwise <code>false</code>
-    //     */
-    //    protected static boolean isFile(BoxTypedObject typedObject) {
-    //        return null != typedObject && TYPE_FILE.equals(typedObject.getType());
-    //    }
-    //
-    //    /**
-    //     * Checks if given typed object denotes a folder
-    //     *
-    //     * @param typedObject The typed object to check
-    //     * @return <code>true</code> if typed object denotes a folder; otherwise <code>false</code>
-    //     */
-    //    protected static boolean isFolder(BoxTypedObject typedObject) {
-    //        return null != typedObject && TYPE_FOLDER.equals(typedObject.getType());
-    //    }
-    //
-    //    /**
-    //     * Checks if given typed object is trashed
-    //     *
-    //     * @param boxFile The typed object to check
-    //     * @return <code>true</code> if typed object is trashed; otherwise <code>false</code>
-    //     */
-    //    protected static boolean isTrashed(BoxFile boxFile) {
-    //        return null != boxFile.getTrashedAt();
-    //    }
-
     /**
      * Checks if given typed object is trashed
      *
