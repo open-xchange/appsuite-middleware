@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,54 +47,16 @@
  *
  */
 
-package com.openexchange.file.storage.boxcom.access;
+package com.openexchange.cluster.lock.internal;
 
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.file.storage.boxcom.Services;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.access.OAuthAccessRegistry;
-import com.openexchange.oauth.access.OAuthAccessRegistryService;
-import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link BoxEventHandler} - The {@link EventHandler event handler}.
+ * {@link ClusterLockExceptionMessages}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class BoxEventHandler implements EventHandler {
+public class ClusterLockExceptionMessages implements LocalizableStrings {
 
-    /**
-     * The logger constant.
-     */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BoxEventHandler.class);
-
-    /**
-     * Initializes a new {@link BoxEventHandler}.
-     */
-    public BoxEventHandler() {
-        super();
-    }
-
-    @Override
-    public void handleEvent(Event event) {
-        String topic = event.getTopic();
-        if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
-            try {
-                Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
-                if (null != contextId) {
-                    Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
-                    if (null != userId) {
-                        OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
-                        OAuthAccessRegistry registry = registryService.get(API.BOX_COM.getFullName());
-                        if (registry.removeIfLast(contextId, userId)) {
-                            LOG.debug("Box.com access removed for user {} in context {}", userId, contextId);
-                        }
-                    }
-                }
-            } catch (final Exception e) {
-                LOG.error("Error while handling SessionD event \"{}\"", topic, e);
-            }
-        }
-    }
+    static String UNABLE_TO_ACQUIRE_CLUSTER_LOCK = "Another node is currently performing the same task. Try again later.";
 }

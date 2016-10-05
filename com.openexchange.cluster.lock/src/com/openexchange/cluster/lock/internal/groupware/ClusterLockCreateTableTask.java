@@ -47,54 +47,76 @@
  *
  */
 
-package com.openexchange.file.storage.onedrive.access;
+package com.openexchange.cluster.lock.internal.groupware;
 
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.file.storage.onedrive.osgi.Services;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.access.OAuthAccessRegistry;
-import com.openexchange.oauth.access.OAuthAccessRegistryService;
-import com.openexchange.sessiond.SessiondEventConstants;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.tableExists;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link OneDriveEventHandler} - The {@link EventHandler event handler}.
+ * {@link ClusterLockCreateTableTask}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class OneDriveEventHandler implements EventHandler {
+public class ClusterLockCreateTableTask extends UpdateTaskAdapter {
+
+    private ServiceLookup services;
 
     /**
-     * The logger constant.
+     * Initialises a new {@link ClusterLockCreateTableTask}.
      */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OneDriveEventHandler.class);
-
-    /**
-     * Initializes a new {@link OneDriveEventHandler}.
-     */
-    public OneDriveEventHandler() {
+    public ClusterLockCreateTableTask(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
+     */
     @Override
-    public void handleEvent(Event event) {
-        String topic = event.getTopic();
-        if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
-            try {
-                Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
-                if (null != contextId) {
-                    Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
-                    if (null != userId) {
-                        OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
-                        OAuthAccessRegistry registry = registryService.get(API.MS_LIVE_CONNECT.getFullName());
-                        if (registry.removeIfLast(contextId, userId)) {
-                            LOG.debug("Live Connect access removed for user {} in context {}", userId, contextId);
-                        }
-                    }
-                }
-            } catch (final Exception e) {
-                LOG.error("Error while handling SessionD event \"{}\"", topic, e);
-            }
+    public void perform(PerformParameters params) throws OXException {
+        DatabaseService dbService = services.getService(DatabaseService.class);
+        final int contextId = params.getContextId();
+        final Connection writeCon;
+        try {
+            writeCon = dbService.getForUpdateTask(contextId);
+        } catch (final OXException e) {
+            throw e;
         }
+        PreparedStatement stmt = null;
+        try {
+            try {
+                if (tableExists(writeCon, CreateClusterLockTable.TABLE_NAME)) {
+                    return;
+                }
+                stmt = writeCon.prepareStatement(CreateClusterLockTable.CREATE_TABLE_STATEMENT);
+                stmt.executeUpdate();
+            } catch (final SQLException e) {
+                throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+            }
+        } finally {
+            closeSQLStuff(null, stmt);
+            dbService.backForUpdateTask(contextId, writeCon);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
+     */
+    @Override
+    public String[] getDependencies() {
+        return new String[] {};
     }
 }

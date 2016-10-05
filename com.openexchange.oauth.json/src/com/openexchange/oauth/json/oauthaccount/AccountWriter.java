@@ -51,10 +51,12 @@ package com.openexchange.oauth.json.oauthaccount;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthInteraction;
 import com.openexchange.oauth.json.AbstractOAuthWriter;
+import com.openexchange.session.Session;
 
 /**
  * The OAuth account writer
@@ -76,14 +78,15 @@ public class AccountWriter extends AbstractOAuthWriter {
      * @param account The account
      * @return The JSON object
      * @throws JSONException If writing to JSON fails
+     * @throws OXException
      */
-    public static JSONObject write(final OAuthAccount account) throws JSONException {
+    public static JSONObject write(final OAuthAccount account, Session session) throws JSONException, OXException {
         final JSONObject jAccount = new JSONObject(5);
         jAccount.put(AccountField.ID.getName(), account.getId());
         jAccount.put(AccountField.DISPLAY_NAME.getName(), account.getDisplayName());
         jAccount.put(AccountField.SERVICE_ID.getName(), account.getMetaData().getId());
         jAccount.put(AccountField.ENABLED_SCOPES.getName(), write(account.getEnabledScopes()));
-        jAccount.put(AccountField.AVAILABLE_SCOPES.getName(), write(account.getMetaData().getAvailableScopes()));
+        jAccount.put(AccountField.AVAILABLE_SCOPES.getName(), write(account.getMetaData().getAvailableScopes(session.getUserId(), session.getContextId())));
         return jAccount;
     }
 

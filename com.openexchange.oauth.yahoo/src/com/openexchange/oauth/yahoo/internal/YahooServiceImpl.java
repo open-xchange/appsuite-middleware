@@ -120,7 +120,7 @@ public class YahooServiceImpl implements YahooService, OAuthAccountDeleteListene
         OAuthAccessRegistryService registryService = services.getService(OAuthAccessRegistryService.class);
         OAuthAccessRegistry registry = registryService.get(API.YAHOO.getFullName());
         OAuthAccess oAuthAccess = registry.get(cid, user);
-        if (oAuthAccess.getAccountId() != id) {
+        if (oAuthAccess == null || oAuthAccess.getAccountId() != id) {
             return;
         }
 

@@ -47,54 +47,34 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox.access;
-
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.file.storage.dropbox.DropboxServices;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.access.OAuthAccessRegistry;
-import com.openexchange.oauth.access.OAuthAccessRegistryService;
-import com.openexchange.sessiond.SessiondEventConstants;
+package com.openexchange.cluster.lock.policies;
 
 /**
- * {@link DropboxEventHandler} - The {@link EventHandler event handler}.
+ * {@link RetryPolicy}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class DropboxEventHandler implements EventHandler {
+public interface RetryPolicy {
 
     /**
-     * The logger constant.
+     * Returns the maximum amount of allowed retries
+     * 
+     * @return the maximum amount of allowed retries
      */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DropboxEventHandler.class);
+    int getMaxTries();
 
     /**
-     * Initializes a new {@link DropboxEventHandler}.
+     * Returns the amount of retries so far
+     * 
+     * @return the amount of retries so far
      */
-    public DropboxEventHandler() {
-        super();
-    }
+    int retryCount();
 
-    @Override
-    public void handleEvent(Event event) {
-        String topic = event.getTopic();
-        if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
-            try {
-                Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
-                if (null != contextId) {
-                    Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
-                    if (null != userId) {
-                        OAuthAccessRegistryService registryService = DropboxServices.getService(OAuthAccessRegistryService.class);
-                        OAuthAccessRegistry registry = registryService.get(API.DROPBOX.getFullName());
-                        if (registry.removeIfLast(contextId, userId)) {
-                            LOG.debug("Dropbox session removed for user {} in context {}", userId, contextId);
-                        }
-                    }
-                }
-            } catch (final Exception e) {
-                LOG.error("Error while handling SessionD event \"{}\"", topic, e);
-            }
-        }
-    }
+    /**
+     * Returns <code>true</code> if retry is allowed by this policy; <code>false</code> otherwise.
+     * If this policy allows a retry, then the current retry count will be increased by one.
+     * 
+     * @return <code>true</code> if retry is allowed by this policy; <code>false</code> otherwise.
+     */
+    boolean isRetryAllowed();
 }

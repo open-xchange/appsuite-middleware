@@ -108,8 +108,8 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     // Your access token for '%1$s' is invalid. You have to reauthorize your account.
     public static String OAUTH_TOKEN_INVALID = "Your access token for '%1$s' is invalid. You have to reauthorize your account.";
     
-    // You need to explicitely authorise %1$s to subscribe to %2$s
-    public static final String NO_SCOPE_PERMISSION = "You need to explicitely authorise %1$s to subscribe to %2$s";
+    // You need to explicitly authorise %1$s to subscribe to %2$s
+    public static final String NO_SCOPE_PERMISSION = "You need to explicitly authorise %1$s to subscribe to %2$s";
 
 
     /**

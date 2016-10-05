@@ -47,54 +47,47 @@
  *
  */
 
-package com.openexchange.file.storage.googledrive.access;
+package com.openexchange.file.storage.oauth;
 
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.file.storage.googledrive.osgi.Services;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.access.OAuthAccessRegistry;
-import com.openexchange.oauth.access.OAuthAccessRegistryService;
-import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.file.storage.FileStorageAccount;
 
 /**
- * {@link GoogleDriveEventHandler} - The {@link EventHandler event handler}.
+ * {@link FileStorageAccountInfo}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class GoogleDriveEventHandler implements EventHandler {
+final class FileStorageAccountInfo {
+
+    private final FileStorageAccount account;
+    private final int ranking;
 
     /**
-     * The logger constant.
+     * Initialises a new {@link FileStorageAccountInfo}.
+     * 
+     * @param account
+     * @param ranking
      */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GoogleDriveEventHandler.class);
-
-    /**
-     * Initializes a new {@link GoogleDriveEventHandler}.
-     */
-    public GoogleDriveEventHandler() {
+    FileStorageAccountInfo(FileStorageAccount account, int ranking) {
         super();
+        this.account = account;
+        this.ranking = ranking;
     }
 
-    @Override
-    public void handleEvent(Event event) {
-        String topic = event.getTopic();
-        if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
-            try {
-                Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
-                if (null != contextId) {
-                    Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
-                    if (null != userId) {
-                        OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
-                        OAuthAccessRegistry registry = registryService.get(API.GOOGLE.getFullName());
-                        if (registry.removeIfLast(contextId, userId)) {
-                            LOG.debug("Google Drive access removed for user {} in context {}", userId, contextId);
-                        }
-                    }
-                }
-            } catch (final Exception e) {
-                LOG.error("Error while handling SessionD event \"{}\"", topic, e);
-            }
-        }
+    /**
+     * Gets the account
+     *
+     * @return The account
+     */
+    public FileStorageAccount getAccount() {
+        return account;
+    }
+
+    /**
+     * Gets the ranking
+     *
+     * @return The ranking
+     */
+    public int getRanking() {
+        return ranking;
     }
 }
