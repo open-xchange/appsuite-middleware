@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage.boxcom;
 
-import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -135,7 +134,7 @@ public abstract class AbstractBoxResourceAccess {
      * @param folder The typed object to check
      * @return <code>true</code> if typed object is trashed; otherwise <code>false</code>
      */
-    protected static boolean isFolderTrashed(BoxFolder.Info folder) {
+    protected boolean isFolderTrashed(BoxFolder.Info folder) {
         return hasTrashedParent(folder);
     }
 
@@ -145,7 +144,7 @@ public abstract class AbstractBoxResourceAccess {
      * @param boxFolder The box folder
      * @return <code>true</code> if the parent folder is trashed; otherwise <code>false</code>
      */
-    private static boolean hasTrashedParent(BoxFolder.Info boxFolder) {
+    private boolean hasTrashedParent(BoxFolder.Info boxFolder) {
         BoxFolder.Info parent = boxFolder.getParent();
         if (null == parent) {
             return false;
@@ -162,7 +161,7 @@ public abstract class AbstractBoxResourceAccess {
      * @param fileInfo The file to check
      * @return <code>true</code> if the file is trashed; otherwise <code>false</code>
      */
-    protected static boolean isFileTrashed(BoxFile.Info fileInfo) {
+    protected boolean isFileTrashed(BoxFile.Info fileInfo) {
         return fileInfo.getTrashedAt() != null;
     }
 
@@ -172,7 +171,7 @@ public abstract class AbstractBoxResourceAccess {
      * @param fileInfo The file's validity
      * @throws OXException if the specified file was trashed
      */
-    protected static void checkFileValidity(BoxFile.Info fileInfo) throws OXException {
+    protected void checkFileValidity(BoxFile.Info fileInfo) throws OXException {
         if (isFileTrashed(fileInfo)) {
             throw FileStorageExceptionCodes.NOT_A_FILE.create(BoxConstants.ID, fileInfo.getID());
         }
@@ -196,26 +195,6 @@ public abstract class AbstractBoxResourceAccess {
 
             throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, BoxConstants.ID, e.getMessage());
         }
-    }
-
-    /**
-     * Handles given API error.
-     *
-     * @param e The {@link BoxAPIException} error
-     * @return The resulting exception
-     */
-    protected static OXException handleRestError(BoxAPIException e) {
-        Throwable cause = e.getCause();
-
-        if (cause == null) {
-            return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getResponseCode() + " " + e.getResponse());
-        }
-
-        if (cause instanceof IOException) {
-            return FileStorageExceptionCodes.IO_ERROR.create(cause, cause.getMessage());
-        }
-
-        return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, BoxConstants.ID, e.getMessage());
     }
 
     /** Status code (400) indicating a bad requestn. */
