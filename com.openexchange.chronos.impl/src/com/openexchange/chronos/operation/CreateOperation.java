@@ -149,8 +149,7 @@ public class CreateOperation extends AbstractOperation {
         if (false == eventData.containsUid() || Strings.isEmpty(eventData.getUid())) {
             event.setUid(UUID.randomUUID().toString());
         } else {
-            Check.uidIsUnique(storage, eventData);
-            event.setUid(eventData.getUid());
+            event.setUid(Check.uidIsUnique(storage, eventData));
         }
         /*
          * creation/modification metadata, organizer
@@ -174,8 +173,7 @@ public class CreateOperation extends AbstractOperation {
          * classification, status, transparency
          */
         if (eventData.containsClassification() && null != eventData.getClassification()) {
-            Check.classificationIsValid(eventData, folder);
-            event.setClassification(eventData.getClassification());
+            event.setClassification(Check.classificationIsValid(eventData, folder));
         } else {
             event.setClassification(Classification.PUBLIC);
         }
@@ -185,12 +183,10 @@ public class CreateOperation extends AbstractOperation {
          * recurrence related fields
          */
         if (eventData.containsRecurrenceRule() && null != eventData.getRecurrenceRule()) {
-            Check.recurrenceRule(eventData);
-            event.setRecurrenceRule(eventData.getRecurrenceRule());
+            event.setRecurrenceRule(Check.recurrenceRuleIsValid(eventData));
             event.setSeriesId(event.getId());
             if (eventData.containsDeleteExceptionDates()) {
-                Check.recurrenceIdsExist(eventData, eventData.getDeleteExceptionDates());
-                event.setDeleteExceptionDates(eventData.getDeleteExceptionDates());
+                event.setDeleteExceptionDates(Check.recurrenceIdsExist(eventData, eventData.getDeleteExceptionDates()));
             }
         }
         /*

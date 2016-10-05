@@ -203,28 +203,34 @@ public class Check {
      *
      * @param event The event to check
      * @param folder The target folder for the event
+     * @return The passed event's classification, after it was checked for validity
      * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_CLASSIFICATION}
      */
-    public static void classificationIsValid(Event event, UserizedFolder folder) throws OXException {
-        if (event.containsClassification() && false == Classification.PUBLIC.equals(event.getClassification()) && PublicType.getInstance().equals(folder.getType())) {
-            throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION.create(String.valueOf(event.getClassification()), I(i(folder)), PublicType.getInstance());
+    public static Classification classificationIsValid(Event event, UserizedFolder folder) throws OXException {
+        Classification classification = event.getClassification();
+        if (event.containsClassification() && false == Classification.PUBLIC.equals(classification) && PublicType.getInstance().equals(folder.getType())) {
+            throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION.create(String.valueOf(classification), I(i(folder)), PublicType.getInstance());
         }
+        return classification;
     }
 
     /**
-     * Checks an event's recurrence rule.
+     * Checks an event's recurrence rule for validity.
      *
      * @param event The event to check
+     * @return The passed event's recurrence rule, after it was checked for validity
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
      */
-    public static void recurrenceRule(Event event) throws OXException {
-        if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
+    public static String recurrenceRuleIsValid(Event event) throws OXException {
+        String recurrenceRule = event.getRecurrenceRule();
+        if (event.containsRecurrenceRule() && null != recurrenceRule) {
             try {
                 new RecurrenceRule(event.getRecurrenceRule());
             } catch (InvalidRecurrenceRuleException e) {
                 throw CalendarExceptionCodes.INVALID_RRULE.create(e, event.getRecurrenceRule());
             }
         }
+        return recurrenceRule;
     }
 
     /**
@@ -233,14 +239,16 @@ public class Check {
      *
      * @param seriesMaster The series master event providing the recurrence information
      * @param recurrenceID The recurrence identifier
+     * @return The passed list of recurrence identifiers, after their existence was checked
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
-    public static void recurrenceIdsExist(Event seriesMaster, List<Date> recurrenceIDs) throws OXException {
+    public static List<Date> recurrenceIdsExist(Event seriesMaster, List<Date> recurrenceIDs) throws OXException {
         if (null != recurrenceIDs) {
             for (Date recurrenceID : recurrenceIDs) {
                 recurrenceIdExists(seriesMaster, recurrenceID);
             }
         }
+        return recurrenceIDs;
     }
 
     /**
@@ -276,24 +284,25 @@ public class Check {
      *
      * @param storage A reference to the calendar storage
      * @param event The event to check
+     * @return The passed event's unique identifier, after it was checked for uniqueness
      * @throws OXException {@link CalendarExceptionCodes#UID_CONFLICT}
      */
-    public static void uidIsUnique(CalendarStorage storage, Event event) throws OXException {
+    public static String uidIsUnique(CalendarStorage storage, Event event) throws OXException {
         String uid = event.getUid();
-        if (Strings.isEmpty(uid)) {
-            return;
+        if (Strings.isNotEmpty(uid)) {
+            CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+                .addSearchTerm(getSearchTerm(EventField.UID, SingleOperation.EQUALS, uid))
+                .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                    .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL))
+                    .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
+                )
+            ;
+            List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions().setLimits(0, 1), new EventField[] { EventField.ID });
+            if (0 < events.size()) {
+                throw CalendarExceptionCodes.UID_CONFLICT.create(uid, I(events.get(0).getId()));
+            }
         }
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(EventField.UID, SingleOperation.EQUALS, uid))
-            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL))
-                .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
-            )
-        ;
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions().setLimits(0, 1), new EventField[] { EventField.ID });
-        if (0 < events.size()) {
-            throw CalendarExceptionCodes.UID_CONFLICT.create(uid, I(events.get(0).getId()));
-        }
+        return uid;
     }
 
     /**
