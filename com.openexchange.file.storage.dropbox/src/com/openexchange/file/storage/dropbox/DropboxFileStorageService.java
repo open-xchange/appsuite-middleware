@@ -66,13 +66,11 @@ import com.openexchange.session.Session;
  */
 public final class DropboxFileStorageService extends AbstractOAuthFileStorageService {
 
-    private static final String SERVICE_ID = DropboxConstants.ID;
-
     /**
      * Initializes a new {@link BoxFileStorageService}.
      */
     public DropboxFileStorageService(ServiceLookup services) {
-        super(services, API.DROPBOX);
+        super(services, API.DROPBOX, DropboxConstants.DISPLAY_NAME, DropboxConstants.ID);
     }
 
     /**
@@ -82,17 +80,7 @@ public final class DropboxFileStorageService extends AbstractOAuthFileStorageSer
      * @param compositeFileStorageAccountManagerProvider
      */
     public DropboxFileStorageService(ServiceLookup services, CompositeFileStorageAccountManagerProvider compositeFileStorageAccountManagerProvider) {
-        super(services, API.DROPBOX, compositeFileStorageAccountManagerProvider);
-    }
-
-    @Override
-    public String getId() {
-        return SERVICE_ID;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return "Dropbox File Storage Service";
+        super(services, API.DROPBOX, DropboxConstants.DISPLAY_NAME, DropboxConstants.ID, compositeFileStorageAccountManagerProvider);
     }
 
     @Override

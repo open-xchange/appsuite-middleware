@@ -90,6 +90,8 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
     private final DynamicFormDescription formDescription;
     private final ServiceLookup services;
     private final API api;
+    private final String serviceId;
+    private final String displayName;
 
     private volatile FileStorageAccountManager accountManager;
     private volatile CompositeFileStorageAccountManagerProvider compositeAccountManager;
@@ -101,8 +103,8 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
      * @param api The {@link API}
      * @param compositeFileStorageAccountManagerProvider The {@link CompositeFileStorageAccountManagerProvider}
      */
-    public AbstractOAuthFileStorageService(ServiceLookup services, API api, CompositeFileStorageAccountManagerProvider compositeFileStorageAccountManagerProvider) {
-        this(services, api);
+    protected AbstractOAuthFileStorageService(ServiceLookup services, API api, String displayName, String serviceId, CompositeFileStorageAccountManagerProvider compositeFileStorageAccountManagerProvider) {
+        this(services, api, displayName, serviceId);
         compositeAccountManager = compositeFileStorageAccountManagerProvider;
     }
 
@@ -112,10 +114,12 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
      * @param services The {@link ServiceLookup} instance
      * @param api The {@link API}
      */
-    public AbstractOAuthFileStorageService(ServiceLookup services, API api) {
+    protected AbstractOAuthFileStorageService(ServiceLookup services, API api, String displayName, String serviceId) {
         super();
         this.services = services;
         this.api = api;
+        this.displayName = displayName;
+        this.serviceId = serviceId;
 
         final DynamicFormDescription tmpDescription = new DynamicFormDescription();
         final FormElement oauthAccount = FormElement.custom("oauthAccount", "account", FormStrings.ACCOUNT_LABEL);
@@ -142,6 +146,26 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
     @Override
     public Set<String> getSecretProperties() {
         return Collections.emptySet();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.FileStorageService#getId()
+     */
+    @Override
+    public String getId() {
+        return serviceId;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.FileStorageService#getDisplayName()
+     */
+    @Override
+    public String getDisplayName() {
+        return displayName;
     }
 
     /*

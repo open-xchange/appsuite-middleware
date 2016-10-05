@@ -65,30 +65,18 @@ import com.openexchange.session.Session;
  */
 public final class GoogleDriveFileStorageService extends AbstractOAuthFileStorageService {
 
-    private static final String SERVICE_ID = GoogleDriveConstants.ID;
-
     /**
      * Initializes a new {@link GoogleDriveFileStorageService}.
      */
     public GoogleDriveFileStorageService(ServiceLookup services) {
-        super(services, API.GOOGLE);
+        super(services, API.GOOGLE, GoogleDriveConstants.DISPLAY_NAME, GoogleDriveConstants.ID);
     }
 
     /**
      * Initializes a new {@link GoogleDriveFileStorageService}.
      */
     public GoogleDriveFileStorageService(ServiceLookup services, CompositeFileStorageAccountManagerProvider compositeFileStorageAccountManagerProvider) {
-        super(services, API.GOOGLE, compositeFileStorageAccountManagerProvider);
-    }
-
-    @Override
-    public String getId() {
-        return SERVICE_ID;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return "Google Drive File Storage Service";
+        super(services, API.GOOGLE, GoogleDriveConstants.DISPLAY_NAME, GoogleDriveConstants.ID, compositeFileStorageAccountManagerProvider);
     }
 
     @Override

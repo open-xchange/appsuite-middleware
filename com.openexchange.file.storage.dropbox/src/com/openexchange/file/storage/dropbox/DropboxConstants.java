@@ -63,6 +63,11 @@ public final class DropboxConstants implements FileStorageConstants {
      * The identifier for Dropbox file storage service.
      */
     public static final String ID = "dropbox";
+    
+    /**
+     * The display name for dropbox file storage service.
+     */
+    public static final String DISPLAY_NAME = "Dropbox File Storage Service";
 
     /**
      * The configuration property name for Dropbox API key.

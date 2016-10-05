@@ -65,13 +65,11 @@ import com.openexchange.session.Session;
  */
 public final class BoxFileStorageService extends AbstractOAuthFileStorageService {
 
-    private static final String SERVICE_ID = BoxConstants.ID;
-
     /**
      * Initializes a new {@link BoxFileStorageService}.
      */
     public BoxFileStorageService(ServiceLookup services) {
-        super(services, API.BOX_COM);
+        super(services, API.BOX_COM, BoxConstants.DISPLAY_NAME, BoxConstants.ID);
     }
 
     /**
@@ -81,17 +79,7 @@ public final class BoxFileStorageService extends AbstractOAuthFileStorageService
      * @param compositeFileStorageAccountManagerProvider
      */
     public BoxFileStorageService(ServiceLookup services, CompositeFileStorageAccountManagerProvider compositeFileStorageAccountManagerProvider) {
-        super(services, API.BOX_COM, compositeFileStorageAccountManagerProvider);
-    }
-
-    @Override
-    public String getId() {
-        return SERVICE_ID;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return "Box File Storage Service";
+        super(services, API.BOX_COM, BoxConstants.DISPLAY_NAME, BoxConstants.ID, compositeFileStorageAccountManagerProvider);
     }
 
     @Override

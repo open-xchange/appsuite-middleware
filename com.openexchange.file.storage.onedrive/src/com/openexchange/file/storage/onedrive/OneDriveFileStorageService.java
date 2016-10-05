@@ -65,13 +65,11 @@ import com.openexchange.session.Session;
  */
 public final class OneDriveFileStorageService extends AbstractOAuthFileStorageService {
 
-    private static final String SERVICE_ID = OneDriveConstants.ID;
-
     /**
      * Initializes a new {@link BoxFileStorageService}.
      */
     public OneDriveFileStorageService(ServiceLookup services) {
-        super(services, API.MS_LIVE_CONNECT);
+        super(services, API.MS_LIVE_CONNECT, OneDriveConstants.DISPLAY_NAME, OneDriveConstants.ID);
     }
 
     /**
@@ -81,17 +79,7 @@ public final class OneDriveFileStorageService extends AbstractOAuthFileStorageSe
      * @param compositeFileStorageAccountManagerProvider
      */
     public OneDriveFileStorageService(ServiceLookup services, CompositeFileStorageAccountManagerProvider compositeFileStorageAccountManagerProvider) {
-        super(services, API.MS_LIVE_CONNECT, compositeFileStorageAccountManagerProvider);
-    }
-
-    @Override
-    public String getId() {
-        return SERVICE_ID;
-    }
-
-    @Override
-    public String getDisplayName() {
-        return "Microsoft OneDrive File Storage Service";
+        super(services, API.MS_LIVE_CONNECT, OneDriveConstants.DISPLAY_NAME, OneDriveConstants.ID, compositeFileStorageAccountManagerProvider);
     }
 
     @Override
