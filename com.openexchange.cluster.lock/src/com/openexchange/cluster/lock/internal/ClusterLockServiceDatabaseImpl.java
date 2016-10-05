@@ -230,9 +230,6 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
             statement.setInt(index++, userId);
             statement.setString(index++, clusterTask.getTaskName());
             statement.setLong(index++, now);
-            statement.setInt(index++, contextId);
-            statement.setInt(index++, userId);
-            statement.setString(index++, clusterTask.getTaskName());
 
             return statement.executeUpdate() > 0;
         } finally {
