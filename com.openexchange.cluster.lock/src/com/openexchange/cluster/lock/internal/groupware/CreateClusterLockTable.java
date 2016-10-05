@@ -65,7 +65,7 @@ public class CreateClusterLockTable extends AbstractCreateTableImpl {
         "user INT4 UNSIGNED NOT NULL, " +
         "name VARCHAR(255) NOT NULL, " +
         "timestamp INT8 UNSIGNED NOT NULL, " + 
-        "PRIMARY KEY (cid, user, name, timestamp), " +
+        "PRIMARY KEY (cid, user, name), " +
         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
 
     /**
