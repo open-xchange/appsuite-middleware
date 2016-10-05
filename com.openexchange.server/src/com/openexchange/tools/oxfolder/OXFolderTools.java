@@ -531,7 +531,7 @@ public class OXFolderTools {
      * only folders of a certain type or module)
      */
     private final static String getSQLUserVisibleFolders(final String fields, final String permissionIds, final String accessibleModules, final String additionalCondition, final String groupBy, final String orderBy) {
-        final StringBuilder retValBuilder = new StringBuilder("SELECT ").append(fields).append(" FROM oxfolder_tree AS ot ").append("JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? ").append("WHERE (((ot.permission_flag = ").append(FolderObject.PRIVATE_PERMISSION).append(" AND ot.created_from = ?)) OR ").append("((op.admin_flag = 1 AND op.permission_id = ?) OR (op.fp > ").append(OCLPermission.NO_PERMISSIONS).append(" AND op.permission_id IN ").append(permissionIds).append(")))");
+        final StringBuilder retValBuilder = new StringBuilder(300).append("SELECT ").append(fields).append(" FROM oxfolder_tree AS ot ").append("JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? ").append("WHERE (((ot.permission_flag = ").append(FolderObject.PRIVATE_PERMISSION).append(" AND ot.created_from = ?)) OR ").append("((op.admin_flag = 1 AND op.permission_id = ?) OR (op.fp > ").append(OCLPermission.NO_PERMISSIONS).append(" AND op.permission_id IN ").append(permissionIds).append(")))");
         if (OXFolderProperties.isIgnoreSharedAddressbook()) {
             retValBuilder.append(" AND (ot.fuid !=").append(FolderObject.SYSTEM_GLOBAL_FOLDER_ID).append(')');
         }
@@ -609,7 +609,7 @@ public class OXFolderTools {
      * Returns an <code>SearchIterator</code> of <code>FolderObject</code> instances which are located beneath system's private folder.
      */
     private static SearchIterator getVisiblePrivateFolders(final int userId, final int[] groups, final int[] accessibleModules, final Context ctx, final Timestamp since) throws OXException, SearchIteratorException {
-        final StringBuilder condBuilder = new StringBuilder("AND (ot.type = ").append(FolderObject.PRIVATE).append(" AND ot.created_from = ").append(userId).append(") AND (ot.parent = ?)").append((since == null ? STR_EMPTY : " AND (changing_date > ?)"));
+        final StringBuilder condBuilder = new StringBuilder(64).append("AND (ot.type = ").append(FolderObject.PRIVATE).append(" AND ot.created_from = ").append(userId).append(") AND (ot.parent = ?)").append((since == null ? STR_EMPTY : " AND (changing_date > ?)"));
         final String sqlSelectStr = getSQLUserVisibleFolders(FolderObjectIterator.getFieldsForSQL("ot"), StringCollection.getSqlInString(userId, groups), StringCollection.getSqlInString(accessibleModules), condBuilder.toString(), OXFolderProperties.isEnableDBGrouping() ? "GROUP BY ot.fuid" : null, "ORDER by ot.fuid");
         Connection readCon = null;
         PreparedStatement stmt = null;
@@ -686,7 +686,7 @@ public class OXFolderTools {
      */
     private static SearchIterator getVisibleSubfoldersIterator(final FolderObject parentFolder, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx, final Timestamp since) throws OXException, SearchIteratorException {
         final boolean shared = parentFolder.isShared(userId);
-        final StringBuilder condBuilder = new StringBuilder();
+        final StringBuilder condBuilder = new StringBuilder(32);
         if (shared) {
             condBuilder.append("AND (ot.type = ").append(FolderObject.PRIVATE).append(" AND ot.created_from != ").append(userId).append(") ");
         }
@@ -816,7 +816,7 @@ public class OXFolderTools {
         ResultSet rs = null;
         try {
             readCon = DBPool.pickup(ctx);
-            final StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder(1024);
             sb.append("SELECT ").append(FolderObjectIterator.getFieldsForSQL("ot")).append(" FROM oxfolder_tree AS ot ").append("LEFT JOIN oxfolder_permissions AS op ON ot.fuid = op.fuid ").append(" AND ot.cid = ? AND op.cid = ? ").append("WHERE ((ot.permission_flag = ").append(FolderObject.PUBLIC_PERMISSION).append(") OR (ot.permission_flag = ").append(FolderObject.PRIVATE_PERMISSION).append(" AND ot.created_from = ?) OR (op.admin_flag = 1 AND op.permission_id = ?) ").append(" OR (op.fp > 0 AND op.permission_id IN ").append(StringCollection.getSqlInString(userId, groups)).append("))").append(" AND ot.parent NOT IN (SELECT ot2.fuid FROM oxfolder_tree AS ot2 LEFT JOIN oxfolder_permissions AS op2 ON ot2.fuid = op2.fuid ").append(" AND ot2.cid = ? AND op2.cid = ? ").append(" WHERE ((ot2.permission_flag = ").append(FolderObject.PUBLIC_PERMISSION).append(") OR (ot2.permission_flag = ").append(FolderObject.PRIVATE_PERMISSION).append(" AND ot2.created_from = ?)").append(" OR (op2.admin_flag = 1 AND op2.permission_id = ?) ").append(" OR (op2.fp > 0 AND op2.permission_id IN ").append(StringCollection.getSqlInString(userId, groups)).append(")) AND ot2.type != ").append(FolderObject.PRIVATE).append(") AND ot.type != ").append(FolderObject.PRIVATE).append(" AND ot.module = ").append(module).append(" AND ot.module IN ").append(StringCollection.getSqlInString(userConfig.getAccessibleModules())).append(OXFolderProperties.isEnableDBGrouping() ? " GROUP BY ot.fuid" : STR_EMPTY);
             stmt = readCon.prepareStatement(sb.toString());
             stmt.setInt(1, ctx.getContextId());
@@ -1006,7 +1006,7 @@ public class OXFolderTools {
      * type and a certain parent folder.
      */
     private static SearchIterator getAllVisibleFoldersIteratorOfType(final int userId, final int[] memberInGroups, final int[] accessibleModules, final int type, final int[] modules, final Integer parent, final Context ctx) throws OXException, SearchIteratorException {
-        final StringBuilder condBuilder = new StringBuilder("AND (ot.module IN (");
+        final StringBuilder condBuilder = new StringBuilder(64).append("AND (ot.module IN (");
         condBuilder.append(modules[0]);
         for (int i = 1; i < modules.length; i++) {
             condBuilder.append(", ").append(modules[i]);
@@ -1086,7 +1086,7 @@ public class OXFolderTools {
      */
     public static SearchIterator getDeletedFoldersSince(final Date since, final int userId, final int[] memberInGroups, final int[] accessibleModules, final Context ctx) throws OXException, SearchIteratorException {
         final String fields = FolderObjectIterator.getFieldsForSQL("ot");
-        final StringBuilder sqlBuilder = new StringBuilder("SELECT ").append(fields).append(" FROM del_oxfolder_tree AS ot JOIN del_oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? ").append("WHERE ((ot.permission_flag = ").append(FolderObject.PUBLIC_PERMISSION).append(" OR (ot.permission_flag = ").append(FolderObject.PRIVATE_PERMISSION).append(" AND ot.created_from = ?)) OR ").append("((op.admin_flag = 1 AND op.permission_id = ?) OR (op.fp > ? AND op.permission_id IN ").append(StringCollection.getSqlInString(userId, memberInGroups)).append("))) AND (changing_date > ?)").append(" AND (ot.module IN ").append(StringCollection.getSqlInString(accessibleModules)).append(')').append(OXFolderProperties.isEnableDBGrouping() ? " GROUP BY ot.fuid" : STR_EMPTY).append(" ORDER by ot.fuid");
+        final StringBuilder sqlBuilder = new StringBuilder(400).append("SELECT ").append(fields).append(" FROM del_oxfolder_tree AS ot JOIN del_oxfolder_permissions AS op ON ot.fuid = op.fuid AND ot.cid = ? AND op.cid = ? ").append("WHERE ((ot.permission_flag = ").append(FolderObject.PUBLIC_PERMISSION).append(" OR (ot.permission_flag = ").append(FolderObject.PRIVATE_PERMISSION).append(" AND ot.created_from = ?)) OR ").append("((op.admin_flag = 1 AND op.permission_id = ?) OR (op.fp > ? AND op.permission_id IN ").append(StringCollection.getSqlInString(userId, memberInGroups)).append("))) AND (changing_date > ?)").append(" AND (ot.module IN ").append(StringCollection.getSqlInString(accessibleModules)).append(')').append(OXFolderProperties.isEnableDBGrouping() ? " GROUP BY ot.fuid" : STR_EMPTY).append(" ORDER by ot.fuid");
         Connection readCon = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
