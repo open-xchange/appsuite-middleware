@@ -788,9 +788,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             OAuthAccess access = oAuthAccessRegistry.get(contextId, user);
             // No need to re-authorise if access not present
             if (access != null) {
-                // First revoke the old token
-                access.revoke();
-                // Then initialise the access with the new one
+                // Initialise the access with the new access token
                 access.initialize();
             }
             /*

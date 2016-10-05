@@ -134,11 +134,6 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
     }
 
     @Override
-    public void revoke() throws OXException {
-        // No revoke call
-    }
-
-    @Override
     public boolean ping() throws OXException {
         OneDriveClosure<Boolean> closure = new OneDriveClosure<Boolean>() {
 

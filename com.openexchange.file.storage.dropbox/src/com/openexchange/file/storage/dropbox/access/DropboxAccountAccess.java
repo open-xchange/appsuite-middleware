@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.dropbox;
+package com.openexchange.file.storage.dropbox.access;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CapabilityAware;
@@ -60,7 +60,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
+import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
@@ -71,14 +71,14 @@ import com.openexchange.session.Session;
 /**
  * {@link DropboxAccountAccess}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class DropboxAccountAccess implements FileStorageAccountAccess, CapabilityAware {
 
     private final FileStorageAccount account;
     private final Session session;
     private final FileStorageService service;
-    private volatile OAuthAccess dropboxOAuthAccess;
+    private OAuthAccess dropboxOAuthAccess;
 
     /**
      * Initializes a new {@link DropboxAccountAccess}.
@@ -110,9 +110,9 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess, Cap
         OAuthAccessRegistry registry = service.get(API.DROPBOX.getFullName());
         OAuthAccess dropboxOAuthAccess = registry.get(session.getContextId(), session.getUserId());
         if (dropboxOAuthAccess == null) {
-            AbstractOAuthAccess newInstance = new DropboxOAuthAccess(account, session);
+            AbstractOAuthAccess newInstance = new DropboxOAuth2Access(account, session);
             dropboxOAuthAccess = registry.addIfAbsent(session.getContextId(), session.getUserId(), newInstance);
-            if (null == dropboxOAuthAccess) {
+            if (dropboxOAuthAccess == null) {
                 newInstance.initialize();
                 dropboxOAuthAccess = newInstance;
             }

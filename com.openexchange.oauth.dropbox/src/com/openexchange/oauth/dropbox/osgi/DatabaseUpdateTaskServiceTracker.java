@@ -47,79 +47,76 @@
  *
  */
 
-package com.openexchange.oauth.dropbox;
+package com.openexchange.oauth.dropbox.osgi;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import org.scribe.builder.api.Api;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
-import com.openexchange.server.ServiceLookup;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.oauth.dropbox.internal.groupware.OAuthDropboxDropTokensTask;
 
 /**
- * {@link DropboxOAuthServiceMetaData}
+ * {@link DatabaseUpdateTaskServiceTracker}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+public class DatabaseUpdateTaskServiceTracker implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {
+
+    private BundleContext bundleContext;
+
+    private ServiceRegistration<UpdateTaskProviderService> registration;
 
     /**
-     * Initialises a new {@link DropboxOAuthServiceMetaData}.
+     * Initialises a new {@link DatabaseUpdateTaskServiceTracker}.
      */
-    public DropboxOAuthServiceMetaData(ServiceLookup serviceLookup) {
-        super(serviceLookup, API.DROPBOX);
+    public DatabaseUpdateTaskServiceTracker(BundleContext bundleContext) {
+        super();
+        this.bundleContext = bundleContext;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.oauth.ScribeAware#getScribeService()
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
      */
     @Override
-    public Class<? extends Api> getScribeService() {
-        return DropboxApi2.class;
+    public DatabaseService addingService(ServiceReference<DatabaseService> reference) {
+        final DatabaseService databaseService = bundleContext.getService(reference);
+        registration = bundleContext.registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
+
+            @Override
+            public Collection<? extends UpdateTaskV2> getUpdateTasks() {
+                return Arrays.asList(new OAuthDropboxDropTokensTask(databaseService));
+            }
+
+        }, null);
+        return databaseService;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.oauth.OAuthServiceMetaData#getAPI()
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
     @Override
-    public API getAPI() {
-        return API.DROPBOX;
+    public void modifiedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        // Nothing to do
+
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData#getPropertyId()
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
      */
     @Override
-    protected String getPropertyId() {
-        return "dropbox";
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#needsRequestToken()
-     */
-    @Override
-    public boolean needsRequestToken() {
-        return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData#getExtraPropertyNames()
-     */
-    @Override
-    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
-        Collection<OAuthPropertyID> propertyNames = new ArrayList<OAuthPropertyID>(2);
-        Collections.addAll(propertyNames, OAuthPropertyID.redirectUrl, OAuthPropertyID.productName);
-        return propertyNames;
+    public void removedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        registration.unregister();
+        bundleContext.ungetService(reference);
     }
 }

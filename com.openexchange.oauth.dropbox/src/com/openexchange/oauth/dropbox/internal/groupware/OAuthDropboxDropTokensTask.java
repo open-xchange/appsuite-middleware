@@ -47,79 +47,82 @@
  *
  */
 
-package com.openexchange.oauth.dropbox;
+package com.openexchange.oauth.dropbox.internal.groupware;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import org.scribe.builder.api.Api;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask2;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link DropboxOAuthServiceMetaData}
+ * {@link OAuthDropboxDropTokensTask}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+public class OAuthDropboxDropTokensTask extends UpdateTaskAdapter {
+
+    private final DatabaseService databaseService;
 
     /**
-     * Initialises a new {@link DropboxOAuthServiceMetaData}.
+     * Initialises a new {@link OAuthDropboxDropTokensTask}.
      */
-    public DropboxOAuthServiceMetaData(ServiceLookup serviceLookup) {
-        super(serviceLookup, API.DROPBOX);
+    public OAuthDropboxDropTokensTask(DatabaseService databaseService) {
+        super();
+        this.databaseService = databaseService;
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.oauth.ScribeAware#getScribeService()
+     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
      */
     @Override
-    public Class<? extends Api> getScribeService() {
-        return DropboxApi2.class;
+    public void perform(PerformParameters params) throws OXException {
+        int contextId = params.getContextId();
+
+        // Get the writeable connection
+        Connection writeConnection = null;
+        try {
+            writeConnection = databaseService.getForUpdateTask(contextId);
+        } catch (OXException e) {
+            throw e;
+        }
+
+        // Perform the task
+        PreparedStatement statement = null;
+        try {
+            String dropTokensSQL = "UPDATE oauthAccounts SET accessToken = ? AND accessSecret = ? WHERE cid = ? AND serviceId = ?";
+            statement = writeConnection.prepareStatement(dropTokensSQL);
+
+            int parameterIndex = 1;
+            statement.setString(parameterIndex++, "");
+            statement.setString(parameterIndex++, "");
+            statement.setInt(parameterIndex++, contextId);
+            statement.setString(parameterIndex++, API.DROPBOX.getFullName());
+
+            statement.execute();
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(statement);
+            databaseService.backForUpdateTask(writeConnection);
+        }
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.oauth.OAuthServiceMetaData#getAPI()
+     * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
      */
     @Override
-    public API getAPI() {
-        return API.DROPBOX;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData#getPropertyId()
-     */
-    @Override
-    protected String getPropertyId() {
-        return "dropbox";
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#needsRequestToken()
-     */
-    @Override
-    public boolean needsRequestToken() {
-        return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData#getExtraPropertyNames()
-     */
-    @Override
-    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
-        Collection<OAuthPropertyID> propertyNames = new ArrayList<OAuthPropertyID>(2);
-        Collections.addAll(propertyNames, OAuthPropertyID.redirectUrl, OAuthPropertyID.productName);
-        return propertyNames;
+    public String[] getDependencies() {
+        return new String[] { OAuthCreateTableTask2.class.getName() };
     }
 }

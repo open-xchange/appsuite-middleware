@@ -49,42 +49,40 @@
 
 package com.openexchange.oauth.dropbox;
 
-import org.apache.http.client.HttpClient;
-import org.apache.http.conn.scheme.Scheme;
-import com.dropbox.client2.session.AccessTokenPair;
-import com.dropbox.client2.session.AppKeyPair;
-import com.dropbox.client2.session.WebAuthSession;
-
-
 /**
- * {@link TrustAllWebAuthSession}
+ * {@link OAuthToken}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class TrustAllWebAuthSession extends WebAuthSession {
+public class OAuthToken {
 
-    private static final Scheme SCHEME_HTTPS = new Scheme("https", EasySSLSocketFactory.getInstance(), 443);
-
-    /**
-     * Initializes a new {@link TrustAllWebAuthSession}.
-     */
-    public TrustAllWebAuthSession(AppKeyPair appKeyPair, AccessType type) {
-        super(appKeyPair, type);
-    }
+    private final String key;
+    private final String secret;
 
     /**
-     * Initializes a new {@link TrustAllWebAuthSession}.
+     * Initialises a new {@link OAuthToken}.
      */
-    public TrustAllWebAuthSession(AppKeyPair appKeyPair, AccessType type, AccessTokenPair accessTokenPair) {
-        super(appKeyPair, type, accessTokenPair);
+    public OAuthToken(String key, String secret) {
+        super();
+        this.key = key;
+        this.secret = secret;
     }
 
-    @Override
-    public synchronized HttpClient getHttpClient() {
-        // Obtain HttpClient from super class, but modify its HTTPS connector scheme
-        final HttpClient httpClient = super.getHttpClient();
-        httpClient.getConnectionManager().getSchemeRegistry().register(SCHEME_HTTPS);
-        return httpClient;
+    /**
+     * Gets the key
+     *
+     * @return The key
+     */
+    public String getKey() {
+        return key;
     }
 
+    /**
+     * Gets the secret
+     *
+     * @return The secret
+     */
+    public String getSecret() {
+        return secret;
+    }
 }

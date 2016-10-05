@@ -49,14 +49,10 @@
 
 package com.openexchange.file.storage.boxcom.access;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import org.scribe.model.Token;
 import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxAPIException;
-import com.box.sdk.BoxAPIRequest;
-import com.box.sdk.BoxAPIResponse;
 import com.box.sdk.BoxUser;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
@@ -103,28 +99,6 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
             verifyAccount(boxOAuthAccount);
             setOAuthAccount(boxOAuthAccount);
             createOAuthClient(boxOAuthAccount);
-        }
-    }
-
-    @Override
-    public void revoke() throws OXException {
-        synchronized (this) {
-            // No Java API call
-            // More information here: https://docs.box.com/reference#revoke
-            try {
-                URL url = new URL("https://api.box.com/oauth2/revoke?client_id=" + getOAuthAccount().getMetaData().getId() + "&client_secret" + getOAuthAccount().getMetaData().getAPISecret(getSession()) + "&token=" + getOAuthAccount().getToken());
-                BoxAPIRequest request = new BoxAPIRequest((BoxAPIConnection) getOAuthClient().client, url, "GET");
-                BoxAPIResponse apiResponse = request.send();
-
-                // The Box SDK already checks for status code 200, so no need to check again
-                apiResponse.getResponseCode();
-
-                return;
-            } catch (BoxAPIException e) {
-                throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
-            } catch (IOException e) {
-                throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            }
         }
     }
 

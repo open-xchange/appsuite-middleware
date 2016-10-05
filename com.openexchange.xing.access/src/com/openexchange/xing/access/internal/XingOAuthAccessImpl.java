@@ -148,11 +148,6 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
     }
 
     @Override
-    public void revoke() throws OXException {
-        // No revoke
-    }
-
-    @Override
     public OAuthAccess ensureNotExpired() throws OXException {
         return this;
     }

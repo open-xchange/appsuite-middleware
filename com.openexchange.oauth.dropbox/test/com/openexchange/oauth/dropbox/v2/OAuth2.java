@@ -47,38 +47,59 @@
  *
  */
 
-package com.openexchange.oauth.dropbox;
+package com.openexchange.oauth.dropbox.v2;
 
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import javax.net.ssl.X509TrustManager;
+import java.io.IOException;
+import java.util.Scanner;
+import com.dropbox.core.DbxAppInfo;
+import com.dropbox.core.DbxAuthFinish;
+import com.dropbox.core.DbxException;
+import com.dropbox.core.DbxRequestConfig;
+import com.dropbox.core.DbxWebAuth;
+import com.dropbox.core.DbxWebAuth.Request;
+import com.dropbox.core.v2.DbxClientV2;
+import com.dropbox.core.v2.users.FullAccount;
 
 /**
- * The No-Op trust manager.
+ * {@link OAuth2} tests the OAuth 2.0 authorisation workflow
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class TrivialTrustManager implements X509TrustManager {
+public class OAuth2 {
 
     /**
-     * Initializes a new {@link TrivialTrustManager}.
+     * Simple OAuth 2.0 test with V2 API
      */
-    public TrivialTrustManager() {
-        super();
-    }
+    public static void main(String[] args) throws IOException, DbxException {
+        if (args.length == 0) {
+            System.err.println("You must specify the API key and API secret");
+            System.exit(-1);
+        }
+        String apiKey = args[0];
+        String apiSecret = args[1];
 
-    @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        // No-op
-    }
+        // Setup
+        DbxAppInfo appInfo = new DbxAppInfo(apiKey, apiSecret);
+        DbxRequestConfig config = new DbxRequestConfig("Deucalion");
 
-    @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        // No-op
-    }
+        // Request authorisation
+        DbxWebAuth webAuth = new DbxWebAuth(config, appInfo);
+        String authorize = webAuth.authorize(Request.newBuilder().withNoRedirect().build());
+        System.out.println(authorize);
 
-    @Override
-    public X509Certificate[] getAcceptedIssuers() {
-        return new X509Certificate[0];
+        // Wait for the authorisation code
+        Scanner in = new Scanner(System.in);
+        System.out.println("Enter the authorisation code:");
+        String authCode = in.nextLine();
+        in.close();
+
+        // Finish authorisation
+        DbxAuthFinish finish = webAuth.finishFromCode(authCode);
+        String accessToken = finish.getAccessToken();
+        DbxClientV2 client = new DbxClientV2(config, accessToken);
+
+        // Perform a simple API call
+        FullAccount currentAccount = client.users().getCurrentAccount();
+        System.out.println(currentAccount.getEmail());
     }
 }
