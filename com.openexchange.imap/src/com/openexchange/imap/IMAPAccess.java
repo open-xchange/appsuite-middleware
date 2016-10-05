@@ -423,7 +423,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 LOG.error("Error while closing IMAP message storage: {}", e.getMessage()).toString(), e));
             } finally {
                 messageStorage = null;
-        
+
             }
         }
         if (logicTools != null) {
@@ -663,6 +663,10 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     throw oxe;
                 } else if (StarttlsRequiredException.class.isInstance(cause)) {
                     OXException oxe = MailExceptionCode.NON_SECURE_DENIED.create(config.getServer());
+                    warnings.add(oxe);
+                    throw oxe;
+                } else if (SSLHandshakeException.class.isInstance(cause)) {
+                    OXException oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(config.getServer(), e);
                     warnings.add(oxe);
                     throw oxe;
                 }
@@ -1404,7 +1408,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             /*
              * Specify SSL cipher suites
              */
-            
+
             if (Strings.isNotEmpty(cipherSuites)) {
                 imapProps.put("mail.imap.ssl.ciphersuites", cipherSuites);
             } else {
