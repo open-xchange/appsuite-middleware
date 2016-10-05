@@ -49,19 +49,37 @@
 
 package com.openexchange.chronos.impl;
 
+import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import java.util.Date;
+import java.util.List;
+import java.util.TimeZone;
+import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
+import org.dmfs.rfc5545.recur.RecurrenceRule;
+import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarService;
+import com.openexchange.chronos.service.SortOptions;
+import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.type.PublicType;
+import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.java.Strings;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ColumnFieldOperand;
 
 /**
  * {@link CalendarService}
@@ -146,6 +164,141 @@ public class Check {
         }
     }
 
+    /**
+     * Checks that all specified mandatory fields are <i>set</i> and not <code>null</code> in the event.
+     *
+     * @param event The event to check
+     * @param fields The mandatory fields
+     * @throws OXException {@link CalendarExceptionCodes#MANDATORY_FIELD}
+     */
+    public static void mandatoryFields(Event event, EventField... fields) throws OXException {
+        if (null != fields) {
+            for (EventField field : fields) {
+                Mapping<? extends Object, Event> mapping = EventMapper.getInstance().get(field);
+                if (false == mapping.isSet(event) || null == mapping.get(event)) {
+                    String readableName = String.valueOf(field); //TODO i18n
+                    throw CalendarExceptionCodes.MANDATORY_FIELD.create(readableName, String.valueOf(field));
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks that the start- and enddate properties are set in an event, and ensures that the end date does is not before the start date.
+     *
+     * @param event The event to check
+     * @see Check#mandatoryFields(Event, EventField...)
+     * @throws OXException {@link CalendarExceptionCodes#MANDATORY_FIELD}, {@link CalendarExceptionCodes#END_BEFORE_START}
+     */
+    public static void startAndEndDate(Event event) throws OXException {
+        mandatoryFields(event, EventField.START_DATE, EventField.END_DATE);
+        if (event.getStartDate().after(event.getEndDate())) {
+            throw CalendarExceptionCodes.END_BEFORE_START.create(L(event.getStartDate().getTime()), L(event.getEndDate().getTime()));
+        }
+    }
+
+    /**
+     * Checks that the classification is supported based on the given folder's type, if the event contains a classification different
+     * from {@link Classification#PUBLIC}.
+     *
+     * @param event The event to check
+     * @param folder The target folder for the event
+     * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_CLASSIFICATION}
+     */
+    public static void classificationIsValid(Event event, UserizedFolder folder) throws OXException {
+        if (event.containsClassification() && false == Classification.PUBLIC.equals(event.getClassification()) && PublicType.getInstance().equals(folder.getType())) {
+            throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION.create(String.valueOf(event.getClassification()), I(i(folder)), PublicType.getInstance());
+        }
+    }
+
+    /**
+     * Checks an event's recurrence rule.
+     *
+     * @param event The event to check
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    public static void recurrenceRule(Event event) throws OXException {
+        if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
+            try {
+                new RecurrenceRule(event.getRecurrenceRule());
+            } catch (InvalidRecurrenceRuleException e) {
+                throw CalendarExceptionCodes.INVALID_RRULE.create(e, event.getRecurrenceRule());
+            }
+        }
+    }
+
+    /**
+     * Ensures that all recurrence identifiers are valid for a specific recurring event series, i.e. the targeted occurrences
+     * are actually part of the series.
+     *
+     * @param seriesMaster The series master event providing the recurrence information
+     * @param recurrenceID The recurrence identifier
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
+     */
+    public static void recurrenceIdsExist(Event seriesMaster, List<Date> recurrenceIDs) throws OXException {
+        if (null != recurrenceIDs) {
+            for (Date recurrenceID : recurrenceIDs) {
+                recurrenceIdExists(seriesMaster, recurrenceID);
+            }
+        }
+    }
+
+    /**
+     * Ensures that a specific recurrence identifier is valid for a specific recurring event series, i.e. the targeted occurrence
+     * is actually part of the series.
+     *
+     * @param seriesMaster The series master event providing the recurrence information
+     * @param recurrenceID The recurrence identifier
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
+     */
+    public static void recurrenceIdExists(Event seriesMaster, Date recurrenceID) throws OXException {
+        RecurrenceRule rule;
+        try {
+            rule = new RecurrenceRule(seriesMaster.getRecurrenceRule());
+        } catch (InvalidRecurrenceRuleException e) {
+            throw CalendarExceptionCodes.INVALID_RRULE.create(e, seriesMaster.getRecurrenceRule());
+        }
+        DateTime start;
+        if (seriesMaster.isAllDay()) {
+            start = new DateTime(seriesMaster.getStartDate().getTime()).toAllDay();
+        } else {
+            start = new DateTime(TimeZone.getTimeZone(seriesMaster.getStartTimeZone()), seriesMaster.getStartDate().getTime());
+        }
+        RecurrenceRuleIterator iterator = rule.iterator(start);
+        iterator.fastForward(recurrenceID.getTime());
+        if (false == iterator.hasNext() || recurrenceID.getTime() != iterator.nextMillis()) {
+            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(L(recurrenceID.getTime()), seriesMaster.getRecurrenceRule());
+        }
+    }
+
+    /**
+     * Checks that the supplied event's unique identifier (UID) is not already used for another event within the same context.
+     *
+     * @param storage A reference to the calendar storage
+     * @param event The event to check
+     * @throws OXException {@link CalendarExceptionCodes#UID_CONFLICT}
+     */
+    public static void uidIsUnique(CalendarStorage storage, Event event) throws OXException {
+        String uid = event.getUid();
+        if (Strings.isEmpty(uid)) {
+            return;
+        }
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
+            .addSearchTerm(getSearchTerm(EventField.UID, SingleOperation.EQUALS, uid))
+            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
+                .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL))
+                .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
+            )
+        ;
+        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, new SortOptions().setLimits(0, 1), new EventField[] { EventField.ID });
+        if (0 < events.size()) {
+            throw CalendarExceptionCodes.UID_CONFLICT.create(uid, I(events.get(0).getId()));
+        }
+    }
+
+    /**
+     * Initializes a new {@link Check}.
+     */
     private Check() {
         super();
     }

@@ -44,6 +44,8 @@ Import-Package: com.openexchange.chronos,
  com.openexchange.tools.session,
  com.openexchange.user,
  javax.mail.internet,
+ org.dmfs.rfc5545,
+ org.dmfs.rfc5545.recur,
  org.osgi.framework,
  org.osgi.service.event,
  org.slf4j

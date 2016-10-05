@@ -50,8 +50,13 @@
 package com.openexchange.chronos.exception;
 
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.CONCURRENT_MODIFICATION_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.END_BEFORE_START_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_NOT_FOUND_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_RRULE_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.MANDATORY_FIELD_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_PERMISSION_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.UID_CONFLICT_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_MSG;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -101,6 +106,36 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Concurrent modification [id %1$d, client timestamp %2$d, actual timestamp %3$d]</li>
      */
     CONCURRENT_MODIFICATION("Concurrent modification [id %1$d, client timestamp %2$d, actual timestamp %3$d]", CONCURRENT_MODIFICATION_MSG, Category.CATEGORY_CONFLICT, 4120),
+    /**
+     * <li>The event could not be created due to another conflicting event with the same unique identifier.</li>
+     * <li>UID conflict [uid %1$s, conflicting id %2$d]</li>
+     */
+    UID_CONFLICT("UID conflict [uid %1$s, conflicting id %2$d]", UID_CONFLICT_MSG, Category.CATEGORY_CONFLICT, 4090),
+    /**
+     * <li>The field \"%1$s\" is mandatory. Please supply a valid value and try again.</li>
+     * <li>Mandatory field missing [field %1$s]</li>
+     */
+    MANDATORY_FIELD("Mandatory field missing [field %1$s]", MANDATORY_FIELD_MSG, Category.CATEGORY_USER_INPUT, 4220),
+    /**
+     * <li>The end date lies before the start date. Please correct the event times and try again.</li>
+     * <li>End before start date [start %1$d, end %2$d]</li>
+     */
+    END_BEFORE_START("End before start date [start %1$d, end %2$d]", END_BEFORE_START_MSG, Category.CATEGORY_USER_INPUT, 4221),
+    /**
+     * <li>Events in non-personal folders must not be classified as \"private\" or \"confidential\".</li>
+     * <li>Unsupported classification [classification %1$s, folder %2$d, type %3$s]</li>
+     */
+    UNSUPPORTED_CLASSIFICATION("Unsupported classification [classification %1$s, folder %2$d, type %3$s]", UNSUPPORTED_CLASSIFICATION_MSG, Category.CATEGORY_USER_INPUT, 4222),
+    /**
+     * <li>The supplied recurrence rule is invalid. Please correct the rule and try again.</li>
+     * <li>Invalid recurrence rule [rule %1$s]</li>
+     */
+    INVALID_RRULE("Invalid recurrence rule [rule %1$s]", INVALID_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4223),
+    /**
+     * <li>The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.</li>
+     * <li>Invalid recurrence id [id %1$d, rule %2$s]</li>
+     */
+    INVALID_RECURRENCE_ID("Invalid recurrence id [id %1$d, rule %2$s]", INVALID_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4224),
 
     ;
 

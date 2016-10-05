@@ -65,6 +65,18 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String CONCURRENT_MODIFICATION_MSG = "The operation could not be completed due to a concurrent modification. Please reload the data and try again.";
 
+    public static final String UID_CONFLICT_MSG = "The event could not be created due to another conflicting event with the same unique identifier.";
+
+    public static final String MANDATORY_FIELD_MSG = "The field \"%1$s\" is mandatory. Please supply a valid value and try again.";
+
+    public static final String END_BEFORE_START_MSG = "The end date lies before the start date. Please correct the event times and try again.";
+
+    public static final String UNSUPPORTED_CLASSIFICATION_MSG = "Events in non-personal folders must not be classified as \"private\" or \"confidential\".";
+
+    public static final String INVALID_RRULE_MSG = "The supplied recurrence rule is invalid. Please correct the rule and try again.";
+
+    public static final String INVALID_RECURRENCE_ID_MSG = "The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.";
+
     /**
      * Initializes a new {@link CalendarExceptionMessages}.
      */

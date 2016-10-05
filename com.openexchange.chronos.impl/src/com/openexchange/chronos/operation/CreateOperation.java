@@ -50,7 +50,6 @@
 package com.openexchange.chronos.operation;
 
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
-import static com.openexchange.chronos.impl.Utils.getSearchTerm;
 import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
@@ -58,20 +57,22 @@ import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import java.util.List;
 import java.util.UUID;
 import com.openexchange.chronos.Alarm;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.EventStatus;
+import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.impl.AttendeeHelper;
+import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.java.Strings;
-import com.openexchange.search.CompositeSearchTerm;
-import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
-import com.openexchange.search.SingleSearchTerm.SingleOperation;
-import com.openexchange.search.internal.operands.ColumnFieldOperand;
 
 /**
  * {@link CreateOperation}
@@ -108,7 +109,7 @@ public class CreateOperation extends AbstractOperation {
      * Performs the creation of an event.
      *
      * @param event The event to create
-     * @param alarms The alarms to insert
+     * @param alarms The alarms to insert for the current calendar user
      * @return The result
      */
     public CalendarResultImpl perform(Event event, List<Alarm> alarms) throws OXException {
@@ -116,59 +117,87 @@ public class CreateOperation extends AbstractOperation {
          * check current session user's permissions
          */
         requireCalendarPermission(folder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
-        Consistency.setCreated(timestamp, event, calendarUser.getId());
-        Consistency.setModified(timestamp, event, session.getUser().getId());
-        if (null == event.getOrganizer()) {
-            Consistency.setOrganizer(event, calendarUser, session.getUser());
-        }
-        Consistency.setTimeZone(event, calendarUser);
-        Consistency.adjustAllDayDates(event);
-        event.setSequence(0);
-        if (Strings.isNotEmpty(event.getUid())) {
-            if (0 < resolveUid(event.getUid())) {
-                throw OXException.general("Duplicate uid"); //TODO
-            }
-        } else {
-            event.setUid(UUID.randomUUID().toString());
-        }
-        event.setPublicFolderId(PublicType.getInstance().equals(folder.getType()) ? i(folder) : 0);
         /*
-         * assign new object identifier
+         * prepare event & attendee data for insert
          */
-        int objectID = storage.nextObjectID();
-        event.setId(objectID);
-        if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
-            event.setSeriesId(objectID);
-        }
+        Event newEvent = prepareEvent(event);
+        List<Attendee> newAttendees = prepareAttendees(event.getAttendees());
         /*
          * insert event, attendees & alarms of user
          */
-        storage.getEventStorage().insertEvent(event);
-        storage.getAttendeeStorage().insertAttendees(objectID, new AttendeeHelper(session, folder, null, event.getAttendees()).getAttendeesToInsert());
+        storage.getEventStorage().insertEvent(newEvent);
+        storage.getAttendeeStorage().insertAttendees(newEvent.getId(), newAttendees);
         if (null != alarms && 0 < alarms.size()) {
-            storage.getAlarmStorage().insertAlarms(objectID, calendarUser.getId(), alarms);
+            storage.getAlarmStorage().insertAlarms(newEvent.getId(), calendarUser.getId(), alarms);
         }
-        result.addCreation(new CreateResultImpl(loadEventData(objectID)));
+        result.addCreation(new CreateResultImpl(loadEventData(newEvent.getId())));
         return result;
     }
 
-    private int resolveUid(String uid) throws OXException {
-        /*
-         * construct search term
-         */
-        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND)
-            .addSearchTerm(getSearchTerm(EventField.UID, SingleOperation.EQUALS, uid))
-            .addSearchTerm(new CompositeSearchTerm(CompositeOperation.OR)
-                .addSearchTerm(getSearchTerm(EventField.SERIES_ID, SingleOperation.ISNULL))
-                .addSearchTerm(getSearchTerm(EventField.ID, SingleOperation.EQUALS, new ColumnFieldOperand<EventField>(EventField.SERIES_ID)))
-            )
-        ;
-        /*
-         * search for an event matching the UID
-         */
-        List<Event> events = storage.getEventStorage().searchEvents(searchTerm, null, new EventField[] { EventField.ID });
-        return 0 < events.size() ? events.get(0).getId() : 0;
+    private List<Attendee> prepareAttendees(List<Attendee> attendeeData) throws OXException {
+        return new AttendeeHelper(session, folder, null, attendeeData).getAttendeesToInsert();
     }
 
+    private Event prepareEvent(Event eventData) throws OXException {
+        Event event = new Event();
+        /*
+         * identifiers
+         */
+        event.setId(storage.nextObjectID());
+        event.setPublicFolderId(PublicType.getInstance().equals(folder.getType()) ? i(folder) : 0);
+        event.setSequence(0);
+        if (false == eventData.containsUid() || Strings.isEmpty(eventData.getUid())) {
+            event.setUid(UUID.randomUUID().toString());
+        } else {
+            Check.uidIsUnique(storage, eventData);
+            event.setUid(eventData.getUid());
+        }
+        /*
+         * creation/modification metadata, organizer
+         */
+        Consistency.setCreated(timestamp, event, calendarUser.getId());
+        Consistency.setModified(timestamp, event, session.getUser().getId());
+        if (eventData.containsOrganizer() && null != eventData.getOrganizer()) {
+            //TODO: check client-supplied organizer?
+            event.setOrganizer(eventData.getOrganizer());
+        } else {
+            Consistency.setOrganizer(event, calendarUser, session.getUser());
+        }
+        /*
+         * date/time related properties
+         */
+        Check.startAndEndDate(eventData);
+        EventMapper.getInstance().copy(eventData, event, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
+        Consistency.adjustAllDayDates(event);
+        Consistency.setTimeZone(event, calendarUser);
+        /*
+         * classification, status, transparency
+         */
+        if (eventData.containsClassification() && null != eventData.getClassification()) {
+            Check.classificationIsValid(eventData, folder);
+            event.setClassification(event.getClassification());
+        } else {
+            event.setClassification(Classification.PUBLIC);
+        }
+        event.setStatus(eventData.containsStatus() && null != eventData.getStatus() ? eventData.getStatus() : EventStatus.CONFIRMED);
+        event.setTransp(eventData.containsTransp() && null != eventData.getTransp() ? eventData.getTransp() : TimeTransparency.OPAQUE);
+        /*
+         * recurrence related fields
+         */
+        if (eventData.containsRecurrenceRule() && null != eventData.getRecurrenceRule()) {
+            Check.recurrenceRule(eventData);
+            event.setRecurrenceRule(eventData.getRecurrenceRule());
+            event.setSeriesId(event.getId());
+            if (eventData.containsDeleteExceptionDates()) {
+                Check.recurrenceIdsExist(eventData, eventData.getDeleteExceptionDates());
+                event.setDeleteExceptionDates(eventData.getDeleteExceptionDates());
+            }
+        }
+        /*
+         * copy over further (unchecked) event fields
+         */
+        EventMapper.getInstance().copy(eventData, event, EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.CATEGORIES, EventField.COLOR);
+        return event;
+    }
 
 }
