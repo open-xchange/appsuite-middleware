@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.cluster.lock.ClusterTask;
@@ -61,7 +60,6 @@ import com.openexchange.cluster.lock.policies.RetryPolicy;
 import com.openexchange.cluster.lock.policies.RunOnceRetryPolicy;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -74,10 +72,11 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterLockServiceDatabaseImpl.class);
 
-    private static final String ACQUIRE_LOCK = "INSERT INTO user_attribute (cid, id, name, value, uuid) SELECT ?, ?, ?, ?, ? FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM user_attribute WHERE cid=? AND id=? AND name=?)";
-    private static final String GET_TIMESTAMP = "SELECT value FROM user_attribute WHERE cid=? AND id=? AND name=?";
-    private static final String UPDATE_X_TIMESTAMP = "UPDATE user_attribute SET value=? WHERE cid=? AND id=? AND name=? AND value=?";
-    private static final String DELETE_TIMESTAMP = "DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?";
+    // On duplicate key simply retain the same values
+    private static final String ACQUIRE_LOCK = "INSERT INTO clusterLock (cid, user, name, timestamp) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `cid` = `cid` AND `user` = `user` AND `name` = `name` AND `timestamp` = `timestamp`";
+    private static final String GET_TIMESTAMP = "SELECT timestamp FROM clusterLock WHERE cid=? AND user=? AND name=?";
+    private static final String UPDATE_X_TIMESTAMP = "UPDATE clusterLock SET timestamp=? WHERE cid=? AND user=? AND name=? AND timestamp=?";
+    private static final String DELETE_TIMESTAMP = "DELETE FROM clusterLock WHERE cid=? AND user=? AND name=?";
 
     /**
      * Initialises a new {@link ClusterLockServiceDatabaseImpl}.
@@ -159,7 +158,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
      */
     private class RefreshLockTask<T> implements Runnable {
 
-        private static final String UPDATE_TIMESTAMP = "UPDATE user_attribute SET value=? WHERE cid=? AND id=? AND name=?";
+        private static final String UPDATE_TIMESTAMP = "UPDATE clusterLock SET timestamp=? WHERE cid=? AND user=? AND name=?";
         private final ClusterTask<T> clusterTask;
 
         /**
@@ -230,8 +229,7 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
             statement.setInt(index++, contextId);
             statement.setInt(index++, userId);
             statement.setString(index++, clusterTask.getTaskName());
-            statement.setString(index++, Long.toString(now));
-            statement.setBytes(index++, UUIDs.toByteArray(UUID.randomUUID()));
+            statement.setLong(index++, now);
             statement.setInt(index++, contextId);
             statement.setInt(index++, userId);
             statement.setString(index++, clusterTask.getTaskName());
@@ -284,11 +282,11 @@ public class ClusterLockServiceDatabaseImpl extends AbstractClusterLockServiceIm
             statement = connection.prepareStatement(UPDATE_X_TIMESTAMP);
 
             int index = 1;
-            statement.setString(index++, Long.toString(timeNow));
+            statement.setLong(index++, timeNow);
             statement.setInt(index++, clusterTask.getContextId());
             statement.setInt(index++, clusterTask.getUserId());
             statement.setString(index++, clusterTask.getTaskName());
-            statement.setString(index++, Long.toString(timeThen));
+            statement.setLong(index++, timeThen);
 
             return statement.executeUpdate() > 0;
         } finally {
