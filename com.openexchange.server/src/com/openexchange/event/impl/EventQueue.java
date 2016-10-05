@@ -51,6 +51,7 @@ package com.openexchange.event.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
@@ -73,6 +74,9 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class EventQueue {
+
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventQueue.class);
 
     private static final class EventQueueTimerTask implements Runnable {
 
@@ -150,39 +154,37 @@ public final class EventQueue {
 
     private static volatile boolean isEnabled;
 
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventQueue.class);
-
     /*
      * +++++++++++++++ Appointment Event Lists +++++++++++++++
      */
 
-    private static final List<AppointmentEventInterface> appointmentEventList = new ArrayList<AppointmentEventInterface>(4);
+    private static final List<AppointmentEventInterface> appointmentEventList = new CopyOnWriteArrayList<AppointmentEventInterface>();
 
-    private static final List<AppointmentEventInterface> noDelayAppointmentEventList = new ArrayList<AppointmentEventInterface>(4);
+    private static final List<AppointmentEventInterface> noDelayAppointmentEventList = new CopyOnWriteArrayList<AppointmentEventInterface>();
 
     /*
      * +++++++++++++++ Task Event Lists +++++++++++++++
      */
 
-    private static final List<TaskEventInterface> taskEventList = new ArrayList<TaskEventInterface>(4);
+    private static final List<TaskEventInterface> taskEventList = new CopyOnWriteArrayList<TaskEventInterface>();
 
-    private static final List<TaskEventInterface> noDelayTaskEventList = new ArrayList<TaskEventInterface>(4);
+    private static final List<TaskEventInterface> noDelayTaskEventList = new CopyOnWriteArrayList<TaskEventInterface>();
 
     /*
      * +++++++++++++++ Contact Event Lists +++++++++++++++
      */
 
-    private static final List<ContactEventInterface> contactEventList = new ArrayList<ContactEventInterface>(4);
+    private static final List<ContactEventInterface> contactEventList = new CopyOnWriteArrayList<ContactEventInterface>();
 
-    private static final List<ContactEventInterface> noDelayContactEventList = new ArrayList<ContactEventInterface>(4);
+    private static final List<ContactEventInterface> noDelayContactEventList = new CopyOnWriteArrayList<ContactEventInterface>();
 
     /*
      * +++++++++++++++ Folder Event Lists +++++++++++++++
      */
 
-    private static final List<FolderEventInterface> folderEventList = new ArrayList<FolderEventInterface>(4);
+    private static final List<FolderEventInterface> folderEventList = new CopyOnWriteArrayList<FolderEventInterface>();
 
-    private static final List<FolderEventInterface> noDelayFolderEventList = new ArrayList<FolderEventInterface>(4);
+    private static final List<FolderEventInterface> noDelayFolderEventList = new CopyOnWriteArrayList<FolderEventInterface>();
 
     /*
      * +++++++++++++++ Infostore Event Lists +++++++++++++++
@@ -620,15 +622,6 @@ public final class EventQueue {
         }
     }
 
-// FIXME: remove
-//    public static void addInfostoreEvent(final InfostoreEventInterface event) {
-//        if (NoDelayEventInterface.class.isInstance(event)) {
-//            noDelayInfostoreEventList.add(event);
-//        } else {
-//            infostoreEventList.add(event);
-//        }
-//    }
-
     public static void removeAppointmentEvent(final AppointmentEventInterface event) {
         if (NoDelayEventInterface.class.isInstance(event)) {
             noDelayAppointmentEventList.remove(event);
@@ -654,21 +647,9 @@ public final class EventQueue {
     }
 
     public static void removeFolderEvent(final FolderEventInterface event) {
-        if (NoDelayEventInterface.class.isInstance(event)) {
-            noDelayFolderEventList.remove(event);
-        } else {
-            folderEventList.remove(event);
-        }
+        List<FolderEventInterface> toRemoveFrom = NoDelayEventInterface.class.isInstance(event) ? noDelayFolderEventList : folderEventList;
+        toRemoveFrom.remove(event);
     }
-
-// FIXME: remove
-//    public static void removeInfostoreEvent(final InfostoreEventInterface event) {
-//        if (NoDelayEventInterface.class.isInstance(event)) {
-//            noDelayInfostoreEventList.remove(event);
-//        } else {
-//            infostoreEventList.remove(event);
-//        }
-//    }
 
     public static void addModernListener(final AppointmentEventInterface listener) {
         checkEventDispatcher();
@@ -735,6 +716,5 @@ public final class EventQueue {
         taskEventList.clear();
         contactEventList.clear();
         folderEventList.clear();
-//        infostoreEventList.clear();
     }
 }
