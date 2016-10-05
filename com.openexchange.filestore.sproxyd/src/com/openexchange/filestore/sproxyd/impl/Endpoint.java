@@ -61,24 +61,19 @@ import com.openexchange.java.util.UUIDs;
 public class Endpoint {
 
     private final String baseUrl;
-
-    private final int contextId;
-
-    private final int userId;
+    private final String prefix;
 
     /**
      * Initializes a new {@link Endpoint}.
      *
      * @param baseUrl The base URL including the namespace for OX files, e.g. <code>http://ring12.example.com/proxy/ox/</code>;
      *                must always end with a trailing slash
-     * @param contextId The context ID
-     * @param userId The user ID
+     * @param prefix The prefix
      */
-    public Endpoint(String baseUrl, int contextId, int userId) {
+    public Endpoint(String baseUrl, String prefix) {
         super();
         this.baseUrl = baseUrl;
-        this.contextId = contextId;
-        this.userId = userId;
+        this.prefix = prefix;
     }
 
     /**
@@ -87,7 +82,7 @@ public class Endpoint {
      * @return The URL; always with trailing slash
      */
     public String getFullUrl() {
-        return baseUrl + contextId + '/' + userId + '/';
+        return baseUrl + prefix + '/';
     }
 
     /**
@@ -118,8 +113,7 @@ public class Endpoint {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((baseUrl == null) ? 0 : baseUrl.hashCode());
-        result = prime * result + contextId;
-        result = prime * result + userId;
+        result = prime * result + ((prefix == null) ? 0 : prefix.hashCode());
         return result;
     }
 
@@ -142,10 +136,11 @@ public class Endpoint {
         } else if (!baseUrl.equals(other.baseUrl)) {
             return false;
         }
-        if (contextId != other.contextId) {
-            return false;
-        }
-        if (userId != other.userId) {
+        if (prefix == null) {
+            if (other.prefix != null) {
+                return false;
+            }
+        } else if (!prefix.equals(other.prefix)) {
             return false;
         }
         return true;
