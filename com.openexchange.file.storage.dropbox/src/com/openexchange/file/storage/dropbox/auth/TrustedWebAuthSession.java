@@ -47,80 +47,52 @@
  *
  */
 
-package com.openexchange.oauth.dropbox;
+package com.openexchange.file.storage.dropbox.auth;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import org.scribe.builder.api.Api;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
-import com.openexchange.server.ServiceLookup;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.StrictHostnameVerifier;
+import com.dropbox.client2.session.AccessTokenPair;
+import com.dropbox.client2.session.AppKeyPair;
+import com.dropbox.client2.session.WebAuthSession;
+import com.openexchange.file.storage.dropbox.DropboxServices;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
+
 
 /**
- * {@link DropboxOAuthServiceMetaData}
+ * {@link TrustedWebAuthSession}
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
+public final class TrustedWebAuthSession extends WebAuthSession {
 
     /**
-     * Initialises a new {@link DropboxOAuthServiceMetaData}.
+     * Initializes a new {@link TrustedWebAuthSession}.
      */
-    public DropboxOAuthServiceMetaData(ServiceLookup serviceLookup) {
-        super(serviceLookup, API.DROPBOX);
+    public TrustedWebAuthSession(AppKeyPair appKeyPair, AccessType type) {
+        super(appKeyPair, type);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.ScribeAware#getScribeService()
+    /**
+     * Initializes a new {@link TrustedWebAuthSession}.
      */
-    @Override
-    public Class<? extends Api> getScribeService() {
-        return DropboxApi2.class;
+    public TrustedWebAuthSession(AppKeyPair appKeyPair, AccessType type, AccessTokenPair accessTokenPair) {
+        super(appKeyPair, type, accessTokenPair);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthServiceMetaData#getAPI()
-     */
     @Override
-    public API getAPI() {
-        return API.DROPBOX;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData#getPropertyId()
-     */
-    @Override
-    protected String getPropertyId() {
-        return "dropbox";
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#needsRequestToken()
-     */
-    @Override
-    public boolean needsRequestToken() {
-        return false;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData#getExtraPropertyNames()
-     */
-    @Override
-    protected Collection<OAuthPropertyID> getExtraPropertyNames() {
-        Collection<OAuthPropertyID> propertyNames = new ArrayList<OAuthPropertyID>(2);
-        Collections.addAll(propertyNames, OAuthPropertyID.redirectUrl, OAuthPropertyID.productName);
-        return propertyNames;
+    public synchronized HttpClient getHttpClient() {
+        final HttpClient httpClient = super.getHttpClient();
+        javax.net.ssl.SSLSocketFactory f = SSLSocketFactoryProvider.getDefault();
+        SSLConfigurationService sslConfig = DropboxServices.getService(SSLConfigurationService.class);
+        final ClientConnectionManager connectionManager = httpClient.getConnectionManager();
+        final SchemeRegistry schemeRegistry = connectionManager.getSchemeRegistry();
+        schemeRegistry.register(new Scheme("https", new SSLSocketFactory(f, sslConfig.getSupportedCipherSuites(), sslConfig.getSupportedProtocols(), new StrictHostnameVerifier()), 443));
+        return httpClient;
     }
 
 }

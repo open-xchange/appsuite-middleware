@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.client.osgi;
 
+import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
 import com.openexchange.rest.client.endpointpool.internal.EndpointManagerFactoryImpl;
@@ -72,7 +73,7 @@ public class RestClientActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TimerService.class };
+        return new Class<?>[] { TimerService.class, SSLConfigurationService.class };
     }
 
     @Override

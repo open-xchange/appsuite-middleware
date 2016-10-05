@@ -47,38 +47,49 @@
  *
  */
 
-package com.openexchange.xing.httpclient;
+package com.openexchange.oauth.dropbox;
 
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import javax.net.ssl.X509TrustManager;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.StrictHostnameVerifier;
+import com.dropbox.client2.session.AccessTokenPair;
+import com.dropbox.client2.session.AppKeyPair;
+import com.dropbox.client2.session.WebAuthSession;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.oauth.dropbox.osgi.DropboxOAuthServices;
+
 
 /**
- * The No-Op trust manager.
+ * {@link TrustedWebAuthSession}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class TrivialTrustManager implements X509TrustManager {
+public final class TrustedWebAuthSession extends WebAuthSession {
 
     /**
-     * Initializes a new {@link TrivialTrustManager}.
+     * Initializes a new {@link TrustedWebAuthSession}.
      */
-    public TrivialTrustManager() {
-        super();
+    public TrustedWebAuthSession(AppKeyPair appKeyPair, AccessType type) {
+        super(appKeyPair, type);
+    }
+
+    /**
+     * Initializes a new {@link TrustedWebAuthSession}.
+     */
+    public TrustedWebAuthSession(AppKeyPair appKeyPair, AccessType type, AccessTokenPair accessTokenPair) {
+        super(appKeyPair, type, accessTokenPair);
     }
 
     @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        // No-op
+    public synchronized HttpClient getHttpClient() {
+        // Obtain HttpClient from super class, but modify its HTTPS connector scheme
+        final HttpClient httpClient = super.getHttpClient();
+        javax.net.ssl.SSLSocketFactory f = SSLSocketFactoryProvider.getDefault();
+        SSLConfigurationService sslConfig = DropboxOAuthServices.getService(SSLConfigurationService.class);
+        httpClient.getConnectionManager().getSchemeRegistry().register(new Scheme("https", new SSLSocketFactory(f, sslConfig.getSupportedCipherSuites(), sslConfig.getSupportedProtocols(), new StrictHostnameVerifier()), 443));
+        return httpClient;
     }
 
-    @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        // No-op
-    }
-
-    @Override
-    public X509Certificate[] getAcceptedIssuers() {
-        return new X509Certificate[0];
-    }
 }

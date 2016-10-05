@@ -47,38 +47,70 @@
  *
  */
 
-package com.openexchange.rest.client.httpclient.ssl;
+package com.openexchange.oauth.dropbox.osgi;
 
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import javax.net.ssl.X509TrustManager;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * The No-Op trust manager.
+ * {@link DropboxOAuthServices}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8.3
  */
-public final class TrivialTrustManager implements X509TrustManager {
-
-    /**
-     * Initializes a new {@link TrivialTrustManager}.
-     */
-    public TrivialTrustManager() {
+public final class DropboxOAuthServices {
+    
+    private static final AtomicReference<ServiceLookup> SERVICES = new AtomicReference<ServiceLookup>();
+    
+    private DropboxOAuthServices() {
         super();
     }
 
-    @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        // No-op
+    /**
+     * Sets the {@link ServiceLookup} reference.
+     *
+     * @param services The reference
+     */
+    public static void setServices(final ServiceLookup services) {
+        SERVICES.set(services);
     }
 
-    @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-        // No-op
+    /**
+     * Gets the {@link ServiceLookup} reference.
+     *
+     * @return The reference
+     */
+    public static ServiceLookup getServices() {
+        return SERVICES.get();
     }
 
-    @Override
-    public X509Certificate[] getAcceptedIssuers() {
-        return new X509Certificate[0];
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("ServiceLookup is absent. Check bundle activator.");
+        }
+        return serviceLookup.getService(clazz);
     }
+
+    /**
+     * Gets the optional service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S getOptionalService(final Class<? extends S> clazz) {
+        final ServiceLookup serviceLookup = SERVICES.get();
+        if (null == serviceLookup) {
+            return null;
+        }
+        return serviceLookup.getOptionalService(clazz);
+    }
+
 }
