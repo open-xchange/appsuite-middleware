@@ -136,7 +136,7 @@ public class CookieRefresher implements SessionServletInterceptor {
             // Needs refresh
             synchronized (stamp) {
                 Long check = (Long) session.getParameter(PARAM_COOKIE_REFRESH_TIMESTAMP);
-                if (stamp != check) {
+                if (!stamp.equals(check)) {
                     // Concurrent update. Another thread already initiated cookie refresh
                     return false;
                 }

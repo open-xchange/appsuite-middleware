@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,28 +47,32 @@
  *
  */
 
-package com.openexchange.tools.exceptions;
+package com.openexchange.groupware.filestore;
+
+import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorageInfo;
+import com.openexchange.filestore.FileStorageInfoService;
+
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * {@link FileStorageInfoServiceImpl}
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class OXAborted extends RuntimeException {
-
-    private static final long serialVersionUID = 8334216056095164302L;
+public class FileStorageInfoServiceImpl implements FileStorageInfoService {
 
     /**
-     * Initializes a new {@link OXAborted}.
+     * Initializes a new {@link FileStorageInfoServiceImpl}.
      */
-    public OXAborted() {
+    public FileStorageInfoServiceImpl() {
         super();
     }
 
-    /**
-     * Initializes a new {@link OXAborted}.
-     *
-     * @param cause The cause
-     */
-    public OXAborted(Throwable cause) {
-        super(cause);
+    @Override
+    public FileStorageInfo getFileStorageInfo(int fileStorageId) throws OXException {
+        Filestore filestore = FilestoreStorage.getInstance().getFilestore(fileStorageId);
+        return new FileStorageInfoImpl(filestore);
     }
+
 }

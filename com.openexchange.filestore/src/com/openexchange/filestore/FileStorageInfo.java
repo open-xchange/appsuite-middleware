@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,28 +47,44 @@
  *
  */
 
-package com.openexchange.tools.exceptions;
+package com.openexchange.filestore;
+
+import java.net.URI;
 
 /**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * {@link FileStorageInfo} - Provides basic provisioning information for a file storage.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class OXAborted extends RuntimeException {
-
-    private static final long serialVersionUID = 8334216056095164302L;
+public interface FileStorageInfo {
 
     /**
-     * Initializes a new {@link OXAborted}.
-     */
-    public OXAborted() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link OXAborted}.
+     * Gets the identifier of the registered file storage.
      *
-     * @param cause The cause
+     * @return The identifier
      */
-    public OXAborted(Throwable cause) {
-        super(cause);
-    }
+    int getId();
+
+    /**
+     * Gets the maximum number of contexts that are allowed to be assigned to the registered file storage
+     *
+     * @return The max. number of contexts
+     */
+    long getMaxContext();
+
+    /**
+     * Gets the size (in bytes) for the registered file storage that is allowed to be occupied.
+     *
+     * @return The size
+     */
+    long getSize();
+
+    /**
+     * Gets the base URI for the registered file storage
+     *
+     * @return The base URI
+     */
+    URI getUri();
+
 }

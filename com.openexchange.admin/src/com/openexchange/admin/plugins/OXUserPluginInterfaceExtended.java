@@ -47,28 +47,22 @@
  *
  */
 
-package com.openexchange.tools.exceptions;
+package com.openexchange.admin.plugins;
 
-/**
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
- */
-public class OXAborted extends RuntimeException {
+import com.openexchange.admin.rmi.dataobjects.Context;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.User;
 
-    private static final long serialVersionUID = 8334216056095164302L;
-
-    /**
-     * Initializes a new {@link OXAborted}.
-     */
-    public OXAborted() {
-        super();
-    }
+public interface OXUserPluginInterfaceExtended extends OXUserPluginInterface {
 
     /**
-     * Initializes a new {@link OXAborted}.
+     * Invoked before a user is actually changed.
      *
-     * @param cause The cause
+     * @param ctx The associated context
+     * @param usrdata The data of the user to change
+     * @param auth The authentication information
+     * @throws PluginException If plug-in call fails and change is supposed to be aborted
      */
-    public OXAborted(Throwable cause) {
-        super(cause);
-    }
+    public void beforeChange(final Context ctx, final User usrdata, final Credentials auth) throws PluginException;
+
 }
