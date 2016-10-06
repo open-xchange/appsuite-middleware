@@ -88,7 +88,7 @@ public final class TrustedWebAuthSession extends WebAuthSession {
         final HttpClient httpClient = super.getHttpClient();
         javax.net.ssl.SSLSocketFactory f = SSLSocketFactoryProvider.getDefault();
         SSLConfigurationService sslConfig = DropboxOAuthServices.getService(SSLConfigurationService.class);
-        httpClient.getConnectionManager().getSchemeRegistry().register(new Scheme("https", new SSLSocketFactory(f, sslConfig.getSupportedCipherSuites(), sslConfig.getSupportedProtocols(), new StrictHostnameVerifier()), 443));
+        httpClient.getConnectionManager().getSchemeRegistry().register(new Scheme("https", new SSLSocketFactory(f, sslConfig.getSupportedProtocols(), sslConfig.getSupportedCipherSuites(), new StrictHostnameVerifier()), 443));
         return httpClient;
     }
 

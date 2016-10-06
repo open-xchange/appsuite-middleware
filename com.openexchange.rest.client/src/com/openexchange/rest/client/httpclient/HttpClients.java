@@ -155,7 +155,7 @@ public final class HttpClients {
         SSLConfigurationService sslConfig = RestClientServices.getService(SSLConfigurationService.class);
         final SchemeRegistry schemeRegistry = new SchemeRegistry();
         schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-        schemeRegistry.register(new Scheme("https", 443, new SSLSocketFactory(f, sslConfig.getSupportedCipherSuites(), sslConfig.getSupportedProtocols(), new StrictHostnameVerifier())));
+        schemeRegistry.register(new Scheme("https", 443, new SSLSocketFactory(f, sslConfig.getSupportedProtocols(), sslConfig.getSupportedCipherSuites(), new StrictHostnameVerifier())));
 
         ClientConnectionManager ccm = new ClientConnectionManager(schemeRegistry, config.maxConnectionsPerRoute, config.maxTotalConnections, config.keepAliveMonitorInterval);
         ccm.setIdleConnectionCloser(new IdleConnectionCloser(ccm, config.keepAliveDuration));
