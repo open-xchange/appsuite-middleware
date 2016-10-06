@@ -32,11 +32,24 @@ tags:
     description: |
       The folders module is used to access the OX folder structure.
       
-      Folders with some kind of special:
+      Special system folders:
       
-      | ID | Type | Description |
-      |----|------|-------------|
-      | 6 | contacts | System Users |
+      <table class=simpleTable>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Type</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>6</td>
+            <td>contacts</td>
+            <td>System Users</td>
+          </tr>
+        </tbody>
+      </table>
       
   - name: Tasks
     description: The tasks module is used to access task information.
