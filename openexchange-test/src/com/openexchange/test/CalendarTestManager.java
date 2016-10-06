@@ -303,35 +303,55 @@ public class CalendarTestManager implements TestManager {
     }
 
     public void confirm(Appointment app, int status, String message, int occurrence) {
-        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), occurrence, status, message, 0, app.getLastModified(), getFailOnError());
+        confirm(app.getParentFolderID(), app.getObjectID(), app.getLastModified(), status, message, occurrence);
+    }
+
+    public void confirm(int folderId, int objectId, Date timestamp, int status, String message, int occurrence) {
+        ConfirmRequest confirmRequest = new ConfirmRequest(folderId, objectId, occurrence, status, message, 0, timestamp, getFailOnError());
         ConfirmResponse resp = execute(confirmRequest);
         setLastResponse(resp);
         setLastModification(resp.getTimestamp());
     }
 
     public void confirm(Appointment app, int status, String message) {
-        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), status, message, app.getLastModified(),  getFailOnError());
+        confirm(app.getParentFolderID(), app.getObjectID(), app.getLastModified(), status, message);
+    }
+
+    public void confirm(int folderId, int objectId, Date timestamp, int status, String message) {
+        ConfirmRequest confirmRequest = new ConfirmRequest(folderId, objectId, status, message, 0, timestamp, getFailOnError());
         ConfirmResponse resp = execute(confirmRequest);
         setLastResponse(resp);
         setLastModification(resp.getTimestamp());
     }
 
     public void confirm(Appointment app, int user, int status, String message) {
-        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), status, message, user, app.getLastModified(),  getFailOnError());
+        confirm(app.getParentFolderID(), app.getObjectID(), app.getLastModified(), user, status, message);
+    }
+
+    public void confirm(int folderId, int objectId, Date timestamp, int user, int status, String message) {
+        ConfirmRequest confirmRequest = new ConfirmRequest(folderId, objectId, status, message, user, timestamp, getFailOnError());
         ConfirmResponse resp = execute(confirmRequest);
         setLastResponse(resp);
         setLastModification(resp.getTimestamp());
     }
 
     public void confirmExternal(Appointment app, String mail, int status, String message, int occurrence) {
-        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), occurrence, status, message, mail, app.getLastModified(),  getFailOnError());
+        confirmExternal(app.getParentFolderID(), app.getObjectID(), app.getLastModified(), mail, status, message, occurrence);
+    }
+
+    public void confirmExternal(int folderId, int objectId, Date timestamp, String mail, int status, String message, int occurrence) {
+        ConfirmRequest confirmRequest = new ConfirmRequest(folderId, objectId, occurrence, status, message, mail, timestamp, getFailOnError());
         ConfirmResponse resp = execute(confirmRequest);
         setLastResponse(resp);
         setLastModification(resp.getTimestamp());
     }
 
     public void confirmExternal(Appointment app, String mail, int status, String message) {
-        ConfirmRequest confirmRequest = new ConfirmRequest(app.getParentFolderID(), app.getObjectID(), status, message, mail, app.getLastModified(),  getFailOnError());
+        confirmExternal(app.getParentFolderID(), app.getObjectID(), app.getLastModified(), mail, status, message);
+    }
+
+    public void confirmExternal(int folderId, int objectId, Date timestamp, String mail, int status, String message) {
+        ConfirmRequest confirmRequest = new ConfirmRequest(folderId, objectId, status, message, mail, timestamp, getFailOnError());
         ConfirmResponse resp = execute(confirmRequest);
         setLastResponse(resp);
         setLastModification(resp.getTimestamp());
