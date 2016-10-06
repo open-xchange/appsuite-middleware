@@ -63,6 +63,7 @@ import com.openexchange.html.internal.jericho.control.JerichoParseControlTask;
 import com.openexchange.html.internal.jericho.control.JerichoParseTask;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.services.ServiceRegistry;
+import com.openexchange.html.tools.CombinedCharSequence;
 import com.openexchange.java.InterruptibleCharSequence;
 import com.openexchange.java.InterruptibleCharSequence.InterruptedRuntimeException;
 import com.openexchange.java.Streams;
@@ -289,10 +290,8 @@ public final class JerichoParser {
     }
 
     private Segment combineSegments(Segment prev, Segment segment) {
-        StringBuilder sb = new StringBuilder(prev.length() + segment.length());
-        sb.append(prev.toString());
-        sb.append(segment.toString());
-        return new Segment(new Source(sb), 0, sb.length());
+        CharSequence cs = new CombinedCharSequence(prev, segment);
+        return new Segment(new Source(cs), 0, cs.length());
     }
 
     private boolean combineable(Segment segment) {
