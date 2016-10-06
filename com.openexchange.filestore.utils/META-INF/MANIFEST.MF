@@ -5,7 +5,10 @@ Bundle-SymbolicName: com.openexchange.filestore.utils
 Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.ajax.container,
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.ajax.container,
  com.openexchange.database,
  com.openexchange.exception,
  com.openexchange.filestore,
