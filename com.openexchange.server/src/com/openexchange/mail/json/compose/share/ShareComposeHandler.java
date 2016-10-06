@@ -658,7 +658,9 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                         IFileHolder mp3Cover = null;
                         try {
                             mp3Cover = getCoverImage(document);
-                            encodedThumbnail = transformImage(mp3Cover.getStream(), "image/jpeg");
+                            if (null != mp3Cover) {
+                                encodedThumbnail = transformImage(mp3Cover.getStream(), "image/jpeg");
+                            }
                         } finally {
                             if (null != mp3Cover) {
                                 mp3Cover.close();
@@ -711,7 +713,10 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 fileHolder.setContentType("audio/mpeg");
                 fileHolder.setName(id + ".mp3");
                 return mp3CoverExtractor.extractCover(fileHolder);
-            } finally {
+            } catch (OXException e) {
+                throw e;
+            }
+            finally {
                 if (null != fileHolder) {
                     fileHolder.close();
                 }
