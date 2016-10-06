@@ -3636,6 +3636,18 @@ msgstr ""
 msgid "Invalid OAuth account specified."
 msgstr ""
 
+#. The certificate for domain "%1$s" is untrusted.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:63
+msgid "The certificate for domain \"%1$s\" is untrusted."
+msgstr ""
+
+#. The certificate for domain "%1$s" is untrusted. You can change your general trust level in the settings.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:66
+msgid ""
+"The certificate for domain \"%1$s\" is untrusted. You can change your "
+"general trust level in the settings."
+msgstr ""
+
 #.
 #. * The display of a users given and sur name name in e.g. notification mails (Hello John Doe, ...).
 #. * The placeholders mean $givenname $surname.
@@ -3843,12 +3855,12 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:109
 msgid ""
 "Your access token for '%1$s' is invalid. You have to reauthorize your "
-"account."
+"account. URL: '%2$s'"
 msgstr ""
 
-#. You need to explicitly authorise %1$s to subscribe to %2$s
+#. You need to explicitely authorise %1$s to subscribe to %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:112
-msgid "You need to explicitly authorise %1$s to subscribe to %2$s"
+msgid "You need to explicitely authorise %1$s to subscribe to %2$s"
 msgstr ""
 
 #. *
