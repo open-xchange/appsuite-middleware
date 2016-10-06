@@ -49,16 +49,23 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
@@ -108,6 +115,28 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try {
             connection = dbProvider.getReadConnection(context);
             return selectEvents(connection, false, context.getContextId(), searchTerm, sortOptions, fields);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
+    @Override
+    public List<Event> searchConflictingEvents(Date from, Date until, List<Attendee> attendees, SortOptions sortOptions, EventField[] fields) throws OXException {
+        Set<Integer> userIDs = new HashSet<Integer>();
+        Set<Integer> resourceIDs = new HashSet<Integer>();
+        for (Attendee attendee : attendees) {
+            if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && 0 < attendee.getEntity()) {
+                userIDs.add(I(attendee.getEntity()));
+            } else if (CalendarUserType.RESOURCE.equals(attendee.getCuType()) && 0 < attendee.getEntity()) {
+                resourceIDs.add(I(attendee.getEntity()));
+            }
+        }
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return selectConflictingEvents(connection, context.getContextId(), from, until, I2i(userIDs), I2i(resourceIDs), sortOptions, fields);
         } catch (SQLException e) {
             throw EventExceptionCode.MYSQL.create(e);
         } finally {
@@ -337,6 +366,73 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             stmt.setInt(1, contextID);
             adapter.setParameters(stmt, 2);
+            ResultSet resultSet = logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                events.add(readEvent(resultSet, mappedFields, "d."));
+            }
+        }
+        return events;
+    }
+
+    private static List<Event> selectConflictingEvents(Connection connection, int contextID, Date from, Date until, int[] userIDs, int[] resourceIDs, SortOptions sortOptions, EventField[] fields) throws SQLException, OXException {
+        EventField[] mappedFields = EventMapper.getInstance().getMappedFields(fields);
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT DISTINCT ").append(EventMapper.getInstance().getColumns(mappedFields, "d.")).append(" FROM prg_dates AS d");
+        if (null != userIDs && 0 < userIDs.length) {
+            stringBuilder.append(" LEFT JOIN prg_dates_members AS m ON d.cid=m.cid AND d.intfield01=m.object_id");
+        }
+        if (null != resourceIDs && 0 < resourceIDs.length) {
+            stringBuilder.append(" LEFT JOIN prg_date_rights AS r ON d.cid=r.cid AND d.intfield01=r.object_id");
+        }
+        stringBuilder.append(" WHERE d.cid=? AND d.intfield06<>4");
+        if (null != from) {
+            stringBuilder.append(" AND d.timestampfield02>=?");
+        }
+        if (null != until) {
+            stringBuilder.append(" AND d.timestampfield01<=?");
+        }
+        if (null != userIDs && 0 < userIDs.length || null != resourceIDs && 0 < resourceIDs.length) {
+            stringBuilder.append(" AND (");
+            if (null != userIDs && 0 < userIDs.length) {
+                if (1 == userIDs.length) {
+                    stringBuilder.append("m.member_uid=?");
+                } else {
+                    stringBuilder.append("m.member_uid IN (").append(EventMapper.getParameters(userIDs.length)).append(')');
+                }
+                if (null != resourceIDs && 0 < resourceIDs.length) {
+                    stringBuilder.append(" OR ");
+                }
+            }
+            if (null != resourceIDs && 0 < resourceIDs.length) {
+                if (1 == resourceIDs.length) {
+                    stringBuilder.append("r.id=?");
+                } else {
+                    stringBuilder.append("r.id IN (").append(EventMapper.getParameters(resourceIDs.length)).append(')');
+                }
+            }
+            stringBuilder.append(')');
+        }
+        stringBuilder.append(getSortOptions(sortOptions, "d.")).append(';');
+        List<Event> events = new ArrayList<Event>();
+        try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, contextID);
+            if (null != from) {
+                stmt.setTimestamp(parameterIndex++, new Timestamp(from.getTime()));
+            }
+            if (null != until) {
+                stmt.setTimestamp(parameterIndex++, new Timestamp(until.getTime()));
+            }
+            if (null != userIDs && 0 < userIDs.length) {
+                for (int id : userIDs) {
+                    stmt.setInt(parameterIndex++, id);
+                }
+            }
+            if (null != resourceIDs && 0 < resourceIDs.length) {
+                for (int id : resourceIDs) {
+                    stmt.setInt(parameterIndex++, id);
+                }
+            }
             ResultSet resultSet = logExecuteQuery(stmt);
             while (resultSet.next()) {
                 events.add(readEvent(resultSet, mappedFields, "d."));

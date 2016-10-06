@@ -51,6 +51,7 @@ package com.openexchange.chronos.storage;
 
 import java.util.Date;
 import java.util.List;
+import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.SortOptions;
@@ -104,6 +105,8 @@ public interface EventStorage {
      * @return The found events
      */
     List<Event> searchDeletedEvents(SearchTerm<?> searchTerm, SortOptions sortOptions, EventField[] fields) throws OXException;
+
+    List<Event> searchConflictingEvents(Date from, Date until, List<Attendee> attendees, SortOptions sortOptions, EventField[] fields) throws OXException;
 
     /**
      * Generates the next object unique identifier for inserting new event data.

@@ -381,7 +381,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
         int updated = 0;
         Set<Integer> usedEntities = new HashSet<Integer>();
         for (Attendee attendee : attendees) {
-            if (0 >= attendee.getEntity()) {
+            if (0 > attendee.getEntity() || 0 == attendee.getEntity() && false == CalendarUserType.GROUP.equals(attendee.getCuType())) {
                 /*
                  * insert additional record into dateExternal for external users
                  */

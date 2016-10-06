@@ -67,6 +67,7 @@ import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentAJAXRequestFactory;
 import com.openexchange.calendar.json.actions.AppointmentAction;
@@ -74,9 +75,11 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CommonObject.Marker;
 import com.openexchange.groupware.results.CollectionDelta;
@@ -193,6 +196,22 @@ public abstract class ChronosAction extends AppointmentAction {
             timestamp = getLatestModified(timestamp, event);
         }
         return new AJAXRequestResult(appointments, timestamp, "appointment");
+    }
+
+    protected AJAXRequestResult getAppointmentConflictResult(CalendarSession session, List<EventConflict> conflicts) throws OXException, JSONException {
+        TimeZone timeZone = session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class, TimeZone.getTimeZone(session.getUser().getTimeZone()));
+        AppointmentWriter appointmentWriter = new AppointmentWriter(timeZone).setSession(session.getSession());
+        JSONArray jsonArray = new JSONArray(conflicts.size());
+        for (EventConflict conflict : conflicts) {
+            JSONObject jsonObject = new JSONObject();
+            CalendarDataObject appointment = getEventConverter().getAppointment(session, conflict.getConflictingEvent());
+            if (conflict.isHardConflict()) {
+                appointment.setHardConflict();
+            }
+            appointmentWriter.writeAppointment(appointment, jsonObject);
+            jsonArray.put(jsonObject);
+        }
+        return new AJAXRequestResult(new JSONObject().put("conflicts", jsonArray), null, "json");
     }
 
     protected static Date getLatestModified(Date lastModified, UserizedEvent event) {

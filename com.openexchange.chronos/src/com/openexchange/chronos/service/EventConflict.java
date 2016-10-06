@@ -49,74 +49,21 @@
 
 package com.openexchange.chronos.service;
 
-import java.util.Date;
 import java.util.List;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.chronos.Attendee;
 
 /**
- * {@link CalendarResult}
+ * {@link EventConflict}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public interface CalendarResult {
+public interface EventConflict {
 
-    /**
-     * Gets the underlying calendar session.
-     *
-     * @return The calendar session
-     */
-    CalendarSession getSession();
+    UserizedEvent getConflictingEvent();
 
-    /**
-     * Gets the the actual target calendar user based on the folder view the action has been performed in. This is either the current
-     * session's user when operating in <i>private</i> or <i>public</i> folders, or the folder owner for <i>shared</i> calendar folders.
-     *
-     * @return The actual calendar user
-     */
-    User getCalendarUser();
+    List<Attendee> getConflictingAttendees();
 
-    /**
-     * Gets the updated server timestamp as used as new/updated last-modification date of the modified data in storage, which is usually
-     * also returned to clients.
-     *
-     * @return The server timestamp
-     */
-    Date getTimestamp();
-
-    /**
-     * Gets the identifier of the folder the action has been performed in, representing the view of the calendar user.
-     *
-     * @return The folder identifier
-     */
-    int getFolderID();
-
-    /**
-     * Gets the delete results.
-     *
-     * @return The delete results, or an empty list if there are none
-     */
-    List<DeleteResult> getDeletions();
-
-    /**
-     * Gets the update results.
-     *
-     * @return The update results, or an empty list if there are none
-     */
-    List<UpdateResult> getUpdates();
-
-    /**
-     * Gets the create results.
-     *
-     * @return The create results, or an empty list if there are none
-     */
-    List<CreateResult> getCreations();
-
-    /**
-     * Gets the conflicts that occurred during create- or update operations.
-     *
-     * @return The conflicts, or an empty list if there are none
-     */
-    List<EventConflict> getConflicts();
+    boolean isHardConflict();
 
 }

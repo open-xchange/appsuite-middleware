@@ -297,6 +297,17 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets a value indicating whether a specific event is over, i.e. it's end-time falls into the past, based on the system time.
+     *
+     * @param event The event to check
+     * @param timeZone The timezone to consider if the event has <i>floating</i> dates
+     * @return <code>true</code> if the event is in the past, <code>false</code>, otherwise
+     */
+    public static boolean isInPast(Event event, TimeZone timeZone) {
+        return false == isInRange(event, new Date(), null, timeZone);
+    }
+
+    /**
      * Gets a value indicating whether the supplied event contains so-called <i>floating</i> dates, i.e. the event doesn't start- and end
      * at a fixed date and time, but is always rendered in the view of the user's current timezone.
      *

@@ -182,6 +182,8 @@ public final class NewAction extends ChronosAction {
         if (null != result.getCreations() && 0 < result.getCreations().size()) {
             int id = result.getCreations().get(0).getCreatedEvent().getId();
             return new AJAXRequestResult(new JSONObject().put(DataFields.ID, id), result.getTimestamp(), "json");
+        } else if (null != result.getConflicts() && 0 < result.getConflicts().size()) {
+            return getAppointmentConflictResult(session, result.getConflicts());
         }
         return null; //TODO: conflicts
     }

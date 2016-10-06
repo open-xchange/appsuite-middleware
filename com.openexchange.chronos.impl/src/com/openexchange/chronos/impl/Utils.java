@@ -145,6 +145,18 @@ public class Utils {
     }
 
     /**
+     * Gets a value indicating whether (soft) conflicts of internal attendees should be ignored during event creation or update or not,
+     * based on the value of {@link CalendarParameters#PARAMETER_IGNORE_CONFLICTS} in the supplied parameters.
+     *
+     * @param parameters The calendar parameters to evaluate
+     * @return <code>true</code> if (soft) conflicts should be ignored, <code>false</code>, otherwise
+     * @see CalendarParameters#PARAMETER_IGNORE_CONFLICTS
+     */
+    public static boolean isIgnoreConflicts(CalendarParameters parameters) {
+        return parameters.get(CalendarParameters.PARAMETER_IGNORE_CONFLICTS, Boolean.class, Boolean.FALSE).booleanValue();
+    }
+
+    /**
      * Gets the timezone valid for the supplied calendar session, which is either the (possibly overridden) timezone defined via
      * {@link CalendarParameters#PARAMETER_TIMEZONE}, or as fallback, the session user's default timezone.
      *
@@ -153,7 +165,7 @@ public class Utils {
      * @see CalendarParameters#PARAMETER_TIMEZONE
      * @see User#getTimeZone()
      */
-    static TimeZone getTimeZone(CalendarSession session) {
+    public static TimeZone getTimeZone(CalendarSession session) {
         return session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class, TimeZone.getTimeZone(session.getUser().getTimeZone()));
     }
 
@@ -370,7 +382,7 @@ public class Utils {
      * @param userID The identifier of the user requesting the event data
      * @return The potentially anonymized event
      */
-    static UserizedEvent anonymizeIfNeeded(UserizedEvent userizedEvent) throws OXException {
+    public static UserizedEvent anonymizeIfNeeded(UserizedEvent userizedEvent) throws OXException {
         Event event = userizedEvent.getEvent();
         int userID = userizedEvent.getSession().getUserId();
         if (false == isClassifiedFor(event, userID)) {

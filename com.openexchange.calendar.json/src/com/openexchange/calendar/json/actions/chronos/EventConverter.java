@@ -69,6 +69,7 @@ import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -358,9 +359,9 @@ public class EventConverter {
      * @param userizedEvent The userized event to convert
      * @return The appointment
      */
-    public Appointment getAppointment(CalendarSession session, UserizedEvent userizedEvent) throws OXException {
+    public CalendarDataObject getAppointment(CalendarSession session, UserizedEvent userizedEvent) throws OXException {
         Event event = userizedEvent.getEvent();
-        Appointment appointment = new Appointment();
+        CalendarDataObject appointment = new CalendarDataObject();
         if (event.containsId()) {
             appointment.setObjectID(event.getId());
         }
@@ -737,7 +738,7 @@ public class EventConverter {
      */
     private SeriesPattern loadSeriesPattern(CalendarSession session, EventID eventID) throws OXException {
         EventField [] recurrenceFields = {
-            EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.ALL_DAY, 
+            EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.ALL_DAY,
             EventField.START_DATE, EventField.START_TIMEZONE, EventField.END_DATE, EventField.END_TIMEZONE
         };
         Event event = getEvent(session, eventID, recurrenceFields);
