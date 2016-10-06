@@ -71,7 +71,6 @@ import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.IndividualAutoconfig;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
 import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
-import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.server.ServiceLookup;
 
