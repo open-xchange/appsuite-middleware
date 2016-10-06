@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLHandshakeException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -70,6 +71,7 @@ import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.IndividualAutoconfig;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
 import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.server.ServiceLookup;
 
@@ -167,6 +169,9 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
             Autoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
             autoConfigCache.put(sUrl, autoconfig);
             return generateIndividualAutoconfig(emailLocalPart, emailDomain, autoconfig, forceSecure, isOAuth);
+        } catch (SSLHandshakeException e) {
+            LOG.info("Could not retrieve config XML.", e);
+            return null;
         } catch (ClientProtocolException e) {
             LOG.warn("Could not retrieve config XML.", e);
             return null;
