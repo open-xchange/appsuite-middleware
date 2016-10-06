@@ -142,6 +142,7 @@ public class GetTest extends AppointmentTest {
         appointmentObj.setLabel(2);
         appointmentObj.setNote("note");
         appointmentObj.setCategories("testcat1,testcat2,testcat3");
+        appointmentObj.setIgnoreConflicts(true);
 
         final int userParticipantId = ContactTest.searchContact(
             getWebConversation(),
