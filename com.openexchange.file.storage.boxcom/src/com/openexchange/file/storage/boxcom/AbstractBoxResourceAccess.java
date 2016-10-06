@@ -167,7 +167,7 @@ public abstract class AbstractBoxResourceAccess {
         }
     }
 
-    /** Status code (400) indicating a bad requestn. */
+    /** Status code (400) indicating a bad request. */
     private static final int SC_BAD_REQUEST = 400;
 
     /** Status code (401) indicating that the request requires HTTP authentication. */
