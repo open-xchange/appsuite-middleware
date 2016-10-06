@@ -133,7 +133,7 @@ public class AllAction extends AbstractFileStorageAccountAction {
                         try {
                             fsService.getAccountManager().deleteAccount(account, session);
                         } catch (Exception x) {
-                            // Ignore
+                            LOG.debug("Failed to delete the file storage account '{}' for user '{}' in context '{}'", account.getId(), session.getUserId(), session.getContextId(), x);
                         }
                     } else {
                         // Add account with error
