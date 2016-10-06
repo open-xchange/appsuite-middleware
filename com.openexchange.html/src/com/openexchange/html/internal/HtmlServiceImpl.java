@@ -538,6 +538,7 @@ public final class HtmlServiceImpl implements HtmlService {
             html = replacePercentTags(html);
             html = replaceHexEntities(html);
             html = processDownlevelRevealedConditionalComments(html);
+            html = dropWeirdXmlNamespaceDeclarations(html);
             html = dropDoubleAccents(html);
             html = dropSlashedTags(html);
             html = dropExtraLt(html);
@@ -1738,6 +1739,31 @@ public final class HtmlServiceImpl implements HtmlService {
             return sb.toString();
         }
         return htmlContent;
+    }
+
+    private static final Pattern PATTERN_XML_NS_DECLARATION = Pattern.compile("<\\?xml:namespace[^>]*>", Pattern.CASE_INSENSITIVE);
+
+    private static String dropWeirdXmlNamespaceDeclarations(String htmlContent) {
+        // <?xml:namespace prefix = "o" ns =  "urn:schemas-microsoft-com:office:office" />
+        if (null == htmlContent) {
+            return htmlContent;
+        }
+
+        if (htmlContent.indexOf("<?xml:") < 0 && htmlContent.indexOf("<?XML:") < 0) {
+            return htmlContent;
+        }
+
+        Matcher m = PATTERN_XML_NS_DECLARATION.matcher(htmlContent);
+        if (false == m.find()) {
+            return htmlContent;
+        }
+
+        StringBuffer sb = new StringBuffer(htmlContent.length());
+        do {
+            m.appendReplacement(sb, "");
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
     }
 
     private static final Pattern PATTERN_CC = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\](?:--!?)?>)(.*?)((?:<!\\[endif\\])?(?:--)?>)", Pattern.DOTALL);

@@ -258,6 +258,7 @@ public final class JerichoParser {
             streamedSource = new StreamedSource(InterruptibleCharSequence.valueOf(html));
             streamedSource.setLogger(null);
             int lastSegmentEnd = 0;
+            Segment prev = null;
             for (Iterator<Segment> iter = streamedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
                 Segment segment = iter.next();
                 if (segment.getEnd() <= lastSegmentEnd) {
@@ -266,8 +267,17 @@ public final class JerichoParser {
                 }
                 lastSegmentEnd = segment.getEnd();
 
+                // Parsing left-over?
+                if (null != prev) {
+                    if (combineable(segment)) {
+                        segment = combineSegments(prev, segment);
+                    } else {
+                        handleSegment(handler, prev, true, true);
+                    }
+                }
+
                 // Handle current segment
-                handleSegment(handler, segment, true);
+                prev = handleSegment(handler, segment, true, false);
             }
         } catch (InterruptedRuntimeException e) {
             throw new ParsingDeniedException("Parser timeout.", e);
@@ -276,6 +286,17 @@ public final class JerichoParser {
         } finally {
             Streams.close(streamedSource);
         }
+    }
+
+    private Segment combineSegments(Segment prev, Segment segment) {
+        StringBuilder sb = new StringBuilder(prev.length() + segment.length());
+        sb.append(prev.toString());
+        sb.append(segment.toString());
+        return new Segment(new Source(sb), 0, sb.length());
+    }
+
+    private boolean combineable(Segment segment) {
+        return !(segment instanceof Tag);
     }
 
     private static enum EnumTagType {
@@ -297,7 +318,7 @@ public final class JerichoParser {
         }
     }
 
-    private static void handleSegment(JerichoHandler handler, Segment segment, boolean fixStartTags) {
+    private static Segment handleSegment(JerichoHandler handler, Segment segment, boolean fixStartTags, boolean force) {
         if (segment instanceof Tag) {
             Tag tag = (Tag) segment;
             TagType tagType = tag.getTagType();
@@ -328,61 +349,73 @@ public final class JerichoParser {
                         break;
                 }
             }
-        } else if (segment instanceof CharacterReference) {
+            return null;
+        }
+
+        if (segment instanceof CharacterReference) {
             CharacterReference characterReference = (CharacterReference) segment;
             handler.handleCharacterReference(characterReference);
-        } else {
-            // Safety re-parse
-            safeParse(handler, segment, fixStartTags);
+            return null;
         }
+
+        // Safety re-parse
+        return safeParse(handler, segment, fixStartTags, force);
     }
 
-    private static void safeParse(JerichoHandler handler, Segment segment, boolean fixStartTags) {
-        if (fixStartTags && containsStartTag(segment)) {
-            Matcher m = FIX_START_TAG.matcher(segment);
-            if (m.find()) {
-                // Re-parse start tag
-
-                String startTag = m.group(1);
-                if (startTag.startsWith("<!--")) {
-                    handler.handleComment(m.group());
-                    return;
-                }
-
-                int start = m.start();
-                if (start > 0) {
-                    handler.handleSegment(segment.subSequence(0, start));
-                }
-                int[] remainder = null;
-
-                int end = m.end();
-                if (end < segment.length()) {
-                    int pos = indexOf('>', end, segment);
-                    if (pos >= 0) {
-                        startTag = startTag + segment.subSequence(end, pos + 1);
-                        remainder = new int[] { pos + 1, segment.length() };
-                    } else {
-                        remainder = new int[] { end, segment.length() };
-                    }
-                }
-
-                @SuppressWarnings("resource")
-                StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(startTag)); // No need to close since String-backed (all in memory)!
-                Thread thread = Thread.currentThread();
-                for (Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
-                    Segment nestedSegment = iter.next();
-                    handleSegment(handler, nestedSegment, false);
-                }
-                if (null != remainder) {
-                    safeParse(handler, new Segment(new Source(segment), remainder[0], remainder[1]), fixStartTags);
-                    // handler.handleSegment(remainder);
-                }
-            } else {
-                handler.handleSegment(segment);
-            }
-        } else {
+    private static Segment safeParse(JerichoHandler handler, Segment segment, boolean fixStartTags, boolean force) {
+        if (!fixStartTags || !containsStartTag(segment)) {
             handler.handleSegment(segment);
+            return null;
         }
+
+        Matcher m = FIX_START_TAG.matcher(segment);
+        if (!m.find()) {
+            handler.handleSegment(segment);
+            return null;
+        }
+
+        String startTag = m.group(1);
+        if (startTag.startsWith("<!--")) {
+            handler.handleComment(m.group());
+            return null;
+        }
+
+        if (!force) {
+            String closing = m.group(2);
+            if (Strings.isEmpty(closing)) {
+                return segment;
+            }
+        }
+
+        int start = m.start();
+        if (start > 0) {
+            handler.handleSegment(segment.subSequence(0, start));
+        }
+        int[] remainder = null;
+
+        int end = m.end();
+        if (end < segment.length()) {
+            int pos = indexOf('>', end, segment);
+            if (pos >= 0) {
+                startTag = startTag + segment.subSequence(end, pos + 1);
+                remainder = new int[] { pos + 1, segment.length() };
+            } else {
+                remainder = new int[] { end, segment.length() };
+            }
+        }
+
+        @SuppressWarnings("resource")
+        StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(startTag)); // No need to close since String-backed (all in memory)!
+        Thread thread = Thread.currentThread();
+        for (Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
+            Segment nestedSegment = iter.next();
+            handleSegment(handler, nestedSegment, false, true);
+        }
+        if (null != remainder) {
+            return safeParse(handler, new Segment(new Source(segment), remainder[0], remainder[1]), fixStartTags, force);
+            // handler.handleSegment(remainder);
+        }
+        return null;
     }
 
     private static boolean containsStartTag(CharSequence toCheck) {
