@@ -250,7 +250,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                 op.thumbnail(Integer.valueOf(maxWidth), Integer.valueOf(maxHeight));
                 break;
             case COVER_AND_CROP:
-                // Only Shrink Larger Images ('>' flag)
+                // Fill Area Flag ('^' flag)
                 op.resize(Integer.valueOf(maxWidth), Integer.valueOf(maxHeight), Character.valueOf('^'));
                 op.gravity("center");
                 op.extent(Integer.valueOf(maxWidth), Integer.valueOf(maxHeight));
