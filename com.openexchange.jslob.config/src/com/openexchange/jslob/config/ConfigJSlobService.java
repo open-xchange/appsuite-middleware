@@ -1153,7 +1153,7 @@ public final class ConfigJSlobService implements JSlobService {
         return services.getService(ConfigViewFactory.class);
     }
 
-    private static final Set<String> SKIP_META = new HashSet<String>(Arrays.asList("final", METADATA_PROTECTED, "preferencePath"));
+    private static final Set<String> SKIP_META = new HashSet<String>(Arrays.asList("final", METADATA_PROTECTED, METADATA_PREFERENCE_PATH));
 
     private static void add2JSlob(final AttributedProperty attributedProperty, final JSlob jsonJSlob, final ConfigView view) throws OXException {
         if (null == attributedProperty) {
