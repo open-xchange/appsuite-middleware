@@ -3106,6 +3106,9 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         }
         cdao.setParentFolderID(cdao.getActionFolder());
+        if(cdao.getParentFolderID()<=0){
+            cdao.setParentFolderID(inFolder);
+        }
 
         if (cdao.getFolderMove()) {
             /*
