@@ -70,6 +70,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.java.Strings;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthUtil;
+import com.openexchange.session.Session;
 
 /**
  * {@link DropboxExceptionHandler}
@@ -82,9 +87,11 @@ final class DropboxExceptionHandler {
      * Handles the specified Exception and returns an appropriate {@link OXException}
      * 
      * @param e The {@link Exception} to handle
+     * @param session The groupware {@link Session}
+     * @param oauthAccount The {@link OAuthAccount}
      * @return An {@link OXException}
      */
-    static final OXException handle(Exception e) {
+    static final OXException handle(Exception e, Session session, OAuthAccount oauthAccount) {
         // It's an OXException, so return it
         if (OXException.class.isInstance(e)) {
             return (OXException) e;
@@ -97,7 +104,9 @@ final class DropboxExceptionHandler {
 
         // Invalid token or account was unlinked
         if (InvalidAccessTokenException.class.isInstance(e)) {
-            return FileStorageExceptionCodes.UNLINKED_ERROR.create(e, new Object[0]);
+            String cburl = OAuthUtil.buildCallbackURL(oauthAccount);
+            API api = oauthAccount.getAPI();
+            return OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getShortName(), oauthAccount.getId(), session.getUserId(), session.getContextId(), api.getFullName(), cburl);
         }
 
         // Protocol error

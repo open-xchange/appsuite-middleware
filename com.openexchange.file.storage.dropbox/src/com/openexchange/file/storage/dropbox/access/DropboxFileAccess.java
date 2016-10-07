@@ -163,7 +163,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             throw DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId, id);
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -190,7 +190,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         } catch (GetMetadataErrorException e) {
             throw DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId, id);
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -221,7 +221,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 file.copyFrom(dbxFile, copyFields);
                 return dbxFile.getIDTuple();
             } catch (DbxException e) {
-                throw DropboxExceptionHandler.handle(e);
+                throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
             }
         } else {
             String path = toPath(file.getFolderId(), file.getId());
@@ -244,7 +244,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                     } catch (RelocationErrorException e) {
                         throw DropboxExceptionHandler.handleRelocationErrorException(e, file.getFolderId(), file.getId());
                     } catch (DbxException e) {
-                        throw DropboxExceptionHandler.handle(e);
+                        throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
                     }
                 }
             }
@@ -260,7 +260,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                     } catch (RestoreErrorException e) {
                         throw DropboxExceptionHandler.handleRestoreErrorException(e, file.getFolderId(), file.getId());
                     } catch (DbxException e) {
-                        throw DropboxExceptionHandler.handle(e);
+                        throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
                     }
                 }
             }
@@ -305,7 +305,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         } catch (RelocationErrorException e) {
             throw DropboxExceptionHandler.handleRelocationErrorException(e, source.getFolder(), source.getId());
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -333,7 +333,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         } catch (RelocationErrorException e) {
             throw DropboxExceptionHandler.handleRelocationErrorException(e, source.getFolder(), source.getId());
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -350,7 +350,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         } catch (DownloadErrorException e) {
             throw DropboxExceptionHandler.handleDownloadErrorException(e, folderId, id);
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -417,7 +417,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         } catch (ListFolderErrorException e) {
             throw DropboxExceptionHandler.handleListFolderErrorException(e, folderId);
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -451,7 +451,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             }
             return ret;
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -488,7 +488,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         } catch (ListFolderErrorException e) {
             throw DropboxExceptionHandler.handleListFolderErrorException(e, folderId);
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -524,7 +524,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         } catch (ListFolderErrorException e) {
             throw DropboxExceptionHandler.handleListFolderErrorException(e, folderId);
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
 
     }
@@ -555,7 +555,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             } catch (ListFolderErrorException e) {
                 throw DropboxExceptionHandler.handleListFolderErrorException(e, path);
             } catch (DbxException e) {
-                throw DropboxExceptionHandler.handle(e);
+                throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
             }
         } else {
             // Load metadata one-by-one
@@ -574,7 +574,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                         throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                     }
                 } catch (DbxException e) {
-                    throw DropboxExceptionHandler.handle(e);
+                    throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
                 }
             }
         }
@@ -735,7 +735,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         } catch (DeleteErrorException e) {
             throw DropboxExceptionHandler.handleDeleteErrorException(e, folderId, id);
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -787,7 +787,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         } catch (ListRevisionsErrorException e) {
             throw DropboxExceptionHandler.handleListRevisionsErrorException(e, folderId, id);
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -806,7 +806,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             } catch (GetMetadataErrorException e) {
                 throw DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId, "");
             } catch (DbxException e) {
-                throw DropboxExceptionHandler.handle(e);
+                throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
             }
         }
         return sequenceNumbers;
@@ -825,7 +825,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         } catch (ThumbnailErrorException e) {
             throw DropboxExceptionHandler.handleThumbnailErrorException(e, folderId, id);
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -928,7 +928,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             // Return
             return new DropboxFile(metadata, userId);
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         } catch (IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
@@ -955,7 +955,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         } catch (UploadErrorException e) {
             throw DropboxExceptionHandler.handleUploadErrorException(e, path);
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         } catch (IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
@@ -1003,7 +1003,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         } catch (ListFolderErrorException e) {
             throw DropboxExceptionHandler.handleListFolderErrorException(e, folderId);
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 

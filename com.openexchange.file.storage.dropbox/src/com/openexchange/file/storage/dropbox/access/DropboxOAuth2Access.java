@@ -126,7 +126,7 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
             client.users().getCurrentAccount();
             return true;
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, getSession(), getOAuthAccount());
         }
     }
 

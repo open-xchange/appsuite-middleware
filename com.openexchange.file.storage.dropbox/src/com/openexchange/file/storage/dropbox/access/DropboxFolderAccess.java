@@ -123,7 +123,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             }
             throw DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId, "");
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -150,7 +150,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         } catch (GetMetadataErrorException e) {
             throw DropboxExceptionHandler.handleGetMetadataErrorException(e, folderId, "");
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -212,7 +212,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         } catch (ListFolderErrorException e) {
             throw DropboxExceptionHandler.handleListFolderErrorException(e, parentIdentifier);
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -257,7 +257,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         } catch (CreateFolderErrorException e) {
             throw DropboxExceptionHandler.handleCreateFolderErrorException(e, fullpath);
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -299,7 +299,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         } catch (RelocationErrorException e) {
             throw DropboxExceptionHandler.handleRelocationErrorException(e, folderId, "");
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -319,7 +319,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         } catch (RelocationErrorException e) {
             throw DropboxExceptionHandler.handleRelocationErrorException(e, folderId, "");
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -336,7 +336,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         } catch (DeleteErrorException e) {
             throw DropboxExceptionHandler.handleDeleteErrorException(e, folderId, "");
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
@@ -371,7 +371,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
         } catch (ListFolderErrorException e) {
             throw DropboxExceptionHandler.handleListFolderErrorException(e, folderId);
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
 
     }
@@ -417,7 +417,7 @@ public class DropboxFolderAccess extends AbstractDropboxAccess implements FileSt
             TeamSpaceAllocation teamValue = spaceUsage.getAllocation().getTeamValue();
             return new Quota(spaceUsage.getUsed(), individualValue.getAllocated() + teamValue.getAllocated(), Type.STORAGE);
         } catch (DbxException e) {
-            throw DropboxExceptionHandler.handle(e);
+            throw DropboxExceptionHandler.handle(e, session, dropboxOAuthAccess.getOAuthAccount());
         }
     }
 
