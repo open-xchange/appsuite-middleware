@@ -56,8 +56,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.attach.AttachmentBase;
@@ -84,9 +82,6 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@Action(method = RequestMethod.PUT, name = "copy", description = "", parameters = {},
-requestBody = "",
-responseDescription = "")
 @OAuthAction(ContactActionFactory.OAUTH_WRITE_SCOPE)
 public class CopyAction extends ContactAction {
 
