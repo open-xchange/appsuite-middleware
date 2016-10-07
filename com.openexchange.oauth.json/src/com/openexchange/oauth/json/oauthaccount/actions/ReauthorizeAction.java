@@ -57,7 +57,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
 import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthInteractionType;
@@ -77,7 +76,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Module(name = "oauth", description = "The OAuth module is used to manage multiple OAuth accounts for certain online services for a user. The OAuth mechanism allows the Open-Xchange application to act on behalf of this user using previously obtained access tokens granted by the user.")
 public class ReauthorizeAction extends AbstractOAuthTokenAction {
 
     @Override
@@ -138,7 +136,7 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see com.openexchange.cluster.lock.ClusterTask#getTaskName()
          */
         @Override
@@ -148,7 +146,7 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see com.openexchange.cluster.lock.ClusterTask#perform()
          */
         @Override
@@ -186,7 +184,7 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see com.openexchange.cluster.lock.ClusterTask#getContextId()
          */
         @Override
@@ -196,7 +194,7 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see com.openexchange.cluster.lock.ClusterTask#getUserId()
          */
         @Override
