@@ -86,7 +86,7 @@ public final class GetTreeAction extends AbstractMailAccountTreeAction {
 
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jVoid) throws OXException, JSONException {
-        final int id = parseIntParameter(AJAXServlet.PARAMETER_ID, requestData);
+        final int id = requireIntParameter(AJAXServlet.PARAMETER_ID, requestData);
 
         final MailAccountStorageService storageService =
             ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
