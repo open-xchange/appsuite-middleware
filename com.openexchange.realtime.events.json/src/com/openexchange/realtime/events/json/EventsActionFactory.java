@@ -55,7 +55,6 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.events.json.actions.AllAction;
 import com.openexchange.realtime.events.json.actions.EventsAction;
@@ -69,7 +68,6 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Module(name = "events", description = "Allows clients to register for events. Events are transmitted via the RT system.")
 public class EventsActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> actions;
