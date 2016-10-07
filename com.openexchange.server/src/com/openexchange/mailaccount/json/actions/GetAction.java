@@ -98,7 +98,7 @@ public final class GetAction extends AbstractMailAccountAction implements MailAc
 
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jVoid) throws OXException {
-        final int id = parseIntParameter(AJAXServlet.PARAMETER_ID, requestData);
+        final int id = requireIntParameter(AJAXServlet.PARAMETER_ID, requestData);
 
         try {
             final MailAccountStorageService storageService =
