@@ -56,9 +56,6 @@ import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
@@ -76,12 +73,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "clear", description = "Clearing a folder's content", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "tree", description = "(Preliminary) The identifier of the folder tree. If missing '0' (primary folder tree) is assumed."),
-    @Parameter(name = "allowed_modules", description = "(Preliminary) An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered.")
-}, requestBody = "A JSON array containing the folder ID(s) whose content should be cleared. NOTE: Although the requests offers to clear multiple folders at once it is recommended to clear only one folder per request since if any exception occurs (e.g. missing permissions) the complete request is going to be aborted.",
-responseDescription = "A JSON array containing the IDs of folders that could not be cleared due to a concurrent modification. Meaning you receive an empty JSON array if everything worked well.")
 @OAuthAction(OAuthAction.CUSTOM)
 public final class ClearAction extends AbstractFolderAction {
 
