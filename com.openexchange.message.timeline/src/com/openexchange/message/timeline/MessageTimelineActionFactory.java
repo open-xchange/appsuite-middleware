@@ -54,7 +54,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.message.timeline.actions.AbstractMessageTimelineAction;
@@ -67,7 +66,6 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Module(name = "message.timeline", description = "Provides access to a message timeline associated with a certain client.")
 public class MessageTimelineActionFactory implements AJAXActionServiceFactory {
 
     /**
