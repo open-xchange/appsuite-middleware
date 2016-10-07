@@ -54,7 +54,6 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
@@ -76,7 +75,6 @@ import com.openexchange.tasks.json.actions.UpdatesAction;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-@Module(name = "tasks", description = "Provides access to task information.")
 @OAuthModule
 public class TaskActionFactory implements AJAXActionServiceFactory {
 
