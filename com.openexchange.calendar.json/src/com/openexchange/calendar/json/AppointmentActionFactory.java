@@ -69,7 +69,6 @@ import com.openexchange.calendar.json.actions.ResolveUIDAction;
 import com.openexchange.calendar.json.actions.SearchAction;
 import com.openexchange.calendar.json.actions.UpdateAction;
 import com.openexchange.calendar.json.actions.UpdatesAction;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
@@ -80,7 +79,6 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-@Module(name = "calendar", description = "Provides access to calendar information.")
 @OAuthModule
 public class AppointmentActionFactory implements AJAXActionServiceFactory {
 
