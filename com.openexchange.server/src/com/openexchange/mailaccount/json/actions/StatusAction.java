@@ -58,18 +58,15 @@ import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.AuthInfo;
-import com.openexchange.mailaccount.Status;
+import com.openexchange.mailaccount.KnownStatus;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.KnownStatus;
+import com.openexchange.mailaccount.Status;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.json.MailAccountFields;
@@ -84,10 +81,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.GET, name = "status", description = "Gets the status for a mail account", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "The ID of the account to return.")
-}, responseDescription = "A JSON object representing the account's status.")
 @OAuthAction(MailAccountOAuthConstants.OAUTH_READ_SCOPE)
 public final class StatusAction extends AbstractValidateMailAccountAction implements MailAccountFields {
 

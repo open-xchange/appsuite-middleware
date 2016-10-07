@@ -55,9 +55,6 @@ import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
@@ -71,10 +68,6 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "move_all", description = "Moves all mails of a folder to another folder.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
-}, requestBody = "A JSON object containing the identifers of the source and destination folders; e.g.: {\"source\": \"default0/INBOX\", \"target\": \"default0/INBOX/Trash\"}.",
-responseDescription = "A JSON response providing information for affected folders;e.g. {\"default0/INBOX\":{\"total\":0,\"unread\":0},\"default0/INBOX/Trash\":{\"total\":82,\"unread\":8}")
 public final class MoveAllAction extends AbstractMailAction {
 
     /**

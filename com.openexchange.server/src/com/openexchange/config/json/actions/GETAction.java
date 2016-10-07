@@ -56,9 +56,6 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.json.ConfigAJAXRequest;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
@@ -73,9 +70,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.GET, name = "config/path", description = "Get configuration data", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
-}, responseDescription = "Value of the node specified by path.")
 @OAuthAction(OAuthAction.GRANT_ALL)
 public final class GETAction extends AbstractConfigAction {
 
