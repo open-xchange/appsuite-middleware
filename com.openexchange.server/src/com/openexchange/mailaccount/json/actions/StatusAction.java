@@ -121,7 +121,7 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
                     if (Strings.isNotEmpty(message)) {
                         jStatus.put("message", message);
                     }
-                    return new AJAXRequestResult(jStatus, "json").addWarnings(warnings);
+                    return new AJAXRequestResult(new JSONObject(2).put(Integer.toString(id), jStatus), "json").addWarnings(warnings);
                 }
             }
 
