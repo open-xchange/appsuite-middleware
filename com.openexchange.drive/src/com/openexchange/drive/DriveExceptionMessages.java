@@ -94,6 +94,8 @@ public final class DriveExceptionMessages implements LocalizableStrings {
     public static final String TOO_MANY_FILES_MSG = "The maximum number of files (%1$d) is exceeded in directory \"%2$s\". Please remove some files and try again.";
     public static final String TOKEN_ALREADY_REGISTERED_MSG = "The token \"%1$s\" is already registered.";
     public static final String ZERO_BYTE_FILES_MSG = "Empty files indicated for directory \"%1$s\".";
+    public static final String FILE_ALREADY_EXISTS_MSG = "A file named \"%1$s\" already exists at \"%2$s\".";
+    public static final String DIRECTORY_ALREADY_EXISTS_MSG = "A directory named \"%1$s\" already exists at \"%2$s\".";
 
     /**
      * Prevent instantiation.
