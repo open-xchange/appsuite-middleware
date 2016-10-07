@@ -163,12 +163,8 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
             if (access == null) {
                 performReauthorize(oauthService);
             } else {
-                // The OAuth access is not initialised yet
-                if (access.getOAuthAccount() == null) {
-                    access.initialize();
-                }
-                
-                OAuthAccount cachedOAuthAccount = access.getOAuthAccount();
+                // The OAuth access is not initialised yet; reload from DB, as it may have been changed from another node
+                OAuthAccount cachedOAuthAccount = (access.getOAuthAccount() == null) ? oauthService.getAccount(Integer.parseInt(accountId), session, session.getUserId(), session.getContextId()) : access.getOAuthAccount();
                 if (dbOAuthAccount.getToken().equals(cachedOAuthAccount.getToken()) && dbOAuthAccount.getSecret().equals(cachedOAuthAccount.getSecret())) {
                     performReauthorize(oauthService);
                 } else {
