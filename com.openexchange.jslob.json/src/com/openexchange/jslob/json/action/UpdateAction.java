@@ -57,9 +57,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONUtil;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSONUpdate;
@@ -75,27 +72,6 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-@Action(
-    name = "update"
-    , description = "Updates or sets single elements within the JSlob associated with the current user and context." +
-    		"This can be done in a REST-like fashion. The path info specifies the path to the element that is supposed to be updated" +
-    		"; e.g. /ajax/jslob/the/path/to/element. Then the request body is considered to be the the new value for the addressed element." +
-    		" If non-REST the request body is expected to be a JSON object containing of a \"path\" and \"value\" element with the same " +
-    		"semantics. If the \"path\" element is missing in request's JSON object, that JSON object is completely <b>merged</b> with the" +
-    		" current JSON object representing the user's configuration.<br><br>Examples:<br>" +
-    		"The fastes way of storing a configuration:<br>" +
-    		"PUT /ajax/jslob/myKey?action=update&id=myId<br>" +
-    		"\"MyValue\"\n" +
-    		"<br>" +
-    		"results in a jslob {myKey: \"MyValue\"}"
-    , method = RequestMethod.PUT
-    , parameters = {
-        @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
-        , @Parameter(name = "id", description = "The path of the JSlob.", optional=false)
-    }
-    , requestBody = "A JSON object to perform update or set. If the object contains a path key-value pair update is performed, set otherwise."
-    , responseDescription = "The updated JSlob."
-)
 public final class UpdateAction extends JSlobAction {
 
     private final List<Method> restMethods;
