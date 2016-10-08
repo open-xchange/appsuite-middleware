@@ -147,6 +147,16 @@ public class CalendarUtils {
     }
 
     /**
+     * Gets a value indicating whether an attendee represents an <i>internal</i> entity, i.e. an internal user, group or resource, or not.
+     *
+     * @param attendee The attendee to check
+     * @return <code>true</code> if the attendee is internal, <code>false</code>, otherwise
+     */
+    public static boolean isInternal(Attendee attendee) {
+        return 0 < attendee.getEntity() || 0 == attendee.getEntity() && CalendarUserType.GROUP.equals(attendee.getCuType());
+    }
+
+    /**
      * Gets a value indicating whether a collection of attendees contains a specific internal attendee based on its entity identifier or
      * not.
      *
@@ -337,8 +347,7 @@ public class CalendarUtils {
         List<Attendee> filteredAttendees = new ArrayList<Attendee>(attendees.size());
         for (Attendee attendee : attendees) {
             if (null == cuType || cuType.equals(attendee.getCuType())) {
-                if (null == internal || internal.equals(Boolean.valueOf(
-                    0 < attendee.getEntity() || 0 == attendee.getEntity() && CalendarUserType.GROUP.equals(attendee.getCuType())))) {
+                if (null == internal || internal.booleanValue() == isInternal(attendee)) {
                     filteredAttendees.add(attendee);
                 }
             }
@@ -358,7 +367,7 @@ public class CalendarUtils {
         }
         List<Integer> userIDs = new ArrayList<Integer>(attendees.size());
         for (Attendee attendee : attendees) {
-            if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && 0 < attendee.getEntity()) {
+            if (CalendarUserType.INDIVIDUAL.equals(attendee.getCuType()) && isInternal(attendee)) {
                 userIDs.add(I(attendee.getEntity()));
             }
         }

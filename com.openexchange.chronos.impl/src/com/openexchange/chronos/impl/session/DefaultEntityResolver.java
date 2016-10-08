@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.impl.session;
 
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
@@ -169,7 +170,7 @@ public class DefaultEntityResolver implements EntityResolver {
         Set<Integer> groupsToLoad = new HashSet<Integer>();
         Set<Integer> resourcesToLoad = new HashSet<Integer>();
         for (Attendee attendee : attendees) {
-            if (0 < attendee.getEntity()) {
+            if (isInternal(attendee)) {
                 Integer id = I(attendee.getEntity());
                 switch (attendee.getCuType()) {
                     case GROUP:

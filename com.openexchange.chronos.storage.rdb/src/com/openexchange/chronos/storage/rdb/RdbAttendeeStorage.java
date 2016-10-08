@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -358,7 +359,7 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, objectID);
             stmt.setInt(parameterIndex++, contextID);
-            if (0 < attendee.getEntity()) {
+            if (isInternal(attendee)) {
                 stmt.setInt(parameterIndex++, entity);
                 stmt.setInt(parameterIndex++, Event2Appointment.getParticipantType(attendee.getCuType(), true));
                 stmt.setNull(parameterIndex++, java.sql.Types.VARCHAR);
@@ -405,15 +406,15 @@ public class RdbAttendeeStorage extends RdbStorage implements AttendeeStorage {
 
     /**
      * Determines the next unique entity identifier to use when inserting an entry into the <code>prg_date_rights</code> table. For
-     * "internal" attendees, this is always the (already unique) entity identifier itself. For "external" attendees, the identifier is
-     * always negative and based on the hash code of the URI.
+     * <i>internal</i> attendees, this is always the (already unique) entity identifier itself. For <i>external</i> attendees, the
+     * identifier is always negative and based on the hash code of the URI.
      *
      * @param attendee The attendee to determine the entity for
      * @param usedEntities The so far used entities to avoid hash collisions
      * @return The entity
      */
     private static int determineEntity(Attendee attendee, Set<Integer> usedEntities) {
-        if (0 < attendee.getEntity()) {
+        if (isInternal(attendee)) {
             usedEntities.add((attendee.getEntity()));
             return attendee.getEntity();
         } else {

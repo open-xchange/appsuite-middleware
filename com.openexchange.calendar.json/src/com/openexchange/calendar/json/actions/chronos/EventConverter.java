@@ -695,7 +695,7 @@ public class EventConverter {
                 participants.add(groupParticipant);
                 break;
             case INDIVIDUAL:
-                if (0 < attendee.getEntity()) {
+                if (CalendarUtils.isInternal(attendee)) {
                     UserParticipant userParticipant = new UserParticipant(attendee.getEntity());
                     userParticipant.setConfirm(Event2Appointment.getConfirm(attendee.getPartStat()));
                     userParticipant.setConfirmMessage(attendee.getComment());

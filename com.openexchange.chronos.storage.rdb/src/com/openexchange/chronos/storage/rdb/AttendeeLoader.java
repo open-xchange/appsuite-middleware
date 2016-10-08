@@ -60,7 +60,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -145,7 +144,7 @@ public class AttendeeLoader {
     private int findGroupID(List<Attendee> internalAttendees, int member) throws OXException {
         for (Attendee internalAttendee : filter(internalAttendees, Boolean.TRUE, CalendarUserType.GROUP)) {
             int[] members = entityResolver.getGroupMembers(internalAttendee.getEntity());
-            if (0 <= Arrays.binarySearch(members, member)) {
+            if (com.openexchange.tools.arrays.Arrays.contains(members, member)) {
                 return internalAttendee.getEntity();
             }
         }
