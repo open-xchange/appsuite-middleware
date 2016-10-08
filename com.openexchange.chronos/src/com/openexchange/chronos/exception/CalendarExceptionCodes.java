@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.exception;
 
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.ATTENDEE_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.CONCURRENT_MODIFICATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.END_BEFORE_START_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_NOT_FOUND_MSG;
@@ -87,6 +88,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     EVENT_RECURRENCE_NOT_FOUND("Event recurrence not found [series id %1$d, recurrence id %2$s]", EVENT_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4042),
     /**
+     * <li>The requested attendee was not found.</li>
+     * <li>Attendee not found [attendee %1$s, event %1$d]</li>
+     */
+    ATTENDEE_NOT_FOUND("Attendee not found [attendee %1$s, event %1$d]", ATTENDEE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4043),
+    /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
      * <li>Insufficient read permissions in folder [folder %1$d]</li>
      */
@@ -101,6 +107,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Insufficient delete permissions in folder [folder %1$d]</li>
      */
     NO_DELETE_PERMISSION("Insufficient delete permissions in folder [folder %1$d]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4032),
+    /**
+     * <li>The operation could not be completed due to insufficient permissions.</li>
+     * <li>Forbidden attendee change [id %1$d, attendee %2$s, field %3$s]</li>
+     */
+    FORBIDDEN_ATTENDEE_CHANGE("Forbidden attendee change [id %1$d, attendee %2$s, field %3$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4033),
     /**
      * <li>The operation could not be completed due to a concurrent modification. Please reload the data and try again.</li>
      * <li>Concurrent modification [id %1$d, client timestamp %2$d, actual timestamp %3$d]</li>

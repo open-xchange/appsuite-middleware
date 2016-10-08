@@ -62,9 +62,12 @@ import com.openexchange.chronos.Period;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.EventMapper;
+import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.ldap.User;
 
@@ -100,12 +103,20 @@ public abstract class AbstractOperation {
         this.result = new CalendarResultImpl(session, calendarUser, i(folder)).applyTimestamp(timestamp);
     }
 
+    /**
+     * Prepares a new change exception for a recurring event series.
+     *
+     * @param originalMasterEvent The original master event
+     * @param recurrenceID The recurrence identifier
+     * @return The prepared exception event
+     */
     protected Event prepareException(Event originalMasterEvent, Date recurrenceID) throws OXException {
         Event exceptionEvent = new Event();
         EventMapper.getInstance().copy(originalMasterEvent, exceptionEvent, EventField.values());
         exceptionEvent.setId(storage.nextObjectID());
         exceptionEvent.setRecurrenceId(recurrenceID);
         exceptionEvent.setChangeExceptionDates(Collections.singletonList(recurrenceID));
+        exceptionEvent.setDeleteExceptionDates(null);
         exceptionEvent.setStartDate(recurrenceID);
         exceptionEvent.setEndDate(new Date(recurrenceID.getTime() + new Period(originalMasterEvent).getDuration()));
         Consistency.setCreated(timestamp, exceptionEvent, calendarUser.getId());
@@ -113,6 +124,49 @@ public abstract class AbstractOperation {
         return exceptionEvent;
     }
 
+    /**
+     * <i>Touches</i> an event in the storage by setting it's last modification timestamp and modified-by property to the current
+     * timestamp and calendar user.
+     *
+     * @param id The identifier of the event to <i>touch</i>
+     */
+    protected void touch(int id) throws OXException {
+        Event eventUpdate = new Event();
+        eventUpdate.setId(id);
+        Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
+        storage.getEventStorage().updateEvent(eventUpdate);
+    }
+
+    /**
+     * Adds a specific recurrence identifier to the series master's change exception array and updates the series master event in the
+     * storage. Also, an appropriate update result is added.
+     *
+     * @param originalMasterEvent The original series master event
+     * @param recurrenceID The recurrence identifier of the occurrence to add
+     */
+    protected void addChangeExceptionDate(Event originalMasterEvent, Date recurrenceID) throws OXException {
+        List<Date> changeExceptionDates = new ArrayList<Date>();
+        if (null != originalMasterEvent.getChangeExceptionDates()) {
+            changeExceptionDates.addAll(originalMasterEvent.getChangeExceptionDates());
+        }
+        if (false == changeExceptionDates.add(recurrenceID)) {
+            // TODO throw/log?
+        }
+        Event eventUpdate = new Event();
+        eventUpdate.setId(originalMasterEvent.getId());
+        eventUpdate.setChangeExceptionDates(changeExceptionDates);
+        Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
+        storage.getEventStorage().updateEvent(eventUpdate);
+        result.addUpdate(new UpdateResultImpl(originalMasterEvent, i(folder), loadEventData(originalMasterEvent.getId())));
+    }
+
+    /**
+     * Loads all data for a specific event, including attendees and attachments.
+     *
+     * @param id The identifier of the event to load
+     * @return The event data
+     * @throws OXException {@link CalendarExceptionCodes#EVENT_NOT_FOUND}
+     */
     protected Event loadEventData(int id) throws OXException {
         Event event = storage.getEventStorage().loadEvent(id, null);
         if (null == event) {
@@ -141,6 +195,10 @@ public abstract class AbstractOperation {
         excpetion.setAttendees(storage.getAttendeeStorage().loadAttendees(excpetion.getId()));
         excpetion.setAttachments(storage.getAttachmentStorage().loadAttachments(excpetion.getId()));
         return excpetion;
+    }
+
+    protected UserizedFolder getFolder(int folderID) throws OXException {
+        return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderID), session.getSession(), null);
     }
 
 }

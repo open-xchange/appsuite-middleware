@@ -94,7 +94,7 @@ public interface CalendarService {
 
     CalendarResult updateEvent(CalendarSession session, EventID eventID, UserizedEvent event) throws OXException;
 
-    CalendarResult updateAttendee(CalendarSession session, int folderID, int objectID, Attendee attendee) throws OXException;
+    CalendarResult updateAttendee(CalendarSession session, EventID eventID, Attendee attendee) throws OXException;
 
     Map<EventID, CalendarResult> deleteEvents(CalendarSession session, List<EventID> eventIDs) throws OXException;
 

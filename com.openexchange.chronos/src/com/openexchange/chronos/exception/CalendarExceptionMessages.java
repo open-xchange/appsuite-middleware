@@ -61,6 +61,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String EVENT_NOT_FOUND_MSG = "The requested event was not found.";
 
+    public static final String ATTENDEE_NOT_FOUND_MSG = "The requested attendee was not found.";
+
     public static final String NO_PERMISSION_MSG = "The operation could not be completed due to insufficient permissions.";
 
     public static final String CONCURRENT_MODIFICATION_MSG = "The operation could not be completed due to a concurrent modification. Please reload the data and try again.";

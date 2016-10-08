@@ -257,9 +257,10 @@ public class Check {
      *
      * @param seriesMaster The series master event providing the recurrence information
      * @param recurrenceID The recurrence identifier
+     * @return The passed recurrence identifier, after it was checked for validity
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
-    public static void recurrenceIdExists(Event seriesMaster, Date recurrenceID) throws OXException {
+    public static Date recurrenceIdExists(Event seriesMaster, Date recurrenceID) throws OXException {
         RecurrenceRule rule;
         try {
             rule = new RecurrenceRule(seriesMaster.getRecurrenceRule());
@@ -277,6 +278,7 @@ public class Check {
         if (false == iterator.hasNext() || recurrenceID.getTime() != iterator.nextMillis()) {
             throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(L(recurrenceID.getTime()), seriesMaster.getRecurrenceRule());
         }
+        return recurrenceID;
     }
 
     /**
@@ -303,6 +305,23 @@ public class Check {
             }
         }
         return uid;
+    }
+
+    /**
+     * Checks that a particular attendee exists in an event.
+     *
+     * @param event The event to check
+     * @param attendee The attendee to lookup
+     * @return The successfully looked up attendee
+     * @see CalendarUtils#find(List, Attendee)
+     * @throws OXException {@link CalendarExceptionCodes#ATTENDEE_NOT_FOUND}
+     */
+    public static Attendee attendeeExists(Event event, Attendee attendee) throws OXException {
+        Attendee matchingAttendee = CalendarUtils.find(event.getAttendees(), attendee);
+        if (null == matchingAttendee) {
+            throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(attendee, I(event.getId()));
+        }
+        return matchingAttendee;
     }
 
     /**

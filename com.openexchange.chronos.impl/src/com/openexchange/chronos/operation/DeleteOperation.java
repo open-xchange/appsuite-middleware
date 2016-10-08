@@ -319,12 +319,9 @@ public class DeleteOperation extends AbstractOperation {
         storage.getAttendeeStorage().deleteAttendees(objectID, Collections.singletonList(originalAttendee));
         storage.getAlarmStorage().deleteAlarms(objectID, userID);
         /*
-         * 'touch' event
+         * 'touch' event & add track update result
          */
-        Event eventUpdate = new Event();
-        eventUpdate.setId(objectID);
-        Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
-        storage.getEventStorage().updateEvent(eventUpdate);
+        touch(objectID);
         result.addUpdate(new UpdateResultImpl(originalEvent, i(folder), loadEventData(objectID)));
     }
 
@@ -398,28 +395,6 @@ public class DeleteOperation extends AbstractOperation {
     }
 
     /**
-     * Adds a specific recurrence identifier to the series master's change exception array.
-     *
-     * @param originalMasterEvent The original series master event
-     * @param recurrenceID The recurrence identifier of the occurrence to add
-     */
-    private void addChangeExceptionDate(Event originalMasterEvent, Date recurrenceID) throws OXException {
-        List<Date> changeExceptionDates = new ArrayList<Date>();
-        if (null != originalMasterEvent.getChangeExceptionDates()) {
-            changeExceptionDates.addAll(originalMasterEvent.getChangeExceptionDates());
-        }
-        if (false == changeExceptionDates.add(recurrenceID)) {
-            // TODO throw/log?
-        }
-        Event eventUpdate = new Event();
-        eventUpdate.setId(originalMasterEvent.getId());
-        eventUpdate.setChangeExceptionDates(changeExceptionDates);
-        Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
-        storage.getEventStorage().updateEvent(eventUpdate);
-        result.addUpdate(new UpdateResultImpl(originalMasterEvent, i(folder), loadEventData(originalMasterEvent.getId())));
-    }
-
-    /**
      * Deletes an existing change exception. Besides the removal of the change exception data via {@link #delete(Event)}, this also
      * includes adjusting the master event's change- and delete exception date arrays.
      *
@@ -455,10 +430,7 @@ public class DeleteOperation extends AbstractOperation {
          * 'touch' the series master accordingly
          */
         Event originalMasterEvent = loadEventData(seriesID);
-        Event eventUpdate = new Event();
-        eventUpdate.setId(originalMasterEvent.getId());
-        Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
-        storage.getEventStorage().updateEvent(eventUpdate);
+        touch(seriesID);
         result.addUpdate(new UpdateResultImpl(originalMasterEvent, i(folder), loadEventData(seriesID)));
     }
 
@@ -498,5 +470,5 @@ public class DeleteOperation extends AbstractOperation {
          */
         addChangeExceptionDate(originalMasterEvent, recurrenceID);
     }
-    
+
 }

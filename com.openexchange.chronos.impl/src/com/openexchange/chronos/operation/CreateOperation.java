@@ -228,9 +228,6 @@ public class CreateOperation extends AbstractOperation {
 
     //TODO
     private List<EventConflict> checkConflicts(Event event, List<Attendee> attendees) throws OXException {
-        if (event.containsTransp() && TimeTransparency.TRANSPARENT.equals(event.getTransp())) {
-            return Collections.emptyList();
-        }
         if (isSeriesMaster(event)) {
             //TODO: check for "finished" sequence
         } else {
@@ -241,7 +238,7 @@ public class CreateOperation extends AbstractOperation {
         }
         List<Attendee> checkedAttendees = new ArrayList<Attendee>();
         checkedAttendees.addAll(filter(attendees, Boolean.TRUE, CalendarUserType.RESOURCE));
-        if (false == isIgnoreConflicts(session)) {
+        if (false == isIgnoreConflicts(session) && (false == event.containsTransp() || false == TimeTransparency.TRANSPARENT.equals(event.getTransp()))) {
             checkedAttendees.addAll(filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL));
         }
         if (0 == checkedAttendees.size()) {
@@ -267,7 +264,7 @@ public class CreateOperation extends AbstractOperation {
         List<EventConflict> conflicts = new ArrayList<EventConflict>();
         Period period = new Period(event); // TODO: resolve occurrences
         for (Event conflictingEvent : conflictingEvents) {
-            if (event.getId() == conflictingEvent.getId()) {
+            if (event.getId() == conflictingEvent.getId() || TimeTransparency.TRANSPARENT.equals(event.getTransp())) {
                 continue;
             }
             if (CalendarUtils.isInRange(conflictingEvent, period.getStartDate(), period.getEndDate(), timeZone)) {

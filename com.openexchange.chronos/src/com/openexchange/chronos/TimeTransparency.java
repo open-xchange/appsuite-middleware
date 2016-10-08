@@ -86,4 +86,14 @@ public enum TimeTransparency implements Transp {
         return value;
     }
 
+    /**
+     * Gets a value indicating whether this transparency's value equals another one.
+     *
+     * @param other The transparency to check
+     * @return <code>true</code> if the other transparency's value is equal to this one's, <code>false</code>, otherwise
+     */
+    public boolean equals(Transp other) {
+        return null != other && value.equals(other.getValue());
+    }
+
 }

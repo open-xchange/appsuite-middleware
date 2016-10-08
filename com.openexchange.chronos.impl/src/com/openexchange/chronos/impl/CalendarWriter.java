@@ -85,6 +85,7 @@ import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.operation.CalendarResultImpl;
 import com.openexchange.chronos.operation.CreateOperation;
 import com.openexchange.chronos.operation.DeleteOperation;
+import com.openexchange.chronos.operation.UpdateAttendeeOperation;
 import com.openexchange.chronos.operation.UpdateResultImpl;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
@@ -133,8 +134,9 @@ public class CalendarWriter extends CalendarReader {
         return updateEvent(getFolder(eventID.getFolderID()), eventID.getObjectID(), event, clientTimestamp);
     }
 
-    public CalendarResult updateAttendee(int folderID, int objectID, Attendee attendee) throws OXException {
-        return updateAttendee(getFolder(folderID), objectID, attendee);
+    public CalendarResult updateAttendee(EventID eventID, Attendee attendee, Long clientTimestamp) throws OXException {
+        return UpdateAttendeeOperation.prepare(storage, session, getFolder(eventID.getFolderID()))
+            .perform(eventID.getObjectID(), eventID.getRecurrenceID(), attendee, clientTimestamp);
     }
 
     public CalendarResult deleteEvent(EventID eventID, long clientTimestamp) throws OXException {
@@ -437,96 +439,6 @@ public class CalendarWriter extends CalendarReader {
          * not supported move operation, otherwise
          */
         throw OXException.general("unsupported move");
-    }
-
-    private CalendarResultImpl updateAttendee(UserizedFolder folder, int objectID, Attendee attendee) throws OXException {
-        /*
-         * load original event data & target attendee
-         */
-        Event originalEvent = readAdditionalEventData(storage.getEventStorage().loadEvent(objectID, null), null);
-        if (null == originalEvent) {
-            throw OXException.notFound(String.valueOf(objectID));//TODO
-        }
-        Attendee originalAttendee = find(originalEvent.getAttendees(), attendee);
-        if (null == originalAttendee) {
-            throw OXException.notFound(attendee.toString());//TODO
-        }
-        /*
-         * check current session user's permissions
-         */
-        Check.eventIsInFolder(originalEvent, folder);
-        if (session.getUser().getId() == originalEvent.getCreatedBy()) {
-            requireCalendarPermission(folder, READ_FOLDER, READ_OWN_OBJECTS, WRITE_OWN_OBJECTS, NO_PERMISSIONS);
-        } else {
-            requireCalendarPermission(folder, READ_FOLDER, READ_ALL_OBJECTS, WRITE_ALL_OBJECTS, NO_PERMISSIONS);
-        }
-        User calendarUser = getCalendarUser(folder);
-        if (0 < originalAttendee.getEntity() && calendarUser.getId() != originalAttendee.getEntity() && session.getUser().getId() != originalAttendee.getEntity()) {
-            // TODO: allowed for proxy user? calendarUser.getId() != originalAttendee.getEntity()
-            throw OXException.general("can't confirm for someone else");
-        }
-        /*
-         * determine & check modified fields
-         */
-        Attendee attendeeUpdate = AttendeeMapper.getInstance().getDifferences(originalAttendee, attendee);
-        AttendeeField[] updatedFields = AttendeeMapper.getInstance().getAssignedFields(attendeeUpdate);
-        if (0 == updatedFields.length) {
-            // TODO or throw?
-            return new CalendarResultImpl(session, calendarUser, i(folder)).applyTimestamp(originalEvent.getLastModified()).addUpdate(
-                new UpdateResultImpl(originalEvent, i(folder), originalEvent));
-        }
-        for (AttendeeField field : AttendeeMapper.getInstance().getAssignedFields(attendeeUpdate)) {
-            switch (field) {
-                case FOLDER_ID:
-                    /*
-                     * move to other folder; perform additional checks
-                     */
-                    if (originalAttendee.getFolderID() != i(folder)) {
-                        throw OXException.general("wrong source folder for update");
-                    }
-                    if (PublicType.getInstance().equals(folder.getType())) {
-                        throw OXException.general("not allowed to move event from public to personal folder");
-                    }
-                    UserizedFolder targetFolder = getFolder(attendeeUpdate.getFolderID());
-                    requireCalendarPermission(targetFolder, CREATE_OBJECTS_IN_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
-                    if (session.getUser().getId() == originalEvent.getCreatedBy()) {
-                        requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_OWN_OBJECTS);
-                    } else {
-                        requireCalendarPermission(folder, READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, DELETE_ALL_OBJECTS);
-                    }
-                    if (folder.getCreatedBy() != targetFolder.getCreatedBy()) {
-                        throw OXException.general("not allowed folder change for attendee");
-                    }
-                    break;
-                case CU_TYPE:
-                case ENTITY:
-                case MEMBER:
-                case URI:
-                    throw OXException.general("not allowed change");
-                default:
-                    break;
-            }
-        }
-        /*
-         * perform update
-         */
-        Date now = new Date();
-        AttendeeMapper.getInstance().copy(originalAttendee, attendeeUpdate, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
-        if (session.getUser().getId() != calendarUser.getId() && false == attendeeUpdate.containsSentBy()) {
-            attendeeUpdate.setSentBy(Utils.getCalAddress(session.getUser()));
-        }
-        if (attendeeUpdate.containsFolderID()) {
-            storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, now, calendarUser.getId()));
-            storage.getAttendeeStorage().insertTombstoneAttendee(objectID, AttendeeMapper.getInstance().getTombstone(originalAttendee));
-        }
-        storage.getAttendeeStorage().updateAttendee(objectID, attendeeUpdate);
-        Event eventUpdate = new Event();
-        eventUpdate.setId(objectID);
-        Consistency.setModified(now, eventUpdate, session.getUser().getId());
-        storage.getEventStorage().updateEvent(eventUpdate);
-        Event updatedEvent = readAdditionalEventData(storage.getEventStorage().loadEvent(objectID, null), null);
-        return new CalendarResultImpl(session, calendarUser, i(folder)).applyTimestamp(now).addUpdate(
-            new UpdateResultImpl(originalEvent, i(folder), updatedEvent));
     }
 
 }

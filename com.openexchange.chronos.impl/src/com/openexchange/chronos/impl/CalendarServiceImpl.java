@@ -247,15 +247,16 @@ public class CalendarServiceImpl implements CalendarService {
     }
 
     @Override
-    public CalendarResult updateAttendee(CalendarSession session, final int folderID, final int objectID, final Attendee attendee) throws OXException {
+    public CalendarResult updateAttendee(CalendarSession session, final EventID eventID, final Attendee attendee) throws OXException {
         /*
          * update attendee & notify handlers
          */
+        final Long clientTimestamp = session.get(CalendarParameters.PARAMETER_TIMESTAMP, Long.class);
         return notifyHandlers(new WriteOperation<CalendarResult>(session) {
 
             @Override
             protected CalendarResult execute(CalendarWriter writer) throws OXException {
-                return writer.updateAttendee(folderID, objectID, attendee);
+                return writer.updateAttendee(eventID, attendee, clientTimestamp);
             }
         }.execute());
     }

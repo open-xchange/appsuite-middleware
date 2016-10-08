@@ -50,6 +50,7 @@
 package com.openexchange.calendar.json.actions;
 
 import java.util.Date;
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -65,6 +66,7 @@ import com.openexchange.calendar.json.actions.chronos.EventConverter;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.service.CalendarResult;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventID;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -157,18 +159,31 @@ public final class ConfirmAction extends ChronosAction {
         return new AJAXRequestResult(new JSONObject(0), timestamp, "json");
     }
 
+    private static final Set<String> OPTIONAL_PARAMETERS = com.openexchange.tools.arrays.Collections.unmodifiableSet(AJAXServlet.PARAMETER_TIMESTAMP);
+
+    @Override
+    protected Set<String> getOptionalParameters() {
+        return OPTIONAL_PARAMETERS;
+    }
+
     @Override
     protected AJAXRequestResult perform(CalendarSession session, AppointmentAJAXRequest request) throws OXException, JSONException {
         int objectID = request.checkInt(AJAXServlet.PARAMETER_ID);
         int folderID = request.checkInt(AJAXServlet.PARAMETER_FOLDERID);
-        int recurrenceID = request.optInt(AJAXServlet.PARAMETER_OCCURRENCE);
+        int recurrencePosition = request.optInt(AJAXServlet.PARAMETER_OCCURRENCE);
+        EventID eventID;
+        if (AppointmentAJAXRequest.NOT_FOUND == recurrencePosition) {
+            eventID = new EventID(folderID, objectID);
+        } else {
+            eventID = getEventConverter().getEventID(session, folderID, objectID, recurrencePosition);
+        }
         JSONObject jsonObject = request.getData();
         ConfirmableParticipant participant = new ParticipantParser().parseConfirmation(true, jsonObject);
         Attendee attendee = EventConverter.getAttendee(participant);
         if ((0 == participant.getType() || Participant.USER == participant.getType()) && 0 == participant.getIdentifier()) {
             attendee.setEntity(jsonObject.has(AJAXServlet.PARAMETER_ID) ? jsonObject.getInt(AJAXServlet.PARAMETER_ID) : session.getUser().getId());
         }
-        CalendarResult result = session.getCalendarService().updateAttendee(session, folderID, objectID, attendee);
+        CalendarResult result = session.getCalendarService().updateAttendee(session, eventID, attendee);
         return new AJAXRequestResult(new JSONObject(0), result.getTimestamp(), "json");
     }
 
