@@ -88,6 +88,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.mail.AbstractMailDriveResourceAccess;
 import com.openexchange.file.storage.mail.FullName;
@@ -450,6 +451,8 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                                 }
                                 MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, rootFolderId, fields);
                                 if (null != mailDriveFile) {
+                                    mailDriveFile.setId(new FileID(com.openexchange.file.storage.mail.MailDriveConstants.ID, com.openexchange.file.storage.mail.MailDriveConstants.ACCOUNT_ID, fullName.getFolderId(), Long.toString(uid)).toUniqueID());
+                                    mailDriveFile.setFolderId(new FolderID(com.openexchange.file.storage.mail.MailDriveConstants.ID, com.openexchange.file.storage.mail.MailDriveConstants.ACCOUNT_ID, fullName.getFolderId()).toUniqueID());
                                     files.add(mailDriveFile);
                                 }
                             }
@@ -493,6 +496,8 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                             }
                             MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, rootFolderId, fields);
                             if (null != mailDriveFile) {
+                                mailDriveFile.setId(new FileID(com.openexchange.file.storage.mail.MailDriveConstants.ID, com.openexchange.file.storage.mail.MailDriveConstants.ACCOUNT_ID, fullName.getFolderId(), Long.toString(uid)).toUniqueID());
+                                mailDriveFile.setFolderId(new FolderID(com.openexchange.file.storage.mail.MailDriveConstants.ID, com.openexchange.file.storage.mail.MailDriveConstants.ACCOUNT_ID, fullName.getFolderId()).toUniqueID());
                                 files.add(mailDriveFile);
                             }
                         }
