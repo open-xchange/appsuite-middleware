@@ -413,7 +413,6 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
             IMAPStore imapStore = messageStorage.getImapStore();
 
             int userId = session.getUserId();
-            String rootFolderId = MailFolder.DEFAULT_FOLDER_ID;
 
             files = new LinkedList<File>();
             if (fullNames.size() > 1) {
@@ -440,20 +439,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                             // Fetch messages
                             imapFolder.fetch(messages, FETCH_PROFILE_VIRTUAL);
 
-                            int i = 0;
-                            for (int k = messages.length; k-- > 0;) {
-                                IMAPMessage message = (IMAPMessage) messages[i++];
-                                long uid = message.getUID();
-                                if (uid < 0) {
-                                    uid = imapFolder.getUID(message);
-                                }
-                                MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, rootFolderId, fields);
-                                if (null != mailDriveFile) {
-                                    mailDriveFile.setId(new FileID(com.openexchange.file.storage.mail.MailDriveConstants.ID, com.openexchange.file.storage.mail.MailDriveConstants.ACCOUNT_ID, fullName.getFolderId(), Long.toString(uid)).toUniqueID());
-                                    mailDriveFile.setFolderId(new FolderID(com.openexchange.file.storage.mail.MailDriveConstants.ID, com.openexchange.file.storage.mail.MailDriveConstants.ACCOUNT_ID, fullName.getFolderId()).toUniqueID());
-                                    files.add(mailDriveFile);
-                                }
-                            }
+                            files = convertMessagesToFiles(fields, userId, fullName, imapFolder, messages);
                         }
                     } finally {
                         imapFolder.close(false);
@@ -485,20 +471,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                         // Fetch messages
                         imapFolder.fetch(messages, FETCH_PROFILE_VIRTUAL);
 
-                        int i = 0;
-                        for (int k = messages.length; k-- > 0;) {
-                            IMAPMessage message = (IMAPMessage) messages[i++];
-                            long uid = message.getUID();
-                            if (uid < 0) {
-                                uid = imapFolder.getUID(message);
-                            }
-                            MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, rootFolderId, fields);
-                            if (null != mailDriveFile) {
-                                mailDriveFile.setId(new FileID(com.openexchange.file.storage.mail.MailDriveConstants.ID, com.openexchange.file.storage.mail.MailDriveConstants.ACCOUNT_ID, fullName.getFolderId(), Long.toString(uid)).toUniqueID());
-                                mailDriveFile.setFolderId(new FolderID(com.openexchange.file.storage.mail.MailDriveConstants.ID, com.openexchange.file.storage.mail.MailDriveConstants.ACCOUNT_ID, fullName.getFolderId()).toUniqueID());
-                                files.add(mailDriveFile);
-                            }
-                        }
+                        files = convertMessagesToFiles(fields, userId, fullName, imapFolder, messages);
                     }
                 } finally {
                     imapFolder.close(false);
@@ -549,6 +522,26 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
             results.add(new FileDocument(file));
         }
         return new SearchResult(-1, searchRequest.getStart(), results, searchRequest.getActiveFacets());
+    }
+
+    private List<File> convertMessagesToFiles(List<Field> fields, int userId, FullName fullName, IMAPFolder imapFolder, Message[] messages) throws MessagingException, OXException {
+        List<File> files = new LinkedList<>();
+        String rootFolderId = MailFolder.DEFAULT_FOLDER_ID;
+        int i = 0;
+        for (int k = messages.length; k-- > 0;) {
+            IMAPMessage message = (IMAPMessage) messages[i++];
+            long uid = message.getUID();
+            if (uid < 0) {
+                uid = imapFolder.getUID(message);
+            }
+            MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, rootFolderId, fields);
+            if (null != mailDriveFile) {
+                mailDriveFile.setId(new FileID(com.openexchange.file.storage.mail.MailDriveConstants.ID, com.openexchange.file.storage.mail.MailDriveConstants.ACCOUNT_ID, fullName.getFolderId(), Long.toString(uid)).toUniqueID());
+                mailDriveFile.setFolderId(new FolderID(com.openexchange.file.storage.mail.MailDriveConstants.ID, com.openexchange.file.storage.mail.MailDriveConstants.ACCOUNT_ID, fullName.getFolderId()).toUniqueID());
+                files.add(mailDriveFile);
+            }
+        }
+        return files;
     }
 
     private SortTerm[] getSortTermsBy(SearchRequest searchRequest) {
