@@ -164,10 +164,8 @@ public class WebSocketsCapabilityTracker implements ServiceTrackerCustomizer<Obj
 
                     ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
                     ComposedConfigProperty<Boolean> property = view.property("com.openexchange.websockets.enabled", boolean.class);
-
                     if (null == property || !property.isDefined()) {
-                        // Default is "true"
-                        return true;
+                        return false;
                     }
 
                     return property.get().booleanValue();

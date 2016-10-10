@@ -2,7 +2,7 @@
   put:
     operationId: updateInfoItem
     tags:
-      - Infostore
+      - infostore
     summary: Updates an infoitem.
     description: |
       Updates an infoitem's data. This request cannot change or add files. Therefore it
@@ -34,18 +34,18 @@
       200:
         description: |
           A JSON object with the object ID of the updated infoitem. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/InfoItemUpdateResponse"
   post:
     operationId: updateInfoItemAdvanced
     tags:
-      - Infostore
+      - infostore
     summary: Updates an infoitem.
     description: |
       Updates an infoitem's data and file. The normal request body must be placed as form-data using the
       content-type `multipart/form-data`. The form field `json` contains the infoitem's data while the file
-      must be placed in a file field named `file` (see also [File uploads](#file-uploads)).
+      must be placed in a file field named `file` (see also [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads)).
     consumes:
       - multipart/form-data
     produces:
@@ -66,12 +66,12 @@
       - in: query
         name: offset
         type: integer
-        description: Optionally sets the start offset in bytes where to append the data to the document, must be equal to the actual document's length. Only available if the underlying File storage account supports the "RANDOM_FILE_ACCESS" capability.
+        description: Optionally sets the start offset in bytes where to append the data to the document, must be equal to the actual document's length (available since v7.8.1). Only available if the underlying File storage account supports the "RANDOM_FILE_ACCESS" capability.
         required: false
       - in: formData
         name: json
         type: string
-        description: Represents the normal request body as JSON string containing the infoitem's data (See InfoItemBody model of the [newInfoItem](#infostore/createInfoItem) request). Only modified fields must be specified but at least "{}".
+        description: Represents the normal request body as JSON string containing the infoitem's data as described in the [InfoItemBody](#/definitions/InfoItemBody) model. Only modified fields must be specified but at least "{}".
         required: true
         default: "{}"
       - in: formData
@@ -82,6 +82,6 @@
     responses:
       200:
         description: |
-          A HTML page as described in [File uploads](#file-uploads) containing the object ID of the infoitem or errors if some occurred.
+          A HTML page as described in [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) containing the object ID of the infoitem or errors if some occurred.
         schema:
           type: string

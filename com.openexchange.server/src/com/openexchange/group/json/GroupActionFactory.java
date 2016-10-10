@@ -54,6 +54,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.json.actions.AbstractGroupAction;
 import com.openexchange.server.ServiceLookup;
@@ -63,6 +64,7 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Module(name = "group", description = "The group module allows to query available groups. It is mainly used by the dialog for the selection of participants.")
 @com.openexchange.ajax.requesthandler.Module(actions = {"get","all","list","search","updates"})
 public class GroupActionFactory implements AJAXActionServiceFactory {
 

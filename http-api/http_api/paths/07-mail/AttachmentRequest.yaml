@@ -2,7 +2,7 @@
   get:
     operationId: getMailAttachment
     tags:
-      - Mail
+      - mail
     summary: Gets a mail attachment.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

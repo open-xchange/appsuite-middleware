@@ -2,8 +2,8 @@
   get:
     operationId: getCapability
     tags:
-      - Capabilities
-    summary: Gets a capability.
+      - capabilities
+    summary: Gets a capability (**available since v7.4.2**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
@@ -15,6 +15,6 @@
       200:
         description: |
           A JSON object containing the data of the capability or an empty result, if capability not available. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/CapabilityResponse"

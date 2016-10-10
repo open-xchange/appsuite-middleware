@@ -69,11 +69,6 @@ public final class GoogleDriveConstants implements FileStorageConstants {
      * The identifier for Google Drive file storage service.
      */
     public static final String ID = "googledrive";
-    
-    /**
-     * The display name for Google Drive file storage service.
-     */
-    public static final String DISPLAY_NAME = "Google Drive File Storage Service";
 
     /**
      * The special MIME type marking a file as a directory.

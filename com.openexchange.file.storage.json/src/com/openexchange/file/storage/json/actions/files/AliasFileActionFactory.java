@@ -49,11 +49,15 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import com.openexchange.documentation.annotations.Module;
+
+
 /**
  * {@link AliasFileActionFactory}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Module(name = "files", description = "The files module.")
 public final class AliasFileActionFactory extends FileActionFactory {
 
     /**

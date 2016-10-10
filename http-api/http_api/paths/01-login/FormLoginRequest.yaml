@@ -2,8 +2,8 @@
   post:
     operationId: doFormLogin
     tags:
-      - Login
-    summary: Login to the web frontend using a simple HTML form.
+      - login
+    summary: Login to the web frontend using a simple HTML form (**available since v6.20**).
     description: |
       This request implements a possible login to the web frontend by only using a simple HTML form.
       The response contains a redirect link to the Web-UI. See [OXSessionFormLogin](http://oxpedia.org/wiki/index.php?title=OXSessionFormLogin) for details.

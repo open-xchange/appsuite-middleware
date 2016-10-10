@@ -55,6 +55,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.parser.FolderParser;
 import com.openexchange.folder.json.services.ServiceRegistry;
@@ -77,6 +80,13 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "new", description = "Create a folder", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "folder_id", description = "The parent folder of the newly created folder."),
+    @Parameter(name = "tree", description = "(Preliminary) The identifier of the folder tree. If missing '0' (primary folder tree) is assumed."),
+    @Parameter(name = "allowed_modules", description = "(Preliminary) An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered.")
+}, requestBody = "Folder object as described in Common folder data and Detailed folder data. The field id should not be present. Provided that permission is granted to create a folder, its module is bound to the limitation, that the new folder's module must be equal to parent folder's module except that: Parent folder is one of the system folders private, public, or shared. Below these folders task, calendar, and contact modules are permitted. Parent folder's module is one of task, calendar, or contact. Below this kind of folders task, calendar, and contact modules are permitted.",
+responseDescription = "Object ID of the newly created folder.")
 @OAuthAction(OAuthAction.CUSTOM)
 public final class CreateAction extends AbstractFolderAction {
 

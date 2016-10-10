@@ -101,10 +101,10 @@ public class IMAPInputStream extends InputStream {
 		msg.getProtocol().noop();
 	    } catch (ConnectionException cex) {
 		throw new FolderClosedIOException(msg.getFolder(),
-						cex.getMessage(), cex);
+						cex.getMessage());
 	    } catch (FolderClosedException fex) {
 		throw new FolderClosedIOException(fex.getFolder(),
-						fex.getMessage(), fex);
+						fex.getMessage());
 	    } catch (ProtocolException pex) {
 		// ignore it
 	    }
@@ -210,7 +210,7 @@ public class IMAPInputStream extends InputStream {
      * the return value to insure that they have obtained the
      * requisite number of bytes.
      */
-    public synchronized int read(byte b[], int off, int len)
+    public synchronized int read(byte b[], int off, int len) 
 		throws IOException {
 
 	int avail = bufcount - bufpos;

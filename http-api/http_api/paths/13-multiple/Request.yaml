@@ -5,7 +5,7 @@
   put:
     operationId: process
     tags:
-      - Multiple
+      - multiple
     summary: Processes multiple requests to other modules in a single request.
     description: |
       #### Not supported requests are:
@@ -44,6 +44,8 @@
       200:
         description: A JSON array containing the response data of the processed requests where response[0] corresponds to request[0], response[1] to request[1], and so on.
         schema:
-          $ref: "#/definitions/MultipleResponse"
+          type: array
+          items:
+            $ref: "#/definitions/SingleResponse"
       400:
         description: Syntactically incorrect request.

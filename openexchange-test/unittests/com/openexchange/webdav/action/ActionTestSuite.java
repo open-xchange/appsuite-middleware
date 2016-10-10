@@ -1,9 +1,9 @@
 package com.openexchange.webdav.action;
 
-import com.openexchange.webdav.action.ifheader.IgnoreLocksIfHeaderApplyTest;
-import com.openexchange.webdav.action.ifheader.StandardIfHeaderApplyTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import com.openexchange.webdav.action.ifheader.IgnoreLocksIfHeaderApplyTest;
+import com.openexchange.webdav.action.ifheader.StandardIfHeaderApplyTest;
 
 public class ActionTestSuite {
 	public static Test suite(){
@@ -31,7 +31,6 @@ public class ActionTestSuite {
 		tests.addTestSuite(IgnoreLocksIfHeaderApplyTest.class);
         tests.addTestSuite(Bug33505Test.class);
         tests.addTestSuite(Bug34283Test.class);
-        tests.addTestSuite(Bug49057Test.class);
 		return tests;
 	}
 }

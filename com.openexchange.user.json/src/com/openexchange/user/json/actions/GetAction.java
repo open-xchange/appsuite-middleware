@@ -55,6 +55,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.contacts.json.mapping.ContactMapper;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -70,6 +73,10 @@ import com.openexchange.user.json.UserContact;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@Action(method = RequestMethod.GET, name = "get", description = "Get a user.", parameters = {
+		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+		@Parameter(name = "id", optional = true, description = "Object ID of the requested user. Since v6.18.1, this parameter is optional: the default is the currently logged in user.")
+}, responseDescription = "Response with timestamp: An object containing all data of the requested user. The fields of the object are listed in Common object data, Detailed contact data and Detailed user data.")
 public final class GetAction extends AbstractUserAction {
 
     /**

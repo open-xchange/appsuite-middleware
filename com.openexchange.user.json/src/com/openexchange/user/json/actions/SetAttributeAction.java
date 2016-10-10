@@ -54,6 +54,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
@@ -66,6 +69,12 @@ import com.openexchange.user.UserService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "setAttribute", description = "Set user attribute (available with v6.20).", parameters = {
+		@Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+		@Parameter(name = "id", description = "ID of the user."),
+		@Parameter(name = "setIfAbsent", description = "Set to \"true\" to put the value only if the specified name is not already associated with a value, otherwise \"false\" to put value in any case.")
+}, requestBody = "A JSON object providing name and value of the attribute. If the \"value\" field id missing or NULL, the attribute is removed.",
+responseDescription = "The boolean value \"true\" if PUT was successful; otherwise \"false\".")
 public final class SetAttributeAction extends AbstractUserAction {
 
     /**

@@ -57,6 +57,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSONPathElement;
 import com.openexchange.jslob.JSlob;
@@ -71,6 +74,31 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
+@Action(
+    name = "get"
+    , description = "Get a specific JSlob associated with the current user and context.<br><br>Examples:<br>" +
+    		"Consider the first element of a config cascade preference path to be the id of the jslob:<br>" +
+    		"<br>" +
+    		"ui/somekey = somevalue\n" +
+    		"<br>" +
+    		"results in<br>" +
+    		"<br>" +
+    		"GET /ajax/jslob?action=get&id=ui<br>" +
+    		"<br>" +
+    		"{\"somekey\": \"somevalue\"} <br>" +
+    		"<br>" +
+    		"while currently all config cascade properties are mixed into every JSLob" +
+    		"<br><br>" +
+    		"Or in a REST-like fashion vie GET request:<br>" +
+    		"GET /ajax/jslob/ui" +
+    		"<br>" +
+            "{\"somekey\": \"somevalue\"} <br>"
+    , method = RequestMethod.GET
+    , parameters = {
+        @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
+        , @Parameter(name = "id", description = "The identifier of the JSlob.")
+    }
+)
 public final class GetAction extends JSlobAction {
 
     private final List<Method> restMethods;

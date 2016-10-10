@@ -65,30 +65,16 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
      * Cluster is locked for action \"%1$s\". Try again later.
      */
     CLUSTER_LOCKED("Cluster is locked for action \"%1$s\". Try again later.", Category.CATEGORY_TRY_AGAIN, 1),
+
     /**
      * Cluster is locked for the period \"%1$s\" for action \"%2$s\". Try again in \"%3$s.
      */
-    CLUSTER_PERIODIC_LOCKED("Cluster is locked for the period \"%1$s\" for action \"%2$s\". Try again in \"%3$s.", Category.CATEGORY_TRY_AGAIN, 2),
+    CLUSTER_PERIODIC_LOCKED("Cluster is locked for the period \"%1$s\" for action \"%2$s\". Try again in \"%3$s.", Category.CATEGORY_TRY_AGAIN, 2), 
+    
     /**
      * Timed-out while waiting to acquire lock. Try again
      */
     TIMEOUT("Timed-out while waiting to acquire lock. Try again", CATEGORY_TRY_AGAIN, 3),
-    /**
-     * Interrupted while trying to acquire a cluster lock for the cluster task '%1$s'
-     */
-    INTERRUPTED("Interrupted while trying to acquire a cluster lock for the cluster task '%1$s'", CATEGORY_ERROR, 4),
-    /**
-     * Unable to acquire cluster lock for the cluster task '%1$s' on this node (waiting time of '%2$s' %3$s expired). Another node is currently performing the same task. Try again later.
-     */
-    UNABLE_TO_ACQUIRE_CLUSTER_LOCK_EXPIRED("Unable to acquire cluster lock for the cluster task '%1$s' on this node (waiting time of '%2$s' %3$s expired). Another node is currently performing the same task. Try again later.", Category.CATEGORY_TRY_AGAIN, 5),
-    /**
-     * Unable to acquire cluster lock for the cluster task '%1$s' on this node. Another node is currently performing the same task. Try again later.
-     */
-    UNABLE_TO_ACQUIRE_CLUSTER_LOCK("Unable to acquire cluster lock for the cluster task '%1$s' on this node. Another node is currently performing the same task. Try again later.", ClusterLockExceptionMessages.UNABLE_TO_ACQUIRE_CLUSTER_LOCK, CATEGORY_TRY_AGAIN, 6),
-    /**
-     * An SQL error occurred: %1$s
-     */
-    SQL_ERROR("An SQL error occurred: %1$s", CATEGORY_ERROR, 7)
 
     ;
 
@@ -104,13 +90,6 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
 
     private ClusterLockExceptionCodes(final String message, final Category category, final int detailNumber) {
         this.message = message;
-        this.category = category;
-        this.number = detailNumber;
-    }
-
-    private ClusterLockExceptionCodes(final String message, String displayMessage, final Category category, final int detailNumber) {
-        this.message = message;
-        this.displayMessage = displayMessage;
         this.category = category;
         this.number = detailNumber;
     }
@@ -136,7 +115,6 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
 
     /*
      * (non-Javadoc)
-     * 
      * @see com.openexchange.exception.OXExceptionCode#equals(com.openexchange.exception.OXException)
      */
     @Override
@@ -146,7 +124,6 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
 
     /*
      * (non-Javadoc)
-     * 
      * @see com.openexchange.exception.OXExceptionCode#getNumber()
      */
     @Override
@@ -156,7 +133,6 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
 
     /*
      * (non-Javadoc)
-     * 
      * @see com.openexchange.exception.OXExceptionCode#getCategory()
      */
     @Override
@@ -166,7 +142,6 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
 
     /*
      * (non-Javadoc)
-     * 
      * @see com.openexchange.exception.OXExceptionCode#getPrefix()
      */
     @Override
@@ -176,7 +151,6 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
 
     /*
      * (non-Javadoc)
-     * 
      * @see com.openexchange.exception.OXExceptionCode#getMessage()
      */
     @Override
@@ -186,7 +160,6 @@ public enum ClusterLockExceptionCodes implements DisplayableOXExceptionCode {
 
     /*
      * (non-Javadoc)
-     * 
      * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
      */
     @Override

@@ -2,8 +2,8 @@
   get:
     operationId: checkName
     tags:
-      - Infostore
-    summary: Checks if a given file name is valid.
+      - infostore
+    summary: Checks if a given file name is valid (**available since v7.8.1, preliminary**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
@@ -15,6 +15,6 @@
       200:
         description: |
           An empty JSON object when file name is valid. In case of errors the responsible fields in the
-          response are filled (see [Error handling](#error-handling)).
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/CommonResponse"

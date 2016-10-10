@@ -2,17 +2,13 @@ type: object
 properties:
   bits:
     type: integer
-    description: A number specifying the permission flags.
-    enum: 
-      - 0 (the numerical value indicating no object permissions)
-      - 1 (the numerical value indicating read object permissions)
-      - '2 (the numerical value indicating write object permissions. This implicitly includes the “read” permission (this is no bitmask))'
+    description: 'A number specifying the permission flags: 0 (the numerical value indicating no object permissions), 1 (the numerical value indicating read object permissions), 2 (the numerical value indicating write object permissions. This implicitly includes the “read” permission (this is no bitmask)).'
   entity:
     type: integer
     description: User ID of the user or group to which this permission applies.
   group:
     type: boolean
-    description: 'Is `true` if entity refers to a group, `false` if it refers to a user.'
+    description: Is true if entity refers to a group, false if it refers to a user.
   type:
     type: string
     description: The recipient type, i.e. one of "user", "group", "guest", "anonymous" (required if no internal "entity" defined).

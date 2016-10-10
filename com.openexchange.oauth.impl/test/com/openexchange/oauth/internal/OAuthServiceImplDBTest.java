@@ -116,7 +116,7 @@ public class OAuthServiceImplDBTest extends SQLTestCase {
             }
 
             @Override
-            public Set<OAuthScope> getAvailableScopes(int userId, int ctxId) {
+            public Set<OAuthScope> getAvailableScopes() {
                 return Collections.emptySet();
             }
 

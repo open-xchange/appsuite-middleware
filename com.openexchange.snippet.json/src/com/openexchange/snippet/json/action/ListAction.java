@@ -55,6 +55,8 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
@@ -68,6 +70,14 @@ import com.openexchange.snippet.json.SnippetRequest;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(
+    name = "list"
+    , description = "Get a list of snippets associated with the current user and context."
+    , method = RequestMethod.PUT
+    , parameters = {}
+    , requestBody = "An array containing snippet identifiers."
+    , responseDescription = "An array containing snippets."
+)
 public final class ListAction extends SnippetAction {
 
     /**

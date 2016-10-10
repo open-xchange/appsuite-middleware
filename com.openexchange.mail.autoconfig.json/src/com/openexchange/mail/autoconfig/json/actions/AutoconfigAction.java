@@ -69,8 +69,4 @@ public abstract class AutoconfigAction implements AJAXActionService {
     protected AutoconfigService getAutoconfigService() {
         return services.getService(AutoconfigService.class);
     }
-
-    protected <S> S getService(Class<? extends S> clazz) {
-        return services.getService(clazz);
-    }
 }

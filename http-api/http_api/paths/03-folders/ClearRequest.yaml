@@ -2,7 +2,7 @@
   put:
     operationId: clearFolders
     tags:
-      - Folders
+      - folders
     summary: Clears the content of a list of folders.
     consumes:
       - application/json
@@ -23,6 +23,6 @@
         description: |
           A JSON array containing the IDs of folders that could not be cleared due to a concurrent modification.
           Meaning you receive an empty JSON array if everything worked well. In case of errors the responsible
-          fields in the response are filled (see [Error handling](#error-handling)).
+          fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/FoldersCleanUpResponse"

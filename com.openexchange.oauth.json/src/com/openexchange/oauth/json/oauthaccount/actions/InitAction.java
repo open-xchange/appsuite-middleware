@@ -70,6 +70,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -96,6 +99,11 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a> (refactoring)
  */
+@Action(method = RequestMethod.GET, name = "init", description = "Initialize creation of an OAuth account", parameters = { 
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."), 
+    @Parameter(name = "serviceId", description = "The service meta data identifier; e.g. \"com.openexchange.oauth.twitter\""), 
+    @Parameter(name = "scopes", description = "A space separated list with scopes"),
+}, responseDescription = "An JSON representation of the resulting interaction providing needed information to complete account creation. See OAuth interaction data.")
 public final class InitAction extends AbstractOAuthTokenAction {
 
     /**
@@ -126,7 +134,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
 
     /**
      * Creates an <code>init?action=create</code> call-back action
-     *
+     * 
      * @param request The {@link AJAXRequestData}
      * @param session The server session
      * @return the {@link AJAXRequestResult} containing the {@link OAuthInteraction} as a {@link JSONObject}
@@ -171,7 +179,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
 
     /**
      * Creates an <code>init?action=reauthorize</code> call-back action
-     *
+     * 
      * @param request The {@link AJAXRequestData}
      * @param session The server session
      * @return the {@link AJAXRequestResult} containing the {@link OAuthInteraction} as a {@link JSONObject}
@@ -196,7 +204,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
 
     /**
      * Processes and invokes the {@link OAuthInteraction}
-     *
+     * 
      * @param request The {@link AJAXRequestData}
      * @param session The server {@link Session}
      * @param action The action of the <code>init</code> call
@@ -272,7 +280,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
 
     /**
      * Composes the call-back URL
-     *
+     * 
      * @param request The {@link AJAXRequestData}
      * @param session The server {@link Session}
      * @param action The action of the <code>init</code> call
@@ -311,7 +319,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
 
     /**
      * URL encodes the specified string
-     *
+     * 
      * @param s The string to URL encode
      * @return The URL encoded string
      */
@@ -326,7 +334,7 @@ public final class InitAction extends AbstractOAuthTokenAction {
     /**
      * Determines the host. Starts by the {@link HostnameService}, then from the specified {@link AJAXRequestData},
      * then Java and sets it to localhost as a last resort.
-     *
+     * 
      * @param requestData The {@link AJAXRequestData}
      * @param session The groupware {@link Session}
      * @return The hostname

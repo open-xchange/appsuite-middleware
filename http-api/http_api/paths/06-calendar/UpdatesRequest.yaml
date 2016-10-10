@@ -2,7 +2,7 @@
   get:
     operationId: getAppointmentUpdates
     tags:
-      - Calendar
+      - calendar
     summary: Gets updated appointments.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -41,7 +41,7 @@
       - in: query
         name: showPrivate
         type: boolean
-        description: 'Only works in shared folders: When enabled, shows private appointments of the folder owner. Such appointments are anonymized by stripping away all information except start date, end date and recurrence information.'
+        description: 'Only works in shared folders: When enabled, shows private appointments of the folder owner. Such appointments are anonymized by stripping away all information except start date, end date and recurrence information (since 6.18)'
         required: false
     responses:
       200:
@@ -52,6 +52,6 @@
           by their object IDs as integers, without being part of a nested array. Appointment sequencies are broken up
           into individual appointments and each modified occurrence of a sequence in the requested range is returned
           separately. The appointments are sorted in ascending order by the field start_date. In case of errors the
-          responsible fields in the response are filled (see [Error handling](#error-handling)).
+          responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/AppointmentUpdatesResponse"

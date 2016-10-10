@@ -67,9 +67,9 @@ public interface MimeMailExceptionHandler {
      * Handles given exception.
      *
      * @param me The exception to handle
-     * @param mailConfig The optional mail configuration of the affected user
-     * @param session The optional session of the affected user
-     * @param folder The optional folder involved with failed operation
+     * @param mailConfig The optional mail config
+     * @param session The optional session
+     * @param folder The optional folder
      * @return An appropriate {@link OXException} instance or <code>null</code>
      */
     OXException handle(MessagingException me, MailConfig mailConfig, Session session, Folder folder);

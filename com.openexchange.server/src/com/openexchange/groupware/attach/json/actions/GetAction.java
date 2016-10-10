@@ -54,6 +54,9 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.AttachmentWriter;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.ldap.User;
@@ -68,6 +71,13 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.GET, name = "get", description = "Get an attachment.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "folder", description = "Object ID of the folder, whose contents are queried."),
+    @Parameter(name = "attached", description = "Object ID of the object to which the attachments are attached."),
+    @Parameter(name = "module", description = "Module ID (as per Attachment object) of the attached object."),
+    @Parameter(name = "id", description = "Object ID of the requested attachment.")
+}, responseDescription = "Response with timestamp: An object containing all data of the requested attachment. The fields of the object are listed in Common object data (with only id, created_by and creation_date available) and Attachment object.")
 public final class GetAction extends AbstractAttachmentAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetAction.class);

@@ -1,4 +1,3 @@
-
 /*
  *
  *    OPEN-XCHANGE legal information
@@ -58,28 +57,25 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Google2Api;
-import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
-import com.openexchange.cluster.lock.ClusterLockService;
-import com.openexchange.cluster.lock.ClusterTask;
-import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.services.Services;
 import com.openexchange.java.Strings;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractReauthorizeClusterTask;
+import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
+
 
 /**
  * {@link GoogleApiClients} - Utility class for Google API client.
@@ -142,8 +138,20 @@ public class GoogleApiClients {
                 int expiry = scribeOAuthService.getExpiry(defaultAccount.getToken());
                 if (expiry < 300) {
                     // Less than 5 minutes to live -> refresh token!
-                    ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-                    defaultAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, defaultAccount), new ExponentialBackOffRetryPolicy());
+                    String refreshToken = defaultAccount.getSecret();
+                    Token accessToken = scribeOAuthService.getAccessToken(new Token(defaultAccount.getToken(), defaultAccount.getSecret()), null);
+                    if (!Strings.isEmpty(accessToken.getSecret())) {
+                        refreshToken = accessToken.getSecret();
+                    }
+                    // Update account
+                    int accountId = defaultAccount.getId();
+                    Map<String, Object> arguments = new HashMap<String, Object>(3);
+                    arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
+                    arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
+                    oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId(), defaultAccount.getEnabledScopes());
+
+                    // Reload
+                    defaultAccount = oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
                 }
             } catch (org.scribe.exceptions.OAuthException e) {
                 // Failed to request new access token
@@ -205,8 +213,19 @@ public class GoogleApiClients {
             int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
             if (expiry < 300) {
                 // Less than 5 minutes to live -> refresh token!
-                ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-                googleAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount), new ExponentialBackOffRetryPolicy());
+                String refreshToken = googleAccount.getSecret();
+                Token accessToken = scribeOAuthService.getAccessToken(new Token(googleAccount.getToken(), googleAccount.getSecret()), null);
+                if (!Strings.isEmpty(accessToken.getSecret())) {
+                    refreshToken = accessToken.getSecret();
+                }
+                // Update account
+                Map<String, Object> arguments = new HashMap<String, Object>(3);
+                arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
+                arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
+                oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId(), googleAccount.getEnabledScopes());
+
+                // Reload
+                googleAccount = oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
             }
         }
 
@@ -244,7 +263,7 @@ public class GoogleApiClients {
      * @return The non-expired candidate or <code>null</code> if given account appears to have enough time left
      * @throws OXException If a non-expired candidate cannot be returned
      */
-    public static OAuthAccount ensureNonExpiredGoogleAccount(final OAuthAccount googleAccount, final Session session) throws OXException {
+    public static OAuthAccount ensureNonExpiredGoogleAccount(OAuthAccount googleAccount, Session session) throws OXException {
         if (null == googleAccount) {
             return googleAccount;
         }
@@ -258,7 +277,7 @@ public class GoogleApiClients {
         // Create Scribe Google OAuth service
         final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
         serviceBuilder.apiKey(googleAccount.getMetaData().getAPIKey(session)).apiSecret(googleAccount.getMetaData().getAPISecret(session));
-        final Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
+        Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
 
         // Check expiry
         int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
@@ -267,8 +286,37 @@ public class GoogleApiClients {
             return null;
         }
 
-        ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
-        return clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount), new ExponentialBackOffRetryPolicy());
+        // Less than 5 minutes to live -> refresh token!
+        String refreshToken = googleAccount.getSecret();
+        Token accessToken;
+        try {
+            accessToken = scribeOAuthService.getAccessToken(new Token(googleAccount.getToken(), googleAccount.getSecret()), null);
+        } catch (org.scribe.exceptions.OAuthException e) {
+            String message = e.getMessage();
+            String errorMsg = parseErrorFrom(message);
+            if (Strings.isEmpty(errorMsg)) {
+                throw OAuthExceptionCodes.OAUTH_ERROR.create(e, message);
+            }
+
+            if ("invalid_grant".equals(e)) {
+                throw OAuthExceptionCodes.OAUTH_PROBLEM_ACCESS_DENIED.create(e, message);
+            }
+            throw OAuthExceptionCodes.OAUTH_ERROR.create(e, errorMsg);
+        }
+
+        if (!Strings.isEmpty(accessToken.getSecret())) {
+            refreshToken = accessToken.getSecret();
+        }
+
+        // Update account
+        int accountId = googleAccount.getId();
+        Map<String, Object> arguments = new HashMap<String, Object>(3);
+        arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
+        arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
+        oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId(), googleAccount.getEnabledScopes());
+
+        // Reload
+        return oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
     }
 
     private static String parseErrorFrom(String message) {
@@ -317,7 +365,10 @@ public class GoogleApiClients {
             NetHttpTransport transport = new NetHttpTransport.Builder().doNotValidateCertificate().build();
 
             // Build credentials
-            return new GoogleCredential.Builder().setClientSecrets(googleOAuthAccount.getMetaData().getAPIKey(session), googleOAuthAccount.getMetaData().getAPISecret(session)).setJsonFactory(JSON_FACTORY).setTransport(transport).build().setRefreshToken(googleOAuthAccount.getSecret()).setAccessToken(googleOAuthAccount.getToken());
+            return new GoogleCredential.Builder()
+            .setClientSecrets(googleOAuthAccount.getMetaData().getAPIKey(session), googleOAuthAccount.getMetaData().getAPISecret(session))
+            .setJsonFactory(JSON_FACTORY).setTransport(transport).build()
+            .setRefreshToken(googleOAuthAccount.getSecret()).setAccessToken(googleOAuthAccount.getToken());
         } catch (GeneralSecurityException e) {
             throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -333,48 +384,4 @@ public class GoogleApiClients {
         return null == configService ? "" : configService.getProperty("com.openexchange.oauth.google.productName", "");
     }
 
-    //////////////////////// HELPERS /////////////////////////////
-
-    /**
-     * {@link GoogleReauthorizeClusterTask}
-     */
-    private static class GoogleReauthorizeClusterTask extends AbstractReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
-
-        /**
-         * Initialises a new {@link GoogleApiClients.GoogleReauthorizeClusterTask}.
-         */
-        public GoogleReauthorizeClusterTask(Session session, OAuthAccount cachedAccount) {
-            super(Services.getServiceLookup(), session, cachedAccount);
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see com.openexchange.cluster.lock.ClusterTask#perform()
-         */
-        @Override
-        public Token reauthorize() throws OXException {
-            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
-            serviceBuilder.apiKey(getCachedAccount().getMetaData().getAPIKey(getSession())).apiSecret(getCachedAccount().getMetaData().getAPISecret(getSession()));
-            Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
-
-            // Refresh the token
-            try {
-                return scribeOAuthService.getAccessToken(new Token(getCachedAccount().getToken(), getCachedAccount().getSecret()), null);
-            } catch (OAuthException e) {
-                String exMessage = e.getMessage();
-                String errorMsg = parseErrorFrom(exMessage);
-                if (Strings.isEmpty(errorMsg)) {
-                    throw OAuthExceptionCodes.OAUTH_ERROR.create(e, exMessage);
-                }
-                if (exMessage.contains("invalid_grant")) {
-                    OAuthAccount dbAccount = getDBAccount();
-                    String cburl = OAuthUtil.buildCallbackURL(dbAccount);
-                    API api = dbAccount.getAPI();
-                    throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(api.getShortName(), dbAccount.getId(), getSession().getUserId(), getSession().getContextId(), api.getFullName(), cburl);
-                }
-                throw OAuthExceptionCodes.OAUTH_ERROR.create(exMessage, e);
-            }
-        }
-    }
 }

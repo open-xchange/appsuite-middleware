@@ -69,11 +69,6 @@ public final class OneDriveConstants implements FileStorageConstants {
      * The identifier for Microsoft OneDrive file storage service.
      */
     public static final String ID = "onedrive";
-    
-    /**
-     * The display name for Microsoft OneDrive file storage service.
-     */
-    public static final String DISPLAY_NAME = "Microsoft OneDrive File Storage Service";
 
     // ----------------------------------------------------------------------------------------------------------- //
 

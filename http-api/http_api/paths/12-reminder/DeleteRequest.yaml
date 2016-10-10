@@ -2,8 +2,9 @@
   put:
     operationId: deleteReminders
     tags:
-      - Reminder
-    summary: Deletes reminders.
+      - reminder
+    summary: Deletes reminders (**available since v6.22**).
+    description: Before version 6.22 the request body contained only a JSON object with the field `id`.
     consumes:
       - application/json
     parameters:
@@ -20,6 +21,6 @@
       200:
         description: |
           A JSON object containing an array with identifiers of reminders that were not deleted. In case of
-          errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+          errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/RemindersResponse"

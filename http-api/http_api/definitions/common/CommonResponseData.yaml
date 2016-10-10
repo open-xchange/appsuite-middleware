@@ -3,7 +3,7 @@ error:
   description: The translated error message. Present in case of errors.
 error_params:
   type: array
-  description: "Empty JSON array."
+  description: "As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style)."
   items:
     type: string
 error_id:
@@ -14,7 +14,7 @@ error_desc:
   description: The technical error message (always English) useful for debugging the problem. Might be the same as error message if there is no more information available.
 error_stack:
   type: array
-  description: 'If configured (see [com.openexchange.ajax.response.includeStackTraceOnError](http://oxpedia.org/wiki/index.php?title=AppSuite:Configuration_properties_7.8.0)) this field provides the stack trace of associated Java exception represented as a JSON array.'
+  description: If configured (see "com.openexchange.ajax.response.includeStackTraceOnError" in "server.properties") this field provides the stack trace of associated Java exception represented as a JSON array.
   items:
     type: string
 code:
@@ -29,4 +29,4 @@ category:
 timestamp:
   type: integer
   format: int64
-  description: The latest timestamp of the returned data (see [Updates](#updates)).
+  description: The latest timestamp of the returned data (see [Updates](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#updates)).

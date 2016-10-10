@@ -2,7 +2,7 @@
   post:
     operationId: createAttachment
     tags:
-      - Attachments
+      - attachments
     summary: Creates an attachment.
     description: |
       #### Note

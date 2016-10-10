@@ -51,7 +51,6 @@ package com.openexchange.file.storage.json;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -61,7 +60,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageConstants;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.json.actions.files.AJAXInfostoreRequest;
@@ -83,10 +81,7 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
     private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
     private static final FileFieldGet get = new FileFieldGet();
 
-    private static final String FIELD_ENCRYPTED = Strings.asciiLowerCase(FileStorageConstants.METADATA_KEY_ENCRYPTED);
-
     private final AJAXInfostoreRequest request;
-    private final JSONObject optJsonFile;
 
     /**
      * Initializes a new {@link JsonFieldHandler}.
@@ -94,19 +89,8 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
      * @param request The underlying infostore request
      */
     public JsonFieldHandler(AJAXInfostoreRequest request) {
-        this(request, null);
-    }
-
-    /**
-     * Initializes a new {@link JsonFieldHandler}.
-     *
-     * @param request The underlying infostore request
-     * @param jFile The JSON file representation
-     */
-    public JsonFieldHandler(AJAXInfostoreRequest request, JSONObject optJsonFile) {
         super();
         this.request = request;
-        this.optJsonFile = optJsonFile;
     }
 
     @Override
@@ -146,16 +130,7 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
                 if (value == null) {
                     return null;
                 }
-
-                if (null == optJsonFile) {
-                    return JSONCoercion.coerceToJSON(value);
-                }
-
-                Map<String, Object> meta = (Map<String, Object>) value;
-                // Add encrypted flag if appropriate
-                Object oEncrypted = meta.get(FileStorageConstants.METADATA_KEY_ENCRYPTED);
-                optJsonFile.put(FIELD_ENCRYPTED, ((oEncrypted instanceof Boolean) && ((Boolean) oEncrypted).booleanValue()));
-                return new JSONObject(meta);
+                return JSONCoercion.coerceToJSON(value);
             } catch (JSONException e) {
                 LOG.error("", e);
                 return null;

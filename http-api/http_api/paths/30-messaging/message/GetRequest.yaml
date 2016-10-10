@@ -2,7 +2,7 @@
   get:
     operationId: getMessagingMessage
     tags:
-      - Messaging
+      - messaging
     summary: Gets a messaging message.
     description: |
       A messaging message consists of some metadata, headers and a content. The content attribute varies
@@ -33,6 +33,6 @@
       200:
         description: |
           A JSON object containing the data of the message. In case of errors the responsible fields in the
-          response are filled (see [Error handling](#error-handling)).
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/MessagingMessageResponse"

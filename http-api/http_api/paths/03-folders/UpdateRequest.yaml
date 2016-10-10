@@ -2,7 +2,7 @@
   put:
     operationId: updateFolder
     tags:
-      - Folders
+      - folders
     summary: Updates a folder.
     consumes:
       - application/json
@@ -26,7 +26,7 @@
         type: boolean
         description: |
           `true` to cascade permissions to all sub-folders. The user must have administrative permissions to all
-          sub-folders subject to change. If one permission change fails, the entire operation fails.
+          sub-folders subject to change. If one permission change fails, the entire operation fails. (since 7.8.0)
         required: false
         default: false
       - in: body
@@ -40,6 +40,6 @@
           $ref: "#/definitions/FolderBody"
     responses:
       200:
-        description: A JSON object with the object id of the folder. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+        description: A JSON object with the object id of the folder. In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/FolderUpdateResponse"

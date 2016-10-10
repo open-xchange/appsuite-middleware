@@ -86,16 +86,6 @@ public class Status {
      * Initializes a new {@link Status}.
      *
      * @param status The status code returned by Anti-Abuse service
-     * @param properties The optional properties returned by Anti-Abuse service
-     */
-    public Status(int status, Map<String, String> properties) {
-        this(status, null, null, properties);
-    }
-
-    /**
-     * Initializes a new {@link Status}.
-     *
-     * @param status The status code returned by Anti-Abuse service
      * @param message The optional message
      * @param attributes Additional attributes
      * @param properties The optional properties returned by Anti-Abuse service

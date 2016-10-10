@@ -1,0 +1,185 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the OX Software GmbH group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.cluster.lock.internal;
+
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
+import com.hazelcast.core.IMap;
+import com.openexchange.cluster.lock.ClusterLockService;
+import com.openexchange.cluster.lock.osgi.Services;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.timer.TimerService;
+
+/**
+ * {@link ClusterLockServiceImpl}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
+public class ClusterLockServiceImpl implements ClusterLockService {
+
+    private final HazelcastInstance hazelcastInstance;
+
+    private final Unregisterer unregisterer;
+
+    /**
+     * Initializes a new {@link ClusterLockServiceImpl}.
+     */
+    public ClusterLockServiceImpl(HazelcastInstance hazelcastInstance, Unregisterer unregisterer) {
+        super();
+        this.hazelcastInstance = hazelcastInstance;
+        this.unregisterer = unregisterer;
+    }
+
+    private OXException handleNotActiveException(HazelcastInstanceNotActiveException e) {
+        final Logger logger = org.slf4j.LoggerFactory.getLogger(ClusterLockServiceImpl.class);
+        logger.warn(
+            "Encountered a {} error. {} will be shut-down!",
+            HazelcastInstanceNotActiveException.class.getSimpleName(),
+            ClusterLockServiceImpl.class);
+        unregisterer.propagateNotActive(e);
+        unregisterer.unregister();
+        return ServiceExceptionCode.absentService(HazelcastInstance.class);
+    }
+
+    private IMap<String, Lock> getHzMap() throws OXException {
+        try {
+            return hazelcastInstance.getMap("SingleNodeClusterLocks");
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
+    }
+
+    private IMap<String, Long> getPeriodicHzMap() throws OXException {
+        try {
+            return hazelcastInstance.getMap("PeriodicClusterLocks");
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw handleNotActiveException(e);
+        }
+    }
+
+    @Override
+    public Lock acquireClusterLock(final String action) throws OXException {
+        final ConcurrentMap<String, Lock> map = getHzMap();
+        if (map.get(action) != null) {
+            throw ClusterLockExceptionCodes.CLUSTER_LOCKED.create(action);
+        }
+        final Lock lock = hazelcastInstance.getLock(action);
+        if (map.putIfAbsent(action, lock) != null) {
+            throw ClusterLockExceptionCodes.CLUSTER_LOCKED.create(action);
+        }
+        return lock;
+    }
+
+    @Override
+    public void releaseClusterLock(final String action, final Lock lock) throws OXException {
+        final ConcurrentMap<String, Lock> map = getHzMap();
+        map.remove(action, lock);
+    }
+
+    @Override
+    public Lock acquirePeriodicClusterLock(final String action, final long period) throws OXException {
+        final long now = System.currentTimeMillis();
+        final ConcurrentMap<String, Long> map = getPeriodicHzMap();
+        final Long timestamp = map.get(action);
+        if (timestamp != null) {
+            if (now - timestamp.longValue() < period) {
+                throw ClusterLockExceptionCodes.CLUSTER_PERIODIC_LOCKED.create(period, action, period - (now - timestamp));
+            }
+        }
+        final Lock lock = hazelcastInstance.getLock(action);
+        final Long futureTS = map.putIfAbsent(action, Long.valueOf(now));
+        if (futureTS != null) {
+            throw ClusterLockExceptionCodes.CLUSTER_PERIODIC_LOCKED.create(period, action, period - (now - futureTS));
+        }
+
+        final TimerService timerService = Services.getService(TimerService.class);
+        timerService.schedule(new ReleasePeriodicClusterLock(action), period, TimeUnit.MILLISECONDS);
+
+        return lock;
+    }
+
+    @Override
+    public void releasePeriodicClusterLock(String action) throws OXException {
+        final ConcurrentMap<String, Long> map = getPeriodicHzMap();
+        map.remove(action);
+    }
+
+    private class ReleasePeriodicClusterLock implements Runnable {
+
+        private final String action;
+
+        /**
+         * Initializes a new {@link ReleasePeriodicClusterLock}.
+         * 
+         * @param action
+         * @param period
+         */
+        public ReleasePeriodicClusterLock(String action) {
+            super();
+            this.action = action;
+        }
+
+        @Override
+        public void run() {
+            try {
+                releasePeriodicClusterLock(action);
+            } catch (OXException e) {
+                final Logger log = LoggerFactory.getLogger(ClusterLockServiceImpl.class);
+                log.warn("Unable to release periodic lock for action {}", action, e);
+            }
+        }
+    }
+}

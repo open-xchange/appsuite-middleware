@@ -54,6 +54,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 
@@ -63,6 +64,7 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@Module(name = "messagingaccount", description = "Management of messaging accounts")
 public class AccountActionFactory implements AJAXActionServiceFactory {
 
     public static volatile AccountActionFactory INSTANCE; // Initialize in Activator

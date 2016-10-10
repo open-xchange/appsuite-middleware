@@ -53,6 +53,9 @@ import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
@@ -65,6 +68,14 @@ import com.openexchange.snippet.json.SnippetRequest;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(
+    name = "all"
+    , description = "Gets all snippets associated with the current user and context."
+    , method = RequestMethod.GET
+    , parameters = {
+        @Parameter(name = "type", description = "Optional comma-separated identifiers for snippet types", optional=true)
+    }
+)
 public final class AllAction extends SnippetAction {
 
     /**

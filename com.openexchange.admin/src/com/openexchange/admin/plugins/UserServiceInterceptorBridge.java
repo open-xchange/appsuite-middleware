@@ -67,7 +67,7 @@ import com.openexchange.user.UserServiceInterceptorRegistry;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.0
  */
-public class UserServiceInterceptorBridge implements OXUserPluginInterfaceExtended {
+public class UserServiceInterceptorBridge implements OXUserPluginInterface {
 
     private final UserServiceInterceptorRegistry interceptorRegistry;
 
@@ -104,22 +104,6 @@ public class UserServiceInterceptorBridge implements OXUserPluginInterfaceExtend
                 } catch (OXException e) {
                     throw new PluginException(e);
                 }
-            }
-        }
-    }
-
-    @Override
-    public void beforeChange(Context ctx, User user, Credentials auth) throws PluginException {
-        ContextAdapter contextAdapter = new ContextAdapter(ctx);
-        UserAdapter userAdapter = new UserAdapter(user);
-        ContactAdapter contactAdapter = new ContactAdapter(user, ctx.getId().intValue());
-        Map<String, Object> props = UserServiceInterceptor.EMPTY_PROPS;
-        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
-        for (UserServiceInterceptor interceptor : interceptors) {
-            try {
-                interceptor.beforeUpdate(contextAdapter, userAdapter, contactAdapter, props);
-            } catch (OXException e) {
-                throw new PluginException(e);
             }
         }
     }

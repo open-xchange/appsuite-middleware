@@ -2,7 +2,7 @@
   get:
     operationId: examine
     tags:
-      - Mail
+      - mail
     summary: Examines a specifed mail folder and provides its basic status information
     consumes:
       - application/json
@@ -19,6 +19,6 @@
       200:
         description: |
           'The JSON representation for the status information. In case of errors the responsible fields in the
-          response are filled (see [Error handling](#error-handling)).'
+          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).'
         schema:
           $ref: "#/definitions/ExamineResponse"

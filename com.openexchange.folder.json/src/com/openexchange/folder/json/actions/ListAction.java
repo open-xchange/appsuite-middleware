@@ -59,6 +59,9 @@ import org.json.JSONArray;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.Tools;
@@ -79,6 +82,15 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.GET, name = "list", description = "Get subfolders", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "parent", description = "Object ID of a folder, which is the parent folder of the requested folders."),
+    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for folders are defined in Common folder data and Detailed folder data."),
+    @Parameter(name = "all", description = "Set to 1 to list even not subscribed folders."),
+    @Parameter(name = "tree", description = "The identifier of the folder tree. If missing '0' (primary folder tree) is assumed."),
+    @Parameter(name = "allowed_modules", description = "An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered."),
+    @Parameter(name = "errorOnDuplicateName", description = "An optional flag to enable or disable (default) check for duplicate folder names within returned folder response (since v6.20.1). If a duplicate folder name is detected, an appropriate error is returned as response.")
+}, responseDescription = "Response with timestamp: An array with data for all folders, which have the folder with the requested object ID as parent. Each array element describes one folder and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 @OAuthAction(OAuthAction.GRANT_ALL)
 public final class ListAction extends AbstractFolderAction {
 

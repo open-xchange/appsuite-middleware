@@ -2,5 +2,11 @@ type: object
 properties:
   $ref: ../common/CommonResponseData.yaml
   data:
-    type: object
+    type: array
     description: Array of folders.
+    items:
+      type: object
+      description: |
+        An element can be an array itself for new and modified folders containing the information of a folder specified by the corresponding
+        identifiers in the `columns` parameter. Or the element can be a plain string representing the object ID of a deleted folder.
+        Therefore, the element types can be distinguished.

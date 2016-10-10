@@ -92,11 +92,6 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthenticationFilter.class);
 
-    private static interface AnnotationProvider {
-
-        <A extends Annotation> A getAnnotation(Class<A> annotationClass);
-    }
-
     @Context
     private ResourceInfo resourceInfo;
 

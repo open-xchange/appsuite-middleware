@@ -127,13 +127,13 @@ public class AllAction extends AbstractFileStorageAccountAction {
                         result.put(writer.write(account, rootFolder, caps));
                     }
                 } catch (OXException e) {
-                    LOG.debug(e.getMessage(), e);
+                    LOG.debug(e.getMessage());
                     if (e.equalsCode(6, "OAUTH")) {
                         // "OAUTH-0006" --> OAuth account not found
                         try {
                             fsService.getAccountManager().deleteAccount(account, session);
                         } catch (Exception x) {
-                            LOG.debug("Failed to delete the file storage account '{}' for user '{}' in context '{}'", account.getId(), session.getUserId(), session.getContextId(), x);
+                            // Ignore
                         }
                     } else {
                         // Add account with error

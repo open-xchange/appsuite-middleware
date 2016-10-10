@@ -3,4 +3,4 @@ properties:
   $ref: ./RawAppointmentData.yaml
   hard_conflicts:
     type: boolean
-    description: '`true` if appointment represents a resource conflict.'
+    description: '"true" if appointment represents a resource conflict.'

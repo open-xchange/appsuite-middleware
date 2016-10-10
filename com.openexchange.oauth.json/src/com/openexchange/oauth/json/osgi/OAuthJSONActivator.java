@@ -54,13 +54,11 @@ import java.util.Hashtable;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.http.OAuthHTTPClientFactory;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Services;
@@ -85,7 +83,7 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class, OAuthService.class, OAuthScopeRegistry.class, OAuthHTTPClientFactory.class, CapabilityService.class, ClusterLockService.class, OAuthAccessRegistryService.class };
+        return new Class<?>[] { ConfigurationService.class, DispatcherPrefixService.class, OAuthService.class, OAuthScopeRegistry.class, OAuthHTTPClientFactory.class, CapabilityService.class };
     }
 
     @Override

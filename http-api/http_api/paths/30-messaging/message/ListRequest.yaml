@@ -2,7 +2,7 @@
   put:
     operationId: getMessagingMessageList
     tags:
-      - Messaging
+      - messaging
     summary: Gets a list of messaging messages.
     consumes:
       - application/json
@@ -11,7 +11,7 @@
       - in: query
         name: columns
         type: string
-        description: A comma-separated list of column names, like "folder,headers,body". See [Messaging fields](#messaging-message-columns) for valid column names.
+        description: A comma-separated list of column names, like "folder,headers,body". See [Messaging fields](#messaging fields) for valid column names.
         required: true
       - in: body
         name: body
@@ -28,6 +28,6 @@
         description: |
           A JSON object containing an array with data for requested messages. Each array element describes one message and
           is itself an array. The elements of each array contain the information specified by the corresponding
-          column names in the `columns` parameter. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+          column names in the `columns` parameter. In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/MessagingMessagesResponse"

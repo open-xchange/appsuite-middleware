@@ -56,6 +56,9 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.parser.ParsedFolder;
 import com.openexchange.folder.json.services.ServiceRegistry;
@@ -79,6 +82,15 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "update", description = "Update a folder", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "id", description = "Object ID of the updated folder."),
+    @Parameter(name = "timestamp", description = "Timestamp of the updated folder. If the folder was modified after the specified timestamp, then the update must fail."),
+    @Parameter(name = "tree", description = "(Preliminary) The identifier of the folder tree. If missing '0' (primary folder tree) is assumed."),
+    @Parameter(name = "allowed_modules", description = "(Preliminary) An array of modules (either numbers or strings; e.g. \"tasks,calendar,contacts,mail\") supported by requesting client. If missing, all available modules are considered."),
+    @Parameter(name = "cascadePermissions", description = "(Optional. Defaults to false) Flag to cascade permissions to all sub-folders. The user must have administrative permissions to all sub-folders subject to change. If one permission change fails, the entire operation fails.")
+}, requestBody = "Folder object as described in Common folder data and Detailed folder data. Only modified fields are present.",
+    responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated folder, and maybe errors.")
 @OAuthAction(OAuthAction.CUSTOM)
 public final class UpdateAction extends AbstractFolderAction {
 

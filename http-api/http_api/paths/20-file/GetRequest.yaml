@@ -2,7 +2,7 @@
   get:
     operationId: getFile
     tags:
-      - File
+      - file
     summary: Requests a formerly uploaded file.
     produces:
       - application/octet-stream

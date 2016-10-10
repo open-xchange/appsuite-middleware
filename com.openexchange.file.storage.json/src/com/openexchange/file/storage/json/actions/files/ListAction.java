@@ -52,6 +52,9 @@ package com.openexchange.file.storage.json.actions.files;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -66,6 +69,11 @@ import com.openexchange.groupware.results.TimedResult;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@Action(method = RequestMethod.PUT, name = "list", description = "Get a list of infoitems", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for infoitems are defined in Common object data and Detailed infoitem data.")
+}, requestBody = "An array with object IDs of requested infoitems. ",
+responseDescription = "Response with timestamp: An array with infoitem data. Each array element describes one infoitem and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public class ListAction extends AbstractListingAction {
 
     @Override

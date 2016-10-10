@@ -2,8 +2,8 @@
   get:
     operationId: getAllSnippets
     tags:
-      - Snippet
-    summary: Gets all snippets.
+      - snippet
+    summary: Gets all snippets (**available since v7.0.0/v6.22.0**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
@@ -15,6 +15,6 @@
       200:
         description: |
           A JSON object containing an array with data for all snippets. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/SnippetsResponse"

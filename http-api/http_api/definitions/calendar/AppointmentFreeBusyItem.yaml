@@ -27,18 +27,7 @@ properties:
       $ref: "#/definitions/TaskParticipant"
   recurrence_type:
     type: integer
-    description: Specifies the type of the recurrence for a task sequence.
-    enum: 
-      - 0 (none, single event)
-      - 1 (daily)
-      - 2 (weekly)
-      - 3 (monthly)
-      - 4 (yearly)
+    description: 'Specifies the type of the recurrence for a task sequence: 0 (none, single event), 1(daily), 2 (weekly), 3 (monthly), 4 (yearly).'
   shown_as:
     type: integer
-    description: Describes, how this appointment appears in availability queries.
-    enum: 
-      - 1 (reserved)
-      - 2 (temporary)
-      - 3 (absent)
-      - 4 (free)
+    description: 'Describes, how this appointment appears in availability queries: 1 (reserved), 2 (temporary), 3 (absent), 4 (free).'

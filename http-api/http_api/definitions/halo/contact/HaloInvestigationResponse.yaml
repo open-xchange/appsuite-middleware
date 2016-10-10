@@ -2,5 +2,12 @@ type: object
 properties:
   $ref: ../../common/CommonResponseData.yaml
   data:
-    type: object
-    description: Array of halo data objects specified by the corresponding identifiers in the `columns` parameter. The element types can be distinguished.
+    type: array
+    description: Array of halo data objects. Each object is described as an array itself.
+    items:
+      type: array
+      items:
+        type: object
+        description: |
+          Array with elements that contain the information of a data object specified by the corresponding
+          identifiers in the `columns` parameter. The element types can be distinguished.

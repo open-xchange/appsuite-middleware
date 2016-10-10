@@ -23,7 +23,7 @@ categories:
   description: String containing comma separated the categories. Order is preserved. Changing the order counts as modification of the object. Not present in folder objects.
 private_flag:
   type: boolean
-  description: 'Overrides folder permissions in shared private folders: When `true`, this object is not visible to anyone except the owner. Not present in folder objects.'
+  description: 'Overrides folder permissions in shared private folders: When true, this object is not visible to anyone except the owner. Not present in folder objects.'
 color_label:
   type: integer
   minimum: 0

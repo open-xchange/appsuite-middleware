@@ -52,8 +52,10 @@ package com.openexchange.xing.json;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.xing.json.actions.AbstractXingAction;
@@ -64,9 +66,9 @@ import com.openexchange.xing.json.actions.CreateProfileAction;
 import com.openexchange.xing.json.actions.DeleteActivityAction;
 import com.openexchange.xing.json.actions.DeleteCommentActivityAction;
 import com.openexchange.xing.json.actions.FindByMailRequestAction;
-import com.openexchange.xing.json.actions.FindByMailsRequestAction;
 import com.openexchange.xing.json.actions.GetActivityLikesAction;
 import com.openexchange.xing.json.actions.GetCommentsActivityAction;
+import com.openexchange.xing.json.actions.FindByMailsRequestAction;
 import com.openexchange.xing.json.actions.InviteRequestAction;
 import com.openexchange.xing.json.actions.LikeActivityAction;
 import com.openexchange.xing.json.actions.NewsFeedAction;
@@ -83,6 +85,7 @@ import com.openexchange.xing.json.actions.UserFeedAction;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Module(name = "xing", description = "Provides access to XING module.")
 public class XingActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AbstractXingAction> actions;

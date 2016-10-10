@@ -2,11 +2,11 @@
   post:
     operationId: importMail
     tags:
-      - Mail
-    summary: Import of mails as MIME data block ([RFC822](https://tools.ietf.org/html/rfc822)).
+      - mail
+    summary: Import of mails as MIME data block (RFC822) (**available since v6.18**).
     description: |
       This request can be used to store a single or a lot of mails in the OX mail storage backend. This
-      action should be used instead of [/mail?action=new](#operation--mail-action-new-post) because it is faster and tolerant to 8-bit encoded emails.
+      action should be used instead of `/mail?action=new` because it is faster and tolerant to 8-bit encoded emails.
       
       To import multiple mails add further form-data fields.
     consumes:
@@ -21,22 +21,22 @@
       - in: query
         name: flags
         type: string
-        description: In case the mail should be stored with status "read" (e.g. mail has been read already in the client inbox), the parameter "flags" has to be included. For information about mail flags see [Detailed mail data](#detailed-mail-data).
+        description: In case the mail should be stored with status "read" (e.g. mail has been read already in the client inbox), the parameter "flags" has to be included. For information about mail flags see [Mail data](#/definitions/MailData) model.
         required: false
       - in: query
         name: force
         type: boolean
-        description: 'If this parameter is set to `true`, the server skips checking the valid from address.'
+        description: If this parameter is set to `true`, the server skips checking the valid from address.
         required: false
       - in: formData
         name: file
         type: file
-        description: 'The [RFC822](https://tools.ietf.org/html/rfc822) encoded email as binary data.'
+        description: The RFC822 encoded email as binary data.
         required: true
     responses:
       200:
         description: |
           A JSON object containing an array of JSON objects each with the folder identifier and the object ID
-          of the imported mail(s). In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+          of the imported mail(s). In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/MailImportResponse"

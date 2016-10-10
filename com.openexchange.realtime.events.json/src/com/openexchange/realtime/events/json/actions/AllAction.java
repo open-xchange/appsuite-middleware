@@ -51,6 +51,9 @@ package com.openexchange.realtime.events.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.events.json.EventsRequest;
 import com.openexchange.server.ServiceLookup;
@@ -61,6 +64,10 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@Action(method = RequestMethod.GET, name = "all", description = "List all events the given client is subscribed to", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "resource", description = "The resource id of the RT client")
+}, responseDescription = "A list of all subscribed events")
 public class AllAction extends AbstractEventAction implements AJAXActionService {
 
     public AllAction(ServiceLookup services) {

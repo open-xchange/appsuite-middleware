@@ -2,8 +2,8 @@
   get:
     operationId: searchContactsByAnniversary
     tags:
-      - Contacts
-    summary: Search for contacts by anniversary.
+      - contacts
+    summary: Search for contacts by anniversary (**available since v6.22.1, preliminary**).
     description: Finds contacts whose anniversary falls into a specified time range.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -38,7 +38,7 @@
       - in: query
         name: collation
         type: string
-        description: Allows you to specify a collation to sort the contacts by. Only supports "gbk" and "gb2312", not needed for other languages. Parameter sort should be set for this to work.
+        description: Allows you to specify a collation to sort the contacts by. As of 6.20, only supports "gbk" and "gb2312", not needed for other languages. Parameter sort should be set for this to work. (preliminary, since 6.20)
         required: false
         enum:
           - gbk
@@ -48,6 +48,6 @@
         description: |
           A JSON object containing an array with matching contacts. Contacts are represented by arrays. The elements of each array contain the
           information specified by the corresponding identifiers in the `columns` parameter. In case of errors the
-          responsible fields in the response are filled (see [Error handling](#error-handling)).
+          responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/ContactsResponse"

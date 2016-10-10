@@ -86,24 +86,6 @@ public enum ScaleType {
      */
     CONTAIN_FORCE_DIMENSION("containforcedimension"),
 
-
-    /**
-     * The "cover" scale type, specifying the target dimensions. If the source image is bigger than the target dimension, in a first step the image will be resized in a way that the resulting
-     * image covers the target resolution entirely, with the original aspect ratio being preserved. In a second step the image will be cropped to fit the target dimension.
-     *
-     * <p/>
-     * For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "coverandcrop", will result in the
-     * picture being resized to 267x200 pixels and then cropped to fit 200x200.
-     *
-     * <p/>
-     * In case the image is smaller than then target dimension the image will not be resized and instead it gets padded to fit exact dimension.
-     *
-     * <p/>
-     * For example, with an original resolution of 100x100 pixels and a target dimension of 200x200 pixels and type "coverandcrop", will result in the
-     * picture being padded on all sides with 50 pixels.
-     */
-    COVER_AND_CROP("coverandcrop"),
-
     /**
      * The "auto" scale type
      */

@@ -52,15 +52,9 @@ package com.openexchange.mail.autoconfig.json.actions;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.java.util.Tools;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.AutoconfigService;
-import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -90,38 +84,18 @@ public class GetAction extends AutoconfigAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         String mail = request.getParameter(EMAIL, String.class);
-        String password = request.getParameter(PASSWORD);
+        String password = request.getParameter(PASSWORD, String.class);
         boolean forceSecure = true;
         if (request.containsParameter(FORCE_SECURE)) {
             forceSecure = request.getParameter(FORCE_SECURE, Boolean.class).booleanValue();
         }
         boolean isOAuth = false;
         if (request.containsParameter(OAUTH)) {
-            String sOAuth = request.getParameter(OAUTH);
-            int id = parseInt(sOAuth);
-            if (id >= 0) {
-                OAuthService oAuthService = getService(OAuthService.class);
-                if (null == oAuthService) {
-                    throw ServiceExceptionCode.absentService(OAuthService.class);
-                }
-
-                OAuthAccount oAuthAccount = oAuthService.getAccount(id, session, session.getUserId(), session.getContextId());
-                password = oAuthAccount.getToken();
-                isOAuth = true;
-            } else {
-                isOAuth = request.getParameter(OAUTH, Boolean.class).booleanValue();
-            }
-        }
-        if (Strings.isEmpty(password)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PASSWORD);
+            isOAuth = request.getParameter(OAUTH, Boolean.class).booleanValue();
         }
         AutoconfigService autoconfigService = getAutoconfigService();
         Autoconfig autoconfig = autoconfigService.getConfig(mail, password, session.getUser(), session.getContext(), forceSecure, isOAuth);
         return new AJAXRequestResult(autoconfig, "autoconfig");
-    }
-
-    private int parseInt(String str) {
-        return Tools.getUnsignedInteger(str);
     }
 
 }

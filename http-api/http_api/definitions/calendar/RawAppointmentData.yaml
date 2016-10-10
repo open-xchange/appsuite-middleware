@@ -26,12 +26,7 @@ location:
   description: The location of the appointment.
 shown_as:
   type: integer
-  description: Describes, how this appointment appears in availability queries.
-  enum: 
-    - 1 (reserved)
-    - 2 (temporary)
-    - 3 (absent)
-    - 4 (free)
+  description: 'Describes, how this appointment appears in availability queries: 1 (reserved), 2 (temporary), 3 (absent), 4 (free).'
 timezone:
   type: string
   description: The timezone of the appointment.

@@ -52,6 +52,9 @@ package com.openexchange.resource.managerequest.request.actions;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.resource.json.ResourceFields;
@@ -66,6 +69,10 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "new", description = "Create a resource", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
+}, requestBody = "AResource object as described in Resource response. The field id is not present.",
+responseDescription = "An object with attribute id of the newly created resource.")
 public final class NewAction extends AbstractResourceAction {
 
     /**

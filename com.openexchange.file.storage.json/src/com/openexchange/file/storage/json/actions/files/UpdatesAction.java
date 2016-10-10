@@ -52,6 +52,9 @@ package com.openexchange.file.storage.json.actions.files;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -67,6 +70,15 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@Action(method = RequestMethod.GET, name = "updates", description = "Get updated infoitems", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "folder", description = "Object ID of the folder, whose contents are queried."),
+    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for infoitems are defined in Common object data and Detailed infoitem data."),
+    @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified."),
+    @Parameter(name = "order", optional=true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
+    @Parameter(name = "timestamp", description = "Timestamp of the last update of the requested infoitems."),
+    @Parameter(name = "ignore", optional=true, description = "Which kinds of updates should be ignored. Currently, the only valid value - \"deleted\" - causes deleted object IDs not to be returned.")
+}, responseDescription = "Response with timestamp: An array with new, modified and deleted infoitems. New and modified infoitems are represented by arrays. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. Deleted infoitems (should the ignore parameter be ever implemented) would be identified by their object IDs as plain strings, without being part of a nested array.")
 public class UpdatesAction extends AbstractListingAction {
 
     @Override

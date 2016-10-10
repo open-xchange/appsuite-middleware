@@ -639,7 +639,6 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 transport.connect(server, port, null, null);
             }
 
-            Session session = this.session;
             if (session != null) {
                 AuditLogService auditLogService = Services.optService(AuditLogService.class);
                 if (null != auditLogService) {
@@ -758,21 +757,9 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     transport.addTransportListener(new AddressAddingTransportListener(mtaInfo));
                 }
 
-                // Register transport listener for audit logging
-                Session session = this.session;
-                if (null != session) {
-                    AuditLogService auditLogService = Services.optService(AuditLogService.class);
-                    if (null != auditLogService) {
-                        String server = IDNA.toASCII(smtpConfig.getServer());
-                        int port = smtpConfig.getPort();
-                        String login = smtpConfig.getLogin();
-                        transport.addTransportListener(new AuditLoggingTransportListener(login, server, port, accountId, session, auditLogService));
-                    }
-                }
-
                 // Transport
                 long start = System.currentTimeMillis();
-                doTransport(messageToSend, recipients, transport);
+                transport.sendMessage(messageToSend, recipients);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                 logMessageTransport(messageToSend, smtpConfig);
             } catch (OXException e) {
@@ -825,18 +812,6 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         } finally {
             closeSafe(transport);
         }
-    }
-
-    /**
-     * Actually transports given message via specified connected transport to given recipients.
-     *
-     * @param messageToSend The message to send
-     * @param recipients The recipients to send to
-     * @param transport The transport to use
-     * @throws MessagingException If transport fails
-     */
-    protected void doTransport(MimeMessage messageToSend, Address[] recipients, Transport transport) throws MessagingException {
-        transport.sendMessage(messageToSend, recipients);
     }
 
     private void closeSafe(Transport transport) {
@@ -1224,7 +1199,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             if (!transport.isConnected()) {
                 connectTransport(transport, smtpConfig);
             }
-            doTransport(smtpMessage, recipients, transport);
+            transport.sendMessage(smtpMessage, recipients);
             logMessageTransport(smtpMessage, smtpConfig);
             invokeLater(new Runnable() {
 
@@ -1415,69 +1390,6 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             arr = e.getValidSentAddresses();
             if (null != arr) {
                 statusInfo.getSentAddresses().addAll(Arrays.asList(arr));
-            }
-        }
-    }
-
-    private static final class AuditLoggingTransportListener implements TransportListener {
-
-        private final int accountId;
-        private final Session session;
-        private final AuditLogService auditLogService;
-        private final String login;
-        private final String server;
-        private final int port;
-
-        AuditLoggingTransportListener(String login, String server, int port, int accountId, Session session, AuditLogService auditLogService) {
-            super();
-            this.login = login;
-            this.server = server;
-            this.port = port;
-            this.accountId = accountId;
-            this.session = session;
-            this.auditLogService = auditLogService;
-        }
-
-        @Override
-        public void messagePartiallyDelivered(TransportEvent e) {
-            logAddressesFromEvent(e);
-        }
-
-        @Override
-        public void messageNotDelivered(TransportEvent e) {
-            logAddressesFromEvent(e);
-
-        }
-
-        @Override
-        public void messageDelivered(TransportEvent e) {
-            logAddressesFromEvent(e);
-
-        }
-
-        private void logAddressesFromEvent(TransportEvent e) {
-            javax.mail.Address[] arr = e.getInvalidAddresses();
-            if (null != arr) {
-                for (Address address : arr) {
-                    String eventId = MailAccount.DEFAULT_ID == accountId ? "smtp.primary.invalid" : "smtp.external.invalid";
-                    auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("smtp.login", null == login ? "<none>" : login), DefaultAttribute.arbitraryFor("smtp.server", server), DefaultAttribute.arbitraryFor("smtp.port", Integer.toString(port)), DefaultAttribute.arbitraryFor("smtp.invalid", address instanceof InternetAddress ? ((InternetAddress) address).getAddress() : address.toString()));
-                }
-            }
-
-            arr = e.getValidUnsentAddresses();
-            if (null != arr) {
-                for (Address address : arr) {
-                    String eventId = MailAccount.DEFAULT_ID == accountId ? "smtp.primary.unsent" : "smtp.external.unsent";
-                    auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("smtp.login", null == login ? "<none>" : login), DefaultAttribute.arbitraryFor("smtp.server", server), DefaultAttribute.arbitraryFor("smtp.port", Integer.toString(port)), DefaultAttribute.arbitraryFor("smtp.unsent", address instanceof InternetAddress ? ((InternetAddress) address).getAddress() : address.toString()));
-                }
-            }
-
-            arr = e.getValidSentAddresses();
-            if (null != arr) {
-                for (Address address : arr) {
-                    String eventId = MailAccount.DEFAULT_ID == accountId ? "smtp.primary.sent" : "smtp.external.sent";
-                    auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("smtp.login", null == login ? "<none>" : login), DefaultAttribute.arbitraryFor("smtp.server", server), DefaultAttribute.arbitraryFor("smtp.port", Integer.toString(port)), DefaultAttribute.arbitraryFor("smtp.sent", address instanceof InternetAddress ? ((InternetAddress) address).getAddress() : address.toString()));
-                }
             }
         }
     }

@@ -2,8 +2,8 @@
   get:
     operationId: getAllAccounts
     tags:
-      - Mailaccount
-    summary: Gets all mail accounts.
+      - mailaccount
+    summary: Gets all mail accounts (**available since v6.12**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/gblQueryParamAccountColumns"
@@ -13,6 +13,6 @@
           A JSON object containing an array with data for all mail accounts. Each array element describes one account and
           is itself an array. The elements of each array contain the information specified by the corresponding
           identifiers in the `columns` parameter. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/MailAccountsResponse"

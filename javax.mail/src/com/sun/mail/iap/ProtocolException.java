@@ -50,7 +50,6 @@ public class ProtocolException extends Exception {
     private static final long serialVersionUID = -4360500807971797439L;
 
     private final String responseCode;
-    private final String rest;
     private final ResponseCode knownResponseCode;
 
     /**
@@ -59,7 +58,6 @@ public class ProtocolException extends Exception {
     public ProtocolException() {
 	super();
 	responseCode = null;
-	rest = null;
 	knownResponseCode = null;
     }
 
@@ -71,7 +69,6 @@ public class ProtocolException extends Exception {
     public ProtocolException(String message) {
 	super(message);
     responseCode = null;
-    rest = null;
     knownResponseCode = null;
     }
 
@@ -85,7 +82,6 @@ public class ProtocolException extends Exception {
     public ProtocolException(String message, Throwable cause) {
 	super(message, cause);
     responseCode = null;
-    rest = null;
     knownResponseCode = null;
     }
 
@@ -99,17 +95,14 @@ public class ProtocolException extends Exception {
 	response = r;
 
 	String responseCode = null;
-	String rest = null;
 	String s = r.getRest();    // get the text after the response
 	if (s.startsWith("[")) {   // a response code
 	    int i = s.indexOf(']');
         if (i > 0) {
             responseCode = s.substring(0, i + 1);
-            rest = s.substring(i + 1).trim();
         }
 	}
 	this.responseCode = responseCode;
-	this.rest = rest;
 	this.knownResponseCode = ResponseCode.responseCodeFor(responseCode);
     }
 
@@ -123,17 +116,6 @@ public class ProtocolException extends Exception {
      */
     public String getResponseCode() {
         return responseCode;
-    }
-
-    /**
-     * Gets the rest of the response as a string, usually used to return the arbitrary message text after a NO response.
-     * <p>
-     * This method omits the response code (if any)
-     *
-     * @return The rest of the response as a string
-     */
-    public String getResponseRest() {
-        return rest;
     }
 
     /**

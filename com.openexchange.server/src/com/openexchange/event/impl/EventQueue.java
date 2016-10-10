@@ -51,7 +51,6 @@ package com.openexchange.event.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
@@ -74,9 +73,6 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class EventQueue {
-
-    /** The logger constant */
-    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventQueue.class);
 
     private static final class EventQueueTimerTask implements Runnable {
 
@@ -130,7 +126,7 @@ public final class EventQueue {
                         shutdownLock.unlock();
                     }
                 }
-            } catch (final Exception t) {
+            } catch (final Throwable t) {
                 LOG.error("", t);
             }
         }
@@ -154,37 +150,39 @@ public final class EventQueue {
 
     private static volatile boolean isEnabled;
 
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(EventQueue.class);
+
     /*
      * +++++++++++++++ Appointment Event Lists +++++++++++++++
      */
 
-    private static final List<AppointmentEventInterface> appointmentEventList = new CopyOnWriteArrayList<AppointmentEventInterface>();
+    private static final List<AppointmentEventInterface> appointmentEventList = new ArrayList<AppointmentEventInterface>(4);
 
-    private static final List<AppointmentEventInterface> noDelayAppointmentEventList = new CopyOnWriteArrayList<AppointmentEventInterface>();
+    private static final List<AppointmentEventInterface> noDelayAppointmentEventList = new ArrayList<AppointmentEventInterface>(4);
 
     /*
      * +++++++++++++++ Task Event Lists +++++++++++++++
      */
 
-    private static final List<TaskEventInterface> taskEventList = new CopyOnWriteArrayList<TaskEventInterface>();
+    private static final List<TaskEventInterface> taskEventList = new ArrayList<TaskEventInterface>(4);
 
-    private static final List<TaskEventInterface> noDelayTaskEventList = new CopyOnWriteArrayList<TaskEventInterface>();
+    private static final List<TaskEventInterface> noDelayTaskEventList = new ArrayList<TaskEventInterface>(4);
 
     /*
      * +++++++++++++++ Contact Event Lists +++++++++++++++
      */
 
-    private static final List<ContactEventInterface> contactEventList = new CopyOnWriteArrayList<ContactEventInterface>();
+    private static final List<ContactEventInterface> contactEventList = new ArrayList<ContactEventInterface>(4);
 
-    private static final List<ContactEventInterface> noDelayContactEventList = new CopyOnWriteArrayList<ContactEventInterface>();
+    private static final List<ContactEventInterface> noDelayContactEventList = new ArrayList<ContactEventInterface>(4);
 
     /*
      * +++++++++++++++ Folder Event Lists +++++++++++++++
      */
 
-    private static final List<FolderEventInterface> folderEventList = new CopyOnWriteArrayList<FolderEventInterface>();
+    private static final List<FolderEventInterface> folderEventList = new ArrayList<FolderEventInterface>(4);
 
-    private static final List<FolderEventInterface> noDelayFolderEventList = new CopyOnWriteArrayList<FolderEventInterface>();
+    private static final List<FolderEventInterface> noDelayFolderEventList = new ArrayList<FolderEventInterface>(4);
 
     /*
      * +++++++++++++++ Infostore Event Lists +++++++++++++++
@@ -297,7 +295,7 @@ public final class EventQueue {
         }
     }
 
-    static void callEvent(final List<EventObject> al) {
+    protected static void callEvent(final List<EventObject> al) {
         for (int a = 0; a < al.size(); a++) {
             event(al.get(a));
         }
@@ -305,11 +303,11 @@ public final class EventQueue {
         al.clear();
     }
 
-    static void event(final EventObject eventObj) {
+    protected static void event(final EventObject eventObj) {
         event(eventObj, false);
     }
 
-    static void event(final EventObject eventObj, final boolean noDelay) {
+    protected static void event(final EventObject eventObj, final boolean noDelay) {
         if (null == eventObj) {
             LOG.warn("Skipping null event", new Throwable());
             return;
@@ -336,7 +334,7 @@ public final class EventQueue {
         }
     }
 
-    static void appointment(final EventObject eventObj, final List<AppointmentEventInterface> appointmentEventList) {
+    protected static void appointment(final EventObject eventObj, final List<AppointmentEventInterface> appointmentEventList) {
         if (appointmentEventList.isEmpty()) {
             return;
         }
@@ -348,7 +346,7 @@ public final class EventQueue {
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
                     next.appointmentCreated(appointment, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -357,7 +355,7 @@ public final class EventQueue {
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
                     next.appointmentModified(appointment, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -366,7 +364,7 @@ public final class EventQueue {
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
                     next.appointmentDeleted(appointment, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -375,7 +373,7 @@ public final class EventQueue {
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
                     next.appointmentAccepted(appointment, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -384,7 +382,7 @@ public final class EventQueue {
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
                     next.appointmentDeclined(appointment, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -393,7 +391,7 @@ public final class EventQueue {
             for (final AppointmentEventInterface next : appointmentEventList) {
                 try {
                     next.appointmentTentativelyAccepted(appointment, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -415,7 +413,7 @@ public final class EventQueue {
             for (final ContactEventInterface next : contactEventList) {
                 try {
                     next.contactCreated(contact, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -424,7 +422,7 @@ public final class EventQueue {
             for (final ContactEventInterface next : contactEventList) {
                 try {
                     next.contactModified(contact, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -433,7 +431,7 @@ public final class EventQueue {
             for (final ContactEventInterface next : contactEventList) {
                 try {
                     next.contactDeleted(contact, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -455,7 +453,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskCreated(task, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -464,7 +462,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskModified(task, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -473,7 +471,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskDeleted(task, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -482,7 +480,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskAccepted(task, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -491,7 +489,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskDeclined(task, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -500,7 +498,7 @@ public final class EventQueue {
             for (final TaskEventInterface next : taskEventList) {
                 try {
                     next.taskTentativelyAccepted(task, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -522,7 +520,7 @@ public final class EventQueue {
             for (final FolderEventInterface next : folderEventList) {
                 try {
                     next.folderCreated(folderObject, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -531,7 +529,7 @@ public final class EventQueue {
             for (final FolderEventInterface next : folderEventList) {
                 try {
                     next.folderModified(folderObject, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -540,7 +538,7 @@ public final class EventQueue {
             for (final FolderEventInterface next : folderEventList) {
                 try {
                     next.folderDeleted(folderObject, session);
-                } catch (final Exception t) {
+                } catch (final Throwable t) {
                     LOG.error("", t);
                 }
             }
@@ -622,6 +620,15 @@ public final class EventQueue {
         }
     }
 
+// FIXME: remove
+//    public static void addInfostoreEvent(final InfostoreEventInterface event) {
+//        if (NoDelayEventInterface.class.isInstance(event)) {
+//            noDelayInfostoreEventList.add(event);
+//        } else {
+//            infostoreEventList.add(event);
+//        }
+//    }
+
     public static void removeAppointmentEvent(final AppointmentEventInterface event) {
         if (NoDelayEventInterface.class.isInstance(event)) {
             noDelayAppointmentEventList.remove(event);
@@ -647,9 +654,21 @@ public final class EventQueue {
     }
 
     public static void removeFolderEvent(final FolderEventInterface event) {
-        List<FolderEventInterface> toRemoveFrom = NoDelayEventInterface.class.isInstance(event) ? noDelayFolderEventList : folderEventList;
-        toRemoveFrom.remove(event);
+        if (NoDelayEventInterface.class.isInstance(event)) {
+            noDelayFolderEventList.remove(event);
+        } else {
+            folderEventList.remove(event);
+        }
     }
+
+// FIXME: remove
+//    public static void removeInfostoreEvent(final InfostoreEventInterface event) {
+//        if (NoDelayEventInterface.class.isInstance(event)) {
+//            noDelayInfostoreEventList.remove(event);
+//        } else {
+//            infostoreEventList.remove(event);
+//        }
+//    }
 
     public static void addModernListener(final AppointmentEventInterface listener) {
         checkEventDispatcher();
@@ -716,5 +735,6 @@ public final class EventQueue {
         taskEventList.clear();
         contactEventList.clear();
         folderEventList.clear();
+//        infostoreEventList.clear();
     }
 }

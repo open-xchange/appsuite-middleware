@@ -95,8 +95,6 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
         actions.put("autocomplete", new AutocompleteAction());
         actions.put("trashStats", new TrashStatsAction());
         actions.put("emptyTrash", new EmptyTrashAction());
-        actions.put("moveFile", new MoveFileAction());
-        actions.put("moveFolder", new MoveFolderAction());
         this.actions = actions.build();
     }
 

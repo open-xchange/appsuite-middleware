@@ -3255,7 +3255,7 @@ public final class IMAPCommandsCollection {
                         if (null == message) {
                             return null;
                         }
-                        return toMailPart((IMAPMessage) message, sectionId, peek, bid.bodystructure, imapFolder.getFullName(), false);
+                        return toMailPart((IMAPMessage) message, sectionId, peek, bid.bodystructure, imapFolder.getFullName(), true);
                     } catch (final Exception e) {
                         // Ignore
                     }
@@ -3412,7 +3412,7 @@ public final class IMAPCommandsCollection {
                         if (null == message) {
                             return null;
                         }
-                        return toMailPart((IMAPMessage) message, bid.sectionId, peek, bid.bodystructure, imapFolder.getFullName(), false);
+                        return toMailPart((IMAPMessage) message, bid.sectionId, peek, bid.bodystructure, imapFolder.getFullName(), true);
                     } catch (final Exception e) {
                         // Ignore
                     }

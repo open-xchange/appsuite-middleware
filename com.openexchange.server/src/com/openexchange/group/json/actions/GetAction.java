@@ -52,6 +52,9 @@ package com.openexchange.group.json.actions;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
@@ -64,6 +67,10 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.GET, name = "get", description = "Get a group", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "id", description = "The group id.")
+}, responseDescription = "A group object as described in Group data. ")
 public final class GetAction extends AbstractGroupAction {
 
     /**

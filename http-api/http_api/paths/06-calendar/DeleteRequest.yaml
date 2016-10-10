@@ -2,8 +2,11 @@
   put:
     operationId: deleteAppointment
     tags:
-      - Calendar
-    summary: Deletes appointments.
+      - calendar
+    summary: Deletes appointments (**available since v6.22**).
+    description: |
+      Before version 6.22 the request body contained a JSON object with the fields `id`, `folder` and
+      optionally `pos` and could only delete one appointment.
     consumes:
       - application/json
     parameters:
@@ -26,6 +29,6 @@
       200:
         description: |
           A JSON array of objects identifying the appointments which were modified after the specified timestamp and were therefore not deleted. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/AppointmentDeletionsResponse"

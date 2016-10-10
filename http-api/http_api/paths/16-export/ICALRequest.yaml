@@ -2,7 +2,7 @@
   get:
     operationId: exportAsICal
     tags:
-      - Export
+      - export
     summary: Exports appointment and task data to an iCalendar file.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

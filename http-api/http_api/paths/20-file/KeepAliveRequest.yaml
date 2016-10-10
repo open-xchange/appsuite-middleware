@@ -2,7 +2,7 @@
   get:
     operationId: keepAlive
     tags:
-      - File
+      - file
     summary: Updates a file's last access timestamp and keeps it alive.
     description: |
       By updating the last access timestamp the file is prevented from being deleted from both session and disk
@@ -16,6 +16,6 @@
         required: true
     responses:
       200:
-        description: In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+        description: In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/CommonResponse"

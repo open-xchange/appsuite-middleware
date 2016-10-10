@@ -61,7 +61,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface OAuthServiceMetaData {
 
@@ -119,13 +118,6 @@ public interface OAuthServiceMetaData {
      * @return the consumer secret
      */
     String getConsumerSecret();
-
-    /**
-     * Returns the product name of the registered OAuth application
-     * 
-     * @return the product name of the registered OAuth application
-     */
-    String getProductName();
 
     /**
      * Indicates if this meta data needs a request token to obtain authorization URL.
@@ -222,10 +214,7 @@ public interface OAuthServiceMetaData {
     /**
      * Returns an unmodifiable {@link Set} with all available {@link OAuthScope}s
      * 
-     * @param userId The user id
-     * @param ctxId The context id
      * @return an unmodifiable {@link Set} with all available {@link OAuthScope}s
-     * @throws OXException if available scopes couldn't be retrieved
      */
-    Set<OAuthScope> getAvailableScopes(int userId, int ctxId) throws OXException;
+    Set<OAuthScope> getAvailableScopes();
 }

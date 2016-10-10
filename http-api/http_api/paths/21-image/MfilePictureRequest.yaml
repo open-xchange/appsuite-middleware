@@ -2,7 +2,7 @@
   get:
     operationId: getManagedImageFile
     tags:
-      - Image
+      - image
     summary: Requests an image that was previously uploaded with the ajax file upload module.
     produces:
       - application/octet-stream

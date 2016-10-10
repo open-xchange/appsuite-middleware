@@ -54,6 +54,9 @@ import org.json.JSONArray;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.Constants;
 import com.openexchange.folder.json.Tools;
@@ -74,6 +77,13 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@Action(method = RequestMethod.GET, name = "shares", description = "Get folders of the user shared to other entities", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for folders are defined in Common folder data and Detailed folder data."),
+    @Parameter(name = "all", description = "Set to 1 to list even not subscribed folders."),
+    @Parameter(name = "tree", description = "The identifier of the folder tree. If missing '0' (primary folder tree) is assumed."),
+    @Parameter(name = "content_type", description = "The desired content type (either numbers or strings; e.g. \"tasks\", \"calendar\", \"contacts\", \"infostore\")"),
+}, responseDescription = "Response with timestamp: An array with data for all folders that are considered as shared by the user. Each array element describes one folder and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 @OAuthAction(OAuthAction.GRANT_ALL)
 public class SharesAction extends AbstractFolderAction {
 

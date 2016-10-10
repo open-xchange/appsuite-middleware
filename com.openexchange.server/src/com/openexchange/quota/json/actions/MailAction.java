@@ -52,6 +52,9 @@ package com.openexchange.quota.json.actions;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.quota.json.QuotaAJAXRequest;
@@ -64,6 +67,9 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.GET, name = "mail", description = "Get the mail usage data", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
+}, responseDescription = "A JSON Object containing the fields \"use\" and \"quota\". \"use\" represents the use mail quota and the field \"quota\" represents the maximum. -1 represents an unlimited quota.")
 public final class MailAction extends AbstractQuotaAction {
 
     private static final org.slf4j.Logger LOG =

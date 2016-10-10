@@ -4,7 +4,7 @@
   get:
     operationId: getInfoItemDocument
     tags:
-      - Infostore
+      - infostore
     summary: Gets an infoitem document.
     description: |
       It is possible to add a filename to the request's URI like `/infostore/{filename}?action=document`.

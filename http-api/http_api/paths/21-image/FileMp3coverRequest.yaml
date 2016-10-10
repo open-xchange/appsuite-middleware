@@ -2,7 +2,7 @@
   get:
     operationId: getMP3CoverImage
     tags:
-      - Image
+      - image
     summary: Requests a MP3 cover image.
     produces:
       - application/octet-stream

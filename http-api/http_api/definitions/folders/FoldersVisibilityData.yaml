@@ -1,11 +1,32 @@
 type: object
 properties:
   private:
-    type: object
+    type: array
     description: Array of private folders. Each folder is described as an array itself.
+    items:
+      type: array
+      items:
+        type: object
+        description: |
+          Array with elements that contain the information of a folder specified by the corresponding
+          identifiers in the `columns` parameter. The element types can be distinguished.
   public:
-    type: object
+    type: array
     description: Array of public folders. Each folder is described as an array itself.
+    items:
+      type: array
+      items:
+        type: object
+        description: |
+          Array with elements that contain the information of a folder specified by the corresponding
+          identifiers in the `columns` parameter. The element types can be distinguished.
   shared:
-    type: object
+    type: array
     description: Array of shared folders. Each folder is described as an array itself.
+    items:
+      type: array
+      items:
+        type: object
+        description: |
+          Array with elements that contain the information of a folder specified by the corresponding
+          identifiers in the `columns` parameter. The element types can be distinguished.

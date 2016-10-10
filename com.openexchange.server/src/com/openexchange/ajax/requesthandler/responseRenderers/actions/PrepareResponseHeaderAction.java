@@ -196,26 +196,41 @@ public class PrepareResponseHeaderAction implements IFileResponseRendererAction 
                 }
             }
 
-            if (!data.getContentTypeByParameter().booleanValue() || data.getContentType() == null || IDataWrapper.SAVE_AS_TYPE.equals(data.getContentType())) {
-                // Either no Content-Type parameter specified or set to "application/octet-stream"
+            if (!data.getContentTypeByParameter() || data.getContentType() == null || IDataWrapper.SAVE_AS_TYPE.equals(data.getContentType())) {
                 data.getResponse().setContentType(preferredContentType);
                 data.setContentType(preferredContentType);
             } else {
-                // A Content-Type parameter is specified...
-                if (IDataWrapper.SAVE_AS_TYPE.equals(preferredContentType) || equalTypes(preferredContentType, data.getContentType())) {
+                if (IDataWrapper.SAVE_AS_TYPE.equals(preferredContentType) || equalPrimaryTypes(preferredContentType, data.getContentType())) {
                     // Set if sanitize-able
                     if (!trySetSanitizedContentType(data.getContentType(), preferredContentType, data.getResponse())) {
                         data.setContentType(preferredContentType);
                     }
                 } else {
-                    // Specified Content-Type does NOT match file's real MIME type. Ignore it due to security reasons (see bug #25343)
-                    final StringBuilder sb = new StringBuilder(128);
-                    sb.append("Denied parameter \"").append(IDataWrapper.PARAMETER_CONTENT_TYPE);
-                    sb.append("\" due to security constraints (requested \"");
-                    sb.append(data.getContentType()).append("\" , but is \"").append(preferredContentType).append("\").");
-                    LOG.warn(sb.toString());
-                    data.getResponse().setContentType(preferredContentType);
-                    data.setContentType(preferredContentType);
+                    // Specified Content-Type does NOT match file's real MIME type
+                    final ThresholdFileHolder temp = new ThresholdFileHolder(IDataWrapper.DEFAULT_IN_MEMORY_THRESHOLD, IDataWrapper.INITIAL_CAPACITY);
+                    data.addCloseable(temp);
+                    temp.write(data.getDocumentData());
+                    data.setDocumentData(temp.getClosingRandomAccess());
+                    preferredContentType = detectMimeType(temp.getStream());
+                    if ("text/plain".equals(preferredContentType)) {
+                        preferredContentType = HTMLDetector.containsHTMLTags(temp.getStream(), true) ? "text/html" : preferredContentType;
+                    }
+                    // One more time...
+                    if (equalPrimaryTypes(preferredContentType, data.getContentType())) {
+                        // Set if sanitize-able
+                        if (!trySetSanitizedContentType(data.getContentType(), preferredContentType, data.getResponse())) {
+                            data.setContentType(preferredContentType);
+                        }
+                    } else {
+                        // Ignore it due to security reasons (see bug #25343)
+                        final StringBuilder sb = new StringBuilder(128);
+                        sb.append("Denied parameter \"").append(IDataWrapper.PARAMETER_CONTENT_TYPE);
+                        sb.append("\" due to security constraints (requested \"");
+                        sb.append(data.getContentType()).append("\" , but is \"").append(preferredContentType).append("\").");
+                        LOG.warn(sb.toString());
+                        data.getResponse().setContentType(preferredContentType);
+                        data.setContentType(preferredContentType);
+                    }
                 }
             }
         }
@@ -250,21 +265,6 @@ public class PrepareResponseHeaderAction implements IFileResponseRendererAction 
 
     private String detectMimeType(final InputStream in) throws IOException {
         return AJAXUtility.detectMimeType(in);
-    }
-
-    private boolean equalTypes(final String contentType1, final String contentType2) {
-        if (null == contentType1 || null == contentType2) {
-            return false;
-        }
-        return com.openexchange.java.Strings.toLowerCase(getType(contentType1)).startsWith(com.openexchange.java.Strings.toLowerCase(getType(contentType2)));
-    }
-
-    private String getType(final String contentType) {
-        if (isEmpty(contentType)) {
-            return contentType;
-        }
-        final int pos = contentType.indexOf(';');
-        return pos > 0 ? contentType.substring(0, pos) : contentType;
     }
 
     private boolean equalPrimaryTypes(final String contentType1, final String contentType2) {

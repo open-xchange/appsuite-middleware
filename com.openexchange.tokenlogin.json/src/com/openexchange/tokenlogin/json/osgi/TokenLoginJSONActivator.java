@@ -50,6 +50,7 @@
 package com.openexchange.tokenlogin.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.documentation.annotations.Module;
 import com.openexchange.tokenlogin.TokenLoginService;
 import com.openexchange.tokenlogin.json.TokenLoginActionFactory;
 
@@ -58,6 +59,7 @@ import com.openexchange.tokenlogin.json.TokenLoginActionFactory;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@Module(name = "token", description = "One-time token login")
 public class TokenLoginJSONActivator extends AJAXModuleActivator {
 
     @Override

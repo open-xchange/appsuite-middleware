@@ -321,7 +321,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             if (original.getSequence() > update.getSequence()) {
                 return true;
             }
-            if (original.getSequence() <= update.getSequence()) {
+            if (original.getSequence() < update.getSequence()) {
                 return false;
             }
         }

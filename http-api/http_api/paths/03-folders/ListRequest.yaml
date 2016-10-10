@@ -2,7 +2,7 @@
   get:
     operationId: getSubFolders
     tags:
-      - Folders
+      - folders
     summary: Gets the subfolders of a specified parent folder.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -29,6 +29,6 @@
           A JSON object containing an array with data for all folders, which have the folder with the requested object
           ID as parent. Each array element describes one folder and is itself an array. The elements of each array
           contain the information specified by the corresponding identifiers in the `columns` parameter. In case of
-          errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+          errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/FoldersResponse"

@@ -2,7 +2,7 @@
   put:
     operationId: getTaskList
     tags:
-      - Tasks
+      - tasks
     summary: Gets a list of tasks.
     consumes:
       - application/json
@@ -23,6 +23,6 @@
           A JSON object containing an array with data for the requested tasks. Each array element describes one task and
           is itself an array. The elements of each array contain the information specified by the corresponding
           identifiers in the `columns` parameter. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/TasksResponse"

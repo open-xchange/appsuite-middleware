@@ -13,8 +13,10 @@ properties:
     type: boolean
     description: Indicates whether the field is mandatory.
   options:
-    type: object
+    type: array
     description: A list of available options in the field.
+    items:
+      type: object
   defaultValue:
     type: object
     description: Can contain a default value.

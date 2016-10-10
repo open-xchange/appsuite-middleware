@@ -2,7 +2,7 @@
   get:
     operationId: getMailsAsZip
     tags:
-      - Mail
+      - mail
     summary: Gets multiple mails as a ZIP file.
     produces:
       - application/zip

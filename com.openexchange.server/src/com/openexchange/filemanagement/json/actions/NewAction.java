@@ -58,6 +58,9 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
@@ -75,6 +78,12 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.POST, name = "new", description = "Uploading a file", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "module", description = "The module for which the file is uploaded to determine proper upload quota constraints (e.g. \"mail\", \"infostore\", etc.)."),
+    @Parameter(name = "type", description = "The file type filter to define which file types are allowed during upload. Currently supported filters are: file=all, text=text/*, media=image OR audio OR video, image=image/*, audio=audio/*, video=video/*, application=application/*")
+}, requestBody = "A common POST request body of MIME type \"multipart/*\" which holds the file(s) to upload",
+responseDescription = "A JSON array containing the IDs of the uploaded files. The files are accessible through the returned IDs for future use.")
 public final class NewAction implements AJAXActionService {
 
     /**

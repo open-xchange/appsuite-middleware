@@ -57,6 +57,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
@@ -71,6 +74,10 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "search", description = "Search for resources", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
+}, requestBody = "An object with search parameters as described in Participant search.",
+responseDescription = "An array of resource objects as described in Resource response.")
 public final class SearchAction extends AbstractResourceAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchAction.class);

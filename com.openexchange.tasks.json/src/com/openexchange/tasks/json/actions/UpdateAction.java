@@ -55,6 +55,9 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
@@ -69,6 +72,13 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@Action(method = RequestMethod.PUT, name = "update", description = "Update a tasks.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "folder", description = "Folder Identifier through that the task is accessed. This is necessary for checking the permissions."),
+    @Parameter(name = "id", description = "Object ID of the updated task."),
+    @Parameter(name = "timestamp", description = "Timestamp of the updated task. If the task was modified after the specified timestamp, then the update must fail.")
+}, requestBody = "Task object as described in Common object data, Detailed task and appointment data and Detailed task data. Only modified fields are present. ",
+responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated task, and maybe errors.")
 @OAuthAction(TaskActionFactory.OAUTH_WRITE_SCOPE)
 public class UpdateAction extends TaskAction {
 

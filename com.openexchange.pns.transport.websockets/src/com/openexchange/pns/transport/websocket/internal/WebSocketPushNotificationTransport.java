@@ -309,8 +309,7 @@ public class WebSocketPushNotificationTransport implements PushNotificationTrans
             return property.get().booleanValue();
         }
 
-        // Default is "true"
-        return true;
+        return false;
     }
 
     @Override

@@ -2,7 +2,7 @@
   get:
     operationId: exportAsCSV
     tags:
-      - Export
+      - export
     summary: Exports contact data to a CSV file.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -14,15 +14,15 @@
       - in: query
         name: columns
         type: string
-        description: 'A comma-separated list of columns to export, like "501,502". A column is specified by a numeric column identifier, see [Detailed contact data](#detailed-contact-data).'
+        description: A comma-separated list of columns to export, like "501,502". A column is specified by a numeric column identifier, see [Detailed contact data](https://documentation.open-xchange.com/latest/middleware/http_api/2_column_identifiers.html#detailed-contact-data).
         required: false
       - in: query
         name: export_dlists
         type: string
-        description: 'Toggles whether distribution lists shall be exported too (default is `false`).'
+        description: Toggles whether distribution lists shall be exported too (default is `false`). (since 7.4.1)
         required: false
     responses:
       200:
-        description: 'An input stream containing the content of the CSV file with the MIME type `text/csv`.'
+        description: An input stream containing the content of the CSV file with the MIME type `text/csv`.
         schema:
           type: string

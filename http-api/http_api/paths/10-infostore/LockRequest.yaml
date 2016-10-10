@@ -2,7 +2,7 @@
   get:
     operationId: lockInfoItem
     tags:
-      - Infostore
+      - infostore
     summary: Locks an infoitem.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -20,6 +20,6 @@
     responses:
       200:
         description: |
-          In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+          In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/CommonResponse"

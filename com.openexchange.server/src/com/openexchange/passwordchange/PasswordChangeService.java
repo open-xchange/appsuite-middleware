@@ -136,17 +136,6 @@ public abstract class PasswordChangeService {
     }
 
     /**
-     * Specifies whether the old password is supposed to be checked prior to changing a user's password.
-     * <p>
-     * Default is true.
-     *
-     * @return <code>true</code> if the old password is supposed to be checked; otherwise <code>false</code>
-     */
-    protected boolean checkOldPassword() {
-        return true;
-    }
-
-    /**
      * Check old password
      *
      * @param event The event containing the session of the user whose password shall be changed, the context, the new password, and the old
@@ -157,11 +146,10 @@ public abstract class PasswordChangeService {
         User user;
         try {
             /*
-             * Check whether to verify old password prior to applying new one
+             * Verify old password prior to applying new one
              */
-            boolean checkOldPassword = checkOldPassword();
             final AuthenticationService authenticationService = Authentication.getService();
-            if (checkOldPassword && authenticationService == null) {
+            if (authenticationService == null) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AuthenticationService.class.getName());
             }
             UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
@@ -176,34 +164,32 @@ public abstract class PasswordChangeService {
             /*
              * verify mandatory parameters
              */
-            if (checkOldPassword && Strings.isEmpty(event.getOldPassword()) && false == user.isGuest()) {
+            if (Strings.isEmpty(event.getOldPassword()) && !user.isGuest()) {
                 throw UserExceptionCode.MISSING_CURRENT_PASSWORD.create();
             }
             if (Strings.isEmpty(event.getNewPassword()) && false == user.isGuest()) {
                 throw UserExceptionCode.MISSING_NEW_PASSWORD.create();
             }
 
-            if (checkOldPassword) {
-                Map<String, Object> properties = new LinkedHashMap<String, Object>(2);
-                {
-                    Map<String, List<String>> headers = event.getHeaders();
-                    if (headers != null) {
-                        properties.put("headers", headers);
-                    }
-                    com.openexchange.authentication.Cookie[] cookies = event.getCookies();
-                    if (null != cookies) {
-                        properties.put("cookies", cookies);
-                    }
+            Map<String, Object> properties = new LinkedHashMap<String, Object>(2);
+            {
+                Map<String, List<String>> headers = event.getHeaders();
+                if (headers != null) {
+                    properties.put("headers", headers);
                 }
-                if (!user.isGuest()) {
-                    Authentication.login(new _LoginInfo(session.getLogin(), event.getOldPassword(), properties), authenticationService);
-                } else {
-                    BasicAuthenticationService basicService = Authentication.getBasicService();
-                    if (basicService == null) {
-                        throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(BasicAuthenticationService.class.getName());
-                    }
-                    basicService.handleLoginInfo(user.getId(), session.getContextId(), event.getOldPassword());
+                com.openexchange.authentication.Cookie[] cookies = event.getCookies();
+                if (null != cookies) {
+                    properties.put("cookies", cookies);
                 }
+            }
+            if (!user.isGuest()) {
+                Authentication.login(new _LoginInfo(session.getLogin(), event.getOldPassword(), properties), authenticationService);
+            } else {
+                BasicAuthenticationService basicService = Authentication.getBasicService();
+                if (basicService == null) {
+                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(BasicAuthenticationService.class.getName());
+                }
+                basicService.handleLoginInfo(user.getId(), session.getContextId(), event.getOldPassword());
             }
         } catch (final OXException e) {
             if (e.equalsCode(6, "LGI")) {

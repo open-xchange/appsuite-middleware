@@ -61,6 +61,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
@@ -75,6 +78,11 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "delete", description = "Delete mails", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "timestamp", description = "Timestamp of the last update of the deleted mails.")
+}, requestBody = "An array of objects providing folder IDs and object IDs of the deleted mails. [{ \"folder\":\"default0/INBOX\", \"id\":\"123\" } ... { \"folder\":\"default0/MyFolder\", \"id\":\"134\" }]",
+responseDescription = "An array with object IDs of mails which were modified after the specified timestamp and were therefore not deleted.")
 public final class DeleteAction extends AbstractMailAction {
 
     /**

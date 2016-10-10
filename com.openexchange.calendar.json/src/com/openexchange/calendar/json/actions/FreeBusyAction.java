@@ -60,6 +60,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.container.Appointment;
@@ -74,6 +77,13 @@ import com.openexchange.tools.iterator.SearchIterator;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@Action(method = RequestMethod.PUT, name = "freebusy", description = "Free & Busy.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "id", description = "Internal user id. Must be obtained from the contact module."),
+    @Parameter(name = "type", description = "Constant for user or resource (1 for users, 3 for resources)."),
+    @Parameter(name = "start", description = "Lower inclusive limit of the queried range as a Date. Only appointments which end on or after this date are returned."),
+    @Parameter(name = "end", description = "Upper exclusive limit of the queried range as a Date. Only appointments which start before this date are returned.")
+}, responseDescription = "An array of objects identifying the appointments which lie between start and end as described.")
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
 public final class FreeBusyAction extends AppointmentAction {
 

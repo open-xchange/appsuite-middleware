@@ -210,7 +210,6 @@ public final class DefaultMailAccountWriter implements MailAccountFields {
             json.put(MAIL_SERVER, account.getMailServer());
             json.put(MAIL_URL, account.generateMailServerURL());
             json.put(MAIL_STARTTLS, account.isMailStartTls());
-            json.put(MAIL_OAUTH, account.isMailOAuthAble() ? account.getMailOAuthId() : -1);
 
             {
                 TransportAuth transportAuth = account.getTransportAuth();
@@ -224,7 +223,6 @@ public final class DefaultMailAccountWriter implements MailAccountFields {
             json.put(TRANSPORT_SERVER, account.getTransportServer());
             json.put(TRANSPORT_URL, account.generateTransportServerURL());
             json.put(TRANSPORT_STARTTLS, account.isTransportStartTls());
-            json.put(TRANSPORT_OAUTH, account.isTransportOAuthAble() ? account.getTransportOAuthId() : -1);
 
             json.put(TRANSPORT_LOGIN, account.getTransportLogin());
             // json.put(TRANSPORT_PASSWORD, account.getTransportPassword());
@@ -233,7 +231,6 @@ public final class DefaultMailAccountWriter implements MailAccountFields {
             json.put(PRIMARY_ADDRESS, addr2String(account.getPrimaryAddress()));
             json.put(PERSONAL, account.getPersonal());
             json.put(SPAM_HANDLER, account.getSpamHandler());
-            json.put(ROOT_FOLDER, account.getRootFolder());
 
             // Folder names
             json.put(TRASH, account.getTrash());

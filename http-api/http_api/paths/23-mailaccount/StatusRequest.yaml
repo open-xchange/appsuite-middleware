@@ -3,18 +3,18 @@
     operationId: statusAccount
     tags:
       - mailaccount
-    summary: Gets the status for a mail account.
+    summary: Gets the status for a mail account (**available since v7.8.3**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
         name: id
         type: integer
-        description: The optional account identifier to query the status for a single mail account. If not set the status for all accounts are returned
-        required: false
+        description: Account ID of the requested account.
+        required: true
     responses:
       200:
         description: |
-          A small JSON response providing the accounts' status information; such as "ok" or "invalid_credentials"
+          A small JSON response providing the account's status information; such as "ok" or "invalid_credentials"
           In case of errors the responsible fields in the response are filled
           (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:

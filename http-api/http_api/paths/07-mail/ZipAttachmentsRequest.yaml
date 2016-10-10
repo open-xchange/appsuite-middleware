@@ -2,7 +2,7 @@
   get:
     operationId: getAttachmentsAsZip
     tags:
-      - Mail
+      - mail
     summary: Gets multiple mail attachments as a ZIP file.
     produces:
       - application/zip

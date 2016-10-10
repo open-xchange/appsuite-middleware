@@ -53,7 +53,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.java.ListSet;
 
 /**
  * {@link CacheEvent}
@@ -115,7 +114,7 @@ public class CacheEvent implements Serializable {
     private static final long serialVersionUID = 7172029773641345572L;
 
     private final CacheOperation operation;
-    private final ListSet<Serializable> keys;
+    private final List<Serializable> keys;
     private final String groupName;
     private final String region;
 
@@ -135,13 +134,15 @@ public class CacheEvent implements Serializable {
         this.groupName = groupName;
     }
 
-    private static ListSet<Serializable> getPreparedKeys(List<Serializable> keys) {
+    private static List<Serializable> getPreparedKeys(List<Serializable> keys) {
         if (null == keys) {
             return null;
         }
-        ListSet<Serializable> retval = new ListSet<Serializable>(keys.size());
+        List<Serializable> retval = new ArrayList<Serializable>(keys.size());
         for (Serializable keyToAdd : keys) {
-            retval.add(keyToAdd);
+            if (!retval.contains(keyToAdd)) {
+                retval.add(keyToAdd);
+            }
         }
         return retval;
     }
@@ -193,7 +194,9 @@ public class CacheEvent implements Serializable {
 
         // Add keys if absent
         for (Serializable keyToAdd : event.keys) {
-            thisKeys.add(keyToAdd);
+            if (!thisKeys.contains(keyToAdd)) {
+                thisKeys.add(keyToAdd);
+            }
         }
 
         return true;

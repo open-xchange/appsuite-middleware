@@ -2,8 +2,8 @@
   put:
     operationId: deleteShareLink
     tags:
-      - Share/Management
-    summary: Deletes a share link.
+      - share/management
+    summary: Deletes a share link (**available since v7.8.0**).
     consumes:
       - application/json
     parameters:
@@ -16,6 +16,6 @@
           $ref: "#/definitions/ShareTargetData"
     responses:
       200:
-        description: In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+        description: In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/CommonResponse"

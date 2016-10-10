@@ -18,9 +18,4 @@ properties:
     description: Size of the attachment in bytes.
   disp:
     type: string
-    description: "Attachment's disposition."
-    enum: 
-      - "null"
-      - inline
-      - attachment
-      - alternative
+    description: "Attachment's disposition: null, inline, attachment or alternative."

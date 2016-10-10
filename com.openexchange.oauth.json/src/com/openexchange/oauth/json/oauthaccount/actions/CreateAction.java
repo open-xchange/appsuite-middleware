@@ -58,6 +58,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -77,6 +80,14 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "create", description = "Create an OAuth account", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "oauth_token", description = "The request token from preceeding OAuth interaction."),
+    @Parameter(name = "uuid", description = "The UUID of the preceeding OAuth interaction."),
+    @Parameter(name = "oauth_verfifier", description = "The verifier string which confirms that user granted access."),
+    @Parameter(name = "displayName", description = "The display name for the new account."),
+    @Parameter(name = "scopes", description = "A space separated list with scopes")
+}, responseDescription = "A JSON object describing the newly created OAuth account as specified in OAuth account data.")
 @DispatcherNotes(noSecretCallback = true)
 public final class CreateAction extends AbstractOAuthTokenAction {
 
@@ -128,7 +139,7 @@ public final class CreateAction extends AbstractOAuthTokenAction {
             }
 
             // Write as JSON
-            final JSONObject jsonAccount = AccountWriter.write(newAccount, session);
+            final JSONObject jsonAccount = AccountWriter.write(newAccount);
 
             // Return appropriate result
             return new AJAXRequestResult(jsonAccount);

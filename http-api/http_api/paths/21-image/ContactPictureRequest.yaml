@@ -2,7 +2,7 @@
   get:
     operationId: getContactProfileImage
     tags:
-      - Image
+      - image
     summary: Requests a contact's profile image.
     produces:
       - application/octet-stream

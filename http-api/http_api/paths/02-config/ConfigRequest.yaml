@@ -2,7 +2,7 @@
   get:
     operationId: getConfigNode
     tags:
-      - Config
+      - config
     summary: Gets data of a configuration node.
     description: |
       The configuration is stored in a tree. Each node of the tree has a name and a value.
@@ -15,13 +15,13 @@
       - $ref: "#/parameters/gblQueryParamSession"
     responses:
       200:
-        description: Value of the node specified by path. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+        description: Value of the node specified by path. In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/ConfigResponse"
   put:
     operationId: putConfigNode
     tags:
-      - Config
+      - config
     summary: Sets the value of a configuration node.
     description: |
         The configuration is stored in a tree. Each node of the tree has a name and a value.
@@ -42,6 +42,6 @@
           $ref: "#/definitions/ConfigBody"
     responses:
       200:
-        description: In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
+        description: In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/CommonResponse"

@@ -58,7 +58,6 @@ import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.dropbox.DropboxConstants;
 import com.openexchange.file.storage.dropbox.DropboxFileStorageService;
-import com.openexchange.file.storage.dropbox.DropboxServices;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 
 /**
@@ -100,7 +99,7 @@ public final class DropboxServiceRegisterer implements ServiceTrackerCustomizer<
                 /*
                  * Try to create Dropbox service
                  */
-                service = new DropboxFileStorageService(DropboxServices.getServices());
+                service = DropboxFileStorageService.newInstance();
                 this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
                 this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
                 this.service = service;
@@ -114,7 +113,7 @@ public final class DropboxServiceRegisterer implements ServiceTrackerCustomizer<
                     compositeProvider = new CompositeFileStorageAccountManagerProvider();
                     compositeProvider.addProvider(this.provider);
                     unregisterService(null);
-                    service = new DropboxFileStorageService(DropboxServices.getServices(), compositeProvider);
+                    service = DropboxFileStorageService.newInstance(compositeProvider);
                     this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
                     this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
                     this.service = service;

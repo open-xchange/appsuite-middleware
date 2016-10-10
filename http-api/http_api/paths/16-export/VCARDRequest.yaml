@@ -2,7 +2,7 @@
   get:
     operationId: exportAsVCard
     tags:
-      - Export
+      - export
     summary: Exports contact data to a vCard file.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"

@@ -227,19 +227,4 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // Something is wrong with a subscribed E-Mail account; e.g. invalid credentials. Example: "Please check your mail account: The entered credentials are wrong"
     public static final String ACCOUNT_STATUS_WITH_INFO_MSG = "Please check your mail account: %2$s";
 
-    // Invalid name specified. Information from mail server: %1$s
-    public static final String INVALID_FOLDER_NAME_SIMPLE_MSG = "Invalid name specified. Information from mail server: %1$s";
-
-    // Insufficient permissions to perform the operation.
-    public static final String INSUFFICIENT_PERMISSIONS_MSG = "Insufficient permissions to perform the operation.";
-
-    // Such a folder already exists.
-    public static final String DUPLICATE_FOLDER_SIMPLE_MSG = "Such a folder already exists.";
-
-    // A non-secure connection is not allowed. Please change mail settings and configure a secure connection (if Transport Layer Security (TLS) is not in use, the client could try STARTTLS).
-    public static final String NONSECURE_CONNECTION_DENIED_MSG = "Please change mail settings and configure a secure connection (if Transport Layer Security (TLS) is not in use, the client could try STARTTLS)";
-
-    // A temporary failure because a subsystem is down. Please try again later.
-    public static final String SUBSYSTEM_DOWN_MSG = "A temporary failure because a subsystem is down (maybe due to maintenance). Please try again later.";
-
 }

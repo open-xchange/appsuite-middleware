@@ -65,6 +65,9 @@ import com.openexchange.ajax.parser.CalendarParser;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.Participants;
@@ -85,6 +88,13 @@ import com.openexchange.tools.iterator.SearchIterators;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@Action(method = RequestMethod.PUT, name = "search", description = "Search for tasks.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for tasks are defined in Common object data, Detailed task and appointment data and Detailed task data."),
+    @Parameter(name = "sort", optional = true, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified , then the parameter order must be also specified."),
+    @Parameter(name = "order", optional = true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.")
+}, requestBody = "A JSON object with attributes described in Search tasks.",
+responseDescription = "Response with timestamp: An array with matching tasks. Tasks are represented by arrays. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 @OAuthAction(TaskActionFactory.OAUTH_READ_SCOPE)
 public class SearchAction extends TaskAction {
 

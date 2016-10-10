@@ -54,6 +54,9 @@ import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.internal.ResourceServiceImpl;
@@ -66,6 +69,9 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.GET, name = "all", description = "Get all resources", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
+}, responseDescription = "An array of resource identifier.")
 public final class AllAction extends AbstractResourceAction {
 
     /**

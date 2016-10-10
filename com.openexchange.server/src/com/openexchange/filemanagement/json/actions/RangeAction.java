@@ -60,6 +60,9 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
@@ -77,6 +80,12 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.GET, name = "range", description = "Requesting a range from a formerly uploaded file", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "id", description = "The ID of the uploaded file."),
+    @Parameter(name = "off", description = "The offset position to read from."),
+    @Parameter(name = "len", description = "The number of bytes to read.")
+}, responseDescription = "The content of the requested file range is directly written into output stream.")
 @DispatcherNotes(defaultFormat = "file", allowPublicSession = true)
 public final class RangeAction implements AJAXActionService {
 

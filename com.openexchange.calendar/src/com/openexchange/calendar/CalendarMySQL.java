@@ -5096,7 +5096,6 @@ public class CalendarMySQL implements CalendarSqlImp {
                         }
                         final CalendarDataObject update = new CalendarDataObject();
                         update.setContext(ctx);
-                        update.setActionFolder(fid);
                         update.setObjectID(edao.getRecurrenceID());
                         if (deleted_exceptions != null) {
                             final List<Date> asList = Arrays.asList(deleted_exceptions);

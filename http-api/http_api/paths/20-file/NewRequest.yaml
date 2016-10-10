@@ -2,7 +2,7 @@
   post:
     operationId: uploadFile
     tags:
-      - File
+      - file
     summary: Uploads a file.
     description: |
       It can be uploaded multiple files at once. Each file must be specified in an own form field

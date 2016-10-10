@@ -371,11 +371,9 @@ public class Attachment extends PermissionServlet {
     private void document(Session session, final HttpServletResponse res, final String userAgent, final boolean ie, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) {
         Readable documentData = null;
         OutputStream os = null;
-        boolean rollback = false;
-        Exception exc = null;
+
         try {
             ATTACHMENT_BASE.startTransaction();
-            rollback = true;
             final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
 
             res.setContentLength((int) attachment.getFilesize());
@@ -417,19 +415,15 @@ public class Attachment extends PermissionServlet {
             os = null; // No need to close the IS anymore
 
             ATTACHMENT_BASE.commit();
-            rollback = false;
-        } catch (final Exception e) {
-            exc = e;
+        } catch (final Throwable t) {
+            // This is a bit convoluted: In case the contentType is not
+            // overridden the returned file will be opened
+            // in a new window. To call the JS callback routine from a popup we
+            // can use parent.callback_error() but
+            // must use window.opener.callback_error()
+            rollback(t, res, ResponseFields.ERROR, session);
             return;
         } finally {
-            if (rollback) {
-                // This is a bit convoluted: In case the contentType is not
-                // overridden the returned file will be opened
-                // in a new window. To call the JS callback routine from a popup we
-                // can use parent.callback_error() but
-                // must use window.opener.callback_error()
-                rollback(exc, res, ResponseFields.ERROR, session);
-            }
             Streams.close(documentData);
             Streams.flush(os);
             try {
@@ -446,12 +440,10 @@ public class Attachment extends PermissionServlet {
         } catch (final OXException e) {
             LOG.debug("", e);
         }
-        if (null != t) {
-            if (t instanceof OXException) {
-                handle(res, (OXException) t, action, session);
-            } else {
-                handle(res, new OXException(t), action, session);
-            }
+        if (t instanceof OXException) {
+            handle(res, (OXException) t, action, session);
+        } else {
+            handle(res, new OXException(t), action, session);
         }
     }
 

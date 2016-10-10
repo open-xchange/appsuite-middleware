@@ -52,6 +52,10 @@ package com.openexchange.freebusy.json.actions;
 import java.util.Map;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.Type;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.FreeBusyData;
 import com.openexchange.freebusy.json.FreeBusyRequest;
@@ -63,6 +67,17 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@Action(method = RequestMethod.PUT, name = "list", description = "Get a list of free/busy information.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "from", description = "The lower (inclusive) limit of the requested time-range."),
+    @Parameter(name = "until", description = "The upper (exclusive) limit of the requested time-range."),
+    @Parameter(name = "merged", type = Type.BOOLEAN, optional = true, description = "Whether to pre-process the free/busy data on the " +
+    "server or not. This includes sorting as well as merging overlapping free/busy intervals.")
+}, requestBody = "An array of participants to get the free/busy data for. Each participant may be either an internal user-, group- or " +
+    "resource-ID, or an e-mail address for external participants.",
+responseDescription = "Response: The free/busy data for all requested participants. Besides a combined data element for a requested " +
+    "group, all group members are resolved and listed seperately in the result. If the 'merged' view was requested, an additional data " +
+    "element named 'merged' representing a combined view for all requested participants is added to the results implicitly.")
 public class ListAction extends FreeBusyAction {
 
     /**

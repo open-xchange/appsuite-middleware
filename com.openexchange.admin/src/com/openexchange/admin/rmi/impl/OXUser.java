@@ -73,7 +73,6 @@ import org.osgi.framework.BundleContext;
 import com.damienmiller.BCrypt;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
-import com.openexchange.admin.plugins.OXUserPluginInterfaceExtended;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.OXContextInterface;
@@ -1223,28 +1222,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                         FileStorages.getFileStorageService().getFileStorage(uri);
                     } catch (OXException e) {
                         throw new StorageException(e.getMessage(), e);
-                    }
-                }
-            }
-        }
-
-        // Trigger plugin extensions
-        {
-            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
-            if (null != pluginInterfaces) {
-                for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
-                    if ((oxuser instanceof OXUserPluginInterfaceExtended) && (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin))) {
-                        OXUserPluginInterfaceExtended oxuserExtended = (OXUserPluginInterfaceExtended) oxuser;
-                        try {
-                            LOGGER.debug("Calling change for plugin: {}", oxuser.getClass().getName());
-                            oxuserExtended.beforeChange(ctx, usrdata, auth);
-                        } catch (final PluginException e) {
-                            LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
-                            throw StorageException.wrapForRMI(e);
-                        } catch (final RuntimeException e) {
-                            LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
-                            throw StorageException.wrapForRMI(e);
-                        }
                     }
                 }
             }

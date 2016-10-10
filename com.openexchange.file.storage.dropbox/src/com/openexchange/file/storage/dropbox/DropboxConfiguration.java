@@ -55,7 +55,6 @@ import com.openexchange.config.ConfigurationService;
  * {@link DropboxConfiguration}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class DropboxConfiguration {
 
@@ -77,8 +76,8 @@ public final class DropboxConfiguration {
      */
 
     private String apiKey;
+
     private String secretKey;
-    private String productName;
 
     /**
      * Initializes a new {@link DropboxConfiguration}.
@@ -88,13 +87,9 @@ public final class DropboxConfiguration {
         reset();
     }
 
-    /**
-     * Resets the values
-     */
     private void reset() {
         apiKey = DropboxConstants.KEY_API;
         secretKey = DropboxConstants.KEY_SECRET;
-        productName = DropboxConstants.PRODUCT_NAME;
     }
 
     /**
@@ -108,9 +103,6 @@ public final class DropboxConfiguration {
         }
         {
             secretKey = configurationService.getProperty("com.openexchange.oauth.dropbox.apiSecret", DropboxConstants.KEY_SECRET).trim();
-        }
-        {
-            productName = configurationService.getProperty("com.openexchange.oauth.dropbox.productName", DropboxConstants.PRODUCT_NAME).trim();
         }
     }
 
@@ -137,14 +129,5 @@ public final class DropboxConfiguration {
      */
     public String getSecretKey() {
         return secretKey;
-    }
-
-    /**
-     * Gets the product name.
-     * 
-     * @return the product name
-     */
-    public String getProductName() {
-        return productName;
     }
 }

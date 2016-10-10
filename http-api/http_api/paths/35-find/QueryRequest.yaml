@@ -2,10 +2,10 @@
   put:
     operationId: doQuery
     tags:
-      - Find
-    summary: Performs the actual search and returns the found items.
+      - find
+    summary: Performs the actual search and returns the found items (**available since v7.6.1**).
     description: |
-      Before querying the search you should fetch the search filters (facets) by calling the [/find?action=autocomplete](#operation--find-action-autocomplete-put) 
+      Before querying the search you should fetch the search filters (facets) by calling the `/find?action=autocomplete`
       request.
       #### Active facets
       Every value that has been selected by a user must be remembered and provided with every subsequent request.
@@ -39,6 +39,6 @@
       200:
         description: |
           A JSON object containing the search result. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/FindQueryResponse"

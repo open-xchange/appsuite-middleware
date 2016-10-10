@@ -4,6 +4,6 @@ properties:
   data:
     type: object
     description: |
-      A JSON object providing the status information for each mail account; such as "ok" or "invalid_credentials"
+      A JSON object providing the status information for a mail account; such as "ok" or "invalid_credentials"
   warnings:
       $ref: "#/definitions/CommonResponse"

@@ -176,6 +176,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
     protected DefaultAttachmentStorage(String id) {
         super();
         this.id = id;
+        this.timerTask = timerTask;
     }
 
     private void setCleanerInfo(DefaultAttachmentStoragePeriodicCleaner cleaner, ScheduledTimerTask timerTask) {

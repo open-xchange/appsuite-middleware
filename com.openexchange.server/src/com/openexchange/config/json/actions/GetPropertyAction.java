@@ -58,6 +58,9 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.json.ConfigAJAXRequest;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
@@ -72,6 +75,10 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
  */
+@Action(method = RequestMethod.GET, name = "get_property", description = "Gets a user property", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "name", description = "The property name.")
+}, responseDescription = "A JSON object providing the property's name and its value")
 public class GetPropertyAction extends AbstractConfigAction {
 
     /**

@@ -5,6 +5,4 @@ properties:
     type: array
     description: Array of infoitem identifiers that could not be moved (due to a conflict).
     items:
-      type: string
-      description: The infoitem identifier
-      
+      type: object

@@ -147,6 +147,7 @@ public class OAuthAddScopeColumnTask extends UpdateTaskAdapter {
     }
 
     private enum Scope {
+
         BOXCOM(API.BOX_COM.getFullName(), OXScope.drive),
         DROPBOX(API.DROPBOX.getFullName(), OXScope.drive),
         GOOGLE(API.GOOGLE.getFullName(), OXScope.calendar_ro, OXScope.contacts_ro, OXScope.drive),

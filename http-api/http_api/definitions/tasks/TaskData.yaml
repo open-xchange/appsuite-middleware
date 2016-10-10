@@ -3,13 +3,7 @@ properties:
   $ref: ./RawTaskAndAppointmentData.yaml
   status:
     type: integer
-    description: Status of the task.
-    enum: 
-      - 1 (not started)
-      - 2 (in progress)
-      - 3 (done)
-      - 4 (waiting)
-      - 5 (deferred)
+    description: 'Status of the task: 1 (not started), 2 (in progress), 3 (done), 4 (waiting), 5 (deferred).'
   percent_completed:
     type: integer
     minimum: 0
@@ -38,11 +32,7 @@ properties:
     description: Target duration of the task, e.g. in minutes.
   priority:
     type: integer
-    description: The priority of the task.
-    enum: 
-      - 1 (low)
-      - 2 (medium)
-      - 3 (high)
+    description: 'The priority of the task: 1 (low), 2 (medium), 3 (high).'
   currency:
     type: string
     description: The currency, e.g. "EUR".

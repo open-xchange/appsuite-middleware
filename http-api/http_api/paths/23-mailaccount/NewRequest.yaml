@@ -2,8 +2,8 @@
   put:
     operationId: createAccount
     tags:
-      - Mailaccount
-    summary: Creates a new mail account.
+      - mailaccount
+    summary: Creates a new mail account (**available since v6.12**).
     consumes:
       - application/json
     parameters:
@@ -18,6 +18,6 @@
       200:
         description: |
           A JSON object containing the data of the inserted mail account. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/MailAccountUpdateResponse"

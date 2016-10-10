@@ -2,14 +2,14 @@
   get:
     operationId: investigateContactHalo
     tags:
-      - Halo
+      - halo
     summary: Investigates a contact.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
         name: provider
         type: string
-        description: The halo provider, like "com.openexchange.halo.contacts". See [/halo/contact?action=services](#operation--halo-contact-action-services-get) for available providers.
+        description: The halo provider, like "com.openexchange.halo.contacts". See `/halo/contact?action=services` for available providers.
         required: true
       - in: query
         name: timezone
@@ -52,6 +52,6 @@
       200:
         description: |
           A JSON object containing an array with data for the requested columns. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/HaloInvestigationResponse"

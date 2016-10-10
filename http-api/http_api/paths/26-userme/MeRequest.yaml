@@ -2,14 +2,14 @@
   get:
     operationId: getCurrentUser
     tags:
-      - User/Me
-    summary: Gets information about current user.
+      - user/me
+    summary: Gets information about current user (**available since v7.6.2**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
     responses:
       200:
         description: |
           A JSON object containing the data of the current user. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/CurrentUserResponse"

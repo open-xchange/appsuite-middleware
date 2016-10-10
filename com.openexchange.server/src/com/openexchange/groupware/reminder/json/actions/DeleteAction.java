@@ -57,6 +57,9 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.ReminderService;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderHandler;
@@ -72,6 +75,10 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Action(method = RequestMethod.PUT, name = "delete", description = "Delete Reminders", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
+}, requestBody = "An object with the field \"id\" or an array of objects with the field \"id\".",
+responseDescription = "An JSON array with the ids that was not deleted.")
 @OAuthAction(ReminderActionFactory.OAUTH_WRITE_SCOPE)
 public final class DeleteAction extends AbstractReminderAction {
 

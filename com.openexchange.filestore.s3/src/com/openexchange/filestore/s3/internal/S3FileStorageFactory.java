@@ -375,46 +375,17 @@ public class S3FileStorageFactory implements FileStorageProvider {
         if (path.endsWith("ctx_store")) {
             Matcher matcher = CTX_STORE_PATTERN.matcher(path);
             if (false == matcher.matches()) {
-                throw new IllegalArgumentException("Path does not match the expected pattern \"\\d+_ctx_store\" in URI: " + uri);
+                throw new IllegalArgumentException("Path does not match the expected pattern \"\\d+_ctx_store\"");
             }
             return new StringBuilder(16).append(matcher.group(1)).append("ctxstore").toString();
         }
 
-        if (path.endsWith("user_store")) {
-            // Expect user store identifier
-            Matcher matcher = USER_STORE_PATTERN.matcher(path);
-            if (false == matcher.matches()) {
-                throw new IllegalArgumentException("Path does not match the expected pattern \"(\\d+)_ctx_(\\d+)_user_store\" in URI: " + uri);
-            }
-            return new StringBuilder(24).append(matcher.group(1)).append("ctx").append(matcher.group(2)).append("userstore").toString();
+        // Expect user store identifier
+        Matcher matcher = USER_STORE_PATTERN.matcher(path);
+        if (false == matcher.matches()) {
+            throw new IllegalArgumentException("Path does not match the expected pattern \"(\\d+)_ctx_(\\d+)_user_store\"");
         }
-
-        // Any path that serves as prefix; e.g. "photos"
-        return sanitizePathForPrefix(path, uri);
-    }
-
-    private static String sanitizePathForPrefix(String path, URI uri) {
-        if (Strings.isEmpty(path)) {
-            throw new IllegalArgumentException("Path is empty in URI: " + uri);
-        }
-
-        StringBuilder sb = null;
-        for (int k = path.length(), i = 0; k-- > 0; i++) {
-            char ch = path.charAt(i);
-            if ('_' == ch) {
-                // Underscore not allowed
-                if (null == sb) {
-                    sb = new StringBuilder(path.length());
-                    sb.append(path, 0, i);
-                }
-            } else {
-                // Append
-                if (null != sb) {
-                    sb.append(ch);
-                }
-            }
-        }
-        return null == sb ? path : sb.toString();
+        return new StringBuilder(24).append(matcher.group(1)).append("ctx").append(matcher.group(2)).append("userstore").toString();
     }
 
     /**

@@ -61,6 +61,7 @@ import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.session.Session;
 
 /**
  * {@link OAuthUtil}
@@ -72,7 +73,7 @@ public final class OAuthUtil {
     /**
      * Parses the specified {@link Set} with {@link OAuthScope}s and returns
      * the OAuth provider-specific mappings ({@link OAuthScope#getProviderScopes()})
-     * as a space separated string. Duplicate OAuth provider-specific scopes will only be
+     * as a space separated string. Duplicate OAuth provider-specific scopes will only be 
      * present once in the returned string.
      * 
      * @param scopes The {@link OAuthScope}s
@@ -126,10 +127,11 @@ public final class OAuthUtil {
      * Builds the 'init' call-back URL for the given {@link OAuthAccount}
      * 
      * @param account The {@link OAuthAccount}
-     * 
+     * @param session The session
+     * @param account The {@link OAuthAccount}
      * @return the 'init' call-back URL for the given {@link OAuthAccount}
      */
-    public static final String buildCallbackURL(OAuthAccount account) {
+    public static final String buildCallbackURL(Session session, OAuthAccount account) {
         RequestContext requestContext = RequestContextHolder.get();
         HostData hostData = requestContext.getHostData();
         boolean isSecure = hostData.isSecure();
@@ -142,6 +144,7 @@ public final class OAuthUtil {
         builder.append("&serviceId=").append(account.getAPI().getFullName());
         builder.append("&id=").append(account.getId());
         builder.append('&').append(OAuthConstants.ARGUMENT_DISPLAY_NAME).append('=').append(urlEncode(account.getDisplayName()));
+        builder.append("&session=").append(session.getSessionID());
         builder.append("&scopes=").append(urlEncode(OAuthUtil.oxScopesToString(account.getEnabledScopes())));
 
         return builder.toString();

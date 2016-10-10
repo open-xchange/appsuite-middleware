@@ -52,6 +52,9 @@ package com.openexchange.file.storage.json.actions.files;
 import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -66,6 +69,13 @@ import com.openexchange.tools.iterator.SearchIterators;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@Action(method = RequestMethod.PUT, name = "revert", description = "Delete all versions of infostore documents", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "id", description = "The ID of the base Object."),
+    @Parameter(name = "folder", description = "The Folder of the Object."),
+    @Parameter(name = "timestamp", description = "Timestamp of the infostore object.")
+}, requestBody = "",
+responseDescription = "")
 public class RevertAction extends AbstractWriteAction {
 
     @Override

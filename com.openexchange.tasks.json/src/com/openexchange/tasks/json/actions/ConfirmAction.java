@@ -55,6 +55,9 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.parser.TaskParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.api2.TasksSQLInterface;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
@@ -71,6 +74,13 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
+@Action(method = RequestMethod.PUT, name = "confirm", description = "Confirm a task.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "id", description ="Object ID of the to confirm task."),
+    @Parameter(name = "folder", description = "Object ID of the folder, whose contents are queried."),
+    @Parameter(name = "timestamp", description =  "Timestamp of the last update of the to confirm task.")
+}, requestBody = "An object with the fields \"confirmation\" and \"confirmmessage\" as described in User participant object.",
+responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the confirmed and thereby updated task, and maybe errors.")
 @OAuthAction(TaskActionFactory.OAUTH_WRITE_SCOPE)
 public class ConfirmAction extends TaskAction {
 

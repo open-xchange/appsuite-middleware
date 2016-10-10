@@ -15,12 +15,7 @@ properties:
     description: The time of the alarm.
   module:
     type: integer
-    description: The module of the reminder's target object.
-    enum: 
-      - 1 (appointment)
-      - 4 (task)
-      - 7 (contact)
-      - 137 (infostore)
+    description: "The module of the reminder's target object: 1 (appointment), 4 (task), 7 (contact), 137 (infostore)."
   server_time:
     type: integer
     format: int64

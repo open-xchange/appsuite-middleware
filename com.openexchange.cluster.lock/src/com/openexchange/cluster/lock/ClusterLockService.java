@@ -49,7 +49,7 @@
 
 package com.openexchange.cluster.lock;
 
-import com.openexchange.cluster.lock.policies.RetryPolicy;
+import java.util.concurrent.locks.Lock;
 import com.openexchange.exception.OXException;
 
 /**
@@ -60,46 +60,38 @@ import com.openexchange.exception.OXException;
 public interface ClusterLockService {
 
     /**
-     * Acquires a cluster lock for the specified {@link ClusterTask}
+     * Acquire a cluster lock.
      * 
-     * @param clusterTask The {@link ClusterTask} for which to acquire the cluster lock
-     * @return <code>true</code> if the cluster lock was successfully acquired, <code>false</code> otherwise
-     * @throws OXException if an error is occurred during the acquisition of the cluster lock
+     * @param node The action that is going to be performed cluster-wise
+     * @return The lock
+     * @throws OXException if the cluster is already locked for that action
      */
-    <T> boolean acquireClusterLock(ClusterTask<T> clusterTask) throws OXException;
+    public Lock acquireClusterLock(String action) throws OXException;
 
     /**
-     * Releases the cluster lock that was previously acquired for the specified {@link ClusterTask}
+     * Release a cluster lock previously acquired via {@link ClusterLockService.acquireClusterLock}.
      * 
-     * @param clusterTask The {@link ClusterTask} for which to release the lock
-     * @throws OXException if an error is occurred during the release of the cluster lock
+     * @param action the action that was performed cluster-wise
+     * @param lock The lock
+     * @throws OXException
      */
-    <T> void releaseClusterLock(ClusterTask<T> clusterTask) throws OXException;
+    public void releaseClusterLock(String action, Lock lock) throws OXException;
 
     /**
-     * Runs the specified cluster task while previously acquiring a lock on the entire cluster
-     * for this specific task. The current thread will acquire the lock for a predefined amount
-     * of time. This method will either run the cluster task or not depending on whether the
-     * cluster lock was acquired. If not an exception will be thrown
+     * Acquire a periodic cluster lock.
      * 
-     * @param clusterTask The {@link ClusterTask} to perform
-     * @return The result {@link T}
-     * @throws OXException if an error is occurred during the execution of the task or if the acquisition
-     *             of the cluster lock fails
+     * @param action
+     * @param period
+     * @return The lock
+     * @throws OXException
      */
-    <T> T runClusterTask(ClusterTask<T> clusterTask) throws OXException;
+    public Lock acquirePeriodicClusterLock(String action, long period) throws OXException;
 
     /**
-     * Runs the specified cluster task while previously acquiring a lock on the entire cluster
-     * for this specific task. The current thread will acquire the lock for a predefined amount
-     * of time. The amount of retries to acquire the lock is depended on the specified {@link RetryPolicy}.
-     * If the lock is not acquired after the predefined amount of retries an exception will be thrown.
+     * Release a periodic cluster lock.
      * 
-     * @param clusterTask The {@link ClusterTask} to perform
-     * @param retryPolicy The {@link RetryPolicy} for acquiring a lock
-     * @return The result {@link T}
-     * @throws OXException if an error is occurred during the execution or if the acquisition
-     *             of the cluster lock fails
+     * @param action
+     * @throws OXException
      */
-    <T> T runClusterTask(ClusterTask<T> clusterTask, RetryPolicy retryPolicy) throws OXException;
+    public void releasePeriodicClusterLock(String action) throws OXException;
 }

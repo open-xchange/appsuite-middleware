@@ -2,8 +2,8 @@
   put:
     operationId: getFreeBusyList
     tags:
-      - Freebusy
-    summary: Gets a list of free/busy information.
+      - freebusy
+    summary: Gets a list of free/busy information (**available since v6.22.1**).
     consumes:
       - application/json
     parameters:
@@ -41,6 +41,6 @@
           A JSON object containing the free/busy data for all requested participants. For each participant it is added
           an object (with the participant's ID as key) that contains a field `data` that is an array with objects representing
           free/busy information as described in [FreeBusyData](#/definitions/FreeBusyData) model. In case of errors the responsible fields in the response are
-          filled (see [Error handling](#error-handling)).
+          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/FreeBusysResponse"

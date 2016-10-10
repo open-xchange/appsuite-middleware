@@ -72,6 +72,13 @@ public interface OAuthAccess {
     void initialize() throws OXException;
 
     /**
+     * Revokes the OAuth token from this {@link OAuthAccess}
+     *
+     * @throws OXException if the token cannot be revoked
+     */
+    void revoke() throws OXException;
+
+    /**
      * Ensures that the access is not expired
      *
      * @return The non-expired access

@@ -56,13 +56,5 @@ package com.openexchange.file.storage;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface FileFieldHandler {
-
-    /**
-     * Handles given field.
-     *
-     * @param field The field to handle
-     * @param args The optional accompanying arguments
-     * @return The resulting object
-     */
-    Object handle(File.Field field, Object...args);
+    public Object handle(File.Field field, Object...args);
 }

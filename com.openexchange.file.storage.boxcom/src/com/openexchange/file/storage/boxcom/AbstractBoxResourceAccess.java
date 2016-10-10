@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.boxcom;
 
+import java.io.IOException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -98,13 +99,43 @@ public abstract class AbstractBoxResourceAccess {
         return closure.perform(this, boxAccess, session);
     }
 
+    //    /**
+    //     * Checks if given typed object denotes a file
+    //     *
+    //     * @param typedObject The typed object to check
+    //     * @return <code>true</code> if typed object denotes a file; otherwise <code>false</code>
+    //     */
+    //    protected static boolean isFile(BoxTypedObject typedObject) {
+    //        return null != typedObject && TYPE_FILE.equals(typedObject.getType());
+    //    }
+    //
+    //    /**
+    //     * Checks if given typed object denotes a folder
+    //     *
+    //     * @param typedObject The typed object to check
+    //     * @return <code>true</code> if typed object denotes a folder; otherwise <code>false</code>
+    //     */
+    //    protected static boolean isFolder(BoxTypedObject typedObject) {
+    //        return null != typedObject && TYPE_FOLDER.equals(typedObject.getType());
+    //    }
+    //
+    //    /**
+    //     * Checks if given typed object is trashed
+    //     *
+    //     * @param boxFile The typed object to check
+    //     * @return <code>true</code> if typed object is trashed; otherwise <code>false</code>
+    //     */
+    //    protected static boolean isTrashed(BoxFile boxFile) {
+    //        return null != boxFile.getTrashedAt();
+    //    }
+
     /**
      * Checks if given typed object is trashed
      *
      * @param folder The typed object to check
      * @return <code>true</code> if typed object is trashed; otherwise <code>false</code>
      */
-    protected boolean isFolderTrashed(BoxFolder.Info folder) {
+    protected static boolean isFolderTrashed(BoxFolder.Info folder) {
         return hasTrashedParent(folder);
     }
 
@@ -114,7 +145,7 @@ public abstract class AbstractBoxResourceAccess {
      * @param boxFolder The box folder
      * @return <code>true</code> if the parent folder is trashed; otherwise <code>false</code>
      */
-    private boolean hasTrashedParent(BoxFolder.Info boxFolder) {
+    private static boolean hasTrashedParent(BoxFolder.Info boxFolder) {
         BoxFolder.Info parent = boxFolder.getParent();
         if (null == parent) {
             return false;
@@ -131,7 +162,7 @@ public abstract class AbstractBoxResourceAccess {
      * @param fileInfo The file to check
      * @return <code>true</code> if the file is trashed; otherwise <code>false</code>
      */
-    protected boolean isFileTrashed(BoxFile.Info fileInfo) {
+    protected static boolean isFileTrashed(BoxFile.Info fileInfo) {
         return fileInfo.getTrashedAt() != null;
     }
 
@@ -141,7 +172,7 @@ public abstract class AbstractBoxResourceAccess {
      * @param fileInfo The file's validity
      * @throws OXException if the specified file was trashed
      */
-    protected void checkFileValidity(BoxFile.Info fileInfo) throws OXException {
+    protected static void checkFileValidity(BoxFile.Info fileInfo) throws OXException {
         if (isFileTrashed(fileInfo)) {
             throw FileStorageExceptionCodes.NOT_A_FILE.create(BoxConstants.ID, fileInfo.getID());
         }
@@ -167,7 +198,27 @@ public abstract class AbstractBoxResourceAccess {
         }
     }
 
-    /** Status code (400) indicating a bad request. */
+    /**
+     * Handles given API error.
+     *
+     * @param e The {@link BoxAPIException} error
+     * @return The resulting exception
+     */
+    protected static OXException handleRestError(BoxAPIException e) {
+        Throwable cause = e.getCause();
+
+        if (cause == null) {
+            return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getResponseCode() + " " + e.getResponse());
+        }
+
+        if (cause instanceof IOException) {
+            return FileStorageExceptionCodes.IO_ERROR.create(cause, cause.getMessage());
+        }
+
+        return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, BoxConstants.ID, e.getMessage());
+    }
+
+    /** Status code (400) indicating a bad requestn. */
     private static final int SC_BAD_REQUEST = 400;
 
     /** Status code (401) indicating that the request requires HTTP authentication. */

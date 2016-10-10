@@ -99,7 +99,7 @@ public final class GoogleDriveServiceRegisterer implements ServiceTrackerCustomi
                 /*
                  * Try to create Google Drive service
                  */
-                service = new GoogleDriveFileStorageService(Services.getServiceLookup());
+                service = GoogleDriveFileStorageService.newInstance();
                 this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
                 this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
                 this.service = service;
@@ -113,7 +113,7 @@ public final class GoogleDriveServiceRegisterer implements ServiceTrackerCustomi
                     compositeProvider = new CompositeFileStorageAccountManagerProvider();
                     compositeProvider.addProvider(this.provider);
                     unregisterService(null);
-                    service = new GoogleDriveFileStorageService(Services.getServiceLookup(), compositeProvider);
+                    service = GoogleDriveFileStorageService.newInstance(compositeProvider);
                     this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
                     this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
                     this.service = service;

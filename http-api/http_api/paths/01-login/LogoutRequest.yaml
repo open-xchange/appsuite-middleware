@@ -2,7 +2,7 @@
   get:
     operationId: doLogout
     tags:
-      - Login
+      - login
     summary: Does the logout.
     description: Does the logout which invalidates the session.
     parameters:

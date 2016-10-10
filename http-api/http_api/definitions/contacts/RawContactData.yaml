@@ -253,22 +253,22 @@ useCount:
   description: In case of sorting purposes the column 609 is also available, which places global address book contacts at the beginning of the result. If 609 is used, the order direction (ASC, DESC) is ignored.
 yomiFirstName:
   type: string
-  description: Kana based representation for the First Name. Commonly used in japanese environments for searchin/sorting issues.
+  description: Kana based representation for the First Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)
 yomiLastName:
   type: string
-  description: Kana based representation for the Last Name. Commonly used in japanese environments for searchin/sorting issues.
+  description: Kana based representation for the Last Name. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)
 yomiCompany:
   type: string
-  description: Kana based representation for the Company. Commonly used in japanese environments for searchin/sorting issues.
+  description: Kana based representation for the Company. Commonly used in japanese environments for searchin/sorting issues. (since 6.20)
 addressHome:
   type: string
-  description: Support for Outlook 'home' address field.
+  description: Support for Outlook 'home' address field. (since 6.20.1)
 addressBusiness:
   type: string
-  description: Support for Outlook 'business' address field.
+  description: Support for Outlook 'business' address field. (since 6.20.1)
 addressOther:
   type: string
-  description: Support for Outlook 'other' address field.
+  description: Support for Outlook 'other' address field. (since 6.20.1)
 userfield01:
   type: string
   description: Dynamic Field 1.

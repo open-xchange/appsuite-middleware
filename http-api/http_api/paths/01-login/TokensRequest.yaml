@@ -2,8 +2,8 @@
   post:
     operationId: accessSession
     tags:
-      - Login
-    summary: Accesses a session that was previously created with the token login.
+      - login
+    summary: Accesses a session that was previously created with the token login (**available since v7.0.1**).
     description: |
       This request allows clients to access a session created with the `/login?action=tokenLogin` request.
       When accessing the session its life time is extended equally to every other session.
@@ -28,6 +28,6 @@
         description: |
           A JSON object conform to the normal response body containing the session identifier, the login, the identifier
           and the locale of the user.  In case of errors the responsible fields in the response are filled
-          (see [Error handling](#error-handling)).
+          (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
         schema:
           $ref: "#/definitions/TokensResponse"

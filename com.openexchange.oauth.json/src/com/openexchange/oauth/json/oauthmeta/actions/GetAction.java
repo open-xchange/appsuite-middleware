@@ -96,7 +96,7 @@ public final class GetAction extends AbstractOAuthAJAXActionService {
             /*
              * Write account as a JSON object
              */
-            final JSONObject jsonObject = MetaDataWriter.write(service, session);
+            final JSONObject jsonObject = MetaDataWriter.write(service);
             /*
              * Return appropriate result
              */

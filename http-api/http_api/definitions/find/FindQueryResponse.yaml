@@ -10,5 +10,7 @@ properties:
     type: integer
     description: The page size.
   results:
-    type: object
+    type: array
     description: An array of search results. Each result is described by a JSON object containing the fields specified in the `columns` parameter.
+    items:
+      type: object

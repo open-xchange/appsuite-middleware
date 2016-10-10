@@ -52,6 +52,7 @@ package com.openexchange.jump.json.osgi;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.documentation.annotations.Module;
 import com.openexchange.jump.EndpointHandler;
 import com.openexchange.jump.json.EndpointHandlerRegistry;
 import com.openexchange.jump.json.JumpActionFactory;
@@ -63,6 +64,7 @@ import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@Module(name = "jump", description = "Identity token pass-over")
 public final class JumpJsonActivator extends AJAXModuleActivator {
 
     private static final AtomicReference<BundleContext> START_BUNDLE_CONTEXT_REF = new AtomicReference<BundleContext>();

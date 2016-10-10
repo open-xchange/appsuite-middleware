@@ -171,26 +171,6 @@ public interface DriveUtility {
     void updateDirectory(DriveSession session, DirectoryVersion directoryVersion, JSONObject jsonObject, NotificationParameters parameters) throws OXException;
 
     /**
-     * Moves and/or renames a file version.
-     *
-     * @param session The session
-     * @param path The path to the original file
-     * @param fileVersion The original file version
-     * @param newPath The new target path, or <code>null</code> to rename only
-     * @param newName The new filename, or <code>null</code> to move only
-     */
-    void moveFile(DriveSession session, String path, FileVersion fileVersion, String newPath, String newName) throws OXException;
-
-    /**
-     * Moves and/or renames a directory version.
-     *
-     * @param session The session
-     * @param directoryVersion The original directory version
-     * @param newPath The new target path
-     */
-    void moveDirectory(DriveSession session, DirectoryVersion directoryVersion, String newPath) throws OXException;
-
-    /**
      * Gets an existing or creates a new share link for a specific file or folder.
      *
      * @param session The session

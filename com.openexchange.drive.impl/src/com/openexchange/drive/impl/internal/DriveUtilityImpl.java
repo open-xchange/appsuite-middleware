@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.impl.internal;
 
-import static com.openexchange.drive.impl.DriveConstants.ROOT_PATH;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -339,108 +338,6 @@ public class DriveUtilityImpl implements DriveUtility {
             parameters.addWarnings(shareHelper.sendNotifications(
                 targetReference.getValue(), parameters.getNotificationTransport(), parameters.getNotificationMessage(), entities));
         }
-    }
-
-    @Override
-    public void moveFile(final DriveSession session, final String path, final FileVersion fileVersion, String newPath, String newName) throws OXException {
-        if (null == newPath && null == newName) {
-            return;
-        }
-        final String targetPath = null != newPath ? newPath : path;
-        final String targetName = null != newName ? newName : fileVersion.getName();
-        final SyncSession syncSession = new SyncSession(session);
-        syncSession.trace("About to move file [" + fileVersion + "], targetPath: " + targetPath + ", targetName: " + targetName);
-        syncSession.getStorage().wrapInTransaction(new StorageOperation<Void>() {
-
-            @Override
-            public Void call() throws OXException {
-                /*
-                 * get the original file
-                 */
-                File file = syncSession.getStorage().getFileByName(path, fileVersion.getName(), true);
-                if (null == file || false == ChecksumProvider.matches(syncSession, file, fileVersion.getChecksum())) {
-                    throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
-                }
-                /*
-                 * verify the target name & path
-                 */
-                if (null == syncSession.getStorage().getFolder(targetPath)) {
-                    throw DriveExceptionCodes.PATH_NOT_FOUND.create(targetPath);
-                }
-                if (session.useDriveMeta() && DriveConstants.METADATA_FILENAME.equals(fileVersion.getName())) {
-                    throw DriveExceptionCodes.NO_MODIFY_FILE_PERMISSION.create(fileVersion.getName(), targetPath);
-                }
-                if (session.useDriveMeta() && DriveConstants.METADATA_FILENAME.equals(targetName)) {
-                    throw DriveExceptionCodes.NO_CREATE_FILE_PERMISSION.create(targetName);
-                }
-                if (FilenameValidationUtils.isInvalidFileName(targetName)) {
-                    throw DriveExceptionCodes.INVALID_FILENAME.create(targetName);
-                }
-                if (DriveUtils.isIgnoredFileName(session, path, targetName)) {
-                    throw DriveExceptionCodes.IGNORED_FILENAME.create(targetName);
-                }
-                if (null != syncSession.getStorage().getFileByName(targetPath, targetName, true)) {
-                    throw DriveExceptionCodes.FILE_ALREADY_EXISTS.create(targetName, targetPath);
-                }
-                if (null != syncSession.getStorage().optFolder(DriveUtils.combine(targetPath, targetName))) {
-                    throw DriveExceptionCodes.LEVEL_CONFLICTING_FILENAME.create(targetName, targetPath);
-                }
-                /*
-                 * move the file; further permission checks are performed internally
-                 */
-                syncSession.getStorage().moveFile(file, targetName, targetPath);
-                return null;
-            }
-        });
-        syncSession.trace("File [" + fileVersion + "] moved successfully.");
-    }
-
-    @Override
-    public void moveDirectory(final DriveSession session, final DirectoryVersion directoryVersion, final String newPath) throws OXException {
-        if (null == newPath) {
-            return;
-        }
-        final SyncSession syncSession = new SyncSession(session);
-        syncSession.trace("About to move directory [" + directoryVersion + "], newPath: " + newPath);
-        syncSession.getStorage().wrapInTransaction(new StorageOperation<Void>() {
-
-            @Override
-            public Void call() throws OXException {
-                /*
-                 * get the server directory checksum (verifies the checksum implicitly)
-                 */
-                ServerDirectoryVersion.valueOf(directoryVersion, syncSession);
-                /*
-                 * verify the target name & path
-                 */
-                if (DriveUtils.isInvalidPath(newPath)) {
-                    throw DriveExceptionCodes.INVALID_PATH.create(newPath);
-                }
-                if (DriveUtils.isIgnoredPath(syncSession, newPath)) {
-                    throw DriveExceptionCodes.IGNORED_PATH.create(newPath);
-                }
-                String lastExistingPath = ROOT_PATH;
-                String firstNewName = null;
-                for (String name : DriveUtils.split(newPath)) {
-                    firstNewName = name;
-                    String normalizedName = PathNormalizer.normalize(name);
-                    FileStorageFolder existingFolder = syncSession.getStorage().optFolder(lastExistingPath + normalizedName);
-                    if (null == existingFolder) {
-                        break;
-                    }
-                    lastExistingPath += name + DriveConstants.PATH_SEPARATOR;
-                }
-                if (null != syncSession.getStorage().getFileByName(lastExistingPath, firstNewName, true)) {
-                    throw DriveExceptionCodes.LEVEL_CONFLICTING_PATH.create(newPath, lastExistingPath);
-                }
-                /*
-                 * move the folder; further permission checks are performed internally
-                 */
-                syncSession.getStorage().moveFolder(directoryVersion.getPath(), newPath);
-                return null;
-            }
-        });
-        syncSession.trace("Folder [" + directoryVersion + "] moved successfully.");
     }
 
     private JSONArray getFileSharesMetadata(SyncSession session) throws OXException, JSONException {

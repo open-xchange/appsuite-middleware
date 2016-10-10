@@ -5,31 +5,23 @@ Bundle-SymbolicName: com.openexchange.oauth.dropbox
 Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.fasterxml.jackson.core;version="2.6.2",
- com.openexchange.config,
- com.openexchange.database,
- com.openexchange.dispatcher,
+Import-Package: com.openexchange.config,
  com.openexchange.exception,
- com.openexchange.groupware.update,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.net.ssl,
  com.openexchange.net.ssl.config,
  com.openexchange.oauth,
  com.openexchange.oauth.impl,
- com.openexchange.oauth.impl.internal.groupware,
  com.openexchange.oauth.scope,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
- com.openexchange.sessiond.impl,
- com.openexchange.tools.sql,
  javax.crypto,
  javax.crypto.interfaces,
  javax.crypto.spec,
  javax.net,
  javax.net.ssl,
- javax.security.auth.x500,
  org.apache.commons.codec,
  org.apache.commons.codec.binary,
  org.apache.commons.codec.digest,
@@ -86,9 +78,5 @@ Import-Package: com.fasterxml.jackson.core;version="2.6.2",
  org.slf4j
 Bundle-Activator: com.openexchange.oauth.dropbox.osgi.DropboxOAuthActivator
 Bundle-ClassPath: .,
- lib/dropbox-java-sdk-2.1.1.jar
-Export-Package: com.dropbox.core,
- com.dropbox.core.v2,
- com.dropbox.core.v2.auth,
- com.dropbox.core.v2.files,
- com.dropbox.core.v2.users
+ lib/dropbox-java-sdk-1.5.3.jar,
+ lib/json_simple-1.1.jar

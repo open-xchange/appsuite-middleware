@@ -44,6 +44,7 @@ import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUtility;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.push.dovecot.Utility;
 import com.openexchange.push.dovecot.osgi.Services;
 import com.openexchange.rest.services.annotation.Role;
 import com.openexchange.rest.services.annotation.RoleAllowed;
@@ -248,7 +249,7 @@ public class DovecotPushRESTService {
                 messageData.put(PushNotificationField.MAIL_UNREAD.getId(), Integer.valueOf(unread));
             }
         }
-        {
+        if (Utility.getBoolFromProperty("com.openexchange.push.dovecot.snippet.enabled", Boolean.FALSE, userId, contextId, services).booleanValue()) {
             String snippet = data.optString("snippet", null);
             if (null != snippet) {
                 messageData.put(PushNotificationField.MAIL_TEASER.getId(), snippet);

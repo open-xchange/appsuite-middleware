@@ -117,10 +117,11 @@ public class EndpointPool {
     /**
      * Gets an available endpoint.
      *
-     * @param prefix The prefix
+     * @param contextId The context ID
+     * @param userId The userID
      * @return The endpoint or <code>null</code> if all endpoints have been blacklisted
      */
-    public Endpoint get(String prefix) {
+    public Endpoint get(int contextId, int userId) {
         lock.readLock().lock();
         try {
             if (available.isEmpty()) {
@@ -133,7 +134,7 @@ public class EndpointPool {
                 counter.compareAndSet(next, newNext);
                 next = newNext;
             }
-            Endpoint endpoint = new Endpoint(available.get(next % available.size()), prefix);
+            Endpoint endpoint = new Endpoint(available.get(next % available.size()), contextId, userId);
             LOG.debug("Sproxyd endpoint pool [{}]: Returning endpoint {}", filestoreId, endpoint);
             return endpoint;
         } finally {
