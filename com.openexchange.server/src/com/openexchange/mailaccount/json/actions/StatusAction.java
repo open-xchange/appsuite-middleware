@@ -128,14 +128,16 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
 
             for (MailAccount account : accounts) {
                 int id = account.getId();
-                Status status = determineAccountStatus(id, true, storageService, warnings, session);
-                String message = status.getMessage(session.getUser().getLocale());
+                Status status = determineAccountStatus(id, false, storageService, warnings, session);
+                if (null != status) {
+                    String message = status.getMessage(session.getUser().getLocale());
 
-                JSONObject jStatus = new JSONObject(4).put("status", status.getId());
-                if (Strings.isNotEmpty(message)) {
-                    jStatus.put("message", message);
+                    JSONObject jStatus = new JSONObject(4).put("status", status.getId());
+                    if (Strings.isNotEmpty(message)) {
+                        jStatus.put("message", message);
+                    }
+                    jStatuses.put(Integer.toString(id), jStatus);
                 }
-                jStatuses.put(Integer.toString(id), jStatus);
             }
             return new AJAXRequestResult(jStatuses, "json").addWarnings(warnings);
         } catch (JSONException e) {
