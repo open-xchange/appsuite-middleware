@@ -581,7 +581,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             stmt.setInt(2, user);
             stmt.setInt(3, accountId);
             stmt.executeUpdate();
-            LOG.info("Deleted OAuth account with id '{}' for user '{}' in context '{}'", accountId, user, contextId);
             deleteListenerRegistry.triggerOnAfterDeletion(accountId, properties, user, contextId, con);
             /*
              * Post folder event
