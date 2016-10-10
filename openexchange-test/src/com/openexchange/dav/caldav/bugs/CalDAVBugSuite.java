@@ -108,7 +108,8 @@ import org.junit.runners.Suite.SuiteClasses;
     Bug47121Test.class,
     Bug48856Test.class,
     Bug44109Test.class,
-    Bug48917Test.class
+    Bug48917Test.class,
+    Bug48241Test.class
 })
 
 public final class CalDAVBugSuite {
