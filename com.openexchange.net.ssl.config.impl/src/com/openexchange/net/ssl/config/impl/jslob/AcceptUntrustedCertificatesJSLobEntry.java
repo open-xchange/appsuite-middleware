@@ -113,7 +113,7 @@ public class AcceptUntrustedCertificatesJSLobEntry implements JSlobEntry {
         boolean allowedToDefineTrustLevel = userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(sessiond.getUserId(), sessiond.getContextId());
 
         if (!allowedToDefineTrustLevel) {
-            LOG.debug("Setting {} has been disabled due to configuration ('com.openexchange.net.ssl.user.configuration.enabled'). The request will be ignored.", UserAwareSSLConfigurationService.USER_ATTRIBUTE_NAME);
+            LOG.debug("Setting {} has been disabled due to configuration ('" + UserAwareSSLConfigurationService.USER_CONFIG_ENABLED_PROPERTY + "'). The request will be ignored.", UserAwareSSLConfigurationService.USER_ATTRIBUTE_NAME);
             return;
         }
         userAwareSSLConfigurationService.setTrustAll(sessiond.getUserId(), contextService.getContext(sessiond.getContextId()), Boolean.parseBoolean(value.toString()));

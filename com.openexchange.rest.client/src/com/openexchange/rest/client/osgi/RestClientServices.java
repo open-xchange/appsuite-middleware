@@ -56,7 +56,7 @@ import com.openexchange.server.ServiceLookup;
  * {@link RestClientServices}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.2
+ * @since v7.8.3
  */
 public final class RestClientServices {
     

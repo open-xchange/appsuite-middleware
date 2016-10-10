@@ -49,6 +49,7 @@
 
 package com.openexchange.net.ssl.config.impl.internal;
 
+import org.slf4j.Logger;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
@@ -64,6 +65,8 @@ import com.openexchange.user.UserService;
  * @since v7.8.3
  */
 public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationService {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class);
 
     private UserService userService;
 
@@ -92,7 +95,7 @@ public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationS
             }
             return Boolean.parseBoolean(userTrustsAll);
         } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class).error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, userId, contextId);
+            LOG.error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, userId, contextId);
         }
         return false;
     }
@@ -105,13 +108,13 @@ public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationS
 
         try {
             ConfigView view = this.configViewFactory.getView(userId, contextId);
-            Boolean isUserAllowedToDefineTrustlevel = view.property("com.openexchange.net.ssl.user.configuration.enabled", Boolean.class).get();
+            Boolean isUserAllowedToDefineTrustlevel = view.property(USER_CONFIG_ENABLED_PROPERTY, Boolean.class).get();
             if (isUserAllowedToDefineTrustlevel == null) {
                 return false;
             }
             return isUserAllowedToDefineTrustlevel.booleanValue();
         } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class).error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, userId, contextId);
+            LOG.error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, userId, contextId);
         }
         return false;
     }
@@ -130,7 +133,7 @@ public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationS
         try {
             userService.setUserAttribute(USER_ATTRIBUTE_NAME, Boolean.toString(trustAll), userId, context);
         } catch (OXException e) {
-            org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class).error("Unable to set trust level for user {} in context {}", e, USER_ATTRIBUTE_NAME, userId, context);
+            LOG.error("Unable to set trust level for user {} in context {}", e, USER_ATTRIBUTE_NAME, userId, context);
         }
     }
 

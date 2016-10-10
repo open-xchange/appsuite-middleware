@@ -61,6 +61,8 @@ import com.openexchange.osgi.annotation.SingletonService;
 @SingletonService
 public interface UserAwareSSLConfigurationService {
 
+    public static final String USER_CONFIG_ENABLED_PROPERTY = "com.openexchange.net.ssl.user.configuration.enabled";
+
     /**
      * Name of the user attribute the configuration made by the user is handled for.
      */
