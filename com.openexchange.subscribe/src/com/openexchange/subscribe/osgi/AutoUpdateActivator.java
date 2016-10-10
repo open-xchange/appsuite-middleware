@@ -55,8 +55,13 @@ import java.util.List;
 import org.osgi.framework.BundleActivator;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.framework.request.DefaultRequestContext;
+import com.openexchange.framework.request.RequestContext;
+import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.NonTransient;
@@ -66,8 +71,8 @@ import com.openexchange.session.Session;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImpl;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
-
 
 /**
  * {@link AutoUpdateActivator}
@@ -84,14 +89,13 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[]{ConfigViewFactory.class, SecretService.class};
+        return new Class[] { ConfigViewFactory.class, SecretService.class, DispatcherPrefixService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         registerService(LoginHandlerService.class, new SubscriptionLoginHandler());
     }
-
 
     private final class SubscriptionLoginHandler implements LoginHandlerService, NonTransient {
 
@@ -112,13 +116,13 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
                 String secret = getService(SecretService.class).getSecret(session);
                 long now = System.currentTimeMillis();
 
-
                 List<SubscriptionSource> sources = COLLECTOR.getSources();
                 List<Subscription> subscriptionsToRefresh = new ArrayList<Subscription>(10);
 
                 for (SubscriptionSource subscriptionSource : sources) {
-                    String autorunName = subscriptionSource.getId()+".autorunInterval";
-                    Long interval = view.opt(autorunName, Long.class, 24 * 60 * 60 * 1000l);
+                    String autorunName = subscriptionSource.getId() + ".autorunInterval";
+                    //Long interval = view.opt(autorunName, Long.class, 24 * 60 * 60 * 1000l);
+                    Long interval = view.opt(autorunName, Long.class, 10 * 1000l);
                     if (interval < 0) {
                         continue;
                     }
@@ -131,6 +135,9 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
                     }
                 }
 
+                // Set request context
+                RequestContextHolder.set(buildRequestContext(login));
+
                 EXECUTOR.executeSubscriptions(subscriptionsToRefresh, ServerSessionAdapter.valueOf(session), null);
             } catch (OXException e) {
                 LOG.error("", e);
@@ -141,6 +148,60 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
         public void handleLogout(LoginResult logout) throws OXException {
             // nothing to do
         }
-    }
 
+        /**
+         * Builds the {@link RequestContext} from the specified {@link LoginResult}
+         * 
+         * @param login The {@link LoginResult} from which to build the {@link RequestContext}
+         * @return The built {@link RequestContext}
+         */
+        private RequestContext buildRequestContext(LoginResult login) {
+            DefaultRequestContext context = new DefaultRequestContext();
+            HostData hostData = createHostData(login);
+            context.setHostData(hostData);
+            context.setUserAgent(login.getRequest().getUserAgent());
+            return context;
+        }
+
+        /**
+         * Creates and returns the {@link HostData} out of the specified {@link LoginResult}
+         * 
+         * @param login The {@link LoginResult} from which to create the {@link HostData}
+         * @return The {@link HostData}
+         */
+        private HostData createHostData(final LoginResult login) {
+            return new HostData() {
+
+                @Override
+                public String getHTTPSession() {
+                    return login.getRequest().getHttpSessionID();
+                }
+
+                @Override
+                public boolean isSecure() {
+                    return login.getRequest().isSecure();
+                }
+
+                @Override
+                public String getRoute() {
+                    return Tools.extractRoute(getHTTPSession());
+                }
+
+                @Override
+                public int getPort() {
+                    return login.getRequest().getServerPort();
+                }
+
+                @Override
+                public String getHost() {
+                    return login.getRequest().getServerName();
+                }
+
+                @Override
+                public String getDispatcherPrefix() {
+                    return getService(DispatcherPrefixService.class).getPrefix();
+                }
+            };
+        }
+    }
 }
