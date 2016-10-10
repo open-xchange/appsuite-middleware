@@ -9,5 +9,5 @@ properties:
   availableScopes:
     type: array
     description: The available scopes for the OAuth provider
-    items:
+    items: 
       type: string

@@ -6,7 +6,7 @@
     summary: Creates an OAuth account (**available since v6.20**).
     description: |
       This action is typically called by provided call-back URL and is only intended for manual invocation if
-      "outOfBand" interaction is returned by preceeding `/oauth/account?action=init` step.
+      "outOfBand" interaction is returned by preceeding [/oauth/account?action=init](#operation--oauth-accounts-action-init-get) step.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
@@ -34,6 +34,6 @@
       200:
         description: |
           A JSON object containing the newly created OAuth account. In case of errors the responsible fields in the response are
-          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/OAuthAccountResponse"

@@ -4,7 +4,7 @@
   get:
     operationId: getMailSource
     tags:
-      - mail
+      - Mail
     summary: Gets the complete message source as plain text.
     description: |
       #### Note
@@ -38,6 +38,6 @@
       200:
         description: |
           A JSON object containing the complete message source as plain text. In case of errors the responsible fields in the
-          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/MailSourceResponse"

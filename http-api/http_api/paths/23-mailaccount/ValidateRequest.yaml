@@ -2,7 +2,7 @@
   put:
     operationId: validateAccount
     tags:
-      - mailaccount
+      - Mailaccount
     summary: Validates a mail account which shall be created (**available since v6.12**).
     consumes:
       - application/json

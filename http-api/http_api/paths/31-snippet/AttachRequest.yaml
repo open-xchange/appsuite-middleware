@@ -2,7 +2,7 @@
   post:
     operationId: addSnippetAttachment
     tags:
-      - snippet
+      - Snippet
     summary: Attaches one or more files to an existing snippet (**available since v7.0.0/v6.22.0**).
     description: |
       It can be uploaded multiple files at once. Each file must be specified in an own form field

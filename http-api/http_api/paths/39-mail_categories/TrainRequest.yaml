@@ -2,7 +2,7 @@
   put:
     operationId: train
     tags: 
-      - mail_categories
+      - Mail_categories
     summary: Add a new rule 
     description: Adds a new rule with the given mail addresses to the given category and optionally reorganize all existing mails in the inbox.
     consumes:
@@ -35,6 +35,6 @@
       200:
         description: |
           'An empty response if everything went well. In case of errors the responsible fields in the
-          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).'
+          response are filled (see [Error handling](#error-handling)).'
         schema:
           $ref: "#/definitions/CommonResponse"

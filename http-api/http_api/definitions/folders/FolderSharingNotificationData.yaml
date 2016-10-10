@@ -1,7 +1,5 @@
 type: object
 properties:
   warnings:
-    type: array
-    description: Can contain transport warnings that occured during sending the notifications.
-    items:
-      type: object
+    type: object
+    description: An array of transport warnings that occured during sending the notifications.

@@ -2,7 +2,7 @@
   put:
     operationId: sendShareLink
     tags:
-      - share/management
+      - Share/Management
     summary: Sends a share link (**available since v7.8.0**).
     consumes:
       - application/json
@@ -21,6 +21,6 @@
       200:
         description: |
           Transport warnings that occurred during sending the notifications are available in a `warnings` array.
-          In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/ShareLinkSendResponse"

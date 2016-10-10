@@ -2,7 +2,7 @@
   put:
     operationId: doAutoComplete
     tags:
-      - find
+      - Find
     summary: Suggests possible search filters based on a user's input (**available since v7.6.1**).
     description: |
       Filters are grouped into categories, the so called facets.
@@ -64,6 +64,6 @@
       200:
         description: |
           A JSON object containing the facets that were found. In case of errors the responsible fields in the response are
-          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/FindAutoCompleteResponse"

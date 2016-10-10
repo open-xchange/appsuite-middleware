@@ -2,7 +2,7 @@
   put:
     operationId: sendMessagingMessage
     tags:
-      - messaging
+      - Messaging
     summary: Sends a messaging message.
     consumes:
       - spplication/json
@@ -11,7 +11,7 @@
       - in: query
         name: recipients
         type: string
-        description: A list of recipients as defined in RFC822, like "Joe Doe <joe@doe.org>". If set the message is sent to the given list of recipients, otherwise this defaults to the "To" header of the message.
+        description: A list of recipients as defined in [RFC822](https://tools.ietf.org/html/rfc822), like "Joe Doe <joe@doe.org>". If set the message is sent to the given list of recipients, otherwise this defaults to the "To" header of the message.
         required: false
       - in: body
         name: body
@@ -23,6 +23,6 @@
       200:
         description: |
           A JSON object containing the number 1 if message could be sent. In case of errors the responsible fields in the
-          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          response are filled (see [Error handling](#error-handling).
         schema:
           $ref: "#/definitions/MessagingMessageUpdateResponse"

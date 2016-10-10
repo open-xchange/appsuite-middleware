@@ -2,7 +2,7 @@
   get:
     operationId: getInlineMailImage
     tags:
-      - image
+      - Image
     summary: Requests an inline image from a mail.
     produces:
       - application/octet-stream

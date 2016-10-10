@@ -2,7 +2,7 @@
   put:
     operationId: updateRule
     tags:
-      - mailfilter
+      - Mailfilter
     summary: Updates a mail filter rule.
     consumes:
       - application/json
@@ -21,6 +21,6 @@
           $ref: "#/definitions/MailFilterRule"
     responses:
       200:
-        description: In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        description: In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/CommonResponse"

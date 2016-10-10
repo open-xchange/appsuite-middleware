@@ -2,7 +2,7 @@
   get:
     operationId: getMail
     tags:
-      - mail
+      - Mail
     summary: Gets a mail.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -57,6 +57,6 @@
       200:
         description: |
           A JSON object containing all data of the requested mail. In case of errors the responsible fields in the
-          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/MailResponse"

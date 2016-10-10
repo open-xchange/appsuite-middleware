@@ -2,7 +2,7 @@
   get:
     operationId: getQuotaInformation
     tags:
-      - quota
+      - Quota
     summary: Gets quota information (**available since v7.6.1, preliminary**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -26,7 +26,7 @@
           `countuse` (account's actual usage for the number of items, or not set if no count quota defined),
           `quota` (account's quota limit for the storage in bytes, or not set if not defined) and `use`
           (account's actual usage for the storage in bytes, or not set if no storage quota defined). In case of errors the responsible
-          fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/QuotasResponse"
       400:

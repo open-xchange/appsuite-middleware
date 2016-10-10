@@ -2,7 +2,7 @@
   get:
     operationId: getUser
     tags:
-      - user
+      - User
     summary: Gets a user (**available since v6.14**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -15,6 +15,6 @@
       200:
         description: |
           An object containing all data of the requested user. In case of errors the responsible fields in the response are
-          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/UserResponse"

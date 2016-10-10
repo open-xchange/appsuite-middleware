@@ -2,7 +2,7 @@
   get:
     operationId: getConfigProperty
     tags:
-      - config
+      - Config
     summary: Gets a property of the configuration (**available since v7.6.2**).
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -13,6 +13,6 @@
         required: true
     responses:
       200:
-        description: A JSON response providing the property's name and its value. In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        description: A JSON response providing the property's name and its value. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/ConfigPropertyResponse"

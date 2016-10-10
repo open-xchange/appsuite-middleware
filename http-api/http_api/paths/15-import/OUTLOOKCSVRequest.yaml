@@ -2,7 +2,7 @@
   post:
     operationId: importOutlookCSV
     tags:
-      - import
+      - Import
     summary: Imports contact data from an Outlook CSV file.
     description: |
       #### Example: exported Outlook CSV
@@ -38,6 +38,6 @@
         description: |
           A HTML page as described in [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) containing a JSON object with the field `data` that represents
           an array of objects each consisting of the fields `id`, `folder_id` and `last_modified` of the newly created contacts.
-          In case of errors the JSON object contains the well known [error fields](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling).
+          In case of errors the JSON object contains the well known [error fields](#error-handling).
         schema:
           type: string

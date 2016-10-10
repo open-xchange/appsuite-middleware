@@ -36,7 +36,7 @@ list.
   get:
     operationId: getGroup
     tags:
-      - groups
+      - Groups
     summary: Gets a group.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -56,7 +56,7 @@ list.
       200:
         description: |
           A JSON object containing the group data. In case of errors the responsible fields in the
-          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/GroupResponse"
 ```
@@ -97,7 +97,7 @@ After defining the parameter you can use it in a request's `parameters` section 
   get:
     operationId: getGroup
     tags:
-      - groups
+      - Groups
     summary: Gets a group.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -113,7 +113,7 @@ After defining the parameter you can use it in a request's `parameters` section 
       200:
         description: |
           A JSON object containing the group data. In case of errors the responsible fields in the
-          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/GroupResponse"
 ```
@@ -164,7 +164,7 @@ Look at other request files of the module to find out the correct name (attentio
   get:
     operationId: hasGroup
 	tags:
-	  - groups
+	  - Groups
 ```
 
 Afterwards each request should have a short `summary`. This can be followed by a description that goes into detail.
@@ -187,7 +187,7 @@ e.g. consumes `application/json` and produces `text/html`, you have to override 
   get:
     operationId: hasGroup
 	tags:
-	  - groups
+	  - Groups
 	summary: Indicates whether the given group exists.
 	consumes:
 	  - application/json
@@ -205,7 +205,7 @@ that provides detailed information on adding parameters. Responses are specified
   get:
     operationId: hasGroup
 	tags:
-	  - groups
+	  - Groups
 	summary: Indicates whether the given group exists.
 	parameters:
 	  - $ref: "#/parameters/gblQueryParamSession"
@@ -215,7 +215,7 @@ that provides detailed information on adding parameters. Responses are specified
 	    description: |
 		  A JSON object containing the value `true` if the group exists, otherwise `false`. In
 		  case of errors the responsible fields in the response are filled (see
-		  [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+		  [Error handling](#error-handling)).
 		schema:
 		  $ref: "#/definitions/GroupExistenceResponse"
 ```
@@ -241,7 +241,7 @@ model inside of the response's schema as seen above (`$ref: "#/definitions/Group
 to learn how to write a response model.
 
 Normally each description of a response of the OX HTTP API ends with the sentence "In case of errors the responsible fields in the
-response are filled (see \[Error handling\](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling))". Please retain this convention when you write the definition of a new request
+response are filled (see \[Error handling\](#error-handling))". Please retain this convention when you write the definition of a new request
 that returns a normal JSON object as defined in the low level protocol and error handling section of the API.
 
 #### Checklist

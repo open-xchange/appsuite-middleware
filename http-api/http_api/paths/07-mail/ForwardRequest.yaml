@@ -2,7 +2,7 @@
   get:
     operationId: forwardMail
     tags:
-      - mail
+      - Mail
     summary: Forwards a mail.
     description: Returns the data for the message that shall be forwarded.
     parameters:
@@ -31,6 +31,6 @@
       200:
         description: |
           A JSON object containing all data of the requested mail. Not IMAP: with timestamp. In case of errors the responsible fields in the
-          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/MailReplyResponse"
