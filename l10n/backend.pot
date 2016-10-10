@@ -987,10 +987,6 @@ msgstr ""
 msgid "Your device configuration"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.cluster.lock/src/com/openexchange/cluster/lock/internal/ClusterLockExceptionMessages.java:61
-msgid "Another node is currently performing the same task. Try again later."
-msgstr ""
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
 msgid "LDAP contacts cannot be deleted."
 msgstr ""
@@ -1830,18 +1826,9 @@ msgstr ""
 msgid "Empty files indicated for directory \"%1$s\"."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:97
-msgid "A file named \"%1$s\" already exists at \"%2$s\"."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:98
-msgid "A directory named \"%1$s\" already exists at \"%2$s\"."
-msgstr ""
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.oauth/src/com/openexchange/file/storage/oauth/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/FormStrings.java:61
@@ -7576,35 +7563,6 @@ msgstr ""
 #. Something is wrong with a subscribed E-Mail account; e.g. invalid credentials. Example: "Please check your mail account: The entered credentials are wrong"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:228
 msgid "Please check your mail account: %2$s"
-msgstr ""
-
-#. Invalid name specified. Information from mail server: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:231
-msgid "Invalid name specified. Information from mail server: %1$s"
-msgstr ""
-
-#. Insufficient permissions to perform the operation.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:234
-msgid "Insufficient permissions to perform the operation."
-msgstr ""
-
-#. Such a folder already exists.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:237
-msgid "Such a folder already exists."
-msgstr ""
-
-#. A non-secure connection is not allowed. Please change mail settings and configure a secure connection (if Transport Layer Security (TLS) is not in use, the client could try STARTTLS).
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:240
-msgid ""
-"Please change mail settings and configure a secure connection (if Transport "
-"Layer Security (TLS) is not in use, the client could try STARTTLS)"
-msgstr ""
-
-#. A temporary failure because a subsystem is down. Please try again later.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:243
-msgid ""
-"A temporary failure because a subsystem is down (maybe due to maintenance). "
-"Please try again later."
 msgstr ""
 
 #. The default name for a file
