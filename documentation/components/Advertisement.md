@@ -2,13 +2,13 @@
 Title: Advertisement
 ---
 
-With 7.8.3 the OX middleware is able to manage advertisement configurations. These configurations can be used by various clients to show or hide specific advertisement. For example there could be a advertisement banner at the top of the client view which can be switched on and off.
+With 7.8.3 the OX middleware is able to manage advertisement configurations. These configurations can be used by various clients to show or hide specific advertisements. For example there could be an advertisement banner at the top of the client view which can be switched on and off.
 
-These configurations will be stored as JSON strings within the configdb in the table 'advertisement_config'. Additional there is another table with the name 'advertisement_mapping' which contains a mapping from a pair of reseller and package to an advertisement config. Whereby reseller references the name of the reseller and package references an generic package name. In case there is no reseller or just a single package the entry can be replaced by the default value "default". For example if you have no reseller and you have two packages with the names "packA" and "packB" you use "default" for the reseller and either "packA" or "packB" for the package. Which packages are available depends on the configuration of the middleware. Furmost it depends on which package scheme is configured. The scheme determines how the package will be retrieved. The package scheme can be configured per reseller via the com.openexchange.advertisement.<reseller>.packageScheme property. There are currently three possible package schemes:
+These configurations will be stored as JSON strings within the configdb in the table 'advertisement_config'. Additional there is another table with the name 'advertisement_mapping' which contains a mapping from a pair of reseller and package to an advertisement config. Here reseller references the name of the reseller and package references a generic package name. In case there is no reseller or in case of a single package the entry can be replaced by the default value "default". For example if you have no reseller and two packages with the names "packA" and "packB" you use "default" for the reseller and either "packA" or "packB" for the package. Which packages are available depends on the configuration of the middleware. Furmost it depends on which package scheme is configured. The scheme determines how the package will be retrieved. The package scheme can be configured per reseller via the com.openexchange.advertisement.<reseller>.packageScheme property. There are currently three possible package schemes:
 
 #### Global
 
-The global scheme is the default scheme. It assumes that there are no (or one) reseller and just one package. It uses the default value for both reseller and package.
+The global scheme is the default scheme. It assumes that there are no (or just one) reseller and just one package. It uses the default value for both reseller and package.
 
 #### TaxonomyTypes
 
@@ -23,18 +23,7 @@ In order to store and retrieve these configurations a set of rest requests was i
 
 ## Extension to the HTTP API
 
-For the normal HTTP API a new module named "advertisement" was introduced. This section describes the requests of this new module.
-
-### Get configuration
-
-GET /ajax/advertisement?action=get
-
-**Params:**
-
-| Name    | Description                                                     |
-|:--------|:----------------------------------------------------------------|
-| session | A valid user session previously obtained from the login module. |
-
+For the normal HTTP API a new module named "advertisement" was introduced. For more information see [http-api](https://documentation.open-xchange.com/latest/middleware/http_api.html).
 
 ## Internal rest requests
 
@@ -43,12 +32,11 @@ This section describes the requests which are used by an admin tool to manage th
 com.openexchange.rest.services.basic-auth.login
 com.openexchange.rest.services.basic-auth.password
 
-### Set config by user id and context id
+### Set configuration by user id and context id
 
 PUT /advertisement/v1/config/user
 
 **Params:**
-
 
 | Name   | Description                 |
 |:-------|:----------------------------|
@@ -189,7 +177,7 @@ Empty response with HTTP status code 204.
 removeadvertisementconfigs
 
 This clt allows the master admin to remove the advertisement configurations. He can either remove all or a single reseller configurations.
-It is also possible to remove only the resellers, which are not active anymore. For example if they are deleted.
+It is also possible to remove only the resellers, which are not active anymore (e.g in case they are deleted).
 
 **Help text:**
 
@@ -197,7 +185,7 @@ It is also possible to remove only the resellers, which are not active anymore. 
     -c,--clean                   If set the clt only removes configurations
                                  of resellers which doesn't exist any more.
     -h,--help                    Prints a help text
-    -i,--inlcudePreviews         If set the clt also removes preview
+    -i,--includePreviews         If set the clt also removes preview
                                  configurations. This is only applicable in
                                  case the argument 'clean' is used.
     -P,--adminpass <arg>         Admin password
