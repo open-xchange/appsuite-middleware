@@ -47,55 +47,47 @@
  *
  */
 
-package com.openexchange.mail.autoconfig.json.actions;
+package com.openexchange.mail.autoconfig.sources;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.autoconfig.AutoconfigService;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.Autoconfig;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link GetAction}
+ * {@link ConfigSource} - Generates an {@code Autoconfig} instance.
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class GetAction extends AutoconfigAction {
-
-    private static final String EMAIL = "email";
-
-    private static final String PASSWORD = "password";
-
-    private static final String FORCE_SECURE = "force_secure";
-
-    private static final String OAUTH = "oauth";
+public interface ConfigSource {
 
     /**
-     * Initializes a new {@link GetAction}.
+     * Generates an {@code Autoconfig} instance for given arguments.
      *
-     * @param services
+     * @param emailLocalPart The local part of the Email address; <code>"<b>someone</b>@somewhere.org"</code>
+     * @param emailDomain The domain part of the Email address; <code>"someone@<b>somewhere.org</b>"</code>
+     * @param password The associated password
+     * @param user The associated user
+     * @param context The associated context
+     * @return An {@code Autoconfig} instance or <code>null</code> if generation fails.
+     * @throws OXException If operation fails for any reason
      */
-    public GetAction(ServiceLookup services) {
-        super(services);
-    }
+    Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException;
 
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        String mail = request.getParameter(EMAIL, String.class);
-        String password = request.getParameter(PASSWORD, String.class);
-        boolean forceSecure = true;
-        if (request.containsParameter(FORCE_SECURE)) {
-            forceSecure = request.getParameter(FORCE_SECURE, Boolean.class).booleanValue();
-        }
-        boolean isOAuth = false;
-        if (request.containsParameter(OAUTH)) {
-            isOAuth = request.getParameter(OAUTH, Boolean.class).booleanValue();
-        }
-        AutoconfigService autoconfigService = getAutoconfigService();
-        Autoconfig autoconfig = autoconfigService.getConfig(mail, password, session.getUser(), session.getContext(), forceSecure, isOAuth);
-        return new AJAXRequestResult(autoconfig, "autoconfig");
-    }
+    /**
+     * Generates an {@code Autoconfig} instance for given arguments.
+     *
+     * @param emailLocalPart The local part of the Email address; <code>"<b>someone</b>@somewhere.org"</code>
+     * @param emailDomain The domain part of the Email address; <code>"someone@<b>somewhere.org</b>"</code>
+     * @param password The associated password
+     * @param user The associated user
+     * @param context The associated context
+     * @param forceSecure <code>true</code> if a secure connection should be enforced; otherwise <code>false</code> to also allow plain ones
+     * @param isOAuth <code>true</code> to mark passed password as an OAuth token (and thus performing XOAUTH2 authentication mechanism); otherwise <code>false</code> for a regular password
+     * @return An {@code Autoconfig} instance or <code>null</code> if generation fails.
+     * @throws OXException If operation fails for any reason
+     */
+    DefaultAutoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context, boolean forceSecure, boolean isOAuth) throws OXException;
 
 }

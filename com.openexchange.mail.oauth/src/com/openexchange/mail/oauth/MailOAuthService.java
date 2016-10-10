@@ -47,55 +47,15 @@
  *
  */
 
-package com.openexchange.mail.autoconfig.json.actions;
+package com.openexchange.mail.oauth;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.autoconfig.AutoconfigService;
-import com.openexchange.mail.autoconfig.Autoconfig;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link GetAction}
+ * {@link MailOAuthService} - The service for mail/transport OAuth access.
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class GetAction extends AutoconfigAction {
-
-    private static final String EMAIL = "email";
-
-    private static final String PASSWORD = "password";
-
-    private static final String FORCE_SECURE = "force_secure";
-
-    private static final String OAUTH = "oauth";
-
-    /**
-     * Initializes a new {@link GetAction}.
-     *
-     * @param services
-     */
-    public GetAction(ServiceLookup services) {
-        super(services);
-    }
-
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        String mail = request.getParameter(EMAIL, String.class);
-        String password = request.getParameter(PASSWORD, String.class);
-        boolean forceSecure = true;
-        if (request.containsParameter(FORCE_SECURE)) {
-            forceSecure = request.getParameter(FORCE_SECURE, Boolean.class).booleanValue();
-        }
-        boolean isOAuth = false;
-        if (request.containsParameter(OAUTH)) {
-            isOAuth = request.getParameter(OAUTH, Boolean.class).booleanValue();
-        }
-        AutoconfigService autoconfigService = getAutoconfigService();
-        Autoconfig autoconfig = autoconfigService.getConfig(mail, password, session.getUser(), session.getContext(), forceSecure, isOAuth);
-        return new AJAXRequestResult(autoconfig, "autoconfig");
-    }
+public interface MailOAuthService {
 
 }

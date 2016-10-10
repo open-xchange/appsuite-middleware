@@ -47,55 +47,56 @@
  *
  */
 
-package com.openexchange.mail.autoconfig.json.actions;
+package com.openexchange.mail.autoconfig.sources;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.autoconfig.AutoconfigService;
-import com.openexchange.mail.autoconfig.Autoconfig;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 
 /**
- * {@link GetAction}
+ * {@link OutlookComConfigSource} - The static config source for <code>outlook.com</code>.
+ * <p>
+ * See <a href="http://windows.microsoft.com/en-US/windows/outlook/send-receive-from-app">http://windows.microsoft.com/en-US/windows/outlook/send-receive-from-app<a>
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.4.0
  */
-public class GetAction extends AutoconfigAction {
-
-    private static final String EMAIL = "email";
-
-    private static final String PASSWORD = "password";
-
-    private static final String FORCE_SECURE = "force_secure";
-
-    private static final String OAUTH = "oauth";
+public class OutlookComConfigSource extends StaticConfigSource {
 
     /**
-     * Initializes a new {@link GetAction}.
-     *
-     * @param services
+     * Initializes a new {@link OutlookComConfigSource}.
      */
-    public GetAction(ServiceLookup services) {
-        super(services);
+    public OutlookComConfigSource() {
+        super(new DomainFilter() {
+
+            @Override
+            public boolean accept(final String emailDomain) {
+                return null != emailDomain && "outlook.com".equals(Strings.toLowerCase(emailDomain.trim()));
+            }
+        });
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        String mail = request.getParameter(EMAIL, String.class);
-        String password = request.getParameter(PASSWORD, String.class);
-        boolean forceSecure = true;
-        if (request.containsParameter(FORCE_SECURE)) {
-            forceSecure = request.getParameter(FORCE_SECURE, Boolean.class).booleanValue();
-        }
-        boolean isOAuth = false;
-        if (request.containsParameter(OAUTH)) {
-            isOAuth = request.getParameter(OAUTH, Boolean.class).booleanValue();
-        }
-        AutoconfigService autoconfigService = getAutoconfigService();
-        Autoconfig autoconfig = autoconfigService.getConfig(mail, password, session.getUser(), session.getContext(), forceSecure, isOAuth);
-        return new AJAXRequestResult(autoconfig, "autoconfig");
+    protected DefaultAutoconfig getStaticAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context, boolean forceSecure, boolean isOAuth) throws OXException {
+        final DefaultAutoconfig autoconfig = new DefaultAutoconfig();
+        // IMAP
+        autoconfig.setMailPort(993);
+        autoconfig.setMailProtocol("imap");
+        autoconfig.setMailSecure(true);
+        autoconfig.setMailStartTls(forceSecure);
+        autoconfig.setMailServer("imap-mail.outlook.com");
+        autoconfig.setMailOAuth(isOAuth);
+        // Transport
+        autoconfig.setTransportPort(25);
+        autoconfig.setTransportProtocol("smtp");
+        autoconfig.setTransportSecure(false);
+        autoconfig.setTransportStartTls(forceSecure);
+        autoconfig.setTransportServer("smtp-mail.outlook.com");
+        autoconfig.setUsername(emailLocalPart + '@' + emailDomain);
+        autoconfig.setTransportOAuth(isOAuth);
+        return autoconfig;
     }
 
 }

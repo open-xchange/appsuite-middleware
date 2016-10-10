@@ -47,55 +47,111 @@
  *
  */
 
-package com.openexchange.mail.autoconfig.json.actions;
-
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.autoconfig.AutoconfigService;
-import com.openexchange.mail.autoconfig.Autoconfig;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+package com.openexchange.mail.autoconfig;
 
 /**
- * {@link GetAction}
+ * {@link Autoconfig} - Represents an auto-configuration.
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class GetAction extends AutoconfigAction {
-
-    private static final String EMAIL = "email";
-
-    private static final String PASSWORD = "password";
-
-    private static final String FORCE_SECURE = "force_secure";
-
-    private static final String OAUTH = "oauth";
+public interface Autoconfig {
 
     /**
-     * Initializes a new {@link GetAction}.
+     * Gets the source
      *
-     * @param services
+     * @return The source
      */
-    public GetAction(ServiceLookup services) {
-        super(services);
-    }
+    String getSource();
 
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        String mail = request.getParameter(EMAIL, String.class);
-        String password = request.getParameter(PASSWORD, String.class);
-        boolean forceSecure = true;
-        if (request.containsParameter(FORCE_SECURE)) {
-            forceSecure = request.getParameter(FORCE_SECURE, Boolean.class).booleanValue();
-        }
-        boolean isOAuth = false;
-        if (request.containsParameter(OAUTH)) {
-            isOAuth = request.getParameter(OAUTH, Boolean.class).booleanValue();
-        }
-        AutoconfigService autoconfigService = getAutoconfigService();
-        Autoconfig autoconfig = autoconfigService.getConfig(mail, password, session.getUser(), session.getContext(), forceSecure, isOAuth);
-        return new AJAXRequestResult(autoconfig, "autoconfig");
-    }
+    /**
+     * Gets the mail server
+     *
+     * @return The mail server
+     */
+    String getMailServer();
+
+    /**
+     * Gets the transport server
+     *
+     * @return The transport server
+     */
+    String getTransportServer();
+
+    /**
+     * Gets the mail protocol
+     *
+     * @return The mail protocol
+     */
+    String getMailProtocol();
+
+    /**
+     * Gets the transport protocol
+     *
+     * @return The transport protocol
+     */
+    String getTransportProtocol();
+
+    /**
+     * Gets the mail port
+     *
+     * @return The mail port
+     */
+    Integer getMailPort();
+
+    /**
+     * Gets the transport port
+     *
+     * @return The transport port
+     */
+    Integer getTransportPort();
+
+    /**
+     * Gets the mail secure flag
+     *
+     * @return The mail secure flag
+     */
+    Boolean isMailSecure();
+
+    /**
+     * Gets the transport secure flag
+     *
+     * @return The transport secure flag
+     */
+    Boolean isTransportSecure();
+
+    /**
+     * Gets the user name
+     *
+     * @return The user name
+     */
+    String getUsername();
+
+    /**
+     * Checks if STARTTLS is required for mail access.
+     *
+     * @return <code>true</code> if STARTTLS is required; otherwise <code>false</code>
+     */
+    boolean isMailStartTls();
+
+    /**
+     * Checks if STARTTLS is required for mail transport
+     *
+     * @return <code>true</code> if STARTTLS is required; otherwise <code>false</code>
+     */
+    boolean isTransportStartTls();
+
+    /**
+     * Marks mail password as OAuth token and thus XOAUTH2 is supposed to be performed for authentication.
+     *
+     * @return <code>true</code> OAuth-wise mail access; otherwise <code>false</code>
+     */
+    boolean isMailOAuth();
+
+    /**
+     * Marks transport password as OAuth token and thus XOAUTH2 is supposed to be performed for authentication.
+     *
+     * @return <code>true</code> OAuth-wise mail transport; otherwise <code>false</code>
+     */
+    boolean isTransportOAuth();
 
 }

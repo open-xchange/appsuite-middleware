@@ -138,7 +138,7 @@
 	<classpathentry kind="lib" path="lib/xmlwise-1_2.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.imagetransformation"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.imagetransformation.java"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.mail.autoconfig"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.mail.autoconfig.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.mail.autoconfig.json"/>
 	<classpathentry kind="src" path="/com.openexchange.mail.categories"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.templating.impl"/>
@@ -151,5 +151,6 @@
 	<classpathentry kind="lib" path="lib/okhttp-3.4.1.jar" sourcepath="lib/source/okhttp-3.4.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/okhttp-ws-3.4.1.jar" sourcepath="lib/source/okhttp-ws-3.4.1-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.net.ssl"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.mail.autoconfig"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
