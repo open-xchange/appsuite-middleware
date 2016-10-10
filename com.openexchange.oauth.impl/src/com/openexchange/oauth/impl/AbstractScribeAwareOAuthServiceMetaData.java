@@ -60,7 +60,6 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthConfigurationProperty;
-import com.openexchange.oauth.impl.ScribeAware;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.server.ServiceLookup;
 

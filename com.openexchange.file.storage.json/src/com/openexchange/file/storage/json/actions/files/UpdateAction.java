@@ -54,10 +54,6 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Actions;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -73,22 +69,6 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Actions({
-    @Action(method = RequestMethod.PUT, name = "update", description = "Update an infoitem via PUT", parameters = {
-        @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-        @Parameter(name = "id", description = "Object ID of the updated infoitem."),
-        @Parameter(name = "timestamp", description = "Timestamp of the updated infoitem. If the infoitem was modified after the specified timestamp, then the update must fail.")
-    }, requestBody = "Infoitem object as described in Common object data and Detailed infoitem data. Only modified fields are present."),
-    @Action(method = RequestMethod.POST, name = "update", description = "Update an infoitem via POST", parameters = {
-        @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-        @Parameter(name = "id", description = "Object ID of the updated infoitem."),
-        @Parameter(name = "offset", optional = true, description = "Optionally sets the start offset in bytes where to append the data to the document, must be equal to the actual document's length."),
-        @Parameter(name = "timestamp", description = "Timestamp of the updated infoitem. If the infoitem was modified after the specified timestamp, then the update must fail."),
-        @Parameter(name = "json", description = "Infoitem object as described in Common object data and Detailed infoitem data. The field id is not included."),
-        @Parameter(name = "file", description = "File metadata as per <input type=\"file\" />")
-    }, requestBody = "Body of content-type \"multipart/form-data\" or \"multipart/mixed\" containing the above mentioned fields and file-data.",
-    responseDescription = "The response is sent as a HTML document (see introduction).")
-})
 public class UpdateAction extends AbstractWriteAction {
 
     @Override

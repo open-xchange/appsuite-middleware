@@ -52,10 +52,8 @@ package com.openexchange.oauth.impl.internal;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -112,9 +110,9 @@ import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.oauth.impl.services.Services;
-import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.oauth.scope.OAuthScopeRegistry;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.secret.SecretEncryptionFactoryService;
 import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.secret.SecretEncryptionStrategy;
@@ -197,7 +195,8 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                         account.setToken(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessToken", contextId, account.getId())));
                         account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, account.getId())));
                     } catch (final OXException e) {
-                        // IGNORE
+                        // Log for debug purposes and ignore...
+                        LOG.debug("{}", e.getMessage(), e);
                     }
                     String scopes = rs.getString(6);
                     if (!Strings.isEmpty(scopes)) {
@@ -209,7 +208,8 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                     if (!OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.equals(e)) {
                         throw e;
                     }
-                    // Obviously associated service is not available. Ignore...
+                    // Obviously associated service is not available. Log for debug purposes and ignore...
+                    LOG.debug("{}", e.getMessage(), e);
                 }
             } while (rs.next());
             return accounts;
@@ -240,20 +240,31 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             }
             final List<OAuthAccount> accounts = new ArrayList<OAuthAccount>(8);
             do {
-                final DefaultOAuthAccount account = new DefaultOAuthAccount();
-                account.setId(rs.getInt(1));
-                account.setDisplayName(rs.getString(2));
+
                 try {
-                    account.setToken(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessToken", contextId, account.getId())));
-                    account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, account.getId())));
-                } catch (final OXException x) {
-                    // IGNORE
+                    final DefaultOAuthAccount account = new DefaultOAuthAccount();
+                    account.setId(rs.getInt(1));
+                    account.setDisplayName(rs.getString(2));
+                    try {
+                        account.setToken(encryptionService.decrypt(session, rs.getString(3), new PWUpdate("accessToken", contextId, account.getId())));
+                        account.setSecret(encryptionService.decrypt(session, rs.getString(4), new PWUpdate("accessSecret", contextId, account.getId())));
+                    } catch (final OXException x) {
+                        // Log for debug purposes and ignore...
+                        LOG.debug("{}", x.getMessage(), x);
+                    }
+                    account.setMetaData(registry.getService(serviceMetaData, user, contextId));
+                    String scopes = rs.getString(5);
+                    Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
+                    account.setEnabledScopes(enabledScopes);
+
+                    accounts.add(account);
+                } catch (final OXException e) {
+                    if (!OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA.equals(e)) {
+                        throw e;
+                    }
+                    // Obviously associated service is not available. Log for debug purposes and ignore...
+                    LOG.debug("{}", e.getMessage(), e);
                 }
-                account.setMetaData(registry.getService(serviceMetaData, user, contextId));
-                String scopes = rs.getString(5);
-                Set<OAuthScope> enabledScopes = scopeRegistry.getAvailableScopes(account.getMetaData().getAPI(), OXScope.valuesOf(scopes));
-                account.setEnabledScopes(enabledScopes);
-                accounts.add(account);
             } while (rs.next());
             return accounts;
         } catch (final SQLException e) {
@@ -402,14 +413,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         return null != ds && ds.isDeferrerURLAvailable(userId, contextId);
     }
 
-    private static String urlEncode(final String s) {
-        try {
-            return URLEncoder.encode(s, "ISO-8859-1");
-        } catch (final UnsupportedEncodingException e) {
-            return s;
-        }
-    }
-
     @Override
     public OAuthAccount createAccount(final String serviceMetaData, final Map<String, Object> arguments, final int user, final int contextId, Set<OAuthScope> scopes) throws OXException {
         try {
@@ -455,7 +458,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              * Execute INSERT command
              */
             executeUpdate(contextId, insert, values);
-            // TODO: Decide whether we want the scopes in the following info log entry
             LOG.info("Created new {} account with ID {} for user {} in context {}", serviceMetaData, account.getId(), user, contextId);
             /*
              * Return newly created account
@@ -552,6 +554,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             deleteAccount(accountId, user, contextId, con);
             con.commit(); // COMMIT
             committed = true;
+            LOG.info("Deleted OAuth account with id '{}' for user '{}' in context '{}'", accountId, user, contextId);
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (final OXException e) {
@@ -578,6 +581,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             stmt.setInt(2, user);
             stmt.setInt(3, accountId);
             stmt.executeUpdate();
+            LOG.info("Deleted OAuth account with id '{}' for user '{}' in context '{}'", accountId, user, contextId);
             deleteListenerRegistry.triggerOnAfterDeletion(accountId, properties, user, contextId, con);
             /*
              * Post folder event
@@ -784,9 +788,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             OAuthAccess access = oAuthAccessRegistry.get(contextId, user);
             // No need to re-authorise if access not present
             if (access != null) {
-                // First revoke the old token
-                access.revoke();
-                // Then initialise the access with the new one
+                // Initialise the access with the new access token
                 access.initialize();
             }
             /*

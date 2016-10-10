@@ -57,9 +57,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.JSlob;
 import com.openexchange.jslob.JSlobId;
@@ -80,10 +77,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.GET, name = "get", description = "Get a mail account", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "The ID of the account to return.")
-}, responseDescription = "A JSON object representing the desired mail account. See mail account data.")
 @OAuthAction(MailAccountOAuthConstants.OAUTH_READ_SCOPE)
 public final class GetAction extends AbstractMailAccountAction implements MailAccountFields {
 
@@ -98,7 +91,7 @@ public final class GetAction extends AbstractMailAccountAction implements MailAc
 
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jVoid) throws OXException {
-        final int id = parseIntParameter(AJAXServlet.PARAMETER_ID, requestData);
+        final int id = requireIntParameter(AJAXServlet.PARAMETER_ID, requestData);
 
         try {
             final MailAccountStorageService storageService =

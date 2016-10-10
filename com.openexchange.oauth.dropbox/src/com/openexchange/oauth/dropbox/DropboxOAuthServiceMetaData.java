@@ -49,174 +49,77 @@
 
 package com.openexchange.oauth.dropbox;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
 import org.scribe.builder.api.Api;
-import org.scribe.builder.api.DropBoxApi;
-import com.dropbox.client2.DropboxAPI;
-import com.dropbox.client2.DropboxAPI.Account;
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.exception.DropboxServerException;
-import com.dropbox.client2.session.AccessTokenPair;
-import com.dropbox.client2.session.AppKeyPair;
-import com.dropbox.client2.session.RequestTokenPair;
-import com.dropbox.client2.session.Session.AccessType;
-import com.dropbox.client2.session.WebAuthSession;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.DefaultOAuthToken;
-import com.openexchange.oauth.OAuthConstants;
-import com.openexchange.oauth.OAuthExceptionCodes;
-import com.openexchange.oauth.OAuthInteraction;
-import com.openexchange.oauth.OAuthInteractionType;
-import com.openexchange.oauth.OAuthToken;
-import com.openexchange.oauth.impl.AbstractParameterizableOAuthInteraction;
-import com.openexchange.oauth.impl.AbstractScribeAwareOAuthServiceMetaData;
-import com.openexchange.oauth.scope.OAuthScope;
+import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 /**
  * {@link DropboxOAuthServiceMetaData}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class DropboxOAuthServiceMetaData extends AbstractScribeAwareOAuthServiceMetaData {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DropboxOAuthServiceMetaData.class);
+public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAuthServiceMetaData {
 
     /**
-     * Initializes a new {@link DropboxOAuthServiceMetaData}.
+     * Initialises a new {@link DropboxOAuthServiceMetaData}.
      */
-    public DropboxOAuthServiceMetaData(final ServiceLookup services) {
-        super(services, API.DROPBOX, DropboxOAuthScope.values());
+    public DropboxOAuthServiceMetaData(ServiceLookup serviceLookup) {
+        super(serviceLookup, API.DROPBOX);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.ScribeAware#getScribeService()
+     */
+    @Override
+    public Class<? extends Api> getScribeService() {
+        return DropboxApi2.class;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.OAuthServiceMetaData#getAPI()
+     */
+    @Override
+    public API getAPI() {
+        return API.DROPBOX;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData#getPropertyId()
+     */
     @Override
     protected String getPropertyId() {
         return "dropbox";
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.AbstractOAuthServiceMetaData#needsRequestToken()
+     */
+    @Override
+    public boolean needsRequestToken() {
+        return false;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData#getExtraPropertyNames()
+     */
     @Override
     protected Collection<OAuthPropertyID> getExtraPropertyNames() {
-        return Collections.emptyList();
+        Collection<OAuthPropertyID> propertyNames = new ArrayList<OAuthPropertyID>(2);
+        Collections.addAll(propertyNames, OAuthPropertyID.redirectUrl, OAuthPropertyID.productName);
+        return propertyNames;
     }
-
-    @Override
-    public OAuthInteraction initOAuth(final String callbackUrl, final Session session) throws OXException {
-        try {
-            final AppKeyPair appKeys = new AppKeyPair(getAPIKey(session), getAPISecret(session));
-            final DropboxAPI<WebAuthSession> dropboxAPI = new DropboxAPI<WebAuthSession>(new TrustAllWebAuthSession(appKeys, AccessType.DROPBOX));
-            final StringBuilder authUrl = new StringBuilder(dropboxAPI.getSession().getAuthInfo().url);
-            if (!Strings.isEmpty(callbackUrl)) {
-                authUrl.append('&').append(OAuthConstants.URLPARAM_OAUTH_CALLBACK).append('=').append(urlEncode(callbackUrl)).toString();
-            }
-            final String sAuthUrl = authUrl.toString();
-            final AbstractParameterizableOAuthInteraction oAuthInteraction = new AbstractParameterizableOAuthInteraction() {
-
-                @Override
-                public String getAuthorizationURL() {
-                    return sAuthUrl;
-                }
-
-                @Override
-                public OAuthInteractionType getInteractionType() {
-                    return OAuthInteractionType.CALLBACK;
-                }
-
-                @Override
-                public OAuthToken getRequestToken() {
-                    return OAuthToken.EMPTY_TOKEN;
-                }
-
-            };
-            oAuthInteraction.putParameter(DropboxAPI.class.getName(), dropboxAPI);
-            return oAuthInteraction;
-        } catch (final DropboxServerException e) {
-            String reason = e.reason;
-            if (!Strings.isEmpty(reason)) {
-                throw OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, reason);
-            }
-
-            DropboxServerException.Error error = e.body;
-            if (null != error) {
-                reason = error.userError;
-                if (Strings.isEmpty(reason)) {
-                    reason = error.error;
-                }
-            }
-            if (Strings.isEmpty(reason)) {
-                reason = new StringBuilder("Dropbox signaled HTTP error: ").append(e.error).toString();
-            }
-
-            throw OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, reason);
-        } catch (final DropboxException e) {
-            throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    public void processArguments(final Map<String, Object> arguments, final Map<String, String> parameter, final Map<String, Object> state) throws OXException {
-        try {
-            @SuppressWarnings("unchecked") final DropboxAPI<WebAuthSession> dropboxAPI = (DropboxAPI<WebAuthSession>) state.get(DropboxAPI.class.getName());
-            final AccessTokenPair tokenPair = dropboxAPI.getSession().getAccessTokenPair();
-            final RequestTokenPair tokens = new RequestTokenPair(tokenPair.key, tokenPair.secret);
-            dropboxAPI.getSession().retrieveWebAccessToken(tokens); // completes initial auth
-            // Retrieve access tokens for future use
-            final String tokenKey = dropboxAPI.getSession().getAccessTokenPair().key; // store String returned by this call somewhere
-            final String tokenSecret = dropboxAPI.getSession().getAccessTokenPair().secret; // same for this line
-            final DefaultOAuthToken token = new DefaultOAuthToken();
-            token.setSecret(tokenSecret);
-            token.setToken(tokenKey);
-            arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, token);
-            // Check
-            {
-                Session session = (Session) arguments.get(OAuthConstants.ARGUMENT_SESSION);
-                final AppKeyPair appKeys = new AppKeyPair(getAPIKey(session), getAPISecret(session));
-                final WebAuthSession dbxSession = new TrustAllWebAuthSession(appKeys, AccessType.APP_FOLDER);
-                final DropboxAPI<WebAuthSession> mDBApi = new DropboxAPI<WebAuthSession>(dbxSession);
-                // Re-auth specific stuff
-                final AccessTokenPair reAuthTokens = new AccessTokenPair(tokenKey, tokenSecret);
-                mDBApi.getSession().setAccessTokenPair(reAuthTokens);
-
-                final Account accountInfo = mDBApi.accountInfo();
-                LOG.info("Dropbox OAuth account successfully created for {}", accountInfo.displayName);
-            }
-        } catch (final DropboxServerException e) {
-            String reason = e.reason;
-            if (!Strings.isEmpty(reason)) {
-                throw OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, reason);
-            }
-
-            DropboxServerException.Error error = e.body;
-            if (null != error) {
-                reason = error.userError;
-                if (Strings.isEmpty(reason)) {
-                    reason = error.error;
-                }
-            }
-            if (Strings.isEmpty(reason)) {
-                reason = "Dropbox signaled HTTP error: " + e.error;
-            }
-
-            throw OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, reason);
-        } catch (final DropboxException e) {
-            throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    public OAuthToken getOAuthToken(final Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException {
-        return (OAuthToken) arguments.get(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
-    }
-
-    @Override
-    public Class<? extends Api> getScribeService() {
-        return DropBoxApi.class;
-    }
-
 }

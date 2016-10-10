@@ -645,7 +645,8 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
             ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
             ComposedConfigProperty<Boolean> property = view.property("com.openexchange.websockets.enabled", boolean.class);
             if (null == property || !property.isDefined()) {
-                return false;
+                // Default is true
+                return true;
             }
 
             return property.get().booleanValue();

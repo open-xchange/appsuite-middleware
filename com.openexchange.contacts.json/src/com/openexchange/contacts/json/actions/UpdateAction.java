@@ -58,9 +58,6 @@ import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.contacts.json.RequestTools;
 import com.openexchange.contacts.json.mapping.ContactMapper;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -75,13 +72,6 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@Action(method = RequestMethod.PUT, name = "update", description = "Update a contact.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "folder", description = "Folder identifier through that the contact is accessed. This is necessary for checking the permissions."),
-    @Parameter(name = "id", description = "Object ID of the updated contact."),
-    @Parameter(name = "timestamp", description = "Timestamp of the updated contact. If the contact was modified after the specified timestamp, then the update must fail.")
-}, requestBody = "Contact object as described in Common object data and Detailed contact data. Only modified fields are present.",
-responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated contact, and maybe errors.")
 @OAuthAction(ContactActionFactory.OAUTH_WRITE_SCOPE)
 public class UpdateAction extends ContactAction {
 

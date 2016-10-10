@@ -94,16 +94,6 @@ public class YahooOAuthAccess extends AbstractOAuthAccess {
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.oauth.access.OAuthAccess#revoke()
-     */
-    @Override
-    public void revoke() throws OXException {
-        // Nothing
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
      * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
      */
     @Override

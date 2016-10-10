@@ -51,9 +51,6 @@ package com.openexchange.realtime.events.json.actions;
 
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.events.RTEventManagerService;
 import com.openexchange.realtime.events.json.EventsRequest;
@@ -61,14 +58,9 @@ import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link OnAction}
- * 
+ *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Action(method = RequestMethod.GET, name = "on", description = "Subscribe to a given event", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "event", description = "The event to unsubscribe from. If empty, this action unsubscribes the client from all events", optional = true),
-    @Parameter(name = "resource", description = "The resource ID of the client"),
-    @Parameter(name = "selector", description = "The selector to mark event stanzas with") }, responseDescription = "'true' on success, an error in the appropriate fields otherwise")
 public class OnAction extends AbstractEventAction implements AJAXActionService {
 
     public OnAction(ServiceLookup services) {

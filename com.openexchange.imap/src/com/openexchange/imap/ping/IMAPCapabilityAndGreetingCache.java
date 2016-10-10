@@ -446,7 +446,11 @@ public final class IMAPCapabilityAndGreetingCache {
         } else {
             port = 143;
         }
-        return new InetSocketAddress(serverUrl.substring(0, pos).trim(), port);
+        if (pos == -1) {
+            return new InetSocketAddress(serverUrl.trim(), port);
+        } else {
+            return new InetSocketAddress(serverUrl.substring(0, pos).trim(), port);
+        }
     }
 
     /**

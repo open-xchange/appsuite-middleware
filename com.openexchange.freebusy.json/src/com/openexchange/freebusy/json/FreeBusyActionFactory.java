@@ -54,7 +54,6 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.json.actions.FreeBusyAction;
 import com.openexchange.freebusy.json.actions.GetAction;
@@ -66,7 +65,6 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@Module(name = "freebusy", description = "Provides access to free/busy information.")
 public class FreeBusyActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, FreeBusyAction> actions;

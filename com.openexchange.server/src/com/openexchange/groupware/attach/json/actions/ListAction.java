@@ -58,9 +58,6 @@ import com.openexchange.ajax.parser.AttachmentParser.UnknownColumnException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.AttachmentWriter;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentField;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -81,14 +78,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "list", description = "Get a list of attachments.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for attachments are defined in Common object data (with only id, created_by and creation_date available) and Attachment object."),
-    @Parameter(name = "attached", description = "The Object ID of the Object."),
-    @Parameter(name = "folder", description = "The Folder ID of the Object."),
-    @Parameter(name = "module", description = "The Module type of the Object.")
-}, requestBody = "An array of with object IDs of requested attachments.",
-responseDescription = "Response with timestamp: An array with attachment data. Each array element describes one attachment and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class ListAction extends AbstractAttachmentAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ListAction.class);

@@ -21,6 +21,10 @@
         type: boolean
         description: Enforces a secure connection for configured mail account, default is `true` (available since v7.8.2).
         required: false
+      - in: formData
+        name: oauth
+        type: integer
+        description: The optional identifier of the OAuth account to use for authentication. Also accepts a boolean to signal that provided password is considered to be an OAuth token.
     responses:
       200:
         description: |

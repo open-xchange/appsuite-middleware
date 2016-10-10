@@ -55,6 +55,7 @@ import com.openexchange.file.storage.FileStorageConstants;
  * {@link DropboxConstants} - Provides useful constants for Dropbox file storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public final class DropboxConstants implements FileStorageConstants {
 
@@ -62,6 +63,11 @@ public final class DropboxConstants implements FileStorageConstants {
      * The identifier for Dropbox file storage service.
      */
     public static final String ID = "dropbox";
+    
+    /**
+     * The display name for dropbox file storage service.
+     */
+    public static final String DISPLAY_NAME = "Dropbox File Storage Service";
 
     /**
      * The configuration property name for Dropbox API key.
@@ -72,6 +78,11 @@ public final class DropboxConstants implements FileStorageConstants {
      * The configuration property name for Dropbox secret key.
      */
     public static final String SECRET_KEY = "secretKey";
+
+    /**
+     * The configuration property name for Dropbox product name.
+     */
+    public static final String PRODUCT_NAME = "productName";
 
     /**
      * The default API key.

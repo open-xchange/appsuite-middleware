@@ -62,14 +62,21 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.DatabaseAccess;
+import com.openexchange.filestore.DatabaseAccessService;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorageInfo;
+import com.openexchange.filestore.FileStorageInfoService;
 import com.openexchange.filestore.FileStorageProvider;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.sproxyd.chunkstorage.ChunkStorage;
 import com.openexchange.filestore.sproxyd.chunkstorage.RdbChunkStorage;
 import com.openexchange.filestore.sproxyd.impl.EndpointPool;
 import com.openexchange.filestore.sproxyd.impl.SproxydClient;
 import com.openexchange.filestore.sproxyd.impl.SproxydConfig;
+import com.openexchange.filestore.utils.DefaultDatabaseAccess;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
@@ -121,15 +128,30 @@ public class SproxydFileStorageFactory implements FileStorageProvider {
              * extract context and user from URI path
              */
             String filestoreID = extractFilestoreID(uri);
-            int[] contextAndUser = extractContextAndUser(uri);
-            int contextId = contextAndUser[0];
-            int userId = contextAndUser[1];
-            LOG.debug("Using \"{}\" as filestore ID, context ID of filestore is \"{}\", user ID is \"{}\".", filestoreID, contextId, userId);
+            ExtractionResult extractionResult = extractFrom(uri);
+
+            DatabaseAccess databaseAccess;
+            int contextId;
+            int userId;
+            if (extractionResult.hasContextUserAssociation()) {
+                contextId = extractionResult.getContextId();
+                userId = extractionResult.getUserId();
+                databaseAccess = new DefaultDatabaseAccess(userId, contextId, services.getService(DatabaseService.class));
+                LOG.debug("Using \"{}\" as filestore ID, context ID of filestore is \"{}\", user ID is \"{}\".", filestoreID, contextId, userId);
+            } else {
+                contextId = 0;
+                userId = 0;
+                databaseAccess = lookUpDatabaseAccess(uri, extractionResult.getPrefix());
+            }
+
+            // Ensure required tables do exist
+            databaseAccess.createIfAbsent(RdbChunkStorage.getRequiredTables());
+
             /*
              * initialize file storage using dedicated client & chunk storage
              */
-            SproxydClient client = initClient(filestoreID, contextId, userId);
-            ChunkStorage chunkStorage = new RdbChunkStorage(services, contextId, userId);
+            SproxydClient client = initClient(filestoreID, extractionResult.getPrefix());
+            ChunkStorage chunkStorage = new RdbChunkStorage(databaseAccess, contextId, userId);
             SproxydFileStorage newStorage = new SproxydFileStorage(client, chunkStorage);
             storage = storages.putIfAbsent(uri, newStorage);
             if (null == storage) {
@@ -137,6 +159,19 @@ public class SproxydFileStorageFactory implements FileStorageProvider {
             }
         }
         return storage;
+    }
+
+    static DatabaseAccess lookUpDatabaseAccess(URI uri, String prefix) throws OXException {
+        FileStorageInfoService infoService = FileStorages.getFileStorageInfoService();
+        FileStorageInfo info = infoService.getFileStorageIdFor(uri);
+
+        DatabaseAccessService databaseAccessService = FileStorages.getDatabaseAccessService();
+        DatabaseAccess databaseAccess = databaseAccessService.getAccessFor(info.getId(), prefix);
+        if (null == databaseAccess) {
+            throw new IllegalArgumentException("No database access for file storage " + info.getId() + " with prefix \"" + prefix + "\"");
+        }
+
+        return databaseAccess;
     }
 
     @Override
@@ -170,7 +205,14 @@ public class SproxydFileStorageFactory implements FileStorageProvider {
      */
     private static final Pattern USER_STORE_PATTERN = Pattern.compile("(\\d+)_ctx_(\\d+)_user_store");
 
-    private int[] extractContextAndUser(URI uri) {
+    /**
+     * Extracts context and user identifiers from specified URI; e.g. <code>"sproxyd://mysproxyd/57462_ctx_3_user_store"</code>
+     *
+     * @param uri The URI to extract from
+     * @return The extracted context and user identifiers
+     * @throws IllegalArgumentException If URI's path does not follow expected pattern
+     */
+    ExtractionResult extractFrom(URI uri) {
         String path = uri.getPath();
         while (0 < path.length() && '/' == path.charAt(0)) {
             path = path.substring(1);
@@ -183,26 +225,54 @@ public class SproxydFileStorageFactory implements FileStorageProvider {
             if (false == matcher.matches()) {
                 throw new IllegalArgumentException("Path does not match the expected pattern \"\\d+_ctx_store\"");
             }
-            return new int[] {Integer.parseInt(matcher.group(1)), 0};
+            return new ExtractionResult(0, Integer.parseInt(matcher.group(1)));
         }
 
-        // Expect user store identifier
-        Matcher matcher = USER_STORE_PATTERN.matcher(path);
-        if (false == matcher.matches()) {
-            throw new IllegalArgumentException("Path does not match the expected pattern \"(\\d+)_ctx_(\\d+)_user_store\"");
+        if (path.endsWith("user_store")) {
+            // Expect user store identifier
+            Matcher matcher = USER_STORE_PATTERN.matcher(path);
+            if (false == matcher.matches()) {
+                throw new IllegalArgumentException("Path does not match the expected pattern \"(\\d+)_ctx_(\\d+)_user_store\"");
+            }
+            return new ExtractionResult(Integer.parseInt(matcher.group(2)), Integer.parseInt(matcher.group(1)));
         }
-        return new int[] {Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2))};
+
+        // Any path that serves as prefix; e.g. "photos"
+        return new ExtractionResult(sanitizePathForPrefix(path, uri));
+    }
+
+    private static String sanitizePathForPrefix(String path, URI uri) {
+        if (Strings.isEmpty(path)) {
+            throw new IllegalArgumentException("Path is empty in URI: " + uri);
+        }
+
+        StringBuilder sb = null;
+        for (int k = path.length(), i = 0; k-- > 0; i++) {
+            char ch = path.charAt(i);
+            if ('_' == ch) {
+                // Underscore not allowed
+                if (null == sb) {
+                    sb = new StringBuilder(path.length());
+                    sb.append(path, 0, i);
+                }
+            } else {
+                // Append
+                if (null != sb) {
+                    sb.append(ch);
+                }
+            }
+        }
+        return null == sb ? path : sb.toString();
     }
 
     /**
      * Initializes an {@link SproxydClient} as configured by the referenced authority part of the supplied endpoints.
      *
      * @param uri The filestore identifier
-     * @param contextID The context identifier
-     * @param userID The user identifier
+     * @param prefix The prefix to use
      * @return The client
      */
-    private SproxydClient initClient(String filestoreID, int contextID, int userID) throws OXException {
+    private SproxydClient initClient(String filestoreID, String prefix) throws OXException {
         SproxydConfig sproxydConfig = sproxydConfigs.get(filestoreID);
         if (sproxydConfig == null) {
             SproxydConfig newSproxydConfig = initSproxydConfig(filestoreID);
@@ -214,7 +284,7 @@ public class SproxydFileStorageFactory implements FileStorageProvider {
             }
         }
 
-        return new SproxydClient(sproxydConfig, contextID, userID);
+        return new SproxydClient(sproxydConfig, prefix);
     }
 
     /**

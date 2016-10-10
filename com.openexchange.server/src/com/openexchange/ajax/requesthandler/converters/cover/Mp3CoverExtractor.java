@@ -135,42 +135,43 @@ public final class Mp3CoverExtractor implements CoverExtractor {
                 final MP3File mp3 = new MP3File(tmpFile, MP3File.LOAD_IDV2TAG, true);
                 // Get appropriate cover tag
                 final TagField imageField = mp3.getID3v2Tag().getFirstField(FieldKey.COVER_ART);
-                if (imageField instanceof AbstractID3v2Frame) {
-                    final AbstractTagFrameBody body = ((AbstractID3v2Frame) imageField).getBody();
-                    if (body instanceof FrameBodyAPIC) {
-                        final FrameBodyAPIC imageFrameBody = (FrameBodyAPIC) body;
-                        if (!imageFrameBody.isImageUrl()) {
-                            final ByteArrayFileHolder coverFile = new ByteArrayFileHolder(
-                                (byte[]) imageFrameBody.getObjectValue(DataTypes.OBJ_PICTURE_DATA));
-                            final String mimeType = (String) imageFrameBody.getObjectValue(DataTypes.OBJ_MIME_TYPE);
-                            coverFile.setContentType(mimeType);
-                            if (null != mimeType) {
-                                final List<String> extensions = MimeType2ExtMap.getFileExtensions(mimeType);
-                                coverFile.setName("cover." + extensions.get(0));
+                if (null != imageField) {
+                    if (imageField instanceof AbstractID3v2Frame) {
+                        final AbstractTagFrameBody body = ((AbstractID3v2Frame) imageField).getBody();
+                        if (body instanceof FrameBodyAPIC) {
+                            final FrameBodyAPIC imageFrameBody = (FrameBodyAPIC) body;
+                            if (!imageFrameBody.isImageUrl()) {
+                                final ByteArrayFileHolder coverFile = new ByteArrayFileHolder((byte[]) imageFrameBody.getObjectValue(DataTypes.OBJ_PICTURE_DATA));
+                                final String mimeType = (String) imageFrameBody.getObjectValue(DataTypes.OBJ_MIME_TYPE);
+                                coverFile.setContentType(mimeType);
+                                if (null != mimeType) {
+                                    final List<String> extensions = MimeType2ExtMap.getFileExtensions(mimeType);
+                                    coverFile.setName("cover." + extensions.get(0));
+                                }
+                                coverFile.setDelivery(file.getDelivery());
+                                coverFile.setDisposition(file.getDisposition());
+                                return coverFile;
                             }
-                            coverFile.setDelivery(file.getDelivery());
-                            coverFile.setDisposition(file.getDisposition());
-                            return coverFile;
-                        }
-                    } else if (body instanceof FrameBodyPIC) {
-                        final FrameBodyPIC imageFrameBody = (FrameBodyPIC) body;
-                        if (!imageFrameBody.isImageUrl()) {
-                            final ByteArrayFileHolder coverFile = new ByteArrayFileHolder(
-                                (byte[]) imageFrameBody.getObjectValue(DataTypes.OBJ_PICTURE_DATA));
-                            final String mimeType = (String) imageFrameBody.getObjectValue(DataTypes.OBJ_MIME_TYPE);
-                            coverFile.setContentType(mimeType);
-                            if (null != mimeType) {
-                                final List<String> extensions = MimeType2ExtMap.getFileExtensions(mimeType);
-                                coverFile.setName("cover." + extensions.get(0));
+                        } else if (body instanceof FrameBodyPIC) {
+                            final FrameBodyPIC imageFrameBody = (FrameBodyPIC) body;
+                            if (!imageFrameBody.isImageUrl()) {
+                                final ByteArrayFileHolder coverFile = new ByteArrayFileHolder((byte[]) imageFrameBody.getObjectValue(DataTypes.OBJ_PICTURE_DATA));
+                                final String mimeType = (String) imageFrameBody.getObjectValue(DataTypes.OBJ_MIME_TYPE);
+                                coverFile.setContentType(mimeType);
+                                if (null != mimeType) {
+                                    final List<String> extensions = MimeType2ExtMap.getFileExtensions(mimeType);
+                                    coverFile.setName("cover." + extensions.get(0));
+                                }
+                                coverFile.setDelivery(file.getDelivery());
+                                coverFile.setDisposition(file.getDisposition());
+                                return coverFile;
                             }
-                            coverFile.setDelivery(file.getDelivery());
-                            coverFile.setDisposition(file.getDisposition());
-                            return coverFile;
+                        } else {
+                            LOG.warn("Extracting cover image from MP3 failed. Unknown frame body class: {}", body.getClass().getName());
                         }
-                    } else {
-                        LOG.warn("Extracting cover image from MP3 failed. Unknown frame body class: {}", body.getClass().getName());
-                    }
+                    } 
                 }
+                return null;
             } else if (isSupported(managedFile.getContentType()) || isSupportedFileExt(managedFile.getFileName())) {
                 // Grab audio file
                 final AudioFile f = AudioFileIO.read(tmpFile);

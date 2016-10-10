@@ -105,7 +105,6 @@ public abstract class BoxClosure<R> {
         try {
             return doPerform();
         } catch (BoxAPIException e) {
-            //TODO: Handle 404
             int statusCode = e.getResponseCode();
             if (statusCode == SC_UNAUTHORIZED) {
                 if (handleAuthError) {
@@ -115,12 +114,32 @@ public abstract class BoxClosure<R> {
                 throw FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, resourceAccess.account.getId(), BoxConstants.ID, e.getMessage());
             }
             if (e.getCause() instanceof IOException) {
-                throw AbstractBoxResourceAccess.handleRestError(e);
+                throw handleRestError(e);
             }
             throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", statusCode + " " + e.getResponse());
         } catch (final UnsupportedEncodingException | RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Handles given API error.
+     *
+     * @param e The {@link BoxAPIException} error
+     * @return The resulting exception
+     */
+    private OXException handleRestError(BoxAPIException e) {
+        Throwable cause = e.getCause();
+
+        if (cause == null) {
+            return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getResponseCode() + " " + e.getResponse());
+        }
+
+        if (cause instanceof IOException) {
+            return FileStorageExceptionCodes.IO_ERROR.create(cause, cause.getMessage());
+        }
+
+        return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, BoxConstants.ID, e.getMessage());
     }
 
 }

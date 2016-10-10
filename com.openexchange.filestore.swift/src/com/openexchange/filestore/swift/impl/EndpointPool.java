@@ -128,11 +128,10 @@ public class EndpointPool {
     /**
      * Gets an available end-point.
      *
-     * @param contextId The context ID
-     * @param userId The userID
+     * @param prefix The client's prefix
      * @return The end-point or <code>null</code> if all end-points have been blacklisted
      */
-    public Endpoint get(int contextId, int userId) {
+    public Endpoint get(String prefix) {
         lock.readLock().lock();
         try {
             int size = available.size();

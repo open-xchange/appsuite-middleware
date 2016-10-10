@@ -51,7 +51,8 @@ package com.openexchange.passwordchange.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import org.apache.commons.lang.ArrayUtils;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.guest.GuestService;
@@ -79,7 +80,20 @@ public class PasswordChangeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return (Class<?>[]) ArrayUtils.addAll(new Class<?>[] { UserService.class, CapabilityService.class }, EditPasswordCapabilityChecker.getNeededServices());
+        Set<Class<?>> classes = new LinkedHashSet<>(8);
+        classes.add(UserService.class);
+        classes.add(CapabilityService.class);
+
+        Class<?>[] neededServices = EditPasswordCapabilityChecker.getNeededServices();
+        if (null != neededServices && neededServices.length > 0) {
+            for (Class<?> clazz : neededServices) {
+                if (null != clazz) {
+                    classes.add(clazz);
+                }
+            }
+        }
+
+        return classes.toArray(new Class<?>[classes.size()]);
     }
 
     @Override

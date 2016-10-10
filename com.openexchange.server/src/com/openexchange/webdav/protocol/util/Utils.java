@@ -74,9 +74,9 @@ public class Utils {
          new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.sss'Z'", Locale.US)
     };
 
-    private static final SimpleDateFormat output_format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
+    private static final SimpleDateFormat output_format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
     static {
-        output_format.setTimeZone(TimeZoneUtils.getTimeZone("UTC"));
+        output_format.setTimeZone(TimeZoneUtils.getTimeZone("GMT"));
     }
 
 	public static Date convert(final String s) {

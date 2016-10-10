@@ -79,22 +79,19 @@ public class SproxydClient {
 
     private final EndpointPool endpoints;
     private final HttpClient httpClient;
-    private final int contextId;
-    private final int userId;
+    private final String prefix;
 
     /**
      * Initializes a new {@link SproxydClient}.
      *
      * @param sproxydConfig The sproxyd config
-     * @param contextId The context ID
-     * @param userId The user ID
+     * @param prefix The prefix to use
      */
-    public SproxydClient(SproxydConfig sproxydConfig, int contextId, int userId) {
+    public SproxydClient(SproxydConfig sproxydConfig, String prefix) {
         super();
         this.endpoints = sproxydConfig.getEndpointPool();
         this.httpClient = sproxydConfig.getHttpClient();
-        this.contextId = contextId;
-        this.userId = userId;
+        this.prefix = prefix;
     }
 
     /**
@@ -218,7 +215,7 @@ public class SproxydClient {
      * @throws OXException If no endpoint is available (i.e. all are blacklisted due to connection timeouts).
      */
     private Endpoint getEndpoint() throws OXException {
-        Endpoint endpoint = endpoints.get(contextId, userId);
+        Endpoint endpoint = endpoints.get(prefix);
         if (endpoint == null) {
             throw SproxydExceptionCode.STORAGE_UNAVAILABLE.create();
         }

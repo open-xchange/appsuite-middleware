@@ -54,6 +54,7 @@ import static com.openexchange.java.Strings.toLowerCase;
 import java.sql.Connection;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -150,7 +151,7 @@ public final class Tools {
         if (null == given_names) {
             given_names = new HashMap<String, String>();
         }
-        
+
         final int accountId = account.getId();
         if (MailAccount.DEFAULT_ID == accountId) {
             /*
@@ -621,4 +622,20 @@ public final class Tools {
         }
         return fullName.substring(fullName.lastIndexOf(separator) + 1);
     }
+
+    /**
+     * Validates specified account description.
+     *
+     * @param account The account to check
+     * @param session The associated session
+     * @param ignoreInvalidTransport
+     * @param warnings The warnings list
+     * @param errorOnDenied <code>true</code> to throw an error in case account description is denied (either by host or port); otherwise <code>false</code>
+     * @return <code>true</code> for successful validation; otherwise <code>false</code>
+     * @throws OXException If an severe error occurs
+     */
+    public static Boolean actionValidateBoolean(MailAccount account, ServerSession session, boolean ignoreInvalidTransport, List<OXException> warnings, boolean errorOnDenied) throws OXException {
+        return com.openexchange.mailaccount.json.actions.StatusAction.actionValidateBoolean(account, session, ignoreInvalidTransport, warnings, errorOnDenied);
+    }
+
 }

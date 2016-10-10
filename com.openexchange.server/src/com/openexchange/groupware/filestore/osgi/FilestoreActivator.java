@@ -51,6 +51,9 @@ package com.openexchange.groupware.filestore.osgi;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.filestore.FileStorageInfoService;
+import com.openexchange.groupware.filestore.FileStorageInfoServiceImpl;
 
 /**
  * {@link FilestoreActivator}
@@ -59,17 +62,27 @@ import org.osgi.framework.BundleContext;
  */
 public class FilestoreActivator implements BundleActivator {
 
+    private ServiceRegistration<FileStorageInfoService> registration;
+
+    /**
+     * Initializes a new {@link FilestoreActivator}.
+     */
     public FilestoreActivator() {
         super();
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        // Nope
+    public synchronized void start(final BundleContext context) throws Exception {
+        registration = context.registerService(FileStorageInfoService.class, new FileStorageInfoServiceImpl(), null);
     }
 
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        // Nope
+    public synchronized void stop(final BundleContext context) throws Exception {
+        ServiceRegistration<FileStorageInfoService> registration = this.registration;
+        if (null != registration) {
+            this.registration = null;
+            registration.unregister();
+        }
     }
+
 }

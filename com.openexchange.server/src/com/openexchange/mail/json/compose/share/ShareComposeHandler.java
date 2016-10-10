@@ -151,7 +151,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
     private static final String THUMBNAIL_AUDIO = "font-awesome-file-audio.png";
     private static final String THUMBNAIL_EXCEL = "font-awesome-file-excel.png";
     private static final String THUMBNAIL_IMAGE = "font-awesome-file-image.png";
-    private static final String THUMBNAIL_DEFAULT = "font-awesome-file-default.png";
+    private static final String THUMBNAIL_DEFAULT = "font-awesome-file.png";
     private static final String THUMBNAIL_PDF = "font-awesome-file-pdf.png";
     private static final String THUMBNAIL_POWERPOINT = "font-awesome-file-powerpoint.png";
     private static final String THUMBNAIL_VIDEO = "font-awesome-file-video.png";
@@ -479,11 +479,11 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class);
         ThreadPoolService threadPoolService = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
         boolean documentPreviewEnabled = false;
-        int timeout = 500;
+        int timeout = 5000;
         String templatePath = null;
         {
             documentPreviewEnabled = Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.documentPreviewEnabled", false, session);
-            timeout = Utilities.getIntFromProperty("com.openexchange.mail.compose.share.preview.timeout", Integer.valueOf(500), session).intValue();
+            timeout = Utilities.getIntFromProperty("com.openexchange.mail.compose.share.preview.timeout", Integer.valueOf(5000), session).intValue();
             templatePath = Utilities.getValueFromProperty("com.openexchange.templating.path", null, session);
         }
         if (null == items || items.isEmpty() || null == previewService || null == transformationService || null == fileAccessFactory || null == threadPoolService) {
@@ -648,7 +648,7 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
             try {
 
                 // Document is an image
-                if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("image")) {
+                if (!Strings.isEmpty(mimeType) && mimeType.toLowerCase().startsWith("image") && !mimeType.toLowerCase().startsWith("image/svg+xml")) {
                     encodedThumbnail = transformImage(document, mimeType);
                 }
 
@@ -658,7 +658,9 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                         IFileHolder mp3Cover = null;
                         try {
                             mp3Cover = getCoverImage(document);
-                            encodedThumbnail = transformImage(mp3Cover.getStream(), "image/jpeg");
+                            if (null != mp3Cover) {
+                                encodedThumbnail = transformImage(mp3Cover.getStream(), "image/jpeg");
+                            }
                         } finally {
                             if (null != mp3Cover) {
                                 mp3Cover.close();
@@ -693,9 +695,9 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
 
         private ThresholdFileHolder transformImage(InputStream image, String mimeType) throws OXException {
             try {
-                ImageTransformations transformed = transformationService.transfom(image).scale(200, 150, ScaleType.COVER, true).compress();
+                ImageTransformations transformed = transformationService.transfom(image).scale(200, 150, ScaleType.COVER_AND_CROP, true);
                 ThresholdFileHolder transformedImage = new ThresholdFileHolder();
-                transformedImage.write(transformed.getTransformedImage(mimeType).getImageStream());
+                transformedImage.write(transformed.getFullTransformedImage(mimeType).getImageStream());
                 return transformedImage;
             } catch (IOException e) {
                 throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
@@ -711,7 +713,10 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
                 fileHolder.setContentType("audio/mpeg");
                 fileHolder.setName(id + ".mp3");
                 return mp3CoverExtractor.extractCover(fileHolder);
-            } finally {
+            } catch (OXException e) {
+                throw e;
+            }
+            finally {
                 if (null != fileHolder) {
                     fileHolder.close();
                 }

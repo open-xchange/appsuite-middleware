@@ -108,6 +108,10 @@ if [ ${1:-0} -eq 2 ]; then
     VALUE=$(ox_read_property com.openexchange.oauth.google.redirectUrl /opt/open-xchange/etc/googleoauth.properties)
     ox_set_property com.openexchange.oauth.google.redirectUrl "$VALUE" /opt/open-xchange/etc/googleoauth.properties
 
+    # SoftwareChange_Request-3506
+    ox_add_property com.openexchange.oauth.dropbox.redirectUrl REPLACE_WITH_REDIRECT_URL /opt/open-xchange/etc/dropboxoauth.properties
+    ox_add_property com.openexchange.oauth.dropbox.productName REPLACE_WITH_YOUR_REGISTERED_DROPBOX_APP /opt/open-xchange/etc/dropboxoauth.properties
+
     # SoftwareChange_Request-3556
     ox_add_property com.openexchange.oauth.yahoo.redirectUrl REPLACE_WITH_REDIRECT_URL /opt/open-xchange/etc/yahoooauth.properties
     ox_add_property com.openexchange.oauth.yahoo.productName REPLACE_WITH_YOUR_REGISTERED_YAHOO_APP /opt/open-xchange/etc/yahoooauth.properties

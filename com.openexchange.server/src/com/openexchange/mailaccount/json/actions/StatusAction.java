@@ -58,18 +58,15 @@ import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.AuthInfo;
-import com.openexchange.mailaccount.Status;
+import com.openexchange.mailaccount.KnownStatus;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.KnownStatus;
+import com.openexchange.mailaccount.Status;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.json.MailAccountFields;
@@ -84,10 +81,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.GET, name = "status", description = "Gets the status for a mail account", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "The ID of the account to return.")
-}, responseDescription = "A JSON object representing the account's status.")
 @OAuthAction(MailAccountOAuthConstants.OAUTH_READ_SCOPE)
 public final class StatusAction extends AbstractValidateMailAccountAction implements MailAccountFields {
 
@@ -103,34 +96,66 @@ public final class StatusAction extends AbstractValidateMailAccountAction implem
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jVoid) throws OXException {
         try {
-            int id = parseIntParameter(AJAXServlet.PARAMETER_ID, requestData);
 
             MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
-            MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+            List<OXException> warnings = new LinkedList<>();
 
-            if (isUnifiedINBOXAccount(mailAccount)) {
-                // Treat as no hit
-                throw MailAccountExceptionCodes.NOT_FOUND.create(Integer.valueOf(id), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+            {
+                int id = optionalIntParameter(AJAXServlet.PARAMETER_ID, -1, requestData);
+                if (id >= 0) {
+                    if (!session.getUserPermissionBits().isMultipleMailAccounts() && MailAccount.DEFAULT_ID != id) {
+                        throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                    }
+
+                    Status status = determineAccountStatus(id, true, storageService, warnings, session);
+                    String message = status.getMessage(session.getUser().getLocale());
+
+                    JSONObject jStatus = new JSONObject(4).put("status", status.getId());
+                    if (Strings.isNotEmpty(message)) {
+                        jStatus.put("message", message);
+                    }
+                    return new AJAXRequestResult(new JSONObject(2).put(Integer.toString(id), jStatus), "json").addWarnings(warnings);
+                }
             }
 
-            if (!session.getUserPermissionBits().isMultipleMailAccounts() && !isDefaultMailAccount(mailAccount)) {
+            // Get status for all mail accounts
+            if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
                 throw MailAccountExceptionCodes.NOT_ENABLED.create(Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
             }
 
-            List<OXException> warnings = new LinkedList<>();
-            Boolean valid = actionValidateBoolean(mailAccount, session, false, warnings, false);
+            MailAccount[] accounts = storageService.getUserMailAccounts(session.getUserId(), session.getContextId());
+            JSONObject jStatuses = new JSONObject(accounts.length);
 
-            Status status = valid.booleanValue() ? KnownStatus.OK : KnownStatus.INVALID_CREDENTIALS;
-            String message = status.getMessage(session.getUser().getLocale());
+            for (MailAccount account : accounts) {
+                int id = account.getId();
+                Status status = determineAccountStatus(id, true, storageService, warnings, session);
+                String message = status.getMessage(session.getUser().getLocale());
 
-            JSONObject jStatus = new JSONObject(2).put("status", status.getId());
-            if (Strings.isNotEmpty(message)) {
-                jStatus.put("message", message);
+                JSONObject jStatus = new JSONObject(4).put("status", status.getId());
+                if (Strings.isNotEmpty(message)) {
+                    jStatus.put("message", message);
+                }
+                jStatuses.put(Integer.toString(id), jStatus);
             }
-            return new AJAXRequestResult(jStatus, "json").addWarnings(warnings);
+            return new AJAXRequestResult(jStatuses, "json").addWarnings(warnings);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private Status determineAccountStatus(int id, boolean singleRequested, MailAccountStorageService storageService, List<OXException> warnings, ServerSession session) throws OXException {
+        MailAccount mailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+
+        if (isUnifiedINBOXAccount(mailAccount)) {
+            // Treat as no hit
+            if (singleRequested) {
+                throw MailAccountExceptionCodes.NOT_FOUND.create(Integer.valueOf(id), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+            }
+            return null;
+        }
+
+        Boolean valid = actionValidateBoolean(mailAccount, session, false, warnings, false);
+        return valid.booleanValue() ? KnownStatus.OK : KnownStatus.INVALID_CREDENTIALS;
     }
 
     /**

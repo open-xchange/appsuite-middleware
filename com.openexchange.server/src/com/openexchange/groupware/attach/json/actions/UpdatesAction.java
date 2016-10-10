@@ -55,9 +55,6 @@ import com.openexchange.ajax.parser.AttachmentParser.UnknownColumnException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.AttachmentWriter;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentField;
@@ -79,17 +76,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.GET, name = "updates", description = "Get updated attachments.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "folder", description = "Object ID of the folder, whose contents are queried."),
-    @Parameter(name = "attached", description = "Object ID of the object to which the attachments are attached."),
-    @Parameter(name = "module", description = "Module ID (as per Attachment object) of the attached object."),
-    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for attachments are defined in Common object data (with only id, created_by and creation_date available) and Attachment object."),
-    @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified."),
-    @Parameter(name = "order", optional=true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
-    @Parameter(name = "timestamp", description = "Timestamp of the last update of the requested infoitems."),
-    @Parameter(name = "ignore", optional=true, description = "Which kinds of updates should be ignored. Currently, the only valid value \u2013 \"deleted\" \u2013 causes deleted object IDs not to be returned.")
-}, responseDescription = "Response with timestamp: An array with new and deleted attachments for the specified object. New attachments are represented by arrays. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. Deleted attachments (should the ignore parameter be ever implemented) would be identified by their object IDs as plain numbers, without being part of a nested array.")
 public final class UpdatesAction extends AbstractAttachmentAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatesAction.class);

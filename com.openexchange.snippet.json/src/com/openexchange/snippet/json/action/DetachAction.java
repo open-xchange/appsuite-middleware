@@ -56,9 +56,6 @@ import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceLookup;
@@ -75,12 +72,6 @@ import com.openexchange.snippet.json.SnippetRequest;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(
-    name = "detach",
-    description = "Removes a file attachment from an existing snippet associated with the current user and context.",
-    method = RequestMethod.PUT,
-    parameters = { @Parameter(name = "id", description = "The snippet's identifier", optional = false) }
-)
 public final class DetachAction extends SnippetAction {
 
     /**

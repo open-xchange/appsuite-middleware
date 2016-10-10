@@ -63,9 +63,6 @@ import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.calendar.json.AppointmentAJAXRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -81,13 +78,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-@Action(method = RequestMethod.PUT, name = "update", description = "Update an appointment.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "Object ID of the updated appointment."),
-    @Parameter(name = "folder", description = "Object ID of the appointment's folder."),
-    @Parameter(name = "timestamp", description = "Timestamp of the updated appointment. If the appointment was modified after the specified timestamp, then the update must fail.")
-}, requestBody = "Appointment object as described in Common object data, Detailed task and appointment data and Detailed appointment data. The field recurrence_id is always present if it is present in the original appointment. The field recurrence_position is present if it is present in the original appointment and only this single appointment should be modified. The field id is not present because it is already included as a parameter. Other fields are present only if modified.",
-responseDescription = "Nothing, except the standard response object with empty data, the timestamp of the updated appointment, and maybe errors.")
 @OAuthAction(AppointmentActionFactory.OAUTH_WRITE_SCOPE)
 public final class UpdateAction extends AppointmentAction {
 
