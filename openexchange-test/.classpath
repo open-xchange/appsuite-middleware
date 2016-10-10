@@ -21,6 +21,7 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.2.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.2-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.lang_2.6.0.v201205030909.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.lang.source_2.6.0.v201205030909.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.5.jar"/>
+	<classpathentry kind="lib" path="lib/okio-1.9.0.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.calendar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.conversion"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.conversion.engine"/>
@@ -145,5 +146,9 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/stax2-api-3.1.4.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpclient-osgi-4.5.2.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/httpcore-osgi-4.4.5.jar"/>
+	<classpathentry kind="lib" path="lib/socket.io-client-0.8.1.jar" sourcepath="lib/source/socket.io-client-0.8.1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/engine.io-client-0.8.1.jar" sourcepath="lib/source/engine.io-client-0.8.1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/okhttp-3.4.1.jar" sourcepath="lib/source/okhttp-3.4.1-sources.jar"/>
+	<classpathentry kind="lib" path="lib/okhttp-ws-3.4.1.jar" sourcepath="lib/source/okhttp-ws-3.4.1-sources.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
