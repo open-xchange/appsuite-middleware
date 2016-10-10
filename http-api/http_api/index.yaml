@@ -116,8 +116,7 @@ tags:
       The messaging module is divided into services which represent a messaging backend (they add a new folder module "messaging"),
       into accounts which represent the concrete configuration of accounts for a given messaging service, and into messages which
       represent single messages consisting of some metadata, headers and a content.
-  - name: Snippet
-    description: 
+  - name: Snippet 
   - name: Halo
   - name: Capabilities
     description: Provides access to capabilities, i.e. modules or features that are available on the backend and the user has access to.
