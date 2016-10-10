@@ -50,7 +50,6 @@
 package com.openexchange.websockets.grizzly;
 
 import static com.openexchange.java.Autoboxing.I;
-import java.lang.reflect.UndeclaredThrowableException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
@@ -67,9 +66,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.servlet.http.HttpServletRequest;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
-import org.glassfish.grizzly.http.Cookies;
 import org.glassfish.grizzly.http.HttpContent;
 import org.glassfish.grizzly.http.HttpRequestPacket;
 import org.glassfish.grizzly.http.HttpResponsePacket;
@@ -80,39 +77,27 @@ import org.glassfish.grizzly.websockets.HandshakeException;
 import org.glassfish.grizzly.websockets.ProtocolHandler;
 import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
-import org.glassfish.grizzly.websockets.WebSocketException;
 import org.glassfish.grizzly.websockets.WebSocketListener;
 import org.slf4j.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.ImmutableSet;
-import com.openexchange.ajax.SessionUtility;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.configuration.CookieHashSource;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
-import com.openexchange.groupware.ldap.LdapExceptionCode;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.session.UserAndContext;
-import com.openexchange.sessiond.SessionExceptionCodes;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.user.UserService;
 import com.openexchange.websockets.ConnectionId;
 import com.openexchange.websockets.WebSocketInfo;
 import com.openexchange.websockets.WebSockets;
-import com.openexchange.websockets.grizzly.http.GrizzlyWebSocketHttpServletRequest;
+import com.openexchange.websockets.grizzly.auth.GrizzlyWebSocketAuthenticator;
 import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
 
 /**
@@ -185,6 +170,33 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         return APPLICATION_REFERENCE.get();
     }
 
+    private static final AtomicReference<GrizzlyWebSocketAuthenticator> AUTHENTICATOR_REFERENCE = new AtomicReference<GrizzlyWebSocketAuthenticator>();
+
+    /**
+     * Sets the authenticator to use
+     *
+     * @param authenticator The authenticator to use
+     * @return The previously tracked authenticator or <code>null</code>
+     */
+    public static GrizzlyWebSocketAuthenticator setGrizzlyWebSocketAuthenticator(GrizzlyWebSocketAuthenticator authenticator) {
+        if (null == authenticator) {
+            throw new IllegalArgumentException("Authenticator is null.");
+        }
+
+        GrizzlyWebSocketAuthenticator s;
+        do {
+            s = AUTHENTICATOR_REFERENCE.get();
+        } while (!AUTHENTICATOR_REFERENCE.compareAndSet(s, authenticator));
+        return s;
+    }
+
+    /**
+     * Unsets the application
+     */
+    public static void unsetGrizzlyWebSocketAuthenticator() {
+        AUTHENTICATOR_REFERENCE.set(null);
+    }
+
     // ---------------------------------------------------------------------------------------------------------------
 
     private final ConcurrentMap<UserAndContext, ConcurrentMap<ConnectionId, SessionBoundWebSocket>> openSockets;
@@ -192,6 +204,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
     private final WebSocketListenerRegistry listenerRegistry;
     private final CookieHashSource hashSource;
     private final RemoteWebSocketDistributor remoteDistributor;
+    private final DefaultGrizzlyWebSocketAuthenticator defaultAuthenticator;
 
     /**
      * Initializes a new {@link GrizzlyWebSocketApplication}.
@@ -204,6 +217,7 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         openSockets = new ConcurrentHashMap<>(265, 0.9F, 1);
         ConfigurationService configService = services.getService(ConfigurationService.class);
         hashSource = CookieHashSource.parse(configService.getProperty(Property.COOKIE_HASH.getPropertyName()));
+        defaultAuthenticator = new DefaultGrizzlyWebSocketAuthenticator(hashSource, services, LOGGER);
     }
 
     /**
@@ -664,99 +678,13 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
         ctx.write(HttpContent.builder(response).build());
     }
 
+    private GrizzlyWebSocketAuthenticator getAuthenticator() {
+        GrizzlyWebSocketAuthenticator authenticator = AUTHENTICATOR_REFERENCE.get();
+        return null == authenticator ? defaultAuthenticator : authenticator;
+    }
+
     private Session checkSession(String sessionId, HttpRequestPacket requestPacket, Parameters parameters) {
-        // Acquire needed service
-        SessiondService sessiond = SessiondService.SERVICE_REFERENCE.get();
-        if (null == sessiond) {
-            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(GrizzlyWebSocketSessionToucher.class);
-            logger.warn("", ServiceExceptionCode.absentService(SessiondServiceExtended.class));
-            throw new HandshakeException("Missing parameter Sessiond service.");
-        }
-
-        // Look-up appropriate session
-        Session session = sessiond instanceof SessiondServiceExtended ? ((SessiondServiceExtended) sessiond).getSession(sessionId, false) : sessiond.getSession(sessionId);
-        if (null == session) {
-            throw new HandshakeException("No such session: " + sessionId);
-        }
-        if (!sessionId.equals(session.getSessionID())) {
-            LOGGER.info("Request's session identifier \"{}\" differs from the one indicated by SessionD service \"{}\".", sessionId, session.getSessionID());
-            throw new HandshakeException("Wrong session: " + sessionId);
-        }
-
-        // Check context
-        Context context = getContextFrom(session);
-        if (!context.isEnabled()) {
-            sessiond.removeSession(sessionId);
-            LOGGER.info("The context {} associated with session is locked.", Integer.toString(session.getContextId()));
-            throw new HandshakeException("Context locked: " + session.getContextId());
-        }
-
-        // Check user
-        User user = getUserFrom(session, context, sessiond);
-        if (!user.isMailEnabled()) {
-            LOGGER.info("User {} in context {} is not activated.", Integer.toString(user.getId()), Integer.toString(session.getContextId()));
-            throw new HandshakeException("Session expired: " + sessionId);
-        }
-
-        // Check cookies/secret
-        try {
-            Cookies cookies = new Cookies();
-            cookies.setHeaders(requestPacket.getHeaders());
-            if (cookies.get() == null) {
-                // No cookies available. Hence, no need to check secret.
-                throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
-            }
-
-            // Check secret...
-            HttpServletRequest servletRequest = new GrizzlyWebSocketHttpServletRequest(requestPacket, cookies, parameters);
-            SessionUtility.checkSecret(hashSource, servletRequest, session);
-        } catch (OXException e) {
-            throw new HandshakeException(e.getPlainLogMessage());
-        }
-
-        // Check IP address
-        try {
-            SessionUtility.checkIP(session, requestPacket.getRemoteAddress());
-        } catch (OXException e) {
-            throw new HandshakeException(e.getPlainLogMessage());
-        }
-
-        // All fine...
-        return session;
-    }
-
-    private Context getContextFrom(Session session) {
-        try {
-            return services.getService(ContextService.class).getContext(session.getContextId());
-        } catch (OXException e) {
-            throw new HandshakeException("No such context: " + session.getContextId());
-        }
-    }
-
-    private User getUserFrom(Session session, Context context, SessiondService sessiondService) {
-        String sessionId = session.getSessionID();
-        try {
-            return services.getService(UserService.class).getUser(session.getUserId(), context);
-        } catch (OXException e) {
-            if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
-                // An outdated session; context absent
-                sessiondService.removeSession(sessionId);
-                LOGGER.info("The context associated with session \"{}\" cannot be found. Obviously an outdated session which is invalidated now.", sessionId);
-                throw new HandshakeException("Session expired: " + sessionId);
-            }
-            if (UserExceptionCode.USER_NOT_FOUND.getPrefix().equals(e.getPrefix())) {
-                int code = e.getCode();
-                if (UserExceptionCode.USER_NOT_FOUND.getNumber() == code || LdapExceptionCode.USER_NOT_FOUND.getNumber() == code) {
-                    // An outdated session; user absent
-                    sessiondService.removeSession(sessionId);
-                    LOGGER.info("The user associated with session \"{}\" cannot be found. Obviously an outdated session which is invalidated now.", sessionId);
-                    throw new HandshakeException("Session expired: " + sessionId);
-                }
-            }
-            throw new WebSocketException(e);
-        } catch (UndeclaredThrowableException e) {
-            throw new WebSocketException(e);
-        }
+        return getAuthenticator().checkSession(sessionId, requestPacket, parameters);
     }
 
     private static final int MAX_SIZE = 8;

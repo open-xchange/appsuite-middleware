@@ -60,3 +60,4 @@ Import-Package: com.google.common.annotations,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.websockets.grizzly.osgi.GrizzlyWebSocketActivator
+Export-Package: com.openexchange.websockets.grizzly.auth

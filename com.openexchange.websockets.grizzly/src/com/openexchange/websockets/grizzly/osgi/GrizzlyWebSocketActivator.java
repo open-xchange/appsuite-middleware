@@ -74,6 +74,7 @@ import com.openexchange.websockets.WebSocketService;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketService;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketSessionToucher;
+import com.openexchange.websockets.grizzly.auth.GrizzlyWebSocketAuthenticator;
 import com.openexchange.websockets.grizzly.remote.HzRemoteWebSocketDistributor;
 import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributorFactory;
 
@@ -130,6 +131,7 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
         }
 
         track(HazelcastInstance.class, new HzTracker(remoteDistributor, this, context));
+        track(GrizzlyWebSocketAuthenticator.class, new GrizzlyWebSocketAuthenticatorTracker(context));
         openTrackers();
 
         registerService(ForcedReloadable.class, new ForcedReloadable() {
