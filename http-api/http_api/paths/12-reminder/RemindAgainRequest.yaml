@@ -3,7 +3,7 @@
     operationId: remindAgain
     tags:
       - Reminder
-    summary: Updates the reminder alarm (**available since v6.18.1**).
+    summary: Updates the reminder alarm.
     consumes:
       - application/json
     parameters:

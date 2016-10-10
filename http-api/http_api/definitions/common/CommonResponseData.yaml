@@ -3,7 +3,7 @@ error:
   description: The translated error message. Present in case of errors.
 error_params:
   type: array
-  description: "As of 7.4.2: Empty JSON array. Before that: Parameters for the error message that would need to be replaced in the error string (in a printf-format style)."
+  description: "Empty JSON array."
   items:
     type: string
 error_id:

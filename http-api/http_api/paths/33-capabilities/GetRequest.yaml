@@ -3,7 +3,7 @@
     operationId: getCapability
     tags:
       - Capabilities
-    summary: Gets a capability (**available since v7.4.2**).
+    summary: Gets a capability.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query

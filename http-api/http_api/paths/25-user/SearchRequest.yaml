@@ -3,7 +3,7 @@
     operationId: searchUsers
     tags:
       - User
-    summary: Search for users (**available since v6.14**).
+    summary: Search for users.
     consumes:
       - application/json
     parameters:

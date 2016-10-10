@@ -3,7 +3,7 @@
     operationId: getGroupUpdates
     tags:
       - Groups
-    summary: Gets the new, modified and deleted groups (**available since v6.18.1, introduced 2010-09-13**).
+    summary: Gets the new, modified and deleted groups.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query

@@ -41,7 +41,7 @@
       - in: query
         name: showPrivate
         type: boolean
-        description: 'Only works in shared folders: When enabled, shows private appointments of the folder owner. Such appointments are anonymized by stripping away all information except start date, end date and recurrence information (since 6.18)'
+        description: 'Only works in shared folders: When enabled, shows private appointments of the folder owner. Such appointments are anonymized by stripping away all information except start date, end date and recurrence information.'
         required: false
     responses:
       200:

@@ -3,7 +3,7 @@
     operationId: getSharedFolders
     tags:
       - Folders
-    summary: Gets shared folders of a certain module (**available since v7.8.0, preliminary**).
+    summary: Gets shared folders of a certain module.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/gblQueryParamFolderColumns"

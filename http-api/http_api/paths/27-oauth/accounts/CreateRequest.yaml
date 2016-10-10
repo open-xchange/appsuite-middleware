@@ -3,7 +3,7 @@
     operationId: createOAuthAccount
     tags:
       - OAuth
-    summary: Creates an OAuth account (**available since v6.20**).
+    summary: Creates an OAuth account.
     description: |
       This action is typically called by provided call-back URL and is only intended for manual invocation if
       "outOfBand" interaction is returned by preceeding [/oauth/account?action=init](#operation--oauth-accounts-action-init-get) step.

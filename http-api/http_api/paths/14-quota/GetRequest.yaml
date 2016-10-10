@@ -3,7 +3,7 @@
     operationId: getQuotaInformation
     tags:
       - Quota
-    summary: Gets quota information (**available since v7.6.1, preliminary**).
+    summary: Gets quota information.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query

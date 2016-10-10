@@ -3,7 +3,7 @@
     operationId: markAllMailsAsRead
     tags:
       - Mail
-    summary: Marks all mails of a folder as seen (**available since v7.6.0**).
+    summary: Marks all mails of a folder as seen.
     consumes:
       - application/json
     parameters:

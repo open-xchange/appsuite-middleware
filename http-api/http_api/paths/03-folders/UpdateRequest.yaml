@@ -26,7 +26,7 @@
         type: boolean
         description: |
           `true` to cascade permissions to all sub-folders. The user must have administrative permissions to all
-          sub-folders subject to change. If one permission change fails, the entire operation fails. (since 7.8.0)
+          sub-folders subject to change. If one permission change fails, the entire operation fails.
         required: false
         default: false
       - in: body

@@ -66,7 +66,7 @@
       - in: query
         name: offset
         type: integer
-        description: Optionally sets the start offset in bytes where to append the data to the document, must be equal to the actual document's length (available since v7.8.1). Only available if the underlying File storage account supports the "RANDOM_FILE_ACCESS" capability.
+        description: Optionally sets the start offset in bytes where to append the data to the document, must be equal to the actual document's length. Only available if the underlying File storage account supports the "RANDOM_FILE_ACCESS" capability.
         required: false
       - in: formData
         name: json

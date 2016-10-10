@@ -3,7 +3,7 @@
     operationId: getAllOAuthGrants
     tags:
       - OAuth
-    summary: Gets all OAuth grants (**available since v7.8.0**).
+    summary: Gets all OAuth grants.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
     responses:

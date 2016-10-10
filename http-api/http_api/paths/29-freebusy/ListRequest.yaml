@@ -3,7 +3,7 @@
     operationId: getFreeBusyList
     tags:
       - Freebusy
-    summary: Gets a list of free/busy information (**available since v6.22.1**).
+    summary: Gets a list of free/busy information.
     consumes:
       - application/json
     parameters:

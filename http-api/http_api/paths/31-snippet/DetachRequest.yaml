@@ -3,7 +3,7 @@
     operationId: removeSnippetAttachments
     tags:
       - Snippet
-    summary: Detaches one or more files from an existing snippet (**available since v7.0.0/v6.22.0**).
+    summary: Detaches one or more files from an existing snippet.
     consumes:
       - application/json
     parameters:

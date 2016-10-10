@@ -3,7 +3,7 @@
     operationId: acquireIdentityToken
     tags:
       - Jump
-    summary: Acquires an identity token (**available since v7.6.0**).
+    summary: Acquires an identity token.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query

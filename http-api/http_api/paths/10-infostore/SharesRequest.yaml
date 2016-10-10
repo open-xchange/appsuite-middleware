@@ -3,7 +3,7 @@
     operationId: getSharedInfoItems
     tags:
       - Infostore
-    summary: Gets shared infoitems (**available since v7.8.0, preliminary**).
+    summary: Gets shared infoitems.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/gblQueryParamInfostoreColumns"

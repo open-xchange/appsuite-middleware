@@ -3,7 +3,7 @@
     operationId: revokeOAuthGrant
     tags:
       - OAuth
-    summary: Revokes access for an OAuth client (**available since v7.8.0**).
+    summary: Revokes access for an OAuth client.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query

@@ -3,7 +3,7 @@
     operationId: getContactListByUsers
     tags:
       - Contacts
-    summary: Gets a list of users (**available since SP4**).
+    summary: Gets a list of users.
     consumes:
       - application/json
     parameters:

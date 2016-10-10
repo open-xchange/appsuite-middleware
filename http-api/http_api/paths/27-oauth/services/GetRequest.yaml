@@ -3,7 +3,7 @@
     operationId: getOAuthService
     tags:
       - OAuth
-    summary: Gets all OAuth service's meta data (**available since v6.20**).
+    summary: Gets all OAuth service's meta data.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query

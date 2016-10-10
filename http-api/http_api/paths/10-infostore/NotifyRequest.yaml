@@ -3,7 +3,7 @@
     operationId: notifyAboutSharedInfoItem
     tags:
       - Infostore
-    summary: Notifies users or groups about a shared infoitem (**available since v7.8.0, preliminary**).
+    summary: Notifies users or groups about a shared infoitem.
     consumes:
       - application/json
     parameters:

@@ -23,7 +23,7 @@
       - in: query
         name: occurrence
         type: integer
-        description: 'The numeric identifier of the occurrence to which the confirmation applies (in case `id` denotes a series appointment). Available since v7.6.0.'
+        description: 'The numeric identifier of the occurrence to which the confirmation applies (in case `id` denotes a series appointment).'
         required: false
       - in: body
         name: body

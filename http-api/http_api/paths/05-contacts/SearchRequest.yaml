@@ -22,7 +22,7 @@
       - in: query
         name: collation
         type: string
-        description: Allows you to specify a collation to sort the contacts by. As of 6.20, only supports "gbk" and "gb2312", not needed for other languages. Parameter sort should be set for this to work. (preliminary, since 6.20)
+        description: Allows you to specify a collation to sort the contacts by. Only supports "gbk" and "gb2312", not needed for other languages. Parameter sort should be set for this to work.
         required: false
         enum:
           - gbk

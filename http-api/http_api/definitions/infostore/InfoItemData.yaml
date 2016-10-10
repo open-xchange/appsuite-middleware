@@ -3,12 +3,12 @@ properties:
   $ref: ../common/CommonObjectData.yaml
   object_permissions:
     type: array
-    description: An array of object permissions (preliminary, available since v7.8.0).
+    description: An array of object permissions.
     items:
       $ref: "#/definitions/InfoItemPermission"
   shareable:
     type: boolean
-    description: (read-only) Indicates if the item can be shared (preliminary, available since v7.8.0).
+    description: (read-only) Indicates if the item can be shared.
   title:
     type: string
     description: The title.
@@ -49,12 +49,12 @@ properties:
     description: 'The number of all versions of the item. Note: This is not writeable.'
   com.openexchange.share.extendedObjectPermissions:
     type: array
-    description: An array of extended object permissions (read-only). (available since 7.8.0)
+    description: An array of extended object permissions (read-only).
     items:
       $ref: "#/definitions/InfoItemExtendedPermission"
   com.openexchange.realtime.resourceID:
     type: string
-    description: The resource identifier for the infoitem for usage within the realtime component (read-only). (available since 7.8.0)
+    description: The resource identifier for the infoitem for usage within the realtime component (read-only).
   com.openexchange.file.storage.mail.mailMetadata:
     type: object
-    description: Contains additional metadata for items in the "maildrive" file storage (read-only). (available since 7.8.2)
+    description: Contains additional metadata for items in the "maildrive" file storage (read-only).

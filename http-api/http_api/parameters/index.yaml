@@ -182,7 +182,7 @@ gblQueryParamAllowedModules:
   name: allowed_modules
   in: query
   type: string
-  description: (Preliminary) An array of modules (either numbers or strings; e.g. "tasks,calendar,contacts,mail") supported by requesting client. If missing, all available modules are considered.
+  description: An array of modules (either numbers or strings; e.g. "tasks,calendar,contacts,mail") supported by requesting client. If missing, all available modules are considered.
   required: false
 gblQueryParamTaskFolder:
   name: folder

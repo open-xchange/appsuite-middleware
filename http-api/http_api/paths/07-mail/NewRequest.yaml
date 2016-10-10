@@ -20,7 +20,7 @@
       - in: query
         name: lineWrapAfter
         type: integer
-        description: An integer value specifying the line-wrap setting (only effective for plain-text content); if absent the setting is taken from user's mail settings. Available with v7.8.1.
+        description: An integer value specifying the line-wrap setting (only effective for plain-text content); if absent the setting is taken from user's mail settings.
         required: false
       - in: formData
         name: json_0
@@ -57,7 +57,7 @@
     operationId: sendOrSaveMail
     tags:
       - Mail
-    summary: 'Sends or saves a mail as MIME data block ([RFC822](https://tools.ietf.org/html/rfc822)) (**available since SP5**).'
+    summary: 'Sends or saves a mail as MIME data block ([RFC822](https://tools.ietf.org/html/rfc822)).'
     consumes:
       - text/plain
     parameters:

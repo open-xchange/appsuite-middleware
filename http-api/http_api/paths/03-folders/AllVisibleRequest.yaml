@@ -3,7 +3,7 @@
     operationId: getVisibleFolders
     tags:
       - Folders
-    summary: Gets all visible folders of a certain module (**available since v6.18.2**).
+    summary: Gets all visible folders of a certain module.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/gblQueryParamFolderTree"

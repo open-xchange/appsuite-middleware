@@ -20,7 +20,7 @@ size:
   description: The size in bytes (for size-test).
 datepart:
   type: string
-  description: Type of the comparison, which can be "date", "weekday" or "time" (available since v7.6.1) (for currentdate-test).
+  description: Type of the comparison, which can be "date", "weekday" or "time" (for currentdate-test).
 datevalue:
   type: array
   description: Contains the corresponding value to the datepart. For "date" and "time" this will be an array of "Date" (unix timestamp). For "weekday", it will be an array of integers ranging from 0 (sunday) to 6 (saturday) reflecting the equivalent weekday (for currentdate-test).

@@ -3,7 +3,7 @@
     operationId: getJSlobList
     tags:
       - JSlob
-    summary: Gets a list of JSlobs (**available since v6.22**).
+    summary: Gets a list of JSlobs.
     consumes:
       - application/json
     parameters:

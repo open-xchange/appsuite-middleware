@@ -3,7 +3,7 @@
     operationId: createAccount
     tags:
       - Mailaccount
-    summary: Creates a new mail account (**available since v6.12**).
+    summary: Creates a new mail account.
     consumes:
       - application/json
     parameters:

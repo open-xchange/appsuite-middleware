@@ -29,10 +29,10 @@ properties:
     description: Whether to establish a secure connection to mail server (SSL, TLS).
   mail_starttls:
     type: boolean
-    description: Whether to establish a secure connection to mail server via STARTTLS (available since v7.8.2).
+    description: Whether to establish a secure connection to mail server via STARTTLS.
   mail_oauth:
     type: integer
-    description: Provides the identifier of the associated OAuth account (if any) or `-1` (available since v7.8.3).
+    description: Provides the identifier of the associated OAuth account (if any) or `-1`.
   transport_url:
     type: string
     description: The transport server URL, e.g. "smtp://smtp.somewhere.com:25". **URL is preferred over single fields** (like `transport_server`, `transport_port`, etc.).
@@ -56,10 +56,10 @@ properties:
     description: The transport password. **Please see `transport_auth` for the handling of this field.**
   transport_auth:
     type: integer
-    description: **Available since v7.6.1** Specifies the source for mail transport (SMTP) credentials. Possible values are `mail`, `custom`, and `none`. `mail` signals to use the same credentials as given in associated mail store (IMAP, POP3). `custom` signals that individual credentials are supposed to be used (fields `transport_login`, `transport_password` and/or `transport_oauth` are considered). `none` means the mail transport does not support any authentication mechanism (rare case!)
+    description: Specifies the source for mail transport (SMTP) credentials. Possible values are `mail`, `custom`, and `none`. `mail` signals to use the same credentials as given in associated mail store (IMAP, POP3). `custom` signals that individual credentials are supposed to be used (fields `transport_login`, `transport_password` and/or `transport_oauth` are considered). `none` means the mail transport does not support any authentication mechanism (rare case!)
   transport_starttls:
     type: boolean
-    description: Whether to establish a secure connection to transport server via STARTTLS (available since v7.8.2).
+    description: Whether to establish a secure connection to transport server via STARTTLS.
   transport_oauth:
     type: integer
     description: The identifier of the OAuth account to use for mail transport. **Please see `transport_auth` for the handling of this field.**

@@ -19,7 +19,7 @@
       - in: query
         name: export_dlists
         type: string
-        description: 'Toggles whether distribution lists shall be exported too (default is `false`). (since 7.4.1)'
+        description: 'Toggles whether distribution lists shall be exported too (default is `false`).'
         required: false
     responses:
       200:

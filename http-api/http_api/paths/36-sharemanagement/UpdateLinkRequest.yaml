@@ -3,7 +3,7 @@
     operationId: updateShareLink
     tags:
       - Share/Management
-    summary: Updates a share link (**available since v7.8.0**).
+    summary: Updates a share link.
     consumes:
       - application/json
     parameters:

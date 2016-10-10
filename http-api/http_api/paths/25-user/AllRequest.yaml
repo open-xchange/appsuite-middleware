@@ -3,7 +3,7 @@
     operationId: getAllUsers
     tags:
       - User
-    summary: Gets all users (**available since v6.14**).
+    summary: Gets all users.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/gblQueryParamUserColumns"

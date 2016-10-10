@@ -3,7 +3,7 @@
     operationId: getAllJSlobs
     tags:
       - JSlob
-    summary: Gets all JSlobs (**available since v6.22**).
+    summary: Gets all JSlobs.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query

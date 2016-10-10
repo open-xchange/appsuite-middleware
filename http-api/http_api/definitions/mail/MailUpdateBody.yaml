@@ -18,8 +18,8 @@ properties:
     type: integer
     # use long otherwise the codegen module generates two equal methods (setFlags for flags field and setFlags for set_flags field)
     format: int64
-    description: 'A set of flags to add. Note: Flags for "recent" (8) and "user" (64) are ignored (available since SP5 v6.10).'
+    description: 'A set of flags to add. Note: Flags for "recent" (8) and "user" (64) are ignored.'
   clear_flags:
     type: integer
-    description: 'A set of flags to remove. Note: Flags for "recent" (8) and "user" (64) are ignored (available since SP5 v6.10).'
+    description: 'A set of flags to remove. Note: Flags for "recent" (8) and "user" (64) are ignored.'
     

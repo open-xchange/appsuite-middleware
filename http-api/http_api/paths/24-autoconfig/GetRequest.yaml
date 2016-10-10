@@ -3,7 +3,7 @@
     operationId: getAutoConfig
     tags:
       - Autoconfig
-    summary: Gets the auto configuration for a mail account (**available since v6.22**).
+    summary: Gets the auto configuration for a mail account.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: formData
@@ -19,7 +19,7 @@
       - in: formData
         name: force_secure
         type: boolean
-        description: Enforces a secure connection for configured mail account, default is `true` (available since v7.8.2).
+        description: Enforces a secure connection for configured mail account, default is `true`.
         required: false
       - in: formData
         name: oauth

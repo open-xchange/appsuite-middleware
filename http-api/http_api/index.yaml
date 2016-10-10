@@ -20,7 +20,7 @@ tags:
       of the different login methods, see the article titled [Login variations](http://oxpedia.org/wiki/index.php?title=Login_variations).
       
       Because of security reasons each login variation will reject requests containing the parameter
-      "password" within the URL query (starting with 7.8.0). 
+      "password" within the URL query. 
   - name: Config
     description: |
       The config module is used to retrieve and set user-specific configuration. The configuration is
@@ -95,34 +95,34 @@ tags:
   - name: Conversion
     description: The conversion module is a generic module to request data from a data source and to process obtained/submitted data with a data handler. Thus data is converted from a data source by a data handler.
   - name: Mailaccount
-    description: The mailaccount module is used to manage multiple mail accounts held by a user (available since v6.12).
+    description: The mailaccount module is used to manage multiple mail accounts held by a user.
   - name: Autoconfig
-    description: The module autoconfig can be used to request the best available settings for an appropriate mail server (available since v6.22).
+    description: The module autoconfig can be used to request the best available settings for an appropriate mail server.
   - name: User
-    description: The user module is used to access user information (available since v6.14).
+    description: The user module is used to access user information.
   - name: User/Me
-    description: The module user/me is used to access formal information about current user (available since v7.6.2).
+    description: The module user/me is used to access formal information about current user.
   - name: OAuth
     description: |
-      The Open-Xchange server can act as an OAuth client (starting with v6.20) or be an OAuth provider itself (starting with v7.8.0). The OAuth module supports both aspects:
+      The Open-Xchange server can act as an OAuth client or be an OAuth provider itself. The OAuth module supports both aspects:
        * Manage multiple OAuth accounts for certain online services for a user. The OAuth mechanism allows the Open-Xchange application to act as behalf of this user using previously obtained access tokens granted by user. The according interface is divided into two parts: Account access and service's meta data access.
        * Manage granted accesses of external services that can access a users data on his behalf, called "grants".
   - name: JSlob
-    description: The JSlob module is used to store and retrieve arbitrary JSON-structured configuration for a single user (available since v6.22).
+    description: The JSlob module is used to store and retrieve arbitrary JSON-structured configuration for a single user.
   - name: Freebusy
-    description: Provides access to free/busy information (available since v6.22.1).
+    description: Provides access to free/busy information.
   - name: Messaging
     description: |
       The messaging module is divided into services which represent a messaging backend (they add a new folder module "messaging"),
       into accounts which represent the concrete configuration of accounts for a given messaging service, and into messages which
       represent single messages consisting of some metadata, headers and a content.
   - name: Snippet
-    description: Available since v7.0.0/v6.22.0.
+    description: 
   - name: Halo
   - name: Capabilities
-    description: Provides access to capabilities, i.e. modules or features that are available on the backend and the user has access to (available since v7.4.2).
+    description: Provides access to capabilities, i.e. modules or features that are available on the backend and the user has access to.
   - name: Jump
-    description: The jump module is used to pass an acquired identity token for an authenticated user from one system to another for a single sign-on (available since v7.6.0).
+    description: The jump module is used to pass an acquired identity token for an authenticated user from one system to another for a single sign-on.
   - name: Find
     description: |
       The find module consists of calls for performing searches within the modules mail, contacts, tasks and drive.
@@ -135,15 +135,11 @@ tags:
       
       Some of the objects returned by the server contain former user input. A client must never interpret strings as HTML
       but always as plain text to be not vulnerable for CSS attacks!
-      
-      Preliminary, available since v7.6.1.
   - name: Share/Management
     description: |
       The share/management module can create and manage share links via different actions. Dedicated actions to list all shares of a
       user can be found in the corresponding modules, like `/folders?action=shares` of module "folders" or `/infostore?action=shares`
       of module "infostore".
-      
-      Preliminary, available since v7.8.0.
   - name: Passwordchange
     description: Via the passwordchange module the users can change their password.
   - name: Filestorage

@@ -16,7 +16,7 @@
       - in: query
         name: view
         type: string
-        description: "Content 'text' forces the server to deliver a text-only version of the requested mail's body, even if content is HTML. 'html' to allow a possible HTML mail body being transferred as it is (but white-list filter applied). NOTE: if set, the corresponding gui config setting will be ignored. (available since SP6)"
+        description: "Content 'text' forces the server to deliver a text-only version of the requested mail's body, even if content is HTML. 'html' to allow a possible HTML mail body being transferred as it is (but white-list filter applied). NOTE: if set, the corresponding gui config setting will be ignored."
         required: false
         enum:
           - text
@@ -24,13 +24,13 @@
       - in: query
         name: setFrom
         type: boolean
-        description: A flag (`true`/`false`) that signals if "From" header shall be pre-selected according to a suitable recipient address that matches one of user's email address aliases. (available since v7.6.0)
+        description: A flag (`true`/`false`) that signals if "From" header shall be pre-selected according to a suitable recipient address that matches one of user's email address aliases.
         required: false
       - in: query
         name: max_size
         type: integer
         minimum: 10000
-        description: A positive integer number (greater than 10000) to specify how many characters of the message content will be returned. If the number is smaller than 10000 the value will be ignored and 10000 used. (available since v7.6.1)
+        description: A positive integer number (greater than 10000) to specify how many characters of the message content will be returned. If the number is smaller than 10000 the value will be ignored and 10000 used.
         required: false
     responses:
       200:

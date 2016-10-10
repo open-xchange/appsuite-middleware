@@ -3,7 +3,7 @@
     operationId: deleteAccount
     tags:
       - Mailaccount
-    summary: Deletes a mail account (**available since v6.12**).
+    summary: Deletes a mail account.
     consumes:
       - application/json
     parameters:

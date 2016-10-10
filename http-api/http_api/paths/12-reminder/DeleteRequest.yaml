@@ -3,8 +3,7 @@
     operationId: deleteReminders
     tags:
       - Reminder
-    summary: Deletes reminders (**available since v6.22**).
-    description: Before version 6.22 the request body contained only a JSON object with the field `id`.
+    summary: Deletes reminders.
     consumes:
       - application/json
     parameters:

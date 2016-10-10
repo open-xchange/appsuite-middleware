@@ -3,7 +3,7 @@
     operationId: initOAuthAccount
     tags:
       - OAuth
-    summary: Initializes the creation of an OAuth account (**available since v6.20**).
+    summary: Initializes the creation of an OAuth account.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query

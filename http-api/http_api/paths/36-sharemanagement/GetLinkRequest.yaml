@@ -3,7 +3,7 @@
     operationId: getShareLink
     tags:
       - Share/Management
-    summary: Creates or gets a share link (**available since v7.8.0**).
+    summary: Creates or gets a share link.
     consumes:
       - application/json
     parameters:

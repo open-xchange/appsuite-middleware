@@ -12,7 +12,7 @@
       - in: query
         name: headers
         type: string
-        description: (preliminary) A comma-separated list of header names. Each name requests denoted header from each mail.
+        description: A comma-separated list of header names. Each name requests denoted header from each mail.
         required: false
       - in: body
         name: body

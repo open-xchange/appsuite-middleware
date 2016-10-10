@@ -3,7 +3,7 @@
     operationId: getSnippet
     tags:
       - Snippet
-    summary: Gets a snippet (**available since v7.0.0/v6.22.0**).
+    summary: Gets a snippet.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query

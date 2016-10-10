@@ -3,7 +3,7 @@
     operationId: statusAccount
     tags:
       - mailaccount
-    summary: Gets the status for a mail account (**available since v7.8.3**).
+    summary: Gets the status for a mail account.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query

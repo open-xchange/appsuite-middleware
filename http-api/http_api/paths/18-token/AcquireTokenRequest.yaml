@@ -3,7 +3,7 @@
     operationId: acquireToken
     tags:
       - Token
-    summary: Gets a login token (**available since v7.4.0**).
+    summary: Gets a login token.
     description: |
       With a valid session it is possible to acquire a secret. Using this secret another system is able to
       generate a valid session (see [login?action=redeemToken](#operation--login-action-redeemToken-post)).

@@ -3,7 +3,7 @@
     operationId: updateOAuthAccount
     tags:
       - OAuth
-    summary: Updates an OAuth account (**available since v6.20**).
+    summary: Updates an OAuth account.
     consumes:
       - application/json
     parameters:

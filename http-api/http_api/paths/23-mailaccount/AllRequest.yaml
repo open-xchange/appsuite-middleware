@@ -3,7 +3,7 @@
     operationId: getAllAccounts
     tags:
       - Mailaccount
-    summary: Gets all mail accounts (**available since v6.12**).
+    summary: Gets all mail accounts.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - $ref: "#/parameters/gblQueryParamAccountColumns"

@@ -3,7 +3,7 @@
     operationId: deleteOAuthAccount
     tags:
       - OAuth
-    summary: Deletes an OAuth account (**available since v6.20**).
+    summary: Deletes an OAuth account.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query

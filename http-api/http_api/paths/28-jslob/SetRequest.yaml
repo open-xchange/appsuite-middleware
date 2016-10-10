@@ -3,7 +3,7 @@
     operationId: setJSlob
     tags:
       - JSlob
-    summary: Stores or deletes a JSlob (**available since v6.22**).
+    summary: Stores or deletes a JSlob.
     description: To delete a JSON configuration just send an empty request body for the specified `id`.
     consumes:
       - application/json

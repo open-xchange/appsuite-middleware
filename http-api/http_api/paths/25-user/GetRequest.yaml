@@ -3,13 +3,13 @@
     operationId: getUser
     tags:
       - User
-    summary: Gets a user (**available since v6.14**).
+    summary: Gets a user.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
         name: id
         type: string
-        description: Object ID of the requested user. Since v6.18.1, this parameter is optional and the default is the currently logged in user.
+        description: Object ID of the requested user. This parameter is optional and the default is the currently logged in user.
         required: false
     responses:
       200:

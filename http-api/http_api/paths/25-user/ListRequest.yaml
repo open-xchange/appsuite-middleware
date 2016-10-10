@@ -3,7 +3,7 @@
     operationId: getUserList
     tags:
       - User
-    summary: Gets a list of users (**available since v6.14**).
+    summary: Gets a list of users.
     consumes:
       - application/json
     parameters:
@@ -11,7 +11,7 @@
       - $ref: "#/parameters/gblQueryParamUserColumns"
       - in: body
         name: body
-        description: A JSON array of identifiers of the requested users. Since v6.18.1, a `null` value in the array is interpreted as the currently logged in user.
+        description: A JSON array of identifiers of the requested users. A `null` value in the array is interpreted as the currently logged in user.
         required: true
         schema:
           type: array

@@ -20,7 +20,7 @@ properties:
   last_modified_utc:
     type: integer
     format: int64
-    description: Timestamp of the last modification. Note that the type is Timestamp, not Time (added 2008-10-17, with SP5, temporary workaround).
+    description: Timestamp of the last modification. Note that the type is Timestamp, not Time.
   folder_id:
     type: string
     description: Object ID of the parent folder.
@@ -97,16 +97,16 @@ properties:
       type: string
   account_id:
     type: string
-    description: Will be null if the folder does not belong to any account (i.e. if its module doesn't support multiple accounts), is a virtual folder or an account-agnostic system folder. Since 7.8.0.
+    description: Will be null if the folder does not belong to any account (i.e. if its module doesn't support multiple accounts), is a virtual folder or an account-agnostic system folder.
   com.openexchange.publish.publicationFlag:
     type: boolean
-    description: Indicates whether this folder is published. Read Only, provided by the com.openexchange.publish plugin, since 6.14.
+    description: Indicates whether this folder is published. Read Only, provided by the com.openexchange.publish plugin.
   com.openexchange.subscribe.subscriptionFlag:
     type: boolean
-    description: Indicates whether this folder has subscriptions storing their content in this folder. Read Only, provided by the com.openexchange.subscribe plugin, since 6.14.
+    description: Indicates whether this folder has subscriptions storing their content in this folder. Read Only, provided by the com.openexchange.subscribe plugin.
   com.openexchange.folderstorage.displayName:
     type: string
-    description: Provides the display of the folder's owner. Read Only, Since 6.20.
+    description: Provides the read only display name of the folder's owner.
   com.openexchange.share.extendedPermissions:
     type: array
     items:

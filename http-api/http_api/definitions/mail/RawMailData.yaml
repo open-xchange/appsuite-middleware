@@ -99,7 +99,7 @@ account_name:
   description: Message's account name.
 account_id:
   type: integer
-  description: Message's account identifier. Since v6.20.2.
+  description: Message's account identifier.
 user:
   type: array
   description: An array with user-defined flags as strings.
@@ -115,7 +115,7 @@ attachments:
     $ref: "#/definitions/MailAttachment"
 truncated:
   type: boolean
-  description: '`true` / `false` if the mail content was trimmed. Since v7.6.1'
+  description: '`true` / `false` if the mail content was trimmed.'
 source:
   type: string
   description: '[RFC822](https://tools.ietf.org/html/rfc822) source of the mail. Only present for "?action=get&attach_src=true".'

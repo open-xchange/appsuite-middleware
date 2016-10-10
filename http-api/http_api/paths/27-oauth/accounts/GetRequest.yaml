@@ -3,7 +3,7 @@
     operationId: getOAuthAccount
     tags:
       - OAuth
-    summary: Gets an OAuth account (**available since v6.20**).
+    summary: Gets an OAuth account.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query

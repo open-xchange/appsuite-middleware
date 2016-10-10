@@ -3,7 +3,7 @@
     operationId: deleteShareLink
     tags:
       - Share/Management
-    summary: Deletes a share link (**available since v7.8.0**).
+    summary: Deletes a share link.
     consumes:
       - application/json
     parameters:

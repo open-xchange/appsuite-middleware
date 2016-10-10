@@ -3,7 +3,7 @@
     operationId: sendShareLink
     tags:
       - Share/Management
-    summary: Sends a share link (**available since v7.8.0**).
+    summary: Sends a share link.
     consumes:
       - application/json
     parameters:

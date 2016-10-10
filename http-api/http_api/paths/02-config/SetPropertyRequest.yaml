@@ -3,7 +3,7 @@
     operationId: setConfigProperty
     tags:
       - Config
-    summary: Sets a property of the configuration (**available since v7.6.2**).
+    summary: Sets a property of the configuration.
     consumes:
       - application/json
     parameters:

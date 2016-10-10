@@ -3,7 +3,7 @@
     operationId: redeemToken
     tags:
       - Login
-    summary: Redeem Token Login (**available since v7.4.0**).
+    summary: Redeem Token Login.
     description: |
       With a valid session it is possible to acquire a secret (see `token?action=acquireToken`). Using this secret another system is able
       to generate a valid session. This session may also contain the users password (configurable).

@@ -3,7 +3,7 @@
     operationId: getCurrentUser
     tags:
       - User/Me
-    summary: Gets information about current user (**available since v7.6.2**).
+    summary: Gets information about current user.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
     responses:

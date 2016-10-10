@@ -3,7 +3,7 @@
     operationId: doTokenLogin
     tags:
       - Login
-    summary: Login for a very short living session (**available since v7.0.1**).
+    summary: Login for a very short living session.
     description: |
       This request allows every possible client to create a very short living session. This session can then be transferred to any other client preferably a browser entering then the normal web interface. Then the sessions life time will be extended equally to every other session.
       
@@ -78,7 +78,7 @@
       - in: formData
         name: jsonResponse
         type: boolean
-        description: (since 7.8.0) ’True’ or ’false’ (default). Defines the returned data type as JSON. Default `false` will return a redirect.
+        description: ’True’ or ’false’ (default). Defines the returned data type as JSON. Default `false` will return a redirect.
         required: false
         default: false
     responses:

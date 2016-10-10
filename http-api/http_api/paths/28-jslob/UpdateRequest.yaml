@@ -3,7 +3,7 @@
     operationId: updateJSlob
     tags:
       - JSlob
-    summary: Updates a JSlob (**available since v6.22**).
+    summary: Updates a JSlob.
     consumes:
       - application/json
     parameters:

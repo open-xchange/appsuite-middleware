@@ -3,7 +3,7 @@
     operationId: updateUser
     tags:
       - User
-    summary: Updates a user (**available since v6.14**).
+    summary: Updates a user.
     consumes:
       - application/json
     parameters:

@@ -3,7 +3,7 @@
     operationId: importMail
     tags:
       - Mail
-    summary: Import of mails as MIME data block ([RFC822](https://tools.ietf.org/html/rfc822)) (**available since v6.18**).
+    summary: Import of mails as MIME data block ([RFC822](https://tools.ietf.org/html/rfc822)).
     description: |
       This request can be used to store a single or a lot of mails in the OX mail storage backend. This
       action should be used instead of [/mail?action=new](#operation--mail-action-new-post) because it is faster and tolerant to 8-bit encoded emails.

@@ -3,7 +3,7 @@
     operationId: validateAccount
     tags:
       - Mailaccount
-    summary: Validates a mail account which shall be created (**available since v6.12**).
+    summary: Validates a mail account which shall be created.
     consumes:
       - application/json
     parameters:

@@ -3,7 +3,7 @@
     operationId: updateAccount
     tags:
       - Mailaccount
-    summary: Updates a mail account (**available since v6.12**).
+    summary: Updates a mail account.
     consumes:
       - application/json
     parameters:
