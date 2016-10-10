@@ -121,8 +121,7 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
 
                 for (SubscriptionSource subscriptionSource : sources) {
                     String autorunName = subscriptionSource.getId() + ".autorunInterval";
-                    //Long interval = view.opt(autorunName, Long.class, 24 * 60 * 60 * 1000l);
-                    Long interval = view.opt(autorunName, Long.class, 10 * 1000l);
+                    Long interval = view.opt(autorunName, Long.class, 24 * 60 * 60 * 1000l);
                     if (interval < 0) {
                         continue;
                     }
