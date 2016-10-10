@@ -65,8 +65,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 
@@ -78,6 +80,8 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 @OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
 public class SearchAction extends ContactAction {
+
+    private static final String EXCLUDE_FOLDERS_PARAMETER = "exclude_folders";
 
     /**
      * Initializes a new {@link SearchAction}.
@@ -91,6 +95,17 @@ public class SearchAction extends ContactAction {
     protected AJAXRequestResult perform(ContactRequest request) throws OXException {
     	JSONObject jsonObject = request.getJSONData();
         ContactSearchObject contactSearch = createContactSearchObject(jsonObject);
+        String excludeFoldersStr = request.getRequest().getParameter(EXCLUDE_FOLDERS_PARAMETER);
+        if (!Strings.isEmpty(excludeFoldersStr)) {
+            String[] excludeFolderArray = Strings.splitByColon(excludeFoldersStr);
+            for (String folder : excludeFolderArray) {
+                try {
+                    contactSearch.addExcludeFolder(Integer.valueOf(folder));
+                } catch (NumberFormatException e) {
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(EXCLUDE_FOLDERS_PARAMETER, excludeFoldersStr);
+                }
+            }
+        }
         boolean excludeAdmin = request.isExcludeAdmin();
         int excludedAdminID = excludeAdmin ? request.getSession().getContext().getMailadmin() : -1;
         ContactField[] fields = excludeAdmin ? request.getFields(ContactField.INTERNAL_USERID) : request.getFields();

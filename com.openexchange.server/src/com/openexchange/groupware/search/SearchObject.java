@@ -80,6 +80,8 @@ public abstract class SearchObject {
 
     private final Set<Integer> folders = new HashSet<Integer>();
 
+    private final Set<Integer> excludeFolders = new HashSet<Integer>();
+
     private String pattern = NO_PATTERN;
 
     private String catgories = NO_CATEGORIES;
@@ -142,6 +144,34 @@ public abstract class SearchObject {
 
     public boolean hasFolders() {
         return !folders.isEmpty();
+    }
+
+    public void addExcludeFolder(final int folder) {
+        excludeFolders.add(I(folder));
+    }
+
+    public void setExcludeFolders(final int... folder) {
+        excludeFolders.clear();
+        for (int folderId : folder) {
+            excludeFolders.add(I(folderId));
+        }
+    }
+
+    public void setExcludeFolders(List<Integer> folder) {
+        excludeFolders.clear();
+        excludeFolders.addAll(folder);
+    }
+
+    public void clearExcludeFolders() {
+        excludeFolders.clear();
+    }
+
+    public int[] getExcludeFolders() {
+        return I2i(excludeFolders);
+    }
+
+    public boolean hasExcludeFolders() {
+        return !excludeFolders.isEmpty();
     }
 
     public boolean isSubfolderSearch() {
