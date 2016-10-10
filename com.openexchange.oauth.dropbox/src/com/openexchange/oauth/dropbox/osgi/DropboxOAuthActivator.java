@@ -89,7 +89,7 @@ public final class DropboxOAuthActivator extends HousekeepingActivator {
         OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
         scopeRegistry.registerScope(service.getAPI(), DropboxOAuthScope.drive);
     }
-    
+
     @Override
     protected void stopBundle() {
         try {
