@@ -13,6 +13,12 @@ properties:
       This paramenter is optional but searching in all contact folders that are viewable and where objects can be read in is more expensive on that database than searching in a dedicated number of them. 
     items:
       type: integer
+  exclude_folders:
+    type: array
+    description: |
+      If a list of folder identifiers or at least a single folder identifier is given, those folders will not be searched for contacts.  
+    items:
+      type: integer
   last_name:
     type: string
     description: Searches contacts where the last name match with the given last name.

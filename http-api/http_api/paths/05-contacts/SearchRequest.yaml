@@ -27,12 +27,6 @@
         enum:
           - gbk
           - gb2312
-      - in: query 
-        name: exclude_folders
-        type: string
-        description: |
-          A comma-separated list of folder identifiers. If a list of folder identifiers or at least a single folder identifier is given, those folders will not be searched for contacts. 
-          Please note that this folders will also be excluded from the search in case the folder parameter is present in the body.
       - in: body
         name: body
         description: A JSON object containing search parameters.
