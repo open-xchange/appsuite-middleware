@@ -103,7 +103,7 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
             GoogleCredential credentials = GoogleApiClients.getCredentials(oauthAccount, getSession());
 
             // Establish Drive instance
-            setOAuthClient(new OAuthClient<Drive>(new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build(), getOAuthAccount().getToken()));
+            setOAuthClient(new OAuthClient<Drive>(new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName(getSession())).build(), getOAuthAccount().getToken()));
         }
     }
 

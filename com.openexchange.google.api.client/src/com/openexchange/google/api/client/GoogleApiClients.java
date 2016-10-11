@@ -51,8 +51,6 @@
 package com.openexchange.google.api.client;
 
 import java.security.GeneralSecurityException;
-import java.util.HashMap;
-import java.util.Map;
 import javax.net.ssl.SSLHandshakeException;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -60,6 +58,7 @@ import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Google2Api;
 import org.scribe.exceptions.OAuthException;
 import org.scribe.model.Token;
+import org.slf4j.Logger;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
@@ -68,6 +67,8 @@ import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
 import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.services.Services;
 import com.openexchange.java.Strings;
@@ -328,7 +329,20 @@ public class GoogleApiClients {
      *
      * @return The product name
      */
-    public static String getGoogleProductName() {
+    public static String getGoogleProductName(Session session) {
+        if (null != session) {
+            ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+            if (null != factory) {
+                try {
+                    ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+                    return view.opt("com.openexchange.oauth.google.productName", String.class, "");
+                } catch (OXException e) {
+                    Logger logger = org.slf4j.LoggerFactory.getLogger(GoogleApiClients.class);
+                    logger.warn("Failed to look-up property \"com.openexchange.oauth.google.productName\" using config-cascade. Falling back to configuration service...", e);
+                }
+            }
+        }
+
         ConfigurationService configService = Services.getService(ConfigurationService.class);
         return null == configService ? "" : configService.getProperty("com.openexchange.oauth.google.productName", "");
     }
@@ -349,7 +363,7 @@ public class GoogleApiClients {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see com.openexchange.cluster.lock.ClusterTask#perform()
          */
         @Override

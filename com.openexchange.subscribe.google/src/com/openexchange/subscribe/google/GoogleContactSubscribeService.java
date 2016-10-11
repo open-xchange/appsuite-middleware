@@ -268,7 +268,7 @@ public class GoogleContactSubscribeService extends AbstractGoogleSubscribeServic
             final ContactsService contactsService;
             {
                 GoogleCredential googleCreds = GoogleApiClients.getCredentials(subscription.getSession());
-                String productName = GoogleApiClients.getGoogleProductName();
+                String productName = GoogleApiClients.getGoogleProductName(subscription.getSession());
                 contactsService = new ContactsService(productName);
                 contactsService.setOAuth2Credentials(googleCreds);
             }

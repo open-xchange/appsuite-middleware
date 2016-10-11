@@ -90,7 +90,7 @@ public class GoogleMailOAuthProvider implements MailOAuthProvider {
 
             // Determine E-Mail address from "user/me" end-point
             GoogleCredential credentials = com.openexchange.google.api.client.GoogleApiClients.getCredentials(oauthAccountToUse, session);
-            Oauth2 oauth2 = new Oauth2.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build();
+            Oauth2 oauth2 = new Oauth2.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName(session)).build();
             Userinfoplus userinfo = oauth2.userinfo().get().execute();
             String email = userinfo.getEmail();
 

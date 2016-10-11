@@ -135,7 +135,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
         final ServerSession session = subscription.getSession();
         final GoogleCredential googleCreds = GoogleApiClients.getCredentials(session);
-        final Calendar googleCalendarService = new Calendar.Builder(googleCreds.getTransport(), googleCreds.getJsonFactory(), googleCreds.getRequestInitializer()).setApplicationName(GoogleApiClients.getGoogleProductName()).build();
+        final Calendar googleCalendarService = new Calendar.Builder(googleCreds.getTransport(), googleCreds.getJsonFactory(), googleCreds.getRequestInitializer()).setApplicationName(GoogleApiClients.getGoogleProductName(session)).build();
 
         // Check if we have permissions
         try {
