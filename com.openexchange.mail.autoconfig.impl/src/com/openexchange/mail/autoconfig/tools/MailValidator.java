@@ -84,12 +84,11 @@ public class MailValidator {
      * @param port The IMAP port
      * @param secure Whether to establish a secure connection
      * @param requireTls Whether STARTTLS is required
-     * @param isOAuth <code>true</code> to perform XOAUTH2 authentication mechanism; otherwise <code>false</code>
      * @param user The login
      * @param pwd The password
      * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
      */
-    public static boolean validateImap(String host, int port, boolean secure, boolean requireTls, boolean isOAuth, String user, String pwd) {
+    public static boolean validateImap(String host, int port, boolean secure, boolean requireTls, String user, String pwd) {
         Store store = null;
         try {
             String socketFactoryClass = SSLSocketFactoryProvider.getDefault().getClass().getName();
@@ -121,9 +120,6 @@ public class MailValidator {
             props.put("mail.imap.connectiontimeout", DEFAULT_CONNECT_TIMEOUT);
             props.put("mail.imap.timeout", DEFAULT_TIMEOUT);
             props.put("mail.imap.socketFactory.port", port);
-            if (isOAuth) {
-                props.put("mail.imap.auth.mechanisms", "XOAUTH2");
-             }
             Session session = Session.getInstance(props, null);
             store = session.getStore("imap");
             store.connect(host, port, user, pwd);
@@ -146,12 +142,11 @@ public class MailValidator {
      * @param port The POP3 port
      * @param secure Whether to establish a secure connection
      * @param requireTls Whether STARTTLS is required
-     * @param isOAuth <code>true</code> to perform XOAUTH2 authentication mechanism; otherwise <code>false</code>
      * @param user The login
      * @param pwd The password
      * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
      */
-    public static boolean validatePop3(String host, int port, boolean secure, boolean requireTls, boolean isOAuth, String user, String pwd) {
+    public static boolean validatePop3(String host, int port, boolean secure, boolean requireTls, String user, String pwd) {
         Store store = null;
         try {
             Properties props = new Properties();
@@ -183,9 +178,6 @@ public class MailValidator {
             props.put("mail.pop3.socketFactory.port", port);
             props.put("mail.pop3.connectiontimeout", DEFAULT_CONNECT_TIMEOUT);
             props.put("mail.pop3.timeout", DEFAULT_TIMEOUT);
-            if (isOAuth) {
-                props.put("mail.pop3.auth.mechanisms", "XOAUTH2");
-             }
             Session session = Session.getInstance(props, null);
             store = session.getStore("pop3");
             store.connect(host, port, user, pwd);
@@ -208,13 +200,12 @@ public class MailValidator {
      * @param port The SMTP port
      * @param secure Whether to establish a secure connection
      * @param requireTls Whether STARTTLS is required
-     * @param isOAuth <code>true</code> to perform XOAUTH2 authentication mechanism; otherwise <code>false</code>
      * @param user The login
      * @param pwd The password
      * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
      */
-    public static boolean validateSmtp(String host, int port, boolean secure, boolean requireTls, boolean isOAuth, String user, String pwd) {
-        return validateSmtp(host, port, secure, requireTls, isOAuth, user, pwd, null);
+    public static boolean validateSmtp(String host, int port, boolean secure, boolean requireTls, String user, String pwd) {
+        return validateSmtp(host, port, secure, requireTls, user, pwd, null);
     }
 
     /**
@@ -224,13 +215,12 @@ public class MailValidator {
      * @param port The SMTP port
      * @param secure Whether to establish a secure connection
      * @param requireTls Whether STARTTLS is required
-     * @param isOAuth <code>true</code> to perform XOAUTH2 authentication mechanism; otherwise <code>false</code>
      * @param user The login
      * @param pwd The password
      * @param optProperties The optional container for arbitrary properties
      * @return <code>true</code> for successful authentication, otherwise <code>false</code> for failed authentication
      */
-    public static boolean validateSmtp(String host, int port, boolean secure, boolean requireTls, boolean isOAuth, String user, String pwd, Map<String, Object> optProperties) {
+    public static boolean validateSmtp(String host, int port, boolean secure, boolean requireTls, String user, String pwd, Map<String, Object> optProperties) {
         Transport transport = null;
         try {
             String socketFactoryClass = SSLSocketFactoryProvider.getDefault().getClass().getName();
@@ -264,9 +254,6 @@ public class MailValidator {
             props.put("mail.smtp.timeout", DEFAULT_TIMEOUT);
             props.put("mail.smtp.socketFactory.fallback", "false");
             props.put("mail.smtp.auth", "true");
-            if (isOAuth) {
-               props.put("mail.smtp.auth.mechanisms", "XOAUTH2");
-            }
             Session session = Session.getInstance(props, null);
             transport = session.getTransport("smtp");
             transport.connect(host, port, user, pwd);

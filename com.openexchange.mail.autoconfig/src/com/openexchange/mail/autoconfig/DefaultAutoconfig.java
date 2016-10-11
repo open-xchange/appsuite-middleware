@@ -70,8 +70,8 @@ public class DefaultAutoconfig implements Autoconfig {
     private String source;
     private boolean mailStartTls;
     private boolean transportStartTls;
-    private boolean mailOAuth;
-    private boolean transportOAuth;
+    private Integer mailOAuthId;
+    private Integer transportOAuthId;
 
     /**
      * Initializes a new ranked {@link DefaultAutoconfig}.
@@ -249,37 +249,37 @@ public class DefaultAutoconfig implements Autoconfig {
     }
 
     @Override
-    public boolean isMailOAuth() {
-        return mailOAuth;
+    public Integer getMailOAuthId() {
+        return mailOAuthId;
     }
 
     /**
-     * Sets whether mail password is an OAuth token and thus XOAUTH2 is supposed to be performed for authentication.
+     * Sets the identifier of the OAuth account needed for mail access.
      *
-     * @param mailOAuth <code>true</code> to mark mail password as OAuth token
+     * @param mailOAuthId The OAuth account identifier
      */
-    public void setMailOAuth(boolean mailOAuth) {
-        this.mailOAuth = mailOAuth;
+    public void setMailOAuthId(int mailOAuthId) {
+        this.mailOAuthId = Integer.valueOf(mailOAuthId);
     }
 
     @Override
-    public boolean isTransportOAuth() {
-        return transportOAuth;
+    public Integer getTransportOAuthId() {
+        return transportOAuthId;
     }
 
     /**
-     * Sets whether transport password is an OAuth token and thus XOAUTH2 is supposed to be performed for authentication.
+     * Sets the identifier of the OAuth account needed for mail transport.
      *
-     * @param transportOAuth <code>true</code> to mark transport password as OAuth token
+     * @param transportOAuthId The OAuth account identifier
      */
-    public void setTransportOAuth(boolean transportOAuth) {
-        this.transportOAuth = transportOAuth;
+    public void setTransportOAuthId(int transportOAuthId) {
+        this.transportOAuthId = Integer.valueOf(transportOAuthId);
     }
 
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(256);
-        builder.append("Autoconfig [");
+        builder.append("DefaultAutoconfig [");
         if (mailServer != null) {
             builder.append("mailServer=").append(mailServer).append(", ");
         }
@@ -294,6 +294,12 @@ public class DefaultAutoconfig implements Autoconfig {
         }
         builder.append("mailPort=").append(mailPort).append(", transportPort=").append(transportPort).append(", mailSecure=").append(mailSecure).append(", transportSecure=").append(
             transportSecure).append(", mailStartTls=").append(mailStartTls).append(", transportStartTls=").append(transportStartTls);
+        if (mailOAuthId != null) {
+            builder.append("mailOAuthId=").append(mailOAuthId).append(", ");
+        }
+        if (transportOAuthId != null) {
+            builder.append("transportOAuthId=").append(transportOAuthId).append(", ");
+        }
         if (username != null) {
             builder.append(", username=").append(username);
         }

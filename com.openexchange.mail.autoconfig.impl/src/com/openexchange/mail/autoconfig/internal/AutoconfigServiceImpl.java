@@ -89,11 +89,11 @@ public class AutoconfigServiceImpl implements AutoconfigService {
 
     @Override
     public Autoconfig getConfig(final String email, final String password, final User user, final Context context) throws OXException {
-        return getConfig(email, password, user, context, true, false);
+        return getConfig(email, password, user, context, true);
     }
 
     @Override
-    public Autoconfig getConfig(final String email, final String password, final User user, final Context context, boolean forceSecure, boolean isOAuth) throws OXException {
+    public Autoconfig getConfig(final String email, final String password, final User user, final Context context, boolean forceSecure) throws OXException {
         QuotedInternetAddress internetAddress;
         try {
             internetAddress = new QuotedInternetAddress(email);
@@ -111,7 +111,7 @@ public class AutoconfigServiceImpl implements AutoconfigService {
         }
 
         for (ConfigSource source : sources) {
-            DefaultAutoconfig config = source.getAutoconfig(mailLocalPart, mailDomain, password, user, context, forceSecure, isOAuth);
+            DefaultAutoconfig config = source.getAutoconfig(mailLocalPart, mailDomain, password, user, context, forceSecure);
             if (config != null) {
                 config.setSource(source.getClass().getSimpleName());
                 return config;
