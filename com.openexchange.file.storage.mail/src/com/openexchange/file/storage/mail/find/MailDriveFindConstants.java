@@ -94,5 +94,34 @@ public final class MailDriveFindConstants {
     /** The fields to query for */
     public static final List<String> QUERY_FIELDS = Arrays.asList(new String[] { FIELD_FILE_NAME, FIELD_FROM, FIELD_TO });
 
+    /** The patterns used match {@link Type#DOCUMENTS}. */
+    public static final String[] FILETYPE_PATTERNS_DOCUMENTS = {
+        "text/plain",
+        "text/rtf",
+        "application/vnd.ms-word",
+        "application/vnd.ms-excel",
+        "application/vnd.ms-powerpoint",
+        "application/vnd.msword",
+        "application/vnd.msexcel",
+        "application/vnd.mspowerpoint",
+        "application/vnd.openxmlformats",
+        "application/vnd.opendocument",
+        "application/pdf",
+        "application/rtf"
+    };
 
+    /** The patterns used match {@link Type#IMAGES}. */
+    public static final String[] FILETYPE_PATTERNS_IMAGES = {
+        "image/"
+    };
+
+    /** The patterns used match {@link Type#AUDIO}. */
+    public static final String[] FILETYPE_PATTERNS_AUDIO = {
+        "audio/"
+    };
+
+    /** The patterns used match {@link Type#VIDEO}. */
+    public static final String[] FILETYPE_PATTERNS_VIDEO = {
+        "video/"
+    };
 }

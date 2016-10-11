@@ -107,7 +107,6 @@ import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.common.Comparison;
-import com.openexchange.find.basic.drive.Constants;
 import com.openexchange.find.basic.drive.FileSize;
 import com.openexchange.find.basic.drive.FileType;
 import com.openexchange.find.basic.drive.Utils;
@@ -389,7 +388,6 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
 
         // Get search term
         SearchTerm searchTerm = prepareSearchTerm(searchRequest);
-
         // Start/end range
         int start = searchRequest.getStart();
         int end = searchRequest.getStart() + searchRequest.getSize();
@@ -886,20 +884,20 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
     private SearchTerm buildFileTypeTerm(String query) {
         String[] patterns;
         if (FileType.DOCUMENTS.getIdentifier().equals(query)) {
-            patterns = Constants.FILETYPE_PATTERNS_DOCUMENTS;
+            patterns = MailDriveFindConstants.FILETYPE_PATTERNS_DOCUMENTS;
         } else if (FileType.IMAGES.getIdentifier().equals(query)) {
-            patterns = Constants.FILETYPE_PATTERNS_IMAGES;
+            patterns = MailDriveFindConstants.FILETYPE_PATTERNS_IMAGES;
         } else if (FileType.VIDEO.getIdentifier().equals(query)) {
-            patterns = Constants.FILETYPE_PATTERNS_VIDEO;
+            patterns = MailDriveFindConstants.FILETYPE_PATTERNS_VIDEO;
         } else if (FileType.AUDIO.getIdentifier().equals(query)) {
-            patterns = Constants.FILETYPE_PATTERNS_AUDIO;
+            patterns = MailDriveFindConstants.FILETYPE_PATTERNS_AUDIO;
         } else if (FileType.OTHER.getIdentifier().equals(query)) {
             // negate all other patterns
             String[][] patternsToNegate = {
-                Constants.FILETYPE_PATTERNS_DOCUMENTS,
-                Constants.FILETYPE_PATTERNS_IMAGES,
-                Constants.FILETYPE_PATTERNS_VIDEO,
-                Constants.FILETYPE_PATTERNS_AUDIO
+                MailDriveFindConstants.FILETYPE_PATTERNS_DOCUMENTS,
+                MailDriveFindConstants.FILETYPE_PATTERNS_IMAGES,
+                MailDriveFindConstants.FILETYPE_PATTERNS_VIDEO,
+                MailDriveFindConstants.FILETYPE_PATTERNS_AUDIO
             };
             List<SearchTerm> searchTerms = new ArrayList<SearchTerm>();
             for (String[] toNegate : patternsToNegate) {
