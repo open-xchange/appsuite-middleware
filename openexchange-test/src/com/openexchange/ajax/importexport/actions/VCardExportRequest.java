@@ -55,12 +55,29 @@ import com.openexchange.ajax.importexport.actions.AbstractImportRequest.Action;
 public class VCardExportRequest extends AbstractExportRequest<VCardExportResponse> {
 
 	private final boolean failOnError;
+	private final Boolean exportDlists;
 
-	public VCardExportRequest(int folderId, boolean failOnError) {
-		super(Action.VCard, folderId);
-		this.failOnError = failOnError;
-	}
+    public VCardExportRequest(int folderId, boolean failOnError) {
+        this(folderId, null, failOnError);
+    }
 
+    public VCardExportRequest(int folderId, Boolean exportDlists, boolean failOnError) {
+        super(Action.VCard, folderId);
+        this.failOnError = failOnError;
+        this.exportDlists = exportDlists;
+    }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() {
+        Parameter[] parameters = super.getParameters();
+        if (null != exportDlists) {
+            Parameter[] newParameters = new Parameter[parameters.length + 1];
+            System.arraycopy(parameters, 0, newParameters, 0, parameters.length);
+            newParameters[newParameters.length - 1] = new Parameter("export_dlists", exportDlists.booleanValue());
+            return newParameters;
+        }
+        return parameters;
+    }
 
     @Override
     public AbstractAJAXParser<VCardExportResponse> getParser() {
