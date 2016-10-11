@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,29 +47,65 @@
  *
  */
 
-package com.openexchange.mail.oauth;
+package com.openexchange.mail.oauth.google;
 
+import java.io.IOException;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.services.oauth2.Oauth2;
+import com.google.api.services.oauth2.model.Userinfoplus;
 import com.openexchange.exception.OXException;
+import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.mail.autoconfig.Autoconfig;
-import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.mail.autoconfig.ImmutableAutoconfig;
+import com.openexchange.mail.oauth.MailOAuthProvider;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.session.Session;
 
 /**
- * {@link MailOAuthService} - The service for mail/transport OAuth access.
+ * {@link GoogleMailOAuthProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-@SingletonService
-public interface MailOAuthService {
+public class GoogleMailOAuthProvider implements MailOAuthProvider {
 
     /**
-     * Gets the auto-configuration for specified OAuth account and associated session.
-     *
-     * @param oauthAccountId The identifier of the OAuth account
-     * @param session The session
-     * @return The resolved auto-configuration or <code>null</code>
-     * @throws OXException If appropriate auto-configuration cannot be returned
+     * Initializes a new {@link GoogleMailOAuthProvider}.
      */
-    Autoconfig getAutoconfigFor(int oauthAccountId, Session session) throws OXException;
+    public GoogleMailOAuthProvider() {
+        super();
+    }
+
+    @Override
+    public Autoconfig getAutoconfigFor(OAuthAccount oauthAccount, Session session) throws OXException {
+        try {
+            // Ensure not expired
+            OAuthAccount oauthAccountToUse = oauthAccount;
+            OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(oauthAccountToUse, session);
+            if (null != newAccount) {
+                oauthAccountToUse = newAccount;
+            }
+
+            // Determine E-Mail address from "user/me" end-point
+            GoogleCredential credentials = com.openexchange.google.api.client.GoogleApiClients.getCredentials(oauthAccountToUse, session);
+            Oauth2 oauth2 = new Oauth2.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build();
+            Userinfoplus userinfo = oauth2.userinfo().get().execute();
+            String email = userinfo.getEmail();
+
+            ImmutableAutoconfig.Builder builder = ImmutableAutoconfig.builder();
+            builder.username(email);
+            builder.mailOAuth(true).mailPort(993).mailProtocol("imap").mailSecure(true).mailServer("imap.gmail.com").mailStartTls(false);
+            builder.transportOAuth(true).transportPort(587).transportProtocol("smtp").transportSecure(false).transportServer("smtp.gmail.com").transportStartTls(true);
+            return builder.build();
+        } catch (IOException e) {
+            throw OAuthExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
+    public String getProviderId() {
+        return API.GOOGLE.getFullName();
+    }
 }

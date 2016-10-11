@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,34 +47,42 @@
  *
  */
 
+package com.openexchange.mail.oauth.osgi;
 
-package com.openexchange.mail.autoconfig.json.osgi;
-
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.mail.autoconfig.AutoconfigService;
-import com.openexchange.mail.autoconfig.json.actions.AutoconfigActionFactory;
-import com.openexchange.mail.autoconfig.json.converter.AutoconfigResultConverter;
+import com.openexchange.mail.oauth.MailOAuthProvider;
 import com.openexchange.mail.oauth.MailOAuthService;
+import com.openexchange.mail.oauth.internal.MailOAuthProviderRegistry;
+import com.openexchange.mail.oauth.internal.MailOAuthServiceImpl;
+import com.openexchange.oauth.OAuthService;
+import com.openexchange.osgi.HousekeepingActivator;
+
 
 /**
- * {@link Activator}
+ * {@link MailOAuthActivator}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class Activator extends AJAXModuleActivator {
+public class MailOAuthActivator extends HousekeepingActivator {
+
+    /**
+     * Initializes a new {@link MailOAuthActivator}.
+     */
+    public MailOAuthActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { AutoconfigService.class };
+        return new Class<?>[] { OAuthService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        trackService(MailOAuthService.class);
+        MailOAuthProviderRegistry registry = new MailOAuthProviderRegistry();
+        track(MailOAuthProvider.class, new MailOAuthProviderTracker(registry, context));
         openTrackers();
-        registerModule(new AutoconfigActionFactory(this), "autoconfig");
-        registerService(ResultConverter.class, new AutoconfigResultConverter());
+        registerService(MailOAuthService.class, new MailOAuthServiceImpl(registry, this));
     }
 
 }

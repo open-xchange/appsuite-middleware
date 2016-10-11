@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,34 +47,69 @@
  *
  */
 
+package com.openexchange.mail.oauth.internal;
 
-package com.openexchange.mail.autoconfig.json.osgi;
-
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.mail.autoconfig.AutoconfigService;
-import com.openexchange.mail.autoconfig.json.actions.AutoconfigActionFactory;
-import com.openexchange.mail.autoconfig.json.converter.AutoconfigResultConverter;
-import com.openexchange.mail.oauth.MailOAuthService;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.mail.oauth.MailOAuthProvider;
 
 /**
- * {@link Activator}
+ * {@link MailOAuthProviderRegistry}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class Activator extends AJAXModuleActivator {
+public class MailOAuthProviderRegistry {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { AutoconfigService.class };
+    private final ConcurrentMap<String, MailOAuthProvider> providers;
+
+    /**
+     * Initializes a new {@link MailOAuthProviderRegistry}.
+     */
+    public MailOAuthProviderRegistry() {
+        super();
+        providers = new ConcurrentHashMap<>(8, 9.0F, 1);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        trackService(MailOAuthService.class);
-        openTrackers();
-        registerModule(new AutoconfigActionFactory(this), "autoconfig");
-        registerService(ResultConverter.class, new AutoconfigResultConverter());
+    /**
+     * Gets the providers currently held in this registry.
+     *
+     * @return The available providers
+     */
+    public Collection<MailOAuthProvider> getProviders() {
+        return Collections.unmodifiableCollection(providers.values());
+    }
+
+    /**
+     * Gets the provider for given identifier.
+     *
+     * @param provderId The provider identifier
+     * @return The associated provider instance or <code>null</code>
+     */
+    public MailOAuthProvider getProviderFor(String provderId) {
+        return providers.get(provderId);
+    }
+
+    /**
+     * Adds given provider to this registry.
+     *
+     * @param provider The provider to add
+     * @return <code>true</code> if provider was successfully added; otherwise <code>false</code>
+     */
+    public boolean addProvider(MailOAuthProvider provider) {
+        return null == provider ? false : null == providers.putIfAbsent(provider.getProviderId(), provider);
+    }
+
+    /**
+     * Removes given provider from this registry.
+     *
+     * @param provider The provider to remove
+     * @return <code>true</code> if provider was successfully removed; otherwise <code>false</code>
+     */
+    public boolean removeProvider(MailOAuthProvider provider) {
+        return null == provider ? false : null != providers.remove(provider.getProviderId());
     }
 
 }

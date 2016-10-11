@@ -47,34 +47,36 @@
  *
  */
 
+package com.openexchange.mail.oauth;
 
-package com.openexchange.mail.autoconfig.json.osgi;
-
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.mail.autoconfig.AutoconfigService;
-import com.openexchange.mail.autoconfig.json.actions.AutoconfigActionFactory;
-import com.openexchange.mail.autoconfig.json.converter.AutoconfigResultConverter;
-import com.openexchange.mail.oauth.MailOAuthService;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.autoconfig.Autoconfig;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.session.Session;
 
 /**
- * {@link Activator}
+ * {@link MailOAuthProvider} - Mail/transport OAuth access for a certain OAuth provider..
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class Activator extends AJAXModuleActivator {
+public interface MailOAuthProvider {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { AutoconfigService.class };
-    }
+    /**
+     * Gets the identifier of the provider
+     *
+     * @return The provider identifier
+     */
+    String getProviderId();
 
-    @Override
-    protected void startBundle() throws Exception {
-        trackService(MailOAuthService.class);
-        openTrackers();
-        registerModule(new AutoconfigActionFactory(this), "autoconfig");
-        registerService(ResultConverter.class, new AutoconfigResultConverter());
-    }
+    /**
+     * Gets the auto-configuration for specified OAuth account and associated session.
+     *
+     * @param oauthAccount The OAuth account
+     * @param session The session
+     * @return The resolved auto-configuration or <code>null</code>
+     * @throws OXException If appropriate auto-configuration cannot be returned
+     */
+    Autoconfig getAutoconfigFor(OAuthAccount oauthAccount, Session session) throws OXException;
 
 }

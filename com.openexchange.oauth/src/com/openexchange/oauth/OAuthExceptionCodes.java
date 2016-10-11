@@ -255,9 +255,13 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
      */
     MISSING_SCOPE("Please provide at least one scope.", CATEGORY_USER_INPUT, 40, OAuthExceptionMessages.MISSING_SCOPE_MSG),
     /**
-     * The user needs to authorize the '%1$s' provider to gain access to '%2%s'
+     * The user needs to authorize the '%1$s' provider to gain access to '%2$s'
      */
-    NO_SCOPE_PERMISSION("The user needs to authorize the '%1$s' provider to gain access to '%2%s'", CATEGORY_PERMISSION_DENIED, 41, OAuthExceptionMessages.NO_SCOPE_PERMISSION),
+    NO_SCOPE_PERMISSION("The user needs to authorize the '%1$s' provider to gain access to '%2$s'", CATEGORY_PERMISSION_DENIED, 41, OAuthExceptionMessages.NO_SCOPE_PERMISSION),
+    /**
+     * The provider does not support the demanded scope '%1$s'
+     */
+    NO_SUCH_SCOPE_AVAILABLE("The provider does not support the demanded scope '%1$s'", CATEGORY_PERMISSION_DENIED, 42, OAuthExceptionMessages.NO_SUCH_SCOPE_AVAILABLE),
 
     ;
 
