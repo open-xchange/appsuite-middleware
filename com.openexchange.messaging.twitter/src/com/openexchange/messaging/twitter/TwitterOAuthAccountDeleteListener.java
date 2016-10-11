@@ -92,7 +92,10 @@ public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDele
             if (checkData(id, data, con)) {
                 dropAccountByData(data, con);
                 int accountId = data[0];
-                TwitterAccessRegistry.getInstance().purgeUserAccess(cid, user, accountId);
+                boolean purged = TwitterAccessRegistry.getInstance().purgeUserAccess(cid, user, accountId);
+                if (purged) {
+                    LOG.info("Removed Twitter OAuth accesses from registry for the deleted OAuth account with id '{}' for user '{}' in context '{}'", id, user, cid);
+                }
             }
         }
     }

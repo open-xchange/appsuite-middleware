@@ -219,12 +219,29 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @return The parsed <code>int</code>
      * @throws OXException If parameter is not present in given request
      */
-    protected static int parseIntParameter(final String parameterName, final AJAXRequestData request) throws OXException {
+    protected static int requireIntParameter(String parameterName, AJAXRequestData request) throws OXException {
         final String tmp = request.getParameter(parameterName);
         if (null == tmp) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(parameterName);
         }
         return getUnsignedInteger(tmp);
+    }
+
+    /**
+     * Parses specified parameter into <code>int</code>.
+     *
+     * @param parameterName The parameter name
+     * @param defaultValue The default value to return in case given parameter is absent or is not an integer value
+     * @param request The request
+     * @return The parsed <code>int</code>
+     */
+    protected static int optionalIntParameter(String parameterName, int defaultValue, AJAXRequestData request) {
+        final String tmp = request.getParameter(parameterName);
+        if (null == tmp) {
+            return defaultValue;
+        }
+        int parsed = getUnsignedInteger(tmp);
+        return parsed < 0 ? defaultValue : parsed;
     }
 
     private static final Pattern PAT = Pattern.compile(" *, *");

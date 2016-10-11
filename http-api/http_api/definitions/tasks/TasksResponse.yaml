@@ -2,12 +2,5 @@ type: object
 properties:
   $ref: ../common/CommonResponseData.yaml
   data:
-    type: array
+    type: object
     description: Array of tasks. Each task is described as an array itself.
-    items:
-      type: array
-      items:
-        type: object
-        description: |
-          Array with elements that contain the information of a task specified by the corresponding
-          identifiers in the `columns` parameter. Therefore, the element types can be distinguished.

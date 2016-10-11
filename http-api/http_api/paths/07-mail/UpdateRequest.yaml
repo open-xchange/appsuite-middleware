@@ -2,7 +2,7 @@
   put:
     operationId: updateMail
     tags:
-      - mail
+      - Mail
     summary: Updates a mail or a folder's messages and/or moves a mail to another folder.
     description: |
       The update request can perform an update of the color label and flags of one mail object. Beside it
@@ -10,7 +10,7 @@
       can be performed at once too.
       
       If neither parameter `id` nor parameter `message_id` is specified, all folder's messages are updated
-      accordingly (**available since v6.20).
+      accordingly.
     consumes:
       - application/json
     parameters:
@@ -24,7 +24,7 @@
       - in: query
         name: message_id
         type: string
-        description: (Preliminary) The value of "Message-Id" header of the requested mail. This parameter is a substitute for "id" parameter.
+        description: The value of "Message-Id" header of the requested mail. This parameter is a substitute for "id" parameter.
         required: false
       - in: body
         name: body
@@ -37,6 +37,6 @@
         description: |
           A JSON object containing the object ID and the folder ID of an updated and/or moved mail or only
           the folder ID if several mails are updated. In case of errors the responsible fields in the
-          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/MailDestinationResponse"

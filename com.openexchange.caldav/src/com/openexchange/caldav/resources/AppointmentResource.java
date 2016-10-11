@@ -287,6 +287,18 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 handlePrivateComments(appointmentToSave);
                 ReminderObject nextReminder = handleReminders(originalAppointment, appointmentToSave, exceptionsToSave);
                 /*
+                 * explicitly update user's confirmation to trigger scheduling-related notifications
+                 */
+                UserParticipant originalParticipant = getCurrentUserParticipant(originalAppointment);
+                UserParticipant updatedParticipant = getCurrentUserParticipant(appointmentToSave);
+                if (null != originalParticipant && null != updatedParticipant && originalParticipant.getConfirm() != updatedParticipant.getConfirm()) {
+                    LOG.debug("Setting user confirmation of user {} to {}", updatedParticipant.getIdentifier(), updatedParticipant.getConfirm());
+                    clientLastModified = getAppointmentInterface().setUserConfirmation(appointmentToSave.getObjectID(), appointmentToSave.getParentFolderID(),
+                        updatedParticipant.getIdentifier(), updatedParticipant.getConfirm(), updatedParticipant.getConfirmMessage());
+                    originalParticipant.setConfirm(updatedParticipant.getConfirm());
+                    originalParticipant.setConfirmMessage(updatedParticipant.getConfirmMessage());
+                }
+                /*
                  * update appointment
                  */
                 if (false == Patches.Incoming.tryRestoreParticipants(originalAppointment, appointmentToSave)) {
@@ -301,7 +313,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 }
                 checkForExplicitRemoves(originalAppointment, appointmentToSave);
                 if (false == containsChanges(originalAppointment, appointmentToSave)) {
-                    LOG.debug("No changes detected in {}, skipping update.", appointmentToSave);
+                    LOG.debug("No further changes detected in {}, skipping update.", appointmentToSave);
                 } else {
                     Appointment[] hardConflicts = getAppointmentInterface().updateAppointmentObject(appointmentToSave, parentFolderID, clientLastModified, checkPermissions);
                     if (null != hardConflicts && 0 < hardConflicts.length) {
@@ -328,6 +340,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     }
                     insertOrUpdateReminder(nextReminder);
                 }
+
             }
             if (0 == exceptionsToSave.size() && 0 == deleteExceptionsToSave.size()) {
                 return;

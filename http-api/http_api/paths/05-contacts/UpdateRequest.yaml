@@ -2,7 +2,7 @@
   put:
     operationId: updateContact
     tags:
-      - contacts
+      - Contacts
     summary: Updates a contact.
     description: |
       Updates a contact's data. This request cannot change or add contact images. Therefore it
@@ -33,13 +33,13 @@
       200:
         description: |
           A JSON object with a timestamp. In case of errors the responsible fields in the response are
-          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/ContactUpdateResponse"
   post:
     operationId: updateContactAdvanced
     tags:
-      - contacts
+      - Contacts
     summary: Updates a contact.
     description: |
       Updates a contact's data and images. The normal request body must be placed as form-data using the

@@ -2,8 +2,8 @@
   put:
     operationId: markAllMailsAsRead
     tags:
-      - mail
-    summary: Marks all mails of a folder as seen (**available since v7.6.0**).
+      - Mail
+    summary: Marks all mails of a folder as seen.
     consumes:
       - application/json
     parameters:
@@ -13,6 +13,6 @@
       200:
         description: |
           A JSON object with the value `true`. In case of errors the responsible fields in the
-          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/MailsAllSeenResponse"

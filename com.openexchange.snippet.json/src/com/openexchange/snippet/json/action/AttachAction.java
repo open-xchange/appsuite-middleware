@@ -62,9 +62,6 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.configuration.ServerConfig;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
@@ -87,14 +84,6 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(
-    name = "attach"
-    , description = "Attaches a file attachment to an existing snippet associated with the current user and context."
-    , method = RequestMethod.POST
-    , parameters = {
-        @Parameter(name = "id", description = "The snippet's identifier", optional=false)
-    }
-)
 public final class AttachAction extends SnippetAction {
 
     private static final class InputStreamProviderImpl implements InputStreamProvider {

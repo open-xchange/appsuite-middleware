@@ -2,8 +2,8 @@
   post:
     operationId: getAutoConfig
     tags:
-      - autoconfig
-    summary: Gets the auto configuration for a mail account (**available since v6.22**).
+      - Autoconfig
+    summary: Gets the auto configuration for a mail account.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: formData
@@ -19,13 +19,17 @@
       - in: formData
         name: force_secure
         type: boolean
-        description: Enforces a secure connection for configured mail account, default is `true` (available since v7.8.2).
+        description: Enforces a secure connection for configured mail account, default is `true`.
         required: false
+      - in: formData
+        name: oauth
+        type: integer
+        description: The optional identifier of the OAuth account to use for authentication. Also accepts a boolean to signal that provided password is considered to be an OAuth token.
     responses:
       200:
         description: |
           A JSON object containing the best available settings for an appropriate mail server for the given email
           address. The data may be incomplete or empty. In case of errors the responsible fields in the response
-          are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/AutoConfigResponse"

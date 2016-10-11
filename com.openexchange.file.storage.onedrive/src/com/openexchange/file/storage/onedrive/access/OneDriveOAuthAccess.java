@@ -50,10 +50,8 @@
 package com.openexchange.file.storage.onedrive.access;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpGet;
@@ -65,6 +63,9 @@ import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.MsLiveConnectApi;
 import org.scribe.model.Token;
 import org.slf4j.Logger;
+import com.openexchange.cluster.lock.ClusterLockService;
+import com.openexchange.cluster.lock.ClusterTask;
+import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -73,9 +74,8 @@ import com.openexchange.file.storage.onedrive.OneDriveClosure;
 import com.openexchange.file.storage.onedrive.OneDriveConstants;
 import com.openexchange.file.storage.onedrive.osgi.Services;
 import com.openexchange.java.Strings;
-import com.openexchange.oauth.DefaultOAuthToken;
+import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
@@ -131,11 +131,6 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
 
             setOAuthClient(new OAuthClient<>(HttpClients.getHttpClient("Open-Xchange OneDrive Client"), getOAuthAccount().getToken()));
         }
-    }
-
-    @Override
-    public void revoke() throws OXException {
-        // No revoke call
     }
 
     @Override
@@ -204,29 +199,44 @@ public class OneDriveOAuthAccess extends AbstractOAuthAccess {
         // Check expiration
         if (considerExpired || scribeOAuthService.isExpired(liveconnectOAuthAccount.getToken())) {
             // Expired...
-            String refreshToken = liveconnectOAuthAccount.getSecret();
-            Token accessToken;
-            try {
-                accessToken = scribeOAuthService.getAccessToken(new Token(liveconnectOAuthAccount.getToken(), liveconnectOAuthAccount.getSecret()), null);
-            } catch (org.scribe.exceptions.OAuthException e) {
-                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, liveconnectOAuthAccount.getDisplayName(), Integer.valueOf(liveconnectOAuthAccount.getId()));
-            }
-            if (Strings.isEmpty(accessToken.getSecret())) {
-                LOGGER.warn("Received invalid request_token from Live Connect: {}. Response:{}{}", null == accessToken.getSecret() ? "null" : accessToken.getSecret(), Strings.getLineSeparator(), accessToken.getRawResponse());
-            } else {
-                refreshToken = accessToken.getSecret();
-            }
-            // Update account
-            OAuthService oAuthService = Services.getService(OAuthService.class);
-            int accountId = liveconnectOAuthAccount.getId();
-            Map<String, Object> arguments = new HashMap<String, Object>(3);
-            arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
-            arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
-            oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId(), liveconnectOAuthAccount.getEnabledScopes());
-
-            // Reload
-            return oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+            ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
+            return clusterLockService.runClusterTask(new OneDriveReauthorizeClusterTask(session, liveconnectOAuthAccount), new ExponentialBackOffRetryPolicy());
         }
         return null;
+    }
+
+    private class OneDriveReauthorizeClusterTask extends AbstractReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
+
+        /**
+         * Initialises a new {@link OneDriveOAuthAccess.OneDriveReauthorizeClusterTask}.
+         */
+        public OneDriveReauthorizeClusterTask(Session session, OAuthAccount cachedAccount) {
+            super(Services.getServices(), session, cachedAccount);
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.openexchange.cluster.lock.ClusterTask#perform()
+         */
+        @Override
+        public Token reauthorize() throws OXException {
+            Session session = getSession();
+            OAuthAccount cachedAccount = getCachedAccount();
+
+            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MsLiveConnectApi.class);
+            serviceBuilder.apiKey(cachedAccount.getMetaData().getAPIKey(session)).apiSecret(cachedAccount.getMetaData().getAPISecret(session));
+            MsLiveConnectApi.MsLiveConnectService scribeOAuthService = (MsLiveConnectApi.MsLiveConnectService) serviceBuilder.build();
+
+            try {
+                Token accessToken = scribeOAuthService.getAccessToken(new Token(cachedAccount.getToken(), cachedAccount.getSecret()), null);
+                if (Strings.isEmpty(accessToken.getSecret())) {
+                    LOGGER.warn("Received invalid request_token from Live Connect: {}. Response:{}{}", null == accessToken.getSecret() ? "null" : accessToken.getSecret(), Strings.getLineSeparator(), accessToken.getRawResponse());
+                }
+                return accessToken;
+            } catch (org.scribe.exceptions.OAuthException e) {
+                throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, cachedAccount.getDisplayName(), Integer.valueOf(cachedAccount.getId()));
+            }
+        }
     }
 }

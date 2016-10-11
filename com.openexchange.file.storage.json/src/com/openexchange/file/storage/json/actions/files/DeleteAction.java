@@ -51,10 +51,6 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.Type;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 
@@ -63,11 +59,6 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Action(method = RequestMethod.PUT, name = "delete", description = "Delete infoitems", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "timestamp", description = "Timestamp of the last update of the deleted infoitems."),
-    @Parameter(name = "hardDelete", type=Type.BOOLEAN, description = "Optional, defaults to \"false\". If set to \"true\", the file is deleted permanently. Otherwise, and if the underlying storage supports a trash folder and the file is not yet located below the trash folder, it is moved to the trash folder.")
-}, requestBody = "An array with objects to delete. The fields for the object are described in Full identifier for an infostore document.", responseDescription = "An array with [[]].")
 public class DeleteAction extends AbstractWriteAction {
 
     @Override

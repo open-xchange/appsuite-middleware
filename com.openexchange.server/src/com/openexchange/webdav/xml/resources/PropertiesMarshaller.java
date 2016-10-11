@@ -198,7 +198,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 			}
 		} else {
 			if (property.isDate()) {
-				propertyElement.setAttribute("dt", "dateTime.tz", DATE_NS);
+				propertyElement.setAttribute("dt", "dateTime.rfc1123", DATE_NS);
 			}
 			propertyElement.setText(property.getValue());
 		}

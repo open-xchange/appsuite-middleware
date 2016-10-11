@@ -89,6 +89,11 @@ public class SwiftActivator extends HousekeepingActivator {
     }
 
     @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
+
+    @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, DatabaseService.class, TimerService.class };
     }

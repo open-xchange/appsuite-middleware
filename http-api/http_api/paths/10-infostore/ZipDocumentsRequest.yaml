@@ -2,8 +2,8 @@
   put:
     operationId: getDocumentsAsZip
     tags:
-      - infostore
-    summary: Gets multiple documents as a ZIP archive (**available since v7.4.0**).
+      - Infostore
+    summary: Gets multiple documents as a ZIP archive.
     consumes:
       - application/json
     produces:

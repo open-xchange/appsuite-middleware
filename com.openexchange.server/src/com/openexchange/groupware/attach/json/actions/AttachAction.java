@@ -72,9 +72,6 @@ import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataProperties;
 import com.openexchange.conversion.DataSource;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentConfig;
@@ -97,12 +94,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.POST, name = "attach", description = "Create an attachment.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "json_[index]", description = "The JSON representation of an attachment object as described in Common object data (with only id, created_by and creation_date available) and Attachment object."),
-    @Parameter(name = "file_[index]", description = "The file metadata as per <input type=file /> upload. Note: The JSON Object and file fields describe the corresponding attachment. For ex.: json_0 contains metadata for file_0, json_1 for file_1 and so on. Indexes start with 0.")
-}, requestBody = "multipart/form-data or multipart/mixed containing the file data of the attached file and the above fields.",
-responseDescription = "HTML page with javascript callback as per introduction. Contains a JSON-Array of ids of the newly created attachments. The order of the ids corresponds to the indexes in the request.")
 public final class AttachAction extends AbstractAttachmentAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttachAction.class);

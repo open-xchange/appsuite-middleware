@@ -89,6 +89,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageConstants;
 import com.openexchange.file.storage.FileStorageETagProvider;
 import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileStorageEventConstants;
@@ -106,6 +107,7 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageRangeFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
+import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.ObjectPermissionAware;
 import com.openexchange.file.storage.Range;
@@ -1955,10 +1957,10 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
      * @return <code>true</code> if given file meta-data hints to an encrypted file; otherwise <code>false</code>
      */
     protected static boolean isEncryptedFile(File document) {
-        return (null != document) && ("application/pgp-encrypted".equalsIgnoreCase(document.getFileMIMEType()) || (Strings.isNotEmpty(document.getFileName()) && Strings.toLowerCase(document.getFileName()).endsWith(".pgp")));
+        return FileStorageUtility.isEncryptedFile(document);
     }
 
-    private static final String METADATA_KEY_ENCRYPTED = "Encrypted";
+    private static final String METADATA_KEY_ENCRYPTED = FileStorageConstants.METADATA_KEY_ENCRYPTED;
 
     /**
      * Marks given file meta-data as encrypted {@link #isEncryptedFile(File) if appropriate}.

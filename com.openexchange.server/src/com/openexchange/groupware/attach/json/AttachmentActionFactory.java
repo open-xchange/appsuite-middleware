@@ -54,7 +54,6 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
@@ -63,7 +62,6 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Module(name = "attachment", description = "Allows file attachments to arbitrary objects. Object addresses are defined analogous to the Link module. An Attachment always belongs to an object (called 'attached') in a certain folder of a certain module.")
 public class AttachmentActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> actions;

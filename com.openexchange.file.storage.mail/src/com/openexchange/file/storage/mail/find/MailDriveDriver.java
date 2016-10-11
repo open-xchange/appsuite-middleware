@@ -297,7 +297,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
             }
         }
 
-        return delegate().isValidFor(session, facetInfos);
+        return false;
     }
 
     @Override

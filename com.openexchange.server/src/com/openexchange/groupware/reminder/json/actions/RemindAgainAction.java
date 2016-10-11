@@ -59,9 +59,6 @@ import com.openexchange.ajax.parser.ReminderParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ReminderWriter;
 import com.openexchange.api2.ReminderService;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.ReminderExceptionCode;
 import com.openexchange.groupware.reminder.ReminderHandler;
@@ -78,11 +75,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "remindAgain", description = "Remind again (since v6.18.1).", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "The ID of the reminder whose date shall be changed.")
-}, requestBody = "The JSON representation of the reminder; mainly containing the field \u201calarm\u201d which provides the new reminder date. E.g. { \"alarm\": 1283418027381 }",
-responseDescription = "The JSON representation of the updated reminder.")
 @OAuthAction(ReminderActionFactory.OAUTH_WRITE_SCOPE)
 public final class RemindAgainAction extends AbstractReminderAction {
 

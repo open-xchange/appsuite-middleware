@@ -2,11 +2,8 @@
   put:
     operationId: deleteContacts
     tags:
-      - contacts
-    summary: Deletes contacts (**available since v6.22**).
-    description: |
-      Before version 6.22 the request body contained a JSON object with the fields `id` and `folder` and could
-      only delete one contact.
+      - Contacts
+    summary: Deletes contacts.
     consumes:
       - application/json
     parameters:
@@ -29,6 +26,6 @@
       200:
         description: |
           A JSON array with object IDs of contacts which were modified after the specified timestamp and were therefore not deleted.
-          In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/ContactDeletionsResponse"

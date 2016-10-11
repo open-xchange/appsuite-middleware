@@ -56,10 +56,6 @@ import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.Type;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -73,17 +69,6 @@ import com.openexchange.tools.iterator.SearchIterator;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@Action(method = RequestMethod.GET, name = "anniversaries", description = "Search contacts whose anniversary falls into a timerange.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "start", description = "The lower (inclusive) limit of the requested time-range."),
-    @Parameter(name = "end", description = "The upper (exclusive) limit of the requested time-range."),
-    @Parameter(name = "columns", description = "The requested fields."),
-    @Parameter(name = "folder", optional=true, description = "Object ID of the parent folder that is searched. If not set, all visible folders are used."),
-    @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response.  If not specified, the results are sorted ascending by their anniversary in the supplied timerange. If this parameter is specified, then the parameter order must be also specified. In case of use of column 609 (use count depending order for collected contacts with global address book) the parameter \"order\" is NOT necessary and will be ignored."),
-    @Parameter(name = "order", optional=true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
-    @Parameter(name = "collation", optional=true, description = "Allows you to specify a collation to sort the contacts by. As of 6.20, only supports \"gbk\" and \"gb2312\", not needed for other languages. Parameter sort should be set for this to work."),
-    @Parameter(name = "admin", optional=true, type=Type.BOOLEAN, description = "(preliminary, since 7.4.2) - whether to include the contact representing the admin in the result or not. Defaults to \"true\".")
-}, responseDescription = "Response with timestamp: An array with contact data. Each array element describes one contact and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 @OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
 public class AnniversariesAction extends ContactAction {
 

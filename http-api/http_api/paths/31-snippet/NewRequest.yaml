@@ -2,8 +2,8 @@
   put:
     operationId: createSnippet
     tags:
-      - snippet
-    summary: Creates a snippet (**available since v7.0.0/v6.22.0**).
+      - Snippet
+    summary: Creates a snippet.
     consumes:
       - application/json
     parameters:
@@ -18,6 +18,6 @@
       200:
         description: |
           A JSON object containing the ID of the newly created snippet. In case of errors the responsible fields in the response are
-          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/SnippetUpdateResponse"

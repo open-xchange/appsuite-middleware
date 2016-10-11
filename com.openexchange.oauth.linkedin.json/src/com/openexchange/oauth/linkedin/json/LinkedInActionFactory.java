@@ -54,7 +54,6 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.linkedin.json.actions.AbstractLinkedInAction;
 import com.openexchange.oauth.linkedin.json.actions.FullProfilesAction;
@@ -67,7 +66,6 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-@Module(name = "integrations/linkedin/portal", description = "Provides access to linkedin module.")
 public class LinkedInActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AbstractLinkedInAction> actions;

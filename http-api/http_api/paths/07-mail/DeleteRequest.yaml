@@ -2,7 +2,7 @@
   put:
     operationId: deleteMails
     tags:
-      - mail
+      - Mail
     summary: Deletes mails.
     consumes:
       - application/json
@@ -27,6 +27,6 @@
         description: |
           Not IMAP: A JSON array with object IDs of mails which were modified after the specified timestamp and
           were therefore not deleted. In case of errors the responsible fields in the response are
-          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/MailsCleanUpResponse"

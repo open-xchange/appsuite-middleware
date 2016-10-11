@@ -59,9 +59,6 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.ETagAwareAJAXActionService;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.ContentDisposition;
@@ -80,15 +77,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(
-    name = "getattachment"
-    , description = "Gets a specific snippet attachment."
-    , method = RequestMethod.GET
-    , parameters = {
-        @Parameter(name = "id", description = "The identifier of the snippet."),
-        @Parameter(name = "attachmentid", description = "The identifier of the snippet attachment.")
-    }
-)
 public final class GetAttachmentAction extends SnippetAction implements ETagAwareAJAXActionService {
 
     private static String extractFilename(final Attachment attachment) {

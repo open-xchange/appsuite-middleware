@@ -115,6 +115,50 @@ public final class FileStorages {
 
     // -------------------------------------------------------------------------------------------------------------------------
 
+    private static final AtomicReference<FileStorageInfoService> INFO_REF = new AtomicReference<FileStorageInfoService>();
+
+    /**
+     * Sets the file storage info service
+     *
+     * @param infoService The file storage info service
+     */
+    public static void setFileStorageInfoService(FileStorageInfoService infoService) {
+        INFO_REF.set(infoService);
+    }
+
+    /**
+     * Gets the file storage info service
+     *
+     * @return The file storage info service or <code>null</code> if absent
+     */
+    public static FileStorageInfoService getFileStorageInfoService() {
+        return INFO_REF.get();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------
+
+    private static final AtomicReference<DatabaseAccessService> DB_ACCESS_REF = new AtomicReference<DatabaseAccessService>();
+
+    /**
+     * Sets the database access service.
+     *
+     * @param dbAccessService The database access service
+     */
+    public static void setDatabaseAccessService(DatabaseAccessService dbAccessService) {
+        DB_ACCESS_REF.set(dbAccessService);
+    }
+
+    /**
+     * Gets the database access service.
+     *
+     * @return The database access service or <code>null</code> if absent
+     */
+    public static DatabaseAccessService getDatabaseAccessService() {
+        return DB_ACCESS_REF.get();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------
+
     private static final AtomicReference<FileStorageService> FS_REF = new AtomicReference<FileStorageService>();
 
     /**
@@ -202,6 +246,33 @@ public final class FileStorages {
     }
 
     // -------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Gets the fully qualifying URI for given file storage identifier and prefix information.
+     *
+     * @param filestoreId The file storage identifier
+     * @param prefix The prefix; e.g. <code>"1337_ctx_store"</code>
+     * @return The fully qualifying URI
+     * @throws OXException If fully qualifying URI cannot be returned
+     * @see #getContextAppendix(int)
+     * @see #getUserAppendix(int, int)
+     */
+    public static URI getFullyQualifyingUriFor(int filestoreId, String prefix) throws OXException {
+        FileStorageInfoService infoService = INFO_REF.get();
+        if (null == infoService) {
+            throw new IllegalStateException("Missing service: " + FileStorageInfoService.class.getSimpleName());
+        }
+
+        FileStorageInfo fsInfo = infoService.getFileStorageInfo(filestoreId);
+        URI baseUri = fsInfo.getUri();
+        String path = ensureEndingSlash(baseUri.getPath()) + prefix;
+        try {
+            String scheme = baseUri.getScheme();
+            return new URI(null == scheme ? "file" : scheme, baseUri.getAuthority(), path, baseUri.getQuery(), baseUri.getFragment());
+        } catch (URISyntaxException e) {
+            throw FileStorageCodes.URI_CREATION_FAILED.create(e, path);
+        }
+    }
 
     /**
      * Gets the fully qualifying URI for given context; sets returned URI's scheme to <code>"file"</code> if absent in base URI.

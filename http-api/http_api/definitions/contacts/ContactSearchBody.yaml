@@ -8,7 +8,9 @@ properties:
     description: 'Search contacts with the given startletter. If this field is present, the pattern is matched against the contact field which is specified by the property "contact_first_letter_field" on the server (default: last name). Otherwise, the pattern is matched against the display name.'
   folder:
     type: array
-    description: If a list of folder identifiers or at least a single folder identifier is given, only in that folders will be searched for contacts. This paramenter is optional but searching in all contact folders that are viewable and where objects can be read in is more expensive on that database than searching in a dedicated number of them. The possibility to provide here an array of folder identifier has been added with 6.10.
+    description: |
+      If a list of folder identifiers or at least a single folder identifier is given, only in that folders will be searched for contacts. 
+      This paramenter is optional but searching in all contact folders that are viewable and where objects can be read in is more expensive on that database than searching in a dedicated number of them. 
     items:
       type: integer
   last_name:
@@ -22,25 +24,25 @@ properties:
     description: Searches contacts where the display name match with the given display name.
   email1:
     type: string
-    description: Searches contacts where the email1 address match with the given search pattern. (requires version >= 6.12)
+    description: Searches contacts where the email1 address match with the given search pattern.
   email2:
     type: string
-    description: Searches contacts where the email2 address match with the given search pattern. (requires version >= 6.12)
+    description: Searches contacts where the email2 address match with the given search pattern.
   email3:
     type: string
-    description: Searches contacts where the email3 address match with the given search pattern. (requires version >= 6.12)
+    description: Searches contacts where the email3 address match with the given search pattern.
   company:
     type: string
-    description: Searches contacts where the company match with the given search pattern. (requires version >= 6.12)
+    description: Searches contacts where the company match with the given search pattern.
   categories:
     type: string
     description: Searches contacts where the categories match with the given search pattern.
   orSearch:
     type: boolean
-    description: If set to true, a contact is returned if any specified pattern matches at the start of the corresponding field. Otherwise, a contact is returned if all specified patterns match any substring of the corresponding field.
+    description: 'If set to `true`, a contact is returned if any specified pattern matches at the start of the corresponding field. Otherwise, a contact is returned if all specified patterns match any substring of the corresponding field.'
   emailAutoComplete:
     type: boolean
-    description: If set to true, results are guaranteed to contain at least one email adress and the search is performed as if orSearch were set to true. The actual value of orSearch is ignored.
+    description: 'If set to `true`, results are guaranteed to contain at least one email adress and the search is performed as if orSearch were set to `true`. The actual value of orSearch is ignored.'
   exactMatch:
     type: boolean
-    description: If set to true, contacts are returned where the specified patterns match the corresponding fields exactly. Otherwise, a "startsWith" or "substring" comparison is used based on the "orSearch" parameter. (requires version > 6.22.1)
+    description: 'If set to `true`, contacts are returned where the specified patterns match the corresponding fields exactly. Otherwise, a "startsWith" or "substring" comparison is used based on the "orSearch" parameter.'

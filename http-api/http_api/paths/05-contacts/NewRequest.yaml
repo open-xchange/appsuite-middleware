@@ -2,7 +2,7 @@
   put:
     operationId: createContact
     tags:
-      - contacts
+      - Contacts
     summary: Creates a contact.
     description: |
       Creates a new contact. This request cannot add contact images. Therefor it
@@ -21,13 +21,13 @@
       200:
         description: |
           A JSON object containing the ID of the newly created contact. In case of errors the responsible fields in the response are
-          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/ContactUpdateResponse"
   post:
     operationId: createContactAdvanced
     tags:
-      - contacts
+      - Contacts
     summary: Creates a contact.
     description: |
       Creates a new contact with contact images. The normal request body must be placed as form-data using the

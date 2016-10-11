@@ -56,9 +56,6 @@ import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.json.ConfigAJAXRequest;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
@@ -73,12 +70,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
  */
-@Action(method = RequestMethod.PUT, name = "set_property", description = "Sets a property for scope \"context\"", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "name", description = "The property name."),
-    @Parameter(name = "value", description = "The property value to set.")
-}, responseDescription = "A JSON object providing the property's name and its new value",
-   requestBody = "A JSON object providing the new value; { \"value\": \"foobar\"}")
 public class SetPropertyAction extends AbstractConfigAction {
 
     /**
