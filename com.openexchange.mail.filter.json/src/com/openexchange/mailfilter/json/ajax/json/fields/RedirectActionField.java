@@ -55,5 +55,5 @@ package com.openexchange.mailfilter.json.ajax.json.fields;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum RedirectActionField {
-    to;
+    to, keep;
 }
