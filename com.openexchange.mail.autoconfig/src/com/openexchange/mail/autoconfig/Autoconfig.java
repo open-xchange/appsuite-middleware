@@ -141,14 +141,14 @@ public interface Autoconfig {
     boolean isTransportStartTls();
 
     /**
-     * Marks mail password as OAuth token and thus XOAUTH2 is supposed to be performed for authentication.
+     * Marks mail password as OAuth token and thus XOAUTH2 authentication mechanism is supposed to be performed.
      *
      * @return <code>true</code> OAuth-wise mail access; otherwise <code>false</code>
      */
     boolean isMailOAuth();
 
     /**
-     * Marks transport password as OAuth token and thus XOAUTH2 is supposed to be performed for authentication.
+     * Marks transport password as OAuth token and thus XOAUTH2 authentication mechanism is supposed to be performed.
      *
      * @return <code>true</code> OAuth-wise mail transport; otherwise <code>false</code>
      */
