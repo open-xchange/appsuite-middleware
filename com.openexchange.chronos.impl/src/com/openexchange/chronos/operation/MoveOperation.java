@@ -233,6 +233,25 @@ public class MoveOperation extends AbstractOperation {
                 throw CalendarExceptionCodes.ATTENDEE_NOT_FOUND.create(String.valueOf(calendarUser.getId()), originalEvent.getId());
             }
             updateAttendeeFolderId(originalEvent.getId(), originalAttendee, i(targetFolder));
+        } else if (calendarUser.getId() == session.getUser().getId()) {
+            /*
+             * move from user's own calendar to another one ("reassign"), remove the original default user and
+             * ensure that the target calendar user becomes attendee
+             */
+            Attendee defaultAttendee = find(originalEvent.getAttendees(), targetCalendarUser.getId());
+            if (null == defaultAttendee) {
+                defaultAttendee = new AttendeeHelper(session, targetFolder, null, null).getDefaultAttendee(targetFolder, null);
+                storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), Collections.singletonList(defaultAttendee));
+            }
+            for (Attendee originalAttendee : filter(originalEvent.getAttendees(), Boolean.TRUE, CalendarUserType.INDIVIDUAL)) {
+                if (calendarUser.getId() == originalAttendee.getEntity()) {
+                    storage.getAttendeeStorage().insertTombstoneAttendee(originalEvent.getId(), AttendeeMapper.getInstance().getTombstone(originalAttendee));
+                    storage.getAttendeeStorage().deleteAttendees(originalEvent.getId(), Collections.singletonList(originalAttendee));
+                } else {
+                    int folderId = targetCalendarUser.getId() == originalAttendee.getEntity() ? i(targetFolder) : getDefaultCalendarID(originalAttendee.getEntity());
+                    updateAttendeeFolderId(originalEvent.getId(), originalAttendee, folderId);
+                }
+            }
         } else {
             /*
              * move from one personal folder to another user's personal folder, take over target folder for new default attendee
