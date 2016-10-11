@@ -32,4 +32,3 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.tools.session,
  org.json,
  org.osgi.framework
-Bundle-ActivationPolicy: lazy

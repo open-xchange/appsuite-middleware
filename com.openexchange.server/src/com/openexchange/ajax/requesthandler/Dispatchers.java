@@ -56,6 +56,7 @@ import com.openexchange.annotation.Nullable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -73,6 +74,45 @@ public class Dispatchers {
      */
     private Dispatchers() {
         super();
+    }
+
+    /**
+     * Performs specified request using default dispatcher instance.
+     *
+     * @param requestData The request data
+     * @param session The associated session
+     * @param ox The dispatcher
+     * @return The result object (if any)
+     * @throws OXException If execution fails
+     */
+    public static <V> V perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        return perform(requestData, session, DispatcherServlet.getDispatcher());
+    }
+
+    /**
+     * Performs specified request with given dispatcher instance.
+     *
+     * @param requestData The request data
+     * @param session The associated session
+     * @param dispatcher The dispatcher
+     * @return The result object (if any)
+     * @throws OXException If execution fails
+     */
+    public static <V> V perform(AJAXRequestData requestData, ServerSession session, Dispatcher dispatcher) throws OXException {
+        AJAXRequestResult requestResult = null;
+        Exception exc = null;
+        try {
+            requestResult = dispatcher.perform(requestData, null, session);
+            return (V) requestResult.getResultObject();
+        } catch (OXException x) {
+            exc = x;
+            throw x;
+        } catch (RuntimeException x) {
+            exc = x;
+            throw new OXException(x);
+        } finally {
+            Dispatchers.signalDone(requestResult, exc);
+        }
     }
 
     /**
