@@ -154,7 +154,7 @@ public final class HtmlServices {
      */
     public static Result isAcceptableDataUri(String value, Callable<Boolean> condition) {
         String val = value.trim();
-        if (false == val.startsWith(DATA_TOKEN)) {
+        if (false == asciiLowerCase(val).startsWith(DATA_TOKEN)) {
             // No data URI at all
             return Result.NEUTRAL;
         }
@@ -188,7 +188,7 @@ public final class HtmlServices {
         if (endPos < 0) {
             endPos = commaPos;
         }
-        String mimeType = val.substring(dataPos, endPos).trim();
+        String mimeType = asciiLowerCase(val.substring(dataPos, endPos).trim());
         return (mimeType.startsWith("image/") && mimeType.indexOf("svg") < 0) ? Result.ALLOW : Result.DENY;
     }
 
