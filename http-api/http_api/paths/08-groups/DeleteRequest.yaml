@@ -3,7 +3,7 @@
     operationId: deleteGroup
     tags:
       - Groups
-    summary: Deletes a group (**introduced 2008-06-12**).
+    summary: Deletes a group.
     consumes:
       - application/json
     parameters:

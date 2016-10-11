@@ -3,7 +3,7 @@
     operationId: updateGroup
     tags:
       - Groups
-    summary: Updates a group (**introduced 2008-06-12**).
+    summary: Updates a group.
     consumes:
       - application/json
     parameters:

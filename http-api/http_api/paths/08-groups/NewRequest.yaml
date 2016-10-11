@@ -3,7 +3,7 @@
     operationId: createGroup
     tags:
       - Groups
-    summary: Creates a group (**introduced 2008-06-12**).
+    summary: Creates a group.
     consumes:
       - application/json
     parameters:
