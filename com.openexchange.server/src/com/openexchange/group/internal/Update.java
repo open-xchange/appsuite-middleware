@@ -276,9 +276,10 @@ final class Update {
         // folder. This must be done because through this change some folders
         // may get visible or invisible.
         final Connection con = DBPool.pickupWriteable(ctx);
+        boolean writeConnectionUsed = false;
         try {
             con.setAutoCommit(false);
-            propagate(con);
+            writeConnectionUsed = propagate(con);
             con.commit();
         } catch (final SQLException e) {
             DBUtils.rollback(con);
@@ -292,13 +293,17 @@ final class Update {
             } catch (final SQLException e) {
                 LOG.error("Problem setting autocommit to true.", e);
             }
-            DBPool.closeWriterSilent(ctx, con);
+            if(writeConnectionUsed){
+                DBPool.closeWriterSilent(ctx, con);
+            } else {
+                DBPool.closeWriterAfterReading(ctx, con);
+            }
         }
     }
 
-    private void propagate(final Connection con) throws OXException {
+    private boolean propagate(final Connection con) throws OXException {
         try {
-            OXFolderAdminHelper.propagateGroupModification(changed.getIdentifier(), con, con, ctx.getContextId());
+            return OXFolderAdminHelper.propagateGroupModification(changed.getIdentifier(), con, con, ctx.getContextId());
         } catch (final SQLException e) {
             throw GroupExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         }

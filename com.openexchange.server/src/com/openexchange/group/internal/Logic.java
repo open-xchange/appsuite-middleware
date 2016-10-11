@@ -52,6 +52,7 @@ package com.openexchange.group.internal;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.util.Date;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupExceptionCodes;
@@ -59,6 +60,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  *
@@ -134,7 +136,8 @@ public final class Logic {
         // generated.
     }
 
-    private static final String ALLOWED_CHARS = "[$@%\\.+a-zA-Z0-9_-]";
+    private static final String ALLOWED_CHARS = "[ $@%\\.+a-zA-Z0-9_-]";
+    private static final String ALLOWED_CHARS_PROPERTY="CHECK_GROUP_UID_REGEXP";
 
     /**
      * Validates of the simple name of the group only contains allowed
@@ -150,7 +153,9 @@ public final class Logic {
         // Check for allowed chars:
         // abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-+.%$@
         final String groupName = group.getSimpleName();
-        final String illegal = groupName.replaceAll(ALLOWED_CHARS, "");
+        ConfigurationService configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        String allowedChars = configurationService.getProperty(ALLOWED_CHARS_PROPERTY, ALLOWED_CHARS);
+        final String illegal = groupName.replaceAll(allowedChars, "");
         if (illegal.length() > 0) {
             throw GroupExceptionCodes.NOT_ALLOWED_SIMPLE_NAME.create(illegal);
         }
