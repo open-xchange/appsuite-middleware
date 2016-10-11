@@ -58,7 +58,6 @@ import com.openexchange.oauth.scope.OXScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum YahooOAuthScope implements OAuthScope {
-    mail("mail-x", OXScope.mail),
     contacts_ro("sdct-r", OXScope.contacts_ro),
     contacts("sdct-w", OXScope.contacts),
     ;
