@@ -50,6 +50,7 @@
 package com.openexchange.chronos.operation;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -94,6 +95,19 @@ public class CalendarResultImpl implements CalendarResult {
     }
 
     /**
+     * Merges the results of another calendar result into this result.
+     *
+     * @param result The result to merge
+     */
+    public void merge(CalendarResult result) {
+        applyTimestamp(result.getTimestamp());
+        addConflicts(result.getConflicts());
+        addDeletions(result.getDeletions());
+        addCreations(result.getCreations());
+        addUpdates(result.getUpdates());
+    }
+
+    /**
      * Applies an updated server timestamp as used as new/updated last-modification date of the modified data in storage, which is usually
      * also returned to clients.
      * <p/>
@@ -104,7 +118,7 @@ public class CalendarResultImpl implements CalendarResult {
      * @return A self reference
      */
     public CalendarResultImpl applyTimestamp(Date timestamp) {
-        if (null == this.timestamp || timestamp.after(this.timestamp)) {
+        if (null == this.timestamp || null != timestamp && timestamp.after(this.timestamp)) {
             this.timestamp = timestamp;
         }
         return this;
@@ -125,6 +139,21 @@ public class CalendarResultImpl implements CalendarResult {
     }
 
     /**
+     * Adds multiple deletions to this calendar result.
+     *
+     * @param deletions The deletions to add
+     * @return A self reference
+     */
+    public CalendarResultImpl addDeletions(Collection<? extends DeleteResult> deletions) {
+        if (null == this.deletions) {
+            this.deletions = new ArrayList<DeleteResult>(deletions);
+        } else {
+            this.deletions.addAll(deletions);
+        }
+        return this;
+    }
+
+    /**
      * Adds a creation to this calendar result.
      *
      * @param creation The creation to add
@@ -135,6 +164,21 @@ public class CalendarResultImpl implements CalendarResult {
             creations = new ArrayList<CreateResult>();
         }
         creations.add(creation);
+        return this;
+    }
+
+    /**
+     * Adds multiple creations to this calendar result.
+     *
+     * @param creations The creations to add
+     * @return A self reference
+     */
+    public CalendarResultImpl addCreations(Collection<? extends CreateResult> creations) {
+        if (null == this.creations) {
+            this.creations = new ArrayList<CreateResult>(creations);
+        } else {
+            this.creations.addAll(creations);
+        }
         return this;
     }
 
@@ -153,6 +197,21 @@ public class CalendarResultImpl implements CalendarResult {
     }
 
     /**
+     * Adds multiple updates to this calendar result.
+     *
+     * @param updates The updates to add
+     * @return A self reference
+     */
+    public CalendarResultImpl addUpdates(Collection<? extends UpdateResult> updates) {
+        if (null == this.updates) {
+            this.updates = new ArrayList<UpdateResult>(updates);
+        } else {
+            this.updates.addAll(updates);
+        }
+        return this;
+    }
+
+    /**
      * Adds a conflict to this calendar result.
      *
      * @param conflict The conflict to add
@@ -163,6 +222,21 @@ public class CalendarResultImpl implements CalendarResult {
             conflicts = new ArrayList<EventConflict>();
         }
         conflicts.add(conflict);
+        return this;
+    }
+
+    /**
+     * Adds multiple conflicts to this calendar result.
+     *
+     * @param conflicts The conflicts to add
+     * @return A self reference
+     */
+    public CalendarResultImpl addConflicts(Collection<? extends EventConflict> conflicts) {
+        if (null == this.conflicts) {
+            this.conflicts = new ArrayList<EventConflict>(conflicts);
+        } else {
+            this.conflicts.addAll(conflicts);
+        }
         return this;
     }
 

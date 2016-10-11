@@ -293,8 +293,11 @@ public class UpdateAttendeeOperation extends AbstractOperation {
         if (originalAttendee.getFolderID() != i(folder)) {
             throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(I(originalEvent.getId()), originalAttendee, AttendeeField.FOLDER_ID);
         }
-        if (isSeriesException(originalEvent) || isSeriesMaster(originalEvent)) {
-            throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(I(originalEvent.getId()), originalAttendee, AttendeeField.FOLDER_ID);
+        if (isSeriesMaster(originalEvent)) {
+            throw CalendarExceptionCodes.MOVE_SERIES_NOT_SUPPORTED.create(I(originalEvent.getId()), I(i(folder)), I(updatedFolderID));
+        }
+        if (isSeriesException(originalEvent)) {
+            throw CalendarExceptionCodes.MOVE_OCCURRENCE_NOT_SUPPORTED.create(I(originalEvent.getId()), I(i(folder)), I(updatedFolderID));
         }
         if (PublicType.getInstance().equals(folder.getType())) {
             throw CalendarExceptionCodes.FORBIDDEN_ATTENDEE_CHANGE.create(I(originalEvent.getId()), originalAttendee, AttendeeField.FOLDER_ID);

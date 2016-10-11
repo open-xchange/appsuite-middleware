@@ -82,7 +82,7 @@ import com.openexchange.preferences.ServerUserSetting;
 public class AttendeeHelper {
 
     /** The constant used to indicate a common "public" parent folder for internal user attendees */
-    static final int ATTENDEE_PUBLIC_FOLDER_ID = -2;
+    public static final int ATTENDEE_PUBLIC_FOLDER_ID = -2;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttendeeHelper.class);
 
@@ -259,7 +259,16 @@ public class AttendeeHelper {
         return attendees;
     }
 
-    private Attendee getDefaultAttendee(UserizedFolder folder, List<Attendee> requestedAttendees) throws OXException {
+    /**
+     * Gets the <i>default</i> attendee that is always added to a newly inserted event, based on the target folder type.<p/>
+     * For <i>public</i> folders, this is an attendee for the current session's user, otherwise (<i>private</i> or <i>shared</i>, an
+     * attendee for the folder owner (i.e. the calendar user) is prepared.
+     *
+     * @param folder The folder to get the default attendee for
+     * @param requestedAttendees The attendees as supplied by the client, or <code>null</code> if not available
+     * @return The default attendee
+     */
+    public Attendee getDefaultAttendee(UserizedFolder folder, List<Attendee> requestedAttendees) throws OXException {
         /*
          * prepare attendee for default calendar user in folder
          */

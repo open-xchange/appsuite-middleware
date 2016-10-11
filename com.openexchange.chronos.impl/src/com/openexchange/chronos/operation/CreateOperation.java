@@ -203,7 +203,7 @@ public class CreateOperation extends AbstractOperation {
          * classification, status, transparency
          */
         if (eventData.containsClassification() && null != eventData.getClassification()) {
-            event.setClassification(Check.classificationIsValid(eventData, folder));
+            event.setClassification(Check.classificationIsValid(eventData.getClassification(), folder));
         } else {
             event.setClassification(Classification.PUBLIC);
         }

@@ -201,4 +201,14 @@ public abstract class AbstractOperation {
         return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderID), session.getSession(), null);
     }
 
+    /**
+     * Gets the identifier of a specific user's default personal calendar folder.
+     *
+     * @param userID The identifier of the user to retrieve the default calendar identifier for
+     * @return The default calendar folder identifier
+     */
+    protected int getDefaultCalendarID(int userID) throws OXException {
+        return session.getEntityResolver().getDefaultCalendarID(userID);
+    }
+
 }

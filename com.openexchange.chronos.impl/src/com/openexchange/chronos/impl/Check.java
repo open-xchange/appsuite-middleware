@@ -198,17 +198,15 @@ public class Check {
     }
 
     /**
-     * Checks that the classification is supported based on the given folder's type, if the event contains a classification different
-     * from {@link Classification#PUBLIC}.
+     * Checks that the classification is supported based on the given folder's type, if it is different from {@link Classification#PUBLIC}.
      *
-     * @param event The event to check
+     * @param classification The classification to check
      * @param folder The target folder for the event
-     * @return The passed event's classification, after it was checked for validity
+     * @return The passed classification, after it was checked for validity
      * @throws OXException {@link CalendarExceptionCodes#UNSUPPORTED_CLASSIFICATION}
      */
-    public static Classification classificationIsValid(Event event, UserizedFolder folder) throws OXException {
-        Classification classification = event.getClassification();
-        if (event.containsClassification() && false == Classification.PUBLIC.equals(classification) && PublicType.getInstance().equals(folder.getType())) {
+    public static Classification classificationIsValid(Classification classification, UserizedFolder folder) throws OXException {
+        if (false == Classification.PUBLIC.equals(classification) && PublicType.getInstance().equals(folder.getType())) {
             throw CalendarExceptionCodes.UNSUPPORTED_CLASSIFICATION.create(String.valueOf(classification), I(i(folder)), PublicType.getInstance());
         }
         return classification;

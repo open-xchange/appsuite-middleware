@@ -79,6 +79,10 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String INVALID_RECURRENCE_ID_MSG = "The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.";
 
+    public static final String MOVE_SERIES_NOT_SUPPORTED_MSG = "Moving an event series into another folder is not supported.";
+
+    public static final String MOVE_OCCURRENCE_NOT_SUPPORTED_MSG = "Moving an occurrence of an event series into another folder is not supported.";
+
     /**
      * Initializes a new {@link CalendarExceptionMessages}.
      */

@@ -55,6 +55,8 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.END_B
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_NOT_FOUND_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_RRULE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MANDATORY_FIELD_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_OCCURRENCE_NOT_SUPPORTED_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_SERIES_NOT_SUPPORTED_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.NO_PERMISSION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UID_CONFLICT_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.UNSUPPORTED_CLASSIFICATION_MSG;
@@ -92,6 +94,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Attendee not found [attendee %1$s, event %1$d]</li>
      */
     ATTENDEE_NOT_FOUND("Attendee not found [attendee %1$s, event %1$d]", ATTENDEE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4043),
+    /**
+     * <li>The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.</li>
+     * <li>Invalid recurrence id [id %1$d, rule %2$s]</li>
+     */
+    INVALID_RECURRENCE_ID("Invalid recurrence id [id %1$d, rule %2$s]", INVALID_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4044),
     /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
      * <li>Insufficient read permissions in folder [folder %1$d]</li>
@@ -143,10 +150,15 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      */
     INVALID_RRULE("Invalid recurrence rule [rule %1$s]", INVALID_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4223),
     /**
-     * <li>The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.</li>
-     * <li>Invalid recurrence id [id %1$d, rule %2$s]</li>
+     * <li>Moving an event series into another folder is not supported.</li>
+     * <li>Unsupported series move [id %1$d, folder %2$d, target folder %3$d]</li>
      */
-    INVALID_RECURRENCE_ID("Invalid recurrence id [id %1$d, rule %2$s]", INVALID_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4224),
+    MOVE_SERIES_NOT_SUPPORTED("Unsupported series move [id %1$d, folder %2$d, target folder %3$d]", MOVE_SERIES_NOT_SUPPORTED_MSG, Category.CATEGORY_USER_INPUT, 4224),
+    /**
+     * <li>Moving an occurrence of an event series into another folder is not supported.</li>
+     * <li>Unsupported occurrence move [id %1$d, folder %2$d, target folder %3$d]</li>
+     */
+    MOVE_OCCURRENCE_NOT_SUPPORTED("Unsupported occurrence move [id %1$d, folder %2$d, target folder %3$d]", MOVE_OCCURRENCE_NOT_SUPPORTED_MSG, Category.CATEGORY_USER_INPUT, 4225),
 
     ;
 

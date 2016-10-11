@@ -594,7 +594,9 @@ public class EventConverter {
                     copyProperties(getAttendee(user), existingAttendee);
                 } else {
                     //TODO: add from users array or not?
-                    attendees.add(getAttendee(user));
+                    // needs to be ignored for
+                    // - com.openexchange.ajax.appointment.bugtests.Bug15903Test.testUpdatedParticipants() 
+                    //                     attendees.add(getAttendee(user));
                 }
             }
         }
