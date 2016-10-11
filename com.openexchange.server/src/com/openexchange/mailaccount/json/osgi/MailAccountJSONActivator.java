@@ -52,6 +52,7 @@ package com.openexchange.mailaccount.json.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.groupware.userconfiguration.Permission;
@@ -59,10 +60,12 @@ import com.openexchange.jslob.storage.registry.JSlobStorageRegistry;
 import com.openexchange.mailaccount.Constants;
 import com.openexchange.mailaccount.CredentialsProviderRegistry;
 import com.openexchange.mailaccount.CredentialsProviderService;
+import com.openexchange.mailaccount.internal.MailAccountOAuthAccountDeleteListener;
 import com.openexchange.mailaccount.json.MailAccountActionProvider;
 import com.openexchange.mailaccount.json.MailAccountOAuthConstants;
 import com.openexchange.mailaccount.json.actions.AbstractMailAccountAction;
 import com.openexchange.mailaccount.json.factory.MailAccountActionFactory;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 
@@ -117,9 +120,12 @@ public final class MailAccountJSONActivator extends AJAXModuleActivator {
                 context.ungetService(reference);
             }
         });
+        trackService(Dispatcher.class);
         openTrackers();
 
         registerModule(new MailAccountActionFactory(providerTracker), Constants.getModule());
+
+        registerService(OAuthAccountDeleteListener.class, new MailAccountOAuthAccountDeleteListener());
 
         registerService(OAuthScopeProvider.class, new AbstractScopeProvider(MailAccountOAuthConstants.OAUTH_READ_SCOPE, OAuthScopeDescription.READ_ONLY) {
 

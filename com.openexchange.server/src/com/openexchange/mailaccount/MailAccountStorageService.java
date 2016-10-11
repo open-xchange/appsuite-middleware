@@ -378,6 +378,17 @@ public interface MailAccountStorageService {
     void deleteTransportAccount(int id, int userId, int contextId) throws OXException;
 
     /**
+     * Deletes the transport account identified by specified identifier.
+     *
+     * @param id The transport account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param con The connection to use
+     * @throws OXException If the mail account cannot be deleted
+     */
+    void deleteTransportAccount(final int id, final int userId, final int contextId, final Connection con) throws OXException;
+
+    /**
      * Deletes the mail account identified by specified identifier.
      *
      * @param id The mail account identifier

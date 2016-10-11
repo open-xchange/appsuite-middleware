@@ -732,7 +732,13 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         dropSessionParameter(userId, contextId);
         delegate.deleteTransportAccount(id, userId, contextId);
         invalidateMailAccount(id, userId, contextId);
+    }
 
+    @Override
+    public void deleteTransportAccount(int id, int userId, int contextId, Connection con) throws OXException {
+        dropSessionParameter(userId, contextId);
+        delegate.deleteTransportAccount(id, userId, contextId, con);
+        invalidateMailAccount(id, userId, contextId);
     }
 
     @Override
