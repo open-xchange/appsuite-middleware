@@ -1260,9 +1260,10 @@ public final class OXFolderAdminHelper {
      * @param readCon A readable connection to database
      * @param writeCon A writable connection to database
      * @param cid The context ID
+     * @return true in case the write connection has been used, otherwise false
      * @throws SQLException If a SQL related error occurs
      */
-    public static void propagateGroupModification(final int group, final Connection readCon, final Connection writeCon, final int cid) throws SQLException {
+    public static boolean propagateGroupModification(final int group, final Connection readCon, final Connection writeCon, final int cid) throws SQLException {
         try {
             final int[] members = GroupStorage.getInstance().getGroup(group, ContextStorage.getStorageContext(cid)).getMember();
             for (final int member : members) {
@@ -1317,7 +1318,9 @@ public final class OXFolderAdminHelper {
                     }
                 } while (!list.isEmpty());
                 stmt.executeBatch();
+                return true;
             }
+            return false;
         } finally {
             closeResources(rs, stmt, null, true, cid);
         }
