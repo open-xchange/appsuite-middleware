@@ -81,6 +81,8 @@ public class CreateSchema extends BasicCommandlineOptions {
     private final char OPT_DB_ID_SHORT = 'i';
     private final String OPT_DB_ID_LONG = "id";
     private final String OPT_DB_ID_DESCRIPTION = "An optional database id";
+    private final String USAGE = "-A <masteradmin> -P <password> [-i <db_id>] [--csv]";
+    private final String DESCRIPTION = "Creates additional database schemata which can be used during the creation of contexts.";
 
     private CLIOption optDBIdOption;
     private static final List<String> COLUMNS;
@@ -98,11 +100,12 @@ public class CreateSchema extends BasicCommandlineOptions {
 
 
  public void execute(String [] args) {
-     final AdminParser parser = new AdminParser("create schema");
+     final AdminParser parser = new AdminParser("createschema");
+     parser.setUsage(USAGE);
+     parser.setCltDescription(DESCRIPTION);
      try {
         setOptions(parser);
         parser.ownparse(args);
-
         Credentials creds = credentialsparsing(parser);
         String id_str = (String) parser.getOptionValue(optDBIdOption);
         Integer id = Strings.isEmpty(id_str) ? null : Integer.valueOf(id_str);
@@ -118,7 +121,7 @@ public class CreateSchema extends BasicCommandlineOptions {
             data.add(row);
             doCSVOutput(COLUMNS, data);
         } else {
-            System.out.printf("Created a new schema with name \"%s\" in database with id %s", db.getScheme(), db.getId());
+            System.out.printf("Created a new schema with name \"%s\" in database with id %s \n", db.getScheme(), db.getId());
         }
     } catch (CLIParseException e) {
         printError("Parsing command-line failed : " + e.getMessage(), parser);

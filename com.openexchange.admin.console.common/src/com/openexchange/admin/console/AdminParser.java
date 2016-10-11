@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
+import com.openexchange.java.Strings;
 
 /**
  * This class is used to extend the CmdLineParser which two main things:
@@ -91,6 +92,8 @@ public class AdminParser extends CLIParser {
     private String appname = null;
 
     private String usage = "";
+
+    private String cltDescription;
 
     private CLIOption csvImportOption = null;
 
@@ -542,6 +545,9 @@ public class AdminParser extends CLIParser {
     public final void printUsage() {
         System.out.print("Usage: " + this.appname);
         System.out.println(" " + usage);
+        if(Strings.isNotEmpty(cltDescription)){
+            System.out.println(cltDescription+"\n");
+        }
 
         for (final OptionInfo optInfo : this.optinfolist) {
             if (!optInfo.extended && !optInfo.hidden) {
@@ -562,6 +568,9 @@ public class AdminParser extends CLIParser {
     public final void printUsageExtended() {
         System.out.println("Usage: " + this.appname);
         System.out.println(" " + usage);
+        if(Strings.isNotEmpty(cltDescription)){
+            System.out.println("Description: "+cltDescription);
+        }
 
         for (final OptionInfo optInfo : this.optinfolist) {
             basicOutput(optInfo);
@@ -676,5 +685,23 @@ public class AdminParser extends CLIParser {
 
     public String getUsage() {
         return usage;
+    }
+
+    /**
+     * Gets the cltDescription
+     *
+     * @return The cltDescription
+     */
+    public String getCltDescription() {
+        return cltDescription;
+    }
+
+    /**
+     * Sets the cltDescription
+     *
+     * @param cltDescription The cltDescription to set
+     */
+    public void setCltDescription(String cltDescription) {
+        this.cltDescription = cltDescription;
     }
 }
