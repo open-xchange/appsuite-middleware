@@ -138,7 +138,8 @@ Bundle-ClassPath: .,
  lib/google-oauth-client-appengine-1.21.0.jar,
  lib/google-oauth-client-java6-1.21.0.jar,
  lib/google-api-services-calendar-v3-rev191-1.21.0.jar,
- lib/google-api-services-drive-v2-rev224-1.21.0.jar
+ lib/google-api-services-drive-v2-rev224-1.21.0.jar,
+ lib/google-api-services-oauth2-v2-rev120-1.22.0.jar
 Export-Package: com.google.api.client.auth.oauth,
  com.google.api.client.auth.oauth2,
  com.google.api.client.auth.openidconnect,
@@ -206,4 +207,6 @@ Export-Package: com.google.api.client.auth.oauth,
  com.google.api.services.calendar,
  com.google.api.services.calendar.model,
  com.google.api.services.drive,
- com.google.api.services.drive.model
+ com.google.api.services.drive.model,
+ com.google.api.services.oauth2,
+ com.google.api.services.oauth2.model
