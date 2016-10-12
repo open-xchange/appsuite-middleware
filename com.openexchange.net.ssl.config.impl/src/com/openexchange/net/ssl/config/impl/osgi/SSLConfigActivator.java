@@ -65,7 +65,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
 /**
- * 
+ *
  * {@link SSLConfigActivator}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -82,15 +82,15 @@ public class SSLConfigActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         try {
             org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("starting bundle: \"com.openexchange.net.ssl.config.impl\"");
-            Services.setBundleContext(this.context);
-            
+            Services.setServiceLookup(this);
+
             ConfigurationService configService = getService(ConfigurationService.class);
-            
+
             if (configService.getBoolProperty(SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getName(), SSLProperties.SECURE_CONNECTIONS_DEBUG_LOGS_ENABLED.getDefaultBoolean())) {
                 System.setProperty("javax.net.debug", "ssl:record");
                 org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("Enabled SSL debug logging.");
             }
-            
+
             registerService(Reloadable.class, new SSLPropertiesReloadable());
 
             ContextService contextService = getService(ContextService.class);
@@ -98,7 +98,7 @@ public class SSLConfigActivator extends HousekeepingActivator {
 
             registerService(UserAwareSSLConfigurationService.class, userAwareSSLConfigurationImpl);
             registerService(SSLConfigurationService.class, new SSLConfigurationServiceImpl(getService(ConfigurationService.class)));
-            
+
             registerService(JSlobEntry.class, new AcceptUntrustedCertificatesJSLobEntry(contextService, userAwareSSLConfigurationImpl));
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).error("", e);
@@ -110,7 +110,7 @@ public class SSLConfigActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         org.slf4j.LoggerFactory.getLogger(SSLConfigActivator.class).info("stopping bundle: \"com.openexchange.net.ssl.config.impl\"");
 
-        Services.setBundleContext(null);
+        Services.setServiceLookup(null);
 
         super.stopBundle();
     }

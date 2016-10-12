@@ -279,7 +279,12 @@ public final class IMAPCapabilityAndGreetingCache {
             try {
                 // Establish socket connection
                 {
-                    s = isSecure ? SSLSocketFactoryProvider.getDefault().createSocket() : new Socket();
+                    if (isSecure) {
+                        SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
+                        s = factoryProvider.getDefault().createSocket();
+                    } else {
+                        s = new Socket();
+                    }
 
                     // Set connect timeout
                     int connectionTimeout = imapProperties.getImapConnectionTimeout();

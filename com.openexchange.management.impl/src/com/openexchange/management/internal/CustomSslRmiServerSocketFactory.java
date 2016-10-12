@@ -57,6 +57,7 @@ import java.net.UnknownHostException;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.rmi.ssl.SslRMIServerSocketFactory;
+import com.openexchange.management.services.ManagementServiceRegistry;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 
 /**
@@ -112,7 +113,11 @@ public final class CustomSslRmiServerSocketFactory extends SslRMIServerSocketFac
 
     @Override
     public ServerSocket createServerSocket(final int port) throws IOException {
-        final SSLSocketFactory sslSocketFactory = SSLSocketFactoryProvider.getDefault();
+        SSLSocketFactoryProvider factoryProvider = ManagementServiceRegistry.getServiceRegistry().getService(SSLSocketFactoryProvider.class);
+        if (null == factoryProvider) {
+            throw new IOException("Missing " + SSLSocketFactoryProvider.class.getSimpleName() + " service. Bundle \"com.openexchange.net.ssl\" not started?");
+        }
+        final SSLSocketFactory sslSocketFactory = factoryProvider.getDefault();
         return new ServerSocket(port, 0/*use default backlog*/, bindAddress) {
 
             @Override

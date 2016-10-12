@@ -59,7 +59,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
 import com.openexchange.spamhandler.spamexperts.exceptions.SpamExpertsExceptionCode;
-import com.openexchange.spamhandler.spamexperts.osgi.SpamExpertsServiceRegistry;
+import com.openexchange.spamhandler.spamexperts.osgi.Services;
 
 
 /**
@@ -123,7 +123,7 @@ public class SpamExpertsConfig implements Initialization {
         /*
          * register properties
          */
-        load(SpamExpertsServiceRegistry.getInstance().getService(ConfigurationService.class, true));
+        load(Services.requireService(ConfigurationService.class));
     }
 
     /* (non-Javadoc)

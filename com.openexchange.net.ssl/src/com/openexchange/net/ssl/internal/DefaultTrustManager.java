@@ -69,10 +69,10 @@ public class DefaultTrustManager extends AbstractTrustManager {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultTrustManager.class);
 
     public DefaultTrustManager() {
-        this.trustManager = initDefaultTrustManager();
+        super(initDefaultTrustManager());
     }
 
-    private X509ExtendedTrustManager initDefaultTrustManager() {
+    private static X509ExtendedTrustManager initDefaultTrustManager() {
         boolean useDefaultTruststore = Services.getService(SSLConfigurationService.class).isDefaultTruststoreEnabled();
 
         if (useDefaultTruststore) {

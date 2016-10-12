@@ -56,6 +56,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.spamexperts.SpamExpertsSpamHandler;
@@ -69,73 +70,45 @@ public class SpamExpertsActivator extends HousekeepingActivator {
 
 	private HTTPServletRegistration servletRegistration;
 
-	private static final Class<?>[] NEEDED_SERVICES = { UserService.class,DatabaseService.class,ContextService.class,ConfigurationService.class,HttpService.class,MailService.class};
-	    
-    private final Dictionary<String, String> dictionary;
 
 	public SpamExpertsActivator() {
 		super();
-        dictionary = new Hashtable<String, String>();
-        dictionary.put("name", SpamExpertsSpamHandler.getInstance().getSpamHandlerName());
 	}
 
 	@Override
-	protected Class<?>[] getNeededServices() {
-		return NEEDED_SERVICES;
-	}
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { UserService.class, DatabaseService.class, ContextService.class, ConfigurationService.class, HttpService.class, MailService.class, SSLSocketFactoryProvider.class };
+    }
 
 	@Override
-	protected void handleAvailability(final Class<?> clazz) {
-		LOG.warn("Absent service: {}", clazz.getName());
-        SpamExpertsServiceRegistry.getInstance().addService(clazz, getService(clazz));
-	}
-
-	@Override
-	protected void handleUnavailability(final Class<?> clazz) {
-		LOG.info("Re-available service: {}", clazz.getName());
-        SpamExpertsServiceRegistry.getInstance().removeService(clazz);
-	}
-
-	@Override
-	protected void startBundle() throws Exception {
+	protected synchronized void startBundle() throws Exception {
         LOG.info("starting bundle: \"com.openexchange.spamhandler.spamexperts\"");
+        Services.setServiceLookup(this);
 
 		try {
-			{
-                final SpamExpertsServiceRegistry registry = SpamExpertsServiceRegistry.getInstance();
-				registry.clearRegistry();
-				final Class<?>[] classes = getNeededServices();
-				for (int i = 0; i < classes.length; i++) {
-					final Object service = getService(classes[i]);
-					if (null != service) {
-						registry.addService(classes[i], service);
-					}
-				}
-			}
-
+		    Dictionary<String, String> dictionary = new Hashtable<String, String>(2);
+	        dictionary.put("name", SpamExpertsSpamHandler.getInstance().getSpamHandlerName());
 			SpamExpertsConfig.getInstance().start();
 			registerService(SpamHandler.class, SpamExpertsSpamHandler.getInstance(), dictionary);
 			servletRegistration = new HTTPServletRegistration(context, new com.openexchange.spamhandler.spamexperts.servlets.SpamExpertsServlet(), SpamExpertsConfig.getInstance().getPanelServlet());
-
-		} catch (final Throwable t) {
+		} catch (final Exception t) {
 			LOG.error("", t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
+			throw t;
 		}
 
 	}
 
 	@Override
-	protected void stopBundle() throws Exception {
-		try {
-			if(servletRegistration != null) {
-			    servletRegistration.unregister();
-			    servletRegistration = null;
-			}
-			SpamExpertsServiceRegistry.getInstance().clearRegistry();
-		} catch (final Throwable t) {
-			LOG.error("", t);
-			throw t instanceof Exception ? (Exception) t : new Exception(t);
-		}
+	protected synchronized void stopBundle() throws Exception {
+        LOG.info("stopping bundle: \"com.openexchange.spamhandler.spamexperts\"");
+
+        if (servletRegistration != null) {
+            servletRegistration.unregister();
+            servletRegistration = null;
+        }
+
+        Services.setServiceLookup(null);
+        super.stopBundle();
 	}
 
 }

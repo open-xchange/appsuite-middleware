@@ -56,6 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.internal.ManagementAgentImpl;
 import com.openexchange.management.internal.ManagementInit;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceRegistry;
 
@@ -77,7 +78,7 @@ public final class ManagementActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, SSLSocketFactoryProvider.class };
     }
 
     @Override

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.net.ssl;
+package com.openexchange.net.ssl.internal;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -69,8 +69,6 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.net.ssl.internal.CustomTrustManager;
-import com.openexchange.net.ssl.internal.DefaultTrustManager;
 import com.openexchange.net.ssl.osgi.Services;
 
 /**

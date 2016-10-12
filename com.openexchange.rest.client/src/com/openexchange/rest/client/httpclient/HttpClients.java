@@ -151,7 +151,12 @@ public final class HttpClients {
      * @return A newly created {@link DefaultHttpClient} instance
      */
     public static DefaultHttpClient getHttpClient(final ClientConfig config) {
-        javax.net.ssl.SSLSocketFactory f = SSLSocketFactoryProvider.getDefault();
+        SSLSocketFactoryProvider factoryProvider = RestClientServices.getOptionalService(SSLSocketFactoryProvider.class);
+        if (null == factoryProvider) {
+            throw new IllegalStateException("Missing " + SSLSocketFactoryProvider.class.getSimpleName() + " service. Bundle \"com.openexchange.net.ssl\" not started?");
+        }
+
+        javax.net.ssl.SSLSocketFactory f = factoryProvider.getDefault();
         SSLConfigurationService sslConfig = RestClientServices.getService(SSLConfigurationService.class);
         final SchemeRegistry schemeRegistry = new SchemeRegistry();
         schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));

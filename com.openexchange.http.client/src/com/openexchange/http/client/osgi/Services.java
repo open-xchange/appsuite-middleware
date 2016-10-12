@@ -47,9 +47,11 @@
  *
  */
 
-package com.openexchange.net.ssl.config.impl.osgi;
+package com.openexchange.http.client.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -96,7 +98,7 @@ public class Services {
     public static <S extends Object> S getService(final Class<? extends S> clazz) {
         final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
         if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.net.ssl.config.impl\" not started?");
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.http.client\" not started?");
         }
         return serviceLookup.getService(clazz);
     }
@@ -113,6 +115,21 @@ public class Services {
         } catch (final IllegalStateException e) {
             return null;
         }
+    }
+
+    /**
+     * Requires the specified service
+     *
+     * @param clazz The service's class
+     * @return The service instance
+     * @throws OXException If such a service is not available
+     */
+    public static <S extends Object> S requireService(Class<? extends S> clazz) throws OXException {
+        S service = optService(clazz);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(clazz);
+        }
+        return service;
     }
 
 }

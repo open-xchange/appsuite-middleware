@@ -55,10 +55,11 @@ import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.apache.DefaultHostnameVerifier;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
+import com.openexchange.net.ssl.internal.DefaultSSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * 
+ *
  * {@link SSLActivator}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -75,17 +76,20 @@ public class SSLActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         try {
             org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("starting bundle: \"com.openexchange.net.ssl\"");
-            Services.setBundleContext(this.context);
+            Services.setServiceLookup(this);
+
+            DefaultSSLSocketFactoryProvider factoryProvider = DefaultSSLSocketFactoryProvider.getInstance();
+            registerService(SSLSocketFactoryProvider.class, factoryProvider);
 
             SSLConfigurationService sslConfigurationService = getService(SSLConfigurationService.class);
-            
+
             if (sslConfigurationService.isVerifyHostname()) {
                 HttpsURLConnection.setDefaultHostnameVerifier(new DefaultHostnameVerifier());
             } else {
                 HttpsURLConnection.setDefaultHostnameVerifier(new AllowAllHostnameVerifier());
             }
 
-            HttpsURLConnection.setDefaultSSLSocketFactory(SSLSocketFactoryProvider.getDefault());
+            HttpsURLConnection.setDefaultSSLSocketFactory(factoryProvider.getDefault());
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(SSLActivator.class).error("", e);
             throw e;
@@ -96,7 +100,7 @@ public class SSLActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("stopping bundle: \"com.openexchange.net.ssl\"");
 
-        Services.setBundleContext(null);
+        Services.setServiceLookup(null);
         super.stopBundle();
     }
 }

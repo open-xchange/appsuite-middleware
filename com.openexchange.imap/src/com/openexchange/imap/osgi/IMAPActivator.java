@@ -86,6 +86,7 @@ import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -126,8 +127,8 @@ public final class IMAPActivator extends HousekeepingActivator {
         return new Class<?>[] {
             ConfigurationService.class, CacheService.class, CacheEventService.class, UserService.class, MailAccountStorageService.class,
             ThreadPoolService.class, TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class,
-            EventAdmin.class, GroupService.class, ContextService.class, ConfigViewFactory.class, SSLConfigurationService.class, 
-            UserAwareSSLConfigurationService.class };
+            EventAdmin.class, GroupService.class, ContextService.class, ConfigViewFactory.class, SSLSocketFactoryProvider.class,
+            SSLConfigurationService.class, UserAwareSSLConfigurationService.class };
     }
 
     @Override

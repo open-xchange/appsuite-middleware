@@ -51,6 +51,7 @@ package com.openexchange.subscribe.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.secret.SecretService;
@@ -76,6 +77,7 @@ public final class TrackerActivator extends HousekeepingActivator {
     public void startBundle() throws Exception {
         track(ConfigurationService.class, new RegistryServiceTrackerCustomizer<ConfigurationService>(context, SubscriptionServiceRegistry.getInstance(), ConfigurationService.class));
         track(ContactService.class, new RegistryServiceTrackerCustomizer<ContactService>(context, SubscriptionServiceRegistry.getInstance(), ContactService.class));
+        track(SSLSocketFactoryProvider.class, new RegistryServiceTrackerCustomizer<SSLSocketFactoryProvider>(context, SubscriptionServiceRegistry.getInstance(), SSLSocketFactoryProvider.class));
         openTrackers();
         SubscriptionServiceRegistry.getInstance().addService(SecretService.class, secretService = new WhiteboardSecretService(context));
         secretService.open();

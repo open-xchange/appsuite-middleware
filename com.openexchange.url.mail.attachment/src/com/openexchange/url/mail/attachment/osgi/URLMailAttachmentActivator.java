@@ -52,6 +52,7 @@ package com.openexchange.url.mail.attachment.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.conversion.DataSource;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.url.mail.attachment.URLMailAttachmentDataSource;
 
@@ -84,7 +85,7 @@ public final class URLMailAttachmentActivator extends HousekeepingActivator {
              */
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put("identifier", name);
-            registerService(DataSource.class, new URLMailAttachmentDataSource(), props);
+            registerService(DataSource.class, new URLMailAttachmentDataSource(this), props);
         } catch (final Exception e) {
             LOG.error("starting bundle failed: {}", name, e);
             throw e;
@@ -104,8 +105,7 @@ public final class URLMailAttachmentActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        // Nothing to do
-        return null;
+        return new Class<?>[] { SSLSocketFactoryProvider.class };
     }
 
 }

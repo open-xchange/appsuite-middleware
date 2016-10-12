@@ -55,6 +55,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.mail.autoconfig.AutoconfigService;
 import com.openexchange.mail.autoconfig.internal.AutoconfigServiceImpl;
 import com.openexchange.mail.autoconfig.tools.Services;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -66,7 +67,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, DatabaseService.class, ConfigurationService.class };
+        return new Class<?>[] { ConfigViewFactory.class, DatabaseService.class, ConfigurationService.class, SSLSocketFactoryProvider.class };
     }
 
     @Override

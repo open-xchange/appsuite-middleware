@@ -59,19 +59,32 @@ import javax.net.ssl.SSLSocketFactory;
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
+import com.openexchange.http.client.osgi.Services;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 
 public class TrustAdapter implements ProtocolSocketFactory {
-    
-    private final SSLSocketFactory delegate = SSLSocketFactoryProvider.getDefault();
+
+    public TrustAdapter() {
+        super();
+    }
 
     @Override
     public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
+        SSLSocketFactoryProvider factoryProvider = Services.optService(SSLSocketFactoryProvider.class);
+        if (null == factoryProvider) {
+            throw new IOException("Missing " + SSLSocketFactoryProvider.class.getSimpleName() + " service. Bundle \"com.openexchange.net.ssl\" not started?");
+        }
+        SSLSocketFactory delegate = factoryProvider.getDefault();
         return delegate.createSocket(host, port);
     }
 
     @Override
     public Socket createSocket(String host, int port, InetAddress localAddress, int localPort) throws IOException, UnknownHostException {
+        SSLSocketFactoryProvider factoryProvider = Services.optService(SSLSocketFactoryProvider.class);
+        if (null == factoryProvider) {
+            throw new IOException("Missing " + SSLSocketFactoryProvider.class.getSimpleName() + " service. Bundle \"com.openexchange.net.ssl\" not started?");
+        }
+        SSLSocketFactory delegate = factoryProvider.getDefault();
         return delegate.createSocket(host, port, localAddress, localPort);
     }
 
@@ -82,6 +95,11 @@ public class TrustAdapter implements ProtocolSocketFactory {
         if (timeout == 0) {
             socket = createSocket(host, port, localAddress, localPort);
         } else {
+            SSLSocketFactoryProvider factoryProvider = Services.optService(SSLSocketFactoryProvider.class);
+            if (null == factoryProvider) {
+                throw new IOException("Missing " + SSLSocketFactoryProvider.class.getSimpleName() + " service. Bundle \"com.openexchange.net.ssl\" not started?");
+            }
+            SSLSocketFactory delegate = factoryProvider.getDefault();
             socket = delegate.createSocket();
             SocketAddress localaddr = new InetSocketAddress(localAddress, localPort);
             SocketAddress remoteaddr = new InetSocketAddress(host, port);
@@ -89,21 +107,21 @@ public class TrustAdapter implements ProtocolSocketFactory {
             socket.connect(remoteaddr, timeout);
             return socket;
         }
-        
-        
+
+
         int linger = params.getLinger();
         if(linger == 0) {
             socket.setSoLinger(false, 0);
         } else if (linger > 0) {
             socket.setSoLinger(true, linger);
         }
-        
+
         socket.setSoTimeout(params.getSoTimeout());
         socket.setTcpNoDelay(params.getTcpNoDelay());
-        
+
         return socket;
     }
-    
- 
+
+
 }
 

@@ -62,9 +62,6 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.mockito.Mockito;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventConfiguration;
@@ -569,11 +566,9 @@ public final class Init {
     }
 
     private static void startAndInjectNetSSLBundle() {
-        BundleContext bundleContext = Mockito.mock(BundleContext.class);
-        ServiceReference<ConfigurationService> reference = Mockito.mock(ServiceReference.class);
-        Mockito.when(bundleContext.getServiceReference(ConfigurationService.class)).thenReturn(reference);
-        Mockito.when(bundleContext.getService(reference)).thenReturn((ConfigurationService) services.get(ConfigurationService.class));
-        com.openexchange.net.ssl.osgi.Services.setBundleContext(bundleContext);
+        SimpleServiceLookup myServices = new SimpleServiceLookup();
+        myServices.add(ConfigurationService.class, services.get(ConfigurationService.class));
+        com.openexchange.net.ssl.osgi.Services.setServiceLookup(myServices);
     }
 
     private static void startAndInjectThreadPoolBundle() {

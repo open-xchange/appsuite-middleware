@@ -313,7 +313,8 @@ public abstract class AbstractSession implements Session {
                     // Set up scheme registry.
                     final SchemeRegistry schemeRegistry = new SchemeRegistry();
                     schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-                    javax.net.ssl.SSLSocketFactory f = SSLSocketFactoryProvider.getDefault();
+                    SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
+                    javax.net.ssl.SSLSocketFactory f = factoryProvider.getDefault();
                     SSLConfigurationService sslConfig = Services.getService(SSLConfigurationService.class);
                     schemeRegistry.register(new Scheme("https", new SSLSocketFactory(f, sslConfig.getSupportedProtocols(), sslConfig.getSupportedCipherSuites(), new StrictHostnameVerifier()), 443));
 
