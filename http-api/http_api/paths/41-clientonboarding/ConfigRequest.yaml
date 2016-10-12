@@ -1,0 +1,39 @@
+/onboarding?action=config:
+  put:
+    operationId: getClientOnboardingConfig
+    tags: 
+      - Clientonboarding
+    summary: Retrieves the configuration providing available client on-boarding possibilities for session-associated user
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+    responses:  
+      200:
+        description: |
+          'The configuration as a JSON object or in case of errors the responsible fields in the
+          response are filled (see [Error handling](#error-handling)).
+          
+          The JSON object consists of five fields: "platforms", "devices", "scenarios", "actions" and "matching". Each field provides an array of objects.
+
+          The "platforms" field lists the available platforms for which a device can receive on-boarding information.
+
+          The "devices" field lists the concrete devices, which are supported to receive on-boarding information. Each object mainly provides:
+          - A unique identifier for the associated device (e.g. "apple.iphone") and a display name
+          - Whether the device is enabled; "false" to trigger upsell activities
+          - A listing of applicable scenarios for the device consisting of composite identifiers (delimited by "/" character), which point to an entry from the "matching" object
+
+          The "scenarios" field provides all available on-boarding scenarios (like installing an app or receive a profile configuration for a built-in application; e.g. Apple Mail). Each scenario also provides:
+          - A unique identifier and a display name
+          - Whether the scenario is enabled along-side with "missing_capabilities" to trigger upsell activities
+          - A description text for the user
+
+          The "actions" field represents the available actions that can be performed in order to transfer a certain on-boarding information to a device. As of now there are five possible actions for a certain device/scenario combination: "download", "email", "display", "link" and "sms".
+          - "download" refers to a simple download that is performed; e.g. a profile configuration file.
+          - "email" lets the Middleware to send out an E-Mail containing the on-boarding information.
+          - "sms" lets the Middleware to send out an SMS containing the on-boarding information.
+          - "display" represents a plain display of on-boarding information for manual setup. Actions of this type provide a composite identifier (delimited by "/" character) that also contains the concrete scenario to which that action applies; e.g. "display/davsync". Moreover it has a "data" field that provides the user-sensitive information to display; e.g. the mail settings.
+          - "link" hints to an available link that a user can follow; e.g, a link to a certain app held in an app store. Actions of this type provide a composite identifier (delimited by "/" character) that also contains the concrete scenario to which that action applies. In addition there is a field for each device providing the exact link and type; e.g. having a link to Apple Appstore for an iPhone device.
+
+          The "matching" field is the combination of supported device, scenario and actions combinations. It provides an "id" field that contains a composite identifier (delimited by "/" character) to refer to the device and scenario combination; e.g. "apple.ipad/mailsync". Moreover, there is a listing of available action identifiers (pointing to entries from "actions") that are possible being executed in order to let such a device being on-boarded for the referenced scenario.'
+        schema: 
+           $ref: "#/definitions/ClientOnboardingResponse"
+

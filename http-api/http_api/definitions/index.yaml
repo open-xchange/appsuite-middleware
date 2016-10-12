@@ -545,3 +545,8 @@ Mail_CategoriesMoveBody:
   $ref: ./mail_categories/Mail_CategoriesMoveBody.yaml
 Mail_CategoriesTrainBody:
   $ref: ./mail_categories/Mail_CategoriesTrainBody.yaml
+# Module: clientonboarding
+ClientOnboardingData:
+  $ref: ./clientonboarding/ClientOnboardingData.yaml
+ClientOnboardingResponse:
+  $ref: ./clientonboarding/ClientOnboardingResponse.yaml
