@@ -51,7 +51,7 @@ package com.openexchange.mail.mime;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Locale;
+import com.openexchange.java.Strings;
 
 /**
  * {@link HeaderName} - Supports an ignore-case string implementation.
@@ -185,7 +185,7 @@ public final class HeaderName implements Serializable, Cloneable, Comparable<Hea
     private HeaderName(final String s) {
         super();
         this.s = s;
-        hashcode = s.toLowerCase(Locale.ENGLISH).hashCode();
+        hashcode = Strings.asciiLowerCase(s).hashCode();
     }
 
     @Override
