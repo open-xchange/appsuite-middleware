@@ -50,12 +50,7 @@
 package com.openexchange.groupware.ldap;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.IN_LIMIT;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.getIN;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import static com.openexchange.tools.sql.DBUtils.*;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -997,6 +992,11 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
+    @Override
+    public void setAttribute(Connection con, String name, String value, int userId, Context context, boolean invalidate) throws OXException {
+        setAttribute(con, name, value, userId, context);
+    }
+
     /**
      * Stores an internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
      * <p>
@@ -1099,7 +1099,7 @@ public class RdbUserStorage extends UserStorage {
                 int[] updateCounts = stmt.executeBatch();
                 for (int updateCount : updateCounts) {
                     // Concurrent modification of at least one attribute. We lost the race...
-                    if (updateCount != 1) {
+                    if (updateCount == 1) {
                         LOG.error("Concurrent modification of attribute '{}' for user {} in context {}. New value '{}' could not be set.", name, I(userId), I(contextId), value);
                         throw UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.create(I(contextId), I(userId));
                     }
