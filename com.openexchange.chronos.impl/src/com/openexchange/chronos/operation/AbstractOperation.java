@@ -59,6 +59,7 @@ import java.util.List;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.EventMapper;
@@ -110,15 +111,15 @@ public abstract class AbstractOperation {
      * @param recurrenceID The recurrence identifier
      * @return The prepared exception event
      */
-    protected Event prepareException(Event originalMasterEvent, Date recurrenceID) throws OXException {
+    protected Event prepareException(Event originalMasterEvent, RecurrenceId recurrenceID) throws OXException {
         Event exceptionEvent = new Event();
         EventMapper.getInstance().copy(originalMasterEvent, exceptionEvent, EventField.values());
         exceptionEvent.setId(storage.nextObjectID());
         exceptionEvent.setRecurrenceId(recurrenceID);
-        exceptionEvent.setChangeExceptionDates(Collections.singletonList(recurrenceID));
+        exceptionEvent.setChangeExceptionDates(Collections.singletonList(new Date(recurrenceID.getValue())));
         exceptionEvent.setDeleteExceptionDates(null);
-        exceptionEvent.setStartDate(recurrenceID);
-        exceptionEvent.setEndDate(new Date(recurrenceID.getTime() + new Period(originalMasterEvent).getDuration()));
+        exceptionEvent.setStartDate(new Date(recurrenceID.getValue()));
+        exceptionEvent.setEndDate(new Date(recurrenceID.getValue() + new Period(originalMasterEvent).getDuration()));
         Consistency.setCreated(timestamp, exceptionEvent, calendarUser.getId());
         Consistency.setModified(timestamp, exceptionEvent, session.getUser().getId());
         return exceptionEvent;
@@ -144,12 +145,12 @@ public abstract class AbstractOperation {
      * @param originalMasterEvent The original series master event
      * @param recurrenceID The recurrence identifier of the occurrence to add
      */
-    protected void addChangeExceptionDate(Event originalMasterEvent, Date recurrenceID) throws OXException {
+    protected void addChangeExceptionDate(Event originalMasterEvent, RecurrenceId recurrenceID) throws OXException {
         List<Date> changeExceptionDates = new ArrayList<Date>();
         if (null != originalMasterEvent.getChangeExceptionDates()) {
             changeExceptionDates.addAll(originalMasterEvent.getChangeExceptionDates());
         }
-        if (false == changeExceptionDates.add(recurrenceID)) {
+        if (false == changeExceptionDates.add(new Date(recurrenceID.getValue()))) {
             // TODO throw/log?
         }
         Event eventUpdate = new Event();
@@ -177,17 +178,17 @@ public abstract class AbstractOperation {
         return event;
     }
 
-    protected List<Event> loadExceptionData(int seriesID, List<Date> recurrenceIDs) throws OXException {
+    protected List<Event> loadExceptionData(int seriesID, List<RecurrenceId> recurrenceIDs) throws OXException {
         List<Event> exceptions = new ArrayList<Event>();
         if (null != recurrenceIDs && 0 < recurrenceIDs.size()) {
-            for (Date recurrenceID : recurrenceIDs) {
+            for (RecurrenceId recurrenceID : recurrenceIDs) {
                 exceptions.add(loadExceptionData(seriesID, recurrenceID));
             }
         }
         return exceptions;
     }
 
-    protected Event loadExceptionData(int seriesID, Date recurrenceID) throws OXException {
+    protected Event loadExceptionData(int seriesID, RecurrenceId recurrenceID) throws OXException {
         Event excpetion = storage.getEventStorage().loadException(seriesID, recurrenceID, null);
         if (null == excpetion) {
             throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(seriesID), String.valueOf(recurrenceID));

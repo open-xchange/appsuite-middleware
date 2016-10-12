@@ -47,92 +47,23 @@
  *
  */
 
-package com.openexchange.chronos.service;
-
-import com.openexchange.chronos.RecurrenceId;
+package com.openexchange.chronos;
 
 /**
- * {@link EventID}
+ * {@link RecurrenceId}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
+ * @see <a href="https://tools.ietf.org/html/rfc5545#section-3.8.4.4">RFC 5545, section 3.8.4.4</a>
  */
-public class EventID {
-
-    private final int folderID;
-    private final int objectID;
-    private final RecurrenceId recurrenceID;
+public interface RecurrenceId {
 
     /**
-     * Initializes a new {@link EventID}.
+     * Gets the value, i.e. the (original) start-date of the targeted recurrence in the event series. The actual interpretation depends
+     * on the value type of the start-date and all-day-flag of the event series.
      *
-     * @param folderID The folder ID
-     * @param objectID The object ID
+     * @return The recurrence-id value, represented as the number of milliseconds since January 1, 1970, 00:00:00 GMT
      */
-    public EventID(int folderID, int objectID) {
-        this(folderID, objectID, null);
-    }
-
-    /**
-     * Initializes a new {@link EventID}.
-     *
-     * @param folderID The folder ID
-     * @param objectID The object ID
-     * @param recurrenceID The recurrence ID
-     */
-    public EventID(int folderID, int objectID, RecurrenceId recurrenceID) {
-        super();
-        this.folderID = folderID;
-        this.objectID = objectID;
-        this.recurrenceID = recurrenceID;
-    }
-
-    public int getFolderID() {
-        return folderID;
-    }
-
-    public int getObjectID() {
-        return objectID;
-    }
-
-    public RecurrenceId getRecurrenceID() {
-        return recurrenceID;
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + folderID;
-        result = prime * result + objectID;
-        result = prime * result + ((recurrenceID == null) ? 0 : recurrenceID.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        EventID other = (EventID) obj;
-        if (folderID != other.folderID)
-            return false;
-        if (objectID != other.objectID)
-            return false;
-        if (recurrenceID == null) {
-            if (other.recurrenceID != null)
-                return false;
-        } else if (!recurrenceID.equals(other.recurrenceID))
-            return false;
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return null == recurrenceID ? "EventID [folderID=" + folderID + ", objectID=" + objectID + "]" : "EventID [folderID=" + folderID + ", objectID=" + objectID + ", recurrenceID=" + recurrenceID + "]";
-    }
+    long getValue();
 
 }

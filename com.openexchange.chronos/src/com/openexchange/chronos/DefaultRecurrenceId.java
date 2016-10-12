@@ -47,65 +47,42 @@
  *
  */
 
-package com.openexchange.chronos.service;
+package com.openexchange.chronos;
 
-import com.openexchange.chronos.RecurrenceId;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import com.openexchange.java.util.TimeZones;
 
 /**
- * {@link EventID}
+ * {@link DefaultRecurrenceId}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class EventID {
+public class DefaultRecurrenceId implements RecurrenceId {
 
-    private final int folderID;
-    private final int objectID;
-    private final RecurrenceId recurrenceID;
+    private final long value;
 
     /**
-     * Initializes a new {@link EventID}.
+     * Initializes a new {@link DefaultRecurrenceId}.
      *
-     * @param folderID The folder ID
-     * @param objectID The object ID
+     * @param value The recurrence-id value, represented as the number of milliseconds since January 1, 1970, 00:00:00 GMT
      */
-    public EventID(int folderID, int objectID) {
-        this(folderID, objectID, null);
-    }
-
-    /**
-     * Initializes a new {@link EventID}.
-     *
-     * @param folderID The folder ID
-     * @param objectID The object ID
-     * @param recurrenceID The recurrence ID
-     */
-    public EventID(int folderID, int objectID, RecurrenceId recurrenceID) {
+    public DefaultRecurrenceId(long value) {
         super();
-        this.folderID = folderID;
-        this.objectID = objectID;
-        this.recurrenceID = recurrenceID;
+        this.value = value;
     }
 
-    public int getFolderID() {
-        return folderID;
-    }
-
-    public int getObjectID() {
-        return objectID;
-    }
-
-    public RecurrenceId getRecurrenceID() {
-        return recurrenceID;
+    @Override
+    public long getValue() {
+        return value;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + folderID;
-        result = prime * result + objectID;
-        result = prime * result + ((recurrenceID == null) ? 0 : recurrenceID.hashCode());
+        result = prime * result + (int) (value ^ (value >>> 32));
         return result;
     }
 
@@ -117,22 +94,17 @@ public class EventID {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        EventID other = (EventID) obj;
-        if (folderID != other.folderID)
-            return false;
-        if (objectID != other.objectID)
-            return false;
-        if (recurrenceID == null) {
-            if (other.recurrenceID != null)
-                return false;
-        } else if (!recurrenceID.equals(other.recurrenceID))
+        DefaultRecurrenceId other = (DefaultRecurrenceId) obj;
+        if (value != other.value)
             return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return null == recurrenceID ? "EventID [folderID=" + folderID + ", objectID=" + objectID + "]" : "EventID [folderID=" + folderID + ", objectID=" + objectID + ", recurrenceID=" + recurrenceID + "]";
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
+        dateFormat.setTimeZone(TimeZones.UTC);
+        return dateFormat.format(new Date(value));
     }
 
 }

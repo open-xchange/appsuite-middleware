@@ -92,7 +92,7 @@ public class Event {
 
     private int seriesId;
     private String recurrenceRule;
-    private Date recurrenceId;
+    private RecurrenceId recurrenceId;
     private List<Date> changeExceptionDates;
     private List<Date> deleteExceptionDates;
 
@@ -930,7 +930,7 @@ public class Event {
      *
      * @return The recurrence identifier
      */
-    public Date getRecurrenceId() {
+    public RecurrenceId getRecurrenceId() {
         return recurrenceId;
     }
 
@@ -939,7 +939,7 @@ public class Event {
      *
      * @param value The recurrence identifier to set
      */
-    public void setRecurrenceId(Date value) {
+    public void setRecurrenceId(RecurrenceId value) {
         recurrenceId = value;
         setFields.add(EventField.RECURRENCE_ID);
     }

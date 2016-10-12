@@ -326,7 +326,7 @@ public class CalendarReader {
             }
             if (null != eventID.getRecurrenceID() && isSeriesMaster(event.getEvent())) {
                 TimeZone timeZone = getTimeZone(session);
-                Calendar fromCalendar = initCalendar(timeZone, eventID.getRecurrenceID());
+                Calendar fromCalendar = initCalendar(timeZone, eventID.getRecurrenceID().getValue());
                 Iterator<Event> iterator = Services.getService(RecurrenceService.class).calculateInstancesRespectExceptions(event.getEvent(), fromCalendar, null, I(1), null);
                 if (false == iterator.hasNext()) {
                     continue; // TODO check

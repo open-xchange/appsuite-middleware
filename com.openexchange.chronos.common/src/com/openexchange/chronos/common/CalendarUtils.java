@@ -291,6 +291,19 @@ public class CalendarUtils {
     }
 
     /**
+     * Initializes a new calendar in a specific timezone and sets the initial time.
+     *
+     * @param timeZone The timezone to use for the calendar
+     * @param time The initial time in UTC milliseconds from the epoch
+     * @return A new calendar instance
+     */
+    public static Calendar initCalendar(TimeZone timeZone, long time) {
+        Calendar calendar = GregorianCalendar.getInstance(timeZone);
+        calendar.setTimeInMillis(time);
+        return calendar;
+    }
+
+    /**
      * Gets a value indicating whether a specific event falls (at least partly) into a time range.
      *
      * @param event The event to check

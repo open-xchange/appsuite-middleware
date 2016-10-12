@@ -62,8 +62,10 @@ import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
+import com.openexchange.chronos.DefaultRecurrenceId;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarService;
@@ -243,7 +245,7 @@ public class Check {
     public static List<Date> recurrenceIdsExist(Event seriesMaster, List<Date> recurrenceIDs) throws OXException {
         if (null != recurrenceIDs) {
             for (Date recurrenceID : recurrenceIDs) {
-                recurrenceIdExists(seriesMaster, recurrenceID);
+                recurrenceIdExists(seriesMaster, new DefaultRecurrenceId(recurrenceID.getTime()));
             }
         }
         return recurrenceIDs;
@@ -258,7 +260,7 @@ public class Check {
      * @return The passed recurrence identifier, after it was checked for validity
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
-    public static Date recurrenceIdExists(Event seriesMaster, Date recurrenceID) throws OXException {
+    public static RecurrenceId recurrenceIdExists(Event seriesMaster, RecurrenceId recurrenceID) throws OXException {
         RecurrenceRule rule;
         try {
             rule = new RecurrenceRule(seriesMaster.getRecurrenceRule());
@@ -272,9 +274,9 @@ public class Check {
             start = new DateTime(TimeZone.getTimeZone(seriesMaster.getStartTimeZone()), seriesMaster.getStartDate().getTime());
         }
         RecurrenceRuleIterator iterator = rule.iterator(start);
-        iterator.fastForward(recurrenceID.getTime());
-        if (false == iterator.hasNext() || recurrenceID.getTime() != iterator.nextMillis()) {
-            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(L(recurrenceID.getTime()), seriesMaster.getRecurrenceRule());
+        iterator.fastForward(recurrenceID.getValue());
+        if (false == iterator.hasNext() || recurrenceID.getValue() != iterator.nextMillis()) {
+            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(L(recurrenceID.getValue()), seriesMaster.getRecurrenceRule());
         }
         return recurrenceID;
     }

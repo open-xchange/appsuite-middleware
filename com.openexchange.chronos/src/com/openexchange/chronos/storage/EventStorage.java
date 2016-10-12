@@ -54,6 +54,7 @@ import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.database.provider.DBTransactionPolicy;
 import com.openexchange.exception.OXException;
@@ -84,7 +85,7 @@ public interface EventStorage {
      * @param fields The event fields to retrieve from the storage, or <code>null</code> to query all available data
      * @return The event exception
      */
-    Event loadException(int seriesID, Date recurrenceID, EventField[] fields) throws OXException;
+    Event loadException(int seriesID, RecurrenceId recurrenceID, EventField[] fields) throws OXException;
 
     /**
      * Searches for events.

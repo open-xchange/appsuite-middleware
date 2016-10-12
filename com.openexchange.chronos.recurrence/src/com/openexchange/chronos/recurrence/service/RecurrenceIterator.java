@@ -58,6 +58,7 @@ import java.util.NoSuchElementException;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
+import com.openexchange.chronos.DefaultRecurrenceId;
 import com.openexchange.chronos.Event;
 
 /**
@@ -204,7 +205,7 @@ public class RecurrenceIterator implements Iterator<Event> {
         // TODO:
         Event retval = master.clone();
 
-        retval.setRecurrenceId(new Date(next));
+        retval.setRecurrenceId(new DefaultRecurrenceId(next));
 
         //        retval.removeId();
         //        retval.removeRecurrenceRule();

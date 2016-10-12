@@ -63,6 +63,7 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.tools.mappings.DefaultMapper;
@@ -669,7 +670,7 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
                 object.removeRecurrenceRule();
             }
         });
-        mappings.put(EventField.RECURRENCE_ID, new DefaultMapping<Date, Event>() {
+        mappings.put(EventField.RECURRENCE_ID, new DefaultMapping<RecurrenceId, Event>() {
 
             @Override
             public boolean isSet(Event object) {
@@ -677,12 +678,12 @@ public class EventMapper extends DefaultMapper<Event, EventField> {
             }
 
             @Override
-            public void set(Event object, Date value) throws OXException {
+            public void set(Event object, RecurrenceId value) throws OXException {
                 object.setRecurrenceId(value);
             }
 
             @Override
-            public Date get(Event object) {
+            public RecurrenceId get(Event object) {
                 return object.getRecurrenceId();
             }
 

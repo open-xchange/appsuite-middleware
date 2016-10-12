@@ -72,6 +72,7 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeMapper;
 import com.openexchange.chronos.impl.Check;
@@ -123,7 +124,7 @@ public class UpdateAttendeeOperation extends AbstractOperation {
      * @param clientTimestamp The client timestamp to catch concurrent modifications, or <code>null</code> to skip checks
      * @return The result
      */
-    public CalendarResultImpl perform(int objectID, Date recurrenceID, Attendee attendee, Long clientTimestamp) throws OXException {
+    public CalendarResultImpl perform(int objectID, RecurrenceId recurrenceID, Attendee attendee, Long clientTimestamp) throws OXException {
         /*
          * load original event data & attendee
          */
@@ -197,9 +198,9 @@ public class UpdateAttendeeOperation extends AbstractOperation {
         }
     }
 
-    private void updateAttendee(Event originalEvent, Attendee originalAttendee, Attendee attendee, Date recurrenceID) throws OXException {
+    private void updateAttendee(Event originalEvent, Attendee originalAttendee, Attendee attendee, RecurrenceId recurrenceID) throws OXException {
         if (isSeriesMaster(originalEvent)) {
-            if (null != originalEvent.getChangeExceptionDates() && originalEvent.getChangeExceptionDates().contains(recurrenceID)) {
+            if (null != originalEvent.getChangeExceptionDates() && originalEvent.getChangeExceptionDates().contains(new Date(recurrenceID.getValue()))) {
                 /*
                  * update for existing change exception
                  */

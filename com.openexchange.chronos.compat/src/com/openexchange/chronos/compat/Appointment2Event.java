@@ -59,8 +59,10 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
+import com.openexchange.chronos.DefaultRecurrenceId;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.CalendarUtils;
@@ -252,7 +254,7 @@ public class Appointment2Event {
      *            UTC date with truncated time fraction
      * @return The recurrence identifier, or <code>null</code> if no matching recurrence identifier was found
      */
-    public static Date getRecurrenceID(String recurrenceRule, Date seriesStart, TimeZone timeZone, boolean allDay, Date recurrenceDatePosition) throws OXException {
+    public static RecurrenceId getRecurrenceID(String recurrenceRule, Date seriesStart, TimeZone timeZone, boolean allDay, Date recurrenceDatePosition) throws OXException {
         Calendar calendar = CalendarUtils.initCalendar(TimeZone.getTimeZone("UTC"), seriesStart);
         RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceRule, seriesStart.getTime(), timeZone, allDay);
         while (iterator.hasNext()) {
@@ -260,7 +262,7 @@ public class Appointment2Event {
             calendar.setTimeInMillis(nextMillis);
             long nextPosition = CalendarUtils.truncateTime(calendar).getTimeInMillis();
             if (recurrenceDatePosition.getTime() == nextPosition) {
-                return new Date(nextMillis);
+                return new DefaultRecurrenceId(nextMillis);
             }
             if (nextPosition > recurrenceDatePosition.getTime()) {
                 break;
@@ -288,7 +290,8 @@ public class Appointment2Event {
         }
         List<Date> recurrenceIDs = new ArrayList<Date>(recurrenceDatePositions.size());
         for (Date recurrenceDatePosition : recurrenceDatePositions) {
-            recurrenceIDs.add(getRecurrenceID(recurrenceRule, seriesStart, timeZone, allDay, recurrenceDatePosition));
+            RecurrenceId recurrenceID = getRecurrenceID(recurrenceRule, seriesStart, timeZone, allDay, recurrenceDatePosition);
+            recurrenceIDs.add(new Date(recurrenceID.getValue()));
         }
         return recurrenceIDs;
     }
@@ -304,13 +307,13 @@ public class Appointment2Event {
      * @param recurrencePosition The legacy, 1-based recurrence position
      * @return The recurrence identifier, or <code>null</code> if no matching recurrence identifier was found
      */
-    public static Date getRecurrenceID(String recurrenceRule, Date seriesStart, TimeZone timeZone, boolean allDay, int recurrencePosition) throws OXException {
+    public static RecurrenceId getRecurrenceID(String recurrenceRule, Date seriesStart, TimeZone timeZone, boolean allDay, int recurrencePosition) throws OXException {
         RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceRule, seriesStart.getTime(), timeZone, allDay);
         int position = 0;
         while (iterator.hasNext()) {
             long nextMillis = iterator.nextMillis();
             if (++position == recurrencePosition) {
-                return new Date(nextMillis);
+                return new DefaultRecurrenceId(nextMillis);
             }
         }
         return null;

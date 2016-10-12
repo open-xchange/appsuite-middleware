@@ -66,9 +66,11 @@ import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.DefaultRecurrenceId;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
@@ -171,7 +173,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     @Override
-    public Event loadException(int seriesID, Date recurrenceID, EventField[] fields) throws OXException {
+    public Event loadException(int seriesID, RecurrenceId recurrenceID, EventField[] fields) throws OXException {
         long recurrenceDatePosition = Event2Appointment.getRecurrenceDatePosition(recurrenceID).getTime();
         Connection connection = null;
         try {
@@ -529,7 +531,7 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                  */
                 if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
                     event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceRule, new Date(seriesPattern.getSeriesStart().longValue()), seriesPattern.getTimeZone(), allDay, event.getChangeExceptionDates()));
-                    event.setRecurrenceId(event.getChangeExceptionDates().get(0));
+                    event.setRecurrenceId(new DefaultRecurrenceId(event.getChangeExceptionDates().get(0).getTime()));
                 }
             }
         }
@@ -580,7 +582,8 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
          * transform recurrence ids to legacy "recurrence date positions" (UTC dates with truncated time fraction)
          */
         if (event.containsRecurrenceId() && null != event.getRecurrenceId()) {
-            event.setRecurrenceId(Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId()));
+            Date recurrenceDatePosition = Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId());
+            event.setRecurrenceId(new DefaultRecurrenceId(recurrenceDatePosition.getTime()));
         }
         if (event.containsDeleteExceptionDates()) {
             event.setDeleteExceptionDates(Event2Appointment.getRecurrenceDatePositions(event.getDeleteExceptionDates()));

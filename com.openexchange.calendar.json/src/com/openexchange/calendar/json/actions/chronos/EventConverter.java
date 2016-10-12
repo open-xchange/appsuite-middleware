@@ -60,6 +60,7 @@ import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
@@ -210,7 +211,7 @@ public class EventConverter {
         SeriesPattern seriesPattern = loadSeriesPattern(session, eventID);
         String recurrenceRule = Appointment2Event.getRecurrenceRule(seriesPattern);
         Date seriesStart = new Date(seriesPattern.getSeriesStart().longValue());
-        Date recurrenceID = Appointment2Event.getRecurrenceID(recurrenceRule, seriesStart, seriesPattern.getTimeZone(), seriesPattern.isFullTime(), recurrencePosition);
+        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(recurrenceRule, seriesStart, seriesPattern.getTimeZone(), seriesPattern.isFullTime(), recurrencePosition);
         return new EventID(folderID, objectID, recurrenceID);
     }
 
@@ -222,7 +223,7 @@ public class EventConverter {
         SeriesPattern seriesPattern = loadSeriesPattern(session, eventID);
         String recurrenceRule = Appointment2Event.getRecurrenceRule(seriesPattern);
         Date seriesStart = new Date(seriesPattern.getSeriesStart().longValue());
-        Date recurrenceID = Appointment2Event.getRecurrenceID(recurrenceRule, seriesStart, seriesPattern.getTimeZone(), seriesPattern.isFullTime(), recurrenceDatePosition);
+        RecurrenceId recurrenceID = Appointment2Event.getRecurrenceID(recurrenceRule, seriesStart, seriesPattern.getTimeZone(), seriesPattern.isFullTime(), recurrenceDatePosition);
         return new EventID(folderID, objectID, recurrenceID);
     }
 
@@ -595,7 +596,7 @@ public class EventConverter {
                 } else {
                     //TODO: add from users array or not?
                     // needs to be ignored for
-                    // - com.openexchange.ajax.appointment.bugtests.Bug15903Test.testUpdatedParticipants() 
+                    // - com.openexchange.ajax.appointment.bugtests.Bug15903Test.testUpdatedParticipants()
                     //                     attendees.add(getAttendee(user));
                 }
             }

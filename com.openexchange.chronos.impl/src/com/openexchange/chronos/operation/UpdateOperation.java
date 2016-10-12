@@ -65,13 +65,13 @@ import static com.openexchange.folderstorage.Permission.WRITE_ALL_OBJECTS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeHelper;
@@ -146,7 +146,7 @@ public class UpdateOperation extends AbstractOperation {
         return result;
     }
 
-    private void updateEvent(Event originalEvent, Event updatedEvent, Date recurrenceID) throws OXException {
+    private void updateEvent(Event originalEvent, Event updatedEvent, RecurrenceId recurrenceID) throws OXException {
         if (isSeriesMaster(originalEvent)) {
             if (null != originalEvent.getChangeExceptionDates() && originalEvent.getChangeExceptionDates().contains(recurrenceID)) {
                 /*
