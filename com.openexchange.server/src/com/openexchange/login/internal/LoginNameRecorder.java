@@ -49,20 +49,25 @@
 
 package com.openexchange.login.internal;
 
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.java.Strings;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
+import com.openexchange.login.NonTransient;
 import com.openexchange.user.UserService;
 
 /**
- * The {@link LoginNameRecorder} stores the user's login name as a user attribute.
+ * The {@link LoginNameRecorder} stores the user's login name as an user attribute.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public class LoginNameRecorder implements LoginHandlerService {
+public class LoginNameRecorder implements LoginHandlerService, NonTransient {
 
     private final static String LOGIN_ATTRIBUTE_NAME = LoginNameRecorder.class.getSimpleName().toLowerCase() + "/user_login";
 
@@ -78,19 +83,21 @@ public class LoginNameRecorder implements LoginHandlerService {
 
     @Override
     public void handleLogin(LoginResult login) throws OXException {
-        String loginValue = login.getSession().getLogin();
         Context ctx = login.getContext();
         if (login.getContext().isReadOnly()) {
             return;
         }
-
-        try {
-            userService.setAttribute(LOGIN_ATTRIBUTE_NAME, loginValue, login.getUser().getId(), ctx);
-        } catch (OXException ex) {
-            if (!UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.equals(ex)) {
-                throw ex;
+        User user = login.getUser();
+        String value = login.getSession().getLogin();
+        if (Strings.isNotEmpty(value) && false == value.equals(getStoredUserLogin(user))) {
+            try {
+                userService.setAttribute(null, LOGIN_ATTRIBUTE_NAME, value, user.getId(), ctx, false);
+            } catch (OXException ex) {
+                if (!UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.equals(ex)) {
+                    throw ex;
+                }
+                // Do nothing
             }
-            // Do nothing
         }
     }
 
@@ -98,4 +105,17 @@ public class LoginNameRecorder implements LoginHandlerService {
     public void handleLogout(LoginResult logout) throws OXException {
         // nothing to do
     }
+
+    /**
+     * Extracts the currently stored value for the login name from the user's attributes.
+     *
+     * @param user The user to extract the stored login name for
+     * @return The login name, or <code>null</code> if not set at all
+     */
+    private static String getStoredUserLogin(User user) throws OXException {
+        Map<String, Set<String>> attributes = user.getAttributes();
+        Set<String> values = attributes.get(LOGIN_ATTRIBUTE_NAME);
+        return null != values && 0 < values.size() ? values.iterator().next() : null;
+    }
+
 }

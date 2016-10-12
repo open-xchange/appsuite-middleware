@@ -129,6 +129,22 @@ public interface UserService {
     void setAttribute(Connection con, String name, String value, int userId, Context context) throws OXException;
 
     /**
+     * Stores an internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
+     * <p>
+     * This method might throw a {@link UserExceptionCode#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY} error in case a concurrent modification occurred. The
+     * caller can decide to treat as an error or to simply ignore it.
+     *
+     * @param con A writable database connection, or <code>null</code> to acquire one dynamically
+     * @param name Name of the attribute.
+     * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
+     * @param userId Identifier of the user that attribute should be set.
+     * @param context Context the user resides in.
+     * @param invalidate <code>true</code> to perform a cluster-wide cache invalidation for the updated user afterwards, or (preferably) <code>false</code> if not necessary
+     * @throws OXException if writing the attribute fails.
+     */
+    void setAttribute(Connection con, String name, String value, int userId, Context context, boolean invalidate) throws OXException;
+
+    /**
      * Checks if specified user is a guest.
      *
      * @param userId The user identifier
