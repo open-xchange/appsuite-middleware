@@ -93,16 +93,15 @@ public class SecureContentAPIResponseRenderer implements ResponseRenderer {
 
     @Override
     public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest httpReq, HttpServletResponse httpResp) throws IOException {
-        AJAXRequestResult secureResult = new AJAXRequestResult();
-        secureResult.setResultObject(((SecureContentResponse)result.getResultObject()).getResponse());
-        secureResult.setContinuationUuid(result.getContinuationUuid());
-        delegate.write(request, secureResult, httpReq, httpResp);
-
         // deactivate Content-Security-Policy
         httpResp.setHeader("Content-Security-Policy", SECURITY_POLICY);
         httpResp.setHeader("X-WebKit-CSP", SECURITY_POLICY);
         httpResp.setHeader("X-Content-Security-Policy", SECURITY_POLICY);
 
+        AJAXRequestResult secureResult = new AJAXRequestResult();
+        secureResult.setResultObject(((SecureContentResponse)result.getResultObject()).getResponse());
+        secureResult.setContinuationUuid(result.getContinuationUuid());
+        delegate.write(request, secureResult, httpReq, httpResp);
     }
 
 }
