@@ -50,7 +50,6 @@
 package com.openexchange.imap.cache;
 
 import static com.openexchange.imap.IMAPCommandsCollection.performCommand;
-import gnu.trove.map.hash.TObjectIntHashMap;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -90,6 +89,7 @@ import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
+import gnu.trove.map.hash.TObjectIntHashMap;
 
 /**
  * {@link ListLsubCollection}
@@ -1135,7 +1135,7 @@ final class ListLsubCollection implements Serializable {
                 }
                 final IMAPResponse ir = (IMAPResponse) r[i];
                 if (ir.keyEquals(cmd)) {
-                    final ListLsubEntryImpl listLsubEntry = parseListResponse(ir, null);
+                    final ListLsubEntryImpl listLsubEntry = parseListResponse(ir, null, null, ROOT_FULL_NAME);
                     {
                         final ListLsubEntryImpl oldEntry = listMap.get(ROOT_FULL_NAME);
                         if (null == oldEntry) {
@@ -1715,6 +1715,10 @@ final class ListLsubCollection implements Serializable {
     }
 
     private ListLsubEntryImpl parseListResponse(IMAPResponse listResponse, ConcurrentMap<String, ListLsubEntryImpl> lsubMap, String[] requiredAttributes) {
+        return parseListResponse(listResponse, lsubMap, requiredAttributes, null);
+    }
+
+    private ListLsubEntryImpl parseListResponse(IMAPResponse listResponse, ConcurrentMap<String, ListLsubEntryImpl> lsubMap, String[] requiredAttributes, String predefinedName) {
         /*
          * LIST (\NoInferiors \UnMarked) "/" "Sent Items"
          */
@@ -1806,7 +1810,7 @@ final class ListLsubCollection implements Serializable {
          * Read full name; decode the name (using RFC2060's modified UTF7)
          */
         listResponse.skipSpaces();
-        final String name = BASE64MailboxDecoder.decode(listResponse.readAtomString());
+        String name = null == predefinedName ? BASE64MailboxDecoder.decode(listResponse.readAtomString()) : predefinedName;
         /*
          * Return
          */
