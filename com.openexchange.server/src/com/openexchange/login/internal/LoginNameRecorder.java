@@ -57,7 +57,7 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.user.UserService;
 
 /**
- * The {@link LoginNameRecorder} stores the user's login name as an user attribute.
+ * The {@link LoginNameRecorder} stores the user's login name as a user attribute.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
@@ -87,7 +87,7 @@ public class LoginNameRecorder implements LoginHandlerService {
         try {
             userService.setAttribute(LOGIN_ATTRIBUTE_NAME, loginValue, login.getUser().getId(), ctx);
         } catch (OXException ex) {
-            if (ex.getCode() != UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.getNumber() || !ex.getPrefix().equalsIgnoreCase(UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.getPrefix())) {
+            if (!UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.equals(ex)) {
                 throw ex;
             }
             // Do nothing
