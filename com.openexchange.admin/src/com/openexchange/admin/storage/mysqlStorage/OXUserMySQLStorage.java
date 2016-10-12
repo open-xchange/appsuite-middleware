@@ -2030,7 +2030,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 flags |= UserSettingMail.INT_SHOW_GRAPHIC_EMOTICONS;
                 flags |= UserSettingMail.INT_USE_COLOR_QUOTE;
                 flags |= UserSettingMail.INT_NOTIFY_APPOINTMENTS_CONFIRM_OWNER;
-                flags |= UserSettingMail.INT_NOTIFY_APPOINTMENTS_CONFIRM_PARTICIPANT;
                 flags |= UserSettingMail.INT_NOTIFY_TASKS_CONFIRM_OWNER;
                 flags |= UserSettingMail.INT_NOTIFY_TASKS_CONFIRM_PARTICIPANT;
 
