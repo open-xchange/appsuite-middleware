@@ -1,6 +1,6 @@
 array:
   - data:
-      Key: com.openexchange.report.serialization.fileStorage
+      Key: com.openexchange.report.appsuite.fileStorage
       Description: >
 Reports filestorage directory for storage of report parts and composed data.
       Default: /tmp
@@ -10,7 +10,7 @@ Reports filestorage directory for storage of report parts and composed data.
       Related: 
       File: reportserialization.properties
   - data:
-      Key: com.openexchange.report.serialization.maxChunkSize
+      Key: com.openexchange.report.appsuite.maxChunkSize
       Description: >
 Determines how many chunks of data can be kept in the report before saving them in the folder described in the 
 com.openexchange.report.client.fileStorage property
@@ -21,7 +21,7 @@ com.openexchange.report.client.fileStorage property
       Related: 
       File: reportserialization.properties
 - data:
-      Key: com.openexchange.report.serialization.maxThreadPoolSize
+      Key: com.openexchange.report.appsuite.maxThreadPoolSize
       Description: >
 Number of threads allowed to work on the report at the same time.
       Default: 20
@@ -31,7 +31,7 @@ Number of threads allowed to work on the report at the same time.
       Related: 
       File: reportserialization.properties
 - data:
-      Key: com.openexchange.report.serialization.threadPriority
+      Key: com.openexchange.report.appsuite.threadPriority
       Description: >
 The priority that threads, working on the report have. Allowed value range is 1-10. 1 is the lowest, 10 the highest priority.
       Default: 1
