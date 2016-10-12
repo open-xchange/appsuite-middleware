@@ -91,4 +91,5 @@ Export-Package: com.dropbox.core,
  com.dropbox.core.v2,
  com.dropbox.core.v2.auth,
  com.dropbox.core.v2.files,
- com.dropbox.core.v2.users
+ com.dropbox.core.v2.users,
+ com.openexchange.oauth.dropbox
