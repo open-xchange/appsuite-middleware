@@ -59,19 +59,20 @@ import org.apache.jsieve.NumberArgument;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
 
+/**
+ * An {@link ActionCommand} is an identifier followed by zero or more arguments,
+ * terminated by a semicolon. Action commands do not take tests or blocks as
+ * arguments.
+ *
+ * "<code>keep</code>", "<code>discard</code>", and "<code>redirect</code>" these require a require: "<code>reject</code>" and
+ * "<code>fileinto</code>"
+ *
+ * <pre>reject &lt;reason: string&gt; fileinto &lt;folder: string&gt; redirect &lt;address: string&gt; keep discard<pre>
+ *
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
 public class ActionCommand extends ControlOrActionCommand {
-
-    /*
-     * An action command is an identifier followed by zero or more arguments,
-     * terminated by a semicolon. Action commands do not take tests or blocks as
-     * arguments.
-     *
-     * "keep", "discard", and "redirect" these require a require: "reject" and
-     * "fileinto"
-     *
-     * reject <reason: string> fileinto <folder: string> redirect <address:
-     * string> keep discard
-     */
 
     /**
      * <p>
@@ -164,7 +165,7 @@ public class ActionCommand extends ControlOrActionCommand {
          * <pre>
          *   Usage:   vacation [":days" number] [":subject" string]
          *           [":from" string] [":addresses" string-list]
-         *           [":mime"] [":handle" string] <reason: string>
+         *           [":mime"] [":handle" string] &lt;reason: string&gt;
          *</pre>
          *<!-- @formatter:on -->
          *
@@ -196,10 +197,10 @@ public class ActionCommand extends ControlOrActionCommand {
          * <!-- @formatter:off -->
          * <pre>
          *    Usage:  notify [":from" string]
-         *          [":importance" <"1" / "2" / "3">]
+         *          [":importance" &lt;"1" / "2" / "3"&gt;]
          *          [":options" string-list]
          *          [":message" string]
-         *          <method: string>
+         *          &lt;method: string&gt;
          * </pre>
          * <!-- @formatter:on -->
          * @return a {@link Hashtable} with the '<code>:message</code>' tag
@@ -227,8 +228,8 @@ public class ActionCommand extends ControlOrActionCommand {
          * <!-- @formatter:off -->
          * <pre>
          *   Syntax:
-         *        "fileinto" [":copy"] <folder: string>
-         *        "redirect" [":copy"] <address: string>
+         *        "fileinto" [":copy"] &lt;folder: string&gt;
+         *        "redirect" [":copy"] &lt;address: string&gt;
          * </pre>
          * <!-- @formatter:on -->
          * @return a {@link Hashtable} with the '<code>:copy</code>' tag
@@ -310,6 +311,13 @@ public class ActionCommand extends ControlOrActionCommand {
      */
     private final ArrayList<Object> arguments;
 
+    /**
+     * Initialises a new {@link ActionCommand}.
+     * 
+     * @param command The {@link Commands}
+     * @param arguments An {@link ArrayList} with arguments
+     * @throws SieveException if the arguments are incorrect
+     */
     public ActionCommand(final Commands command, final ArrayList<Object> arguments) throws SieveException {
         this.command = command;
         this.arguments = arguments;
