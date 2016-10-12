@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.jsieve.commands;
 
 import java.util.ArrayList;
@@ -100,41 +101,78 @@ public class ActionCommand extends ControlOrActionCommand {
         DELETEHEADER("deleteheader", 1, deleteHeaderTags(), "deleteheader", Collections.singletonList("editheader")),
         SET("set", 2, variablesTags(), "set", Collections.singletonList("variables"));
 
+        /**
+         * <p>
+         * Syntax of the '<code>addheader</code>' action command and the position of the '<code>:last</code>'
+         * tag as described in <a href="https://tools.ietf.org/html/rfc5293#secion-4">https://tools.ietf.org/html/rfc5293#section-4</a>:
+         * </p>
+         * <pre>"addheader" [":last"] &lt;field-name: string&gt; &lt;value: string&gt;</pre>
+         * 
+         * @return a {@link Hashtable} With the ':last' tag
+         */
         private static Hashtable<String, Integer> addHeaderTags() {
-            /*
-             * http://tools.ietf.org/html/rfc5293
-             *
-             * "addheader" [":last"] <field-name: string> <value: string>
-             */
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
             retval.put(":last", Integer.valueOf(0));
             return retval;
         }
 
+        /**
+         * <p>
+         * Syntax of the '<code>deleteheader</code>' action command and the position of the '<code>:last</code>'
+         * tag as described in <a href="https://tools.ietf.org/html/rfc5293#secion-5">https://tools.ietf.org/html/rfc5293#section-5</a>:
+         * </p>
+         *
+         * <!-- @formatter:off -->
+         * <pre>
+         * "deleteheader" [":index" &lt;fieldno: number&gt; [":last"]]
+         *          [COMPARATOR] [MATCH-TYPE]
+         *          &lt;field-name: string&gt;
+         *          [&lt;value-patterns: string-list&gt;]
+         * </pre>
+         * <!-- @formatter:on -->
+         * 
+         * @return an empty {@link Hashtable}
+         */
         private static Hashtable<String, Integer> deleteHeaderTags() {
-            /*
-             * http://tools.ietf.org/html/rfc5293
-             *
-             * "deleteheader" [":index" <fieldno: number> [":last"]]
-             *     [COMPARATOR] [MATCH-TYPE]
-             *      <field-name: string>
-             *     [<value-patterns: string-list>]
-             */
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
             return retval;
         }
 
+        /**
+         * <p>
+         * Syntax of the modifiers as described in
+         * <a href="https://tools.ietf.org/html/rfc5229#section-4.1">https://tools.ietf.org/html/rfc5229#section-4.1</a>:
+         * </p>
+         *
+         * <pre>Usage: ":lower" / ":upper" / ":lowerfirst" / ":upperfirst" / ":quotewildcard" / ":length"</pre>
+         * 
+         * @return an empty {@link Hashtable}
+         */
         private static Hashtable<String, Integer> variablesTags() {
-            /*
-             * http://tools.ietf.org/html/rfc5229
-             *
-             *    Usage:  ":lower" / ":upper" / ":lowerfirst" /
-             *    ":upperfirst" / ":quotewildcard" / ":length"
-             */
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
             return retval;
         }
 
+        /**
+         * <p>
+         * Syntax of the '<code>vacation</code>' action command and the positions of the '<code>:days</code>',
+         * '<code>:addresses</code>', '<code>:subject</code>' and '<code>:from</code>' tags
+         * tag as described in <a href="https://tools.ietf.org/html/rfc5230#section-4">https://tools.ietf.org/html/rfc5230#section-4</a>:
+         * </p>
+         * 
+         * <!-- @formatter:off -->
+         * <pre>
+         *   Usage:   vacation [":days" number] [":subject" string]
+         *           [":from" string] [":addresses" string-list]
+         *           [":mime"] [":handle" string] <reason: string>
+         *</pre>
+         *<!-- @formatter:on -->
+         *
+         * Note: The tags :handle and :mime are intentionally left out because there's no way to deal with that
+         * later in the frontend
+         * 
+         * @return
+         */
         private static Hashtable<String, Integer> vacationTags() {
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
             // The second parameter given the number of parameters which are
@@ -149,30 +187,52 @@ public class ActionCommand extends ControlOrActionCommand {
             return retval;
         }
 
+        /**
+         * <p>
+         * Syntax of the '<code>notify</code>' action command and the positions of the '<code>:message</code>'
+         * tag as described in <a href="https://tools.ietf.org/html/rfc5435#section-3">https://tools.ietf.org/html/rfc5435#section-3</a>:
+         * </p>
+         * 
+         * <!-- @formatter:off -->
+         * <pre>
+         *    Usage:  notify [":from" string]
+         *          [":importance" <"1" / "2" / "3">]
+         *          [":options" string-list]
+         *          [":message" string]
+         *          <method: string>
+         * </pre>
+         * <!-- @formatter:on -->
+         * @return a {@link Hashtable} with the '<code>:message</code>' tag
+         */
         private static Hashtable<String, Integer> enotifyTags() {
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
-            /*
-             * http://tools.ietf.org/html/rfc5435
-             *
-             *    Usage:  notify [":from" string]
-             * [":importance" <"1" / "2" / "3">]
-             * [":options" string-list]
-             * [":message" string]
-             * <method: string>
-             *
-             * only :message is supported
-             *
-             */
             retval.put(":message", Integer.valueOf(1));
             return retval;
         }
 
+        /**
+         * @return a {@link Hashtable} with the '<code>:keys</code>' tag
+         */
         private static Hashtable<String, Integer> pgpEncryptTags() {
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
             retval.put(":keys", Integer.valueOf(1));
             return retval;
         }
-        
+
+        /**
+         * <p>
+         * Syntax of the '<code>copy</code>' tag
+         * tag as described in <a href="https://tools.ietf.org/html/rfc3894#section-3">https://tools.ietf.org/html/rfc3894#section-3</a>:
+         * </p>
+         * <!-- @formatter:off -->
+         * <pre>
+         *   Syntax:
+         *        "fileinto" [":copy"] <folder: string>
+         *        "redirect" [":copy"] <address: string>
+         * </pre>
+         * <!-- @formatter:on -->
+         * @return a {@link Hashtable} with the '<code>:copy</code>' tag
+         */
         private static Hashtable<String, Integer> redirectTags() {
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
             retval.put(":copy", Integer.valueOf(0));
