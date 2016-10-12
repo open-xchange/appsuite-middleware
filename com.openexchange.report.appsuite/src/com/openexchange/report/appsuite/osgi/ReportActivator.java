@@ -51,7 +51,6 @@ package com.openexchange.report.appsuite.osgi;
 
 import javax.management.ObjectName;
 import org.osgi.framework.ServiceReference;
-import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
@@ -72,7 +71,6 @@ import com.openexchange.report.appsuite.UserReportCumulator;
 import com.openexchange.report.appsuite.defaultHandlers.CapabilityHandler;
 import com.openexchange.report.appsuite.defaultHandlers.ClientLoginCount;
 import com.openexchange.report.appsuite.defaultHandlers.Total;
-import com.openexchange.report.appsuite.internal.HazelcastReportService;
 import com.openexchange.report.appsuite.internal.LocalReportService;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.management.ReportMXBeanImpl;
@@ -93,8 +91,6 @@ public class ReportActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServices(this);
-
-        trackService(HazelcastInstance.class);
 
         // ContextReportCumulator
         track(ContextReportCumulator.class, new SimpleRegistryListener<ContextReportCumulator>() {
@@ -203,7 +199,7 @@ public class ReportActivator extends HousekeepingActivator {
         ClientLoginCount clc = new ClientLoginCount();
         Services.add(clc);
 
-        registerService(ReportService.class, new HazelcastReportService(new LocalReportService()));
+        registerService(ReportService.class, new LocalReportService());
         trackService(ReportService.class);
 
         trackService(LogLevelService.class);
@@ -215,6 +211,7 @@ public class ReportActivator extends HousekeepingActivator {
         managementService.registerMBean(new ObjectName("com.openexchange.reporting.appsuite", "name", "AppSuiteReporting"), new ReportMXBeanImpl());
     }
 
+    @Override
     protected void stopBundle() throws Exception {
         Services.setServices(null);
 

@@ -75,10 +75,10 @@ public class CustomTrustManager extends AbstractTrustManager {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomTrustManager.class);
 
     public CustomTrustManager() {
-        this.trustManager = initCustomTrustManager();
+        super(initCustomTrustManager());
     }
 
-    private X509ExtendedTrustManager initCustomTrustManager() {
+    private static X509ExtendedTrustManager initCustomTrustManager() {
         SSLConfigurationService sslConfigurationService = Services.getService(SSLConfigurationService.class);
 
         if (sslConfigurationService.isCustomTruststoreEnabled()) {

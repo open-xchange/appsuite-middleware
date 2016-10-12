@@ -50,50 +50,25 @@
 package com.openexchange.net.ssl;
 
 import javax.net.ssl.SSLSocketFactory;
-import com.openexchange.java.util.Tools;
-import com.openexchange.log.LogProperties;
-import com.openexchange.net.ssl.config.SSLConfigurationService;
-import com.openexchange.net.ssl.config.TrustLevel;
-import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
-import com.openexchange.net.ssl.osgi.Services;
+import com.openexchange.net.ssl.internal.TrustedSSLSocketFactory;
+import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * The provider of the {@link SSLSocketFactory} based on the configuration made by the administrator.
  *
- * 
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since v7.8.3
  */
-public class SSLSocketFactoryProvider {
+@SingletonService
+public interface SSLSocketFactoryProvider {
 
     /**
      * Returns the configured {@link SSLSocketFactory}. This method is invoked by by reflection.
      * <p>
      * Do not use the underlying {@link SSLSocketFactory} directly as this will bypass the server configuration.
-     * 
+     *
      * @return {@link TrustedSSLSocketFactory} or {@link TrustAllSSLSocketFactory} based on the configuration
      */
-    public static SSLSocketFactory getDefault() {
-        SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
+    SSLSocketFactory getDefault();
 
-        if (sslConfigService.getTrustLevel().equals(TrustLevel.TRUST_ALL)) {
-            return TrustAllSSLSocketFactory.getDefault();
-        }
-        int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
-        int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
-        if ((user == -1) || (context == -1)) {
-            return TrustedSSLSocketFactory.getDefault();
-        }
-
-        boolean isUserAllowedToConfigureTrustlevel = Services.getService(UserAwareSSLConfigurationService.class).isTrustAll(user, context);
-        if (isUserAllowedToConfigureTrustlevel) {
-            UserAwareSSLConfigurationService userSSLConfig = Services.getService(UserAwareSSLConfigurationService.class);
-
-            if (userSSLConfig.isTrustAll(user, context)) {
-                return TrustAllSSLSocketFactory.getDefault();
-            }
-        }
-        return TrustedSSLSocketFactory.getDefault();
-    }
 }

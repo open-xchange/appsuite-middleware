@@ -76,6 +76,8 @@ public class JMXReport {
     private final long stopTime;
     private final String type;
     private String data;
+    private boolean isNeedsComposition;
+    private String storageFolderPath;
 
     /**
      * Creates a JMX friendly version of the given report
@@ -86,6 +88,8 @@ public class JMXReport {
         this.tasks = report.getNumberOfTasks();
         this.startTime = report.getStartTime();
         this.stopTime = report.getStopTime();
+        this.isNeedsComposition = report.isNeedsComposition();
+        this.storageFolderPath = report.getStorageFolderPath();
 
         this.type = report.getType();
 
@@ -105,6 +109,8 @@ public class JMXReport {
             jsonData.put("reportType", type);
             jsonData.put("timestamps", new JSONObject().put("start", startTime).put("stop", stopTime));
             jsonData.put("version", new JSONObject().put("version", Version.getInstance().getVersionString()).put("buildDate", Version.getInstance().getBuildDate()));
+            jsonData.put("needsComposition", isNeedsComposition);
+            jsonData.put("storageFolderPath", storageFolderPath);
 
             this.data = jsonData.toString();
         } catch (JSONException e) {
@@ -146,6 +152,27 @@ public class JMXReport {
     public String getData() {
         return data;
     }
+    
+    
+    public boolean isNeedsComposition() {
+        return isNeedsComposition;
+    }
+
+    
+    public void setNeedsComposition(boolean isNeedsComposition) {
+        this.isNeedsComposition = isNeedsComposition;
+    }
+
+    
+    public String getStorageFolderPath() {
+        return storageFolderPath;
+    }
+
+    
+    public void setStorageFolderPath(String storageFolderPath) {
+        this.storageFolderPath = storageFolderPath;
+    }
+
 
     /**
      * A utility method for wrapping an array of reports

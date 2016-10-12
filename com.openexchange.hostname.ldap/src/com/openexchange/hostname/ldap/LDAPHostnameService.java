@@ -67,6 +67,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.hostname.ldap.configuration.LDAPHostnameProperties;
 import com.openexchange.hostname.ldap.configuration.Property;
 import com.openexchange.hostname.ldap.configuration.SearchScope;
+import com.openexchange.hostname.ldap.osgi.Services;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.server.ServiceLookup;
 
@@ -181,7 +182,8 @@ public class LDAPHostnameService implements HostnameService {
             env.put(Context.PROVIDER_URL, "ldap://" + uri);
         }
         if (uri.startsWith("ldaps://")) {
-            env.put("java.naming.ldap.factory.socket", SSLSocketFactoryProvider.getDefault().getClass().getName());
+            SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
+            env.put("java.naming.ldap.factory.socket", factoryProvider.getDefault().getClass().getName());
         }
 
         return env;

@@ -72,6 +72,8 @@ import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * This class implements the login by using an LDAP for authentication.
@@ -124,14 +126,13 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LDAPAuthentication.class);
 
-    /**
-     * Properties for the JNDI context.
-     */
+    /** The OSGi service look-up */
+    private final ServiceLookup services;
+
+    /** Properties for the JNDI context. */
     private Properties props;
 
-    /**
-     * attribute name and base DN.
-     */
+    /** Attribute name and base DN. */
     private String uidAttribute, baseDN, ldapReturnField, searchFilter, bindDN, bindDNPassword, proxyUser, proxyDelimiter, referral, ldapScope;
 
     private boolean bindOnly, useFullLoginInfo;
@@ -144,9 +145,10 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
      * Default constructor.
      * @throws LoginException if setup fails.
      */
-    public LDAPAuthentication(Properties props) throws OXException {
+    public LDAPAuthentication(Properties props, ServiceLookup services) throws OXException {
         super();
         this.props = props;
+        this.services = services;
         init();
     }
 
@@ -345,7 +347,11 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
         if (null == url) {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(Context.PROVIDER_URL);
         } else if (url.startsWith("ldaps")) {
-            props.put("java.naming.ldap.factory.socket", SSLSocketFactoryProvider.getDefault().getClass().getName());
+            SSLSocketFactoryProvider factoryProvider = services.getOptionalService(SSLSocketFactoryProvider.class);
+            if (null == factoryProvider) {
+                throw ServiceExceptionCode.absentService(SSLSocketFactoryProvider.class);
+            }
+            props.put("java.naming.ldap.factory.socket", factoryProvider.getDefault().getClass().getName());
         }
 
         this.ldapReturnField = props.getProperty(PropertyNames.LDAP_RETURN_FIELD.name);

@@ -55,6 +55,7 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.http.client.HTTPClient;
 import com.openexchange.http.client.apache.ApacheHTTPClient;
 import com.openexchange.http.client.builder.HTTPResponseProcessor;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 
@@ -62,8 +63,8 @@ import com.openexchange.osgi.SimpleRegistryListener;
 public class HTTPClientActivator extends HousekeepingActivator {
 
 	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class<?>[]{ManagedFileManagement.class};
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ManagedFileManagement.class, SSLSocketFactoryProvider.class };
 	}
 
 	@Override
@@ -87,9 +88,9 @@ public class HTTPClientActivator extends HousekeepingActivator {
 
 		};
 		track(HTTPResponseProcessor.class, listener );
-		
+
 		openTrackers();
-		
+
 		registerService(HTTPClient.class, client);
 	}
 }

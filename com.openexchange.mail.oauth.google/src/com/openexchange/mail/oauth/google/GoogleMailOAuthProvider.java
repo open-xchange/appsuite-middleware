@@ -51,8 +51,8 @@ package com.openexchange.mail.oauth.google;
 
 import java.io.IOException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.services.oauth2.Oauth2;
-import com.google.api.services.oauth2.model.Userinfoplus;
+import com.google.api.services.gmail.Gmail;
+import com.google.api.services.gmail.model.Profile;
 import com.openexchange.exception.OXException;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.mail.autoconfig.Autoconfig;
@@ -90,14 +90,14 @@ public class GoogleMailOAuthProvider implements MailOAuthProvider {
 
             // Determine E-Mail address from "user/me" end-point
             GoogleCredential credentials = com.openexchange.google.api.client.GoogleApiClients.getCredentials(oauthAccountToUse, session);
-            Oauth2 oauth2 = new Oauth2.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName(session)).build();
-            Userinfoplus userinfo = oauth2.userinfo().get().execute();
-            String email = userinfo.getEmail();
+            Gmail gmail = new Gmail.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName(session)).build();
+            Profile profile = gmail.users().getProfile("me").execute();
+            String email = profile.getEmailAddress();
 
             ImmutableAutoconfig.Builder builder = ImmutableAutoconfig.builder();
             builder.username(email);
-            builder.mailOAuth(true).mailPort(993).mailProtocol("imap").mailSecure(true).mailServer("imap.gmail.com").mailStartTls(false);
-            builder.transportOAuth(true).transportPort(587).transportProtocol("smtp").transportSecure(false).transportServer("smtp.gmail.com").transportStartTls(true);
+            builder.mailOAuthId(oauthAccount.getId()).mailPort(993).mailProtocol("imap").mailSecure(true).mailServer("imap.gmail.com").mailStartTls(false);
+            builder.transportOAuthId(oauthAccount.getId()).transportPort(587).transportProtocol("smtp").transportSecure(false).transportServer("smtp.gmail.com").transportStartTls(true);
             return builder.build();
         } catch (IOException e) {
             throw OAuthExceptionCodes.IO_ERROR.create(e, e.getMessage());

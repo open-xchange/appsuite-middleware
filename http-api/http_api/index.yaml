@@ -147,6 +147,8 @@ tags:
     description: The module mail_categories allows to manage mail categories.
   - name: Advertisement
     description: Via the advertisement module the client can retrieve the advertisement configuration
+  - name: Clientonboarding
+    description: Via the client on-boarding module the client can retrieve possible on-boarding configurations
 # References to the definitions, "global" parameters and paths
 definitions:
   $ref: ./definitions/index.yaml

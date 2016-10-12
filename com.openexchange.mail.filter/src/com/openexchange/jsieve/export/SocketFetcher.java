@@ -58,6 +58,7 @@ import java.security.PrivilegedAction;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import com.openexchange.mailfilter.services.Services;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 
 /**
@@ -104,7 +105,11 @@ public final class SocketFetcher {
         final int port = socket.getPort();
         try {
             // Get SSL socket factory
-            final SSLSocketFactory ssf = SSLSocketFactoryProvider.getDefault();
+            SSLSocketFactoryProvider factoryProvider = Services.optService(SSLSocketFactoryProvider.class);
+            if (null == factoryProvider) {
+                throw new IllegalStateException("No " + SSLSocketFactoryProvider.class.getSimpleName() + " available. Bundle \"com.openexchange.net.ssl\" seems not to be started.");
+            }
+            final SSLSocketFactory ssf =  factoryProvider.getDefault();
             // Create new socket layered over an existing socket connected to the named host, at the given port.
             final Socket newSocket = ssf.createSocket(socket, host, port, true);
             configureSSLSocket(newSocket);

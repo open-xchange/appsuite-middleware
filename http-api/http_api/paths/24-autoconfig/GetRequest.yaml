@@ -24,7 +24,7 @@
       - in: formData
         name: oauth
         type: integer
-        description: The optional identifier of the OAuth account to use for authentication. Also accepts a boolean to signal that provided password is considered to be an OAuth token.
+        description: The optional identifier of the OAuth account to use for authentication.
     responses:
       200:
         description: |

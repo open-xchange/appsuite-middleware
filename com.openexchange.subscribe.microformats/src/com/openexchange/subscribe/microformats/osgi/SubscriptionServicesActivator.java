@@ -56,6 +56,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.FormElement;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.subscribe.SubscribeService;
@@ -143,12 +144,8 @@ public class SubscriptionServicesActivator extends HousekeepingActivator {
         /*
          * Add and open service trackers
          */
-        track(
-            ConfigurationService.class,
-            new RegistryServiceTrackerCustomizer<ConfigurationService>(
-                context,
-                OXMFServiceRegistry.getInstance(),
-                ConfigurationService.class));
+        track(ConfigurationService.class, new RegistryServiceTrackerCustomizer<ConfigurationService>(context, OXMFServiceRegistry.getInstance(), ConfigurationService.class));
+        track(SSLSocketFactoryProvider.class, new RegistryServiceTrackerCustomizer<SSLSocketFactoryProvider>(context, OXMFServiceRegistry.getInstance(), SSLSocketFactoryProvider.class));
         openTrackers();
     }
 

@@ -83,11 +83,11 @@ public class ConfigurationFile extends AbstractConfigSource {
 
     @Override
     public Autoconfig getAutoconfig(String emailLocalPart, final String emailDomain, String password, User user, Context context) throws OXException {
-        return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true, false);
+        return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true);
     }
 
     @Override
-    public DefaultAutoconfig getAutoconfig(String emailLocalPart, final String emailDomain, String password, User user, Context context, boolean forceSecure, boolean isOAuth) throws OXException {
+    public DefaultAutoconfig getAutoconfig(String emailLocalPart, final String emailDomain, String password, User user, Context context, boolean forceSecure) throws OXException {
         ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
         String fileLocation = view.get(locationProperty, String.class);
@@ -121,8 +121,6 @@ public class ConfigurationFile extends AbstractConfigSource {
         replaceUsername(autoconfig, emailLocalPart, emailDomain);
         autoconfig.setMailStartTls(forceSecure);
         autoconfig.setTransportStartTls(forceSecure);
-        autoconfig.setMailOAuth(isOAuth);
-        autoconfig.setTransportOAuth(isOAuth);
         return autoconfig;
     }
 

@@ -1374,8 +1374,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         /*
          * Check if a secure IMAP connection should be established
          */
-        final String sPort = String.valueOf(config.getPort());
-        final String socketFactoryClass = SSLSocketFactoryProvider.getDefault().getClass().getName();
+        String sPort = String.valueOf(config.getPort());
+        SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
+        String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
         String protocols = config.getIMAPProperties().getSSLProtocols();
         String cipherSuites = config.getIMAPProperties().getSSLCipherSuites();
         SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);

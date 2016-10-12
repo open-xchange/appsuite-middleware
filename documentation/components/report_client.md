@@ -277,6 +277,30 @@ might be the case for automated executions of the report client) execute
 the report client with the option -s (send\_only). Now no report will be
 displayed after the report has been sent to activation.open-xchange.com.
 
+## Report performance and storage
+With version 7.8.3 two new properties are introduced.
+
+	com.openexchange.report.appsuite.fileStorage=/tmp
+
+Describes the storage path for all report relevant data. Saving a report will place a JSON-Version of the report in that folder.
+
+	com.openexchange.report.appsuite.maxChunkSize=200
+	
+This property enables the client to store parts of the report on hard drive to keep memory usage small. A chunk is either a CapabilitySet for the default report (Core) or a user for the OXaaS report types (Cloudplugins).
+
+The stored parts are combined into a single .report file and then deleted when the report is finished. The .report file is not deleted automatically.
+
+
+	com.openexchange.report.appsuite.maxThreadPoolSize=20
+	
+The report will use multithreading for faster processing. Therefore the user can edit the threadpoolsize by editing this property value. Each thread is processing the needed values from a schema. If the threadpool is smaller then the schemas in the database, the threads are queued.
+
+	com.openexchange.report.appsuite.threadPriority=1
+	
+This property determines the used threads priotity. It can range from 1 (lowest) to 10 (highest).
+
+
+
 ## Available options
 
 	$ /opt/open-xchange/sbin/report -h
@@ -299,7 +323,7 @@ lists all available options:
     -f,--savereport                                   Save the report as JSON String instead of sending it
     -b,--showaccesscombination <showaccesscombination>  Show access combination for bitmask
     -e,--run-appsuite-report                          Schedule an appsuite style report. Will print out the reports UUID or, if a report is being generated, the UUID of the pending report
-    -t,--report-type <report-type>                    The type of the report to run. Leave this off for the 'default' report. 'Known reports next to 'default': 'extended', 'oscs-extended' Enables additional options, as listed below (provisioning-bundels needed)
+    -t,--report-type <report-type>                    The type of the report to run. Leave this off for the 'default' report. 'Known reports next to 'default': 'extended', 'oxaas-extended' Enables additional options, as listed below (provisioning-bundels needed)
     --inspect-appsuite-reports                     	  Prints information about currently running reports
     --cancel-appsuite-reports                      	  Cancels pending reports     
     -g,--get-appsuite-report                          Retrieve the report that was generated, can (and should) be combined with the options for sending, displaying or saving the report
@@ -485,7 +509,7 @@ Report was finished: Tue Jun 07 11:31:30 CEST 2016
 - **total**: total number of users
 - **admin**: total number of admins
 - **contexts**: total number of contexts
-- **quota**: cumulated quota
+- **quota**: cumulated quota in byte
 
 
 
@@ -946,8 +970,8 @@ Report was finished: Tue May 24 14:41:22 CEST 2016
 **"Context"**: The context Id will be diplayed
 
 * **totals**: Contains values for this context only
-	* **quota**: The quota for this context. User filestores are ignored
-	* **quotaUsage**: The cumulate used quota of all users, except those with an own filestore
+	* **quota**: The quota for this context in byte. User filestores are ignored
+	* **quotaUsage**: The cumulate used quota of all users in byte, except those with an own filestore
 	* **mailQuota**: The total cumulated mail quota of all users
 	* **mailQuotaUsage**: The cumulated used quota of all users
 
@@ -955,8 +979,8 @@ Report was finished: Tue May 24 14:41:22 CEST 2016
 
 * **capabilitySet**: Integer value, which is a reference to the reports capability sets map  
 * **drive**
-	* **quota**: Total quota 
-	* **used-quota**: Used quota by this user
+	* **quota**: Total quota in byte
+	* **used-quota**: Used quota by this user in byte
 	* **file-size-min**: The size of the smallest file
 	* **file-size-max**: The size of the biggest file
 	* **file-size-avg**: Average file size

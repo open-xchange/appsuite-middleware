@@ -49,6 +49,7 @@
 
 package com.openexchange.rest.client.osgi;
 
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
@@ -73,7 +74,7 @@ public class RestClientActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TimerService.class, SSLConfigurationService.class };
+        return new Class<?>[] { TimerService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class };
     }
 
     @Override
@@ -84,7 +85,7 @@ public class RestClientActivator extends HousekeepingActivator {
         // Avoid annoying WARN logging
         //System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.client.protocol.ResponseProcessCookies", "fatal");
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
         try {

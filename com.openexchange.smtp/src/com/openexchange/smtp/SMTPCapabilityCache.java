@@ -251,7 +251,8 @@ public final class SMTPCapabilityCache {
             try {
                 try {
                     if (isSecure) {
-                        s = SSLSocketFactoryProvider.getDefault().createSocket();
+                        SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
+                        s = factoryProvider.getDefault().createSocket();
                     } else {
                         s = new Socket();
                     }

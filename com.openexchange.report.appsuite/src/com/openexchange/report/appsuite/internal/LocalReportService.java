@@ -51,6 +51,7 @@ package com.openexchange.report.appsuite.internal;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
 import org.slf4j.Logger;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -79,7 +81,8 @@ import com.openexchange.report.appsuite.ReportSystemHandler;
 import com.openexchange.report.appsuite.jobs.AnalyzeContextBatch;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.report.appsuite.serialization.ReportConfigs;
-import com.openexchange.report.appsuite.storage.DataloaderMySQL;
+import com.openexchange.report.appsuite.storage.ChunkingUtilities;
+import com.openexchange.report.appsuite.storage.ContextLoader;
 
 /**
  * {@link LocalReportService}
@@ -98,9 +101,9 @@ public class LocalReportService extends AbstractReportService {
      * 
      * 'Implementations of this interface are expected to be thread-safe, and can be safely accessed by multiple concurrent threads.' from http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/cache/Cache.html
      */
-    private static final Cache<String, Map<String, Report>> reportCache = CacheBuilder.newBuilder().concurrencyLevel(20).expireAfterWrite(180, TimeUnit.MINUTES).<String, Map<String, Report>> build();
+    private static final Cache<String, Map<String, Report>> reportCache = CacheBuilder.newBuilder().concurrencyLevel(ReportProperties.getMaxThreadPoolSize()).expireAfterWrite(180, TimeUnit.MINUTES).<String, Map<String, Report>> build();
 
-    private static final Cache<String, Map<String, Report>> failedReportCache = CacheBuilder.newBuilder().concurrencyLevel(20).expireAfterWrite(180, TimeUnit.MINUTES).<String, Map<String, Report>> build();
+    private static final Cache<String, Map<String, Report>> failedReportCache = CacheBuilder.newBuilder().concurrencyLevel(ReportProperties.getMaxThreadPoolSize()).expireAfterWrite(180, TimeUnit.MINUTES).<String, Map<String, Report>> build();
 
     private static AtomicReference<ExecutorService> EXECUTOR_SERVICE_REF = new AtomicReference<ExecutorService>();
 
@@ -163,7 +166,15 @@ public class LocalReportService extends AbstractReportService {
         // Run all applicable cumulators to add the context report results to the global report
         for (ContextReportCumulator cumulator : Services.getContextReportCumulators()) {
             if (cumulator.appliesTo(reportType)) {
-                cumulator.merge(contextReport, report);
+                Collection<Object> reportValues = ((Map<String, Object>) report.getNamespace(Report.MACDETAIL)).values();
+                if (reportValues.size() >= ReportProperties.getMaxChunkSize()) {
+                    synchronized (report) {
+                        cumulator.merge(contextReport, report);
+                    }
+                } else {
+                    cumulator.merge(contextReport, report);
+                }
+
             }
         }
         pendingReports.put(report.getUUID(), report);
@@ -208,6 +219,7 @@ public class LocalReportService extends AbstractReportService {
         }
 
         pendingReports.remove(uuid);
+        ChunkingUtilities.removeAllReportParts(uuid);
         LOG.info("Report generation stopped due to an error. Solve the following error and start report again: {}", reason);
     }
 
@@ -236,42 +248,55 @@ public class LocalReportService extends AbstractReportService {
         String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
 
         // Load all contextIds
-        List<Integer> allContextIds = Services.getService(ContextService.class).getAllContextIds();
+        List<Integer> allContextIds = new ArrayList<Integer>();
 
         // Set up an AnalyzeContextBatch instance for every chunk of contextIds
         if (reportConfig.isShowSingleTenant()) {
-            DataloaderMySQL dataloaderMySQL = new DataloaderMySQL();
+            ContextLoader dataloaderMySQL = new ContextLoader();
             try {
                 allContextIds = dataloaderMySQL.getAllContextsForSid(reportConfig.getSingleTenantId());
             } catch (SQLException e) {
-                LOG.error("Failed to execute SQL to retrieve all context ids");
-                e.printStackTrace();
+                LOG.error("Failed to execute SQL to retrieve all context ids", e);
             }
             if (allContextIds.isEmpty()) {
                 LOG.error("No contexts for this brand or the sid is invalid.");
                 return null;
             }
+        } else {
+            allContextIds = Services.getService(ContextService.class).getAllContextIds();
         }
 
         // Set up the report instance
         Report report = new Report(uuid, System.currentTimeMillis(), reportConfig);
+        report.setStorageFolderPath(ReportProperties.getStoragePath());
         report.setNumberOfTasks(allContextIds.size());
         pendingReports.put(uuid, report);
         reportCache.asMap().put(PENDING_REPORTS_PRE_KEY + reportConfig.getType(), pendingReports);
 
-        setUpContextAnalyzer(uuid, reportConfig.getType(), allContextIds, report);
+        setUpContextAnalyzer(uuid, allContextIds, report);
         return uuid;
     }
 
     //--------------------Private helper methods--------------------
-    private void setUpContextAnalyzer(String uuid, String reportType, List<Integer> allContextIds, Report report) throws OXException {
-        List<List<Integer>> contextsInSameSchema = getContextsInSameSchemas(allContextIds);
-        processAllContexts(report, contextsInSameSchema);
+    private void setUpContextAnalyzer(String uuid, final List<Integer> allContextIds, final Report report) throws OXException {
+        new Thread() {
+
+            public void run() {
+                List<List<Integer>> contextsInSameSchema;
+                try {
+                    contextsInSameSchema = getContextsInSameSchemas(allContextIds);
+                    processAllContexts(report, contextsInSameSchema);
+                } catch (OXException e) {
+                    LOG.error("Unable to strat multithreaded context processing, abort report generation ", e);
+                    abortGeneration(report.getUUID(), report.getType(), "Unable to distribute context processing on multiple threads");
+                }
+            };
+        }.start();
     }
 
     private List<List<Integer>> getContextsInSameSchemas(List<Integer> allContextIds) throws OXException {
         List<List<Integer>> contextsInSchemas = new ArrayList<>();
-        DataloaderMySQL dataloaderMySQL = new DataloaderMySQL();
+        ContextLoader dataloaderMySQL = new ContextLoader();
         try {
             while (!allContextIds.isEmpty()) {
                 List<Integer> currentSchemaIds;
@@ -281,13 +306,13 @@ public class LocalReportService extends AbstractReportService {
                 allContextIds.removeAll(currentSchemaIds);
             }
         } catch (SQLException e) {
-            throw ReportExceptionCodes.UNABLE_TO_RETRIEVE_ALL_CONTEXT_IDS.create(e.getMessage());
+            throw ReportExceptionCodes.UNABLE_TO_RETRIEVE_ALL_CONTEXT_IDS.create(e);
         }
         return contextsInSchemas;
     }
 
     private void processAllContexts(Report report, List<List<Integer>> contextsInSchemas) throws OXException {
-        ExecutorService reportSchemaThreadPool = Executors.newFixedThreadPool(20, new ThreadFactory() {
+        ExecutorService reportSchemaThreadPool = Executors.newFixedThreadPool(ReportProperties.getMaxThreadPoolSize(), new ThreadFactory() {
 
             @Override
             public Thread newThread(Runnable r) {
@@ -317,12 +342,12 @@ public class LocalReportService extends AbstractReportService {
                 Future<Integer> finishedContexts = schemaProcessor.take();
                 report.setTaskState(report.getNumberOfTasks(), report.getNumberOfPendingTasks() - finishedContexts.get());
                 if (report.getNumberOfPendingTasks() <= 0) {
-                    finishUpReport(report.getType(), reportCache.asMap().get(PENDING_REPORTS_PRE_KEY + report.getType()), report);
+                    finishUpReport(report);
                 }
             } catch (InterruptedException e) {
-                throw ReportExceptionCodes.THREAD_WAS_INTERRUPTED.create(e.getMessage());
+                throw ReportExceptionCodes.THREAD_WAS_INTERRUPTED.create(e);
             } catch (ExecutionException e) {
-                throw ReportExceptionCodes.UABLE_TO_RETRIEVE_THREAD_RESULT.create(e.getMessage());
+                throw ReportExceptionCodes.UABLE_TO_RETRIEVE_THREAD_RESULT.create(e);
             }
         }
     }
@@ -331,16 +356,16 @@ public class LocalReportService extends AbstractReportService {
         return LocalReportService.class.getSimpleName() + "-" + threadNumber;
     }
 
-    private void finishUpReport(String reportType, Map<String, Report> pendingReports, Report report) {
+    private void finishUpReport(Report report) {
         for (ReportSystemHandler handler : Services.getSystemHandlers()) {
-            if (handler.appliesTo(reportType)) {
+            if (handler.appliesTo(report.getType())) {
                 handler.runSystemReport(report);
             }
         }
 
         // And perform the finishing touches
         for (ReportFinishingTouches handler : Services.getFinishingTouches()) {
-            if (handler.appliesTo(reportType)) {
+            if (handler.appliesTo(report.getType())) {
                 handler.finish(report);
             }
         }
@@ -357,8 +382,6 @@ public class LocalReportService extends AbstractReportService {
         reportCache.asMap().put(REPORTS_KEY, finishedReports);
 
         // Clean up resources
-        pendingReports.remove(report.getUUID());
-        reportCache.asMap().get(PENDING_REPORTS_PRE_KEY + reportType).remove(report.getUUID());
+        reportCache.asMap().get(PENDING_REPORTS_PRE_KEY + report.getType()).remove(report.getUUID());
     }
-
 }

@@ -357,7 +357,8 @@ public final class POP3CapabilityCache {
             try {
                 try {
                     if (isSecure) {
-                        s = SSLSocketFactoryProvider.getDefault().createSocket();
+                        SSLSocketFactoryProvider factoryProvider = POP3ServiceRegistry.getServiceRegistry().getService(SSLSocketFactoryProvider.class);
+                        s = factoryProvider.getDefault().createSocket();
                     } else {
                         s = new Socket();
                     }

@@ -100,13 +100,13 @@ public abstract class StaticConfigSource implements ConfigSource {
 
     @Override
     public final Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context) throws OXException {
-        return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true, false);
+        return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true);
     }
 
     @Override
-    public final DefaultAutoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context, boolean forceSecure, boolean isOAuth) throws OXException {
+    public final DefaultAutoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context, boolean forceSecure) throws OXException {
         if (null != filter && filter.accept(emailDomain)) {
-            return getStaticAutoconfig(emailLocalPart, emailDomain, password, user, context, forceSecure, isOAuth);
+            return getStaticAutoconfig(emailLocalPart, emailDomain, password, user, context, forceSecure);
         }
         return null;
     }
@@ -120,10 +120,9 @@ public abstract class StaticConfigSource implements ConfigSource {
      * @param user The associated user
      * @param context The context
      * @param forceSecure <code>true</code> if a secure connection should be enforced; otherwise <code>false</code> to also allow plain ones
-     * @param isOAuth <code>true</code> to mark passed password as an OAuth token (and thus performing XOAUTH2 authentication mechanism); otherwise <code>false</code> for a regular password
      * @return The auto-config or <code>null</code>
      * @throws OXException If an error occurs
      */
-    protected abstract DefaultAutoconfig getStaticAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context, boolean forceSecure, boolean isOAuth) throws OXException;
+    protected abstract DefaultAutoconfig getStaticAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context, boolean forceSecure) throws OXException;
 
 }

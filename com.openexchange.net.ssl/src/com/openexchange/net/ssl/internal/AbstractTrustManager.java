@@ -74,7 +74,17 @@ public abstract class AbstractTrustManager extends X509ExtendedTrustManager {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractTrustManager.class);
 
-    protected X509ExtendedTrustManager trustManager;
+    protected final X509ExtendedTrustManager trustManager;
+
+    /**
+     * Initializes a new {@link AbstractTrustManager}.
+     *
+     * @param trustManager The trust manager
+     */
+    protected AbstractTrustManager(X509ExtendedTrustManager trustManager) {
+        super();
+        this.trustManager = trustManager;
+    }
 
     public boolean isInitialized() {
         return this.trustManager != null;

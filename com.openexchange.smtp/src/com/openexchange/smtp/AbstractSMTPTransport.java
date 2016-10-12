@@ -464,8 +464,9 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     /*
                      * Check if a secure SMTP connection should be established
                      */
-                    final String sPort = String.valueOf(smtpConfig.getPort());
-                    final String socketFactoryClass = SSLSocketFactoryProvider.getDefault().getClass().getName();
+                    String sPort = String.valueOf(smtpConfig.getPort());
+                    SSLSocketFactoryProvider factoryProvider = Services.getService(SSLSocketFactoryProvider.class);
+                    String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
                     String protocols = smtpConfig.getSMTPProperties().getSSLProtocols();
                     String cipherSuites = smtpConfig.getSMTPProperties().getSSLCipherSuites();
                     SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);

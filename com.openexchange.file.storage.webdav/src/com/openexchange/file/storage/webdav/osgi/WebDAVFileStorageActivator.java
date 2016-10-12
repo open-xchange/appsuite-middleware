@@ -53,6 +53,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.webdav.WebDAVServices;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 
@@ -72,7 +73,7 @@ public final class WebDAVFileStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, SessiondService.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, SessiondService.class, SSLSocketFactoryProvider.class };
     }
 
     @Override

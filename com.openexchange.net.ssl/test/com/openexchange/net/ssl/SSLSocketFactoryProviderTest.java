@@ -66,6 +66,8 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.config.TrustLevel;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
+import com.openexchange.net.ssl.internal.DefaultSSLSocketFactoryProvider;
+import com.openexchange.net.ssl.internal.TrustedSSLSocketFactory;
 import com.openexchange.net.ssl.osgi.Services;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
@@ -101,7 +103,7 @@ public class SSLSocketFactoryProviderTest {
     public void testGetDefault_trustLevelAll_returnTrustAllFactory() {
         Mockito.when(this.sslConfigurationService.getTrustLevel()).thenReturn(TrustLevel.TRUST_ALL);
 
-        SSLSocketFactory socketFactory = SSLSocketFactoryProvider.getDefault();
+        SSLSocketFactory socketFactory = DefaultSSLSocketFactoryProvider.getInstance().getDefault();
 
         assertEquals(TrustAllSSLSocketFactory.getDefault().getClass().getName(), socketFactory.getClass().getName());
     }
@@ -111,7 +113,7 @@ public class SSLSocketFactoryProviderTest {
         Mockito.when(this.sslConfigurationService.getTrustLevel()).thenReturn(TrustLevel.TRUST_RESTRICTED);
         Mockito.when(this.userAwareSSLConfigurationService.isTrustAll(Matchers.anyInt(), Matchers.anyInt())).thenReturn(Boolean.FALSE.booleanValue());
 
-        SSLSocketFactory socketFactory = SSLSocketFactoryProvider.getDefault();
+        SSLSocketFactory socketFactory = DefaultSSLSocketFactoryProvider.getInstance().getDefault();
 
         assertEquals(TrustedSSLSocketFactory.getDefault().getClass().getName(), socketFactory.getClass().getName());
     }
@@ -121,7 +123,7 @@ public class SSLSocketFactoryProviderTest {
         Mockito.when(this.sslConfigurationService.getTrustLevel()).thenReturn(TrustLevel.TRUST_RESTRICTED);
         Mockito.when(LogProperties.get(LogProperties.Name.SESSION_USER_ID)).thenReturn("-1");
 
-        SSLSocketFactory socketFactory = SSLSocketFactoryProvider.getDefault();
+        SSLSocketFactory socketFactory = DefaultSSLSocketFactoryProvider.getInstance().getDefault();
 
         assertEquals(TrustedSSLSocketFactory.getDefault().getClass().getName(), socketFactory.getClass().getName());
     }
@@ -131,7 +133,7 @@ public class SSLSocketFactoryProviderTest {
         Mockito.when(this.sslConfigurationService.getTrustLevel()).thenReturn(TrustLevel.TRUST_RESTRICTED);
         Mockito.when(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID)).thenReturn("-1");
 
-        SSLSocketFactory socketFactory = SSLSocketFactoryProvider.getDefault();
+        SSLSocketFactory socketFactory = DefaultSSLSocketFactoryProvider.getInstance().getDefault();
 
         assertEquals(TrustedSSLSocketFactory.getDefault().getClass().getName(), socketFactory.getClass().getName());
     }
@@ -143,7 +145,7 @@ public class SSLSocketFactoryProviderTest {
         Mockito.when(LogProperties.get(LogProperties.Name.SESSION_USER_ID)).thenReturn("307");
         Mockito.when(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID)).thenReturn("1");
 
-        SSLSocketFactory socketFactory = SSLSocketFactoryProvider.getDefault();
+        SSLSocketFactory socketFactory = DefaultSSLSocketFactoryProvider.getInstance().getDefault();
 
         assertEquals(TrustedSSLSocketFactory.getDefault().getClass().getName(), socketFactory.getClass().getName());
     }

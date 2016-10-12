@@ -47,31 +47,61 @@
  *
  */
 
-package com.openexchange.spamhandler.spamexperts.osgi;
+package com.openexchange.ajax.requesthandler.responseRenderers;
 
-import com.openexchange.osgi.ServiceRegistry;
+import java.io.IOException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.container.SecureContentResponse;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.ResponseRenderer;
+
 
 /**
- * {@link SpamExpertsServiceRegistry}
+ * {@link SecureContentAPIResponseRenderer} is similiar to a normal {@link APIResponseRenderer}.
+ *
+ * The only addition is, that it only set the Content-Security-Policy headers from {@link HttpServletResponse} to a less strict policy.
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.3
  */
-public final class SpamExpertsServiceRegistry extends ServiceRegistry {
+public class SecureContentAPIResponseRenderer implements ResponseRenderer {
 
-    private static final SpamExpertsServiceRegistry instance = new SpamExpertsServiceRegistry();
+
+    private final APIResponseRenderer delegate;
+    private static final String SECURITY_POLICY="unsafe-inline";
 
     /**
-     * Gets the service registry instance.
-     *
-     * @return The service registry instance.
+     * Initializes a new {@link SecureContentAPIResponseRenderer}.
      */
-    public static SpamExpertsServiceRegistry getInstance() {
-        return instance;
+    public SecureContentAPIResponseRenderer(APIResponseRenderer delegate) {
+        super();
+        this.delegate=delegate;
     }
 
-    /**
-     * Initializes a new {@link SpamExpertsServiceRegistry}.
-     */
-    private SpamExpertsServiceRegistry() {
-        super(2);
+    @Override
+    public boolean handles(AJAXRequestData request, AJAXRequestResult result) {
+
+        return result.getResultObject() instanceof SecureContentResponse;
+    }
+
+    @Override
+    public int getRanking() {
+        return delegate.getRanking();
+    }
+
+    @Override
+    public void write(AJAXRequestData request, AJAXRequestResult result, HttpServletRequest httpReq, HttpServletResponse httpResp) throws IOException {
+        // deactivate Content-Security-Policy
+        httpResp.setHeader("Content-Security-Policy", SECURITY_POLICY);
+        httpResp.setHeader("X-WebKit-CSP", SECURITY_POLICY);
+        httpResp.setHeader("X-Content-Security-Policy", SECURITY_POLICY);
+
+        AJAXRequestResult secureResult = new AJAXRequestResult();
+        secureResult.setResultObject(((SecureContentResponse)result.getResultObject()).getResponse());
+        secureResult.setContinuationUuid(result.getContinuationUuid());
+        delegate.write(request, secureResult, httpReq, httpResp);
     }
 
 }

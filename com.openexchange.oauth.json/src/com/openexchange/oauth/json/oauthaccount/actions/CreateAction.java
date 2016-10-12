@@ -58,6 +58,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.ajax.requesthandler.SecureContentWrapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -129,9 +130,8 @@ public final class CreateAction extends AbstractOAuthTokenAction {
 
             // Write as JSON
             final JSONObject jsonAccount = AccountWriter.write(newAccount, session);
-
             // Return appropriate result
-            return new AJAXRequestResult(jsonAccount);
+            return new AJAXRequestResult(new SecureContentWrapper(jsonAccount, "json"), SecureContentWrapper.CONTENT_TYPE);
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }

@@ -314,8 +314,9 @@ public final class POP3StoreConnector {
              * With JavaMail v1.4.3 the JavaMail POP3 provider supports to start in plain text mode and
              * then switching the connection into TLS mode using the STLS command.
              */
-            final String sPort = String.valueOf(port);
-            final String socketFactoryClass = SSLSocketFactoryProvider.getDefault().getClass().getName();
+            String sPort = String.valueOf(port);
+            SSLSocketFactoryProvider factoryProvider = POP3ServiceRegistry.getServiceRegistry().getService(SSLSocketFactoryProvider.class);
+            String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
             String protocols = pop3Config.getPOP3Properties().getSSLProtocols();
             String cipherSuites = pop3Config.getPOP3Properties().getSSLCipherSuites();
             SSLConfigurationService sslConfigService = POP3ServiceRegistry.getServiceRegistry().getService(SSLConfigurationService.class);

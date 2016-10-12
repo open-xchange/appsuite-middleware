@@ -57,6 +57,7 @@ import com.openexchange.hostname.ldap.LDAPHostnameCache;
 import com.openexchange.hostname.ldap.LDAPHostnameService;
 import com.openexchange.hostname.ldap.configuration.LDAPHostnameProperties;
 import com.openexchange.hostname.ldap.configuration.Property;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -75,7 +76,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CacheService.class, ConfigurationService.class };
+        return new Class<?>[] { CacheService.class, ConfigurationService.class, SSLSocketFactoryProvider.class };
     }
 
     @Override

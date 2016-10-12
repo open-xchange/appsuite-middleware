@@ -69,8 +69,6 @@ import com.openexchange.net.ssl.SSLSocketFactoryProvider;
  */
 public class TrustAdapter implements SecureProtocolSocketFactory {
 
-    private final SSLSocketFactory delegate = SSLSocketFactoryProvider.getDefault();
-
     /**
      * Initializes a new {@link TrustAdapter}.
      */
@@ -80,11 +78,21 @@ public class TrustAdapter implements SecureProtocolSocketFactory {
 
     @Override
     public Socket createSocket(final String host, final int port) throws IOException, UnknownHostException {
+        SSLSocketFactoryProvider factoryProvider = WebDAVServices.getService(SSLSocketFactoryProvider.class);
+        if (null == factoryProvider) {
+            throw new IOException("Missing " + SSLSocketFactoryProvider.class.getSimpleName() + " service. Bundle \"com.openexchange.net.ssl\" not started?");
+        }
+        SSLSocketFactory delegate = factoryProvider.getDefault();
         return delegate.createSocket(host, port);
     }
 
     @Override
     public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort) throws IOException, UnknownHostException {
+        SSLSocketFactoryProvider factoryProvider = WebDAVServices.getService(SSLSocketFactoryProvider.class);
+        if (null == factoryProvider) {
+            throw new IOException("Missing " + SSLSocketFactoryProvider.class.getSimpleName() + " service. Bundle \"com.openexchange.net.ssl\" not started?");
+        }
+        SSLSocketFactory delegate = factoryProvider.getDefault();
         return delegate.createSocket(host, port, localAddress, localPort);
     }
 
@@ -95,6 +103,11 @@ public class TrustAdapter implements SecureProtocolSocketFactory {
         if (timeout == 0) {
             socket = createSocket(host, port, localAddress, localPort);
         } else {
+            SSLSocketFactoryProvider factoryProvider = WebDAVServices.getService(SSLSocketFactoryProvider.class);
+            if (null == factoryProvider) {
+                throw new IOException("Missing " + SSLSocketFactoryProvider.class.getSimpleName() + " service. Bundle \"com.openexchange.net.ssl\" not started?");
+            }
+            SSLSocketFactory delegate = factoryProvider.getDefault();
             socket = delegate.createSocket();
             final SocketAddress localaddr = new InetSocketAddress(localAddress, localPort);
             final SocketAddress remoteaddr = new InetSocketAddress(host, port);
@@ -118,6 +131,11 @@ public class TrustAdapter implements SecureProtocolSocketFactory {
 
     @Override
     public Socket createSocket(final Socket socket, final String host, final int port, final boolean autoClose) throws IOException, UnknownHostException {
+        SSLSocketFactoryProvider factoryProvider = WebDAVServices.getService(SSLSocketFactoryProvider.class);
+        if (null == factoryProvider) {
+            throw new IOException("Missing " + SSLSocketFactoryProvider.class.getSimpleName() + " service. Bundle \"com.openexchange.net.ssl\" not started?");
+        }
+        SSLSocketFactory delegate = factoryProvider.getDefault();
         return delegate.createSocket(socket, host, port, autoClose);
     }
 

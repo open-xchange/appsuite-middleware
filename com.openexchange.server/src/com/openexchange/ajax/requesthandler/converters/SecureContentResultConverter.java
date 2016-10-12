@@ -47,33 +47,63 @@
  *
  */
 
-package com.openexchange.report.appsuite.serialization;
+package com.openexchange.ajax.requesthandler.converters;
 
-import com.hazelcast.nio.serialization.Portable;
-import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
-import com.openexchange.hazelcast.serialization.CustomPortable;
+import java.util.Collection;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.container.SecureContentResponse;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.SecureContentWrapper;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link PortableReportFactory} registered in {@link ReportActivator} to provide a {@link PortableReport} for distribution in a cluster.
+ * {@link SecureContentResultConverter} converts a {@link SecureContentWrapper} objects to {@link SecureContentResponse}.
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.1
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.3
  */
-public class PortableReportFactory extends AbstractCustomPortableFactory {
+public class SecureContentResultConverter implements ResultConverter {
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public int getClassId() {
-        return CustomPortable.PORTABLEREPORT_CLASS_ID;
+    public String getInputFormat() {
+        return SecureContentWrapper.CONTENT_TYPE;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public Portable create() {
-        return new PortableReport();
+    public String getOutputFormat() {
+        return "apiResponse";
     }
+
+    @Override
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
+
+    @SuppressWarnings("unused")
+    @Override
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        final Response response = new Response(session);
+        response.setData(((SecureContentWrapper) result.getResultObject()).getContent());
+        response.setTimestamp(result.getTimestamp());
+        response.setProperties(result.getResponseProperties());
+        OXException exception = result.getException();
+        if (null != exception) {
+            response.setException(exception);
+        }
+        final Collection<OXException> warnings = result.getWarnings();
+        if (null != warnings && !warnings.isEmpty()) {
+            for (final OXException warning : warnings) {
+                response.addWarning(warning);
+            }
+        }
+
+        result.setResultObject(new SecureContentResponse(response));
+
+    }
+
 }

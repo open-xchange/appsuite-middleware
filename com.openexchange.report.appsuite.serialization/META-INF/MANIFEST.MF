@@ -6,14 +6,15 @@ Bundle-Version: 7.8.3
 Bundle-Activator: com.openexchange.report.appsuite.serialization.osgi.ReportSerializationActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.hazelcast.core,
- com.hazelcast.nio,
- com.hazelcast.nio.serialization,
+Import-Package: com.openexchange.ajax.tools,
+ com.openexchange.config,
  com.openexchange.exception,
- com.openexchange.hazelcast.serialization,
  com.openexchange.osgi,
+ com.openexchange.server,
  com.openexchange.tools.strings,
  javax.management.openmbean,
- org.osgi.framework
+ org.json,
+ org.osgi.framework,
+ org.slf4j;version="1.7.5"
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.report.appsuite.serialization

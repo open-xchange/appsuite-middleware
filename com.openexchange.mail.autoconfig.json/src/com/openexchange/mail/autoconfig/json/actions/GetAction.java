@@ -88,7 +88,6 @@ public class GetAction extends AutoconfigAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
-        boolean isOAuth = false;
         if (request.containsParameter(OAUTH)) {
             String sOAuth = request.getParameter(OAUTH);
             int id = parseInt(sOAuth);
@@ -101,8 +100,6 @@ public class GetAction extends AutoconfigAction {
                 Autoconfig autoconfig = mailOAuthService.getAutoconfigFor(id, session);
                 return new AJAXRequestResult(autoconfig, "autoconfig");
             }
-
-            isOAuth = request.getParameter(OAUTH, Boolean.class).booleanValue();
         }
 
         String mail = request.getParameter(EMAIL, String.class);
@@ -118,7 +115,7 @@ public class GetAction extends AutoconfigAction {
         }
 
         AutoconfigService autoconfigService = getAutoconfigService();
-        Autoconfig autoconfig = autoconfigService.getConfig(mail, password, session.getUser(), session.getContext(), forceSecure, isOAuth);
+        Autoconfig autoconfig = autoconfigService.getConfig(mail, password, session.getUser(), session.getContext(), forceSecure);
         return new AJAXRequestResult(autoconfig, "autoconfig");
     }
 

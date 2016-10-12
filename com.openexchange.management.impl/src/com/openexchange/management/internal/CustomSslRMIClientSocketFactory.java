@@ -55,6 +55,7 @@ import java.util.StringTokenizer;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
+import com.openexchange.management.services.ManagementServiceRegistry;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 
 /**
@@ -84,7 +85,8 @@ public final class CustomSslRMIClientSocketFactory extends SslRMIClientSocketFac
     public Socket createSocket(final String host, final int port) throws IOException {
         // Retrieve the SSLSocketFactory
         //
-        final SocketFactory sslSocketFactory = SSLSocketFactoryProvider.getDefault();
+        SSLSocketFactoryProvider factoryProvider = ManagementServiceRegistry.getServiceRegistry().getService(SSLSocketFactoryProvider.class);
+        final SocketFactory sslSocketFactory = factoryProvider.getDefault();
         // Create the SSLSocket
         //
         final SSLSocket sslSocket = (SSLSocket) sslSocketFactory.createSocket(host, port);

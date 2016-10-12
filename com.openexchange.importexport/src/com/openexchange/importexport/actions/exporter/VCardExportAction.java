@@ -54,7 +54,7 @@ import com.openexchange.importexport.exporters.VCardExporter;
 import com.openexchange.importexport.formats.Format;
 
 @DispatcherNotes(defaultFormat="file")
-public class VCardExportAction extends AbstractExportAction {
+public class VCardExportAction extends ContactExportAction {
 
 	private Exporter exporter;
 

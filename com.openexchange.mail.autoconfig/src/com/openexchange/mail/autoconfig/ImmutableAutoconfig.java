@@ -81,8 +81,8 @@ public final class ImmutableAutoconfig implements Autoconfig {
         private String source;
         private boolean mailStartTls;
         private boolean transportStartTls;
-        private boolean mailOAuth;
-        private boolean transportOAuth;
+        private Integer mailOAuthId;
+        private Integer transportOAuthId;
 
         Builder() {
             super();
@@ -148,18 +148,18 @@ public final class ImmutableAutoconfig implements Autoconfig {
             return this;
         }
 
-        public Builder mailOAuth(boolean mailOAuth) {
-            this.mailOAuth = mailOAuth;
+        public Builder mailOAuthId(int mailOAuthId) {
+            this.mailOAuthId = Integer.valueOf(mailOAuthId);
             return this;
         }
 
-        public Builder transportOAuth(boolean transportOAuth) {
-            this.transportOAuth = transportOAuth;
+        public Builder transportOAuthId(int transportOAuthId) {
+            this.transportOAuthId = Integer.valueOf(transportOAuthId);
             return this;
         }
 
         public ImmutableAutoconfig build() {
-            return new ImmutableAutoconfig(mailServer, transportServer, mailProtocol, transportProtocol, mailPort, transportPort, mailSecure, transportSecure, username, source, mailStartTls, transportStartTls, mailOAuth, transportOAuth);
+            return new ImmutableAutoconfig(mailServer, transportServer, mailProtocol, transportProtocol, mailPort, transportPort, mailSecure, transportSecure, username, source, mailStartTls, transportStartTls, mailOAuthId, transportOAuthId);
         }
     }
 
@@ -177,10 +177,10 @@ public final class ImmutableAutoconfig implements Autoconfig {
     private final String source;
     private final boolean mailStartTls;
     private final boolean transportStartTls;
-    private final boolean mailOAuth;
-    private final boolean transportOAuth;
+    private final Integer mailOAuthId;
+    private final Integer transportOAuthId;
 
-    ImmutableAutoconfig(String mailServer, String transportServer, String mailProtocol, String transportProtocol, Integer mailPort, Integer transportPort, Boolean mailSecure, Boolean transportSecure, String username, String source, boolean mailStartTls, boolean transportStartTls, boolean mailOAuth, boolean transportOAuth) {
+    ImmutableAutoconfig(String mailServer, String transportServer, String mailProtocol, String transportProtocol, Integer mailPort, Integer transportPort, Boolean mailSecure, Boolean transportSecure, String username, String source, boolean mailStartTls, boolean transportStartTls, Integer mailOAuthId, Integer transportOAuthId) {
         super();
         this.mailServer = mailServer;
         this.transportServer = transportServer;
@@ -194,8 +194,8 @@ public final class ImmutableAutoconfig implements Autoconfig {
         this.source = source;
         this.mailStartTls = mailStartTls;
         this.transportStartTls = transportStartTls;
-        this.mailOAuth = mailOAuth;
-        this.transportOAuth = transportOAuth;
+        this.mailOAuthId = mailOAuthId;
+        this.transportOAuthId = transportOAuthId;
     }
 
     @Override
@@ -259,13 +259,13 @@ public final class ImmutableAutoconfig implements Autoconfig {
     }
 
     @Override
-    public boolean isMailOAuth() {
-        return mailOAuth;
+    public Integer getMailOAuthId() {
+        return mailOAuthId;
     }
 
     @Override
-    public boolean isTransportOAuth() {
-        return transportOAuth;
+    public Integer getTransportOAuthId() {
+        return transportOAuthId;
     }
 
     @Override
@@ -285,6 +285,12 @@ public final class ImmutableAutoconfig implements Autoconfig {
             builder.append("transportProtocol=").append(transportProtocol).append(", ");
         }
         builder.append("mailPort=").append(mailPort).append(", transportPort=").append(transportPort).append(", mailSecure=").append(mailSecure).append(", transportSecure=").append(transportSecure).append(", mailStartTls=").append(mailStartTls).append(", transportStartTls=").append(transportStartTls);
+        if (mailOAuthId != null) {
+            builder.append("mailOAuthId=").append(mailOAuthId).append(", ");
+        }
+        if (transportOAuthId != null) {
+            builder.append("transportOAuthId=").append(transportOAuthId).append(", ");
+        }
         if (username != null) {
             builder.append(", username=").append(username);
         }

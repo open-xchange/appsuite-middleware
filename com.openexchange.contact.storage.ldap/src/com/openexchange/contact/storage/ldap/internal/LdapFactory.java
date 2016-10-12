@@ -159,7 +159,11 @@ public class LdapFactory  {
             environment.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
             environment.put(Context.PROVIDER_URL, config.getUri());
             if (config.isTrustAllCerts() && config.getUri().startsWith("ldaps://")) {
-                environment.put("java.naming.ldap.factory.socket", SSLSocketFactoryProvider.getDefault().getClass().getName());
+                SSLSocketFactoryProvider factoryProvider = LdapServiceLookup.get().getOptionalService(SSLSocketFactoryProvider.class);
+                if (null == factoryProvider) {
+                    throw new IllegalStateException("Missing " + SSLSocketFactoryProvider.class.getSimpleName() + " service. Bundle \"com.openexchange.net.ssl\" not started?");
+                }
+                environment.put("java.naming.ldap.factory.socket", factoryProvider.getDefault().getClass().getName());
             }
             if (null != config.getReferrals()) {
                 environment.put(Context.REFERRAL, config.getReferrals().getValue());

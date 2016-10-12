@@ -293,7 +293,8 @@ public class IMAPAuthentication implements AuthenticationService {
             }
 
             ConfigurationService configuration = services.getService(ConfigurationService.class);
-            final String socketFactoryClass = SSLSocketFactoryProvider.getDefault().getClass().getName();
+            SSLSocketFactoryProvider factoryProvider = services.getService(SSLSocketFactoryProvider.class);
+            final String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
             final String sPort = port.toString();
             if (secure) {
                 /*

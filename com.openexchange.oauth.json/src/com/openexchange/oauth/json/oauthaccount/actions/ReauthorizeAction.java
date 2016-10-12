@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.SecureContentWrapper;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.ClusterTask;
 import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
@@ -103,7 +104,7 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
         /*
          * Return appropriate result
          */
-        return new AJAXRequestResult(Boolean.TRUE);
+        return new AJAXRequestResult(new SecureContentWrapper(Boolean.TRUE, "boolean"), SecureContentWrapper.CONTENT_TYPE);
 
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.xing.osgi;
 
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -72,7 +73,7 @@ public final class XingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TimerService.class, ThreadPoolService.class, SSLConfigurationService.class };
+        return new Class<?>[] { TimerService.class, ThreadPoolService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class };
     }
 
     @Override
