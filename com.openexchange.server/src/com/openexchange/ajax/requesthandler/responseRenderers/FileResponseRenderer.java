@@ -427,41 +427,27 @@ public class FileResponseRenderer implements ResponseRenderer {
                         }
                     }
                 }
+
                 if (!contentTypeByParameter || contentType == null || SAVE_AS_TYPE.equals(contentType)) {
+                    // Either no Content-Type parameter specified or set to "application/octet-stream"
                     resp.setContentType(preferredContentType);
                     contentType = preferredContentType;
                 } else {
-                    if (SAVE_AS_TYPE.equals(preferredContentType) || equalPrimaryTypes(preferredContentType, contentType)) {
+                    // A Content-Type parameter is specified...
+                    if (SAVE_AS_TYPE.equals(preferredContentType) || equalTypes(preferredContentType, contentType)) {
                         // Set if sanitize-able
                         if (!trySetSanitizedContentType(contentType, preferredContentType, resp)) {
                             contentType = preferredContentType;
                         }
                     } else {
-                        // Specified Content-Type does NOT match file's real MIME type
-                        final ThresholdFileHolder temp = new ThresholdFileHolder(DEFAULT_IN_MEMORY_THRESHOLD, INITIAL_CAPACITY);
-                        closeables.add(temp);
-                        temp.write(documentData);
-                        documentData = temp.getClosingRandomAccess();
-                        preferredContentType = detectMimeType(temp.getStream());
-                        if ("text/plain".equals(preferredContentType)) {
-                            preferredContentType = HTMLDetector.containsHTMLTags(temp.getStream(), true) ? "text/html" : preferredContentType;
-                        }
-                        // One more time...
-                        if (equalPrimaryTypes(preferredContentType, contentType)) {
-                            // Set if sanitize-able
-                            if (!trySetSanitizedContentType(contentType, preferredContentType, resp)) {
-                                contentType = preferredContentType;
-                            }
-                        } else {
-                            // Ignore it due to security reasons (see bug #25343)
-                            final StringBuilder sb = new StringBuilder(128);
-                            sb.append("Denied parameter \"").append(PARAMETER_CONTENT_TYPE);
-                            sb.append("\" due to security constraints (requested \"");
-                            sb.append(contentType).append("\" , but is \"").append(preferredContentType).append("\").");
-                            LOG.warn(sb.toString());
-                            resp.setContentType(preferredContentType);
-                            contentType = preferredContentType;
-                        }
+                        // Specified Content-Type does NOT match file's real MIME type. Ignore it due to security reasons (see bug #25343)
+                        final StringBuilder sb = new StringBuilder(128);
+                        sb.append("Denied parameter \"").append(PARAMETER_CONTENT_TYPE);
+                        sb.append("\" due to security constraints (requested \"");
+                        sb.append(contentType).append("\" , but is \"").append(preferredContentType).append("\").");
+                        LOG.warn(sb.toString());
+                        resp.setContentType(preferredContentType);
+                        contentType = preferredContentType;
                     }
                 }
             }
@@ -1067,6 +1053,21 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private String detectMimeType(final InputStream in) throws IOException {
         return AJAXUtility.detectMimeType(in);
+    }
+
+    private boolean equalTypes(final String contentType1, final String contentType2) {
+        if (null == contentType1 || null == contentType2) {
+            return false;
+        }
+        return com.openexchange.java.Strings.toLowerCase(getType(contentType1)).startsWith(com.openexchange.java.Strings.toLowerCase(getType(contentType2)));
+    }
+
+    private String getType(final String contentType) {
+        if (isEmpty(contentType)) {
+            return contentType;
+        }
+        final int pos = contentType.indexOf(';');
+        return pos > 0 ? contentType.substring(0, pos) : contentType;
     }
 
     /**
