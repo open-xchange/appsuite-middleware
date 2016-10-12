@@ -49,10 +49,7 @@
 
 package com.openexchange.groupware.ldap;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
+import static com.openexchange.java.Autoboxing.*;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Date;
@@ -72,6 +69,8 @@ import com.openexchange.lock.LockService;
 import com.openexchange.passwordmechs.IPasswordMech;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.internal.mapping.UserMapper;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * This class implements the user storage using a cache to store once read objects.
@@ -425,40 +424,54 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
-    public void setAttribute(final String name, final String value, final int userId, final Context context) throws OXException {
+    public void setAttribute(String name, String value, int userId, Context context) throws OXException {
+        setAttribute(null, name, value, userId, context);
+    }
+
+    @Override
+    public void setAttribute(Connection con, String name, String value, int userId, Context context) throws OXException {
+        setAttribute(con, name, value, userId, context, true);
+    }
+
+    public void setAttribute(Connection con, String name, String value, int userId, Context context, boolean invalidate) throws OXException {
         if (null == name) {
             throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
         }
-
-        if (name.startsWith("client:")) {
-            // Special handling for last-login time stamp
+        if (false == invalidate) {
+            // Special handling to avoid invalidations
             CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
             if (cacheService == null) {
                 // Huh...?
-                delegate.setAttribute(name, value, userId, context);
+                if (null == con) {
+                    delegate.setAttribute(name, value, userId, context);
+                } else {
+                    delegate.setAttribute(con, name, value, userId, context);
+                }
             } else {
-                // Set attribute and obtain updated user
-                User updatedUser = delegate.setAttributeAndReturnUser(name, value, userId, context, true);
+                if (null == con) {
+                    // Set attribute and obtain updated user
+                    User updatedUser = delegate.setAttributeAndReturnUser(name, value, userId, context, true);
 
-                // Put into cache
-                Cache cache = cacheService.getCache(REGION_NAME);
-                CacheKey key = cacheService.newCacheKey(context.getContextId(), userId);
-                cache.put(key, updatedUser, false);
+                    // Put into cache
+                    Cache cache = cacheService.getCache(REGION_NAME);
+                    CacheKey key = cacheService.newCacheKey(context.getContextId(), userId);
+                    cache.put(key, updatedUser, false);
+                } else {
+                    // Set attribute
+                    delegate.setAttribute(con, name, value, userId, context);
+
+                    // Reload & put into cache
+                    User updatedUser = delegate.getUser(context, userId, con);
+                    Cache cache = cacheService.getCache(REGION_NAME);
+                    CacheKey key = cacheService.newCacheKey(context.getContextId(), userId);
+                    cache.put(key, updatedUser, false);
+                }
             }
         } else {
             // Regular way
             delegate.setAttribute(name, value, userId, context);
             invalidateUserCache(context, userId);
         }
-    }
-
-    @Override
-    public void setAttribute(Connection con, final String name, final String value, final int userId, final Context context) throws OXException {
-        if (null == name) {
-            throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
-        }
-        delegate.setAttribute(con, name, value, userId, context);
-        invalidateUserCache(context, userId);
     }
 
     @Override
