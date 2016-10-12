@@ -390,7 +390,7 @@ public class AttachmentRequest extends CommonRequest {
             return Integer.parseInt(value);
         } catch (final NumberFormatException nfe) {
             numberError(parameter, value);
-            throw new OXAborted();
+            throw new OXAborted(nfe);
         }
     }
 
@@ -401,8 +401,10 @@ public class AttachmentRequest extends CommonRequest {
     // Actions
 
     private void get(final int folderId, final int attachedId, final int moduleId, final int id) {
+        boolean rollback = false;
         try {
             ATTACHMENT_BASE.startTransaction();
+            rollback = true;
 
             final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
 
@@ -412,14 +414,17 @@ public class AttachmentRequest extends CommonRequest {
             aWriter.endTimedResult();
 
             ATTACHMENT_BASE.commit();
-        } catch (final Throwable t) {
-            try {
-                ATTACHMENT_BASE.rollback();
-            } catch (final OXException e) {
-                LOG.debug("", e);
-            }
+            rollback = false;
+        } catch (final Exception t) {
             handle(t, session);
         } finally {
+            if (rollback) {
+                try {
+                    ATTACHMENT_BASE.rollback();
+                } catch (final OXException e) {
+                    LOG.debug("", e);
+                }
+            }
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {
@@ -433,8 +438,10 @@ public class AttachmentRequest extends CommonRequest {
         SearchIterator<AttachmentMetadata> iter = null;
         SearchIterator<AttachmentMetadata> iter2 = null;
 
+        boolean rollback = false;
         try {
             ATTACHMENT_BASE.startTransaction();
+            rollback = true;
             Delta<AttachmentMetadata> delta;
             if (sort != null) {
                 delta = ATTACHMENT_BASE.getDelta(
@@ -466,14 +473,17 @@ public class AttachmentRequest extends CommonRequest {
             aWriter.endTimedResult();
             // w.flush();
             ATTACHMENT_BASE.commit();
-        } catch (final Throwable t) {
-            try {
-                ATTACHMENT_BASE.rollback();
-            } catch (final OXException e) {
-                LOG.debug("", e);
-            }
+            rollback = false;
+        } catch (final Exception t) {
             handle(t, session);
         } finally {
+            if (rollback) {
+                try {
+                    ATTACHMENT_BASE.rollback();
+                } catch (final OXException e) {
+                    LOG.debug("", e);
+                }
+            }
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {
@@ -487,9 +497,10 @@ public class AttachmentRequest extends CommonRequest {
     private void all(final int folderId, final int attachedId, final int moduleId, final AttachmentField[] fields, final AttachmentField sort, final int order) {
 
         SearchIterator<AttachmentMetadata> iter = null;
-
+        boolean rollback = false;
         try {
             ATTACHMENT_BASE.startTransaction();
+            rollback = true;
             TimedResult<AttachmentMetadata> result;
             if (sort != null) {
                 result = ATTACHMENT_BASE.getAttachments(session, folderId, attachedId, moduleId, fields, sort, order, ctx, user, userConfig);
@@ -503,14 +514,17 @@ public class AttachmentRequest extends CommonRequest {
             aWriter.endTimedResult();
             // w.flush();
             ATTACHMENT_BASE.commit();
-        } catch (final Throwable t) {
-            try {
-                ATTACHMENT_BASE.rollback();
-            } catch (final OXException e) {
-                LOG.debug("", e);
-            }
+            rollback = false;
+        } catch (final Exception t) {
             handle(t, session);
         } finally {
+            if (rollback) {
+                try {
+                    ATTACHMENT_BASE.rollback();
+                } catch (final OXException e) {
+                    LOG.debug("", e);
+                }
+            }
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {
@@ -522,21 +536,26 @@ public class AttachmentRequest extends CommonRequest {
 
     private void detach(final int folderId, final int attachedId, final int moduleId, final int[] ids) {
         long timestamp = 0;
+        boolean rollback = false;
         try {
             ATTACHMENT_BASE.startTransaction();
+            rollback = true;
 
             timestamp = ATTACHMENT_BASE.detachFromObject(folderId, attachedId, moduleId, ids, session, ctx, user, userConfig);
 
             ATTACHMENT_BASE.commit();
-        } catch (final Throwable t) {
-            try {
-                ATTACHMENT_BASE.rollback();
-            } catch (final OXException e) {
-                LOG.debug("", e);
-            }
+            rollback = false;
+        } catch (final Exception t) {
             handle(t, session);
             return;
         } finally {
+            if (rollback) {
+                try {
+                    ATTACHMENT_BASE.rollback();
+                } catch (final OXException e) {
+                    LOG.debug("", e);
+                }
+            }
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {
@@ -570,8 +589,11 @@ public class AttachmentRequest extends CommonRequest {
         } else {
             tz = TimeZoneUtils.getTimeZone(timeZoneId);
         }
+
+        boolean rollback = false;
         try {
             ATTACHMENT_BASE.startTransaction();
+            rollback = true;
 
             final TimedResult<AttachmentMetadata> result = ATTACHMENT_BASE.getAttachments(session, folderId, attachedId, moduleId, ids, fields, ctx, user, userConfig);
 
@@ -584,14 +606,17 @@ public class AttachmentRequest extends CommonRequest {
             // w.flush();
 
             ATTACHMENT_BASE.commit();
-        } catch (final Throwable t) {
-            try {
-                ATTACHMENT_BASE.rollback();
-            } catch (final OXException e) {
-                LOG.error("", e);
-            }
+            rollback = false;
+        } catch (Exception t) {
             handle(t, session);
         } finally {
+            if (rollback) {
+                try {
+                    ATTACHMENT_BASE.rollback();
+                } catch (final OXException e) {
+                    LOG.error("", e);
+                }
+            }
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {

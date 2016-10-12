@@ -241,6 +241,15 @@ public interface MailAccountStorageService {
     String getDefaultFolderPrefix(Session session) throws OXException;
 
     /**
+     * Gets the separator character of the default mail account belonging to specified user in given context.
+     *
+     * @param session The session
+     * @return The separator character
+     * @throws OXException If the separator character cannot be returned
+     */
+    char getDefaultSeparator(Session session) throws OXException;
+
+    /**
      * Updates mail account's value taken specified {@code MailAccountDescription} instance.
      *
      * @param mailAccount TThe {@code MailAccountDescription} instance to read from
@@ -367,6 +376,17 @@ public interface MailAccountStorageService {
      * @throws OXException If the mail account cannot be deleted
      */
     void deleteTransportAccount(int id, int userId, int contextId) throws OXException;
+
+    /**
+     * Deletes the transport account identified by specified identifier.
+     *
+     * @param id The transport account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param con The connection to use
+     * @throws OXException If the mail account cannot be deleted
+     */
+    void deleteTransportAccount(final int id, final int userId, final int contextId, final Connection con) throws OXException;
 
     /**
      * Deletes the mail account identified by specified identifier.

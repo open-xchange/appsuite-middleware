@@ -7,6 +7,7 @@ language > io.ox/core//language
 timezone > io.ox/core//timezone
 serverVersion > io.ox/core//serverVersion
 folder > io.ox/core//folder
+acceptUntrustedCertificates > io.ox/core//security/acceptUntrustedCertificates
 validate_contact_email > io.ox/core//features/validateMailAddresses
 identifier > identifier
 modules/com.openexchange.user.personaldata/internal_user_edit > io.ox/core//user/internalUserEdit

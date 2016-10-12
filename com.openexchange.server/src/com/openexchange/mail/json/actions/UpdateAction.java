@@ -58,9 +58,6 @@ import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -73,13 +70,6 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "update", description = "Update/move mails", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "Object ID of the requested mail."),
-    @Parameter(name = "message_id", description = "(Preliminary) The value of \"Message-Id\" header of the requested mail. This parameter is a substitute for \"id\" parameter."),
-    @Parameter(name = "folder", description = "Object ID of the folder.")
-}, requestBody = "A JSON object which carries the new values that ought to be applied to mail as described in Update mail or Update mail extended (available with SP6 v6.10).",
-responseDescription = "A JSON object containing the Object ID of the updated mail and its folder.")
 public final class UpdateAction extends AbstractMailAction {
 
     /**

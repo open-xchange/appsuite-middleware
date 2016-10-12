@@ -67,7 +67,7 @@ public enum FilestoreExceptionCodes implements DisplayableOXExceptionCode {
      */
     FILESTORE_MIXUP(FileStorageCodes.FILESTORE_MIXUP),
     /**
-     * Cannot find filestore with id %1$d.
+     * Cannot find filestore with id %1$s.
      */
     NO_SUCH_FILESTORE(FileStorageCodes.NO_SUCH_FILE_STORAGE),
     /**

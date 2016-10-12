@@ -1,0 +1,105 @@
+array:
+  - data:
+      Key: com.openexchange.net.ssl.default.truststore.enabled
+      Description: >
+        Defines if the default truststore provided by the JVM should be used. These truststore contains the Application Server’s trusted certificates, including public keys for other entities. For a trusted certificate, the server has confirmed that the public key in the certificate belongs to the certificate’s owner. Trusted certificates generally include those of certification authorities (CAs).
+        The administrator is able to ignore the provided by setting the property to 'false'. If so a custom truststore should be provided. Have a look at 'com.openexchange.net.ssl.custom.truststore.enabled' for more details.
+      Default: true
+      Version: 7.8.3
+      Reloadable: false
+      Configcascade_Aware: false
+      Related: com.openexchange.net.ssl.custom.truststore.enabled
+      File: ssl.properties
+  - data:
+      Key: com.openexchange.net.ssl.custom.truststore.enabled
+      Description: >
+        Defines if the custom truststore should be used to retrieve trusted certificates. The custom truststore should contain a list of certificates that are defined to be trusted.
+        It is possible to define only one custom truststore. But it is of course possible to enable both, default and custom truststore to enhance the trusted certificates pool.
+        If you would like to use a custom truststore it has to be in JKS format.
+      Default: false
+      Version: 7.8.3
+      Reloadable: false
+      Configcascade_Aware: false
+      Related: com.openexchange.net.ssl.custom.truststore.path, com.openexchange.net.ssl.custom.truststore.password
+      File: ssl.properties
+  - data:
+      Key: com.openexchange.net.ssl.custom.truststore.path
+      Description: >
+        Defines the path (including the name of the file) to the custom truststore. 
+      Default: 
+      Version: 7.8.3
+      Reloadable: false
+      Configcascade_Aware: false
+      Related: com.openexchange.net.ssl.custom.truststore.enabled, com.openexchange.net.ssl.custom.truststore.password
+      File: ssl.properties
+  - data:
+      Key: com.openexchange.net.ssl.custom.truststore.password
+      Description: >
+        Defines the password to access the custom truststore.
+      Default: 
+      Version: 7.8.3
+      Reloadable: false
+      Configcascade_Aware: false
+      Related: com.openexchange.net.ssl.custom.truststore.enabled, com.openexchange.net.ssl.custom.truststore.path
+      File: ssl.properties
+  - data:
+      Key: com.openexchange.net.ssl.hostname.verification.enabled
+      Description: >
+        Defines if the name of the host should be checked while SSL handshaking. If the host name verification fails a connection to the desired host cannot be established even if there is a valid certificate. A host name verifier ensures the host name in the URL to which the client connects matches the host name in the digital certificate that the server sends back as part of the SSL connection.  
+      Default: true
+      Version: 7.8.3
+      Reloadable: false
+      Configcascade_Aware: false
+      Related:
+      File: ssl.properties
+  - data:
+      Key: com.openexchange.net.ssl.trustlevel
+      Description: >
+        Defines which level of trust should be considered for potentially secure connections (e. g. https). The default value 'all' means that all certificates will be trusted and a SSLSocketFactory that does not check certificates (and host names) will be used. You can switch this setting to 'restricted' so that every certificate provided by the defined endpoint will be validated trusted.
+      Default: all
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: false
+      Related:
+      File: ssl.properties
+  - data:
+      Key: com.openexchange.net.ssl.protocols
+      Description: >
+        Defines the protocols that will become supported for SSL communication. If the server does not support one of the mentioned protocols the SSL handshake will fail.
+      Default: TLSv1, TLSv1.1, TLSv1.2
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: false
+      Related:
+      File: ssl.properties
+  - data:
+      Key: com.openexchange.net.ssl.ciphersuites
+      Description: >
+        Defines the cipher suites that will become supported for SSL communication. If the server does not support one of the mentioned suites the SSL handshake will fail.
+      Default: TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, TLS_EMPTY_RENEGOTIATION_INFO_SCSV
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: false
+      Related:
+      File: ssl.properties
+  - data:
+      Key: com.openexchange.net.ssl.whitelist
+      Description: >
+        Defines a comma separated list of hosts certificates shouldn't be checked for validity. The list can contain wildcards and ip ranges. In addition it is possible to define a list by host name, IPv4 or IPv6 address. An incoming host name will not be checked against its IP address, for instance connecting against 'imap.gmail.com' will be possible if '*.gmail.com' is whitelisted but adding only the corresponding IP address entry '64.233.167.108' as whitelisted won't work.   
+      Default: 127.0.0.1-127.255.255.255,localhost
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: false
+      Related:
+      File: ssl.properties
+  - data:
+      Key: com.openexchange.net.ssl.user.configuration.enabled
+      Description: >
+        Defines if the user is able to define a more unsecure trust level than it is defined globally the administrator. For instance if 'com.openexchange.net.ssl.trustlevel' is 'restricted' the user won't be able to use untrusted connections (invalid certificates provided by the endpoint). If 'com.openexchange.net.ssl.user.configuration.enabled' is 'true' the user will be able to define that he will use untrusted connections.
+      Default: false
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: true
+      Related: com.openexchange.net.ssl.trustlevel, JSLob: io.ox/core//trustAllConnections
+      File: ssl.properties
+      

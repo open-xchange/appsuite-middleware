@@ -194,7 +194,7 @@ public final class SMTPConfig extends TransportConfig implements TransportAuthSu
             }
             switch (transportAuth) {
             case CUSTOM:
-                int oAuthAccontId = assumeXOauth2For(account);
+                int oAuthAccontId = assumeXOauth2For(account, false);
                 if (oAuthAccontId >= 0) {
                     OAuthService oauthService = Services.optService(OAuthService.class);
                     if (null == oauthService) {

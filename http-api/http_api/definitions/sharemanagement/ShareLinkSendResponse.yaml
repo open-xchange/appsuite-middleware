@@ -2,7 +2,5 @@ type: object
 properties:
   $ref: ../common/CommonResponseData.yaml
   warnings:
-    type: array
-    description: Can contain possible warnings during sending of the notifications.
-    items:
-      type: object
+    type: object
+    description: An array of possible warnings during sending of the notifications.

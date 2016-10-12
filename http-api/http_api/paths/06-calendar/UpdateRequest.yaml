@@ -2,7 +2,7 @@
   put:
     operationId: updateAppointment
     tags:
-      - calendar
+      - Calendar
     summary: Updates an appointment.
     consumes:
       - application/json
@@ -35,6 +35,6 @@
       200:
         description: |
           A JSON object containing the id of the updated appointment. In case of errors the
-          responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/AppointmentUpdateResponse"

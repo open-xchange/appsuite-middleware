@@ -49,7 +49,9 @@
 
 package com.openexchange.find;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.find.facet.FacetInfo;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.session.ServerSession;
@@ -87,11 +89,12 @@ public interface SearchService {
     /**
      * Gets the appropriate driver for given module.
      *
+     * @param facetInfos The basic facet information
      * @param module The module
      * @param session The associated session
      * @return The driver
      * @throws OXException If no suitable driver exists
      */
-    ModuleSearchDriver getDriver(Module module, ServerSession session) throws OXException;
+    ModuleSearchDriver getDriver(List<FacetInfo> facetInfos, Module module, ServerSession session) throws OXException;
 
 }

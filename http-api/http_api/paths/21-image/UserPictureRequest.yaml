@@ -2,7 +2,7 @@
   get:
     operationId: getUserProfileImage
     tags:
-      - image
+      - Image
     summary: Requests a user's profile image.
     produces:
       - application/octet-stream

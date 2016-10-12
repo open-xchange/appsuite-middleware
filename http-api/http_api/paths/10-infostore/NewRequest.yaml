@@ -2,7 +2,7 @@
   put:
     operationId: createInfoItem
     tags:
-      - infostore
+      - Infostore
     summary: Creates an infoitem.
     description: |
       Creates a new contact. This request cannot add a file to the infoitem. Therefor it
@@ -34,18 +34,18 @@
       200:
         description: |
           A JSON object with the object ID of the newly created infoitem. In case of errors the responsible fields in the response are
-          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/InfoItemUpdateResponse"
   post:
     operationId: createInfoItemAdvanced
     tags:
-      - infostore
+      - Infostore
     summary: Creates an infoitem.
     description: |
       Creates a new infoitem with a file. The normal request body must be placed as form-data using the
       content-type `multipart/form-data`. The form field `json` contains the infoitem's data while the file
-      must be placed in a file field named `file` (see also [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads)).
+      must be placed in a file field named `file` (see also [File uploads](#file-uploads)).
     consumes:
       - multipart/form-data
     produces:
@@ -60,7 +60,7 @@
       - in: formData
         name: json
         type: string
-        description: Represents the normal request body as JSON string containing the infoitem's data as described in the [InfoItemBody](#/definitions/InfoItemBody) model.
+        description: Represents the normal request body as JSON string containing the infoitem's data (See InfoItemBody model of the [newInfoItem](#infostore/createInfoItem) request).
         required: true
       - in: formData
         name: file
@@ -70,6 +70,6 @@
     responses:
       200:
         description: |
-          A HTML page as described in [File uploads](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#file-uploads) containing the object ID of the infoitem or errors if some occurred.
+          A HTML page as described in [File uploads](#file-uploads) containing the object ID of the infoitem or errors if some occurred.
         schema:
           type: string

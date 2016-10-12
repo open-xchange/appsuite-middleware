@@ -76,6 +76,8 @@ import com.openexchange.framework.request.RequestContext;
 import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.log.LogProperties;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
+import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -94,6 +96,7 @@ public class DefaultDispatcher implements Dispatcher {
     private final ConcurrentMap<StrPair, Boolean> publicSessionAuthCache;
     private final ConcurrentMap<StrPair, Boolean> omitSessionActionsCache;
     private final ConcurrentMap<StrPair, Boolean> noSecretCallbackCache;
+    private final ConcurrentMap<StrPair, Boolean> preferStreamCache;
 
     private final ConcurrentMap<String, AJAXActionServiceFactory> actionFactories;
     private final Queue<AJAXActionCustomizerFactory> customizerFactories;
@@ -117,6 +120,7 @@ public class DefaultDispatcher implements Dispatcher {
         publicSessionAuthCache = new ConcurrentHashMap<StrPair, Boolean>(128, 0.9f, 1);
         omitSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128, 0.9f, 1);
         noSecretCallbackCache = new ConcurrentHashMap<StrPair, Boolean>(128, 0.9f, 1);
+        preferStreamCache = new ConcurrentHashMap<StrPair, Boolean>(128, 0.9f, 1);
 
         actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>(64, 0.9f, 1);
         customizerFactories = new ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
@@ -166,6 +170,11 @@ public class DefaultDispatcher implements Dispatcher {
             AJAXActionService action = factory.createActionService(modifiedRequestData.getAction());
             if (action == null) {
                 throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(modifiedRequestData.getAction(), modifiedRequestData.getModule());
+            }
+
+            // Load request body if stream is not preferred
+            if (false == preferStream(modifiedRequestData.getModule(), modifiedRequestData.getAction(), action)) {
+                AJAXRequestDataTools.loadRequestBody(modifiedRequestData);
             }
 
             // Validate request headers for caching
@@ -224,6 +233,14 @@ public class DefaultDispatcher implements Dispatcher {
                     }
                 }
             }
+            if (SSLExceptionCode.PREFIX.equals(e.getPrefix())) {
+                UserAwareSSLConfigurationService userAwareSSLConfigurationService = ServerServiceRegistry.getInstance().getService(UserAwareSSLConfigurationService.class);
+                if (null != userAwareSSLConfigurationService) {
+                    if (userAwareSSLConfigurationService.isAllowedToDefineTrustLevel(session.getUserId(), session.getContextId())) {
+                        throw SSLExceptionCode.UNTRUSTED_CERT_USER_CONFIG.create(e.getDisplayArgs()[0]);
+                    }
+                }
+            }
             throw e;
         } catch (RuntimeException e) {
             if ("org.mozilla.javascript.WrappedException".equals(e.getClass().getName())) {
@@ -240,6 +257,25 @@ public class DefaultDispatcher implements Dispatcher {
         } finally {
             RequestContextHolder.reset();
         }
+    }
+
+    /**
+     * Checks if given action wants to read data form possibly available request body stream by itself.
+     *
+     * @param module The module identifier
+     * @param action The action identifier
+     * @param actionService The action service to perform
+     * @return <code>true</code> if stream is preferred; otherwise <code>false</code>
+     */
+    private boolean preferStream(String module, String action, AJAXActionService actionService) {
+        StrPair key = new StrPair(module, action);
+        Boolean ret = preferStreamCache.get(key);
+        if (null == ret) {
+            final DispatcherNotes actionMetadata = getActionMetadata(actionService);
+            ret = actionMetadata == null ? Boolean.FALSE : Boolean.valueOf(actionMetadata.preferStream());
+            preferStreamCache.put(key, ret);
+        }
+        return ret.booleanValue();
     }
 
     private RequestContext buildRequestContext(AJAXRequestData requestData) throws OXException {

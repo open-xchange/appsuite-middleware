@@ -12,7 +12,11 @@ Import-Package: com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi.annotation,
- com.openexchange.session
+ com.openexchange.server,
+ com.openexchange.session,
+ org.scribe.model;version="1.3.7"
 Export-Package: com.openexchange.oauth,
  com.openexchange.oauth.access,
  com.openexchange.oauth.scope
+Bundle-ClassPath: .
+

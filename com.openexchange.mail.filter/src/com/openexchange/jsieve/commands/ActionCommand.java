@@ -87,7 +87,7 @@ public class ActionCommand extends ControlOrActionCommand {
     public enum Commands {
         KEEP("keep", 0, new Hashtable<String, Integer>(), "keep", Collections.<String> emptyList()),
         DISCARD("discard", 0, new Hashtable<String, Integer>(), "discard", Collections.<String> emptyList()),
-        REDIRECT("redirect", 1, new Hashtable<String, Integer>(), "redirect", Collections.<String> emptyList()),
+        REDIRECT("redirect", 1, redirectTags(), "redirect", java.util.Arrays.asList("copy")),
         FILEINTO("fileinto", 1, new Hashtable<String, Integer>(), "move", Collections.singletonList("fileinto")),
         REJECT("reject", 1, new Hashtable<String, Integer>(), "reject", Collections.singletonList("reject")),
         STOP("stop", 0, new Hashtable<String, Integer>(), "stop", Collections.<String> emptyList()),
@@ -170,6 +170,12 @@ public class ActionCommand extends ControlOrActionCommand {
         private static Hashtable<String, Integer> pgpEncryptTags() {
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
             retval.put(":keys", Integer.valueOf(1));
+            return retval;
+        }
+        
+        private static Hashtable<String, Integer> redirectTags() {
+            final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
+            retval.put(":copy", Integer.valueOf(0));
             return retval;
         }
 

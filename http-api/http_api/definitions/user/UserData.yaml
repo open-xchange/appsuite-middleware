@@ -25,4 +25,4 @@ properties:
     description: The user's login information.
   guest_created_by:
     type: integer
-    description: The ID of the user who has created this guest in case this user represents a guest user. 0 represents regular users. (preliminary, available since v7.8.0)
+    description: The ID of the user who has created this guest in case this user represents a guest user. 0 represents regular users.

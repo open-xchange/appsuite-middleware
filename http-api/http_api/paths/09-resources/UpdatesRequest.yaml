@@ -2,7 +2,7 @@
   get:
     operationId: getResourceUpdates
     tags:
-      - resources
+      - Resources
     summary: Gets the new, modified and deleted resources.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -17,6 +17,6 @@
         description: |
           A JSON object with fields `new`, `modified` and `deleted` representing arrays of new, modified and
           deleted resource objects. In case of errors the responsible fields in the response are filled
-          (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/ResourceUpdatesResponse"

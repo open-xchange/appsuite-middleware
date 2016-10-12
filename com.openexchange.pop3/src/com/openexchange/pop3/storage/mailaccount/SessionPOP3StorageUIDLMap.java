@@ -56,8 +56,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.exception.OXException;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
@@ -115,18 +114,14 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
      */
 
     private final Map<String, FullnameUIDPair> uidl2pair;
-
     private final Map<FullnameUIDPair, String> pair2uidl;
-
     private final POP3StorageUIDLMap delegatee;
-
-    private final ReadWriteLock rwLock;
-
+    private final Lock lock;
     private final AtomicReference<Mode> mode;
 
     private SessionPOP3StorageUIDLMap(final POP3StorageUIDLMap delegatee) throws OXException {
         super();
-        rwLock = new ReentrantReadWriteLock();
+        lock = new ReentrantLock();
         this.delegatee = delegatee;
         pair2uidl = new ConcurrentHashMap<FullnameUIDPair, String>();
         uidl2pair = new ConcurrentHashMap<String, FullnameUIDPair>();
@@ -135,65 +130,53 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
         init();
     }
 
+    /**
+     * Initializes the timer task that periodically flushes the cache UIDLs.
+     * <p>
+     * Set mode to {@link Mode#RE_INIT RE_INIT}
+     */
     private void initTimerTask() {
-        final ClearMapsRunnable cmr = new ClearMapsRunnable(uidl2pair, pair2uidl, rwLock, mode);
-        final TimerService timerService = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class);
-        final ScheduledTimerTask timerTask =
-            timerService.scheduleWithFixedDelay(
-                cmr,
-                SessionCacheProperties.SCHEDULED_TASK_DELAY,
-                SessionCacheProperties.SCHEDULED_TASK_DELAY);
+        ClearMapsRunnable cmr = new ClearMapsRunnable(uidl2pair, pair2uidl, lock, mode);
+        TimerService timerService = POP3ServiceRegistry.getServiceRegistry().getService(TimerService.class);
+        ScheduledTimerTask timerTask = timerService.scheduleWithFixedDelay(cmr, SessionCacheProperties.SCHEDULED_TASK_DELAY, SessionCacheProperties.SCHEDULED_TASK_DELAY);
         cmr.setTimerTask(timerTask);
         mode.set(Mode.RE_INIT);
     }
 
+    /**
+     * Initializes/refills the UIDL cache.
+     * <p>
+     * Set mode to {@link Mode#NONE NONE}
+     *
+     * @throws OXException
+     */
     private void init() throws OXException {
-        if (Mode.RE_INIT == mode.get()) {
-            final Map<String, FullnameUIDPair> all = delegatee.getAllUIDLs();
-            final int size = all.size();
-            final Iterator<Entry<String, FullnameUIDPair>> iter = all.entrySet().iterator();
-            for (int i = 0; i < size; i++) {
-                final Entry<String, FullnameUIDPair> entry = iter.next();
-                pair2uidl.put(entry.getValue(), entry.getKey());
-                uidl2pair.put(entry.getKey(), entry.getValue());
-            }
-            mode.set(Mode.NONE);            
+        Map<String, FullnameUIDPair> all = delegatee.getAllUIDLs();
+        Iterator<Entry<String, FullnameUIDPair>> iter = all.entrySet().iterator();
+        for (int i = all.size(); i-- > 0;) {
+            final Entry<String, FullnameUIDPair> entry = iter.next();
+            pair2uidl.put(entry.getValue(), entry.getKey());
+            uidl2pair.put(entry.getKey(), entry.getValue());
         }
+        mode.set(Mode.NONE);
     }
 
-    private void checkInit(final Lock obtainedReadLock) throws OXException {
+    private void checkInit() throws OXException {
         final Mode m = mode.get();
         if (Mode.START_TIMER == m) {
             initTimerTask();
-        }
-        if (Mode.RE_INIT == m) {
-            /*
-             * Upgrade lock: unlock first to acquire write lock
-             */
-            obtainedReadLock.unlock();
-            final Lock writeLock = rwLock.writeLock();
-            writeLock.lock();
-            try {
-                init();
-            } finally {
-                /*
-                 * Downgrade lock: reacquire read without giving up write lock and...
-                 */
-                obtainedReadLock.lock();
-                /*
-                 * ... unlock write.
-                 */
-                writeLock.unlock();
-            }
+            init();
+        } else if (Mode.RE_INIT == m) {
+            init();
         }
     }
 
     @Override
     public void addMappings(final String[] uidls, final FullnameUIDPair[] fullnameUIDPairs) throws OXException {
-        final Lock readLock = rwLock.readLock();
-        readLock.lock();
+        Lock lock = this.lock;
+        lock.lock();
         try {
-            checkInit(readLock);
+            checkInit();
             delegatee.addMappings(uidls, fullnameUIDPairs);
             for (int i = 0; i < fullnameUIDPairs.length; i++) {
                 final String uidl = uidls[i];
@@ -204,86 +187,86 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                 }
             }
         } finally {
-            readLock.unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public FullnameUIDPair getFullnameUIDPair(final String uidl) throws OXException {
-        final Lock readLock = rwLock.readLock();
-        readLock.lock();
+        Lock lock = this.lock;
+        lock.lock();
         try {
-            checkInit(readLock);
+            checkInit();
             return uidl2pair.get(uidl);
         } finally {
-            readLock.unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public FullnameUIDPair[] getFullnameUIDPairs(final String[] uidls) throws OXException {
-        final Lock readLock = rwLock.readLock();
-        readLock.lock();
+        Lock lock = this.lock;
+        lock.lock();
         try {
-            checkInit(readLock);
+            checkInit();
             final FullnameUIDPair[] pairs = new FullnameUIDPair[uidls.length];
             for (int i = 0; i < pairs.length; i++) {
                 pairs[i] = getFullnameUIDPair(uidls[i]);
             }
             return pairs;
         } finally {
-            readLock.unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public String getUIDL(final FullnameUIDPair fullnameUIDPair) throws OXException {
-        final Lock readLock = rwLock.readLock();
-        readLock.lock();
+        Lock lock = this.lock;
+        lock.lock();
         try {
-            checkInit(readLock);
+            checkInit();
             return pair2uidl.get(fullnameUIDPair);
         } finally {
-            readLock.unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public String[] getUIDLs(final FullnameUIDPair[] fullnameUIDPairs) throws OXException {
-        final Lock readLock = rwLock.readLock();
-        readLock.lock();
+        Lock lock = this.lock;
+        lock.lock();
         try {
-            checkInit(readLock);
+            checkInit();
             final String[] uidls = new String[fullnameUIDPairs.length];
             for (int i = 0; i < uidls.length; i++) {
                 uidls[i] = getUIDL(fullnameUIDPairs[i]);
             }
             return uidls;
         } finally {
-            readLock.unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public Map<String, FullnameUIDPair> getAllUIDLs() throws OXException {
-        final Lock readLock = rwLock.readLock();
-        readLock.lock();
+        Lock lock = this.lock;
+        lock.lock();
         try {
-            checkInit(readLock);
+            checkInit();
             final Map<String, FullnameUIDPair> copy = new HashMap<String, FullnameUIDPair>();
             copy.putAll(uidl2pair);
             return copy;
         } finally {
-            readLock.unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public void deleteFullnameUIDPairMappings(final FullnameUIDPair[] fullnameUIDPairs) throws OXException {
-        final Lock readLock = rwLock.readLock();
-        readLock.lock();
+        Lock lock = this.lock;
+        lock.lock();
         try {
-            checkInit(readLock);
+            checkInit();
             delegatee.deleteFullnameUIDPairMappings(fullnameUIDPairs);
             for (int i = 0; i < fullnameUIDPairs.length; i++) {
                 final String uidl = pair2uidl.remove(fullnameUIDPairs[i]);
@@ -292,16 +275,16 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                 }
             }
         } finally {
-            readLock.unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public void deleteUIDLMappings(final String[] uidls) throws OXException {
-        final Lock readLock = rwLock.readLock();
-        readLock.lock();
+        Lock lock = this.lock;
+        lock.lock();
         try {
-            checkInit(readLock);
+            checkInit();
             delegatee.deleteUIDLMappings(uidls);
             for (int i = 0; i < uidls.length; i++) {
                 final FullnameUIDPair pair = uidl2pair.remove(uidls[i]);
@@ -310,27 +293,24 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
                 }
             }
         } finally {
-            readLock.unlock();
+            lock.unlock();
         }
     }
+
+    // ---------------------------------------------------------------------------------------------------------------
 
     private static final class ClearMapsRunnable implements Runnable {
 
         private final Map<String, FullnameUIDPair> tuidl2pair;
-
         private final Map<FullnameUIDPair, String> tpair2uidl;
-
-        private final ReadWriteLock trwLock;
-
+        private final Lock tLock;
         private final AtomicReference<Mode> tmode;
-
         private volatile ScheduledTimerTask timerTask;
-
         private int countEmptyRuns;
 
-        public ClearMapsRunnable(final Map<String, FullnameUIDPair> tuidl2pair, final Map<FullnameUIDPair, String> tpair2uidl, final ReadWriteLock trwLock, final AtomicReference<Mode> tmode) {
+        ClearMapsRunnable(Map<String, FullnameUIDPair> tuidl2pair, Map<FullnameUIDPair, String> tpair2uidl, Lock tLock, AtomicReference<Mode> tmode) {
             super();
-            this.trwLock = trwLock;
+            this.tLock = tLock;
             this.tuidl2pair = tuidl2pair;
             this.tpair2uidl = tpair2uidl;
             this.tmode = tmode;
@@ -338,7 +318,7 @@ public final class SessionPOP3StorageUIDLMap implements POP3StorageUIDLMap {
 
         @Override
         public void run() {
-            final Lock writeLock = trwLock.writeLock();
+            final Lock writeLock = tLock;
             writeLock.lock();
             try {
                 if (tuidl2pair.isEmpty() && tpair2uidl.isEmpty()) {

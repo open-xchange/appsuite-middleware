@@ -274,11 +274,12 @@ public class ParticipantTools {
     }
 
     /**
-     * Gets a specific user participant from an appointment.
+     * Gets a specific user participant from an appointment, by looking up the user participant in the {@link Appointment#getUsers()}
+     * array.
      *
      * @param appointment The appointment
      * @param userID The ID of the user to get
-     * @return The user particpant, or <code>null</code> if not found
+     * @return The user participant, or <code>null</code> if not found
      */
     public static UserParticipant findUser(Appointment appointment, int userID) {
         if (null != appointment && null != appointment.getUsers()) {
@@ -289,6 +290,18 @@ public class ParticipantTools {
             }
         }
         return null;
+    }
+
+    /**
+     * Gets a value indicating whether a specific user is participant in an appointment or not, by looking up the user participant in
+     * the {@link Appointment#getUsers()} array.
+     *
+     * @param appointment The appointment to check
+     * @param userID The identifier of the user to lookup
+     * @return <code>true</code> if the user is participant, <code>false</code>, otherwise
+     */
+    public static boolean isParticipant(Appointment appointment, int userID) {
+        return null != findUser(appointment, userID);
     }
 
     private ParticipantTools() {

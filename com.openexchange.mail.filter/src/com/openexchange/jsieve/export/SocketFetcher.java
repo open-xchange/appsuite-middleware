@@ -58,7 +58,7 @@ import java.security.PrivilegedAction;
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 
 /**
  * {@link SocketFetcher} - Utility class to get Sockets.
@@ -104,7 +104,7 @@ public final class SocketFetcher {
         final int port = socket.getPort();
         try {
             // Get SSL socket factory
-            final SSLSocketFactory ssf = TrustAllSSLSocketFactory.getDefault();
+            final SSLSocketFactory ssf = SSLSocketFactoryProvider.getDefault();
             // Create new socket layered over an existing socket connected to the named host, at the given port.
             final Socket newSocket = ssf.createSocket(socket, host, port, true);
             configureSSLSocket(newSocket);

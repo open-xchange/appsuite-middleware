@@ -538,8 +538,10 @@ public final class HtmlServiceImpl implements HtmlService {
             html = replacePercentTags(html);
             html = replaceHexEntities(html);
             html = processDownlevelRevealedConditionalComments(html);
+            html = dropWeirdXmlNamespaceDeclarations(html);
             html = dropDoubleAccents(html);
             html = dropSlashedTags(html);
+            html = dropExtraLt(html);
 
             // Repetitive sanitizing until no further replacement/changes performed
             final boolean[] sanitized = new boolean[] { true };
@@ -614,6 +616,27 @@ public final class HtmlServiceImpl implements HtmlService {
         final StringBuffer sb = new StringBuffer(html.length());
         do {
             m.appendReplacement(sb, "$1 $2");
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
+    }
+
+    private static final Pattern PATTERN_EXTRA_LT = Pattern.compile("(<[a-zA-Z_0-9-]+)<");
+
+    private static String dropExtraLt(String html) {
+        if (null == html) {
+            return html;
+        }
+        Matcher m = PATTERN_EXTRA_LT.matcher(html);
+        if (!m.find()) {
+            /*
+             * No extra LT found
+             */
+            return html;
+        }
+        StringBuffer sb = new StringBuffer(html.length());
+        do {
+            m.appendReplacement(sb, "$1");
         } while (m.find());
         m.appendTail(sb);
         return sb.toString();
@@ -1716,6 +1739,31 @@ public final class HtmlServiceImpl implements HtmlService {
             return sb.toString();
         }
         return htmlContent;
+    }
+
+    private static final Pattern PATTERN_XML_NS_DECLARATION = Pattern.compile("<\\?xml:namespace[^>]*>", Pattern.CASE_INSENSITIVE);
+
+    private static String dropWeirdXmlNamespaceDeclarations(String htmlContent) {
+        // <?xml:namespace prefix = "o" ns =  "urn:schemas-microsoft-com:office:office" />
+        if (null == htmlContent) {
+            return htmlContent;
+        }
+
+        if (htmlContent.indexOf("<?xml:") < 0 && htmlContent.indexOf("<?XML:") < 0) {
+            return htmlContent;
+        }
+
+        Matcher m = PATTERN_XML_NS_DECLARATION.matcher(htmlContent);
+        if (false == m.find()) {
+            return htmlContent;
+        }
+
+        StringBuffer sb = new StringBuffer(htmlContent.length());
+        do {
+            m.appendReplacement(sb, "");
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
     }
 
     private static final Pattern PATTERN_CC = Pattern.compile("(<!(?:--)?\\[if)([^\\]]+\\](?:--!?)?>)(.*?)((?:<!\\[endif\\])?(?:--)?>)", Pattern.DOTALL);

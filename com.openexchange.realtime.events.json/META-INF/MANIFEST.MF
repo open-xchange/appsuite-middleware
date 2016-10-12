@@ -5,10 +5,12 @@ Bundle-SymbolicName: com.openexchange.realtime.events.json
 Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.ajax.requesthandler,
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.documentation,
- com.openexchange.documentation.annotations,
  com.openexchange.exception,
  com.openexchange.osgi,
  com.openexchange.realtime.events,

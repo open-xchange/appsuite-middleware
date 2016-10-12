@@ -2,8 +2,8 @@
   put:
     operationId: deleteGroup
     tags:
-      - groups
-    summary: Deletes a group (**introduced 2008-06-12**).
+      - Groups
+    summary: Deletes a group.
     consumes:
       - application/json
     parameters:
@@ -24,6 +24,6 @@
       200:
         description: |
           A JSON object with an empty array if the group was deleted successfully. In case of errors the responsible fields in the
-          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/GroupsResponse"

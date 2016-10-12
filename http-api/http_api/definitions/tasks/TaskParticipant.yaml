@@ -5,7 +5,13 @@ properties:
     description: User ID.
   type:
     type: integer
-    description: 'Type of participant: 1 (user), 2 (user group), 3 (resource), 4 (resource group), 5 (external user)'
+    description: Type of participant.
+    enum: 
+      - 1 (user)
+      - 2 (user group)
+      - 3 (resource)
+      - 4 (resource group)
+      - 5 (external user)
   mail:
     type: string
     description: Mail address of an external participant.

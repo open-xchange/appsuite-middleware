@@ -131,8 +131,9 @@ public class DriveConstants {
      * 3: .drive-meta
      * 4: subfolders action, sharing
      * 5: push for multiple root folders (listen/subscribe), inline .drive-meta, trash stats, empty trash
+     * 6: moveFile/moveFolder
      */
-    public static final int SUPPORTED_API_VERSION = 5;
+    public static final int SUPPORTED_API_VERSION = 6;
 
     /**
      * The files module identifier.

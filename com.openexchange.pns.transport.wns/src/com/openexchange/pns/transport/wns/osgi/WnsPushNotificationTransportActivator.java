@@ -58,6 +58,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.DefaultInterests;
+import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -124,6 +125,19 @@ public class WnsPushNotificationTransportActivator extends HousekeepingActivator
     @Override
     protected synchronized void startBundle() throws Exception {
         reinit(getService(ConfigurationService.class));
+
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                WnsPushNotificationTransport.invalidateEnabledCache();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return null;
+            }
+        });
     }
 
     @Override
@@ -154,11 +168,6 @@ public class WnsPushNotificationTransportActivator extends HousekeepingActivator
             this.optionsProviderRegistration = null;
         }
 
-        if (!configService.getBoolProperty("com.openexchange.pns.transport.wns.enabled", false)) {
-            LOG.info("WNS push notification transport is disabled per configuration");
-            return;
-        }
-
         Object yaml = configService.getYaml(CONFIGFILE_WNS_OPTIONS);
         if (null != yaml && Map.class.isInstance(yaml)) {
             Map<String, Object> map = (Map<String, Object>) yaml;
@@ -168,6 +177,7 @@ public class WnsPushNotificationTransportActivator extends HousekeepingActivator
                     Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
                     dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(785));
                     optionsProviderRegistration = context.registerService(WnsOptionsProvider.class, new DefaultWnsOptionsProvider(options), dictionary);
+                    this.optionsProviderRegistration = optionsProviderRegistration;
                 }
             }
         }

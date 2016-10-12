@@ -110,6 +110,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.filestore.FileLocationHandler;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.mail.mime.utils.ImageMatcher;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -363,6 +364,20 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 		});
 
         track(DispatcherListener.class, dispatcherListenerRegistry);
+
+        track(UserAwareSSLConfigurationService.class, new SimpleRegistryListener<UserAwareSSLConfigurationService>() {
+
+            @Override
+            public void added(ServiceReference<UserAwareSSLConfigurationService> reference, UserAwareSSLConfigurationService service) {
+                ServerServiceRegistry.getInstance().addService(UserAwareSSLConfigurationService.class, service);
+            }
+
+            @Override
+            public void removed(ServiceReference<UserAwareSSLConfigurationService> reference, UserAwareSSLConfigurationService service) {
+                ServerServiceRegistry.getInstance().removeService(UserAwareSSLConfigurationService.class);
+            }
+
+        });
 
         openTrackers();
 

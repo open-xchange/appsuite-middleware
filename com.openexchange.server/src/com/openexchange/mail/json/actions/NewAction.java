@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.actions;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -69,11 +70,9 @@ import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Charsets;
@@ -85,9 +84,12 @@ import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.compose.CompositionSpaces;
+import com.openexchange.mail.config.MailConfigException;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -125,12 +127,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "new", description = "Send/Save mail as MIME data block (RFC822) (added in SP5)", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "folder", optional=true, description = "In case the mail should not be sent out, but saved in a specific folder, the \"folder\" parameter can be used. If the mail should be sent out to the recipient, the \"folder\" parameter must not be included and the mail is stored in the folder \"Sent Items\". Example \"folder=default.INBOX/Testfolder\""),
-    @Parameter(name = "flags", optional=true, description = "In case the mail should be stored with status \"read\" (e.g. mail has been read already in the client inbox), the parameter \"flags\" has to be included. If no \"folder\" parameter is specified, this parameter must not be included. For infos about mail flags see Detailed mail data spec.")
-}, requestBody = "The MIME Data Block.",
-responseDescription = "Object ID of the newly created/moved mail.")
+@DispatcherNotes( preferStream = true )
 public final class NewAction extends AbstractMailAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NewAction.class);
@@ -152,8 +149,6 @@ public final class NewAction extends AbstractMailAction {
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
-        final AJAXRequestData request = req.getRequest();
-        final List<OXException> warnings = new ArrayList<OXException>();
         try {
             long maxSize;
             long maxFileSize;
@@ -180,6 +175,10 @@ public final class NewAction extends AbstractMailAction {
                     }
                 }
             }
+
+            AJAXRequestData request = req.getRequest();
+            List<OXException> warnings = new ArrayList<OXException>();
+
             if (request.hasUploads(maxFileSize, maxSize) || request.getParameter(UPLOAD_FORMFIELD_MAIL) != null) {
                 return performWithUploads(req, request, warnings);
             }
@@ -297,6 +296,7 @@ public final class NewAction extends AbstractMailAction {
             ComposeTransportResult transportResult = composeHandler.createTransportResult(composeRequest);
             List<? extends ComposedMailMessage> composedMails = transportResult.getTransportMessages();
             ComposedMailMessage sentMessage = transportResult.getSentMessage();
+            boolean transportEqualToSent = transportResult.isTransportEqualToSent();
 
             if (newMessageId) {
                 for (ComposedMailMessage composedMail : composedMails) {
@@ -431,7 +431,7 @@ public final class NewAction extends AbstractMailAction {
 
             HttpServletRequest servletRequest = request.optHttpServletRequest();
             String remoteAddress = null == servletRequest ? request.getRemoteAddress() : servletRequest.getRemoteAddr();
-            List<String> ids = mailInterface.sendMessages(composedMails, sentMessage, sendType, accountId, usm, new MtaStatusInfo(), remoteAddress);
+            List<String> ids = mailInterface.sendMessages(composedMails, sentMessage, transportEqualToSent, sendType, accountId, usm, new MtaStatusInfo(), remoteAddress);
             msgIdentifier = null == ids || ids.isEmpty() ? null : ids.get(0);
 
             // Apply composition space state(s)
@@ -490,7 +490,14 @@ public final class NewAction extends AbstractMailAction {
         }
     }
 
-    private AJAXRequestResult performWithoutUploads(final MailRequest req, final List<OXException> warnings) throws OXException, MessagingException, JSONException {
+    /**
+     * Performs sending a data block.
+     *
+     * @param req The mail request
+     * @param warnings The warnings to fill
+     * @return The request result
+     */
+    protected AJAXRequestResult performWithoutUploads(final MailRequest req, final List<OXException> warnings) throws OXException, MessagingException, JSONException {
         /*
          * Non-POST
          */
@@ -515,11 +522,11 @@ public final class NewAction extends AbstractMailAction {
             }
         }
 
-        // Get rfc822 bytes and create corresponding mail message
+        // Get RFC822 bytes and create corresponding mail message
         QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), false);
         PutNewMailData data;
         {
-            MimeMessage message = MimeMessageUtility.newMimeMessage(Streams.newByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().requireData())), true);
+            MimeMessage message = loadMimeMessageFrom(req);
             message.removeHeader("x-original-headers");
             if (newMessageId) {
                 message.removeHeader("Message-ID");
@@ -559,6 +566,25 @@ public final class NewAction extends AbstractMailAction {
         AJAXRequestResult result = new AJAXRequestResult(responseData, "json");
         result.addWarnings(warnings);
         return result;
+    }
+
+    private MimeMessage loadMimeMessageFrom(final MailRequest req) throws OXException {
+        HttpServletRequest httpRequest = req.getRequest().optHttpServletRequest();
+        if (null == httpRequest) {
+            return MimeMessageUtility.newMimeMessage(Streams.newByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().requireData())), true);
+        }
+
+        Object requestBody = req.getRequest().getData();
+        if (null != requestBody) {
+            return MimeMessageUtility.newMimeMessage(Streams.newByteArrayInputStream(Charsets.toAsciiBytes((String) requestBody)), true);
+        }
+
+        // Not yet loaded
+        try {
+            return MimeMessageUtility.newMimeMessage(httpRequest.getInputStream(), true);
+        } catch (IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
     }
 
     private interface PutNewMailData {
@@ -612,6 +638,38 @@ public final class NewAction extends AbstractMailAction {
                 accId = MailAccount.DEFAULT_ID;
             }
             accountId = accId;
+        }
+        /*
+         * Check for OAuth request
+         */
+        if (isOAuthRequest(request)) {
+            if (MailAccount.DEFAULT_ID == accountId) {
+                PasswordSource passwordSource = MailProperties.getInstance().getPasswordSource();
+                switch (passwordSource) {
+                    case GLOBAL: {
+                        // Just for convenience
+                        String masterPassword = MailProperties.getInstance().getMasterPassword();
+                        if (masterPassword == null) {
+                            throw MailConfigException.create("Property \"com.openexchange.mail.masterPassword\" not set");
+                        }
+                        break;
+                    }
+                    case SESSION:
+                        // Fall-through
+                    default: {
+                        if (null == session.getPassword()) {
+                            throw MailExceptionCode.MISSING_CONNECT_PARAM.create("password");
+                        }
+                        break;
+                    }
+                }
+            } else {
+                if (null == session.getPassword()) {
+                    // Deny for now.
+                    // ( Might be possible to check SecretService if a proper secret is determineable although no password available )
+                    throw MailExceptionCode.MISSING_CONNECT_PARAM.create("password");
+                }
+            }
         }
         /*
          * Missing "folder" element indicates to send given message via default mail account

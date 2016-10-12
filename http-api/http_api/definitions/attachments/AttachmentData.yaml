@@ -9,7 +9,12 @@ properties:
     description: The ID of the object this attachment is attached to.
   module:
     type: integer
-    description: 'The module type of the object: 1 (appointment), 4 (task), 7 (contact), 137 (infostore).'
+    description: The module type of the object.
+    enum: 
+      - 1 (appointment)
+      - 4 (task)
+      - 7 (contact)
+      - 137 (infostore)
   filename:
     type: string
     description: The filename of the attached file.

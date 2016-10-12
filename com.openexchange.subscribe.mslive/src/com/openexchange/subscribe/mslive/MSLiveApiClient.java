@@ -51,8 +51,6 @@ package com.openexchange.subscribe.mslive;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.MsLiveConnectApi;
@@ -60,12 +58,13 @@ import org.scribe.model.OAuthRequest;
 import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
+import com.openexchange.cluster.lock.ClusterLockService;
+import com.openexchange.cluster.lock.ClusterTask;
+import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.DefaultOAuthToken;
+import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.session.Session;
@@ -98,28 +97,12 @@ public class MSLiveApiClient {
      * @throws OXException if the access token cannot be retrieved
      */
     public static String getAccessToken(OAuthAccount account, Session session) throws OXException {
-        final OAuthService oauthService = Services.getService(OAuthService.class);
-
-        // Build service
-        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MsLiveConnectApi.class);
-        serviceBuilder.apiKey(account.getMetaData().getAPIKey(session)).apiSecret(account.getMetaData().getAPISecret(session));
-        org.scribe.oauth.OAuthService service = serviceBuilder.build();
-
         // Fetch access token
         String token = account.getToken();
         if (isExpired(token)) {
-            String refreshToken = account.getSecret();
-            final Token accessToken = service.getAccessToken(new Token(token, refreshToken), null);
-            if (!Strings.isEmpty(accessToken.getSecret())) {
-                refreshToken = accessToken.getSecret();
-            }
-
-            // Update account
-            Map<String, Object> arguments = new HashMap<String, Object>(3);
-            arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
-            arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
-            oauthService.updateAccount(account.getId(), arguments, session.getUserId(), session.getContextId(), account.getEnabledScopes());
-            token = accessToken.getToken();
+            ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
+            OAuthAccount reauthorizedAccount = clusterLockService.runClusterTask(new MSLiveReauthorizeClusterTask(session, account), new ExponentialBackOffRetryPolicy());
+            token = reauthorizedAccount.getToken();
         }
 
         return token;
@@ -155,4 +138,32 @@ public class MSLiveApiClient {
         }
     }
 
+    private static class MSLiveReauthorizeClusterTask extends AbstractReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
+
+        /**
+         * Initialises a new {@link MSLiveApiClient.MSLiveReauthorizeClusterTask}.
+         */
+        public MSLiveReauthorizeClusterTask(Session session, OAuthAccount cachedAccount) {
+            super(Services.getServiceLookup(), session, cachedAccount);
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.openexchange.cluster.lock.ClusterTask#perform()
+         */
+        @Override
+        public Token reauthorize() throws OXException {
+            Session session = getSession();
+            OAuthAccount dbAccount = getDBAccount();
+
+            // Build service
+            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(MsLiveConnectApi.class);
+            serviceBuilder.apiKey(dbAccount.getMetaData().getAPIKey(session)).apiSecret(dbAccount.getMetaData().getAPISecret(session));
+            org.scribe.oauth.OAuthService service = serviceBuilder.build();
+
+            String refreshToken = dbAccount.getSecret();
+            return service.getAccessToken(new Token(dbAccount.getToken(), refreshToken), null);
+        }
+    }
 }

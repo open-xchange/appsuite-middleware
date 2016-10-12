@@ -73,6 +73,7 @@ import com.openexchange.contact.storage.ldap.config.LdapConfig.SearchScope;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
@@ -158,7 +159,7 @@ public class LdapFactory  {
             environment.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
             environment.put(Context.PROVIDER_URL, config.getUri());
             if (config.isTrustAllCerts() && config.getUri().startsWith("ldaps://")) {
-                environment.put("java.naming.ldap.factory.socket", "com.openexchange.tools.ssl.TrustAllSSLSocketFactory");
+                environment.put("java.naming.ldap.factory.socket", SSLSocketFactoryProvider.getDefault().getClass().getName());
             }
             if (null != config.getReferrals()) {
                 environment.put(Context.REFERRAL, config.getReferrals().getValue());

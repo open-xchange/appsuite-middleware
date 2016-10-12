@@ -50,9 +50,6 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFileAccess;
@@ -64,10 +61,6 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Action(method = RequestMethod.GET, name = "lock", description = "Unlock an infoitem", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "Object ID of the infoitem that should be unlocked.")
-}, responseDescription = "Can only include errors.")
 public class UnlockAction extends AbstractWriteAction {
 
     @Override

@@ -69,7 +69,7 @@ public abstract class AbstractOAuthWriter {
     protected static JSONArray write(Set<OAuthScope> scopes) {
         JSONArray scopeArray = new JSONArray();
         for (OAuthScope scope : scopes) {
-            scopeArray.put(scope.getModule());
+            scopeArray.put(scope.getOXScope());
         }
         return scopeArray;
     }

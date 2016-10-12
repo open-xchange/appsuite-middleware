@@ -70,7 +70,8 @@ import com.openexchange.websockets.grizzly.GrizzlyWebSocketUtils;
  */
 public class PortableMessageDistributor extends AbstractCustomPortable implements Callable<Void> {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PortableMessageDistributor.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(PortableMessageDistributor.class);
+    private static final Logger WS_LOGGER = org.slf4j.LoggerFactory.getLogger("WEBSOCKET");
 
     private static final String DELIM = "?==?";
     private static final Pattern P_DELIM = Pattern.compile("\\?==\\?");
@@ -196,27 +197,32 @@ public class PortableMessageDistributor extends AbstractCustomPortable implement
     public Void call() throws Exception {
         GrizzlyWebSocketApplication application = GrizzlyWebSocketApplication.getGrizzlyWebSocketApplication();
         if (null == application) {
-            LOG.warn("Found no Web Socket application on cluster member {}", GrizzlyWebSocketApplication.getLocalHost());
+            WS_LOGGER.warn("Found no Web Socket application on cluster member {}", GrizzlyWebSocketApplication.getLocalHost());
             return null;
         }
 
         String[] messages = splitMessage(message);
         if (messages.length == 0) {
-            LOG.info("Received no messages on cluster member {} for user {} in context {}", GrizzlyWebSocketApplication.getLocalHost(), I(userId), I(contextId));
+            WS_LOGGER.debug("Received no messages on cluster member {} for user {} in context {}", GrizzlyWebSocketApplication.getLocalHost(), I(userId), I(contextId));
             return null;
         }
 
-        LOG.info("Received {} message(s) on cluster member {} for user {} in context {}", I(messages.length), GrizzlyWebSocketApplication.getLocalHost(), I(userId), I(contextId));
+        WS_LOGGER.debug("Received {} message(s) on cluster member {} for user {} in context {}", I(messages.length), GrizzlyWebSocketApplication.getLocalHost(), I(userId), I(contextId));
 
-        for (String msg : messages) {
-            if (async) {
-                application.sendToUserAsync(msg, filter, true, userId, contextId);
-            } else {
-                application.sendToUser(msg, filter, true, userId, contextId);
+        try {
+            for (String msg : messages) {
+                if (async) {
+                    application.sendToUserAsync(msg, filter, true, userId, contextId);
+                } else {
+                    application.sendToUser(msg, filter, true, userId, contextId);
+                }
+                WS_LOGGER.debug("Transmitted message \"{}\" to Web Socket application using path filter \"{}\" to user {} in context {}", GrizzlyWebSocketUtils.abbreviateMessageArg(msg), filter, I(userId), I(contextId));
             }
-            LOG.info("Transmitted message \"{}\" to Web Socket application using path filter \"{}\" to user {} in context {}", GrizzlyWebSocketUtils.abbreviateMessageArg(msg), filter, I(userId), I(contextId));
+            return null;
+        } catch (Exception e) {
+            LOGGER.error("Failed to handle {} message(s) on cluster member {} for user {} in context {}", I(messages.length), GrizzlyWebSocketApplication.getLocalHost(), I(userId), I(contextId), e);
+            throw e;
         }
-        return null;
     }
 
     @Override

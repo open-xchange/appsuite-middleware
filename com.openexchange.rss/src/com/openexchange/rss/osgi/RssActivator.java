@@ -51,7 +51,6 @@ package com.openexchange.rss.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
-import javax.net.ssl.HttpsURLConnection;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
@@ -61,23 +60,22 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.rss.RssJsonConverter;
 import com.openexchange.rss.actions.RssActionFactory;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 public class RssActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HtmlService.class, CapabilityService.class, ConfigViewFactory.class, ConfigurationService.class };
+        return new Class<?>[] { HtmlService.class, CapabilityService.class, ConfigViewFactory.class, ConfigurationService.class, UserAwareSSLConfigurationService.class };
     }
 
     @Override
     protected void startBundle() {
-        HttpsURLConnection.setDefaultSSLSocketFactory(TrustAllSSLSocketFactory.getDefault());
         Services.setServiceLookup(this);
         registerModule(new RssActionFactory(), "rss");
         registerService(ResultConverter.class, new RssJsonConverter());

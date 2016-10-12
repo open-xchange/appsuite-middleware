@@ -116,7 +116,7 @@ public class PushEventHandler implements org.osgi.service.event.EventHandler {
                 .build();
             notificationService.handle(notification);
         } catch (Exception e) {
-            LOG.warn("Failed to handle incoming legacy push event", e);
+            LOG.warn("Failed to handle incoming \"{}\" push event", KnownTopic.MAIL_NEW.getName(), e);
         }
     }
 

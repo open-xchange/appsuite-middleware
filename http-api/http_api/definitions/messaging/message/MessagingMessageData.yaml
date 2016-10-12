@@ -11,7 +11,7 @@ properties:
     description: The nesting level of this message according to the conversation it's belonged to. May not be set.
   flags:
     type: integer
-    description: Bitmask showing the state of this message. The same as in the module "mail".
+    description: Bitmask showing the state of this message. The same as in the module [mail](https://documentation.open-xchange.com/latest/middleware/http-api-gen/#_mail_resource).
   receivedDate:
     type: integer
     format: int64

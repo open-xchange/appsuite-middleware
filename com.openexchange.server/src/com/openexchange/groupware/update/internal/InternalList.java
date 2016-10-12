@@ -113,6 +113,7 @@ import com.openexchange.groupware.update.tasks.UserSettingServerAddPrimaryKeyUpd
 import com.openexchange.groupware.update.tasks.UserSettingServerAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.VirtualFolderAddSortNumTask;
 import com.openexchange.groupware.update.tasks.objectusagecount.CreateObjectUseCountTableTask;
+import com.openexchange.tools.oxfolder.RemoveInconsistentLocksUpdateTasks;
 
 /**
  * Lists all update tasks of the com.openexchange.server bundle.
@@ -623,6 +624,9 @@ public final class InternalList {
 
         //Adds "oauth" column to account tables
         list.add(new AddOAuthColumnToMailAccountTableTask());
+
+        // Removes inconsistent locks (See Bug #47929)
+        list.add(new RemoveInconsistentLocksUpdateTasks());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

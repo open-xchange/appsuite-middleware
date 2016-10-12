@@ -60,6 +60,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.pns.PushNotificationService;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.mail.notify.MailNotifyPushDeleteListener;
@@ -135,6 +136,10 @@ public final class MailNotifyActivator extends HousekeepingActivator {
             // Initialize listener registry
             MailNotifyPushListenerRegistry registry = new MailNotifyPushListenerRegistry(config.useOXLogin, config.useEmailAddress);
             this.registry = registry;
+
+            // Track optional services
+            trackService(PushNotificationService.class);
+            openTrackers();
 
             // Register push manager
             registerService(PushManagerService.class, new MailNotifyPushManagerService(registry), null);

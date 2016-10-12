@@ -49,13 +49,9 @@
 
 package com.openexchange.mailaccount.json.actions;
 
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import javax.mail.MessagingException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -64,17 +60,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.crypto.CryptoErrorMessage;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.mail.transport.TransportProvider;
-import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
@@ -82,12 +69,9 @@ import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.TransportAuth;
+import com.openexchange.mailaccount.json.ActiveProviderDetector;
 import com.openexchange.mailaccount.json.parser.DefaultMailAccountParser;
-import com.openexchange.mailaccount.utils.MailAccountUtils;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.net.URIDefaults;
-import com.openexchange.tools.net.URIParser;
-import com.openexchange.tools.net.URITools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -95,11 +79,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "validate", description = "Validate a mail account (which shall be created)", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "tree", optional=true, description = "An optional boolean parameter which indicates whether on successful validation the folder tree shall be returned (NULL on failure) or if set to \"false\" or missing only a boolean is returned which indicates validation result.")
-}, requestBody = "A JSON object describing the new account to validate. See mail account data.",
-    responseDescription = "Dependent on optional \"tree\" parameter a JSON folder object or a boolean value indicating the validation result.")
 public final class ValidateAction extends AbstractMailAccountTreeAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ValidateAction.class);
@@ -109,8 +88,8 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
     /**
      * Initializes a new {@link ValidateAction}.
      */
-    public ValidateAction() {
-        super();
+    public ValidateAction(ActiveProviderDetector activeProviderDetector) {
+        super(activeProviderDetector);
     }
 
     @Override
@@ -305,224 +284,6 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             }
         }
         return Boolean.valueOf(validated);
-    }
-
-    static void checkForCommunicationProblem(List<OXException> warnings, boolean transport, MailAccountDescription accountDescription) {
-        if (null != warnings && !warnings.isEmpty()) {
-            OXException warning = warnings.get(0);
-            if (indicatesCommunicationProblem(warning.getCause())) {
-                OXException newWarning;
-                if (transport) {
-                    String login = accountDescription.getTransportLogin();
-                    if (!seemsValid(login)) {
-                        login = accountDescription.getLogin();
-                    }
-                    newWarning = MailAccountExceptionCodes.VALIDATE_FAILED_TRANSPORT.create(accountDescription.getTransportServer(), login);
-                } else {
-                    newWarning = MailAccountExceptionCodes.VALIDATE_FAILED_MAIL.create(accountDescription.getMailServer(), accountDescription.getLogin());
-                }
-                newWarning.setCategory(Category.CATEGORY_WARNING);
-                warnings.clear();
-                warnings.add(newWarning);
-            }
-        }
-    }
-
-    private static boolean indicatesCommunicationProblem(Throwable cause) {
-        if (MessagingException.class.isInstance(cause)) {
-            Exception ne = ((MessagingException) cause).getNextException();
-            return indicatesCommunicationProblem(ne);
-        }
-        return com.sun.mail.iap.ConnectionException.class.isInstance(cause) || java.net.SocketException.class.isInstance(cause);
-    }
-
-    static boolean checkMailServerURL(MailAccountDescription accountDescription, ServerSession session, List<OXException> warnings, boolean errorOnDenied) throws OXException {
-        if (MailAccountUtils.isDenied(accountDescription.getMailServer(), accountDescription.getMailPort())) {
-            OXException oxe = MailAccountExceptionCodes.VALIDATE_FAILED_MAIL.create(accountDescription.getMailServer(), accountDescription.getLogin());
-            if (errorOnDenied) {
-                throw oxe;
-            }
-            warnings.add(oxe);
-            return false;
-        }
-
-        try {
-            fillMailServerCredentials(accountDescription, session, false);
-        } catch (OXException e) {
-            if (!CryptoErrorMessage.BadPassword.equals(e)) {
-                throw e;
-            }
-            fillMailServerCredentials(accountDescription, session, true);
-        }
-        // Proceed
-        final MailAccess<?, ?> mailAccess = getMailAccess(accountDescription, session, warnings);
-        if (null == mailAccess) {
-            return false;
-        }
-        // Now try to connect
-        final boolean success = mailAccess.ping();
-        // Add possible warnings
-        {
-            final Collection<OXException> currentWarnings = mailAccess.getWarnings();
-            if (null != currentWarnings) {
-                warnings.addAll(currentWarnings);
-            }
-        }
-        return success;
-    }
-
-    protected static boolean checkTransportServerURL(MailAccountDescription accountDescription, ServerSession session, List<OXException> warnings, boolean errorOnDenied) throws OXException {
-        // Now check transport server URL, if a transport server is present
-        if (isEmpty(accountDescription.getTransportServer())) {
-            return true;
-        }
-
-        if (MailAccountUtils.isDenied(accountDescription.getTransportServer(), accountDescription.getTransportPort())) {
-            String login = accountDescription.getTransportLogin();
-            if (!seemsValid(login)) {
-                login = accountDescription.getLogin();
-            }
-            OXException oxe = MailAccountExceptionCodes.VALIDATE_FAILED_TRANSPORT.create(accountDescription.getTransportServer(), login);
-            if (errorOnDenied) {
-                throw oxe;
-            }
-            warnings.add(oxe);
-            return false;
-        }
-
-        final String transportServerURL = accountDescription.generateTransportServerURL();
-        // Get the appropriate transport provider by transport server URL
-        final TransportProvider transportProvider = TransportProviderRegistry.getTransportProviderByURL(transportServerURL);
-        if (null == transportProvider) {
-            LOG.debug("Validating mail account failed. No transport provider found for URL: {}", transportServerURL);
-            return false;
-        }
-        // Create a transport access instance
-        final MailTransport mailTransport = transportProvider.createNewMailTransport(session);
-        final TransportConfig transportConfig = mailTransport.getTransportConfig();
-        // Set login and password
-        try {
-            fillTransportServerCredentials(accountDescription, session, false);
-        } catch (OXException e) {
-            if (!CryptoErrorMessage.BadPassword.equals(e)) {
-                throw e;
-            }
-            fillTransportServerCredentials(accountDescription, session, true);
-        }
-        // Credentials
-        {
-            String login = accountDescription.getTransportLogin();
-            String password = accountDescription.getTransportPassword();
-            if (!seemsValid(login)) {
-                login = accountDescription.getLogin();
-            }
-            if (!seemsValid(password)) {
-                password = accountDescription.getPassword();
-            }
-            transportConfig.setLogin(login);
-            transportConfig.setPassword(password);
-        }
-        // Set server and port
-        final URI uri;
-        try {
-            uri = URIParser.parse(transportServerURL, URIDefaults.SMTP);
-        } catch (final URISyntaxException e) {
-            throw MailExceptionCode.URI_PARSE_FAILED.create(e, transportServerURL);
-        }
-        transportConfig.setServer(URITools.getHost(uri));
-        transportConfig.setPort(uri.getPort());
-        transportConfig.setSecure(accountDescription.isTransportSecure());
-        boolean validated = true;
-        // Now try to connect
-        boolean close = false;
-        try {
-            mailTransport.ping();
-            close = true;
-        } catch (final OXException e) {
-            LOG.debug("Validating transport account failed.", e);
-            Throwable cause = e.getCause();
-            while ((null != cause) && (cause instanceof OXException)) {
-                cause = cause.getCause();
-            }
-            if (null != cause) {
-                warnings.add(MailAccountExceptionCodes.VALIDATE_FAILED_TRANSPORT.create(cause, transportConfig.getServer(), transportConfig.getLogin()));
-            } else {
-                e.setCategory(Category.CATEGORY_WARNING);
-                warnings.add(e);
-            }
-            validated = false;
-        } finally {
-            if (close) {
-                mailTransport.close();
-            }
-        }
-        return validated;
-    }
-
-    private static void fillMailServerCredentials(MailAccountDescription accountDescription, ServerSession session, boolean invalidate) throws OXException {
-        int accountId = accountDescription.getId();
-        String login = accountDescription.getLogin();
-        String password = accountDescription.getPassword();
-
-        if (accountId >= 0 && (isEmpty(login) || isEmpty(password))) {
-            /* ID is delivered, but password not set. Thus load from storage version.*/
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-            final MailAccount mailAccount = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
-
-            if (invalidate) {
-                storageService.invalidateMailAccounts(session.getUserId(), session.getContextId());
-            }
-            accountDescription.setLogin(mailAccount.getLogin());
-            String encPassword = mailAccount.getPassword();
-            accountDescription.setPassword(MailPasswordUtil.decrypt(encPassword, session, accountId, accountDescription.getLogin(), accountDescription.getMailServer()));
-        }
-
-        checkNeededFields(accountDescription);
-    }
-
-    private static void fillTransportServerCredentials(MailAccountDescription accountDescription, ServerSession session, boolean invalidate) throws OXException {
-        int accountId = accountDescription.getId();
-        String login = accountDescription.getTransportLogin();
-        String password = accountDescription.getTransportPassword();
-
-        if (accountId >= 0 && (isEmpty(login) || isEmpty(password))) {
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-            final MailAccount mailAccount = storageService.getMailAccount(accountId, session.getUserId(), session.getContextId());
-            if (invalidate) {
-                storageService.invalidateMailAccounts(session.getUserId(), session.getContextId());
-            }
-            if (isEmpty(login)) {
-                login = mailAccount.getTransportLogin();
-                if (isEmpty(login)) {
-                    login = accountDescription.getLogin();
-                    if (isEmpty(login)) {
-                        login = mailAccount.getLogin();
-                    }
-                }
-            }
-            accountDescription.setTransportLogin(login);
-            if (isEmpty(password)) {
-                String encPassword = mailAccount.getTransportPassword();
-                accountId = mailAccount.getId();
-                password = MailPasswordUtil.decrypt(encPassword, session, accountId, login, mailAccount.getTransportServer());
-                if (isEmpty(password)) {
-                    password = accountDescription.getPassword();
-                    if (isEmpty(password)) {
-                        encPassword = mailAccount.getPassword();
-                        password = MailPasswordUtil.decrypt(encPassword, session, accountId, login, mailAccount.getTransportServer());
-                    }
-                }
-            }
-            accountDescription.setTransportPassword(password);
-        }
-    }
-
-    private static boolean seemsValid(final String str) {
-        if (isEmpty(str)) {
-            return false;
-        }
-
-        return !"null".equalsIgnoreCase(str);
     }
 
 }

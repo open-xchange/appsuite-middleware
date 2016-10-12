@@ -94,7 +94,7 @@ public class ValidateActionTest {
 
     @Test
     public void testInnerPerform_mailAccountIsPrimaryAccount_doNotValidateAndReturnTrue() throws OXException, JSONException {
-        ValidateAction action = new ValidateAction();
+        ValidateAction action = new ValidateAction(null);
         AJAXRequestResult innerPerform = action.innerPerform(requestData, session, jData);
         Object resultObject = innerPerform.getResultObject();
 

@@ -246,18 +246,22 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     OAUTH_PROBLEM_ACCESS_DENIED("The OAuth provider refused to permit this Consumer to access the protected resources.", CATEGORY_PERMISSION_DENIED, 39, null),
 
     /**
-     * The OAuth access token for OAuth account '%1$s' is invalid. Re-authorisation is required: %2$s
+     * The OAuth access token for the '%1$s' OAuth account with id '%2$s' of user '%3$s' in context '%4$s' is invalid. Reauthorization is required.
      */
-    OAUTH_ACCESS_TOKEN_INVALID("The OAuth access token for OAuth account '%1$s' is invalid. Re-authorisation is required: %2$s", CATEGORY_ERROR, 40, OAuthExceptionMessages.OAUTH_TOKEN_INVALID),
+    OAUTH_ACCESS_TOKEN_INVALID("The OAuth access token for the '%1$s' OAuth account with id '%2$s' of user '%3$s' in context '%4$s' is invalid. Reauthorization is required.", CATEGORY_ERROR, 40, OAuthExceptionMessages.OAUTH_TOKEN_INVALID),
 
     /**
      * Please provide at least one scope.
      */
     MISSING_SCOPE("Please provide at least one scope.", CATEGORY_USER_INPUT, 40, OAuthExceptionMessages.MISSING_SCOPE_MSG),
     /**
-     * The user needs to authorise the '%1$s' provider to gain access to '%2%s'
+     * The user needs to authorize the '%1$s' provider to gain access to '%2$s'
      */
-    NO_SCOPE_PERMISSION("The user needs to authorise the '%1$s' provider to gain access to '%2%s'", CATEGORY_PERMISSION_DENIED, 41, OAuthExceptionMessages.NO_SCOPE_PERMISSION),
+    NO_SCOPE_PERMISSION("The user needs to authorize the '%1$s' provider to gain access to '%2$s'", CATEGORY_PERMISSION_DENIED, 41, OAuthExceptionMessages.NO_SCOPE_PERMISSION),
+    /**
+     * The provider does not support the demanded scope '%1$s'
+     */
+    NO_SUCH_SCOPE_AVAILABLE("The provider does not support the demanded scope '%1$s'", CATEGORY_PERMISSION_DENIED, 42, OAuthExceptionMessages.NO_SUCH_SCOPE_AVAILABLE),
 
     ;
 

@@ -170,7 +170,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static final String select = "SELECT intfield01, timestampfield01, timestampfield02, field01 FROM prg_dates ";
 
-    private static final String FREE_BUSY_SELECT = "SELECT intfield01, timestampfield01, timestampfield02, intfield07, intfield06, field01, fid, pflag, created_from, intfield02, intfield04, field06, field07, field08, timezone, intfield05, intfield03, field09 FROM prg_dates ";
+    private static final String FREE_BUSY_SELECT = "SELECT intfield01, timestampfield01, timestampfield02, intfield07, intfield06, field01, fid, pflag, created_from, intfield02, intfield04, field06, field07, field08, timezone, intfield05, intfield03, field09, field02 FROM prg_dates ";
 
     private static final String RANGE_SELECT = "SELECT intfield01, timestampfield01, timestampfield02, intfield02, intfield04, field06, field07, field08, timezone, intfield07 FROM prg_dates ";
 
@@ -5096,6 +5096,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         }
                         final CalendarDataObject update = new CalendarDataObject();
                         update.setContext(ctx);
+                        update.setActionFolder(fid);
                         update.setObjectID(edao.getRecurrenceID());
                         if (deleted_exceptions != null) {
                             final List<Date> asList = Arrays.asList(deleted_exceptions);

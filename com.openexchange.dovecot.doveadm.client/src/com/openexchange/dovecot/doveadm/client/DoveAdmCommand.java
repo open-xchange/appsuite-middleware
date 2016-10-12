@@ -67,6 +67,6 @@ public interface DoveAdmCommand extends DoveAdmEntity {
      *
      * @return The parameters
      */
-    Map<String, String> getParameters();
+    Map<String, Object> getParameters();
 
 }

@@ -88,6 +88,8 @@ import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.StrictHostnameVerifier;
 import org.apache.http.cookie.ClientCookie;
 import org.apache.http.cookie.CookieSpec;
 import org.apache.http.cookie.CookieSpecFactory;
@@ -107,11 +109,12 @@ import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.TextUtils;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.xing.XingAPI;
 import com.openexchange.xing.exception.XingException;
-import com.openexchange.xing.httpclient.EasySSLSocketFactory;
 import com.openexchange.xing.util.Services;
 
 /**
@@ -287,6 +290,7 @@ public abstract class AbstractSession implements Session {
      * battery power on mobile devices. It's unlikely that you'll want to
      * change this behavior.
      */
+    @SuppressWarnings("deprecation")
     @Override
     public HttpClient getHttpClient() {
         HttpClient client = this.client.get();
@@ -309,7 +313,9 @@ public abstract class AbstractSession implements Session {
                     // Set up scheme registry.
                     final SchemeRegistry schemeRegistry = new SchemeRegistry();
                     schemeRegistry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-                    schemeRegistry.register(new Scheme("https", EasySSLSocketFactory.getInstance(), 443));
+                    javax.net.ssl.SSLSocketFactory f = SSLSocketFactoryProvider.getDefault();
+                    SSLConfigurationService sslConfig = Services.getService(SSLConfigurationService.class);
+                    schemeRegistry.register(new Scheme("https", new SSLSocketFactory(f, sslConfig.getSupportedProtocols(), sslConfig.getSupportedCipherSuites(), new StrictHostnameVerifier()), 443));
 
                     final XingClientConnManager cm = new XingClientConnManager(connParams, schemeRegistry);
 

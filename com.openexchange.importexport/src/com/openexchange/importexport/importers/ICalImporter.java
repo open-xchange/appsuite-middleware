@@ -675,8 +675,7 @@ public class ICalImporter extends AbstractImporter {
             }
         }
         if (false == containsInternalParticpiant) {
-            UserParticipant userParticipant = new UserParticipant(
-                FolderObject.SHARED == targetFolder.getType() ? targetFolder.getCreatedBy() : session.getUserId());
+            UserParticipant userParticipant = new UserParticipant(targetFolder.getType() == FolderObject.PUBLIC ? session.getUserId() : targetFolder.getCreatedBy());
             userParticipant.setConfirm(Appointment.ACCEPT);
             Participant[] newParticipants = null == currentParticipants ?
                 new Participant[1] : Arrays.copyOf(currentParticipants, 1 + currentParticipants.length);

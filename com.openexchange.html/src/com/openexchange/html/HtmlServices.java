@@ -50,10 +50,13 @@
 package com.openexchange.html;
 
 import static com.openexchange.java.Strings.isEmpty;
+import static com.openexchange.java.Strings.isWhitespace;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.codec.net.URLCodec;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
@@ -68,12 +71,20 @@ import net.htmlparser.jericho.HTMLElementName;
  */
 public final class HtmlServices {
 
+    public static void main(String[] args) {
+        boolean nonJavaScriptURL = isNonJavaScriptURL("java&#09;script:alert(document.domain)", null);
+
+        System.out.println(nonJavaScriptURL);
+    }
+
     /**
      * Initializes a new {@link HtmlServices}.
      */
     private HtmlServices() {
         super();
     }
+
+    private static final Pattern UNICODE_CHAR = Pattern.compile("&(?:amp;)?#0*([1-9][0-9]*);?", Pattern.CASE_INSENSITIVE);
 
     /**
      * Does URL decoding until fully decoded
@@ -105,6 +116,18 @@ public final class HtmlServices {
             }
         }
 
+        if (s.indexOf('#') >= 0) {
+            for (Matcher m; (m = UNICODE_CHAR.matcher(s)).find();) {
+                StringBuffer sb = new StringBuffer(s.length());
+                do {
+                    char c = (char) Integer.parseInt(m.group(1));
+                    m.appendReplacement(sb, String.valueOf(c));
+                } while (m.find());
+                m.appendTail(sb);
+                s = sb.toString();
+            }
+        }
+
         // Return result
         return s;
     }
@@ -131,7 +154,7 @@ public final class HtmlServices {
      */
     public static Result isAcceptableDataUri(String value, Callable<Boolean> condition) {
         String val = value.trim();
-        if (false == val.startsWith(DATA_TOKEN)) {
+        if (false == asciiLowerCase(val).startsWith(DATA_TOKEN)) {
             // No data URI at all
             return Result.NEUTRAL;
         }
@@ -165,7 +188,7 @@ public final class HtmlServices {
         if (endPos < 0) {
             endPos = commaPos;
         }
-        String mimeType = val.substring(dataPos, endPos).trim();
+        String mimeType = asciiLowerCase(val.substring(dataPos, endPos).trim());
         return (mimeType.startsWith("image/") && mimeType.indexOf("svg") < 0) ? Result.ALLOW : Result.DENY;
     }
 
@@ -200,6 +223,7 @@ public final class HtmlServices {
         }
 
         // Check basic unsafe tokens
+        lc = dropWhitespacesFrom(lc);
         for (String unsafeToken : UNSAFE_TOKENS) {
             if (lc.indexOf(unsafeToken) >= 0) {
                 return false;
@@ -216,6 +240,32 @@ public final class HtmlServices {
         }
 
         return true;
+    }
+
+    private static String dropWhitespacesFrom(String str) {
+        if (null == str) {
+            return null;
+        }
+
+        int length = str.length();
+        StringBuilder sb = null;
+        for (int k = length, i = 0; k-- > 0; i++) {
+            char c = str.charAt(i);
+            if (isWhitespace(c)) {
+                if (null == sb) {
+                    sb = new StringBuilder(length);
+                    if (i > 0) {
+                        sb.append(str.substring(0, i));
+                    }
+                }
+            } else {
+                if (null != sb) {
+                    sb.append(c);
+                }
+            }
+        }
+
+        return null == sb ? str : sb.toString();
     }
 
     /**

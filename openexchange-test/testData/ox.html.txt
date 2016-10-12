@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <p><a href="java&#9;script:alert(document.domain)">test</a></p><p></p><div class="io-ox-signature"></div>
+</body>
+</html>

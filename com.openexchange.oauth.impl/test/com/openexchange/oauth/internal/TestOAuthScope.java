@@ -49,7 +49,7 @@
 
 package com.openexchange.oauth.internal;
 
-import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.oauth.scope.OAuthScope;
 
 /**
@@ -59,17 +59,17 @@ import com.openexchange.oauth.scope.OAuthScope;
  */
 public enum TestOAuthScope implements OAuthScope {
 
-    calendar("some scopes the OAuth provider specifies for CALENDAR", Module.calendar_ro),
-    drive("some scopes the OAuth provider specifies for DRIVE", Module.drive),
+    calendar("some scopes the OAuth provider specifies for CALENDAR", OXScope.calendar_ro),
+    drive("some scopes the OAuth provider specifies for DRIVE", OXScope.drive),
     ;
 
-    private String mapping;
-    private Module module;
+    private final String mapping;
+    private final OXScope module;
 
     /**
      * Initialises a new {@link TestOAuthScope}.
      */
-    private TestOAuthScope(String mapping, Module module) {
+    private TestOAuthScope(String mapping, OXScope module) {
         this.mapping = mapping;
         this.module = module;
 
@@ -77,21 +77,21 @@ public enum TestOAuthScope implements OAuthScope {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
      */
     @Override
-    public String getMapping() {
+    public String getProviderScopes() {
         return mapping;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScope#getModule()
      */
     @Override
-    public Module getModule() {
+    public OXScope getOXScope() {
         return module;
     }
 

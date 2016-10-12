@@ -2,7 +2,7 @@
   get:
     operationId: unread
     tags: 
-      - mail_categories
+      - Mail_categories
     summary: Retrieves the unread counts of active mail categories
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -15,7 +15,7 @@
       200:
         description: |
           'A JSON object with a field for each active category containing the number of unread messages. In case of errors the responsible fields in the
-          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).'
+          response are filled (see [Error handling](#error-handling)).'
         schema:
           $ref: "#/definitions/Mail_CategoriesUnreadResponse"
           

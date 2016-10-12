@@ -59,6 +59,9 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.json.ActiveProviderDetector;
+import com.openexchange.mailaccount.json.MailAccountOAuthConstants;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -67,6 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
+@OAuthAction(MailAccountOAuthConstants.OAUTH_READ_SCOPE)
 public final class GetTreeAction extends AbstractMailAccountTreeAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetTreeAction.class);
@@ -76,13 +80,13 @@ public final class GetTreeAction extends AbstractMailAccountTreeAction {
     /**
      * Initializes a new {@link GetTreeAction}.
      */
-    public GetTreeAction() {
-        super();
+    public GetTreeAction(ActiveProviderDetector activeProviderDetector) {
+        super(activeProviderDetector);
     }
 
     @Override
     protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jVoid) throws OXException, JSONException {
-        final int id = parseIntParameter(AJAXServlet.PARAMETER_ID, requestData);
+        final int id = requireIntParameter(AJAXServlet.PARAMETER_ID, requestData);
 
         final MailAccountStorageService storageService =
             ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);

@@ -58,6 +58,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -66,6 +67,8 @@ import org.slf4j.Logger;
 import com.google.android.gcm.Constants;
 import com.google.android.gcm.Message;
 import com.google.android.gcm.Message.Priority;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.android.gcm.MulticastResult;
 import com.google.android.gcm.Notification;
 import com.google.android.gcm.Result;
@@ -78,6 +81,7 @@ import com.openexchange.java.SortableConcurrentList;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.util.RankedService;
 import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.EnabledKey;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMatch;
@@ -188,8 +192,27 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
         return ID;
     }
 
+    private static final Cache<EnabledKey, Boolean> CACHE_AVAILABILITY = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
+
+    /**
+     * Invalidates the <i>enabled cache</i>.
+     */
+    public static void invalidateEnabledCache() {
+        CACHE_AVAILABILITY.invalidateAll();
+    }
+
     @Override
     public boolean isEnabled(String topic, String client, int userId, int contextId) throws OXException {
+        EnabledKey key = new EnabledKey(topic, client, userId, contextId);
+        Boolean result = CACHE_AVAILABILITY.getIfPresent(key);
+        if (null == result) {
+            result = Boolean.valueOf(doCheckEnabled(topic, client, userId, contextId));
+            CACHE_AVAILABILITY.put(key, result);
+        }
+        return result.booleanValue();
+    }
+
+    private boolean doCheckEnabled(String topic, String client, int userId, int contextId) throws OXException {
         ConfigView view = configViewFactory.getView(userId, contextId);
 
         String basePropertyName = "com.openexchange.pns.transport.gcm.enabled";

@@ -76,7 +76,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
@@ -135,7 +135,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
 
         final ServerSession session = subscription.getSession();
         final GoogleCredential googleCreds = GoogleApiClients.getCredentials(session);
-        final Calendar googleCalendarService = new Calendar.Builder(googleCreds.getTransport(), googleCreds.getJsonFactory(), googleCreds.getRequestInitializer()).setApplicationName(GoogleApiClients.getGoogleProductName()).build();
+        final Calendar googleCalendarService = new Calendar.Builder(googleCreds.getTransport(), googleCreds.getJsonFactory(), googleCreds.getRequestInitializer()).setApplicationName(GoogleApiClients.getGoogleProductName(session)).build();
 
         // Check if we have permissions
         try {
@@ -147,7 +147,7 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                     GoogleJsonError details = ex.getDetails();
                     String message = details.getMessage();
                     if (message.toLowerCase().equals("insufficient permission")) {
-                        throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), Module.calendar_ro.getDisplayName());
+                        throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), OXScope.calendar_ro.getDisplayName());
                     }
                     throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(message);
                 }

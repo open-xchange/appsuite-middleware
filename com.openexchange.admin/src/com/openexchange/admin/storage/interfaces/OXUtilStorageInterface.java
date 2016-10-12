@@ -53,6 +53,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -459,4 +460,25 @@ public abstract class OXUtilStorageInterface {
      * @throws StorageException
      */
     public abstract int getWritePoolIdForCluster(final int clusterId) throws StorageException;
+
+
+    /**
+     * Creates a new schema in the given database if possible. In case the optDBId is null the best suitable DB is selected automatically.
+     *
+     * @param optDBId Optional database identifier. If missing the best suitable database is selected automatically.
+     * @return The schema name.
+     * @throws StorageException
+     */
+    public abstract Database createSchema(Integer optDBId) throws StorageException;
+
+    /**
+     * Determine the next database to use depending on database weight factor. Each database should be equal full according to their weight.
+     * Additionally check each master for availability.
+     *
+     * @param con
+     * @return the database
+     * @throws SQLException
+     * @throws StorageException
+     */
+    public abstract Database getNextDBHandleByWeight(Connection con) throws SQLException, StorageException;
 }

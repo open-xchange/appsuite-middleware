@@ -52,9 +52,6 @@ package com.openexchange.mail.json.actions;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
@@ -70,12 +67,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
-@Action(method = RequestMethod.PUT, name = "archive_folder", description = "Moves mails to archive folder from given folder using certain criteria", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "days", description = "The days threshold to use."),
-    @Parameter(name = "folder", description = "Object ID of the source folder.")
-},
-responseDescription = "A JSON true response.")
 public final class ArchiveFolderAction extends AbstractArchiveMailAction {
 
     /**

@@ -71,7 +71,7 @@ import com.openexchange.imap.services.Services;
 import com.openexchange.java.BoundaryExceededException;
 import com.openexchange.java.BoundedStringBuilder;
 import com.openexchange.java.Strings;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 
 /**
  * {@link IMAPCapabilityAndGreetingCache} - A cache for CAPABILITY and greeting from IMAP servers.
@@ -279,7 +279,7 @@ public final class IMAPCapabilityAndGreetingCache {
             try {
                 // Establish socket connection
                 {
-                    s = isSecure ? TrustAllSSLSocketFactory.getDefault().createSocket() : new Socket();
+                    s = isSecure ? SSLSocketFactoryProvider.getDefault().createSocket() : new Socket();
 
                     // Set connect timeout
                     int connectionTimeout = imapProperties.getImapConnectionTimeout();
@@ -446,7 +446,11 @@ public final class IMAPCapabilityAndGreetingCache {
         } else {
             port = 143;
         }
-        return new InetSocketAddress(serverUrl.substring(0, pos).trim(), port);
+        if (pos == -1) {
+            return new InetSocketAddress(serverUrl.trim(), port);
+        } else {
+            return new InetSocketAddress(serverUrl.substring(0, pos).trim(), port);
+        }
     }
 
     /**

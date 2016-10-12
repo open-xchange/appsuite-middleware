@@ -49,25 +49,22 @@
 
 package com.openexchange.file.storage.boxcom.access;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import org.scribe.model.Token;
 import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxAPIException;
-import com.box.sdk.BoxAPIRequest;
-import com.box.sdk.BoxAPIResponse;
 import com.box.sdk.BoxUser;
+import com.openexchange.cluster.lock.ClusterLockService;
+import com.openexchange.cluster.lock.ClusterTask;
+import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.boxcom.BoxClosure;
 import com.openexchange.file.storage.boxcom.BoxConstants;
 import com.openexchange.file.storage.boxcom.Services;
-import com.openexchange.oauth.DefaultOAuthToken;
+import com.openexchange.oauth.AbstractReauthorizeClusterTask;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.oauth.access.AbstractOAuthAccess;
@@ -102,28 +99,6 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
             verifyAccount(boxOAuthAccount);
             setOAuthAccount(boxOAuthAccount);
             createOAuthClient(boxOAuthAccount);
-        }
-    }
-
-    @Override
-    public void revoke() throws OXException {
-        synchronized (this) {
-            // No Java API call
-            // More information here: https://docs.box.com/reference#revoke
-            try {
-                URL url = new URL("https://api.box.com/oauth2/revoke?client_id=" + getOAuthAccount().getMetaData().getId() + "&client_secret" + getOAuthAccount().getMetaData().getAPISecret(getSession()) + "&token=" + getOAuthAccount().getToken());
-                BoxAPIRequest request = new BoxAPIRequest((BoxAPIConnection) getOAuthClient().client, url, "GET");
-                BoxAPIResponse apiResponse = request.send();
-
-                // The Box SDK already checks for status code 200, so no need to check again
-                apiResponse.getResponseCode();
-
-                return;
-            } catch (BoxAPIException e) {
-                throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
-            } catch (IOException e) {
-                throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            }
         }
     }
 
@@ -166,16 +141,9 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
 
         // Box SDK performs an automatic access token refresh, so we need to see if the tokens were renewed
         if (!oAuthAccount.getToken().equals(apiConnection.getAccessToken()) || !oAuthAccount.getSecret().equals(apiConnection.getRefreshToken())) {
-            OAuthService oauthService = Services.getService(OAuthService.class);
-
-            Map<String, Object> arguments = new HashMap<>();
-            arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(apiConnection.getAccessToken(), apiConnection.getRefreshToken()));
-            arguments.put(OAuthConstants.ARGUMENT_SESSION, getSession());
-
-            int userId = getSession().getUserId();
-            int contextId = getSession().getContextId();
-            oauthService.updateAccount(oAuthAccount.getId(), arguments, userId, contextId, oAuthAccount.getEnabledScopes());
-            setOAuthAccount(oauthService.getAccount(oAuthAccount.getId(), getSession(), userId, contextId));
+            ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
+            OAuthAccount account = clusterLockService.runClusterTask(new BoxReauthorizeClusterTask(getSession(), oAuthAccount), new ExponentialBackOffRetryPolicy());
+            setOAuthAccount(account);
         }
         return this;
     }
@@ -187,5 +155,28 @@ public class BoxOAuthAccess extends AbstractOAuthAccess {
         BoxAPIConnection boxAPI = new BoxAPIConnection(boxMetaData.getAPIKey(getSession()), boxMetaData.getAPISecret(getSession()), account.getToken(), account.getSecret());
         OAuthClient<BoxAPIConnection> oAuthClient = new OAuthClient<>(boxAPI, account.getToken());
         setOAuthClient(oAuthClient);
+    }
+
+    private class BoxReauthorizeClusterTask extends AbstractReauthorizeClusterTask implements ClusterTask<OAuthAccount> {
+
+        /**
+         * Initialises a new {@link BoxOAuthAccess.BoxReauthorizeClusterTask}.
+         */
+        public BoxReauthorizeClusterTask(Session session, OAuthAccount cachedAccount) {
+            super(Services.getServices(), session, cachedAccount);
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see com.openexchange.cluster.lock.ClusterTask#perform()
+         */
+        @Override
+        public Token reauthorize() throws OXException {
+            // Box SDK performs an automatic access token refresh, therefore the access token and refresh token
+            // should already be present in the BoxAPIConnection instance.
+            BoxAPIConnection apiConnection = (BoxAPIConnection) getClient().client;
+            return new Token(apiConnection.getAccessToken(), apiConnection.getRefreshToken());
+        }
     }
 }

@@ -49,10 +49,7 @@
 
 package com.openexchange.importexport.exporters;
 
-import static com.openexchange.importexport.formats.csv.CSVLibrary.CELL_DELIMITER;
-import static com.openexchange.importexport.formats.csv.CSVLibrary.ROW_DELIMITER;
-import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderId;
-import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObject;
+import static com.openexchange.importexport.formats.csv.CSVLibrary.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -72,6 +69,7 @@ import com.openexchange.groupware.contact.helpers.ContactStringGetter;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.importexport.actions.exporter.ContactExportAction;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
@@ -89,8 +87,6 @@ import com.openexchange.tools.session.ServerSession;
 public class CSVContactExporter implements Exporter {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVContactExporter.class);
-
-    public static final String PARAMETER_EXPORT_DLISTS = "export_dlists";
 
     /**
      * All possible contact fields as used by the CSV contact exporter
@@ -180,7 +176,7 @@ public class CSVContactExporter implements Exporter {
         if (optionalParams == null) {
             exportDlists = true;
         } else {
-            exportDlists = optionalParams.containsKey(PARAMETER_EXPORT_DLISTS) ? Boolean.valueOf(optionalParams.get(PARAMETER_EXPORT_DLISTS).toString()).booleanValue() : true;
+            exportDlists = optionalParams.containsKey(ContactExportAction.PARAMETER_EXPORT_DLISTS) ? Boolean.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS).toString()).booleanValue() : true;
         }
 
         SearchIterator<Contact> conIter;

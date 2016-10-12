@@ -49,7 +49,7 @@
 
 package com.openexchange.oauth.vkontakte;
 
-import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.oauth.scope.OAuthScope;
 
 /**
@@ -58,39 +58,39 @@ import com.openexchange.oauth.scope.OAuthScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum VkontakteOAuthScope implements OAuthScope {
-    contacts_ro("friends wall offline", Module.contacts_ro);
+    contacts_ro("friends wall offline", OXScope.contacts_ro);
 
-    private String mapping;
-    private Module module;
+    private final String mapping;
+    private final OXScope module;
 
     /**
      * Initialises a new {@link VkontakteOAuthScope}.
-     * 
+     *
      * @param mapping The OAuth mapping
-     * @param module The {@link Module}
+     * @param module The {@link OXScope}
      */
-    private VkontakteOAuthScope(String mapping, Module module) {
+    private VkontakteOAuthScope(String mapping, OXScope module) {
         this.mapping = mapping;
         this.module = module;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
      */
     @Override
-    public String getMapping() {
+    public String getProviderScopes() {
         return mapping;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScope#getModule()
      */
     @Override
-    public Module getModule() {
+    public OXScope getOXScope() {
         return module;
     }
 }

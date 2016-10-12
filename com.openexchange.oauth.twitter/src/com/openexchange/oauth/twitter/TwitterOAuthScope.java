@@ -49,7 +49,7 @@
 
 package com.openexchange.oauth.twitter;
 
-import com.openexchange.oauth.scope.Module;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.oauth.scope.OAuthScope;
 
 /**
@@ -58,39 +58,39 @@ import com.openexchange.oauth.scope.OAuthScope;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum TwitterOAuthScope implements OAuthScope {
-    feeds("", Module.generic);
+    feeds("", OXScope.generic);
 
-    private String mapping;
-    private Module module;
+    private final String mapping;
+    private final OXScope module;
 
     /**
      * Initialises a new {@link TwitterOAuthScope}.
-     * 
+     *
      * @param mapping The OAuth mapping
-     * @param module The {@link Module}
+     * @param module The {@link OXScope}
      */
-    private TwitterOAuthScope(String mapping, Module module) {
+    private TwitterOAuthScope(String mapping, OXScope module) {
         this.mapping = mapping;
         this.module = module;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScope#getMapping()
      */
     @Override
-    public String getMapping() {
+    public String getProviderScopes() {
         return mapping;
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.oauth.scope.OAuthScope#getModule()
      */
     @Override
-    public Module getModule() {
+    public OXScope getOXScope() {
         return module;
     }
 }

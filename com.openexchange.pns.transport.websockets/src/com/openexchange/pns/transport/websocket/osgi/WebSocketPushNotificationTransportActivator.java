@@ -57,6 +57,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
@@ -99,19 +100,13 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
 
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
-        try {
-            reinit(configService);
-        } catch (Exception e) {
-            LOG.error("Failed to re-initialize Web Socket transport", e);
-        }
+        // Nothing to do as "com.openexchange.pns.transport.websocket.enabled" is read on-the-fly through config-cascade
     }
 
     @Override
     public Interests getInterests() {
         return Reloadables.interestsForProperties(
-            "com.openexchange.pns.transport.websocket.enabled",
-            "com.openexchange.pns.transport.websocket.delayDuration",
-            "com.openexchange.pns.transport.websocket.timerFrequency"
+            "com.openexchange.pns.transport.websocket.enabled"
             );
     }
 
@@ -131,7 +126,20 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
         props.put(Constants.SERVICE_RANKING, Integer.valueOf(100));
         registerService(PushClientChecker.class, new WebSocketClientPushClientChecker(resolverTracker), props);
 
-        reinit(getService(ConfigurationService.class));
+        reinit();
+
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                WebSocketPushNotificationTransport.invalidateEnabledCache();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return null;
+            }
+        });
     }
 
     @Override
@@ -155,7 +163,7 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
         super.stopBundle();
     }
 
-    private synchronized void reinit(ConfigurationService configService) {
+    private synchronized void reinit() {
         List<ServiceRegistration<?>> serviceRegistrations = this.serviceRegistrations;
         if (null != serviceRegistrations) {
             for (ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
@@ -170,12 +178,6 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
             webSocketTransport.stop();
         }
 
-        if (!configService.getBoolProperty("com.openexchange.pns.transport.websocket.enabled", true)) {
-            LOG.info("Web Socket push notification transport is disabled per configuration");
-            return;
-        }
-
-        WebSocketPushNotificationTransport.cleanseInits();
         webSocketTransport = new WebSocketPushNotificationTransport(resolverTracker, this);
         this.webSocketTransport = webSocketTransport;
 

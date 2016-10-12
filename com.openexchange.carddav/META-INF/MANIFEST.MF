@@ -6,7 +6,7 @@ Bundle-Version: 7.8.3
 Bundle-Activator: com.openexchange.carddav.osgi.CarddavActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.google.common.io;version="19.0.0",
+Import-Package: com.google.common.io,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.ajax.requesthandler.oauth,
@@ -77,7 +77,7 @@ Import-Package: com.google.common.io;version="19.0.0",
  javax.servlet.http,
  org.apache.commons.io,
  org.apache.commons.logging,
- org.apache.http.client.utils;version="4.5.2",
+ org.apache.http.client.utils,
  org.jdom2,
  org.jdom2.output,
  org.osgi.framework,

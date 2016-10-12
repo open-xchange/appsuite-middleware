@@ -58,7 +58,9 @@ import org.slf4j.Logger;
 import com.openexchange.caching.CacheService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.filestore.DatabaseAccessService;
 import com.openexchange.filestore.FileStorageService;
+import com.openexchange.filestore.impl.DatabaseAccessServiceImpl;
 import com.openexchange.filestore.impl.groupware.AddFilestoreColumnsToUserTable;
 import com.openexchange.filestore.impl.groupware.AddFilestoreOwnerColumnToUserTable;
 import com.openexchange.filestore.impl.groupware.AddInitialUserFilestoreUsage;
@@ -98,7 +100,9 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
 
         // Service trackers
         {
-            ServiceTracker<FileStorageService,FileStorageService> tracker = new ServiceTracker<FileStorageService,FileStorageService>(context, FileStorageService.class, new DBQuotaFileStorageRegisterer(context));
+            QuotaFileStorageListenerTracker listenerTracker = new QuotaFileStorageListenerTracker(context);
+            rememberTracker(listenerTracker);
+            ServiceTracker<FileStorageService,FileStorageService> tracker = new ServiceTracker<FileStorageService,FileStorageService>(context, FileStorageService.class, new DBQuotaFileStorageRegisterer(listenerTracker, context));
             rememberTracker(tracker);
             trackService(ContextService.class);
             trackService(UserService.class);
@@ -162,7 +166,12 @@ public class DBQuotaFileStorageActivator extends HousekeepingActivator {
                 track(CacheService.class, customizer);
             }
 
+            DatabaseAccessServiceImpl registry = new DatabaseAccessServiceImpl(context);
+            rememberTracker(tracker);
+
             openTrackers();
+
+            registerService(DatabaseAccessService.class, registry);
         }
 
         // Update tasks

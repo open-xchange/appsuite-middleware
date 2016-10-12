@@ -49,9 +49,7 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -229,7 +227,7 @@ public class Bug44131Test extends CalDAVTest {
         exception.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
         exception.setLastModified(clientLastModified);
         manager2.update(exception);
-        clientLastModified = getManager().getLastModification();
+        clientLastModified = manager2.getLastModification();
         /*
          * try to access the deleted exception again on client as user a
          */

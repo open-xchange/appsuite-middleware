@@ -2,7 +2,7 @@
   get:
     operationId: getMailAttachment
     tags:
-      - mail
+      - Mail
     summary: Gets a mail attachment.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -52,3 +52,59 @@
         schema:
           type: string
           format: binary
+  put:
+    operationId: putMailAttachment
+    tags:
+      - mail
+    summary: Stores a mail attachment to the drive.
+    consumes:
+      - application/json
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - $ref: "#/parameters/gblQueryParamMailFolder"
+      - in: query
+        name: id
+        type: string
+        description:  Object ID of the mail which contains the attachment.
+        required: true
+      - in: query
+        name: attachment
+        type: string
+        description:  ID of the requested attachment.
+        required: true
+      - in: query
+        name: dest_folder
+        type: string
+        description:  Object ID of the folder in which the attachment should be stored.
+        required: true
+      - in: body
+        name: body
+        description: |
+          A possible empty JSON object containing the optional fields `description` and `filename`. The filename and description values will be used for the newly created file in the drive module.
+        required: true
+        schema:
+          $ref: "#/definitions/PutAttachmentBody"
+    responses:
+      200:
+        description: A JSON object containting the data of the store operation. E.g. contains the id of the newly created drive file.
+        schema:
+          type: object
+          properties:
+            data: 
+              type: object
+              properties:
+                mailFolder:
+                  type: string
+                  description: Object ID of the folder who contains the mails.
+                mailUID:
+                  type: string
+                  description: Object ID of the mail which contains the attachment.
+                id:
+                  type: string
+                  description: Object ID of the newly created drive file.
+                folder_id: 
+                  type: string
+                  description: Object ID of the folder in which the attachment is stored to.
+                filename:
+                  type: string
+                  description: Name of the newly created drive file.

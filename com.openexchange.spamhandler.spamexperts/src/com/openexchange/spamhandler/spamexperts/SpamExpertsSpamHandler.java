@@ -61,12 +61,12 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.spamexperts.exceptions.SpamExpertsExceptionCode;
 import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
 import com.openexchange.spamhandler.spamexperts.osgi.SpamExpertsServiceRegistry;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
@@ -101,7 +101,7 @@ public class SpamExpertsSpamHandler extends SpamHandler {
     }
 
     private void copyToSpamexpertsFolder(String folder, MailMessage[] messages) throws OXException {
-        final String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+        final String socketFactoryClass = SSLSocketFactoryProvider.getDefault().getClass().getName();
         final URLName imapUrl = SpamExpertsConfig.getInstance().getImapUrl();
         final Properties props = new Properties();
         if( "imaps".equals(imapUrl.getProtocol())) {

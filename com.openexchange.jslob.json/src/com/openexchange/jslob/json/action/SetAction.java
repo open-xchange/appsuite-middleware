@@ -56,9 +56,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlobService;
@@ -72,17 +69,6 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-@Action(
-    name = "set"
-    , description = "Sets the JSlob associated with the current user and context. Performs a delete if the passed JSlob is null."
-    , method = RequestMethod.PUT
-    , parameters = {
-        @Parameter(name = "serviceId", description = "Optional identifier for the JSlob. Default is <tt>com.openexchange.jslob.config</tt>", optional=true)
-        , @Parameter(name = "id", description = "The path of the JSlob.", optional=false)
-    }
-    , requestBody = "The JSON object to set with the current user and context or null to delete the JSlob."
-)
-
 public final class SetAction extends JSlobAction {
 
     private final List<Method> restMethods;

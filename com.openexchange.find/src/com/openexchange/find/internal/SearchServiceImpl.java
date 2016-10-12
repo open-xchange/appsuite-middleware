@@ -49,8 +49,8 @@
 
 package com.openexchange.find.internal;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.find.AbstractFindRequest;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.FindExceptionCode;
@@ -58,6 +58,7 @@ import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.SearchService;
+import com.openexchange.find.facet.FacetInfo;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.tools.session.ServerSession;
 
@@ -83,7 +84,7 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public AutocompleteResult autocomplete(AutocompleteRequest autocompleteRequest, Module module, ServerSession session) throws OXException {
         try {
-            return requireDriver(session, module, autocompleteRequest).autocomplete(autocompleteRequest, session);
+            return requireDriver(session, module, new LookUpInfo(autocompleteRequest, null)).autocomplete(autocompleteRequest, session);
         } catch (final RuntimeException e) {
             throw FindExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -92,19 +93,19 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public SearchResult search(SearchRequest searchRequest, Module module, ServerSession session) throws OXException {
         try {
-            return requireDriver(session, module, searchRequest).search(searchRequest, session);
+            return requireDriver(session, module, new LookUpInfo(searchRequest, null)).search(searchRequest, session);
         } catch (final RuntimeException e) {
             throw FindExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
-    public ModuleSearchDriver getDriver(Module module, ServerSession session) throws OXException {
-        return requireDriver(session, module, null);
+    public ModuleSearchDriver getDriver(List<FacetInfo> facetInfos, Module module, ServerSession session) throws OXException {
+        return requireDriver(session, module, new LookUpInfo(null, facetInfos));
     }
 
-    private ModuleSearchDriver requireDriver(ServerSession session, Module module, AbstractFindRequest findRequest) throws OXException {
-        ModuleSearchDriver determined = driverManager.determineDriver(session, module, findRequest, true);
+    private ModuleSearchDriver requireDriver(ServerSession session, Module module, LookUpInfo lookUpInfo) throws OXException {
+        ModuleSearchDriver determined = driverManager.determineDriver(session, module, lookUpInfo, true);
         if (determined == null) {
             throw FindExceptionCode.MISSING_DRIVER.create(module.getIdentifier(), session.getUserId(), session.getContextId());
         }

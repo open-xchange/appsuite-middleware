@@ -76,6 +76,7 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.importexport.actions.exporter.ContactExportAction;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
@@ -249,6 +250,7 @@ public class VCardExporter implements Exporter {
             throw ImportExportExceptionCodes.NUMBER_FAILED.create(e, folder);
         }
 
+        boolean exportDistributionLists = null != optionalParams ? Boolean.parseBoolean(String.valueOf(optionalParams.get(ContactExportAction.PARAMETER_EXPORT_DLISTS))) : false;
         try {
             AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
             if (null != requestData) {
@@ -258,7 +260,7 @@ public class VCardExporter implements Exporter {
                     requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
                     requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + Format.VCARD.getFullName() + "." + Format.VCARD.getExtension());
                     requestData.removeCachingHeader();
-                    export(session, folder, oId, fieldsToBeExported, new OutputStreamWriter(out, DEFAULT_CHARSET));
+                    export(session, folder, oId, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(out, DEFAULT_CHARSET));
                     return null;
                 }
             }
@@ -267,7 +269,7 @@ public class VCardExporter implements Exporter {
             ThresholdFileHolder sink = new ThresholdFileHolder();
             boolean error = true;
             try {
-                export(session, folder, oId, fieldsToBeExported, new OutputStreamWriter(sink.asOutputStream(), DEFAULT_CHARSET));
+                export(session, folder, oId, exportDistributionLists, fieldsToBeExported, new OutputStreamWriter(sink.asOutputStream(), DEFAULT_CHARSET));
                 SizedInputStream sizedIn = new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.VCARD);
                 error = false;
                 return sizedIn;
@@ -283,7 +285,7 @@ public class VCardExporter implements Exporter {
 
     private static final ContactField[] FIELDS_ID = new ContactField[] { ContactField.OBJECT_ID };
 
-    private void export(final ServerSession session, final String folderId, final String objectId, int[] fieldsToBeExported, Writer writer) throws OXException {
+    private void export(final ServerSession session, final String folderId, final String objectId, boolean exportDistributionLists, int[] fieldsToBeExported, Writer writer) throws OXException {
         ContactField[] fields;
         if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
             fields = ContactMapper.getInstance().getFields(_contactFields);
@@ -315,6 +317,9 @@ public class VCardExporter implements Exporter {
                 Contact contact = searchIterator.next();
                 try {
                     Contact fullContact = contactService.getContact(session, folderId, Integer.toString(contact.getObjectID()), fields);
+                    if (false == exportDistributionLists && (fullContact.containsDistributionLists() || fullContact.getMarkAsDistribtuionlist())) {
+                        continue;
+                    }
                     exportContact(session, fullContact, vCardService, vCardStorage, writer);
                 } catch (OXException e) {
                     if (!ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
@@ -333,11 +338,6 @@ public class VCardExporter implements Exporter {
     }
 
     protected void exportContact(ServerSession session, Contact contactObj, VCardService optVCardService, VCardStorageService optVCardStorageService, Writer writer) throws OXException {
-        if (contactObj.containsDistributionLists() || contactObj.getMarkAsDistribtuionlist()) {
-            // Ignore distribution list
-            return;
-        }
-
         InputStream originalVCard = null;
         Reader vcardReader = null;
         try {

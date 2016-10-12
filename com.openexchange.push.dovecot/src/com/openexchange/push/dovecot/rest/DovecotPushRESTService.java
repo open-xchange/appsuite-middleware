@@ -248,6 +248,12 @@ public class DovecotPushRESTService {
                 messageData.put(PushNotificationField.MAIL_UNREAD.getId(), Integer.valueOf(unread));
             }
         }
+        {
+            String snippet = data.optString("snippet", null);
+            if (null != snippet) {
+                messageData.put(PushNotificationField.MAIL_TEASER.getId(), snippet);
+            }
+        }
 
         DefaultPushNotification notification = DefaultPushNotification.builder()
             .contextId(contextId)

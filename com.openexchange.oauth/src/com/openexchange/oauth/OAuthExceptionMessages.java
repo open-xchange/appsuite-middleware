@@ -104,12 +104,15 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
 
     // Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
     public static String OAUTH_PROBLEM_TOKEN_REVOKED_MSG = "Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.";
-    
+
     // Your access token for '%1$s' is invalid. You have to reauthorize your account.
-    public static String OAUTH_TOKEN_INVALID = "Your access token for '%1$s' is invalid. You have to reauthorize your account. URL: '%2$s'";
-    
-    // You need to explicitely authorise %1$s to subscribe to %2$s
-    public static final String NO_SCOPE_PERMISSION = "You need to explicitely authorise %1$s to subscribe to %2$s";
+    public static String OAUTH_TOKEN_INVALID = "Your access token for '%1$s' is invalid. You have to reauthorize your account.";
+
+    // You need to explicitly authorise %1$s to subscribe to %2$s
+    public static final String NO_SCOPE_PERMISSION = "You need to explicitly authorise %1$s to subscribe to %2$s";
+
+    // Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
+    public static final String NO_SUCH_SCOPE_AVAILABLE = "The scope %1$s is not supported by the provider";
 
 
     /**

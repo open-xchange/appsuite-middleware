@@ -88,6 +88,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.mail.AbstractMailDriveResourceAccess;
 import com.openexchange.file.storage.mail.FullName;
@@ -106,7 +107,6 @@ import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
 import com.openexchange.find.basic.common.Comparison;
-import com.openexchange.find.basic.drive.Constants;
 import com.openexchange.find.basic.drive.FileSize;
 import com.openexchange.find.basic.drive.FileType;
 import com.openexchange.find.basic.drive.Utils;
@@ -119,6 +119,7 @@ import com.openexchange.find.drive.FileDocument;
 import com.openexchange.find.facet.ActiveFacet;
 import com.openexchange.find.facet.DefaultFacet;
 import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.FacetInfo;
 import com.openexchange.find.facet.FacetType;
 import com.openexchange.find.facet.FacetTypeLookUp;
 import com.openexchange.find.facet.FacetValue;
@@ -284,6 +285,21 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
     }
 
     @Override
+    public boolean isValidFor(ServerSession session, List<FacetInfo> facetInfos) throws OXException {
+        if (null == facetInfos) {
+            return isValidFor(session);
+        }
+
+        for (FacetInfo facetInfo : facetInfos) {
+            if ("account".equals(facetInfo.getType())) {
+                return isMailDriveAccount(facetInfo.getValue());
+            }
+        }
+
+        return false;
+    }
+
+    @Override
     public SearchConfiguration getSearchConfiguration(ServerSession session) throws OXException {
         return delegate().getSearchConfiguration(session);
     }
@@ -372,7 +388,6 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
 
         // Get search term
         SearchTerm searchTerm = prepareSearchTerm(searchRequest);
-
         // Start/end range
         int start = searchRequest.getStart();
         int end = searchRequest.getStart() + searchRequest.getSize();
@@ -398,7 +413,6 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
             IMAPStore imapStore = messageStorage.getImapStore();
 
             int userId = session.getUserId();
-            String rootFolderId = MailFolder.DEFAULT_FOLDER_ID;
 
             files = new LinkedList<File>();
             if (fullNames.size() > 1) {
@@ -425,18 +439,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                             // Fetch messages
                             imapFolder.fetch(messages, FETCH_PROFILE_VIRTUAL);
 
-                            int i = 0;
-                            for (int k = messages.length; k-- > 0;) {
-                                IMAPMessage message = (IMAPMessage) messages[i++];
-                                long uid = message.getUID();
-                                if (uid < 0) {
-                                    uid = imapFolder.getUID(message);
-                                }
-                                MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, rootFolderId, fields);
-                                if (null != mailDriveFile) {
-                                    files.add(mailDriveFile);
-                                }
-                            }
+                            files = convertMessagesToFiles(fields, userId, fullName, imapFolder, messages);
                         }
                     } finally {
                         imapFolder.close(false);
@@ -468,18 +471,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                         // Fetch messages
                         imapFolder.fetch(messages, FETCH_PROFILE_VIRTUAL);
 
-                        int i = 0;
-                        for (int k = messages.length; k-- > 0;) {
-                            IMAPMessage message = (IMAPMessage) messages[i++];
-                            long uid = message.getUID();
-                            if (uid < 0) {
-                                uid = imapFolder.getUID(message);
-                            }
-                            MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, rootFolderId, fields);
-                            if (null != mailDriveFile) {
-                                files.add(mailDriveFile);
-                            }
-                        }
+                        files = convertMessagesToFiles(fields, userId, fullName, imapFolder, messages);
                     }
                 } finally {
                     imapFolder.close(false);
@@ -530,6 +522,26 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
             results.add(new FileDocument(file));
         }
         return new SearchResult(-1, searchRequest.getStart(), results, searchRequest.getActiveFacets());
+    }
+
+    private List<File> convertMessagesToFiles(List<Field> fields, int userId, FullName fullName, IMAPFolder imapFolder, Message[] messages) throws MessagingException, OXException {
+        List<File> files = new LinkedList<>();
+        String rootFolderId = MailFolder.DEFAULT_FOLDER_ID;
+        int i = 0;
+        for (int k = messages.length; k-- > 0;) {
+            IMAPMessage message = (IMAPMessage) messages[i++];
+            long uid = message.getUID();
+            if (uid < 0) {
+                uid = imapFolder.getUID(message);
+            }
+            MailDriveFile mailDriveFile = MailDriveFile.parse(message, fullName.getFolderId(), Long.toString(uid), userId, rootFolderId, fields);
+            if (null != mailDriveFile) {
+                mailDriveFile.setId(new FileID(com.openexchange.file.storage.mail.MailDriveConstants.ID, com.openexchange.file.storage.mail.MailDriveConstants.ACCOUNT_ID, fullName.getFolderId(), Long.toString(uid)).toUniqueID());
+                mailDriveFile.setFolderId(new FolderID(com.openexchange.file.storage.mail.MailDriveConstants.ID, com.openexchange.file.storage.mail.MailDriveConstants.ACCOUNT_ID, fullName.getFolderId()).toUniqueID());
+                files.add(mailDriveFile);
+            }
+        }
+        return files;
     }
 
     private SortTerm[] getSortTermsBy(SearchRequest searchRequest) {
@@ -872,20 +884,20 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
     private SearchTerm buildFileTypeTerm(String query) {
         String[] patterns;
         if (FileType.DOCUMENTS.getIdentifier().equals(query)) {
-            patterns = Constants.FILETYPE_PATTERNS_DOCUMENTS;
+            patterns = MailDriveFindConstants.FILETYPE_PATTERNS_DOCUMENTS;
         } else if (FileType.IMAGES.getIdentifier().equals(query)) {
-            patterns = Constants.FILETYPE_PATTERNS_IMAGES;
+            patterns = MailDriveFindConstants.FILETYPE_PATTERNS_IMAGES;
         } else if (FileType.VIDEO.getIdentifier().equals(query)) {
-            patterns = Constants.FILETYPE_PATTERNS_VIDEO;
+            patterns = MailDriveFindConstants.FILETYPE_PATTERNS_VIDEO;
         } else if (FileType.AUDIO.getIdentifier().equals(query)) {
-            patterns = Constants.FILETYPE_PATTERNS_AUDIO;
+            patterns = MailDriveFindConstants.FILETYPE_PATTERNS_AUDIO;
         } else if (FileType.OTHER.getIdentifier().equals(query)) {
             // negate all other patterns
             String[][] patternsToNegate = {
-                Constants.FILETYPE_PATTERNS_DOCUMENTS,
-                Constants.FILETYPE_PATTERNS_IMAGES,
-                Constants.FILETYPE_PATTERNS_VIDEO,
-                Constants.FILETYPE_PATTERNS_AUDIO
+                MailDriveFindConstants.FILETYPE_PATTERNS_DOCUMENTS,
+                MailDriveFindConstants.FILETYPE_PATTERNS_IMAGES,
+                MailDriveFindConstants.FILETYPE_PATTERNS_VIDEO,
+                MailDriveFindConstants.FILETYPE_PATTERNS_AUDIO
             };
             List<SearchTerm> searchTerms = new ArrayList<SearchTerm>();
             for (String[] toNegate : patternsToNegate) {

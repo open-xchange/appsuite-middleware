@@ -143,7 +143,7 @@ public class QuotaFileStorageTest extends TestCase {
     public static final class TestQuotaFileStorage extends DBQuotaFileStorage {
 
         public TestQuotaFileStorage(final Context ctx, final com.openexchange.filestore.FileStorage fs) throws OXException {
-            super(ctx.getContextId(), -1, 0L, fs, null);
+            super(ctx.getContextId(), -1, 0L, fs, null, null);
         }
 
         private long usage;
@@ -168,7 +168,7 @@ public class QuotaFileStorageTest extends TestCase {
         }
 
         @Override
-        protected boolean incUsage(final long added) {
+        protected boolean incUsage(String id, final long added) {
             boolean full = false;
             if (this.usage + added <= this.quota) {
                 this.usage += added;
@@ -179,7 +179,7 @@ public class QuotaFileStorageTest extends TestCase {
         }
 
         @Override
-        protected void decUsage(final long removed) {
+        protected void decUsage(String id, final long removed) {
             this.usage -= removed;
         }
     }

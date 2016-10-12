@@ -186,6 +186,7 @@ public class TestCommand extends Command {
 
         private static Hashtable<String, String> standardAddressMatchTypes() {
             final Hashtable<String, String> standard_match_types = standardMatchTypes();
+            standard_match_types.putAll(standardAddressPart());
             standard_match_types.put(":user", "subaddress");
             standard_match_types.put(":detail", "subaddress");
             return standard_match_types;

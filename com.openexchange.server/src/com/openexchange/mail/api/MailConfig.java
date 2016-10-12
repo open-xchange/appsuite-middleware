@@ -69,6 +69,7 @@ import com.openexchange.config.Reloadables;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailConfigException;
@@ -81,9 +82,13 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MailPasswordUtil;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.Account;
+import com.openexchange.mailaccount.Credentials;
+import com.openexchange.mailaccount.CredentialsProviderRegistry;
+import com.openexchange.mailaccount.CredentialsProviderService;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.Password;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.server.ServiceExceptionCode;
@@ -684,17 +689,20 @@ public abstract class MailConfig {
      * @throws OXException If a configuration error occurs
      */
     protected static final void fillLoginAndPassword(final MailConfig mailConfig, final Session session, final String userLoginInfo, final Account account) throws OXException {
-        final String proxyDelimiter = account.isDefaultAccount() ? MailProperties.getInstance().getAuthProxyDelimiter() : null;
         // Assign login
-        final String slogin = session.getLoginName();
-        if (proxyDelimiter != null && slogin.contains(proxyDelimiter)) {
-            mailConfig.login = saneLogin(slogin);
-        } else {
-            mailConfig.login = getMailLogin(account, userLoginInfo);
+        {
+            String proxyDelimiter = account.isDefaultAccount() ? MailProperties.getInstance().getAuthProxyDelimiter() : null;
+            final String slogin = session.getLoginName();
+            if (proxyDelimiter != null && slogin.contains(proxyDelimiter)) {
+                mailConfig.login = saneLogin(slogin);
+            } else {
+                mailConfig.login = getMailLogin(account, userLoginInfo);
+            }
         }
+
         // Assign password
         if (account.isDefaultAccount()) {
-            final PasswordSource cur = MailProperties.getInstance().getPasswordSource();
+            PasswordSource cur = MailProperties.getInstance().getPasswordSource();
             if (PasswordSource.GLOBAL.equals(cur)) {
                 final String masterPw = MailProperties.getInstance().getMasterPassword();
                 if (masterPw == null) {
@@ -709,44 +717,102 @@ public abstract class MailConfig {
                 mailConfig.password = sessionPassword;
             }
         } else {
-            int oAuthAccontId = assumeXOauth2For(account);
-            if (oAuthAccontId >= 0) {
-                // Do the XOAUTH2 dance...
-                OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
-                if (null == oauthService) {
-                    throw ServiceExceptionCode.absentService(OAuthService.class);
-                }
-
-                OAuthAccount oAuthAccount = oauthService.getAccount(oAuthAccontId, session, session.getUserId(), session.getContextId());
-                mailConfig.login = oAuthAccount.getToken();
-                mailConfig.password = oAuthAccount.getSecret();
-                mailConfig.authType = AuthType.OAUTH;
+            CredentialsProviderService credentialsProvider = CredentialsProviderRegistry.getInstance().optCredentialsProviderFor(account.isMailAccount(), account.getId(), session);
+            if (null == credentialsProvider) {
+                applyPasswordAndAuthType(mailConfig, session, account);
             } else {
-                String mailAccountPassword = account.getPassword();
-                if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
-                    // Set to empty string
-                    mailConfig.password = "";
+                if (account.isMailAccount()) {
+                    if (false == applyCredentials(mailConfig, credentialsProvider.getMailCredentials(account.getId(), session))) {
+                        applyPasswordAndAuthType(mailConfig, session, account);
+                    }
                 } else {
-                    // Mail account's password
-                    if (account.isMailAccount()) {
-                        mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), ((MailAccount) account).getMailServer());
-                    } else {
-                        mailConfig.password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), account.getTransportServer());
+                    if (false == applyCredentials(mailConfig, credentialsProvider.getTransportCredentials(account.getId(), session))) {
+                        applyPasswordAndAuthType(mailConfig, session, account);
                     }
                 }
             }
         }
+    }
+
+    private static boolean applyCredentials(MailConfig mailConfig, Credentials credentials) {
+        if (null == credentials) {
+            return false;
+        }
+
+        try {
+            String login = credentials.getLogin();
+            if (Strings.isEmpty(login)) {
+                return false;
+            }
+            Password pw = credentials.getPassword();
+            if (null == pw) {
+                return false;
+            }
+            try {
+                mailConfig.login = saneLogin(login);
+                mailConfig.password = new String(pw.getPassword());
+                AuthType authType = credentials.getAuthType();
+                mailConfig.authType = null == authType ? AuthType.LOGIN : authType;
+                return true;
+            } finally {
+                Streams.close(pw);
+            }
+        } finally {
+            Streams.close(credentials);
+        }
+    }
+
+    private static void applyPasswordAndAuthType(MailConfig mailConfig, Session session, Account account) throws OXException {
+        AuthInfo authInfo = determinePasswordAndAuthType(mailConfig.login, session, account, account.isMailAccount());
+        mailConfig.password = authInfo.getPassword();
+        mailConfig.authType = authInfo.getAuthType();
         mailConfig.doCustomParsing(account, session);
+    }
+
+    /**
+     * Determines given account's password and authentication type.
+     *
+     * @param login The login to assume
+     * @param session The session to check by
+     * @param account The account
+     * @param forMailAccess <code>true</code> to resolve for mail access; otherwise <code>false</code> for mail transport
+     * @return The authentication information
+     * @throws OXException If authentication information cannot be resolved
+     */
+    public static AuthInfo determinePasswordAndAuthType(String login, Session session, Account account, boolean forMailAccess) throws OXException {
+        int oAuthAccontId = assumeXOauth2For(account, forMailAccess);
+        if (oAuthAccontId >= 0) {
+            // Do the XOAUTH2 dance...
+            OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
+            if (null == oauthService) {
+                throw ServiceExceptionCode.absentService(OAuthService.class);
+            }
+
+            OAuthAccount oAuthAccount = oauthService.getAccount(oAuthAccontId, session, session.getUserId(), session.getContextId());
+            return new AuthInfo(login, oAuthAccount.getToken(), AuthType.OAUTH);
+        }
+
+        String mailAccountPassword = account.getPassword();
+        if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
+            // Advertise empty string
+            return new AuthInfo(login, "", AuthType.LOGIN);
+        }
+
+        // Mail account's password
+        String server = forMailAccess ? ((MailAccount) account).getMailServer() : account.getTransportServer();
+        String password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), server);
+        return new AuthInfo(login, password, AuthType.LOGIN);
     }
 
     /**
      * Checks whether XOAUTH2 authentication is assumed for specified account.
      *
      * @param account The account to check
+     * @param forMailAccess <code>true</code> to resolve for mail access; otherwise <code>false</code> for mail transport
      * @return The verified identifier of the associated OAuth account or <code>-1</code>
      */
-    protected static int assumeXOauth2For(Account account) {
-        if (account.isMailAccount()) {
+    protected static int assumeXOauth2For(Account account, boolean forMailAccess) {
+        if (forMailAccess) {
             MailAccount mailAccount = (MailAccount) account;
             if (false == mailAccount.isMailOAuthAble()) {
                 return -1;
@@ -1044,6 +1110,15 @@ public abstract class MailConfig {
      */
     public void setPassword(final String password) {
         this.password = password;
+    }
+
+    /**
+     * Sets the authentication type.
+     *
+     * @param authType The authentication type to set
+     */
+    public void setAuthType(AuthType authType) {
+        this.authType = authType;
     }
 
     /**

@@ -192,6 +192,8 @@ ResolveShareReferenceResponse:
   $ref: ./mail/ResolveShareReferenceResponse.yaml
 ExamineResponse:
  $ref: ./mail/ExamineResponse.yaml
+PutAttachmentBody:
+ $ref: ./mail/PutAttachmentBody.yaml
 # Module: groups
 GroupData:
   $ref: ./groups/GroupData.yaml
@@ -290,8 +292,8 @@ ReminderResponse:
 # Module: multiple
 SingleRequest:
   $ref: ./multiple/SingleRequest.yaml
-SingleResponse:
-  $ref: ./multiple/SingleResponse.yaml
+MultipleResponse:
+  $ref: ./multiple/MultipleResponse.yaml
 # Module: quota
 QuotasResponse:
   $ref: ./quota/QuotasResponse.yaml
@@ -351,6 +353,8 @@ MailAccountDeletionResponse:
   $ref: ./mailaccount/MailAccountDeletionResponse.yaml
 MailAccountValidationResponse:
   $ref: ./mailaccount/MailAccountValidationResponse.yaml
+MailAccountStatusResponse:
+  $ref: ./mailaccount/MailAccountStatusResponse.yaml
 # Module: autoconfig
 AutoConfigResponse:
   $ref: ./autoconfig/AutoConfigResponse.yaml

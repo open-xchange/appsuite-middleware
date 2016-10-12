@@ -3085,7 +3085,8 @@ public final class OXFolderSQL {
 
     private static final String SQL_CLEAN_LOCKS =   "DELETE FROM infostore_lock WHERE cid=? AND userid=? AND " + 
                                                     "entity IN (SELECT id FROM infostore WHERE cid=? AND folder_id=?) AND " + 
-                                                    "entity NOT IN (SELECT object_id FROM object_permission where cid=? AND folder_id=?);";
+                                                    "entity NOT IN (SELECT object_id FROM object_permission WHERE cid=? AND folder_id=?) AND " +
+                                                    "entity NOT IN (SELECT i.id FROM oxfolder_permissions AS fp INNER JOIN infostore AS i ON i.folder_id=fp.fuid AND i.cid=fp.cid WHERE fp.owp=2 AND i.created_by=?);";
 
     static void cleanLocksForFolder(int folder, int[] userIds, Connection con, Context ctx) throws SQLException {
 
@@ -3099,6 +3100,7 @@ public final class OXFolderSQL {
                 stmt.setInt(4, folder);
                 stmt.setInt(5, ctx.getContextId());
                 stmt.setInt(6, folder);
+                stmt.setInt(7, userId);
                 stmt.execute();
                 closeSQLStuff(stmt);
             }

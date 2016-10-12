@@ -13,7 +13,14 @@ properties:
     description: Indicates the ID of the referenced original mail.
   sendtype:
     type: integer
-    description: 'Indicates the type of the meessage: 0 (normal new mail), 1 (a reply mail, field "msgref" must be present), 2 (a forward mail, field "msgref" must be present), 3 (draft edit operation, field "msgref" must be present in order to delete previous draft message since e.g. IMAP does not support changing/replacing a message but requires a delete-and-insert sequence), 4 (transport of a draft mail, field "msgref" must be present), 6 (signals that user intends to send out a saved draft message and expects the draft message (referenced by "msgref" field) being deleted after successful transport).'
+    description: Indicates the type of the meessage.
+    enum: 
+      - 0 (normal new mail)
+      - 1 (a reply mail, field "msgref" must be present)
+      - 2 (a forward mail, field "msgref" must be present)
+      - 3 (draft edit operation, field "msgref" must be present in order to delete previous draft message since e.g. IMAP does not support changing/replacing a message but requires a delete-and-insert sequence)
+      - 4 (transport of a draft mail, field "msgref" must be present)
+      - 6 (signals that user intends to send out a saved draft message and expects the draft message (referenced by "msgref" field) being deleted after successful transport)
   vcard:
     type: integer
     description: The user's VCard.

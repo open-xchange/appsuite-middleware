@@ -50,6 +50,7 @@
 package com.openexchange.groupware.filestore;
 
 import static com.openexchange.java.Autoboxing.I;
+import java.net.URI;
 import java.sql.Connection;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
@@ -81,6 +82,11 @@ public class CachingFilestoreStorage extends FilestoreStorage {
         final Filestore filestore = delegate.getFilestore(id);
         cache.put(I(id), filestore, false);
         return filestore;
+    }
+
+    @Override
+    public Filestore getFilestore(URI uri) throws OXException {
+        return delegate.getFilestore(uri);
     }
 
     @Override

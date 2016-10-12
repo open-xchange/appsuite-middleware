@@ -79,6 +79,7 @@ import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -292,7 +293,7 @@ public class IMAPAuthentication implements AuthenticationService {
             }
 
             ConfigurationService configuration = services.getService(ConfigurationService.class);
-            final String socketFactoryClass = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
+            final String socketFactoryClass = SSLSocketFactoryProvider.getDefault().getClass().getName();
             final String sPort = port.toString();
             if (secure) {
                 /*
