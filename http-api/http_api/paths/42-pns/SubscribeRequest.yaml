@@ -1,0 +1,21 @@
+/pns?action=subscribe:
+  put:
+    operationId: subscribe
+    tags: 
+      - Pns
+    summary: Adds a new subscription associated with a token for certain topics
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+      - in: body
+        name: body
+        description: A JSON object describing the subscription
+        required: true
+        schema:
+          $ref: "#/definitions/SubscriptionData"
+    responses:  
+      200:
+        description: |
+          A JSON object signaling success. In case of errors the responsible fields in the response are
+          filled (see [Error handling](#error-handling)).
+        schema:
+          $ref: "#/definitions/PnsResponse"
