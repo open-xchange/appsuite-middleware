@@ -49,31 +49,15 @@
 
 package com.openexchange.mailaccount.internal;
 
-import static com.openexchange.ajax.requesthandler.AJAXRequestDataBuilder.request;
 import java.sql.Connection;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.slf4j.Logger;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.Dispatcher;
-import com.openexchange.ajax.requesthandler.DispatcherServlet;
-import com.openexchange.ajax.requesthandler.Dispatchers;
-import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.exception.OXExceptions;
-import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -83,10 +67,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @since v7.8.3
  */
 public class MailAccountOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
-
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountOAuthAccountDeleteListener.class);
-
-    private static final String DEFAULT_ID = Integer.toString(MailAccount.DEFAULT_ID);
 
     /**
      * Initializes a new {@link MailAccountOAuthAccountDeleteListener}.
@@ -122,72 +102,6 @@ public class MailAccountOAuthAccountDeleteListener implements OAuthAccountDelete
                 }
             }
         }
-
-        Dispatcher ox = DispatcherServlet.getDispatcher();
-        if (null == ox) {
-            return;
-        }
-
-        ServerSession session = ServerSessionAdapter.valueOf(new FakeSession(null, user, cid));
-
-        Object result;
-        {
-            String columns = Attribute.ID_LITERAL.getId() + "," + Attribute.MAIL_URL_LITERAL.getId() + "," + Attribute.MAIL_OAUTH_LITERAL.getId() + "," + Attribute.TRANSPORT_OAUTH_LITERAL.getId();
-            AJAXRequestData requestData = request().session(session).module("account").action("all").format("json").params("columns", columns).build();
-            result = perform(requestData, session, ox);
-        }
-
-        if (null != result) {
-            try {
-                JSONArray jAccounts = (JSONArray) result;
-                List<String> toDelete = new ArrayList<>(jAccounts.length());
-                for (int i = 0, k = jAccounts.length(); k-- > 0; i++) {
-                    JSONArray jAccount = jAccounts.getJSONArray(i);
-                    String accountId = jAccount.getString(0);
-                    if (false == DEFAULT_ID.equals(accountId)) {
-                        String url = jAccount.getString(1);
-                        if (!url.startsWith(UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX)) {
-                            int mailOAuthId = jAccount.getInt(2);
-                            boolean deleted = false;
-                            if (mailOAuthId == id) {
-                                toDelete.add(accountId);
-                                deleted = true;
-                            }
-
-                            int transportOAuthId = jAccount.getInt(4);
-                            if (!deleted && transportOAuthId == id) {
-                                toDelete.add(accountId);
-                            }
-                        }
-                    }
-                }
-
-                if (false == toDelete.isEmpty()) {
-                    JSONArray jIds = new JSONArray(toDelete.size());
-                    for (String accId : toDelete) {
-                        jIds.put(accId);
-                    }
-                    AJAXRequestData requestData = request().session(session).module("account").action("delete").format("json").data(jIds, "json").build();
-                    perform(requestData, session, ox);
-                }
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-            }
-        }
-    }
-
-    private static <V> V perform(AJAXRequestData requestData, ServerSession session, Dispatcher ox) {
-        try {
-            Dispatchers.perform(requestData, session, ox);
-        } catch (OXException e) {
-            if (OXExceptions.isCategory(Category.CATEGORY_PERMISSION_DENIED, e)) {
-                LOG.debug("Permission error", e);
-            } else {
-                LOG.error("Error", e);
-            }
-        }
-
-        return null;
     }
 
     private static boolean isUnifiedINBOXAccount(final MailAccount mailAccount) {
