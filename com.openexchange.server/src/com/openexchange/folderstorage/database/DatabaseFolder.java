@@ -54,6 +54,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import java.util.Date;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccounts;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
@@ -86,6 +87,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
@@ -147,6 +149,7 @@ public class DatabaseFolder extends AbstractFolder {
         contentType = getContentType(folderObject.getModule());
         if (contentType.getModule() == InfostoreContentType.getInstance().getModule()) {
             accountId = FileStorageAccounts.getQualifiedID(FileID.INFOSTORE_SERVICE_ID, FileID.INFOSTORE_ACCOUNT_ID);
+            addSupportedCapabilities(Strings.asciiLowerCase(FileStorageCapability.ZIPPABLE_FOLDER.name()));
         }
         final OCLPermission[] oclPermissions = folderObject.getPermissionsAsArray();
         permissions = new Permission[oclPermissions.length];
