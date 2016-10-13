@@ -60,6 +60,7 @@ import com.openexchange.imap.acl.ACLExtension;
 import com.openexchange.imap.acl.ACLExtensionFactory;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.Services;
+import com.openexchange.mail.api.MailConfig.BoolCapVal;
 import com.openexchange.mail.cache.SessionMailCache;
 import com.openexchange.mail.cache.SessionMailCacheEntry;
 import com.openexchange.mail.config.MailProperties;
@@ -192,7 +193,14 @@ public final class CapabilitiesCache {
              * Get as map
              */
             @SuppressWarnings("unchecked") final Map<String, String> map = imapStore.getCapabilities();
-            imapCaps.setACL(map.containsKey(IMAPCapabilities.CAP_ACL));
+            {
+                BoolCapVal supportsACLs = imapConfig.getIMAPProperties().getSupportsACLs();
+                if (BoolCapVal.AUTO.equals(supportsACLs)) {
+                    imapCaps.setACL(map.containsKey(IMAPCapabilities.CAP_ACL));
+                } else {
+                    imapCaps.setACL(BoolCapVal.TRUE.equals(supportsACLs));
+                }
+            }
             imapCaps.setThreadReferences(map.containsKey(IMAPCapabilities.CAP_THREAD_REFERENCES));
             imapCaps.setThreadOrderedSubject(map.containsKey(IMAPCapabilities.CAP_THREAD_ORDEREDSUBJECT));
             imapCaps.setQuota(map.containsKey(IMAPCapabilities.CAP_QUOTA));
