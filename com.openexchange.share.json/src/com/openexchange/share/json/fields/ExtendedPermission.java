@@ -137,7 +137,7 @@ public abstract class ExtendedPermission {
         }
     }
 
-    protected void addShareInfo(AJAXRequestData requestData, JSONObject jsonObject, ShareInfo share) throws JSONException {
+    protected void addShareInfo(AJAXRequestData requestData, JSONObject jsonObject, ShareInfo share) throws JSONException, OXException {
         if (null != share) {
             if (null != requestData) {
                 jsonObject.putOpt("share_url", share.getShareURL(requestData.getHostData()));
