@@ -56,7 +56,6 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -148,30 +147,36 @@ public class EventClient {
         PushNotificationService pushNotificationService = ServerServiceRegistry.getInstance().getService(PushNotificationService.class);
         if (null != pushNotificationService) {
             for (Map.Entry<Integer, Set<Integer>> entry : affectedUsers.entrySet()) {
-                int userId = entry.getKey().intValue();
-                Iterator<Integer> i = entry.getValue().iterator();
-                if (i.hasNext()) {
-                    Integer folderId = i.next();
-                    Date[] startAndEndDate = determineStartAndEndDate(appointment);
-    
-                    Map<String, Object> messageData = PushNotifications.messageDataBilder()
-                        .put(PushNotificationField.ID, Integer.valueOf(appointment.getObjectID()))
-                        .put(PushNotificationField.FOLDER, folderId)
-                        .put(PushNotificationField.APPOINTMENT_TITLE, appointment.getTitle())
-                        .put(PushNotificationField.APPOINTMENT_LOCATION, appointment.getLocation())
-                        .put(PushNotificationField.APPOINTMENT_START_DATE, startAndEndDate[0])
-                        .put(PushNotificationField.APPOINTMENT_END_DATE, startAndEndDate[1])
-                        .build();
-    
-                    PushNotification notification = DefaultPushNotification.builder()
-                        .contextId(contextId)
-                        .userId(userId)
-                        .topic(KnownTopic.CALENDAR_NEW.getName())
-                        .messageData(messageData)
-                        .build();
-                    pushNotificationService.handle(notification);
+                Set<Integer> folderIds = entry.getValue();
+                if (false == folderIds.isEmpty()) {
+                    postNotification(appointment, folderIds.iterator().next(), entry.getKey().intValue(), pushNotificationService);
                 }
             }
+        }
+    }
+
+    private void postNotification(Appointment appointment, Integer folderId, int userId, PushNotificationService pushNotificationService) {
+        try {
+            Date[] startAndEndDate = determineStartAndEndDate(appointment);
+
+            Map<String, Object> messageData = PushNotifications.messageDataBilder()
+                .put(PushNotificationField.ID, Integer.valueOf(appointment.getObjectID()))
+                .put(PushNotificationField.FOLDER, folderId)
+                .put(PushNotificationField.APPOINTMENT_TITLE, appointment.getTitle())
+                .put(PushNotificationField.APPOINTMENT_LOCATION, appointment.getLocation())
+                .put(PushNotificationField.APPOINTMENT_START_DATE, startAndEndDate[0])
+                .put(PushNotificationField.APPOINTMENT_END_DATE, startAndEndDate[1])
+                .build();
+
+            PushNotification notification = DefaultPushNotification.builder()
+                .contextId(contextId)
+                .userId(userId)
+                .topic(KnownTopic.CALENDAR_NEW.getName())
+                .messageData(messageData)
+                .build();
+            pushNotificationService.handle(notification);
+        } catch (Exception e) {
+            LOG.warn("Failed to deliver {} to user {} in context {}", KnownTopic.CALENDAR_NEW.getName(), Integer.valueOf(userId), Integer.valueOf(contextId), e);
         }
     }
 
