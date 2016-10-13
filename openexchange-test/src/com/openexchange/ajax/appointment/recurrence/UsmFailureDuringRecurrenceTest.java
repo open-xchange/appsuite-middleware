@@ -129,6 +129,8 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, 1);
         changes.put(Appointment.START_DATE, myDate);
+        // FIXME: should fail with APP-0020 Categories=USER_INPUT Message='End date is before start date.'
+        //        or, a "valid" END_DATE would be supplied here
         changes.put(Appointment.INTERVAL, 1);
 
         Expectations expectationsForException = new Expectations();
