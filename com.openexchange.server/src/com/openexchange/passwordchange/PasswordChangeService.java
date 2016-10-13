@@ -142,8 +142,9 @@ public abstract class PasswordChangeService {
      *
      * @param event The event containing the session of the user whose password shall be changed, the context, the new password, and the old password (needed for verification)
      * @return <code>true</code> if the old password is supposed to be checked; otherwise <code>false</code>
+     * @throws OXException If check fails
      */
-    protected boolean checkOldPassword(PasswordChangeEvent event) {
+    protected boolean checkOldPassword(PasswordChangeEvent event) throws OXException {
         return true;
     }
 
