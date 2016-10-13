@@ -23,8 +23,8 @@ Summary:        Open-Xchange Meta packages
 %package -n     open-xchange-meta-appsuite-push
 Group:          Applications/Productivity
 Summary:        The Open-Xchange Meta package for App Suite push
-Requires:       open-xchange-meta-ui-appsuite
-Requires:       open-xchange-pns-impl, open-xchange-pns-transport-websockets
+Requires:       open-xchange-pns-impl
+Requires:       open-xchange-pns-transport-websockets
 
 %description -n open-xchange-meta-appsuite-push
 The Open-Xchange Meta package for App Suite push
