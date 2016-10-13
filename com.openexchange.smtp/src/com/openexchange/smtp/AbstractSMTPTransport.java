@@ -569,8 +569,9 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                      */
                     // smtpProps.put(MIMESessionPropertyNames.PROP_SMTPHOST, smtpConfig.getServer());
                     // smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, sPort);
-                    smtpSession = javax.mail.Session.getInstance(smtpProps, null);
+                    javax.mail.Session smtpSession = javax.mail.Session.getInstance(smtpProps, null);
                     smtpSession.addProvider(new Provider(Provider.Type.TRANSPORT, "smtp", JavaSMTPTransport.class.getName(), "OX Software GmbH", MailAccess.getVersion()));
+                    this.smtpSession = smtpSession;
                 }
             }
         }
