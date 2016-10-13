@@ -101,6 +101,7 @@ public class AppointmentAJAXSuite extends TestSuite {
         tests.addTestSuite(PrivateTests.class);
         tests.addTestSuite(FolderIdTestAjax.class);
         tests.addTestSuite(MoveTestNew.class);
+        tests.addTestSuite(CreateExceptionWithBadDate.class);
         // tests.addTestSuite(ChangeTimeZoneTest.class); Deactivated, because Feature is postponed.
         return tests;
     }

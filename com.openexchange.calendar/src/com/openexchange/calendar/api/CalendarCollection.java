@@ -2908,7 +2908,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         }
     }
 
-    private void setStartAndEndDate(CalendarDataObject target, CalendarDataObject source) throws OXException {
+    public void setStartAndEndDate(CalendarDataObject target, CalendarDataObject source) throws OXException {
         if ((target.getRecurrenceDatePosition() != null || target.getRecurrencePosition() != 0) && (target.getRecurrenceID() == 0 || target.getRecurrenceID() == target.getObjectID())) { //Create Exception
             if (target.getStartDate() != null && target.getEndDate() != null) {
                 return;
