@@ -93,8 +93,15 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
- * EventClient
+ * Responsible for advertising {@link CommonEvent common Groupware events} to several notification/event mechanisms
+ * <ul>
+ * <li>Posting an {@link Event event} using <code>org.osgi.service.event.EventAdmin</code></li>
+ * <li>Legacy <code>com.openexchange.event.impl.EventQueue</code></li>
+ * <li><code>com.openexchange.pns.PushNotificationService</code></li>
+ * </ul>
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public class EventClient {
 
@@ -109,13 +116,18 @@ public class EventClient {
     public static final int CONFIRM_TENTATIVE = 11;
     public static final int CONFIRM_WAITING = 11;
 
+    // -----------------------------------------------------------------------------------------
+
     private final Session session;
-
     private final int userId;
-
     private final int contextId;
 
-    public EventClient(final Session session) {
+    /**
+     * Initializes a new {@link EventClient} using specified session.
+     *
+     * @param session The session
+     */
+    public EventClient(Session session) {
         this.session = session;
         userId = session.getUserId();
         contextId = session.getContextId();
