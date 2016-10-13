@@ -51,6 +51,7 @@ package com.openexchange.file.storage.composition;
 
 import java.util.Locale;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.Quota;
@@ -67,6 +68,26 @@ import com.openexchange.tx.TransactionAware;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface IDBasedFolderAccess extends TransactionAware, WarningsAware {
+
+    /**
+     * Checks if specified folder supports given capability.
+     *
+     * @param capability The capability to check
+     * @param folderId The identifier
+     * @return <code>true</code> if supported; otherwise <code>false</code>
+     * @throws OXException If check for capability support fails
+     */
+    boolean hasCapability(FileStorageCapability capability, String folderId) throws OXException;
+
+    /**
+     * Checks if specified folder supports given capability.
+     *
+     * @param capability The capability to check
+     * @param folderId The identifier
+     * @return <code>true</code> if supported; otherwise <code>false</code>
+     * @throws OXException If check for capability support fails
+     */
+    boolean hasCapability(FileStorageCapability capability, FolderID folderId) throws OXException;
 
     /**
      * Checks if a folder exists whose identifier matches given <code>identifier</code>

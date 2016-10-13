@@ -64,13 +64,18 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
+import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.DefaultTypeAwareFileStorageFolder;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageFolderType;
@@ -107,6 +112,30 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
      */
     protected AbstractCompositingIDBasedFolderAccess(Session session) {
         super(session);
+    }
+
+    @Override
+    public boolean hasCapability(FileStorageCapability capability, String folderId) throws OXException {
+        FolderID folderID = new FolderID(folderId);
+        return hasCapability(capability, folderID);
+    }
+
+    @Override
+    public boolean hasCapability(FileStorageCapability capability, FolderID folderId) throws OXException {
+        FileStorageAccountAccess accountAccess = optAccountAccess(folderId.getService(), folderId.getAccountId());
+        if (null == accountAccess) {
+            FileStorageService fileStorage = getFileStorageServiceRegistry().getFileStorageService(folderId.getService());
+            accountAccess = fileStorage.getAccountAccess(folderId.getAccountId(), session);
+        }
+
+        if (accountAccess instanceof CapabilityAware) {
+            CapabilityAware capabilityAware = (CapabilityAware) accountAccess;
+            Boolean supported = capabilityAware.supports(capability);
+            return (null != supported && supported.booleanValue());
+        }
+
+        FileStorageFileAccess fileAccess = getFileAccess(folderId);
+        return FileStorageCapabilityTools.supports(fileAccess, capability);
     }
 
     @Override

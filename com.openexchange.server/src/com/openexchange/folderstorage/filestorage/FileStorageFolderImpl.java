@@ -49,15 +49,20 @@
 
 package com.openexchange.folderstorage.filestorage;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
+import org.slf4j.Logger;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CacheAware;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.TypeAware;
+import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Permission;
@@ -75,6 +80,7 @@ import com.openexchange.folderstorage.filestorage.contentType.VideosContentType;
 import com.openexchange.folderstorage.type.FileStorageType;
 import com.openexchange.folderstorage.type.SystemType;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
@@ -87,6 +93,8 @@ import com.openexchange.session.Session;
 public final class FileStorageFolderImpl extends AbstractFolder {
 
     private static final long serialVersionUID = 6445442372690458946L;
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FileStorageFolderImpl.class);
 
     /**
      * <code>"9"</code>
@@ -163,9 +171,10 @@ public final class FileStorageFolderImpl extends AbstractFolder {
      * @param accountId The full-qualified file storage account ID
      * @param session The requesting users session
      * @param altNames If the client requested alternative names
+     * @param folderAccess The associated folder access
      */
-    public FileStorageFolderImpl(final FileStorageFolder fsFolder, final String accountId, final Session session, final boolean altNames) {
-        this(fsFolder, accountId, showPersonalBelowInfoStore(session, altNames));
+    public FileStorageFolderImpl(final FileStorageFolder fsFolder, final String accountId, final Session session, final boolean altNames, IDBasedFolderAccess folderAccess) {
+        this(fsFolder, accountId, showPersonalBelowInfoStore(session, altNames), folderAccess);
     }
 
     /**
@@ -178,9 +187,10 @@ public final class FileStorageFolderImpl extends AbstractFolder {
      * @param userId ID of the user requesting the folder
      * @param contextId The context ID
      * @param altNames If the client requested alternative names
+     * @param folderAccess The associated folder access
      */
-    public FileStorageFolderImpl(FileStorageFolder fsFolder, String accountId, int userId, int contextId, boolean altNames) {
-        this(fsFolder, accountId, showPersonalBelowInfoStore(userId, contextId, altNames));
+    public FileStorageFolderImpl(FileStorageFolder fsFolder, String accountId, int userId, int contextId, boolean altNames, IDBasedFolderAccess folderAccess) {
+        this(fsFolder, accountId, showPersonalBelowInfoStore(userId, contextId, altNames), folderAccess);
     }
 
     /**
@@ -191,8 +201,9 @@ public final class FileStorageFolderImpl extends AbstractFolder {
      * @param fsFolder The underlying file storage folder
      * @param accountId The full-qualified file storage account ID
      * @param showPersonalBelowInfoStore If the users personal FS folder shall be shown below folder 9 instead below folder 10
+     * @param folderAccess The associated folder access
      */
-    private FileStorageFolderImpl(FileStorageFolder fsFolder, String accountId, boolean showPersonalBelowInfoStore) {
+    private FileStorageFolderImpl(FileStorageFolder fsFolder, String accountId, boolean showPersonalBelowInfoStore, IDBasedFolderAccess folderAccess) {
         super();
         id = fsFolder.getId();
         name = fsFolder.getName();
@@ -260,11 +271,29 @@ public final class FileStorageFolderImpl extends AbstractFolder {
             cacheable = !fsFolder.isDefaultFolder();
         }
         meta = fsFolder.getMeta();
-        supportedCapabilities = fsFolder.getCapabilities();
+        Set<String> supportedCapabilities = fsFolder.getCapabilities();
+        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.ZIPPABLE_FOLDER, folderAccess)) {
+            if (null == supportedCapabilities) {
+                supportedCapabilities = new LinkedHashSet<>(2);
+            } else {
+                supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
+            }
+            supportedCapabilities.add(Strings.asciiLowerCase(FileStorageCapability.ZIPPABLE_FOLDER.name()));
+        }
+        this.supportedCapabilities = supportedCapabilities;
         lastModified = fsFolder.getLastModifiedDate();
         creationDate = fsFolder.getCreationDate();
         createdBy = fsFolder.getCreatedBy();
         modifiedBy = fsFolder.getModifiedBy();
+    }
+
+    private static boolean optCheckCapability(String folderId, FileStorageCapability capability, IDBasedFolderAccess folderAccess) {
+        try {
+            return folderAccess.hasCapability(capability, folderId);
+        } catch (Exception e) {
+            LOG.warn("Failed to check for capability {}. Assuming no support for it.", capability.name(), e);
+            return false;
+        }
     }
 
     private static boolean showPersonalBelowInfoStore(final Session session, final boolean altNames) {
