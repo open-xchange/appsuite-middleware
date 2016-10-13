@@ -176,7 +176,7 @@ public class EventClient {
                 .build();
             pushNotificationService.handle(notification);
         } catch (Exception e) {
-            LOG.warn("Failed to deliver {} to user {} in context {}", KnownTopic.CALENDAR_NEW.getName(), Integer.valueOf(userId), Integer.valueOf(contextId), e);
+            LOG.warn("Failed to deliver \"{}\" event to user {} in context {}", KnownTopic.CALENDAR_NEW.getName(), Integer.valueOf(userId), Integer.valueOf(contextId), e);
         }
     }
 
