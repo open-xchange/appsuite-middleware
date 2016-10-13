@@ -96,9 +96,9 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
     ATTENDEE_NOT_FOUND("Attendee not found [attendee %1$s, event %1$d]", ATTENDEE_NOT_FOUND_MSG, Category.CATEGORY_USER_INPUT, 4043),
     /**
      * <li>The targeted occurrence is not part of the event series. Please select a valid recurrence identifier and try again.</li>
-     * <li>Invalid recurrence id [id %1$d, rule %2$s]</li>
+     * <li>Invalid recurrence id [id %1$s, rule %2$s]</li>
      */
-    INVALID_RECURRENCE_ID("Invalid recurrence id [id %1$d, rule %2$s]", INVALID_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4044),
+    INVALID_RECURRENCE_ID("Invalid recurrence id [id %1$s, rule %2$s]", INVALID_RRULE_MSG, Category.CATEGORY_USER_INPUT, 4044),
     /**
      * <li>The operation could not be completed due to insufficient permissions.</li>
      * <li>Insufficient read permissions in folder [folder %1$d]</li>

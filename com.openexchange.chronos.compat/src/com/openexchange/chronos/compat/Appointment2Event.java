@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
@@ -66,8 +65,11 @@ import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.service.DefaultRecurrenceData;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link Appointment2Event}
@@ -230,33 +232,31 @@ public class Appointment2Event {
     }
 
     /**
-     * Gets the recurrence rule for the supplied series pattern.
+     * Gets the recurrence data for the supplied series pattern.
      *
      * @param pattern The legacy series pattern
-     * @return The recurrence rule, or <code>null</code> if not mappable
+     * @return The recurrence data, or <code>null</code> if not mappable
      */
-    public static String getRecurrenceRule(SeriesPattern pattern) {
+    public static RecurrenceData getRecurrenceData(SeriesPattern pattern) {
         if (null == pattern || null == pattern.getType()) {
             return null;
         }
-        return Recurrence.getRecurrenceRule(pattern);
+        String recurrenceRule = Recurrence.getRecurrenceRule(pattern);
+        return new DefaultRecurrenceData(recurrenceRule, pattern.isFullTime().booleanValue(), pattern.getTimeZone().getID(), pattern.getSeriesStart().longValue());
     }
 
     /**
      * Calculates the recurrence identifier, i.e. the start time of a specific occurrence of a recurring event, based on the legacy
      * recurrence date position.
      *
-     * @param recurrenceRule The recurrence rule
-     * @param seriesStart The start-date of the series, i.e. the actual start-date of the series master
-     * @param timeZone The timezone to consider (should be <code>UTC</code> for "all-day" event series)
-     * @param allDay <code>true</code> for an "all-day" event series, <code>false</code>, otherwise
+     * @param recurrenceData The corresponding recurrence data
      * @param recurrenceDatePosition The legacy recurrence date position, i.e. the date where the original occurrence would have been, as
      *            UTC date with truncated time fraction
      * @return The recurrence identifier, or <code>null</code> if no matching recurrence identifier was found
      */
-    public static RecurrenceId getRecurrenceID(String recurrenceRule, Date seriesStart, TimeZone timeZone, boolean allDay, Date recurrenceDatePosition) throws OXException {
-        Calendar calendar = CalendarUtils.initCalendar(TimeZone.getTimeZone("UTC"), seriesStart);
-        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceRule, seriesStart.getTime(), timeZone, allDay);
+    public static RecurrenceId getRecurrenceID(RecurrenceData recurrenceData, Date recurrenceDatePosition) throws OXException {
+        Calendar calendar = CalendarUtils.initCalendar(TimeZones.UTC, recurrenceData.getSeriesStart());
+        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceData);
         while (iterator.hasNext()) {
             long nextMillis = iterator.nextMillis();
             calendar.setTimeInMillis(nextMillis);
@@ -275,22 +275,19 @@ public class Appointment2Event {
      * Calculates the recurrence identifiers, i.e. the start times of the specific occurrences of a recurring event, for a list of legacy
      * recurrence date position.
      *
-     * @param recurrenceRule The recurrence rule
-     * @param seriesStart The start-date of the series, i.e. the actual start-date of the series master
-     * @param timeZone The timezone to consider (should be <code>UTC</code> for "all-day" event series)
-     * @param allDay <code>true</code> for an "all-day" event series, <code>false</code>, otherwise
+     * @param recurrenceData The corresponding recurrence data
      * @param recurrenceDatePositions The legacy recurrence date positions, i.e. the dates where the original occurrences would have been,
      *            as UTC date with truncated time fraction
      * @return The recurrence identifiers
      */
-    public static List<Date> getRecurrenceIDs(String recurrenceRule, Date seriesStart, TimeZone timeZone, boolean allDay, List<Date> recurrenceDatePositions) throws OXException {
+    public static List<Date> getRecurrenceIDs(RecurrenceData recurrenceData, List<Date> recurrenceDatePositions) throws OXException {
         // TODO
         if (null == recurrenceDatePositions) {
             return null;
         }
         List<Date> recurrenceIDs = new ArrayList<Date>(recurrenceDatePositions.size());
         for (Date recurrenceDatePosition : recurrenceDatePositions) {
-            RecurrenceId recurrenceID = getRecurrenceID(recurrenceRule, seriesStart, timeZone, allDay, recurrenceDatePosition);
+            RecurrenceId recurrenceID = getRecurrenceID(recurrenceData, recurrenceDatePosition);
             recurrenceIDs.add(new Date(recurrenceID.getValue()));
         }
         return recurrenceIDs;
@@ -300,15 +297,12 @@ public class Appointment2Event {
      * Gets the recurrence identifier, i.e. the original start time of a recurrence instance, based on the supplied legacy recurrence
      * position number.
      *
-     * @param recurrenceRule The recurrence rule
-     * @param seriesStart The start-date of the series, i.e. the actual start-date of the series master
-     * @param timeZone The timezone to consider (should be <code>UTC</code> for "all-day" event series)
-     * @param allDay <code>true</code> for an "all-day" event series, <code>false</code>, otherwise
+     * @param recurrenceData The corresponding recurrence data
      * @param recurrencePosition The legacy, 1-based recurrence position
      * @return The recurrence identifier, or <code>null</code> if no matching recurrence identifier was found
      */
-    public static RecurrenceId getRecurrenceID(String recurrenceRule, Date seriesStart, TimeZone timeZone, boolean allDay, int recurrencePosition) throws OXException {
-        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceRule, seriesStart.getTime(), timeZone, allDay);
+    public static RecurrenceId getRecurrenceID(RecurrenceData recurrenceData, int recurrencePosition) throws OXException {
+        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceData);
         int position = 0;
         while (iterator.hasNext()) {
             long nextMillis = iterator.nextMillis();

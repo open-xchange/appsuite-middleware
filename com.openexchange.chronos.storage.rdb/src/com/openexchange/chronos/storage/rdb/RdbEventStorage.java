@@ -49,6 +49,8 @@
 
 package com.openexchange.chronos.storage.rdb;
 
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesException;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import java.sql.Connection;
@@ -57,26 +59,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.CalendarUserType;
-import com.openexchange.chronos.DefaultRecurrenceId;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.compat.SeriesPattern;
+import com.openexchange.chronos.service.DefaultRecurrenceData;
 import com.openexchange.chronos.service.EntityResolver;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.service.SortOrder;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -266,6 +265,18 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         }
     }
 
+    public RecurrenceData loadRecurrenceData(int contextID, int seriesID) throws OXException {
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(context);
+            return selectRecurrenceData(connection, contextID, seriesID, false);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
+        } finally {
+            dbProvider.releaseReadConnection(context, connection);
+        }
+    }
+
     private static int deleteEvent(Connection connection, int contextID, int objectID) throws SQLException {
         try (PreparedStatement stmt = connection.prepareStatement("DELETE FROM prg_dates WHERE cid=? AND intfield01=?;")) {
             stmt.setInt(1, contextID);
@@ -288,10 +299,11 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             .append("(cid,").append(EventMapper.getInstance().getColumns(mappedFields)).append(") ")
             .append("VALUES (?,").append(EventMapper.getInstance().getParameters(mappedFields)).append(");")
         .toString();
+        Event eventData = adjustPriorSave(connection, contextID, event);
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, contextID);
-            EventMapper.getInstance().setParameters(stmt, parameterIndex, adjustPriorSave(event), mappedFields);
+            EventMapper.getInstance().setParameters(stmt, parameterIndex, eventData, mappedFields);
             return logExecuteUpdate(stmt);
         }
     }
@@ -302,9 +314,10 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             .append("UPDATE prg_dates SET ").append(EventMapper.getInstance().getAssignments(assignedfields)).append(' ')
             .append("WHERE cid=? AND intfield01=?;")
         .toString();
+        Event eventData = adjustPriorSave(connection, contextID, event);
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             int parameterIndex = 1;
-            parameterIndex = EventMapper.getInstance().setParameters(stmt, parameterIndex, adjustPriorSave(event), assignedfields);
+            parameterIndex = EventMapper.getInstance().setParameters(stmt, parameterIndex, eventData, assignedfields);
             stmt.setInt(parameterIndex++, contextID);
             stmt.setInt(parameterIndex++, objectID);
             return logExecuteUpdate(stmt);
@@ -443,6 +456,29 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
         return events;
     }
 
+    private static RecurrenceData selectRecurrenceData(Connection connection, int contextID, int seriesID, boolean deleted) throws SQLException, OXException {
+        EventField[] fields = EventMapper.getInstance().getMappedFields(new EventField[] {
+            EventField.ID, EventField.SERIES_ID, EventField.RECURRENCE_RULE, EventField.ALL_DAY, EventField.START_DATE,
+            EventField.START_TIMEZONE, EventField.END_DATE, EventField.END_TIMEZONE
+        });
+        String sql = new StringBuilder()
+            .append("SELECT ").append(EventMapper.getInstance().getColumns(fields))
+            .append(" FROM ").append(deleted ? "del_dates" : "prg_dates")
+            .append(" WHERE cid=? AND intfield01=? AND intfield02=?;")
+        .toString();
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, contextID);
+            stmt.setInt(2, seriesID);
+            stmt.setInt(3, seriesID);
+            ResultSet resultSet = logExecuteQuery(stmt);
+            if (resultSet.next()) {
+                Event event = readEvent(resultSet, fields, null);
+                return new DefaultRecurrenceData(event);
+            }
+        }
+        return null;
+    }
+
     /**
      * Gets the SQL representation of the supplied sort options, optionally prefixing any used column identifiers.
      *
@@ -501,12 +537,12 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
              * convert legacy series pattern into proper recurrence rule
              */
             SeriesPattern seriesPattern = new SeriesPattern(databasePattern, timeZone, allDay);
-            String recurrenceRule = Recurrence.getRecurrenceRule(seriesPattern);
-            if (CalendarUtils.isSeriesMaster(event)) {
+            RecurrenceData recurrenceData = Appointment2Event.getRecurrenceData(seriesPattern);
+            if (isSeriesMaster(event)) {
                 /*
                  * apply recurrence rule & adjust the recurrence master's actual start- and enddate
                  */
-                event.setRecurrenceRule(recurrenceRule);
+                event.setRecurrenceRule(recurrenceData.getRecurrenceRule());
                 Period seriesPeriod = new Period(event);
                 Period masterPeriod = Recurrence.getRecurrenceMasterPeriod(seriesPeriod, absoluteDuration);
                 event.setStartDate(masterPeriod.getStartDate());
@@ -515,23 +551,25 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
                  * transform legacy "recurrence date positions" for exceptions to recurrence ids
                  */
                 if (event.containsDeleteExceptionDates() && null != event.getDeleteExceptionDates()) {
-                    event.setDeleteExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceRule, new Date(seriesPattern.getSeriesStart().longValue()), seriesPattern.getTimeZone(), allDay, event.getDeleteExceptionDates()));
+                    event.setDeleteExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceData, event.getDeleteExceptionDates()));
                 }
                 if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
-                    event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceRule, new Date(seriesPattern.getSeriesStart().longValue()), seriesPattern.getTimeZone(), allDay, event.getChangeExceptionDates()));
+                    event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceData, event.getChangeExceptionDates()));
                 }
-            } else if (CalendarUtils.isSeriesException(event)) {
+            } else if (isSeriesException(event)) {
                 /*
                  * drop recurrence information for change exceptions
                  */
                 //                event.removeRecurrenceRule(); // better keep?
-                event.setRecurrenceRule(recurrenceRule);
+                event.setRecurrenceRule(recurrenceData.getRecurrenceRule());
                 /*
                  * transform change exception's legacy "recurrence date position" to recurrence id & apply actual recurrence id
                  */
+                if (event.containsRecurrenceId() && null != event.getRecurrenceId() && StoredRecurrenceId.class.isInstance(event.getRecurrenceId())) {
+                    event.setRecurrenceId(Appointment2Event.getRecurrenceID(recurrenceData, ((StoredRecurrenceId) event.getRecurrenceId()).getRecurrencePosition()));
+                }
                 if (event.containsChangeExceptionDates() && null != event.getChangeExceptionDates()) {
-                    event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceRule, new Date(seriesPattern.getSeriesStart().longValue()), seriesPattern.getTimeZone(), allDay, event.getChangeExceptionDates()));
-                    event.setRecurrenceId(new DefaultRecurrenceId(event.getChangeExceptionDates().get(0).getTime()));
+                    event.setChangeExceptionDates(Appointment2Event.getRecurrenceIDs(recurrenceData, event.getChangeExceptionDates()));
                 }
             }
         }
@@ -540,34 +578,55 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
     }
 
     /**
-     * Adjusts certain properties of an event prior saving it in the database.
+     * Adjusts certain properties of an event prior inserting it into the database.
      *
      * @param event The event to adjust
-     * @return The (possibly adjusted) event reference
-     * @throws OXException
+     * @param connection The connection to use
+     * @param contextID The context identifier
+     * @return The adjusted event data to store
      */
-    private static Event adjustPriorSave(Event event) throws OXException {
+    private static Event adjustPriorSave(Connection connection, int contextID, Event event) throws OXException, SQLException {
         /*
-         * convert recurrence rule extract series pattern and "absolute duration" / "recurrence calculator" field
+         * prepare event data for insert
          */
-        if (event.containsRecurrenceRule() && null != event.getRecurrenceRule()) {
-            String recurrenceRule = event.getRecurrenceRule();
-            long absoluteDuration = new Period(event).getTotalDays();
-            TimeZone timeZone = event.containsStartTimeZone() && null != event.getStartTimeZone() ? TimeZone.getTimeZone(event.getStartTimeZone()) : null;
-            Calendar calendar = null != timeZone ? GregorianCalendar.getInstance(timeZone) : GregorianCalendar.getInstance();
-            calendar.setTime(event.getStartDate());
-            SeriesPattern seriesPattern = Recurrence.generatePattern(event.getRecurrenceRule(), calendar);
-            String value = absoluteDuration + "~" + seriesPattern.getDatabasePattern();
-            event.setRecurrenceRule(value);
+        Event eventData = new Event();
+        EventMapper.getInstance().copy(event, eventData, EventMapper.getInstance().getMappedFields());
+        if (isSeriesMaster(eventData)) {
+            RecurrenceData recurrenceData = new DefaultRecurrenceData(eventData);
+            if (eventData.containsRecurrenceRule() && null != eventData.getRecurrenceRule()) {
+                /*
+                 * convert recurrence rule to legacy pattern & derive "absolute duration" / "recurrence calculator" field
+                 */
+                SeriesPattern seriesPattern = Event2Appointment.getSeriesPattern(recurrenceData);
+                long absoluteDuration = new Period(eventData).getTotalDays();
+                eventData.setRecurrenceRule(absoluteDuration + "~" + seriesPattern.getDatabasePattern());
+            }
+            if (eventData.containsStartDate() || eventData.containsEndDate()) {
+                /*
+                 * expand recurrence master start- and enddate to cover the whole series period
+                 */
+                Period seriesPeriod = Recurrence.getImplicitSeriesPeriod(recurrenceData, new Period(eventData));
+                eventData.setStartDate(seriesPeriod.getStartDate());
+                eventData.setEndDate(seriesPeriod.getEndDate());
+            }
+        }
+        if (isSeriesException(eventData)) {
+            RecurrenceData recurrenceData = selectRecurrenceData(connection, contextID, eventData.getSeriesId(), false);
+            if (eventData.containsRecurrenceRule() && null != eventData.getRecurrenceRule()) {
+                // TODO really required to also store series pattern for exceptions?
+                /*
+                 * convert recurrence rule to legacy pattern & derive "absolute duration" / "recurrence calculator" field
+                 */
+                SeriesPattern seriesPattern = Event2Appointment.getSeriesPattern(recurrenceData);
+                long absoluteDuration = new Period(eventData).getTotalDays();
+                eventData.setRecurrenceRule(absoluteDuration + "~" + seriesPattern.getDatabasePattern());
+            }
             /*
-             * expand recurrence master start- and enddate to cover the whole series period
+             * transform recurrence ids to legacy "recurrence date positions" (UTC dates with truncated time fraction)
              */
-            if (event.getId() == event.getSeriesId()) {
-                Period masterPeriod = new Period(event);
-                TimeZone tz = TimeZone.getTimeZone(event.isAllDay() || null == event.getStartTimeZone() ? "UTC" : event.getStartTimeZone());
-                Period seriesPeriod = Recurrence.getImplicitSeriesPeriod(masterPeriod, tz, recurrenceRule);
-                event.setStartDate(seriesPeriod.getStartDate());
-                event.setEndDate(seriesPeriod.getEndDate());
+            if (eventData.containsRecurrenceId() && null != eventData.getRecurrenceId()) {
+                int recurrencePosition = Event2Appointment.getRecurrencePosition(recurrenceData, eventData.getRecurrenceId());
+                eventData.setRecurrenceId(new StoredRecurrenceId(recurrencePosition));
             }
         }
         /*
@@ -575,24 +634,17 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
          * See: http://dev.mysql.com/doc/refman/5.6/en/fractional-seconds.html
          * See: com.openexchange.sql.tools.SQLTools.toTimestamp(Date)
          */
-        if (event.containsCreated() && null != event.getCreated()) {
-            event.setCreated(new Date((event.getCreated().getTime() / 1000) * 1000));
+        if (eventData.containsCreated() && null != eventData.getCreated()) {
+            eventData.setCreated(new Date((eventData.getCreated().getTime() / 1000) * 1000));
         }
-        /*
-         * transform recurrence ids to legacy "recurrence date positions" (UTC dates with truncated time fraction)
-         */
-        if (event.containsRecurrenceId() && null != event.getRecurrenceId()) {
-            Date recurrenceDatePosition = Event2Appointment.getRecurrenceDatePosition(event.getRecurrenceId());
-            event.setRecurrenceId(new DefaultRecurrenceId(recurrenceDatePosition.getTime()));
+        if (eventData.containsDeleteExceptionDates()) {
+            eventData.setDeleteExceptionDates(Event2Appointment.getRecurrenceDatePositions(eventData.getDeleteExceptionDates()));
         }
-        if (event.containsDeleteExceptionDates()) {
-            event.setDeleteExceptionDates(Event2Appointment.getRecurrenceDatePositions(event.getDeleteExceptionDates()));
-        }
-        if (event.containsChangeExceptionDates()) {
-            event.setChangeExceptionDates(Event2Appointment.getRecurrenceDatePositions(event.getChangeExceptionDates()));
+        if (eventData.containsChangeExceptionDates()) {
+            eventData.setChangeExceptionDates(Event2Appointment.getRecurrenceDatePositions(eventData.getChangeExceptionDates()));
         }
 
-        return event;
+        return eventData;
     }
 
 }

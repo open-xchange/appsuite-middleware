@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import org.dmfs.rfc5545.DateTime;
+import org.dmfs.rfc5545.Duration;
 import org.dmfs.rfc5545.recur.Freq;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
@@ -69,8 +70,11 @@ import org.dmfs.rfc5545.recur.RecurrenceRule.WeekdayNum;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.chronos.DefaultRecurrenceId;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
@@ -153,42 +157,16 @@ public class Recurrence {
      * Calculates the implicit start- and end-date of a recurring event series, i.e. the period spanning from the first until the "last"
      * occurrence.
      *
+     * @param recurrenceData The recurrence data
      * @param masterPeriod The actual start- and end-date of the recurrence master, wrapped into a {@link Period} structure
-     * @param timeZone The timezone to consider (should be <code>UTC</code> for "all-day" event series)
-     * @param recurrenceRule The recurrence rule
      * @return The implicit period of a recurring event series
      */
-    public static Period getImplicitSeriesPeriod(Period masterPeriod, TimeZone timeZone, String recurrenceRule) throws OXException {
-
-        // TEST:
-        {
-            try {
-                RecurrenceRule rule = new RecurrenceRule("FREQ=DAILY;UNTIL=20070401T060000Z");
-
-                TimeZone tz = TimeZone.getTimeZone("Europe/Berlin");
-
-                Calendar cal = Calendar.getInstance(tz);
-                cal.set(2007, 2, 10, 8, 0, 0);
-                cal.set(Calendar.MILLISECOND, 0);
-                long start = cal.getTimeInMillis();
-
-                RecurrenceRuleIterator iterator = rule.iterator(start, tz);
-                while (iterator.hasNext()) {
-                    DateTime dateTime = iterator.nextDateTime();
-                    System.out.println(new Date(dateTime.getTimestamp()));
-                }
-
-            } catch (InvalidRecurrenceRuleException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
-        }
-
+    public static Period getImplicitSeriesPeriod(RecurrenceData recurrenceData, Period masterPeriod) throws OXException {
         /*
          * remember time fraction of actual start- and end-date
          */
-        Calendar calendar = GregorianCalendar.getInstance(timeZone);
+        TimeZone timeZone = null != recurrenceData.getTimeZoneID() ? TimeZone.getTimeZone(recurrenceData.getTimeZoneID()) : TimeZones.UTC;
+        Calendar calendar = CalendarUtils.initCalendar(timeZone, masterPeriod.getStartDate());
         calendar.setTime(masterPeriod.getStartDate());
         int startHour = calendar.get(Calendar.HOUR_OF_DAY);
         int startMinute = calendar.get(Calendar.MINUTE);
@@ -197,42 +175,20 @@ public class Recurrence {
         int endHour = calendar.get(Calendar.HOUR_OF_DAY);
         int endMinute = calendar.get(Calendar.MINUTE);
         int endSecond = calendar.get(Calendar.SECOND);
-
-        RecurrenceRule rule;
-        try {
-            rule = new RecurrenceRule(recurrenceRule);
-        } catch (InvalidRecurrenceRuleException e) {
-            throw OXException.general("", e);
-        }
-        // TODO what if masterPeriod.getStartDate() is *no" occurrence? (series start != start of first occurrence)  ???
-        // rule.iterator(masterPeriod.getStartDate().getTime(), timeZone).nextMillis() returns masterPeriod.getStartDate().getTime() then???
-
-        long millis = masterPeriod.getStartDate().getTime();
-        RecurrenceRuleIterator iterator;
-        if (rule.hasPart(Part.BYMONTH) || rule.hasPart(Part.BYMONTHDAY) || rule.hasPart(Part.BYWEEKNO) || rule.hasPart(Part.BYYEARDAY)) {
-            // keine ahnung ???
-            calendar.setTime(masterPeriod.getStartDate());
-            calendar.add(Calendar.DAY_OF_YEAR, -500);
-            iterator = rule.iterator(calendar.getTimeInMillis(), timeZone);
-            while (iterator.hasNext()) {
-                long nextMillis = iterator.nextMillis();
-                if (nextMillis >= millis) {
-                    millis = nextMillis;
-                    break;
-                }
-            }
-            iterator = rule.iterator(masterPeriod.getStartDate().getTime(), timeZone);
-            iterator.nextMillis();
-        } else {
-            iterator = rule.iterator(millis, timeZone);
-            millis = iterator.nextMillis();
-        }
+        /*
+         * iterate recurrence and take over start date of first occurrence
+         */
+        RecurrenceRuleIterator iterator = getRecurrenceIterator(recurrenceData, true);
+        long millis = iterator.nextMillis();
         calendar.setTimeInMillis(millis);
         calendar.set(Calendar.HOUR_OF_DAY, startHour);
         calendar.set(Calendar.MINUTE, startMinute);
         calendar.set(Calendar.SECOND, startSecond);
         Date startDate = calendar.getTime();
-
+        /*
+         * iterate recurrence and take over end date of "last" occurrence
+         */
+        //TODO recurrence service should know "max until"
         for (int i = 1; i < 1000 && iterator.hasNext(); millis = iterator.nextMillis(), i++)
             ;
         calendar.setTimeInMillis(millis);
@@ -256,28 +212,97 @@ public class Recurrence {
     /**
      * Initializes a new recurrence iterator for a specific recurrence rule.
      *
-     * @param recurrenceRule The recurrence rule
-     * @param seriesStart The start-date of the series, i.e. the actual start-date of the series master
-     * @param timeZone The timezone to consider, or <code>null</code> for <i>floating</i> dates
-     * @param allDay <code>true</code> for an "all-day" event series, <code>false</code>, otherwise
+     * @param recurrenceData The recurrence data
      * @return The recurrence rule iterator
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
      */
-    static RecurrenceRuleIterator getRecurrenceIterator(String recurrenceRule, long seriesStart, TimeZone timeZone, boolean allDay) throws OXException {
+    static RecurrenceRuleIterator getRecurrenceIterator(RecurrenceData recurrenceData) throws OXException {
         RecurrenceRule rrule = null;
         try {
-            rrule = new RecurrenceRule(recurrenceRule);
+            rrule = new RecurrenceRule(recurrenceData.getRecurrenceRule());
         } catch (InvalidRecurrenceRuleException e) {
-            throw new OXException(e);
+            throw CalendarExceptionCodes.INVALID_RRULE.create(recurrenceData.getRecurrenceRule());
         }
         DateTime start;
-        if (allDay) {
-            start = new DateTime(TimeZone.getTimeZone("UTC"), seriesStart).toAllDay();
+        if (recurrenceData.isAllDay()) {
+            start = new DateTime(TimeZones.UTC, recurrenceData.getSeriesStart()).toAllDay();
+        } else if (null != recurrenceData.getTimeZoneID()) {
+            start = new DateTime(TimeZone.getTimeZone(recurrenceData.getTimeZoneID()), recurrenceData.getSeriesStart());
         } else {
-            start = new DateTime(timeZone, seriesStart);
+            start = new DateTime(recurrenceData.getSeriesStart());
         }
         return rrule.iterator(start);
     }
 
+    /**
+     * Initializes a new recurrence iterator for a specific recurrence rule, optionally advancing to the first occurrence. The latter
+     * option ensures that the first date delivered by the iterator matches the start-date of the first occurrence.
+     *
+     * @param recurrenceData The recurrence data
+     * @param forwardToOccurrence <code>true</code> to fast-forward the iterator to the first occurrence if the recurrence data's start
+     *            does not fall into the pattern, <code>false</code> otherwise
+     * @return The recurrence rule iterator
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
+     */
+    static RecurrenceRuleIterator getRecurrenceIterator(RecurrenceData recurrenceData, boolean forwardToOccurrence) throws OXException {
+        RecurrenceRule rule = null;
+        try {
+            rule = new RecurrenceRule(recurrenceData.getRecurrenceRule());
+        } catch (InvalidRecurrenceRuleException e) {
+            throw CalendarExceptionCodes.INVALID_RRULE.create(recurrenceData.getRecurrenceRule());
+        }
+        DateTime start;
+        if (recurrenceData.isAllDay()) {
+            start = new DateTime(TimeZones.UTC, recurrenceData.getSeriesStart()).toAllDay();
+        } else if (null != recurrenceData.getTimeZoneID()) {
+            start = new DateTime(TimeZone.getTimeZone(recurrenceData.getTimeZoneID()), recurrenceData.getSeriesStart());
+        } else {
+            start = new DateTime(recurrenceData.getSeriesStart());
+        }
+        if (forwardToOccurrence && false == refersToSeriesStart(rule)) {
+            /*
+             * start iterating in the past to ensure the first occurrence is caught
+             */
+            Integer originalCount = rule.getCount();
+            try {
+                if (null != originalCount) {
+                    rule.setUntil(null);
+                }
+                DateTime adjustedStart = start.addDuration(new Duration(-1, 105));
+                //TODO: max_recurrences guard?
+                for (RecurrenceRuleIterator iterator = rule.iterator(adjustedStart); iterator.hasNext(); iterator.nextMillis()) {
+                    if (iterator.peekMillis() >= recurrenceData.getSeriesStart()) {
+                        return iterator;
+                    }
+                }
+                throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(new DefaultRecurrenceId(recurrenceData.getSeriesStart()), recurrenceData.getRecurrenceRule());
+            } finally {
+                if (null != originalCount) {
+                    rule.setCount(originalCount.intValue());
+                }
+            }
+        }
+        return rule.iterator(start);
+    }
+
+    /**
+     * Gets a value indicating whether the occurrences produced by the recurrence rule are always "relative" to a given start date or not.
+     * <p/>
+     * A "relative" recurrence always begins on the date of the first occurrence and continues with a specific interval, e.g. a simple
+     * <code>FREQ=DAILY</code> event series.
+     * <p/>
+     * Otherwise, the occurrences are derived from the rule directly, and the series start is not necessarily part of the rule, e.g. a
+     * <code>FREQ=WEEKLY;BYDAY=WE</code> or a <code>FREQ=YEARLY;BYMONTH=10;BYMONTHDAY=8</code> event series.
+     *
+     * @param rule The rule to check
+     * @return <code>true</code> if the series refers to the series start, <code>false</code>, otherwise
+     */
+    private static boolean refersToSeriesStart(RecurrenceRule rule) {
+        if (rule.hasPart(Part.BYMONTH) || rule.hasPart(Part.BYMONTHDAY) || rule.hasPart(Part.BYWEEKNO) || rule.hasPart(Part.BYYEARDAY)) {
+            return false;
+        }
+        return true;
+    }
 
     /**
      * Gets the recurrence rule appropriate for the supplied series pattern.

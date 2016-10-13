@@ -51,9 +51,7 @@ package com.openexchange.chronos.compat;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
@@ -71,8 +69,11 @@ import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.Trigger.Related;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 
 /**
  * {@link Event2Appointment}
@@ -296,19 +297,15 @@ public class Event2Appointment {
     }
 
     /**
-     * Gets the series pattern for the supplied recurrence rule.
+     * Gets the legacy series pattern for the supplied recurrence data.
      *
-     * @param recurrenceRule The recurrence rule
-     * @param startDate The start of the series
-     * @param timeZone The timezone of the event series
-     * @param allDay <code>true</code> for an "all-day" event series, <code>false</code>, otherwise
-     * @return The series pattern, or <code>null</code> if not mappable
+     * @param recurrenceData The recurrence data
+     * @return The series pattern, or <code>null</code> if passed <code>recurrenceData</code> reference was null
      */
-    public static SeriesPattern getSeriesPattern(String recurrenceRule, Date startDate, String timeZone, boolean allDay) {
-        if (Strings.isNotEmpty(recurrenceRule)) {
-            Calendar startCalendar = GregorianCalendar.getInstance(TimeZone.getTimeZone(timeZone));
-            startCalendar.setTime(startDate);
-            return Recurrence.generatePattern(recurrenceRule, startCalendar);
+    public static SeriesPattern getSeriesPattern(RecurrenceData recurrenceData) {
+        if (null != recurrenceData) {
+            TimeZone timeZone = null != recurrenceData.getTimeZoneID() ? TimeZone.getTimeZone(recurrenceData.getTimeZoneID()) : TimeZones.UTC;
+            return Recurrence.generatePattern(recurrenceData.getRecurrenceRule(), CalendarUtils.initCalendar(timeZone, recurrenceData.getSeriesStart()));
         }
         return null;
     }
@@ -317,15 +314,12 @@ public class Event2Appointment {
      * Gets the formerly used recurrence position, i.e. the 1-based, sequential position in the series where the original occurrence
      * would have been.
      *
-     * @param recurrenceRule The recurrence rule
-     * @param seriesStart The start-date of the series, i.e. the actual start-date of the series master
-     * @param timeZone The timezone to consider, or <code>null</code> for <i>floating</i> dates
-     * @param allDay <code>true</code> for an "all-day" event series, <code>false</code>, otherwise
-     * @param recurrenceId The recurrence identifier, i.e. the date where the original occurrence would have been
+     * @param recurrenceData The recurrence data
      * @return The recurrence position
+     * @throws OXException {@link CalendarExceptionCodes#INVALID_RECURRENCE_ID}
      */
-    public static int getRecurrencePosition(String recurrenceRule, Date seriesStart, TimeZone timeZone, boolean allDay, RecurrenceId recurrenceId) throws OXException {
-        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceRule, seriesStart.getTime(), timeZone, allDay);
+    public static int getRecurrencePosition(RecurrenceData recurrenceData, RecurrenceId recurrenceId) throws OXException {
+        RecurrenceRuleIterator iterator = Recurrence.getRecurrenceIterator(recurrenceData);
         int position = 0;
         while (iterator.hasNext()) {
             long nextMillis = iterator.nextMillis();
@@ -337,7 +331,7 @@ public class Event2Appointment {
                 break;
             }
         }
-        throw OXException.general("recurrence id not in series: " + recurrenceId);
+        throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceId), recurrenceData.getRecurrenceRule());
     }
 
     /**
@@ -348,7 +342,7 @@ public class Event2Appointment {
      * @return The legacy recurrence date position
      */
     public static Date getRecurrenceDatePosition(RecurrenceId recurrenceId) {
-        return CalendarUtils.truncateTime(new Date(recurrenceId.getValue()), TimeZone.getTimeZone("UTC"));
+        return CalendarUtils.truncateTime(new Date(recurrenceId.getValue()), TimeZones.UTC);
     }
 
     /**

@@ -156,7 +156,7 @@ public class UpdateOperation extends AbstractOperation {
                 updateEvent(originalExceptionEvent, updatedEvent);
             } else {
                 /*
-                 * update for new change exception, prepare& insert a plain exception first
+                 * update for new change exception, prepare & insert a plain exception first
                  */
                 Event newExceptionEvent = prepareException(originalEvent, Check.recurrenceIdExists(originalEvent, recurrenceID));
                 storage.getEventStorage().insertEvent(newExceptionEvent);
@@ -283,7 +283,7 @@ public class UpdateOperation extends AbstractOperation {
                     /*
                      * ensure all necessary recurrence related data is present in passed event update & check rule validity
                      */
-                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
+                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
                     Check.recurrenceRuleIsValid(eventUpdate);
                     /*
                      * assign recurrence id when transforming a single event to a series

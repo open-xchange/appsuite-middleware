@@ -276,7 +276,7 @@ public class Check {
         RecurrenceRuleIterator iterator = rule.iterator(start);
         iterator.fastForward(recurrenceID.getValue());
         if (false == iterator.hasNext() || recurrenceID.getValue() != iterator.nextMillis()) {
-            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(L(recurrenceID.getValue()), seriesMaster.getRecurrenceRule());
+            throw CalendarExceptionCodes.INVALID_RECURRENCE_ID.create(String.valueOf(recurrenceID), seriesMaster.getRecurrenceRule());
         }
         return recurrenceID;
     }

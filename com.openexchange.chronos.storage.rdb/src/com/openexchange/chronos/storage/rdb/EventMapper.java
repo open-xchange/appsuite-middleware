@@ -66,6 +66,7 @@ import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
+import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
@@ -74,6 +75,7 @@ import com.openexchange.groupware.tools.mappings.database.BigIntMapping;
 import com.openexchange.groupware.tools.mappings.database.DateMapping;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMapper;
+import com.openexchange.groupware.tools.mappings.database.DefaultDbMapping;
 import com.openexchange.groupware.tools.mappings.database.DefaultDbMultiMapping;
 import com.openexchange.groupware.tools.mappings.database.IntegerMapping;
 import com.openexchange.groupware.tools.mappings.database.VarCharMapping;
@@ -462,8 +464,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public Integer get(Event event) {
-                String value = event.getColor();
-                return null == value ? null : Event2Appointment.getColorLabel(value);
+                return I(Event2Appointment.getColorLabel(event.getColor()));
             }
 
             @Override
@@ -611,6 +612,50 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
             @Override
             public void remove(Event event) {
                 event.removeSeriesId();
+            }
+        });
+        mappings.put(EventField.RECURRENCE_ID, new DefaultDbMapping<RecurrenceId, Event>("intfield05", "Recurrence id", Types.INTEGER) {
+
+            @Override
+            public RecurrenceId get(ResultSet resultSet, String columnLabel) throws SQLException {
+                int recurrencePosition = resultSet.getInt(columnLabel);
+                if (resultSet.wasNull() || 0 >= recurrencePosition) {
+                    return null;
+                }
+                return new StoredRecurrenceId(recurrencePosition);
+            }
+
+            @Override
+            public int set(PreparedStatement statement, int parameterIndex, Event event) throws SQLException {
+                RecurrenceId value = isSet(event) ? get(event) : null;
+                if (null == value) {
+                    statement.setNull(parameterIndex, Types.INTEGER);
+                } else if (StoredRecurrenceId.class.isInstance(value)) {
+                    statement.setInt(parameterIndex, ((StoredRecurrenceId) value).getRecurrencePosition());
+                } else {
+                    throw new IllegalArgumentException("Unable to set recurrence id \"" + value + "\" in prepared statement");
+                }
+                return 1;
+            }
+
+            @Override
+            public boolean isSet(Event event) {
+                return event.containsRecurrenceRule();
+            }
+
+            @Override
+            public void set(Event event, RecurrenceId value) throws OXException {
+                event.setRecurrenceId(value);
+            }
+
+            @Override
+            public RecurrenceId get(Event event) {
+                return event.getRecurrenceId();
+            }
+
+            @Override
+            public void remove(Event event) {
+                event.removeRecurrenceId();
             }
         });
         mappings.put(EventField.RECURRENCE_RULE, new DefaultDbMultiMapping<String, Event>(new String[] { "field06", "intfield04" }, "Recurrence rule") {

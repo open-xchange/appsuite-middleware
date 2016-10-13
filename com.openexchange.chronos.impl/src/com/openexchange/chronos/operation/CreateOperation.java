@@ -84,6 +84,7 @@ import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.DefaultRecurrenceData;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.chronos.storage.CalendarStorage;
@@ -247,7 +248,8 @@ public class CreateOperation extends AbstractOperation {
         Date from;
         Date until;
         if (isSeriesMaster(event)) {
-            Period period = Recurrence.getImplicitSeriesPeriod(new Period(event), TimeZone.getTimeZone(event.getStartTimeZone()), event.getRecurrenceRule());
+            DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event);
+            Period period = Recurrence.getImplicitSeriesPeriod(recurrenceData, new Period(event));
             from = period.getStartDate();
             until = period.getEndDate();
         } else {
