@@ -374,6 +374,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         // Designates the full email address for the account. If not present in the payload, the device prompts for this string during profile installation.
         payloadContent.addStringValue("EmailAddress", getUserSettingMail(userId, contextId).getSendAddr());
 
+        // -------------------------------------------------- IncomingMailServer --------------------------------------------------------
 
         // Designates the authentication scheme for incoming mail. Allowed values are EmailAuthPassword and EmailAuthNone.
         payloadContent.addStringValue("IncomingMailServerAuthentication", "EmailAuthPassword");
@@ -391,8 +392,11 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         // If not present in the payload, and the account is set up to require authentication for incoming email, the device will prompt for this string during profile installation.
         payloadContent.addStringValue("IncomingMailServerUsername", configurations.imapConfig.login);
 
+        // -------------------------------------------------- OutgoingMailServer --------------------------------------------------------
+
         // Designates the authentication scheme for outgoing mail. Allowed values are EmailAuthPassword and EmailAuthNone.
-        payloadContent.addStringValue("OutgoingMailServerAuthentication", (Strings.isEmpty(configurations.smtpConfig.login) && Strings.isEmpty(configurations.smtpConfig.password)) ? "EmailAuthNone" : "EmailAuthPassword");
+        boolean needsAuthentication = !Strings.isEmpty(configurations.smtpConfig.login) || !Strings.isEmpty(configurations.smtpConfig.password);
+        payloadContent.addStringValue("OutgoingMailServerAuthentication", needsAuthentication ? "EmailAuthPassword" : "EmailAuthNone");
 
         // Designates the outgoing mail server host name (or IP address).
         payloadContent.addStringValue("OutgoingMailServerHostName", configurations.smtpConfig.host);
@@ -405,7 +409,9 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
 
         // Designates the user name for the email account, usually the same as the email address up to the @ character.
         // If not present in the payload, and the account is set up to require authentication for outgoing email, the device prompts for this string during profile installation.
-        payloadContent.addStringValue("OutgoingMailServerUsername", configurations.smtpConfig.login);
+        if (needsAuthentication) {
+            payloadContent.addStringValue("OutgoingMailServerUsername", configurations.smtpConfig.login);
+        }
 
         // Further options (currently not used)
 
