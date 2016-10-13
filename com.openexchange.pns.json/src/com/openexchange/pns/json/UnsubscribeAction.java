@@ -49,9 +49,6 @@
 
 package com.openexchange.pns.json;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -59,26 +56,24 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.pns.DefaultPushSubscription;
-import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.PushSubscriptionRegistry;
-import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link SubscribeAction}
+ * {@link UnsubscribeAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class SubscribeAction extends AbstractPushJsonAction {
+public class UnsubscribeAction extends AbstractPushJsonAction {
 
     /**
-     * Initializes a new {@link SubscribeAction}.
+     * Initializes a new {@link UnsubscribeAction}.
      */
-    public SubscribeAction(ServiceLookup services) {
+    public UnsubscribeAction(ServiceLookup services) {
         super(services);
     }
 
@@ -100,36 +95,23 @@ public class SubscribeAction extends AbstractPushJsonAction {
 
         String token = requireStringField("token", jRequestBody);
         String transportId = requireStringField("transport", jRequestBody);
-        JSONArray jTopics = requireArrayField("topics", jRequestBody);
-
-        List<String> topics = new ArrayList<>(jTopics.length());
-        for (Object topicObj : jTopics) {
-            String topic = topicObj.toString();
-            try {
-                PushNotifications.validateTopicName(topic);
-            } catch (IllegalArgumentException e) {
-                throw PushExceptionCodes.INVALID_TOPIC.create(e, topic);
-            }
-            topics.add(topic);
-        }
 
         DefaultPushSubscription.Builder builder = DefaultPushSubscription.builder()
             .client(client)
-            .topics(topics)
             .contextId(session.getContextId())
             .token(token)
             .transportId(transportId)
             .userId(session.getUserId());
         DefaultPushSubscription subscription = builder.build();
 
-        subscriptionRegistry.registerSubscription(subscription);
+        subscriptionRegistry.unregisterSubscription(subscription);
 
         return new AJAXRequestResult(new JSONObject(2).put("success", true), "json");
     }
 
     @Override
     public String getAction() {
-        return "subscribe";
+        return "unsubscribe";
     }
 
 }

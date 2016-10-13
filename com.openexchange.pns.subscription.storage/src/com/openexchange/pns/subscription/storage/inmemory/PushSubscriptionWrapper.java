@@ -55,7 +55,7 @@ import com.openexchange.pns.PushSubscription;
  * {@link PushSubscriptionWrapper}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v7.8.3
  */
 public class PushSubscriptionWrapper {
 
