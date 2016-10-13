@@ -93,6 +93,10 @@ public class PushJsonActionFactory implements AJAXActionServiceFactory {
             SubscribeAction subscribeAction = new SubscribeAction(services);
             tmp.put(subscribeAction.getAction(), subscribeAction);
         }
+        {
+            UnsubscribeAction unsubscribeAction = new UnsubscribeAction(services);
+            tmp.put(unsubscribeAction.getAction(), unsubscribeAction);
+        }
         return tmp.build();
     }
 

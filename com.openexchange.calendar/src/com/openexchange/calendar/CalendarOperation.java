@@ -1741,11 +1741,26 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             throw OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create();
         }
         // Only start date is set
-        if (cdao.getStartDate() != null && cdao.getEndDate() == null && edao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
-            throw OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create();
-        }// Only end date is set
-        if (cdao.getStartDate() == null && cdao.getEndDate() != null && cdao.getEndDate().getTime() < edao.getStartDate().getTime()) {
-            throw OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create();
+        if (cdao.getStartDate() != null && cdao.getEndDate() == null) {
+            if (cdao.getRecurrencePosition() != 0 || cdao.getRecurrenceDatePosition() != null) {
+                CalendarDataObject tmp = getUpdateWithAppropriateTimes(cdao, edao);
+                if (tmp.getEndDate().getTime() < cdao.getStartDate().getTime()) {
+                    throw OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create();
+                }
+            } else if (edao.getEndDate().getTime() < cdao.getStartDate().getTime()) {
+                throw OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create();
+            }
+        }
+        // Only end date is set
+        if (cdao.getStartDate() == null && cdao.getEndDate() != null) {
+            if (cdao.getRecurrencePosition() != 0 || cdao.getRecurrenceDatePosition() != null) {
+                CalendarDataObject tmp = getUpdateWithAppropriateTimes(cdao, edao);
+                if (cdao.getEndDate().getTime() < tmp.getStartDate().getTime()) {
+                    throw OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create();
+                }
+            } else if (cdao.getEndDate().getTime() < edao.getStartDate().getTime()) {
+                throw OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create();
+            }
         }
         if (cdao.containsUntil() && cdao.getUntil() != null) {
             final Date until = cdao.getUntil();
@@ -1793,6 +1808,12 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (cdao.containsParticipants()) {
             recColl.simpleParticipantCheck(cdao);
         }
+    }
+    
+    private CalendarDataObject getUpdateWithAppropriateTimes(CalendarDataObject cdao, CalendarDataObject edao) throws OXException {
+        CalendarDataObject clone = cdao.clone();
+        recColl.setStartAndEndDate(clone, edao);
+        return clone;
     }
 
     private boolean isUntilBeforeStart(final Date until, final Date start) {

@@ -50,6 +50,7 @@
 package com.openexchange.share.impl;
 
 import java.util.Date;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
@@ -98,7 +99,7 @@ public class DefaultShareLink implements ShareLink {
     }
 
     @Override
-    public String getShareURL(HostData hostData) {
+    public String getShareURL(HostData hostData) throws OXException {
         return delegate.getShareURL(hostData);
     }
 

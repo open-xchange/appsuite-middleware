@@ -1,0 +1,5 @@
+type: object
+properties:
+  success:
+    type: boolean
+    description: The flag signaling success

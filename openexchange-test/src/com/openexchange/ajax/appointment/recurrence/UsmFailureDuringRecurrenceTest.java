@@ -125,10 +125,12 @@ public class UsmFailureDuringRecurrenceTest extends ManagedAppointmentTest {
     }
 
     public void testShouldAllowToCreateAChangeException() throws Exception {
-        Date myDate = D("31.12.2025 00:00");
+        Date start = D("31.12.2025 00:00");
+        Date end = D("31.12.2025 01:00");
         Changes changes = new Changes();
         changes.put(Appointment.RECURRENCE_POSITION, 1);
-        changes.put(Appointment.START_DATE, myDate);
+        changes.put(Appointment.START_DATE, start);
+        changes.put(Appointment.END_DATE, end);
         changes.put(Appointment.INTERVAL, 1);
 
         Expectations expectationsForException = new Expectations();

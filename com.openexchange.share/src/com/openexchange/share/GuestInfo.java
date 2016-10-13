@@ -51,6 +51,7 @@ package com.openexchange.share;
 
 import java.util.Date;
 import java.util.Locale;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.recipient.RecipientType;
 
@@ -152,7 +153,8 @@ public interface GuestInfo {
      * @param hostData Host data
      * @param targetPath The share target path to create the link for, or <code>null</code> to generate a "base" link only
      * @return The share link
+     * @throws OXException in case the link cannot be generated.
      */
-    String generateLink(HostData hostData, ShareTargetPath targetPath);
+    String generateLink(HostData hostData, ShareTargetPath targetPath) throws OXException;
 
 }

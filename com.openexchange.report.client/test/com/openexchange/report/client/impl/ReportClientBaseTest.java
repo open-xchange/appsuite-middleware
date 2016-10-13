@@ -49,8 +49,8 @@
 
 package com.openexchange.report.client.impl;
 
-import static org.hamcrest.Matchers.any;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,9 +59,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeSet;
 import java.util.UUID;
-import java.util.Map.Entry;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.InvalidAttributeValueException;
@@ -84,7 +84,6 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.openexchange.report.appsuite.serialization.ReportConfigs;
 import com.openexchange.report.client.configuration.ReportConfiguration;
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;

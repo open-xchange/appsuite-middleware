@@ -52,6 +52,7 @@ package com.openexchange.drive.impl.internal;
 import java.util.Date;
 import com.openexchange.drive.DriveShareLink;
 import com.openexchange.drive.DriveShareTarget;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareLink;
@@ -79,7 +80,7 @@ public class DefaultDriveShareLink implements DriveShareLink {
     }
 
     @Override
-    public String getShareURL(HostData hostData) {
+    public String getShareURL(HostData hostData) throws OXException {
         return shareLink.getShareURL(hostData);
     }
 

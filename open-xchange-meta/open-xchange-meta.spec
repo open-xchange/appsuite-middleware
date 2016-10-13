@@ -20,6 +20,20 @@ Summary:        Open-Xchange Meta packages
 %define all_lang_backend open-xchange-l10n-de-de, open-xchange-l10n-cs-cz, open-xchange-l10n-es-es, open-xchange-l10n-hu-hu, open-xchange-l10n-it-it, open-xchange-l10n-ja-jp, open-xchange-l10n-lv-lv, open-xchange-l10n-nl-nl, open-xchange-l10n-pl-pl, open-xchange-l10n-sk-sk, open-xchange-l10n-zh-cn, open-xchange-l10n-zh-tw
 
 # ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-meta-appsuite-push
+Group:          Applications/Productivity
+Summary:        The Open-Xchange Meta package for App Suite push
+Requires:       open-xchange-pns-impl
+Requires:       open-xchange-pns-transport-websockets
+
+%description -n open-xchange-meta-appsuite-push
+The Open-Xchange Meta package for App Suite push
+
+Authors:
+--------
+    Open-Xchange
+
+# ----------------------------------------------------------------------------------------------------
 %package -n     open-xchange-meta-server
 Group:          Applications/Productivity
 Summary:        The Open-Xchange Meta package for OX Backend

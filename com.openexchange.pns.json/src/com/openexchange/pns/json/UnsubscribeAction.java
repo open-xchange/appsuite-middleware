@@ -47,69 +47,71 @@
  *
  */
 
-package com.openexchange.mailaccount.internal;
+package com.openexchange.pns.json;
 
-import java.sql.Connection;
-import java.util.Collections;
-import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.mailaccount.UnifiedInboxManagement;
-import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.java.Strings;
+import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link MailAccountOAuthAccountDeleteListener}
+ * {@link UnsubscribeAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class MailAccountOAuthAccountDeleteListener implements OAuthAccountDeleteListener {
+public class UnsubscribeAction extends AbstractPushJsonAction {
 
     /**
-     * Initializes a new {@link MailAccountOAuthAccountDeleteListener}.
+     * Initializes a new {@link UnsubscribeAction}.
      */
-    public MailAccountOAuthAccountDeleteListener() {
-        super();
+    public UnsubscribeAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        // Ignore
-    }
+    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
+        JSONObject jRequestBody = (JSONObject) requestData.requireData();
 
-    @Override
-    public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-        if (null != mass) {
-            MailAccount[] userMailAccounts = mass.getUserMailAccounts(user, cid, con);
-            for (MailAccount mailAccount : userMailAccounts) {
-                if (false == mailAccount.isDefaultAccount() && false == isUnifiedINBOXAccount(mailAccount)) {
-                    boolean deleted = false;
-                    if (mailAccount.isMailOAuthAble()) {
-                        if (mailAccount.getMailOAuthId() == id) {
-                            mass.deleteMailAccount(mailAccount.getId(), Collections.<String, Object> emptyMap(), user, cid, false, con);
-                            deleted = true;
-                        }
-                    }
-                    if (!deleted && mailAccount.isTransportOAuthAble()) {
-                        if (mailAccount.getTransportOAuthId() == id) {
-                            mass.deleteTransportAccount(mailAccount.getId(), user, cid, con);
-                        }
-                    }
-                }
-            }
+        PushSubscriptionRegistry subscriptionRegistry = services.getOptionalService(PushSubscriptionRegistry.class);
+
+        String client = jRequestBody.optString("client", null);
+        if (null == client) {
+            client = session.getClient();
+        } else if (null != session.getClient() && !client.equals(session.getClient())) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("client", client);
         }
+        if (Strings.isEmpty(client)) {
+            throw AjaxExceptionCodes.MISSING_FIELD.create("client");
+        }
+
+        String token = requireStringField("token", jRequestBody);
+        String transportId = requireStringField("transport", jRequestBody);
+
+        DefaultPushSubscription.Builder builder = DefaultPushSubscription.builder()
+            .client(client)
+            .contextId(session.getContextId())
+            .token(token)
+            .transportId(transportId)
+            .userId(session.getUserId());
+        DefaultPushSubscription subscription = builder.build();
+
+        subscriptionRegistry.unregisterSubscription(subscription);
+
+        return new AJAXRequestResult(new JSONObject(2).put("success", true), "json");
     }
 
-    private static boolean isUnifiedINBOXAccount(final MailAccount mailAccount) {
-        return isUnifiedINBOXAccount(mailAccount.getMailProtocol());
-    }
-
-    private static boolean isUnifiedINBOXAccount(final String mailProtocol) {
-        return UnifiedInboxManagement.PROTOCOL_UNIFIED_INBOX.equals(mailProtocol);
+    @Override
+    public String getAction() {
+        return "unsubscribe";
     }
 
 }

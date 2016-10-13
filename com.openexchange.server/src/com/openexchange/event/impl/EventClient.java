@@ -56,6 +56,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -148,25 +149,28 @@ public class EventClient {
         if (null != pushNotificationService) {
             for (Map.Entry<Integer, Set<Integer>> entry : affectedUsers.entrySet()) {
                 int userId = entry.getKey().intValue();
-                Integer folderId = entry.getValue().iterator().next();
-                Date[] startAndEndDate = determineStartAndEndDate(appointment);
-
-                Map<String, Object> messageData = PushNotifications.messageDataBilder()
-                    .put(PushNotificationField.ID, Integer.valueOf(appointment.getObjectID()))
-                    .put(PushNotificationField.FOLDER, folderId)
-                    .put(PushNotificationField.APPOINTMENT_TITLE, appointment.getTitle())
-                    .put(PushNotificationField.APPOINTMENT_LOCATION, appointment.getLocation())
-                    .put(PushNotificationField.APPOINTMENT_START_DATE, startAndEndDate[0])
-                    .put(PushNotificationField.APPOINTMENT_END_DATE, startAndEndDate[1])
-                    .build();
-
-                PushNotification notification = DefaultPushNotification.builder()
-                    .contextId(contextId)
-                    .userId(userId)
-                    .topic(KnownTopic.CALENDAR_NEW.getName())
-                    .messageData(messageData)
-                    .build();
-                pushNotificationService.handle(notification);
+                Iterator<Integer> i = entry.getValue().iterator();
+                if (i.hasNext()) {
+                    Integer folderId = i.next();
+                    Date[] startAndEndDate = determineStartAndEndDate(appointment);
+    
+                    Map<String, Object> messageData = PushNotifications.messageDataBilder()
+                        .put(PushNotificationField.ID, Integer.valueOf(appointment.getObjectID()))
+                        .put(PushNotificationField.FOLDER, folderId)
+                        .put(PushNotificationField.APPOINTMENT_TITLE, appointment.getTitle())
+                        .put(PushNotificationField.APPOINTMENT_LOCATION, appointment.getLocation())
+                        .put(PushNotificationField.APPOINTMENT_START_DATE, startAndEndDate[0])
+                        .put(PushNotificationField.APPOINTMENT_END_DATE, startAndEndDate[1])
+                        .build();
+    
+                    PushNotification notification = DefaultPushNotification.builder()
+                        .contextId(contextId)
+                        .userId(userId)
+                        .topic(KnownTopic.CALENDAR_NEW.getName())
+                        .messageData(messageData)
+                        .build();
+                    pushNotificationService.handle(notification);
+                }
             }
         }
     }

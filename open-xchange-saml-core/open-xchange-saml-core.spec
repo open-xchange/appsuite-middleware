@@ -66,6 +66,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2673
     ox_add_property com.openexchange.saml.enableAutoLogin false $PFILE
+
+    # SoftwareChange_Request-3548
+    ox_add_property com.openexchange.saml.allowUnsolicitedResponses true /opt/open-xchange/etc/saml.properties
 fi
 
 %clean

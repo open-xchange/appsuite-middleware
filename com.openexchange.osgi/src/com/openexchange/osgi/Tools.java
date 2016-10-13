@@ -55,6 +55,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
@@ -66,6 +67,8 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class Tools {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tools.class);
 
     /**
      * Generates an OR filter matching the services given in the classes varargs.
@@ -120,6 +123,22 @@ public class Tools {
         }
 
         return service;
+    }
+
+    /**
+     * Safely ungets the service associated with specified service reference using given bundle context.
+     *
+     * @param reference The service reference to unget
+     * @param context The bundle context to use
+     */
+    public static <S> void ungetServiceSafe(ServiceReference<S> reference, BundleContext context) {
+        if (null != reference && null != context) {
+            try {
+                context.ungetService(reference);
+            } catch (Exception e) {
+                LOG.debug("Failed to unget service.", e);
+            }
+        }
     }
 
     private Tools() {

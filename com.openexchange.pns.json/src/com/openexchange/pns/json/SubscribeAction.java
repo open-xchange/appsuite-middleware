@@ -78,7 +78,7 @@ public class SubscribeAction extends AbstractPushJsonAction {
     /**
      * Initializes a new {@link SubscribeAction}.
      */
-    protected SubscribeAction(ServiceLookup services) {
+    public SubscribeAction(ServiceLookup services) {
         super(services);
     }
 
@@ -120,9 +120,9 @@ public class SubscribeAction extends AbstractPushJsonAction {
             .token(token)
             .transportId(transportId)
             .userId(session.getUserId());
-        DefaultPushSubscription subscriptionDesc = builder.build();
+        DefaultPushSubscription subscription = builder.build();
 
-        subscriptionRegistry.registerSubscription(subscriptionDesc);
+        subscriptionRegistry.registerSubscription(subscription);
 
         return new AJAXRequestResult(new JSONObject(2).put("success", true), "json");
     }

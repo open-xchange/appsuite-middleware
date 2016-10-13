@@ -55,7 +55,7 @@
   put:
     operationId: putMailAttachment
     tags:
-      - mail
+      - Mail
     summary: Stores a mail attachment to the drive.
     consumes:
       - application/json
