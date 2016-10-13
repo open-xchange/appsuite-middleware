@@ -140,9 +140,10 @@ public abstract class PasswordChangeService {
      * <p>
      * Default is true.
      *
+     * @param event The event containing the session of the user whose password shall be changed, the context, the new password, and the old password (needed for verification)
      * @return <code>true</code> if the old password is supposed to be checked; otherwise <code>false</code>
      */
-    protected boolean checkOldPassword() {
+    protected boolean checkOldPassword(PasswordChangeEvent event) {
         return true;
     }
 
@@ -159,7 +160,7 @@ public abstract class PasswordChangeService {
             /*
              * Check whether to verify old password prior to applying new one
              */
-            boolean checkOldPassword = checkOldPassword();
+            boolean checkOldPassword = checkOldPassword(event);
             final AuthenticationService authenticationService = Authentication.getService();
             if (checkOldPassword && authenticationService == null) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AuthenticationService.class.getName());
