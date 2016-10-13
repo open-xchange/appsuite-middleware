@@ -1,3 +1,9 @@
+open-xchange-mobile-push (7.6.2-42) stable; urgency=medium
+
+  * Build for patch 2016-10-24 (3626)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 13 Oct 2016 16:05:51 +0200
+
 open-xchange-mobile-push (7.6.2-41) stable; urgency=medium
 
   * Build for patch 2016-09-26 (3568)
