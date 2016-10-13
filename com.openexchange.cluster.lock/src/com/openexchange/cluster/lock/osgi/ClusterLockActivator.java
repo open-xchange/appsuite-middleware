@@ -58,11 +58,11 @@ import com.openexchange.cluster.lock.internal.ClusterLockServiceDatabaseImpl;
 import com.openexchange.cluster.lock.internal.Unregisterer;
 import com.openexchange.cluster.lock.internal.groupware.ClusterLockCreateTableTask;
 import com.openexchange.cluster.lock.internal.groupware.CreateClusterLockTable;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 
@@ -84,13 +84,13 @@ public class ClusterLockActivator extends HousekeepingActivator implements Unreg
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class, DatabaseService.class, TimerService.class };
+        return new Class<?>[] { ConfigurationService.class, DatabaseService.class, TimerService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        final HazelcastConfigurationService hzConfigService = getService(HazelcastConfigurationService.class);
-        final boolean enabled = hzConfigService.isEnabled();
+        final ConfigurationService configService = getService(ConfigurationService.class);
+        final boolean enabled = configService.getBoolProperty("com.openexchange.hazelcast.enabled", false);
 
         if (false == enabled) {
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ClusterLockCreateTableTask(this)));
