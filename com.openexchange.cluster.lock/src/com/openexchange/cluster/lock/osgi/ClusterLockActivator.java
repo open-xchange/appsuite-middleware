@@ -104,6 +104,11 @@ public class ClusterLockActivator extends HousekeepingActivator implements Unreg
     }
 
     @Override
+    protected void stopBundle() throws Exception {
+        unregisterService(ClusterLockService.class);
+    }
+
+    @Override
     public <S> void registerService(Class<S> clazz, S service) {
         super.registerService(clazz, service);
     }
