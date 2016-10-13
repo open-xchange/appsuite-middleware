@@ -105,7 +105,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     private boolean isCometEnabled = false;
 
     /** The max. number of allowed request parameters */
-    private int maxRequestParameters = 30;
+    private int maxRequestParameters = 1000;
 
     /** Unique backend route for every single backend behind the load balancer */
     private String backendRoute = "OX0";
@@ -262,7 +262,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
         }
         this.httpPort = configService.getIntProperty("com.openexchange.connector.networkListenerPort", 8009);
         this.httpsPort = configService.getIntProperty("com.openexchange.connector.networkSslListenerPort", 8010);
-        this.maxRequestParameters = configService.getIntProperty("com.openexchange.connector.maxRequestParameters", 30);
+        this.maxRequestParameters = configService.getIntProperty("com.openexchange.connector.maxRequestParameters", 1000);
         this.backendRoute = configService.getProperty("com.openexchange.server.backendRoute", "OX0");
         this.echoHeader = configService.getProperty("com.openexchange.servlet.echoHeaderName","X-Echo-Header");
 
