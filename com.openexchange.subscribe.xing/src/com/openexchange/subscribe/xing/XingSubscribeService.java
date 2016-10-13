@@ -365,7 +365,11 @@ public class XingSubscribeService extends AbstractSubscribeService {
             }
             String displayName = null;
             if (subscription.getSecret() != null) {
-                displayName = getXingOAuthAccount(subscription.getSession()).getDisplayName();
+                try {
+                    displayName = getXingOAuthAccount(subscription.getSession()).getDisplayName();
+                } catch (Exception e) {
+                    LOG.debug("Failed to get OAuth account's display name", e);
+                }
             }
             if (com.openexchange.java.Strings.isEmpty(displayName)) {
                 subscription.setDisplayName("XING");
