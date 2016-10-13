@@ -1226,7 +1226,7 @@ old_key=io.ox.calendar//participantBlacklist
 new_key=io.ox/calendar//participantBlacklist
 propfile=/opt/open-xchange/etc/settings/participant-blacklist.properties
 
-if ! ox_exists_property ${new_key} ${propfile} 
+if ! ox_exists_property ${new_key} ${propfile}
 then
     if ox_exists_property ${old_key} ${propfile}
     then
@@ -1239,6 +1239,9 @@ then
         ox_add_property ${new_key} "" ${propfile}
     fi
 fi
+
+# SoftwareChange_Request-3616
+ox_add_property com.openexchange.mail.compose.share.preview.timeout 1000 /opt/open-xchange/etc/mail-compose.properties
 
 setConfigFilePermissions() {
     PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )

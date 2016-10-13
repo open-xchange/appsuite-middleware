@@ -479,11 +479,11 @@ public class ShareComposeHandler extends AbstractComposeHandler<ShareTransportCo
         IDBasedFileAccessFactory fileAccessFactory = ServerServiceRegistry.getInstance().getService(IDBasedFileAccessFactory.class);
         ThreadPoolService threadPoolService = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
         boolean documentPreviewEnabled = false;
-        int timeout = 5000;
+        final int timeout;
         String templatePath = null;
         {
             documentPreviewEnabled = Utilities.getBoolFromProperty("com.openexchange.mail.compose.share.documentPreviewEnabled", false, session);
-            timeout = Utilities.getIntFromProperty("com.openexchange.mail.compose.share.preview.timeout", Integer.valueOf(5000), session).intValue();
+            timeout = Utilities.getIntFromProperty("com.openexchange.mail.compose.share.preview.timeout", Integer.valueOf(1000), session).intValue();
             templatePath = Utilities.getValueFromProperty("com.openexchange.templating.path", null, session);
         }
         if (null == items || items.isEmpty() || null == previewService || null == transformationService || null == fileAccessFactory || null == threadPoolService) {

@@ -1397,6 +1397,9 @@ then
     fi
 fi
 
+# SoftwareChange_Request-3616
+ox_add_property com.openexchange.mail.compose.share.preview.timeout 1000 /opt/open-xchange/etc/mail-compose.properties
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
