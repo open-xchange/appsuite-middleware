@@ -483,11 +483,13 @@ public class AJAXRequestDataTools {
         }
 
         String pathInfo = req.getRequestURI();
-        try {
-            pathInfo = URLDecoder.decode(pathInfo, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            // Should never happen
-            LOG.error(e.getMessage(), e);
+        if (pathInfo.contains("%")) {
+            try {
+                pathInfo = URLDecoder.decode(pathInfo, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                // Should never happen
+                LOG.error(e.getMessage(), e);
+            }
         }
         final int lastIndex = pathInfo.lastIndexOf(';');
         if (lastIndex > 0) {
