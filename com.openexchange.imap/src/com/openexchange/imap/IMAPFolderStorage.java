@@ -2496,9 +2496,9 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             final boolean supportsMove = imapConfig.asMap().containsKey("MOVE");
                             if(supportsMove){
                                 new MoveIMAPCommand(f, trashFullname).doCommand();
-                            } else {
-                                new CopyIMAPCommand(f, trashFullname).doCommand();
+                                return;
                             }
+                            new CopyIMAPCommand(f, trashFullname).doCommand();
                         } catch (final MessagingException e) {
                             if (e.getNextException() instanceof CommandFailedException) {
                                 final CommandFailedException exc = (CommandFailedException) e.getNextException();
