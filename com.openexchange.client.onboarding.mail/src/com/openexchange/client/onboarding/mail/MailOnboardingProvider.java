@@ -70,6 +70,7 @@ import com.openexchange.client.onboarding.plist.PlistResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.service.MailService;
@@ -85,6 +86,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
@@ -309,19 +311,36 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         configuration.put(IMAP_PORT_FIELD, new Integer(configurations.imapConfig.port));
         configuration.put(IMAP_SECURE_FIELD, new Boolean(configurations.imapConfig.secure));
 
-        configuration.put(SMTP_LOGIN_FIELD, configurations.smtpConfig.login);
-        configuration.put(SMTP_SERVER_FIELD, configurations.smtpConfig.host);
+        boolean needsAuthentication = false == configurations.smtpConfig.noAuthentication();
+        if (needsAuthentication) {
+            configuration.put(SMTP_LOGIN_FIELD, configurations.smtpConfig.login);
+            configuration.put(SMTP_SERVER_FIELD, configurations.smtpConfig.host);
+        } else {
+            String none = StringHelper.valueOf(getUser(session).getLocale()).getString("None");
+            configuration.put(SMTP_LOGIN_FIELD, none);
+            configuration.put(SMTP_SERVER_FIELD, none);
+        }
         configuration.put(SMTP_PORT_FIELD, new Integer(configurations.smtpConfig.port));
         configuration.put(SMTP_SECURE_FIELD, new Boolean(configurations.smtpConfig.secure));
 
         return new DisplayResult(configuration, ResultReply.NEUTRAL);
     }
 
+
+
     // --------------------------------------------- PLIST utils --------------------------------------------------------------
 
     private UserSettingMail getUserSettingMail(int userId, int contextId) throws OXException {
 
         return UserSettingMailStorage.getInstance().getUserSettingMail(userId, contextId);
+    }
+
+    private User getUser(Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser();
+        }
+
+        return getUser(session.getUserId(), session.getContextId());
     }
 
     private User getUser(int userId, int contextId) throws OXException {
