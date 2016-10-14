@@ -73,8 +73,6 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link Patches}
@@ -482,45 +480,6 @@ public class Patches {
                 }
             }
             return changeExceptions;
-        }
-
-        /**
-         * If not yet set, sets the organizer's participant status to "accepted".
-         *
-         * @param appointment
-         */
-        public static void setOrganizersParticipantStatus(Appointment appointment) {
-            UserParticipant[] users = appointment.getUsers();
-            if (null != users) {
-                int createdBy = appointment.getCreatedBy();
-                TIntObjectMap<UserParticipant> userMap = new TIntObjectHashMap<UserParticipant>();
-                for (UserParticipant userParticipant : users) {
-                    int identifier = userParticipant.getIdentifier();
-                    if (createdBy == identifier && userParticipant.getConfirm() == CalendarObject.NONE) {
-                        userParticipant.setConfirm(CalendarObject.ACCEPT);
-                    }
-                    userMap.put(identifier, userParticipant);
-                }
-
-                Participant[] participants = appointment.getParticipants();
-                if (null != participants) {
-                    for (Participant participant : participants) {
-                        if (UserParticipant.class.isInstance(participant)) {
-                            UserParticipant userParticipant = (UserParticipant) participant;
-                            int identifier = userParticipant.getIdentifier();
-                            UserParticipant up = userMap.get(identifier);
-                            if (up != null && CalendarObject.NONE != up.getConfirm()) {
-                                // prefer confirmation status from users when set
-                                userParticipant.setConfirm(up.getConfirm());
-                                userParticipant.setConfirmMessage(up.getConfirmMessage());
-                            } else if (createdBy == identifier && CalendarObject.NONE == userParticipant.getConfirm()) {
-                                // assume 'accepted' when no confirmation set
-                                userParticipant.setConfirm(CalendarObject.ACCEPT);
-                            }
-                        }
-                    }
-                }
-            }
         }
 
         /**
