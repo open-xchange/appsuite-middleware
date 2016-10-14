@@ -53,6 +53,7 @@ import javax.net.ssl.SSLSocketFactory;
 import com.openexchange.java.util.Tools;
 import com.openexchange.log.LogProperties;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.TrustedSSLSocketFactory;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.config.TrustLevel;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
