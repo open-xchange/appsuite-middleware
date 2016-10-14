@@ -89,7 +89,17 @@ public class JoinCommand implements GroupCommand {
                     } catch (InterruptedException e) {
                         throw e;
                     } catch (ExecutionException e) {
-                        throw e.getCause();
+                        Throwable t = e.getCause();
+                        if (t instanceof OXException) {
+                            throw (OXException) t;
+                        }
+                        if (t instanceof RuntimeException) {
+                            throw RealtimeExceptionCodes.JOIN_FAILED.create(t, stanza.getFrom().toString());
+                        } else if (t instanceof Error) {
+                            throw (Error) t;
+                        } else {
+                            throw new IllegalStateException("Not unchecked", t);
+                        }
                     }
                 } else {
                     doWelcome(stanza, groupDispatcher);
@@ -99,7 +109,7 @@ public class JoinCommand implements GroupCommand {
             }
         } catch (RealtimeException re) {
             throw re;
-        } catch(Throwable t) {
+        } catch(Exception t) {
             throw RealtimeExceptionCodes.JOIN_FAILED.create(t, stanza.getFrom().toString());
         }
     }
@@ -107,16 +117,19 @@ public class JoinCommand implements GroupCommand {
     void doWelcome(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
         groupDispatcher.join(stanza.getOnBehalfOf(), stanza.getSelector(), stanza);
         Stanza welcomeMessage = groupDispatcher.getWelcomeMessage(stanza.getOnBehalfOf());
+        if (null == welcomeMessage) {
+            throw RealtimeExceptionCodes.JOIN_FAILED.create(stanza.getFrom().toString());
+        }
         welcomeMessage.setFrom(groupDispatcher.getId());
         welcomeMessage.setTo(stanza.getFrom());
-         
+
         GroupServiceRegistry.getInstance().getService(MessageDispatcher.class).send(welcomeMessage);
     }
 
     private boolean isSynchronous(Stanza stanza) {
         return stanza.getFrom().getProtocol().equals("call");
     }
-    
+
     private boolean shouldExecuteAsynchronously(GroupDispatcher groupDispatcher) {
         try {
             return ActionHandler.isAsynchronous(groupDispatcher.getClass().getMethod("getWelcomeMessage", ID.class));
