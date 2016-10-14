@@ -240,7 +240,6 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
             sslSocket.setEnabledCipherSuites(sslConfigService.getSupportedCipherSuites());
             sslSocket.setUseClientMode(true);
             sslSocket.addHandshakeCompletedListener(this);
-            socket = sslSocket;
         }
     }
 
