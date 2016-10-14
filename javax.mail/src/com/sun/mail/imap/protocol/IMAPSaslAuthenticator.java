@@ -273,6 +273,17 @@ public class IMAPSaslAuthenticator implements SaslAuthenticator {
 	boolean hasCaps = pr.setCapabilities(r);
     if (hasCaps) {
         pr.getCapabilities().remove("__PRELOGIN__");
+    } else {
+        // Check for any unsolicited response that might provide capabilities
+        if (responses.length > 0) {
+            for (int i = responses.length; !hasCaps && i-- > 0;) {
+                Response unsolicited = responses[i];
+                hasCaps = pr.setCapabilities(unsolicited);
+                if (hasCaps) {
+                    pr.getCapabilities().remove("__PRELOGIN__");
+                }
+            }
+        }
     }
 
 	/*
