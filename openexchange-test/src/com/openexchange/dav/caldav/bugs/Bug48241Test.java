@@ -51,8 +51,6 @@ package com.openexchange.dav.caldav.bugs;
 
 import static org.junit.Assert.*;
 import java.util.Date;
-import java.util.List;
-import java.util.Map.Entry;
 import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -115,7 +113,7 @@ public class Bug48241Test extends CalDAVTest {
 				"SUMMARY:test accept" + "\r\n" +
 				"DTSTART;TZID=Europe/Berlin:" + format(start, "Europe/Berlin") + "\r\n" +
 				"CREATED:" + formatAsUTC(TimeTools.D("yesterday noon")) + "\r\n" +
-				"ATTENDEE;CN=Horst;CUTYPE=INDIVIDUAL;ROLE=REQ-PARTICIPANT:mailto:horst@example.com" + "\r\n" +
+				"ATTENDEE;CN=Horst;CUTYPE=INDIVIDUAL;PARTSTAT=ACCEPTED;ROLE=REQ-PARTICIPANT:mailto:horst@example.com" + "\r\n" +
 				"ATTENDEE;ROLE=REQ-PARTICIPANT;PARTSTAT=NEEDS-ACTION:mailto:" + getClient().getValues().getDefaultAddress() + "\r\n" +
 				"END:VEVENT" + "\r\n" +
 				"END:VCALENDAR"
@@ -133,21 +131,13 @@ public class Bug48241Test extends CalDAVTest {
         ICalResource iCalResource = get(uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
+        Property attendee = iCalResource.getVEvent().getAttendee(getClient().getValues().getDefaultAddress());
+        assertNotNull("ATTENDEE not found", attendee);
+        assertEquals("PARTSTAT wrong", "NEEDS-ACTION", attendee.getAttribute("PARTSTAT"));
         /*
          * accept appointment on client
          */
-        List<Property> attendees = iCalResource.getVEvent().getProperties("ATTENDEE");
-        for (Property property : attendees) {
-			if (property.getValue().contains(getClient().getValues().getDefaultAddress())) {
-				for (Entry<String, String> attribute : property.getAttributes().entrySet()) {
-					if (attribute.getKey().equals("PARTSTAT")) {
-						attribute.setValue("ACCEPTED");
-						break;
-					}
-				}
-				break;
-			}
-		}
+        attendee.getAttributes().put("PARTSTAT", "ACCEPTED");
         assertEquals("response code wrong", StatusCodes.SC_CREATED, putICalUpdate(iCalResource));
         /*
          * verify appointment on server
@@ -171,16 +161,9 @@ public class Bug48241Test extends CalDAVTest {
         iCalResource = get(uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
-        Property attendee = null;
-        attendees = iCalResource.getVEvent().getProperties("ATTENDEE");
-        for (Property property : attendees) {
-			if (property.getValue().contains(getClient().getValues().getDefaultAddress())) {
-				attendee = property;
-				break;
-			}
-		}
-        assertNotNull("accepting attendee not found", attendee);
-        assertEquals("partstat status wrong", "ACCEPTED", attendee.getAttribute("PARTSTAT"));
+        attendee = iCalResource.getVEvent().getAttendee(getClient().getValues().getDefaultAddress());
+        assertNotNull("ATTENDEE not found", attendee);
+        assertEquals("PARTSTAT wrong", "ACCEPTED", attendee.getAttribute("PARTSTAT"));
 	}
 
 }
