@@ -49,6 +49,7 @@
 
 package com.openexchange.chronos.operation;
 
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.java.Autoboxing.I;
@@ -60,7 +61,9 @@ import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
+import com.openexchange.chronos.impl.AttendeeMapper;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.impl.osgi.Services;
@@ -159,6 +162,63 @@ public abstract class AbstractOperation {
         Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
         storage.getEventStorage().updateEvent(eventUpdate);
         result.addUpdate(new UpdateResultImpl(originalMasterEvent, i(folder), loadEventData(originalMasterEvent.getId())));
+    }
+
+    /**
+     * Deletes a single event from the storage. This can be used for any kind of event, i.e. a single, non-recurring event, an existing
+     * exception of an event series, or an event series. For the latter one, any existing event exceptions are deleted as well.
+     * <p/>
+     * The event's attendees are loaded on demand if not yet present in the passed <code>originalEvent</code> {@code originalEvent}.
+     * <p/>
+     * The deletion includes:
+     * <ul>
+     * <li>insertion of a <i>tombstone</i> record for the original event</li>
+     * <li>insertion of <i>tombstone</i> records for the original event's attendees</li>
+     * <li>deletion of any alarms associated with the event</li>
+     * <li>deletion of the event</li>
+     * <li>deletion of the event's attendees</li>
+     * </ul>
+     *
+     * @param originalEvent The original event to delete
+     */
+    protected void delete(Event originalEvent) throws OXException {
+        /*
+         * recursively delete any existing event exceptions
+         */
+        if (isSeriesMaster(originalEvent)) {
+            deleteExceptions(originalEvent.getSeriesId(), originalEvent.getChangeExceptionDates());
+        }
+        /*
+         * delete event data from storage
+         */
+        int id = originalEvent.getId();
+        storage.getEventStorage().insertTombstoneEvent(EventMapper.getInstance().getTombstone(originalEvent, timestamp, calendarUser.getId()));
+        storage.getAttendeeStorage().insertTombstoneAttendees(id, AttendeeMapper.getInstance().getTombstones(originalEvent.getAttendees()));
+        storage.getAlarmStorage().deleteAlarms(id);
+        storage.getEventStorage().deleteEvent(id);
+        storage.getAttendeeStorage().deleteAttendees(id);
+        result.addDeletion(new DeleteResultImpl(originalEvent));
+    }
+
+    /**
+     * Deletes change exception events from the storage.
+     * <p/>
+     * For each change exception, the data is removed by invoking {@link #delete(Event)} for the exception.
+     *
+     * @param seriesID The series identifier
+     * @param exceptionDates The recurrence identifiers of the change exceptions to delete
+     * @return The results, or <code>null</code> if there are none
+     */
+    protected void deleteExceptions(int seriesID, List<Date> exceptionDates) throws OXException {
+        if (null != exceptionDates && 0 < exceptionDates.size()) {
+            List<RecurrenceId> recurrenceIDs = new ArrayList<RecurrenceId>();
+            for (Date exceptionDate : exceptionDates) {
+                recurrenceIDs.add(new DefaultRecurrenceId(exceptionDate));
+            }
+            for (Event originalExceptionEvent : loadExceptionData(seriesID, recurrenceIDs)) {
+                delete(originalExceptionEvent);
+            }
+        }
     }
 
     /**

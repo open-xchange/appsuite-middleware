@@ -70,9 +70,9 @@ import org.dmfs.rfc5545.recur.RecurrenceRule.WeekdayNum;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.DefaultRecurrenceId;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.exception.OXException;
@@ -248,7 +248,7 @@ public class Recurrence {
         RecurrenceRule rule = null;
         try {
             rule = new RecurrenceRule(recurrenceData.getRecurrenceRule());
-        } catch (InvalidRecurrenceRuleException e) {
+        } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
             throw CalendarExceptionCodes.INVALID_RRULE.create(recurrenceData.getRecurrenceRule());
         }
         DateTime start;

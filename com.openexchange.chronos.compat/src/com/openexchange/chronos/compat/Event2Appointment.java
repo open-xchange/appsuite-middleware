@@ -61,7 +61,6 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
-import com.openexchange.chronos.DefaultRecurrenceId;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
@@ -69,6 +68,7 @@ import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.Trigger.Related;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.exception.OXException;
@@ -358,7 +358,7 @@ public class Event2Appointment {
         }
         List<Date> recurrenceDatePositions = new ArrayList<Date>(recurrenceIDs.size());
         for (Date recurrenceID : recurrenceIDs) {
-            recurrenceDatePositions.add(getRecurrenceDatePosition(new DefaultRecurrenceId(recurrenceID.getTime())));
+            recurrenceDatePositions.add(getRecurrenceDatePosition(new DefaultRecurrenceId(recurrenceID)));
         }
         return recurrenceDatePositions;
     }

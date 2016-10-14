@@ -62,11 +62,11 @@ import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Classification;
-import com.openexchange.chronos.DefaultRecurrenceId;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.SortOptions;
@@ -226,7 +226,7 @@ public class Check {
         if (event.containsRecurrenceRule() && null != recurrenceRule) {
             try {
                 new RecurrenceRule(event.getRecurrenceRule());
-            } catch (InvalidRecurrenceRuleException e) {
+            } catch (InvalidRecurrenceRuleException | IllegalArgumentException e) {
                 throw CalendarExceptionCodes.INVALID_RRULE.create(e, event.getRecurrenceRule());
             }
         }
@@ -245,7 +245,7 @@ public class Check {
     public static List<Date> recurrenceIdsExist(Event seriesMaster, List<Date> recurrenceIDs) throws OXException {
         if (null != recurrenceIDs) {
             for (Date recurrenceID : recurrenceIDs) {
-                recurrenceIdExists(seriesMaster, new DefaultRecurrenceId(recurrenceID.getTime()));
+                recurrenceIdExists(seriesMaster, new DefaultRecurrenceId(recurrenceID));
             }
         }
         return recurrenceIDs;

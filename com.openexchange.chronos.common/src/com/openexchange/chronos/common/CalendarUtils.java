@@ -333,6 +333,8 @@ public class CalendarUtils {
     /**
      * Gets a value indicating whether the supplied event contains so-called <i>floating</i> dates, i.e. the event doesn't start- and end
      * at a fixed date and time, but is always rendered in the view of the user's current timezone.
+     * <p/>
+     * Especially, <i>all-day</i> events are usually floating.
      *
      * @param event The event to check
      * @return <code>true</code> if the event is <i>floating</i>, <code>false</code>, otherwise

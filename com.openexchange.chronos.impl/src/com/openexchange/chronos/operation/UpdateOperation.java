@@ -200,6 +200,12 @@ public class UpdateOperation extends AbstractOperation {
         Event eventUpdate = prepareEventUpdate(originalEvent, updatedEvent);
         if (null != eventUpdate) {
             storage.getEventStorage().updateEvent(eventUpdate);
+            if (isSeriesMaster(originalEvent) && false == isSeriesMaster(eventUpdate)) {
+                /*
+                 * series to single event; ensure to also delete any change exceptions
+                 */
+                deleteExceptions(originalEvent.getSeriesId(), originalEvent.getChangeExceptionDates());
+            }
             wasUpdated = true;
         }
         /*
@@ -280,13 +286,22 @@ public class UpdateOperation extends AbstractOperation {
                         }
                         throw OXException.general("not allowed change");
                     }
+                    if (isSeriesMaster(originalEvent) && null == eventUpdate.getRecurrenceRule()) {
+                        /*
+                         * series to single event, remove recurrence
+                         */
+                        eventUpdate.setSeriesId(0);
+                        eventUpdate.setChangeExceptionDates(null);
+                        eventUpdate.setDeleteExceptionDates(null);
+                        break;
+                    }
                     /*
                      * ensure all necessary recurrence related data is present in passed event update & check rule validity
                      */
                     EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
                     Check.recurrenceRuleIsValid(eventUpdate);
                     /*
-                     * assign recurrence id when transforming a single event to a series
+                     * single event to series, assign new recurrence id
                      */
                     if (0 >= originalEvent.getSeriesId()) {
                         eventUpdate.setSeriesId(originalEvent.getId());

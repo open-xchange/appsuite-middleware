@@ -606,7 +606,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public Integer get(Event event) {
-                return I(event.getSeriesId());
+                return 0 == event.getSeriesId() ? null : I(event.getSeriesId());
             }
 
             @Override

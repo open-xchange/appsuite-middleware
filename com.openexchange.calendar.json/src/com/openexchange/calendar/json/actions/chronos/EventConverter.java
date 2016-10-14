@@ -55,6 +55,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
+import com.openexchange.calendar.RecurrenceChecker;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -62,12 +63,13 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DataAwareRecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Appointment2Event;
 import com.openexchange.chronos.compat.Event2Appointment;
 import com.openexchange.chronos.compat.SeriesPattern;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.chronos.service.DefaultRecurrenceData;
 import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.UserizedEvent;
@@ -424,8 +426,13 @@ public class EventConverter {
             appointment.setRecurrenceID(event.getSeriesId());
         }
         if (event.containsRecurrenceId() && null != event.getRecurrenceId()) {
-            EventID masterID = new EventID(userizedEvent.getFolderId(), event.getSeriesId());
-            RecurrenceData recurrenceData = loadRecurrenceData(session, masterID);
+            RecurrenceData recurrenceData;
+            if (DataAwareRecurrenceId.class.isInstance(event.getRecurrenceId())) {
+                recurrenceData = (RecurrenceData) event.getRecurrenceId();
+            } else {
+                EventID masterID = new EventID(userizedEvent.getFolderId(), event.getSeriesId());
+                recurrenceData = loadRecurrenceData(session, masterID);
+            }
             // TODO:
             // provide master event in resolved recurrence?
             // provide needed info for calculation in resolved recurrence?
@@ -610,7 +617,7 @@ public class EventConverter {
      * @param originalPattern The original pattern, or <code>null</code> if not available
      * @return The series pattern, or <code>null</code> if not set
      */
-    private static RecurrenceData getRecurrenceData(CalendarSession session, Appointment appointment, RecurrenceData originalRecurrenceData) {
+    private static RecurrenceData getRecurrenceData(CalendarSession session, Appointment appointment, RecurrenceData originalRecurrenceData) throws OXException {
         /*
          * prepare series pattern & take over original pattern data if available
          */
@@ -623,8 +630,11 @@ public class EventConverter {
                 pattern.setFullTime(originalPattern.isFullTime());
                 pattern.setInterval(originalPattern.getInterval());
                 pattern.setMonth(originalPattern.getMonth());
-                pattern.setOccurrences(originalPattern.getOccurrences());
-                pattern.setSeriesEnd(originalPattern.getSeriesEnd());
+                if (null != originalPattern.getOccurrences()) {
+                    pattern.setOccurrences(originalPattern.getOccurrences());
+                } else {
+                    pattern.setSeriesEnd(originalPattern.getSeriesEnd());
+                }
                 pattern.setSeriesStart(originalPattern.getSeriesStart());
                 pattern.setType(originalPattern.getType());
                 pattern.setTz(originalPattern.getTimeZone());
@@ -678,7 +688,43 @@ public class EventConverter {
         } else if (null == pattern.getTimeZone()) {
             pattern.setTz(session.get(CalendarParameters.PARAMETER_TIMEZONE, TimeZone.class, TimeZone.getTimeZone(session.getUser().getTimeZone())));
         }
-        return Appointment2Event.getRecurrenceData(pattern);
+        return Appointment2Event.getRecurrenceData(validate(pattern));
+    }
+
+    private static SeriesPattern validate(SeriesPattern pattern) throws OXException {
+        CalendarDataObject cdo = new CalendarDataObject();
+        if (null != pattern.getType()) {
+            if (SeriesPattern.MONTHLY_2.equals(pattern.getType())) {
+                cdo.setRecurrenceType(SeriesPattern.MONTHLY_1.intValue());
+            } else if (SeriesPattern.YEARLY_2.equals(pattern.getType())) {
+                cdo.setRecurrenceType(SeriesPattern.YEARLY_1.intValue());
+            } else {
+                cdo.setRecurrenceType(pattern.getType().intValue());
+            }
+        }
+        if (null != pattern.getInterval()) {
+            cdo.setInterval(pattern.getInterval().intValue());
+        }
+        if (null != pattern.getInterval()) {
+            cdo.setInterval(pattern.getInterval().intValue());
+        }
+        if (null != pattern.getSeriesEnd()) {
+            cdo.setUntil(new Date(pattern.getSeriesEnd().longValue()));
+        }
+        if (null != pattern.getOccurrences()) {
+            cdo.setOccurrence(pattern.getOccurrences().intValue());
+        }
+        if (null != pattern.getDayOfMonth()) {
+            cdo.setDayInMonth(pattern.getDayOfMonth());
+        }
+        if (null != pattern.getDaysOfWeek()) {
+            cdo.setDays(pattern.getDaysOfWeek());
+        }
+        if (null != pattern.getMonth()) {
+            cdo.setMonth(pattern.getMonth());
+        }
+        RecurrenceChecker.check(cdo);
+        return pattern;
     }
 
     private static void convertAttendee(Attendee attendee, List<Participant> participants, List<UserParticipant> users, List<ConfirmableParticipant> confirmations) {

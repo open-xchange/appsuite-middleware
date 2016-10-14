@@ -58,8 +58,8 @@ import java.util.NoSuchElementException;
 import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
-import com.openexchange.chronos.DefaultRecurrenceId;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 
 /**
  * {@link RecurrenceIterator}

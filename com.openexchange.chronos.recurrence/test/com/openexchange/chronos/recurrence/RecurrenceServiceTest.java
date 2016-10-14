@@ -57,8 +57,8 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 import org.junit.After;
 import org.junit.Before;
-import com.openexchange.chronos.DefaultRecurrenceId;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.recurrence.service.RecurrenceServiceImpl;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.time.TimeTools;
@@ -113,7 +113,7 @@ public abstract class RecurrenceServiceTest {
         clone.removeRecurrenceRule();
         clone.removeDeleteExceptionDates();
         clone.removeChangeExceptionDates();
-        clone.setRecurrenceId(new DefaultRecurrenceId(recurrenceId.getTime()));
+        clone.setRecurrenceId(new DefaultRecurrenceId(recurrenceId));
         clone.setStartDate(start);
         clone.setEndDate(end);
 
@@ -130,7 +130,7 @@ public abstract class RecurrenceServiceTest {
         clone.removeRecurrenceRule();
         clone.removeDeleteExceptionDates();
         clone.removeChangeExceptionDates();
-        clone.setRecurrenceId(new DefaultRecurrenceId(recurrenceId.getTime()));
+        clone.setRecurrenceId(new DefaultRecurrenceId(recurrenceId));
         clone.setStartDate(start);
         clone.setEndDate(end);
         clone.setAllDay(true);
@@ -148,7 +148,7 @@ public abstract class RecurrenceServiceTest {
         clone.removeRecurrenceRule();
         clone.removeDeleteExceptionDates();
         clone.removeChangeExceptionDates();
-        clone.setRecurrenceId(new DefaultRecurrenceId(recurrenceId.getTime()));
+        clone.setRecurrenceId(new DefaultRecurrenceId(recurrenceId));
         clone.setStartDate(start);
         clone.setEndDate(end);
         clone.removeAllDay();
@@ -192,7 +192,7 @@ public abstract class RecurrenceServiceTest {
         instance.removeRecurrenceRule();
         instance.removeDeleteExceptionDates();
         instance.removeChangeExceptionDates();
-        instance.setRecurrenceId(new DefaultRecurrenceId(recurrenceId.getTime()));
+        instance.setRecurrenceId(new DefaultRecurrenceId(recurrenceId));
         instance.setStartDate(start);
         instance.setEndDate(end);
         return instance;

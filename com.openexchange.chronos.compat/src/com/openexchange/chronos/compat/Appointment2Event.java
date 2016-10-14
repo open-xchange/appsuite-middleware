@@ -58,14 +58,14 @@ import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.AlarmAction;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Classification;
-import com.openexchange.chronos.DefaultRecurrenceId;
 import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.Transp;
 import com.openexchange.chronos.Trigger;
 import com.openexchange.chronos.common.CalendarUtils;
-import com.openexchange.chronos.service.DefaultRecurrenceData;
+import com.openexchange.chronos.common.DataAwareRecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -262,7 +262,7 @@ public class Appointment2Event {
             calendar.setTimeInMillis(nextMillis);
             long nextPosition = CalendarUtils.truncateTime(calendar).getTimeInMillis();
             if (recurrenceDatePosition.getTime() == nextPosition) {
-                return new DefaultRecurrenceId(nextMillis);
+                return new DataAwareRecurrenceId(recurrenceData, nextMillis);
             }
             if (nextPosition > recurrenceDatePosition.getTime()) {
                 break;
@@ -307,7 +307,7 @@ public class Appointment2Event {
         while (iterator.hasNext()) {
             long nextMillis = iterator.nextMillis();
             if (++position == recurrencePosition) {
-                return new DefaultRecurrenceId(nextMillis);
+                return new DataAwareRecurrenceId(recurrenceData, nextMillis);
             }
         }
         return null;

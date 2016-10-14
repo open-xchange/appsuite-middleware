@@ -47,53 +47,62 @@
  *
  */
 
-package com.openexchange.chronos.service;
+package com.openexchange.chronos.common;
 
-import com.openexchange.chronos.Event;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import com.openexchange.chronos.service.RecurrenceData;
+import com.openexchange.java.util.TimeZones;
 
 /**
- * {@link DefaultRecurrenceData}
+ * {@link DataAwareRecurrenceId}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.10.0
  */
-public class DefaultRecurrenceData implements RecurrenceData {
+public class DataAwareRecurrenceId extends DefaultRecurrenceId implements RecurrenceData {
 
-    private final String rrule;
-    private final boolean allDay;
-    private final String timeZoneID;
-    private final long seriesStart;
+    private final RecurrenceData recurrenceData;
 
-    public DefaultRecurrenceData(String rrule, boolean allDay, String timeZoneID, long seriesStart) {
-        super();
-        this.rrule = rrule;
-        this.allDay = allDay;
-        this.timeZoneID = timeZoneID;
-        this.seriesStart = seriesStart;
-    }
-
-    public DefaultRecurrenceData(Event seriesMaster) {
-        this(seriesMaster.getRecurrenceRule(), seriesMaster.isAllDay(), seriesMaster.isAllDay() ? null : seriesMaster.getStartTimeZone(), seriesMaster.getStartDate().getTime());
+    /**
+     * Initializes a new {@link DataAwareRecurrenceId}.
+     *
+     * @param recurrenceData The underlying recurrence data of the corresponding series
+     * @param value The recurrence-id value, represented as the number of milliseconds since January 1, 1970, 00:00:00 GMT
+     */
+    public DataAwareRecurrenceId(RecurrenceData recurrenceData, long value) {
+        super(value);
+        this.recurrenceData = recurrenceData;
     }
 
     @Override
     public String getRecurrenceRule() {
-        return rrule;
+        return recurrenceData.getRecurrenceRule();
     }
 
     @Override
     public boolean isAllDay() {
-        return allDay;
+        return recurrenceData.isAllDay();
     }
 
     @Override
     public String getTimeZoneID() {
-        return timeZoneID;
+        return recurrenceData.getTimeZoneID();
     }
 
     @Override
     public long getSeriesStart() {
-        return seriesStart;
+        return recurrenceData.getSeriesStart();
+    }
+
+    @Override
+    public String toString() {
+        if (null != getTimeZoneID()) {
+            return super.toString();
+        }
+        SimpleDateFormat dateFormat = new SimpleDateFormat(isAllDay() ? "yyyyMMdd" : "yyyyMMdd'T'HHmmss");
+        dateFormat.setTimeZone(TimeZones.UTC);
+        return dateFormat.format(new Date(value));
     }
 
 }

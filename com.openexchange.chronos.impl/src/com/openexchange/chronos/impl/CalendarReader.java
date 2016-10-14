@@ -98,10 +98,13 @@ import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.common.DataAwareRecurrenceId;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventID;
+import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.RecurrenceService;
 import com.openexchange.chronos.service.SortOptions;
 import com.openexchange.chronos.service.SortOrder;
@@ -541,6 +544,7 @@ public class CalendarReader {
     }
 
     private List<UserizedEvent> resolveOccurrences(UserizedEvent master) throws OXException {
+        RecurrenceData recurrenceData = new DefaultRecurrenceData(master.getEvent());
         List<UserizedEvent> events = new ArrayList<UserizedEvent>();
         Iterator<Event> occurrences = resolveOccurrences(master.getEvent(), getFrom(session), getUntil(session));
         while (occurrences.hasNext()) {
@@ -548,6 +552,7 @@ public class CalendarReader {
             if (isExcluded(occurrence, session, true)) {
                 continue;
             }
+            occurrence.setRecurrenceId(new DataAwareRecurrenceId(recurrenceData, occurrence.getRecurrenceId().getValue()));
             events.add(getUserizedEvent(occurrence, master.getFolderId(), master.getAlarms()));
         }
         return events;
