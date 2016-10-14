@@ -74,6 +74,7 @@ import com.openexchange.chronos.service.EventID;
 import com.openexchange.chronos.service.RecurrenceData;
 import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -627,7 +628,7 @@ public class EventConverter {
      * @param originalPattern The original pattern, or <code>null</code> if not available
      * @return The series pattern, or <code>null</code> if not set
      */
-    private static RecurrenceData getRecurrenceData(CalendarSession session, Appointment appointment, RecurrenceData originalRecurrenceData) throws OXException {
+    private RecurrenceData getRecurrenceData(CalendarSession session, Appointment appointment, RecurrenceData originalRecurrenceData) throws OXException {
         /*
          * prepare series pattern & take over original pattern data if available
          */
@@ -701,7 +702,7 @@ public class EventConverter {
         return Appointment2Event.getRecurrenceData(validate(pattern));
     }
 
-    private static SeriesPattern validate(SeriesPattern pattern) throws OXException {
+    private SeriesPattern validate(SeriesPattern pattern) throws OXException {
         CalendarDataObject cdo = new CalendarDataObject();
         if (null != pattern.getType()) {
             if (SeriesPattern.MONTHLY_2.equals(pattern.getType())) {
@@ -711,9 +712,6 @@ public class EventConverter {
             } else {
                 cdo.setRecurrenceType(pattern.getType().intValue());
             }
-        }
-        if (null != pattern.getInterval()) {
-            cdo.setInterval(pattern.getInterval().intValue());
         }
         if (null != pattern.getInterval()) {
             cdo.setInterval(pattern.getInterval().intValue());
@@ -734,6 +732,7 @@ public class EventConverter {
             cdo.setMonth(pattern.getMonth());
         }
         RecurrenceChecker.check(cdo);
+        services.getService(CalendarCollectionService.class).checkRecurring(cdo);
         return pattern;
     }
 
