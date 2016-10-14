@@ -179,10 +179,21 @@ public abstract class ChronosAction extends AppointmentAction {
             legacy = Boolean.parseBoolean(legacyValue);
         }
         //        legacy = true;
-        try {
-            return legacy ? perform(request) : perform(initSession(request), request);
-        } catch (final JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+
+        if (legacy) {
+            try {
+                return perform(request);
+            } catch (final JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            }
+        } else {
+            try {
+                return perform(initSession(request), request);
+            } catch (OXException e) {
+                throw EventConverter.wrapCalendarException(e);
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            }
         }
     }
 

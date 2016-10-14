@@ -76,6 +76,7 @@ import com.openexchange.chronos.service.UserizedEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -105,6 +106,29 @@ public class EventConverter {
     public EventConverter(ServiceLookup services) {
         super();
         this.services = services;
+    }
+
+    /**
+     * Wraps an exception from <code>com.openexchange.chronos.exception.CalendarExceptionCodes</code> into a similar legacy exception
+     * (from <code>com.openexchange.groupware.calendar.OXCalendarExceptionCodes</code> if possible.
+     *
+     * @param e The exception to wrap
+     * @return The wrapped exception if a suitable exception is available, or the passed exception, otherwise
+     */
+    public static OXException wrapCalendarException(OXException e) {
+        if (false == e.isPrefix("CAL")) {
+            return e;
+        }
+        switch (e.getCode()) {
+            case 4224: // com.openexchange.chronos.exception.CalendarExceptionCodes.MOVE_SERIES_NOT_SUPPORTED
+                return OXCalendarExceptionCodes.RECURRING_FOLDER_MOVE.create(e);
+            case 4221: // com.openexchange.chronos.exception.CalendarExceptionCodes.END_BEFORE_START
+                return OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create(e);
+            case 4041: // com.openexchange.chronos.exception.CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER
+                return OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.create(e, e.getLogArgs()[1]);
+            default:
+                return e;
+        }
     }
 
     /**
