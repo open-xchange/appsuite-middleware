@@ -63,10 +63,16 @@ if [ ${1:-0} -eq 2 ]; then
     fi
 
     # SoftwareChange_Request-1931
-    ox_add_property com.openexchange.pop3.ssl.protocols "SSLv3 TLSv1" $PFILE
+    ox_add_property com.openexchange.pop3.ssl.protocols "" $PFILE
 
     # SoftwareChange_Request-2016
     ox_add_property com.openexchange.pop3.ssl.ciphersuites "" $PFILE
+
+    # SoftwareChange_Request-3636
+    VALUE=$(ox_read_property com.openexchange.pop3.ssl.protocols $PFILE)
+    if [ "SSLv3 TLSv1" = "$VALUE" ]; then
+        ox_set_property com.openexchange.pop3.ssl.protocols "" $PFILE
+    fi
 fi
 
 %clean
