@@ -271,16 +271,35 @@ public class IMAPProtocol extends Protocol {
      * @return <code>true</code> if response contained <code>"[CAPABILITY"</code>; otherwise <code>false</code>
      */
     protected boolean setCapabilities(final Response r, final boolean reparse) {
-	byte b;
-	while ((b = r.readByte()) > 0 && b != (byte)'[') {
+    if (r instanceof IMAPResponse) {
+        IMAPResponse ir = (IMAPResponse) r;
+        if (ir.keyEquals("CAPABILITY")) {
+            if (reparse) {
+                capabilities = new HashMap<String, String>(10);
+                authmechs = new ArrayList<String>(5);
+            } else {
+                if (null == capabilities) {
+                    capabilities = new HashMap<String, String>(10);
+                }
+                if (null == authmechs) {
+                    authmechs = new ArrayList<String>(5);
+                }
+            }
+            parseCapabilities(r);
+            return true;
+        }
+    } 
+
+    byte b;
+    while ((b = r.readByte()) > 0 && b != (byte)'[') {
         ;
     }
-	if (b == 0) {
+    if (b == 0) {
         return false;
     }
-	String s;
-	s = r.readAtom();
-	if (!s.equalsIgnoreCase("CAPABILITY")) {
+    String s;
+    s = r.readAtom();
+    if (!s.equalsIgnoreCase("CAPABILITY")) {
         return false;
     }
 	if (reparse) {
@@ -582,6 +601,17 @@ public class IMAPProtocol extends Protocol {
         boolean hasCaps = setCapabilities(r[r.length - 1]);
         if (hasCaps) {
             capabilities.remove("__PRELOGIN__");
+        } else {
+            // Check for any unsolicited response that might provide capabilities
+            if (r.length > 0) {
+                for (int i = r.length-1; !hasCaps && i-- > 0;) {
+                    Response unsolicited = r[i];
+                    hasCaps = setCapabilities(unsolicited);
+                    if (hasCaps) {
+                        capabilities.remove("__PRELOGIN__");
+                    }
+                }
+            }
         }
         // if we get this far without an exception, we're authenticated
         authenticated = true;
@@ -702,6 +732,17 @@ public class IMAPProtocol extends Protocol {
         boolean hasCaps = setCapabilities(r, false);
         if (hasCaps) {
             capabilities.remove("__PRELOGIN__");
+        } else {
+            // Check for any unsolicited response that might provide capabilities
+            if (responses.length > 0) {
+                for (int i = responses.length; !hasCaps && i-- > 0;) {
+                    Response unsolicited = responses[i];
+                    hasCaps = setCapabilities(unsolicited);
+                    if (hasCaps) {
+                        capabilities.remove("__PRELOGIN__");
+                    }
+                }
+            }
         }
         // if we get this far without an exception, we're authenticated
         authenticated = true;
@@ -851,6 +892,17 @@ public class IMAPProtocol extends Protocol {
         boolean hasCaps = setCapabilities(r, false);
         if (hasCaps) {
             capabilities.remove("__PRELOGIN__");
+        } else {
+            // Check for any unsolicited response that might provide capabilities
+            if (responses.length > 0) {
+                for (int i = responses.length; !hasCaps && i-- > 0;) {
+                    Response unsolicited = responses[i];
+                    hasCaps = setCapabilities(unsolicited);
+                    if (hasCaps) {
+                        capabilities.remove("__PRELOGIN__");
+                    }
+                }
+            }
         }
         // if we get this far without an exception, we're authenticated
         authenticated = true;
@@ -954,6 +1006,17 @@ public class IMAPProtocol extends Protocol {
         boolean hasCaps = setCapabilities(r, false);
         if (hasCaps) {
             capabilities.remove("__PRELOGIN__");
+        } else {
+            // Check for any unsolicited response that might provide capabilities
+            if (responses.length > 0) {
+                for (int i = responses.length; !hasCaps && i-- > 0;) {
+                    Response unsolicited = responses[i];
+                    hasCaps = setCapabilities(unsolicited);
+                    if (hasCaps) {
+                        capabilities.remove("__PRELOGIN__");
+                    }
+                }
+            }
         }
         // if we get this far without an exception, we're authenticated
         authenticated = true;
@@ -1057,6 +1120,17 @@ public class IMAPProtocol extends Protocol {
 	boolean hasCaps = setCapabilities(r);
     if (hasCaps) {
         capabilities.remove("__PRELOGIN__");
+    } else {
+        // Check for any unsolicited response that might provide capabilities
+        if (responses.length > 0) {
+            for (int i = responses.length; !hasCaps && i-- > 0;) {
+                Response unsolicited = responses[i];
+                hasCaps = setCapabilities(unsolicited);
+                if (hasCaps) {
+                    capabilities.remove("__PRELOGIN__");
+                }
+            }
+        }
     }
 	// if we get this far without an exception, we're authenticated
 	authenticated = true;
