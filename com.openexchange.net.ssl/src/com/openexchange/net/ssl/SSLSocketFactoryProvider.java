@@ -50,7 +50,6 @@
 package com.openexchange.net.ssl;
 
 import javax.net.ssl.SSLSocketFactory;
-import com.openexchange.net.ssl.internal.TrustedSSLSocketFactory;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 

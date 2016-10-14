@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.net.ssl.internal;
+package com.openexchange.net.ssl;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -55,7 +55,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -67,13 +66,15 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.internal.CustomTrustManager;
+import com.openexchange.net.ssl.internal.DefaultTrustManager;
 import com.openexchange.net.ssl.osgi.Services;
 
 /**
  * {@link TrustedSSLSocketFactory}
- * 
+ *
  * This implementation has to be placed within an exported package as it will be accessed per reflection.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
@@ -83,36 +84,18 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TrustedSSLSocketFactory.class);
 
-    /** Holds a SSLContext to get SSLSocketFactories from */
-    private SSLContext sslcontext;
-
     /** Holds the TrustManager array to use */
-    private static AtomicReference<TrustManager[]> TRUST_MANAGERS = new AtomicReference<>();
+    private static final AtomicReference<List<TrustManager>> TRUST_MANAGERS = new AtomicReference<>();
 
-    /** Holds a SSLSocketFactory to pass all API-method-calls to */
-    private SSLSocketFactory adapteeFactory = null;
-
-    protected TrustedSSLSocketFactory() {
-        init();
-
-        try {
-            this.sslcontext = SSLContext.getInstance("TLS");
-            newAdapteeFactory();
-        } catch (NoSuchAlgorithmException e) {
-            LOG.error("Unable to retrieve SSLContext.", e);
-        } catch (KeyManagementException e) {
-            LOG.error("Unable to initialize SSLContext.", e);
-        }
+    /**
+     * Initializes the trust managers.
+     */
+    public static void init() {
+        TRUST_MANAGERS.set(initTrustManagers());
     }
 
-    private static synchronized void init() {
-        if (TRUST_MANAGERS.get() == null) {
-            TRUST_MANAGERS.compareAndSet(null, initTrustManagers());
-        }
-    }
-
-    private static TrustManager[] initTrustManagers() {
-        List<X509TrustManager> lTrustManagers = new ArrayList<>();
+    private static List<TrustManager> initTrustManagers() {
+        ImmutableList.Builder<TrustManager> lTrustManagers = ImmutableList.builder();
         DefaultTrustManager defaultTrustManager = new DefaultTrustManager();
         if (defaultTrustManager.isInitialized()) {
             lTrustManagers.add(defaultTrustManager);
@@ -122,10 +105,30 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
         if (customTrustManager.isInitialized()) {
             lTrustManagers.add(customTrustManager);
         }
-        TrustManager[] trustManagersArray = new TrustManager[lTrustManagers.size()];
-        lTrustManagers.toArray(trustManagersArray);
+        return lTrustManagers.build();
+    }
 
-        return trustManagersArray;
+    // -------------------------------------------------------------------------------------------
+
+    /** Holds a SSLSocketFactory to pass all API-method-calls to */
+    private final SSLSocketFactory adapteeFactory;
+
+    /**
+     * Initializes a new {@link TrustedSSLSocketFactory}.
+     */
+    protected TrustedSSLSocketFactory() {
+        super();
+        SSLSocketFactory adapteeFactory = null;
+        try {
+            // Get the SSLContext to get SSLSocketFactories from
+            SSLContext sslcontext = SSLContext.getInstance("TLS");
+            adapteeFactory = newAdapteeFactory(sslcontext);
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("Unable to retrieve SSLContext.", e);
+        } catch (KeyManagementException e) {
+            LOG.error("Unable to initialize SSLContext.", e);
+        }
+        this.adapteeFactory = adapteeFactory;
     }
 
     /**
@@ -135,22 +138,21 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
      *
      * @throws KeyManagementException for key manager errors
      */
-    private void newAdapteeFactory() throws KeyManagementException {
-        TrustManager[] trustManagers = TRUST_MANAGERS.get();
-        if (trustManagers.length == 0) {
-            LOG.error("No trustmanager configured. Going to use default for now. Please enable default or custom truststore.");
-            this.sslcontext.init(null, null, null);
-            this.adapteeFactory = this.sslcontext.getSocketFactory();
-            return;
+    private static SSLSocketFactory newAdapteeFactory(SSLContext sslcontext) throws KeyManagementException {
+        List<TrustManager> trustManagers = TRUST_MANAGERS.get();
+        if (trustManagers.isEmpty()) {
+            LOG.error("No trust manager configured. Going to use default one for now. Please enable default or custom trust store.");
+            sslcontext.init(null, null, null);
+            return sslcontext.getSocketFactory();
         }
-        this.sslcontext.init(null, trustManagers, null);
 
-        this.adapteeFactory = this.sslcontext.getSocketFactory();
+        sslcontext.init(null, trustManagers.toArray(new TrustManager[trustManagers.size()]), null);
+        return sslcontext.getSocketFactory();
     }
 
     /**
      * Returns the {@link TrustedSSLSocketFactory} if desired to use only trusted connections
-     * 
+     *
      * @return an instance of {@link TrustedSSLSocketFactory}
      */
     public static SSLSocketFactory getDefault() {
@@ -169,7 +171,7 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
 
     /**
      * Merges the suites configured to be supported (by the administrator) into the supported ones (by the factory).
-     * 
+     *
      * @return
      */
     private String[] merge() {
