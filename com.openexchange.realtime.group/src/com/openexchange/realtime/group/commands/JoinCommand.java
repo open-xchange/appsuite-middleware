@@ -118,7 +118,7 @@ public class JoinCommand implements GroupCommand {
         groupDispatcher.join(stanza.getOnBehalfOf(), stanza.getSelector(), stanza);
         Stanza welcomeMessage = groupDispatcher.getWelcomeMessage(stanza.getOnBehalfOf());
         if (null == welcomeMessage) {
-            IllegalStateException x = new IllegalStateException("There is no welcome message for " + stanza.getOnBehalfOf();)
+            IllegalStateException x = new IllegalStateException("There is no welcome message for " + stanza.getOnBehalfOf());
             throw RealtimeExceptionCodes.JOIN_FAILED.create(x, stanza.getFrom().toString());
         }
         welcomeMessage.setFrom(groupDispatcher.getId());
