@@ -290,13 +290,23 @@ public class EventConverter {
                 event.setRecurrenceRule(recurrenceData.getRecurrenceRule());
             }
         }
-        if (appointment.containsRecurrenceDatePosition() || appointment.containsRecurrencePosition()) {
-            if (null == recurrenceData) {
-                recurrenceData = loadRecurrenceData(session, originalEventID);
-            }
-            if (appointment.containsRecurrenceDatePosition()) {
+        if (appointment.containsRecurrenceDatePosition()) {
+            if (null == appointment.getRecurrenceDatePosition()) {
+                event.setRecurrenceId(null);
+            } else {
+                if (null == recurrenceData) {
+                    recurrenceData = loadRecurrenceData(session, originalEventID);
+                }
                 event.setRecurrenceId(Appointment2Event.getRecurrenceID(recurrenceData, appointment.getRecurrenceDatePosition()));
-            } else if (appointment.containsRecurrencePosition()) {
+            }
+        }
+        if (appointment.containsRecurrencePosition()) {
+            if (0 >= appointment.getRecurrencePosition()) {
+                event.setRecurrenceId(null);
+            } else {
+                if (null == recurrenceData) {
+                    recurrenceData = loadRecurrenceData(session, originalEventID);
+                }
                 event.setRecurrenceId(Appointment2Event.getRecurrenceID(recurrenceData, appointment.getRecurrencePosition()));
             }
         }

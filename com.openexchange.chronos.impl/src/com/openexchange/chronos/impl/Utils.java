@@ -51,6 +51,7 @@ package com.openexchange.chronos.impl;
 
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.isInRange;
+import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Arrays;
 import java.util.Collection;
@@ -66,8 +67,10 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Period;
 import com.openexchange.chronos.ResourceId;
-import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
@@ -451,18 +454,17 @@ public class Utils {
      * @param includePrivate <code>true</code> to include private or confidential events in non-private folders, <code>false</code>, otherwise
      * @return <code>true</code> if the event should be excluded, <code>false</code>, otherwise
      */
-    static boolean isExcluded(Event event, CalendarSession session, boolean includePrivate) {
+    static boolean isExcluded(Event event, CalendarSession session, boolean includePrivate) throws OXException {
         if (false == includePrivate && isClassifiedFor(event, session.getUser().getId())) {
             return true;
         }
-//        if (false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
-//            return true;
-//        }
-        if ((false == CalendarUtils.isSeriesMaster(event) || false == isResolveOccurrences(session)) &&
-            false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session))) {
-            return true;
+        if (isSeriesMaster(event)) {
+            //TODO: really consider "implicit" series period also if isResolveOccurrences(session) == false?
+            //      (needed for com.openexchange.ajax.appointment.bugtests.Bug16107Test)
+            Period implicitSeriesPeriod = Recurrence.getImplicitSeriesPeriod(new DefaultRecurrenceData(event), new Period(event));
+            return false == isInRange(implicitSeriesPeriod, getFrom(session), getUntil(session), getTimeZone(session));
         }
-        return false;
+        return false == isInRange(event, getFrom(session), getUntil(session), getTimeZone(session));
     }
 
     static boolean isIncludePrivate(CalendarParameters parameters) {

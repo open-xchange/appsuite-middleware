@@ -64,6 +64,7 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.Period;
 
 /**
  * {@link CalendarUtils}
@@ -316,6 +317,22 @@ public class CalendarUtils {
         // TODO floating events that are not "all-day"
         Date startDate = isFloating(event) ? getDateInTimeZone(event.getStartDate(), timeZone) : event.getStartDate();
         Date endDate = isFloating(event) ? getDateInTimeZone(event.getEndDate(), timeZone) : event.getEndDate();
+        return (null == until || startDate.before(until)) && (null == from || endDate.after(from));
+    }
+
+    /**
+     * Gets a value indicating whether a specific period falls (at least partly) into a time range.
+     *
+     * @param period The period to check
+     * @param from The lower inclusive limit of the range, i.e. the event should start on or after this date, or <code>null</code> for no limit
+     * @param until The upper exclusive limit of the range, i.e. the event should end before this date, or <code>null</code> for no limit
+     * @param timeZone The timezone to consider if the event has <i>floating</i> dates
+     * @return <code>true</code> if the event falls into the time range, <code>false</code>, otherwise
+     */
+    public static boolean isInRange(Period period, Date from, Date until, TimeZone timeZone) {
+        // TODO floating events that are not "all-day"
+        Date startDate = period.isAllDay() ? getDateInTimeZone(period.getStartDate(), timeZone) : period.getStartDate();
+        Date endDate = period.isAllDay() ? getDateInTimeZone(period.getEndDate(), timeZone) : period.getEndDate();
         return (null == until || startDate.before(until)) && (null == from || endDate.after(from));
     }
 

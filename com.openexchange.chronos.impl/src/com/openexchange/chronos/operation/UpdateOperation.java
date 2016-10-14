@@ -138,7 +138,7 @@ public class UpdateOperation extends AbstractOperation {
         /*
          * update event or event occurrence
          */
-        if (CalendarUtils.isSeriesMaster(originalEvent) && updatedEvent.containsRecurrenceId()) {
+        if (CalendarUtils.isSeriesMaster(originalEvent) && updatedEvent.containsRecurrenceId() && null != updatedEvent.getRecurrenceId()) {
             updateEvent(originalEvent, updatedEvent, updatedEvent.getRecurrenceId());
         } else {
             updateEvent(originalEvent, updatedEvent);
@@ -279,7 +279,7 @@ public class UpdateOperation extends AbstractOperation {
                     /*
                      * deny update for change exceptions (but ignore if set to 'null')
                      */
-                    if (CalendarUtils.isSeriesException(originalEvent)) {
+                    if (isSeriesException(originalEvent)) {
                         if (null == eventUpdate.getRecurrenceRule()) {
                             eventUpdate.removeRecurrenceRule();
                             break;
@@ -315,13 +315,18 @@ public class UpdateOperation extends AbstractOperation {
                     EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.START_DATE, EventField.END_DATE);
                     Check.startAndEndDate(eventUpdate);
                     break;
+                case RECURRENCE_ID:
+                    if (false == isSeriesException(originalEvent) && null == eventUpdate.getRecurrenceId()) {
+                        // ignore neutral value
+                        break;
+                    }
+                    throw OXException.general("not allowed change");
                 case UID:
                 case CREATED:
                 case CREATED_BY:
                 case SEQUENCE:
                 case SERIES_ID:
                 case PUBLIC_FOLDER_ID:
-                case RECURRENCE_ID:
                 case CHANGE_EXCEPTION_DATES:
                 case DELETE_EXCEPTION_DATES:
                     throw OXException.general("not allowed change");
