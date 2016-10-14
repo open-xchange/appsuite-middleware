@@ -126,6 +126,8 @@ public class EventConverter {
                 return OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create(e);
             case 4041: // com.openexchange.chronos.exception.CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER
                 return OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.create(e, e.getLogArgs()[1]);
+            case 4030: // com.openexchange.chronos.exception.CalendarExceptionCodes.NO_READ_PERMISSION
+                return OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.create(e, e.getLogArgs()[0]);
             default:
                 return e;
         }

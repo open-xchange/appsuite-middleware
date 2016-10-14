@@ -100,6 +100,7 @@ import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.DataAwareRecurrenceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.chronos.service.CalendarSession;
@@ -572,7 +573,15 @@ public class CalendarReader {
     }
 
     protected UserizedFolder getFolder(int folderID) throws OXException {
-        return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderID), session.getSession(), null);
+        try {
+            return Services.getService(FolderService.class).getFolder(FolderStorage.REAL_TREE_ID, String.valueOf(folderID), session.getSession(), null);
+        } catch (OXException e) {
+            if ("FLD-0003".equals(e.getErrorCode())) {
+                // com.openexchange.tools.oxfolder.OXFolderExceptionCode.NOT_VISIBLE
+                throw CalendarExceptionCodes.NO_READ_PERMISSION.create(I(folderID));
+            }
+            throw e;
+        }
     }
 
     protected List<UserizedFolder> getVisibleFolders() throws OXException {

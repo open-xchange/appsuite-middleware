@@ -640,7 +640,7 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
 
             @Override
             public boolean isSet(Event event) {
-                return event.containsRecurrenceRule();
+                return event.containsRecurrenceId();
             }
 
             @Override

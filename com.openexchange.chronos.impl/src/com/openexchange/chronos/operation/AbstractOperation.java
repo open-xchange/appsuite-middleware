@@ -123,7 +123,7 @@ public abstract class AbstractOperation {
         exceptionEvent.setDeleteExceptionDates(null);
         exceptionEvent.setStartDate(new Date(recurrenceID.getValue()));
         exceptionEvent.setEndDate(new Date(recurrenceID.getValue() + new Period(originalMasterEvent).getDuration()));
-        Consistency.setCreated(timestamp, exceptionEvent, calendarUser.getId());
+        Consistency.setCreated(timestamp, exceptionEvent, originalMasterEvent.getCreatedBy());
         Consistency.setModified(timestamp, exceptionEvent, session.getUser().getId());
         return exceptionEvent;
     }
@@ -137,7 +137,7 @@ public abstract class AbstractOperation {
     protected void touch(int id) throws OXException {
         Event eventUpdate = new Event();
         eventUpdate.setId(id);
-        Consistency.setModified(timestamp, eventUpdate, calendarUser.getId());
+        Consistency.setModified(timestamp, eventUpdate, session.getUser().getId());
         storage.getEventStorage().updateEvent(eventUpdate);
     }
 

@@ -611,7 +611,12 @@ public class RdbEventStorage extends RdbStorage implements EventStorage {
             }
         }
         if (isSeriesException(eventData)) {
-            RecurrenceData recurrenceData = selectRecurrenceData(connection, contextID, eventData.getSeriesId(), false);
+            RecurrenceData recurrenceData;
+            if (null != eventData.getRecurrenceId() && RecurrenceData.class.isInstance(eventData.getRecurrenceId())) {
+                recurrenceData = (RecurrenceData) eventData.getRecurrenceId();
+            } else {
+                recurrenceData = selectRecurrenceData(connection, contextID, eventData.getSeriesId(), false);
+            }
             if (eventData.containsRecurrenceRule() && null != eventData.getRecurrenceRule()) {
                 // TODO really required to also store series pattern for exceptions?
                 /*

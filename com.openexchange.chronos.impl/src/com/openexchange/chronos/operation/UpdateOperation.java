@@ -289,8 +289,9 @@ public class UpdateOperation extends AbstractOperation {
                     }
                     if (isSeriesMaster(originalEvent) && null == eventUpdate.getRecurrenceRule()) {
                         /*
-                         * series to single event, remove recurrence
+                         * series to single event, remove recurrence & ensure all necessary recurrence data is present in passed event update
                          */
+                        EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
                         eventUpdate.setSeriesId(0);
                         eventUpdate.setChangeExceptionDates(null);
                         eventUpdate.setDeleteExceptionDates(null);
@@ -311,9 +312,9 @@ public class UpdateOperation extends AbstractOperation {
                 case START_DATE:
                 case END_DATE:
                     /*
-                     * re-validate start- and end date if adjusted
+                     * ensure all necessary recurrence related data is present in passed event update & check rule validity & re-validate start- and end date
                      */
-                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.START_DATE, EventField.END_DATE);
+                    EventMapper.getInstance().copyIfNotSet(originalEvent, eventUpdate, EventField.RECURRENCE_RULE, EventField.SERIES_ID, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY);
                     Check.startAndEndDate(eventUpdate);
                     break;
                 case RECURRENCE_ID:
