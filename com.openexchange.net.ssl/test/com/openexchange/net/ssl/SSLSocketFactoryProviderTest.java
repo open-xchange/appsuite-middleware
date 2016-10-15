@@ -67,7 +67,6 @@ import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.config.TrustLevel;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.net.ssl.internal.DefaultSSLSocketFactoryProvider;
-import com.openexchange.net.ssl.internal.TrustedSSLSocketFactory;
 import com.openexchange.net.ssl.osgi.Services;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 

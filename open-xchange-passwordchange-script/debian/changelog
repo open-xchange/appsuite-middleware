@@ -1,3 +1,9 @@
+open-xchange-passwordchange-script (7.8.3-1) stable; urgency=medium
+
+  * First preview 7.8.3 release
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Fri, 14 Oct 2016 15:22:17 +0200
+
 open-xchange-passwordchange-script (7.8.3-0) unstable; urgency=medium
 
   * prepare for 7.8.3 release

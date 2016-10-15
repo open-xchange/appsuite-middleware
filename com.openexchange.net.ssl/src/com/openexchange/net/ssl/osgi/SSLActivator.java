@@ -52,6 +52,7 @@ package com.openexchange.net.ssl.osgi;
 import javax.net.ssl.HttpsURLConnection;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.TrustedSSLSocketFactory;
 import com.openexchange.net.ssl.apache.DefaultHostnameVerifier;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
@@ -77,6 +78,8 @@ public class SSLActivator extends HousekeepingActivator {
         try {
             org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("starting bundle: \"com.openexchange.net.ssl\"");
             Services.setServiceLookup(this);
+
+            TrustedSSLSocketFactory.init();
 
             DefaultSSLSocketFactoryProvider factoryProvider = DefaultSSLSocketFactoryProvider.getInstance();
             registerService(SSLSocketFactoryProvider.class, factoryProvider);

@@ -1,3 +1,9 @@
+open-xchange-mobile-config (7.8.3-1) stable; urgency=medium
+
+  * First preview 7.8.3 release
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Fri, 14 Oct 2016 15:22:10 +0200
+
 open-xchange-mobile-config (7.8.3-0) unstable; urgency=medium
 
   * prepare for 7.8.3 release

@@ -59,6 +59,7 @@ Possible OPTIONS:
 main() {
   if [ $# -eq 0 ]; then
     show_usage
+    exit 1
   else   
     while getopts ":df:h" opt; do
       case $opt in
