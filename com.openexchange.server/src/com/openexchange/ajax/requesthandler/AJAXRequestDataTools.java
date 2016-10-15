@@ -483,7 +483,7 @@ public class AJAXRequestDataTools {
         }
 
         String pathInfo = req.getRequestURI();
-        if (pathInfo.contains("%")) {
+        if (pathInfo.indexOf('%') >= 0) {
             try {
                 pathInfo = URLDecoder.decode(pathInfo, "UTF-8");
             } catch (UnsupportedEncodingException e) {
