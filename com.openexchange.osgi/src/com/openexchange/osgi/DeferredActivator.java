@@ -195,7 +195,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             }
 
             updateServiceState();
-            super.removedService(reference, service);
+            Tools.ungetServiceSafe(reference, context);
         }
 
     }
