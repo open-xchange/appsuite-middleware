@@ -52,7 +52,6 @@ package com.openexchange.osgi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -63,6 +62,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.annotation.SingletonService;
@@ -390,8 +390,8 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             STATE_LOOKUP.setState(context.getBundle().getSymbolicName(), new ArrayList<String>(0), new ArrayList<String>());
             return;
         }
-        final List<String> missing = new ArrayList<String>(classes.length);
-        final List<String> present = new ArrayList<String>(classes.length);
+        final ImmutableList.Builder<String> missing = ImmutableList.builder();
+        final ImmutableList.Builder<String> present = ImmutableList.builder();
 
         ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
         for (final Class<?> clazz : classes) {
@@ -401,7 +401,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                 missing.add(clazz.getName());
             }
         }
-        STATE_LOOKUP.setState(context.getBundle().getSymbolicName(), missing, present);
+        STATE_LOOKUP.setState(context.getBundle().getSymbolicName(), missing.build(), present.build());
     }
 
     /**
