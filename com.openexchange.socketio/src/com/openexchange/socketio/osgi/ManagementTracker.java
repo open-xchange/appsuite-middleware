@@ -92,7 +92,7 @@ public class ManagementTracker implements ServiceTrackerCustomizer<ManagementSer
         try {
             ObjectName objectName = Managements.getObjectName(SocketIOMBean.class.getName(), SocketIOMBean.DOMAIN);
             managementService.registerMBean(objectName, new SocketIOMBeanImpl(socketIoManager, connectionRegistry));
-            logger.warn("Registered MBean {}", SocketIOMBean.class.getName());
+            logger.info("Registered MBean {}", SocketIOMBean.class.getName());
             return managementService;
         } catch (Exception e) {
             logger.warn("Could not register MBean {}", SocketIOMBean.class.getName(), e);
