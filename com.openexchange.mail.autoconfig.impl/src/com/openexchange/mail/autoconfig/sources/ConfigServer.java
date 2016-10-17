@@ -171,6 +171,10 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
         } catch (ClientProtocolException e) {
             LOG.warn("Could not retrieve config XML.", e);
             return null;
+        } catch (java.net.UnknownHostException e) {
+            // Apparently an invalid host-name was deduced from given auto-config data
+            LOG.debug("Could not retrieve config XML.", e);
+            return null;
         } catch (IOException e) {
             LOG.warn("Could not retrieve config XML.", e);
             return null;
