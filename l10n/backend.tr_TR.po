@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: errors.tr_TR\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-04 07:51+0000\n"
+"POT-Creation-Date: 2016-10-18 12:46+0000\n"
 "PO-Revision-Date: 2015-05-29 13:25+0000\n"
 "Last-Translator: resellerclub <ameya.d@directi.com>\n"
 "Language-Team: <de@li.org>\n"
@@ -147,6 +147,7 @@ msgstr "Konum"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:71
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:67
 msgid "Participants"
 msgstr "Katılımcılar"
 
@@ -1042,6 +1043,10 @@ msgstr ""
 msgid "Your device configuration"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.cluster.lock/src/com/openexchange/cluster/lock/internal/ClusterLockExceptionMessages.java:61
+msgid "Another node is currently performing the same task. Try again later."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
 #, fuzzy
 msgid "LDAP contacts cannot be deleted."
@@ -1698,6 +1703,45 @@ msgstr "Küresel veritabanları için geçersiz yapılandırma: %1$s"
 msgid "No global database for context group \"%1$s\" found."
 msgstr " \"%1$s\" içerik grubu için hiçbir küresel veritabanı bulunamadı."
 
+#. A DoveAdm error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:62
+msgid "A DoveAdm error occurred: %1$s"
+msgstr ""
+
+#. A DoveAdm error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:65
+msgid ""
+"A DoveAdm server error occurred with HTTP status code %1$s. Error message: "
+"%2$s"
+msgstr ""
+
+#. Invalid DoveAdm URL: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:68
+msgid "The provided DoveAdm URL: %1$s is invalid"
+msgstr ""
+
+#. The DoveAdm resource does not exist: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:71
+msgid "The provided DoveAdm resource does not exist: %1$s"
+msgstr ""
+
+#. An I/O error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:74
+msgid "An I/O error occurred: %1$s"
+msgstr "I/O hatası oluştu: %1$s"
+
+#. Authentication failed: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:77
+msgid "Authentication failed: %1$s"
+msgstr "Doğrulama işlemi başarısız oldu: %1$s."
+
+#. The DoveAdm resource does not exist
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:80
+msgid "The DoveAdm resource does not exist"
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.download.limit/src/com/openexchange/download/limit/limiter/exceptions/DownloadLimitedExceptionMessages.java:63
 msgid ""
 "Download denied because download limits have been exceeded. Please try again "
@@ -1896,9 +1940,18 @@ msgstr ""
 msgid "Empty files indicated for directory \"%1$s\"."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:97
+msgid "A file named \"%1$s\" already exists at \"%2$s\"."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:98
+msgid "A directory named \"%1$s\" already exists at \"%2$s\"."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.oauth/src/com/openexchange/file/storage/oauth/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/FormStrings.java:61
@@ -2661,7 +2714,7 @@ msgid "last year"
 msgstr "geçen yıl"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:96
 msgid "Contact"
 msgstr "İletişim"
 
@@ -2700,7 +2753,14 @@ msgstr "adreslerde"
 msgid "in departments"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:93
+#. Context: Searching in contacts.
+#. Displayed as: [Search for] 'user input' in user fields.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:94
+msgid "in user fields"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:98
 msgid "Distribution List"
 msgstr "dağıtım listesi"
 
@@ -3161,16 +3221,6 @@ msgstr "Sağlanan Guard URL'si  %1$s geçersizdir. "
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:71
 msgid "The provided Guard resource does not exist: %1$s"
 msgstr "Sağlanan Guard kaynağı bulunmuyor: %1$s"
-
-#. An I/O error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:74
-msgid "An I/O error occurred: %1$s"
-msgstr "I/O hatası oluştu: %1$s"
-
-#. Authentication failed: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:77
-msgid "Authentication failed: %1$s"
-msgstr "Doğrulama işlemi başarısız oldu: %1$s."
 
 #. The Guard resource does not exist
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:80
@@ -3805,6 +3855,18 @@ msgstr "%2$s klasöründe %1$s mesajı bulunamadı. "
 msgid "Invalid OAuth account specified."
 msgstr "Geçersiz OAuth hesabı belirlendi. "
 
+#. The certificate for domain "%1$s" is untrusted.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:63
+msgid "The certificate for domain \"%1$s\" is untrusted."
+msgstr ""
+
+#. The certificate for domain "%1$s" is untrusted. You can change your general trust level in the settings.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:66
+msgid ""
+"The certificate for domain \"%1$s\" is untrusted. You can change your "
+"general trust level in the settings."
+msgstr ""
+
 #.
 #. * The display of a users given and sur name name in e.g. notification mails (Hello John Doe, ...).
 #. * The placeholders mean $givenname $surname.
@@ -3967,33 +4029,38 @@ msgstr "Hesap \"%1$s\" geçersiz, lütfen yeniden oluşturunuz."
 msgid "Please provide a display name."
 msgstr "Lütfen görünen ismi belirleyiniz. "
 
-#. The associated OAuth provider denied the request: %1$s.
+#. Please provide at least one scope.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:85
+msgid "Please provide at least one scope."
+msgstr ""
+
+#. The associated OAuth provider denied the request: %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:88
 msgid "The associated OAuth provider denied the request: %1$s."
 msgstr "İlişkilendirilmiş  OAuth sağlayıcısı teklifi reddetti: %1$s."
 
 #. The OAuth authentication process has been canceled.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:91
 msgid "The OAuth authentication process has been canceled."
 msgstr " OAuth doğrulama süreci iptal edildi. "
 
 #. Could not get a valid response from the associated OAuth provider.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:94
 msgid "Could not get a valid response from the associated OAuth provider."
 msgstr "İlişkilendirilmiş OAuth sağlayıcısından geçerli bir cevap alınamadı. "
 
 #. There was a problem while creating a connection to the remote service.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:97
 msgid "There was a problem while creating a connection to the remote service."
 msgstr "Uzaktan servise bağlanmaya çalışırken hata oluştu. "
 
 #. You need to grant additional %1$s permissions to access the resource.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:100
 msgid "You need to grant additional %1$s permissions to access the resource."
 msgstr "Kaynağa ulaşmak için ayrıca %1$s izni vermeniz gerekiyor. "
 
 #. Your '%1$s' access was rejected. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:103
 msgid ""
 "Your '%1$s' access was rejected. You have to reauthorize the server to use "
 "your account with a new password. To do so, go to Configuration -> My Social "
@@ -4005,7 +4072,7 @@ msgstr ""
 "sonrasında tekrardan deneyiniz."
 
 #. Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:106
 msgid ""
 "Your '%1$s' access was revoked. You have to reauthorize the server to use "
 "your account with a new password. To do so, go to Configuration -> My Social "
@@ -4015,6 +4082,23 @@ msgstr ""
 "tekrardan onaylamanız gerekmektedir. Bunu yapmak için Yapılandırma - > "
 "Sosyal Yapılandırmam - > Hesaplar kısmına gitmeniz gerekmektedir. Bu işlem "
 "sonrasında tekrardan deneyiniz."
+
+#. Your access token for '%1$s' is invalid. You have to reauthorize your account.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:109
+msgid ""
+"Your access token for '%1$s' is invalid. You have to reauthorize your "
+"account."
+msgstr ""
+
+#. You need to explicitly authorise %1$s to subscribe to %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:112
+msgid "You need to explicitly authorise %1$s to subscribe to %2$s"
+msgstr ""
+
+#. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
+msgid "The scope %1$s is not supported by the provider"
+msgstr ""
 
 #. *
 #. * New password too short.
@@ -4866,38 +4950,38 @@ msgid ""
 msgstr "Girdiğiniz eylem hatalıdır.  \"koşul:eylem\" şeklinde olmalıdır"
 
 #. Unable to convert task status "%1$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:69
 msgid "Unable to convert task status \"%1$s\"."
 msgstr "Görev durumu dönüştürülemedi \"%1$s\"."
 
 #. Unable to convert task priority %1$d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:72
 msgid "Unable to convert task priority %d."
 msgstr "Görev önceliği değiştirilemedi %d."
 
 #. Parsing error parsing ical: %s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:75
 msgid "Parsing error parsing ical: %s"
 msgstr "Ayrıştırma hatası iCal'ı Ayrıştırma: %s"
 
 #. Unknown Class: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:78
 msgid "Unknown Class: %1$s"
 msgstr "Bilinmeyen kategori: %1$s"
 
 #. Cowardly refusing to convert confidential classified objects.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:81
 #, fuzzy
 msgid "Cowardly refusing to convert confidential classified objects."
 msgstr "Gizli objeleri dönüştürmeyi korkakça reddetmek."
 
 #. Missing DTStart in appointment
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:84
 msgid "Missing DTSTART"
 msgstr "DTSTART Eksik"
 
 #. Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:87
 msgid ""
 "Private appointments can not have attendees. Removing attendees and "
 "accepting appointment anyway."
@@ -4906,23 +4990,27 @@ msgstr ""
 "yine de kabul etmek."
 
 #. Not supported recurrence pattern: BYMONTH
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:90
 msgid "Not supported recurrence pattern: BYMONTH"
 msgstr "Desteklenmeyen tekrarlanma kalıbı: BYMONTH"
 
 #. This does not look like an iCal file. Please check the file.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:93
 msgid "This does not look like an iCal file. Please check the file."
 msgstr "Bu dosya iCal dosyası değildir. Lütfen tekrar kontrol ediniz."
 
 #. Empty "CLASS" element.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:96
 msgid "Empty \"CLASS\" element."
 msgstr "Boş \"CLASS\" elemanı. "
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:99
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:98
 msgid "Element truncated: %s"
 msgstr "Kesilmiş eleman: %s "
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:100
+msgid "Invalid mail address for external participant: %1$s"
+msgstr ""
 
 #. You do not have a valid session. Please login again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
@@ -5533,10 +5621,8 @@ msgstr "Bu iletişim bilgisini değiştirme yetkisine sahip değilsiniz"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
 msgid ""
 "An E-Mail address is mandatory for external distribution list members. "
-"Please add a valid E-Mail address."
+"Please add a valid E-Mail address to the contact \"%1$s\"."
 msgstr ""
-"E-Posta adresi harici dağıtım listesi üyeleri için zorunludur. Lütfen "
-"geçerli bir e-posta adresi ekleyiniz."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -8367,6 +8453,45 @@ msgid ""
 "share links"
 msgstr ""
 
+#. The authentication type selected for a certain mail/transport account is not supported; e.g. user wants to authenticate via OAuth, but IMAP server does not support AUTH=XOAUTH2 capability
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:225
+msgid "The selected authentication type is not supported by server %2$s"
+msgstr ""
+
+#. Something is wrong with a subscribed E-Mail account; e.g. invalid credentials. Example: "Please check your mail account: The entered credentials are wrong"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:228
+msgid "Please check your mail account: %2$s"
+msgstr ""
+
+#. Invalid name specified. Information from mail server: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:231
+msgid "Invalid name specified. Information from mail server: %1$s"
+msgstr ""
+
+#. Insufficient permissions to perform the operation.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:234
+msgid "Insufficient permissions to perform the operation."
+msgstr ""
+
+#. Such a folder already exists.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:237
+msgid "Such a folder already exists."
+msgstr ""
+
+#. A non-secure connection is not allowed. Please change mail settings and configure a secure connection (if Transport Layer Security (TLS) is not in use, the client could try STARTTLS).
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:240
+msgid ""
+"Please change mail settings and configure a secure connection (if Transport "
+"Layer Security (TLS) is not in use, the client could try STARTTLS)"
+msgstr ""
+
+#. A temporary failure because a subsystem is down. Please try again later.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:243
+msgid ""
+"A temporary failure because a subsystem is down (maybe due to maintenance). "
+"Please try again later."
+msgstr ""
+
 #. The default name for a file
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
 msgid "File"
@@ -8415,6 +8540,15 @@ msgstr ""
 #. Fall-back name if a file has no valid name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:97
 msgid "Unnamed"
+msgstr ""
+
+#. Application 'xyz' requires following permissions:
+#. - Send RFC822 data using primary account's transport. This requires master authentication to be active.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/osgi/OAuthScopeDescription.java:65
+msgid ""
+"Send RFC822 data using primary account's transport. This requires master "
+"authentication to be active."
 msgstr ""
 
 #. *
@@ -8654,6 +8788,18 @@ msgstr ""
 msgid "Timeout while trying to send to the following recipient: %1$s"
 msgstr ""
 
+#. The message advertising that everything is fine with checked account
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:71
+msgid "All fine"
+msgstr ""
+
+#. The message advertising that authentication against referenced mail account does not work or stopped working
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:74
+msgid ""
+"The entered credential or authentication information does not work or are no "
+"longer accepted by provider. Please change them."
+msgstr ""
+
 #. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
 msgid "Cannot find mail account for user \"%2$s\"."
@@ -8802,6 +8948,20 @@ msgstr "Verilen host adı \"%1$s\" için izin yoktur."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:128
 msgid "The protocol must not changed from %1$s to %2$s."
 msgstr "Protokol %1$s dan %2$s a değiştirilmemelidir."
+
+#. Application 'xyz' requires following permissions:
+#. - Read all your mail accounts.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/json/osgi/OAuthScopeDescription.java:65
+msgid "Read all your mail accounts."
+msgstr ""
+
+#. Application 'xyz' requires following permissions:
+#. - Create, modify and delete mail accounts.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/json/osgi/OAuthScopeDescription.java:70
+msgid "Create, modify and delete mail accounts."
+msgstr ""
 
 #. Found resource(s) with same identifier \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:78
@@ -9828,6 +9988,19 @@ msgstr ""
 msgid "unknown"
 msgstr ""
 
+#.
+#. * Drive Mail notifications
+#.
+#. * and %1$d more files.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:271
+msgid "and %1$d more files."
+msgstr ""
+
+#. * and 1 more file.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:274
+msgid "and 1 more file."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:64
 msgid ""
 "No notification mail could be sent to user \"%1$s\". We don't know his email "
@@ -9957,37 +10130,37 @@ msgid "The OAuth Account to use"
 msgstr "Kullanmak için OAuth Hesabı"
 
 #. The message displayed if the requested cannot be found.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:62
 msgid "Cannot find the requested subscription."
 msgstr "Talep edilen abonelik bulunamıyor."
 
 #. The message displayed if the server is not able to access the 3rd party service with the given credentials.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:65
 msgid "The login/password combination you entered is wrong."
 msgstr "Girilen Kullanıcı Adı/Şifre yanlış."
 
 #. The message displayed if a required service (e. g. for adding a subscription) is currently not available.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:68
 msgid "A required service is currently not available. Please try again later."
 msgstr "İstenilen servis şuan müsait değil. Lütfen daha sonra tekrar deneyin."
 
 #. The message displayed if an argument is missing. %1$s defines the missing argument.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:71
 msgid "The argument %1$s is missing."
 msgstr "Parametre %1$s eksik."
 
 #. The message displayed if the user misses some permissions.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:74
 msgid "You do not have the appropriate permissions to complete this operation."
 msgstr "Bu işlemi tamamlamak için yeterli yetkiniz yok."
 
 #. The message displayed if a non valid email address is inserted.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:77
 msgid "Please specify your full E-Mail address as login name."
 msgstr "Lütfen e-posta adresinizi giriş ismi olarak belirtin."
 
 #. The message displayed if a required service (e. g. for adding a subscription) is currently not available.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:81
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:80
 msgid ""
 "The source the subscription belongs to is currently inactive, and cannot "
 "provide data."
@@ -9996,17 +10169,17 @@ msgstr ""
 "sağlayamıyor."
 
 #. The message displayed if the user would like to access the service but does not have an OAuth account.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:83
 msgid "You need to create an OAuth-account first to access this service."
 msgstr "Bu servise erişebilmek için önce  OAuth hesabı oluşturmanız gerekiyor."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:85
 msgid "Your account needs to be verified: %1$s"
 msgstr "Hesabınızın doğrulanması gerekiyor: %1$s"
 
 #. The service provider asked for an identity confirmation. This happens for some accounts and cannot fixed by us.
 #. It is in the provider's responsibility. For this reason, the subscription cannot be completed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:89
 msgid ""
 "The service provider asked for an identity confirmation. This happens for "
 "some accounts and cannot fixed by us. It is in the provider's "
@@ -10017,21 +10190,21 @@ msgstr ""
 "sorumluluğundadır. Bu nedenle, abonelik tamamlanamaz."
 
 #. You already have such a subscription.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:92
 msgid "You already have such a subscription."
 msgstr "Abonelik zaten mevcut."
 
 #. Application 'xyz' requires following permissions:
 #. - Read all your tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/OAuthScopeDescription.java:9
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/OAuthScopeDescription.java:59
 msgid "Read all your tasks."
 msgstr ""
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/OAuthScopeDescription.java:14
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/OAuthScopeDescription.java:64
 msgid "Create, modify and delete tasks."
 msgstr "Görevleri yarat, değiştir, sil."
 
@@ -12384,6 +12557,13 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr ""
+
+#~ msgid ""
+#~ "An E-Mail address is mandatory for external distribution list members. "
+#~ "Please add a valid E-Mail address."
+#~ msgstr ""
+#~ "E-Posta adresi harici dağıtım listesi üyeleri için zorunludur. Lütfen "
+#~ "geçerli bir e-posta adresi ekleyiniz."
 
 #~ msgid "calendar"
 #~ msgstr "takvim"
