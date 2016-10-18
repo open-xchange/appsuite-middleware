@@ -364,21 +364,6 @@ public final class IMAPFolderConverter {
                             mailFolder.setSubfolders(true);
                             mailFolder.setSubscribedSubfolders(false);
                         }
-                        if (imapConfig.asMap().containsKey("SPECIAL-USE")) {
-                            if (attrs.contains(ATTRIBUTE_DRAFTS)) {
-                                mailFolder.setDefaultFolder(true);
-                                mailFolder.setDefaultFolderType(DefaultFolderType.DRAFTS);
-                            } else if (attrs.contains(ATTRIBUTE_JUNK)) {
-                                mailFolder.setDefaultFolder(true);
-                                mailFolder.setDefaultFolderType(DefaultFolderType.SPAM);
-                            } else if (attrs.contains(ATTRIBUTE_SENT)) {
-                                mailFolder.setDefaultFolder(true);
-                                mailFolder.setDefaultFolderType(DefaultFolderType.SENT);
-                            } else if (attrs.contains(ATTRIBUTE_TRASH)) {
-                                mailFolder.setDefaultFolder(true);
-                                mailFolder.setDefaultFolderType(DefaultFolderType.TRASH);
-                            }
-                        }
                     }
                     if (!mailFolder.containsSubfolders()) {
                         /*

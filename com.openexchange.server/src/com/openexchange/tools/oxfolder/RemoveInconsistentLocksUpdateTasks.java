@@ -70,15 +70,13 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class RemoveInconsistentLocksUpdateTasks extends UpdateTaskAdapter {
 
-    private final String SQL = "DELETE l FROM infostore_lock AS l INNER JOIN infostore AS i ON l.cid=i.cid and l.entity=i.id WHERE "
-        + "i.folder_id NOT IN (SELECT fuid FROM oxfolder_permissions AS fp WHERE fp.cid=l.cid AND fp.permission_id=l.userid AND owp!=0) AND "
-        + "l.entity NOT IN (SELECT object_id FROM object_permission AS op WHERE op.cid=l.cid AND op.permission_id=l.userid AND op.folder_id=i.folder_id AND op.bits=2);";
-
-    /*
-     * (non-Javadoc)
-     *
-     * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
+    /**
+     * Initializes a new {@link RemoveInconsistentLocksUpdateTasks}.
      */
+    public RemoveInconsistentLocksUpdateTasks() {
+        super();
+    }
+
     @Override
     public void perform(PerformParameters params) throws OXException {
         DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
@@ -88,6 +86,11 @@ public class RemoveInconsistentLocksUpdateTasks extends UpdateTaskAdapter {
         try {
             con = dbService.getForUpdateTask(params.getContextId());
             con.setAutoCommit(false);
+
+            String SQL = "DELETE l FROM infostore_lock AS l INNER JOIN infostore AS i ON l.cid=i.cid and l.entity=i.id WHERE "
+                + "i.folder_id NOT IN (SELECT fuid FROM oxfolder_permissions AS fp WHERE fp.cid=l.cid AND fp.permission_id=l.userid AND owp!=0) AND "
+                + "l.entity NOT IN (SELECT object_id FROM object_permission AS op WHERE op.cid=l.cid AND op.permission_id=l.userid AND op.folder_id=i.folder_id AND op.bits=2);";
+
             stmt = con.prepareStatement(SQL);
             rows = stmt.executeUpdate();
             con.commit();

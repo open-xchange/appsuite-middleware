@@ -49,40 +49,77 @@
 
 package com.openexchange.websockets.monitoring.osgi;
 
+import javax.management.ObjectName;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.slf4j.Logger;
 import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.management.Managements;
 import com.openexchange.websockets.WebSocketService;
-
+import com.openexchange.websockets.monitoring.WebSocketMBean;
+import com.openexchange.websockets.monitoring.impl.WebSocketMBeanImpl;
 
 /**
- * {@link WebSocketMonitoringActivator}
+ * {@link WebSocketServiceTracker}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class WebSocketMonitoringActivator extends HousekeepingActivator {
+public class WebSocketServiceTracker implements ServiceTrackerCustomizer<WebSocketService, WebSocketService> {
+
+    private final BundleContext xContext;
+    private final ManagementService managementService;
 
     /**
-     * Initializes a new {@link WebSocketMonitoringActivator}.
+     * Initializes a new {@link WebSocketServiceTracker}.
      */
-    public WebSocketMonitoringActivator() {
+    public WebSocketServiceTracker(ManagementService managementService, BundleContext xContext) {
         super();
+        this.xContext = xContext;
+        this.managementService = managementService;
     }
 
     @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
+    public WebSocketService addingService(ServiceReference<WebSocketService> reference) {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(WebSocketServiceTracker.class);
+
+        WebSocketService webSocketService = xContext.getService(reference);
+        boolean error = true;
+        try {
+            ObjectName objectName = Managements.getObjectName(WebSocketMBean.class.getName(), WebSocketMBean.DOMAIN);
+            managementService.registerMBean(objectName, new WebSocketMBeanImpl(webSocketService));
+            error = false;
+            logger.warn("Registered MBean {}", WebSocketMBean.class.getName());
+            return webSocketService;
+        } catch (Exception e) {
+            logger.warn("Could not register MBean {}", WebSocketMBean.class.getName(), e);
+        } finally {
+            if (error) {
+                xContext.ungetService(reference);
+            }
+        }
+
+        return null;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ManagementService.class };
+    public void modifiedService(ServiceReference<WebSocketService> reference, WebSocketService service) {
+        // Ignore
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        track(WebSocketService.class, new WebSocketServiceTracker(getService(ManagementService.class), context));
-        openTrackers();
+    public void removedService(ServiceReference<WebSocketService> reference, WebSocketService service) {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(WebSocketMonitoringActivator.class);
+
+        try {
+            managementService.unregisterMBean(Managements.getObjectName(WebSocketMBean.class.getName(), WebSocketMBean.DOMAIN));
+            logger.warn("Unregistered MBean {}", WebSocketMBean.class.getName());
+        } catch (Exception e) {
+            logger.warn("Could not un-register MBean {}", WebSocketMBean.class.getName(), e);
+        }
+
+        xContext.ungetService(reference);
     }
 
 }

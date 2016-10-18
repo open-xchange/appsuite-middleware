@@ -42,6 +42,10 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+. /opt/open-xchange/lib/oxfunctions.sh
+ox_update_permissions /opt/open-xchange/etc/sipgate.properties root:open-xchange 640
+
 %clean
 %{__rm} -rf %{buildroot}
 
@@ -53,6 +57,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
 %config(noreplace) /opt/open-xchange/etc/*
+%config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/sipgate.properties
 
 %changelog
 * Fri Oct 14 2016 Jan Bauerdick <jan.bauerdick@open-xchange.com>

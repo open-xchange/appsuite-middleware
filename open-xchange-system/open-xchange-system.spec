@@ -60,6 +60,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 
 %files
 %defattr(-,root,root)
+%dir /opt/open-xchange/
+%dir /opt/open-xchange/lib/
 /opt/open-xchange/lib/oxfunctions.sh
 
 %changelog

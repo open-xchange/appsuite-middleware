@@ -19,6 +19,11 @@
         description: '"asc" if the response entities should be sorted in the ascending order, "desc" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.'
         required: false
       - in: query
+        name: admin
+        type: boolean
+        description: Defines whether the context admin should be included or not. Defaults to `true`.
+        required: false
+      - in: query
         name: collation
         type: string
         description: Allows you to specify a collation to sort the contacts by. Only supports "gbk" and "gb2312", not needed for other languages. Parameter sort should be set for this to work.
