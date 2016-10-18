@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,83 +47,46 @@
  *
  */
 
-package com.openexchange.chronos.service;
+package com.openexchange.chronos.common;
 
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.tools.session.ServerSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * {@link CalendarSession}
+ * {@link ChronosLogger}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public interface CalendarSession extends CalendarParameters {
+public class ChronosLogger {
+
+    public static final String LOGGER_NAME = "chronos-logger";
+
+    public static final Logger LOGGER = LoggerFactory.getLogger(LOGGER_NAME);
 
     /**
-     * Gets the underlying server session.
-     *
-     * @return The underlying server session
+     * Avoid instantiation.
+     * Initializes a new {@link ChronosLogger}.
      */
-    ServerSession getSession();
+    private ChronosLogger() {}
 
-    /**
-     * Gets host data information about the underlying HTTP request.
-     *
-     * @return The host data
-     */
-    HostData getHostData();
+    public static void debug(String message) {
+        LOGGER.debug(message);
+    }
 
-    /**
-     * Gets the session's user.
-     *
-     * @return The user
-     */
-    User getUser();
+    public static void debug(String message, Object arg0) {
+        LOGGER.debug(message, arg0);
+    }
 
-    /**
-     * Gets the session's context.
-     *
-     * @return The context
-     */
-    Context getContext();
+    public static void debug(String message, Object arg0, Object arg1) {
+        LOGGER.debug(message, arg0, arg1);
+    }
 
-    /**
-     * Gets the entity resolver.
-     *
-     * @return The entity resolver
-     */
-    EntityResolver getEntityResolver();
+    public static void debug(String message, Object... args) {
+        LOGGER.debug(message, args);
+    }
 
-    /**
-     * Gets a reference to the calendar service.
-     *
-     * @return The calendar service
-     */
-    CalendarService getCalendarService();
-
-    /**
-     * Logs a debug message with an associated identifier of this particular CalendarSession.
-     *
-     * @param message The message to be logged
-     */
-    void debug(String message);
-
-    /**
-     * Logs a debug message with an associated identifier of this particular CalendarSession.
-     *
-     * @param message The message to be logged
-     * @param e Exception to be logged
-     */
-    void debug(String message, Exception e);
-
-    /**
-     * Determines if debug is enabled.
-     * 
-     * @return True if debug is enabled, false otherwise
-     */
-    boolean isDebugEnabled();
-
+    public static boolean isDebugEnabled() {
+        return LOGGER.isDebugEnabled();
+    }
 }

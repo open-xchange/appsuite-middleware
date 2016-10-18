@@ -51,6 +51,8 @@ package com.openexchange.chronos.impl.session;
 
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.chronos.impl.osgi.Services;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarService;
@@ -80,6 +82,8 @@ public class DefaultCalendarSession implements CalendarSession {
     private final EntityResolver entityResolver;
     private final HostData hostData;
 
+    private static final Logger SESSION_LOGGER = LoggerFactory.getLogger("calendar-session-logger");
+
     /**
      * Initializes a new {@link DefaultCalendarSession}.
      *
@@ -94,6 +98,9 @@ public class DefaultCalendarSession implements CalendarSession {
         this.entityResolver = new DefaultEntityResolver(this.session, Services.getServiceLookup());
         RequestContext requestContext = RequestContextHolder.get();
         this.hostData = null != requestContext ? requestContext.getHostData() : null;
+        if (isDebugEnabled()) {
+            debug("New DefaultCalendarSession created. User: " + session.getUserId() + ", Context: " + session.getContextId());
+        }
     }
 
     @Override
@@ -151,6 +158,25 @@ public class DefaultCalendarSession implements CalendarSession {
     @Override
     public String toString() {
         return "CalendarSession [context=" + session.getContextId() + ", user=" + session.getUserId() + ", sessionId=" + session.getSessionID() + "]";
+    }
+
+    @Override
+    public void debug(String message) {
+        if (SESSION_LOGGER.isDebugEnabled()) {
+            SESSION_LOGGER.debug("{}@{}: {}", this.getClass().getSimpleName(), System.identityHashCode(this), message);
+        }
+    }
+
+    @Override
+    public void debug(String message, Exception e) {
+        if (SESSION_LOGGER.isDebugEnabled()) {
+            SESSION_LOGGER.debug("{}@{}: {}", this.getClass().getSimpleName(), System.identityHashCode(this), message, e);
+        }
+    }
+
+    @Override
+    public boolean isDebugEnabled() {
+        return SESSION_LOGGER.isDebugEnabled();
     }
 
 }

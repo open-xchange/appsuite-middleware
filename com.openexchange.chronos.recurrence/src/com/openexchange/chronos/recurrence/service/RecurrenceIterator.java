@@ -59,6 +59,7 @@ import org.dmfs.rfc5545.recur.InvalidRecurrenceRuleException;
 import org.dmfs.rfc5545.recur.RecurrenceRule;
 import org.dmfs.rfc5545.recur.RecurrenceRuleIterator;
 import com.openexchange.chronos.Event;
+import com.openexchange.chronos.common.ChronosLogger;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 
 /**
@@ -92,7 +93,7 @@ public class RecurrenceIterator implements Iterator<Event> {
      */
     public RecurrenceIterator(Event master, Calendar start, Calendar end, Integer limit, boolean ignoreExceptions) {
         if (limit != null && limit == 0) {
-            // Nothing to do.
+            ChronosLogger.debug("Occurrence limit set to 0, nothing to do.");
             return;
         }
         this.master = master;
@@ -161,27 +162,27 @@ public class RecurrenceIterator implements Iterator<Event> {
 
     private void innerNext() {
         if (count >= MAX) {
-            // Reached internal limit
+            ChronosLogger.debug("Reached internal limit. Stop calculation.");
             next = null;
             return;
         }
 
         if (limit != null && count >= limit) {
-            // Reached given limit
+            ChronosLogger.debug("Reached given limit. Stop calculation.");
             next = null;
             return;
         }
 
         if (!inner.hasNext()) {
-            // No more instances
+            ChronosLogger.debug("No more instances available.");
             next = null;
             return;
         }
 
         long peek = inner.peekMillis();
         if (!ignoreExceptions) {
-            // Check for exceptions
             while (isException(peek)) {
+                ChronosLogger.debug("Next instance is exception.");
                 inner.nextMillis();
                 if (inner.hasNext()) {
                     peek = inner.peekMillis();
@@ -192,7 +193,7 @@ public class RecurrenceIterator implements Iterator<Event> {
             }
         }
         if (this.end != null && peek >= this.end.getTimeInMillis()) {
-            // Reached end boundary
+            ChronosLogger.debug("Next instance ({}) reached end boundary ({}).", peek, this.end.getTimeInMillis());
             next = null;
             return;
         }
