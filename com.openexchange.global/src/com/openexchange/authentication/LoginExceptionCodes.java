@@ -68,7 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * Defines all error messages/codes for login-related errors.
+ * Defines all error messages for the OXException.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -172,23 +172,16 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
     LOGIN_DENIED("Login denied.", LoginExceptionMessages.LOGIN_DENIED_MSG, Category.CATEGORY_PERMISSION_DENIED, 26),
     ;
 
-    private static final String PREFIX = "LGI";
-
-    /**
-     * Gets the error code prefix (<code>"LGI"</code>) for login-related errors.
-     *
-     * @return The prefix
-     */
-    public static String prefix() {
-        return PREFIX;
-    }
 
     private final String message;
+
     private final String displayMessage;
+
     private final Category category;
+
     private final int number;
 
-    private LoginExceptionCodes(String message, String displayMessage, Category category, int detailNumber) {
+    private LoginExceptionCodes(final String message, String displayMessage, final Category category, final int detailNumber) {
         this.message = message;
         this.displayMessage = displayMessage;
         this.category = category;
@@ -197,7 +190,7 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
 
     @Override
     public String getPrefix() {
-        return PREFIX;
+        return "LGI";
     }
 
     @Override

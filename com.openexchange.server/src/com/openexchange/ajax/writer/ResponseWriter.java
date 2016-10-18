@@ -76,7 +76,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
-import org.json.ImmutableJSONArray;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -84,13 +83,11 @@ import org.json.JSONValue;
 import org.json.JSONWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.collect.ImmutableSet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.fields.ResponseFields.ParsingFields;
 import com.openexchange.ajax.fields.ResponseFields.TruncatedFields;
 import com.openexchange.ajax.response.IncludeStackTraceService;
-import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyEvent.Type;
@@ -123,18 +120,10 @@ public final class ResponseWriter {
      */
     private static final Set<String> RESERVED_IDENTIFIERS = ResponseFields.RESERVED_IDENTIFIERS;
 
-    /**
-     * The empty JSON array.
-     */
-    private static final JSONArray EMPTY_ARRAY = ImmutableJSONArray.immutableFor(new JSONArray(0));
-
-    /**
-     * The empty string for the "error_desc" field, which is supposed to provide the rather technical error description.
-     */
-    private static final String EMPTY_ERROR_DESC = OXExceptionConstants.EMPTY_MSG;
-
     private static volatile Locale defaultLocale;
-    /** Gets the default locale. */
+    /**
+     * The default locale.
+     */
     private static Locale defaultLocale() {
         Locale tmp = defaultLocale;
         if (null == tmp) {
@@ -156,41 +145,6 @@ public final class ResponseWriter {
             }
         }
         return tmp;
-    }
-
-    private static volatile Set<String> descriptionAllowingPrefixes;
-    /** Returns those prefixes that allow to keep error descriptions */
-    private static Set<String> descriptionAllowingPrefixes() {
-        Set<String> set = descriptionAllowingPrefixes;
-        if (null == set) {
-            synchronized (ResponseWriter.class) {
-                set = descriptionAllowingPrefixes;
-                if (null == set) {
-                    Set<String> defaultSet = ImmutableSet.<String> builder().add(LoginExceptionCodes.prefix()).build();
-                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    if (null == service) {
-                        set = defaultSet;
-                    } else {
-                        String property = service.getProperty("com.openexchange.ajax.response.descriptionAllowingPrefixes", LoginExceptionCodes.prefix());
-                        // Explicitly check for null to distinguish between absent and empty-defined property
-                        if (null == property) {
-                            set = defaultSet;
-                        } else {
-                            String[] prefixes = Strings.splitByComma(property);
-                            ImmutableSet.Builder<String> builder = ImmutableSet.builder();
-                            for (String prefix : prefixes) {
-                                if (!Strings.isEmpty(prefix)) {
-                                    builder.add(prefix.trim());
-                                }
-                            }
-                            set = builder.build();
-                        }
-                    }
-                    descriptionAllowingPrefixes = set;
-                }
-            }
-        }
-        return set;
     }
 
     private ResponseWriter() {
@@ -568,8 +522,7 @@ public final class ResponseWriter {
         /*
          * Put argument JSON array for compatibility reasons
          */
-        boolean keepDescription = descriptionAllowingPrefixes().contains(exception.getPrefix());
-        if (keepDescription) {
+        {
             Object[] args = exception.getLogArgs();
             if ((null == args) || (0 == args.length)) {
                 args = exception.getDisplayArgs();
@@ -587,8 +540,6 @@ public final class ResponseWriter {
                 }
                 json.put(ERROR_PARAMS, jArgs);
             }
-        } else {
-            json.put(ERROR_PARAMS, EMPTY_ARRAY);
         }
         /*
          * Categories
@@ -607,7 +558,7 @@ public final class ResponseWriter {
             } else {
                 if (size <= 0) {
                     // Empty JSON array
-                    json.put(ERROR_CATEGORIES, EMPTY_ARRAY);
+                    json.put(ERROR_CATEGORIES, new JSONArray(0));
                 } else {
                     JSONArray jArray = new JSONArray(size);
                     for (Category category : categories) {
@@ -627,7 +578,7 @@ public final class ResponseWriter {
          */
         json.put(ERROR_CODE, exception.getErrorCode());
         json.put(ERROR_ID, exception.getExceptionId());
-        json.put(ERROR_DESC, keepDescription ? exception.getSoleMessage() : EMPTY_ERROR_DESC);
+        json.put(ERROR_DESC, exception.getSoleMessage());
         /*
          * Problematics
          */
@@ -917,8 +868,7 @@ public final class ResponseWriter {
         /*
          * Put argument JSON array for compatibility reasons
          */
-        boolean keepDescription = descriptionAllowingPrefixes().contains(exc.getPrefix());
-        if (keepDescription) {
+        {
             Object[] args = exc.getLogArgs();
             if ((null == args) || (0 == args.length)) {
                 args = exc.getDisplayArgs();
@@ -934,8 +884,6 @@ public final class ResponseWriter {
                 }
                 writer.key(ResponseFields.ERROR_PARAMS).value(jArgs);
             }
-        } else {
-            writer.key(ResponseFields.ERROR_PARAMS).value(EMPTY_ARRAY);
         }
         {
             List<Category> categories = exc.getCategories();
@@ -972,7 +920,7 @@ public final class ResponseWriter {
         }
         writer.key(ERROR_CODE).value(exc.getErrorCode());
         writer.key(ERROR_ID).value(exc.getExceptionId());
-        writer.key(ERROR_DESC).value(keepDescription ? exc.getSoleMessage() : EMPTY_ERROR_DESC);
+        writer.key(ERROR_DESC).value(exc.getSoleMessage());
         writeProblematic(exc, writer);
         writeTruncated(exc, writer);
         if (includeArguments()) {
