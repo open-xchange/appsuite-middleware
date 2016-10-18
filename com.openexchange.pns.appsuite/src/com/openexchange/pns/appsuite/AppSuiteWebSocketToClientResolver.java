@@ -66,8 +66,8 @@ import com.openexchange.websockets.WebSockets;
  */
 public class AppSuiteWebSocketToClientResolver implements WebSocketToClientResolver {
 
-    /** The path filter expression for App Suite UI: <code>"/socket.io/*"</code> */
-    private static final String PATH_FILTER_APPSUITE_UI = "/socket.io/*";
+    /** The path filter expression for App Suite UI: <code>"/socket.io/appsuite/*"</code> */
+    private static final String PATH_FILTER_APPSUITE_UI = "/socket.io/appsuite/*";
 
     /**
      * Initializes a new {@link AppSuiteWebSocketToClientResolver}.
