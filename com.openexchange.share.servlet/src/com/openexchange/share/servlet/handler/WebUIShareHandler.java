@@ -102,6 +102,11 @@ public class WebUIShareHandler extends AbstractShareHandler {
         AuthenticationMode authMode = guest.getAuthentication();
         switch (authMode) {
             case ANONYMOUS:
+                if (shareRequest.isInvalidTarget()) {
+                    // Deny handling for invalid targets in case the AuthenticationMode is ANONYMOUS. See bug #49464
+                    return ShareHandlerReply.DENY;
+                }
+                //$FALL-THROUGH$
             case GUEST:
             {
                 if (shareRequest.isInvalidTarget()) {
