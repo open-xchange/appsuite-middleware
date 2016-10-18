@@ -315,7 +315,7 @@ public class MailCategoryConfig {
         if (obj == null) {
             return false;
         }
-        if (obj instanceof MailCategoryConfig) {
+        if (!(obj instanceof MailCategoryConfig)) {
             return false;
         }
         MailCategoryConfig other = (MailCategoryConfig) obj;
