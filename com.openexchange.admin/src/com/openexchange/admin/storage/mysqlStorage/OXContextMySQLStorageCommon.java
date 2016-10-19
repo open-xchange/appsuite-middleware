@@ -603,7 +603,7 @@ public class OXContextMySQLStorageCommon {
                 throw new ContextExistsException("Context " + ctx.getId().intValue() + " already exists!");
             }
             if (Databases.isKeyConflictInMySQL(e, "context_name_unique")) {
-                throw new InvalidDataException("Context " + name + " already exists!");
+                throw new ContextExistsException("Context " + name + " already exists!");
             }
             throw new StorageException(e.getMessage(), e);
         } finally {
