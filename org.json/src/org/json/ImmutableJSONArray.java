@@ -65,10 +65,13 @@ public class ImmutableJSONArray extends JSONArray {
     /**
      * Gets the immutable view for specified JSON array.
      *
-     * @param jsonArray The JSON array
+     * @param jsonArray The source JSON array
      * @return The immutable JSON array
      */
     public static ImmutableJSONArray immutableFor(JSONArray jsonArray) {
+        if (null == jsonArray) {
+            return null;
+        }
         return jsonArray instanceof ImmutableJSONArray ? (ImmutableJSONArray) jsonArray : new ImmutableJSONArray(jsonArray);
     }
 
