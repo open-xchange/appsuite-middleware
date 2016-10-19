@@ -177,6 +177,7 @@ public class MimeMessage extends Message implements MimePart {
 
     // Used to parse dates
     private static final MailDateFormat mailDateFormat = new MailDateFormat();
+    private static final java.util.concurrent.locks.Lock mailDateFormatLock = new java.util.concurrent.locks.ReentrantLock();
 
     // Should addresses in headers be parsed in "strict" mode?
     private boolean strict = true;
@@ -877,8 +878,14 @@ public class MimeMessage extends Message implements MimePart {
 	String s = getHeader("Date", null);
 	if (s != null) {
 	    try {
-		synchronized (mailDateFormat) {
-		    return mailDateFormat.parse(s);
+		if (mailDateFormatLock.tryLock()) {
+		    try {
+		        return mailDateFormat.parse(s);
+		    } finally {
+		        mailDateFormatLock.unlock();
+		    }
+		} else {
+		    return new MailDateFormat().parse(s);
 		}
 	    } catch (ParseException pex) {
 		return null;
@@ -904,8 +911,14 @@ public class MimeMessage extends Message implements MimePart {
 	if (d == null)
 	    removeHeader("Date");
 	else {
-	    synchronized (mailDateFormat) {
-		setHeader("Date", mailDateFormat.format(d));
+	    if (mailDateFormatLock.tryLock()) {
+	        try {
+	            setHeader("Date", mailDateFormat.format(d));
+	        } finally {
+                mailDateFormatLock.unlock();
+            }
+	    } else {
+	    setHeader("Date", new MailDateFormat().format(d));
 	    }
 	}
     }
