@@ -393,7 +393,7 @@ public class WnsPushNotificationTransport extends ServiceTracker<WnsOptionsProvi
         return tile;
     }
 
-    private WnsTile toWnsTile(Map<String, Object> message) throws OXException {
+    private WnsTile toWnsTile(Map<String, Object> message) {
         WnsTileBuilder tileBuilder = new WnsTileBuilder();
 
         Map<String, Object> source = new HashMap<>(message);

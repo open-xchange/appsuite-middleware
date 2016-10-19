@@ -71,7 +71,7 @@ final class WebSocketHit implements Hit {
     private final String client;
 
     /**
-     * Initializes a new {@link HitImplementation}.
+     * Initializes a new {@link WebSocketHit}.
      *
      * @param client The Web Socket client
      * @param userId The user identifier

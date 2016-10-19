@@ -2,12 +2,15 @@ type: object
 properties:
   client:
     type: string
+    required: false
     description: The client identifier; e.g. "open-xchange-appsuite". If not specified, session-associated client identifier is considered
   token:
     type: string
+    required: true
     description: The token to use when sending out notifications using specified transport
   transport:
     type: string
+    required: true
     description: |
       The identifer of the transport; currently supported:
       - "apn"

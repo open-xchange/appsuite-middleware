@@ -650,7 +650,6 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
     /**
      * Gets the other cluster members
      *
-     * @param uuids The known UUIDs
      * @param allMembers All known members
      * @param localMember The local member
      * @return Other cluster members

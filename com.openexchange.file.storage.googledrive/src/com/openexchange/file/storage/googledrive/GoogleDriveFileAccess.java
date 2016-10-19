@@ -90,6 +90,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStoragePersistentIDs;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageUtility;
@@ -111,7 +112,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageVersionedFileAccess, FileStoragePersistentIDs {
+public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageVersionedFileAccess, FileStoragePersistentIDs, FileStorageIgnorableVersionFileAccess {
 
     private final GoogleDriveAccountAccess accountAccess;
     private final int userId;
@@ -208,7 +209,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     private IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields, int retryCount) throws OXException {
         if (null == modifiedFields || modifiedFields.contains(Field.FILENAME) || modifiedFields.contains(Field.VERSION)) {
             try {
-                Drive drive = googleDriveAccess.<Drive>getClient().client;
+                Drive drive = googleDriveAccess.<Drive> getClient().client;
                 com.google.api.services.drive.model.File savedFile = new com.google.api.services.drive.model.File();
                 if (FileStorageFileAccess.NEW != file.getId()) {
                     savedFile.setId(file.getId());
@@ -368,7 +369,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     private IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<File.Field> modifiedFields, int retryCount) throws OXException {
         String id = source.getId();
         try {
-            Drive drive = googleDriveAccess.<Drive>getClient().client;
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
 
             // Get source file
             com.google.api.services.drive.model.File srcFile = drive.files().get(id).execute();
@@ -429,7 +430,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     private InputStream getDocument(String folderId, String id, String version, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.<Drive>getClient().client;
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             /*
              * get download URL from file or revision
              */
@@ -485,7 +486,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     private InputStream getThumbnailStream(String folderId, String id, String version, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.<Drive>getClient().client;
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             /*
              * get thumbnail link from file
              */
@@ -550,7 +551,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
         fileMetadata.setParents(Collections.<ParentReference> singletonList(new ParentReference().setId(toGoogleDriveFolderId(file.getFolderId()))));
         try {
-            Drive drive = googleDriveAccess.<Drive>getClient().client;
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             if (FileStorageFileAccess.NEW == file.getId()) {
                 /*
                  * insert new file
@@ -621,6 +622,26 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         }
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess#saveDocument(com.openexchange.file.storage.File, java.io.InputStream, long, java.util.List, boolean)
+     */
+    @Override
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields, boolean ignoreVersion) throws OXException {
+        return saveDocument(file, data, sequenceNumber, modifiedFields, 0);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess#saveDocumentTryAddVersion(com.openexchange.file.storage.File, java.io.InputStream, long, java.util.List)
+     */
+    @Override
+    public IDTuple saveDocumentTryAddVersion(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+        return saveDocument(file, data, sequenceNumber, modifiedFields, 0);
+    }
+
     @Override
     public void removeDocument(String folderId, long sequenceNumber) throws OXException {
         removeDocument(folderId, sequenceNumber, 0);
@@ -628,7 +649,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     private void removeDocument(String folderId, long sequenceNumber, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.<Drive>getClient().client;
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
 
             // Determine folder identifier
             String fid = toGoogleDriveFolderId(folderId);
@@ -703,7 +724,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     private List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.<Drive>getClient().client;
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             Map<String, Boolean> knownTrashFolders = new HashMap<String, Boolean>();
             List<IDTuple> ret = new ArrayList<IDTuple>(ids.size());
             for (IDTuple id : ids) {
@@ -776,7 +797,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     private TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.<Drive>getClient().client;
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             List<File> files = new LinkedList<File>();
             /*
              * build request to list all files in a folder
@@ -853,7 +874,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     private Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.<Drive>getClient().client;
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             List<File> updatedFiles = new LinkedList<File>();
             List<File> deletedFiles = new LinkedList<File>();
             List<File> newFiles = new LinkedList<File>();
@@ -975,7 +996,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     private Map<String, Long> getSequenceNumbers(List<String> folderIds, int retryCount) throws OXException {
         Long largestChangeId;
         try {
-            Drive drive = googleDriveAccess.<Drive>getClient().client;
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             ChangeList changeList = drive.changes().list().setFields("largestChangeId").execute();
             largestChangeId = changeList.getLargestChangeId();
         } catch (HttpResponseException e) {
@@ -1019,7 +1040,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      */
     private List<File> searchByFileNamePattern(String pattern, String folderId, boolean includeSubfolders, List<Field> fields, Field sort, SortDirection order, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.<Drive>getClient().client;
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             List<File> files = new ArrayList<File>();
             /*
              * build search query
@@ -1139,7 +1160,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     private String[] removeVersion(String folderId, String id, String[] versions, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.<Drive>getClient().client;
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             for (String version : versions) {
                 drive.revisions().delete(id, version).execute();
             }
@@ -1184,7 +1205,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     private TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.<Drive>getClient().client;
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             /*
              * get parent file & apply revisions
              */
@@ -1237,7 +1258,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      */
     private GoogleDriveFile getMetadata(String folderId, String id, String version, List<Field> fields, int retryCount) throws OXException {
         try {
-            Drive drive = googleDriveAccess.<Drive>getClient().client;
+            Drive drive = googleDriveAccess.<Drive> getClient().client;
             /*
              * get single file
              */
@@ -1422,5 +1443,4 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         }
         return pattern.replace("'", "\\'");
     }
-
 }

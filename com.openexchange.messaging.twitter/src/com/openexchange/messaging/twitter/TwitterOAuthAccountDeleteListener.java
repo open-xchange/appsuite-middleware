@@ -50,19 +50,11 @@
 package com.openexchange.messaging.twitter;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.twitter.session.TwitterAccessRegistry;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.oauth.OAuthAccountInvalidationListener;
-import com.openexchange.oauth.OAuthExceptionCodes;
 
 /**
  * {@link TwitterOAuthAccountDeleteListener}
@@ -70,8 +62,6 @@ import com.openexchange.oauth.OAuthExceptionCodes;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDeleteListener, OAuthAccountInvalidationListener {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TwitterOAuthAccountDeleteListener.class);
 
     /**
      * Initializes a new {@link TwitterOAuthAccountDeleteListener}.
@@ -87,143 +77,12 @@ public final class TwitterOAuthAccountDeleteListener implements OAuthAccountDele
 
     @Override
     public void onAfterOAuthAccountDeletion(final int id, final Map<String, Object> eventProps, final int user, final int cid, final Connection con) throws OXException {
-        final List<int[]> dataList = listTwitterMessagingAccounts(user, cid, con);
-        for (final int[] data : dataList) {
-            if (checkData(id, data, con)) {
-                dropAccountByData(data, con);
-                int accountId = data[0];
-                boolean purged = TwitterAccessRegistry.getInstance().purgeUserAccess(cid, user, accountId);
-                if (purged) {
-                    LOG.info("Removed Twitter OAuth accesses from registry for the deleted OAuth account with id '{}' for user '{}' in context '{}'", id, user, cid);
-                }
-            }
-        }
+        TwitterAccessRegistry.getInstance().purgeUserAccess(cid, user);
     }
 
     @Override
     public void onAfterOAuthAccountInvalidation(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
-        TwitterAccessRegistry.getInstance().purgeUserAccess(cid, user, id);
-    }
-
-    private static List<int[]> listTwitterMessagingAccounts(final int userId, final int contextId, final Connection writeCon) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = writeCon.prepareStatement("SELECT account, confId, user, cid FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ?");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.setString(3, TwitterMessagingService.getServiceId());
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return Collections.emptyList();
-            }
-            final List<int[]> dataList = new ArrayList<int[]>(64);
-            do {
-                final int[] data = new int[4];
-                data[0] = rs.getInt(1); // account
-                data[1] = rs.getInt(2); // confId
-                data[2] = rs.getInt(3); // user
-                data[3] = rs.getInt(4); // cid
-                dataList.add(data);
-            } while (rs.next());
-            return dataList;
-        } catch (final SQLException e) {
-            throw createSQLError(e);
-        } finally {
-            closeSQLStuff(rs, stmt);
-        }
-    }
-
-    private static boolean checkData(final int accountId, final int[] data, final Connection writeCon) throws OXException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = writeCon.prepareStatement("SELECT value FROM genconf_attributes_strings WHERE cid = ? AND id = ? AND name = ?");
-            stmt.setInt(1, data[3]);
-            stmt.setInt(2, data[1]);
-            stmt.setString(3, TwitterConstants.TWITTER_OAUTH_ACCOUNT);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return false;
-            }
-            return Integer.parseInt(rs.getString(1)) == accountId;
-        } catch (final SQLException e) {
-            throw createSQLError(e);
-        } finally {
-            closeSQLStuff(rs, stmt);
-        }
-    }
-
-    private static void dropAccountByData(final int[] data, final Connection writeCon) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            /*
-             * Delete genconf
-             */
-            stmt = writeCon.prepareStatement("DELETE FROM genconf_attributes_strings WHERE cid = ? AND id = ?");
-            stmt.setInt(1, data[3]);
-            stmt.setInt(2, data[1]);
-            stmt.executeUpdate();
-            /*
-             * Delete account
-             */
-            stmt.close();
-            stmt = writeCon.prepareStatement("DELETE FROM messagingAccount WHERE cid = ? AND user = ? AND serviceId = ? AND account = ?");
-            stmt.setInt(1, data[3]);
-            stmt.setInt(2, data[2]);
-            stmt.setString(3, TwitterMessagingService.getServiceId());
-            stmt.setInt(4, data[0]);
-            stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw createSQLError(e);
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
-
-    private static OXException createSQLError(final SQLException e) {
-        return OAuthExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-    }
-
-    /**
-     * Closes the ResultSet.
-     *
-     * @param result <code>null</code> or a ResultSet to close.
-     */
-    private static void closeSQLStuff(final ResultSet result) {
-        if (result != null) {
-            try {
-                result.close();
-            } catch (final SQLException e) {
-                LOG.error("", e);
-            }
-        }
-    }
-
-    /**
-     * Closes the {@link Statement}.
-     *
-     * @param stmt <code>null</code> or a {@link Statement} to close.
-     */
-    private static void closeSQLStuff(final Statement stmt) {
-        if (null != stmt) {
-            try {
-                stmt.close();
-            } catch (final SQLException e) {
-                LOG.error("", e);
-            }
-        }
-    }
-
-    /**
-     * Closes the ResultSet and the Statement.
-     *
-     * @param result <code>null</code> or a ResultSet to close.
-     * @param stmt <code>null</code> or a Statement to close.
-     */
-    private static void closeSQLStuff(final ResultSet result, final Statement stmt) {
-        closeSQLStuff(result);
-        closeSQLStuff(stmt);
+        TwitterAccessRegistry.getInstance().purgeUserAccess(cid, user);
     }
 
 }

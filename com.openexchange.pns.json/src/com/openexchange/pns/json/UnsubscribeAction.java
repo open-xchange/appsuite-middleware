@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.pns.DefaultPushSubscription;
 import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -82,6 +83,9 @@ public class UnsubscribeAction extends AbstractPushJsonAction {
         JSONObject jRequestBody = (JSONObject) requestData.requireData();
 
         PushSubscriptionRegistry subscriptionRegistry = services.getOptionalService(PushSubscriptionRegistry.class);
+        if (null == subscriptionRegistry) {
+            throw ServiceExceptionCode.absentService(PushSubscriptionRegistry.class);
+        }
 
         String client = jRequestBody.optString("client", null);
         if (null == client) {

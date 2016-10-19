@@ -272,7 +272,7 @@ public final class CacheFolderStorageActivator extends DeferredActivator {
                 }
             };
             final Dictionary<String, Object> dict = new Hashtable<String, Object>(1);
-            dict.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            dict.put(EventConstants.EVENT_TOPIC, new String[] { SessiondEventConstants.TOPIC_LAST_SESSION, SessiondEventConstants.TOPIC_LAST_SESSION_CONTEXT });
             registrations.add(context.registerService(EventHandler.class, eventHandler, dict));
         }
         {

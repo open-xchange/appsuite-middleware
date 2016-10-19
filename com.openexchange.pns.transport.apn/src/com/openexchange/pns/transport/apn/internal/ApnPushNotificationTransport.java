@@ -76,7 +76,6 @@ import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushNotification;
-import com.openexchange.pns.PushNotificationField;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.DefaultPushSubscription;
@@ -424,24 +423,6 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
         return payload;
     }
 
-
-    private PushNotificationPayload constructMailPayload(PushNotification notification) throws JSONException {
-        PushNotificationPayload payload = new PushNotificationPayload();
-        payload.addSound("beep.wav");
-
-        String subject = PushNotifications.getValueFor(PushNotificationField.MAIL_SUBJECT, notification);
-        String senderAddr = PushNotifications.getValueFor(PushNotificationField.MAIL_SENDER_EMAIL, notification);
-        String senderPers = PushNotifications.getValueFor(PushNotificationField.MAIL_SENDER_PERSONAL, notification);
-        String path = PushNotifications.getValueFor(PushNotificationField.MAIL_PATH, notification);
-        Integer unread = PushNotifications.getValueFor(PushNotificationField.MAIL_UNREAD, notification);
-
-        payload.addAlert(new StringBuilder(null == senderPers ? senderAddr : senderPers).append("\n").append(subject).toString());
-        if (null != unread) {
-            payload.addBadge(unread.intValue());
-        }
-        payload.addCustomDictionary(PushNotificationField.MAIL_PATH.getId(), path);
-        return payload;
-    }
 
     /**
      * Queries the feedback service and processes the received results, removing reported tokens from the subscription store if needed.

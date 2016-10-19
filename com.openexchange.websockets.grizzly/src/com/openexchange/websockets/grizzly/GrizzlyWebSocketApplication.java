@@ -245,7 +245,6 @@ public class GrizzlyWebSocketApplication extends WebSocketApplication {
      * @param candidates The candidates to remove from
      * @param userId The user identifier
      * @param contextId The context identifier
-     * @return The cleaned candidates
      */
     public void retainNonExisting(Set<ConnectionId> candidates, int userId, int contextId) {
         if (null == candidates) {

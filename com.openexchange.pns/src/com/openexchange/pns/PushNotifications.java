@@ -266,7 +266,7 @@ public class PushNotifications {
      */
     public static void validateTopicName(String topic) {
         if (Strings.isEmpty(topic)) {
-            throw new IllegalArgumentException("topic is is null, empty or only consists of white-space characters");
+            throw new IllegalArgumentException("topic is null, empty or only consists of white-space characters");
         }
 
         if (ALL.equals(topic)) {

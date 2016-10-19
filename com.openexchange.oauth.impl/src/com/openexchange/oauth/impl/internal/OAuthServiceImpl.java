@@ -65,6 +65,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLHandshakeException;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
@@ -95,6 +96,7 @@ import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.DefaultOAuthAccount;
@@ -495,6 +497,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
             /*
              * Obtain & apply the access token
              */
+            HttpsURLConnection.setDefaultSSLSocketFactory(Services.getService(SSLSocketFactoryProvider.class).getDefault());
             obtainToken(type, arguments, account, scopes);
             /*
              * Encrypt token & secret

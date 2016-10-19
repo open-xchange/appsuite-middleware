@@ -278,7 +278,7 @@ specific field data of single or multiple objects.
 |547 |Telephone company | telephone_company | String ||
 |548 |Telephone home 1 | telephone_home1 | String ||
 |549 |Telephone home 2 | telephone_home2 | String ||
-|550 |FAX home | fax_home |	String|
+|550 |FAX home | fax_home |	String||
 |551 |Cellular telephone 1 | cellular_telephone1 | String ||
 |552 |Cellular telephone 2 | cellular_telephone2 | String ||
 |553 |Telephone other | telephone_other | String ||

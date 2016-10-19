@@ -66,12 +66,12 @@ import com.openexchange.pns.subscription.storage.MapBackedHits;
 import com.openexchange.pns.subscription.storage.inmemory.InMemoryPushMatch;
 
 /**
- * {@link InMemoryPushSubscriptionCollection}
+ * {@link CachedPushSubscriptionCollection}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class InMemoryPushSubscriptionCollection {
+public class CachedPushSubscriptionCollection {
 
     private static final String ALL = KnownTopic.ALL.getName();
 
@@ -94,12 +94,12 @@ public class InMemoryPushSubscriptionCollection {
     private final Map<String, Set<PushSubscription>> matchingPrefixTopic;
 
     /**
-     * Initializes a new {@link InMemoryPushSubscriptionCollection}.
+     * Initializes a new {@link CachedPushSubscriptionCollection}.
      *
      * @param userId The user identifier
      * @param contextId The context identifier
      */
-    public InMemoryPushSubscriptionCollection(int userId, int contextId) {
+    public CachedPushSubscriptionCollection(int userId, int contextId) {
         super();
         this.userId = userId;
         this.contextId = contextId;
