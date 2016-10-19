@@ -74,7 +74,12 @@ public class ENVELOPE implements Item {
     public final String messageId;
 
     // Used to parse dates
-    private static MailDateFormat mailDateFormat = new MailDateFormat();
+    private static final MailDateFormat mailDateFormat = new MailDateFormat();
+    private static final java.util.concurrent.locks.Lock mailDateFormatLock = new java.util.concurrent.locks.ReentrantLock();
+
+    // special debugging output to debug parsing errors
+    private static final boolean parseDebug =
+	com.sun.mail.util.PropUtil.getBooleanSystemProperty("mail.imap.parse.debug", false);
     
     public ENVELOPE(FetchResponse r) throws ParsingException {
 	msgno = r.getNumber();
@@ -89,9 +94,15 @@ public class ENVELOPE implements Item {
 	String s = r.readString();
 	if (s != null) {
 	    try {
-	    synchronized (mailDateFormat) {
-		date = mailDateFormat.parse(s);
-	    }
+	        if (mailDateFormatLock.tryLock()) {
+	            try {
+	                date = mailDateFormat.parse(s);
+	            } finally {
+	                mailDateFormatLock.unlock();
+	            }
+	        } else {
+	            date = new MailDateFormat().parse(s);
+	        }
 	    } catch (ParseException pex) {
 	    } catch (RuntimeException pex) {
 		// We need to be *very* tolerant about bogus dates (and
