@@ -49,19 +49,16 @@
 
 package com.openexchange.cluster.lock.osgi;
 
-import java.util.concurrent.TimeUnit;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.cluster.lock.ClusterLockService;
-import com.openexchange.cluster.lock.internal.CleanupStaleClusterLocks;
 import com.openexchange.cluster.lock.internal.ClusterLockServiceDatabaseImpl;
 import com.openexchange.cluster.lock.internal.ClusterLockServiceHazelcastImpl;
 import com.openexchange.cluster.lock.internal.Unregisterer;
 import com.openexchange.cluster.lock.internal.groupware.ClusterLockCreateTableTask;
 import com.openexchange.cluster.lock.internal.groupware.CreateClusterLockTable;
-import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
@@ -88,7 +85,7 @@ public class ClusterLockActivator extends HousekeepingActivator implements Unreg
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class, DatabaseService.class, TimerService.class, ContextService.class };
+        return new Class<?>[] { HazelcastConfigurationService.class, DatabaseService.class, TimerService.class };
     }
 
     @Override
@@ -97,13 +94,9 @@ public class ClusterLockActivator extends HousekeepingActivator implements Unreg
         final boolean enabled = hzConfigService.isEnabled();
 
         if (false == enabled) {
-            // Register services
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new ClusterLockCreateTableTask(this)));
             registerService(CreateTableService.class, new CreateClusterLockTable(), null);
             registerService(ClusterLockService.class, new ClusterLockServiceDatabaseImpl(this));
-            // Set the clean up task
-            TimerService timerService = getService(TimerService.class);
-            timerService.scheduleAtFixedRate(new CleanupStaleClusterLocks(this), 10L, 1440L, TimeUnit.MINUTES);
         } else {
             registerService(ClusterLockService.class, new ClusterLockServiceHazelcastImpl(this, this));
             tracker = track(HazelcastInstance.class, new HazelcastClusterLockServiceTracker(context));
