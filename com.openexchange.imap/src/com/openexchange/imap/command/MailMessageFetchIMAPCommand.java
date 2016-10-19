@@ -1017,7 +1017,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             msg.setContentType(contentType);
             msg.addHeader("Content-Type", contentType.toString(true));
 
-            boolean hasAttachment = bs.isMulti() && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MimeMessageUtility.hasAttachments(bs));
+            boolean hasAttachment = bs.isMulti() && MimeMessageUtility.hasAttachments(bs);
             if (hasAttachment) {
                 if (checkICal && hasICal(bs)) {
                     msg.addHeader("X-ICAL", "true");
@@ -1103,9 +1103,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             } else {
                 try {
                     final ContentType ct = new ContentType(contentType);
-                    msg.setHasAttachment(ct.startsWith("multipart/") && ("mixed".equalsIgnoreCase(ct.getSubType()) || MimeMessageUtility.hasAttachments(
-                        (Multipart) message.getContent(),
-                        ct.getSubType())));
+                    msg.setHasAttachment(ct.startsWith("multipart/") && MimeMessageUtility.hasAttachments((Multipart) message.getContent(), ct.getSubType()));
                 } catch (final IOException e) {
                     throw new MessagingException(e.getMessage(), e);
                 }
