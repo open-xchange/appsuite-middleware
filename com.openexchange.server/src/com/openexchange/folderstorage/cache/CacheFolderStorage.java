@@ -1589,26 +1589,11 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
          */
         if (isMove) {
             /*-
-             * Optionally reload folders.
+             * Do not reload folders.
              * 
              * In case of a cross file storage move (e.g. Dropbox to InfoStore), the previously opened in-transaction connection will not
-             * see the newly created folder (as not yet committed).
+             * see the newly created folder (as not yet committed) or read a stale state.
              */
-            Folder f = optLoadFolder(realTreeId, newFolderId, StorageType.WORKING, true, storageParameters);
-            if (null != f) {
-                // The moved folder is loadable. Assume the in-use connection does see recent state.
-                if (f.isCacheable()) {
-                    putFolder(f, realTreeId, storageParameters, true);
-                }
-                f = optLoadFolder(realTreeId, oldParentId, StorageType.WORKING, true, storageParameters);
-                if (null != f && f.isCacheable()) {
-                    putFolder(f, realTreeId, storageParameters, true);
-                }
-                f = optLoadFolder(realTreeId, updatedFolder.getParentID(), StorageType.WORKING, true, storageParameters);
-                if (null != f && f.isCacheable()) {
-                    putFolder(f, realTreeId, storageParameters, true);
-                }
-            }
         } else {
             Folder f = loadFolder(realTreeId, newFolderId, StorageType.WORKING, true, storageParameters);
             if (f.isCacheable()) {
