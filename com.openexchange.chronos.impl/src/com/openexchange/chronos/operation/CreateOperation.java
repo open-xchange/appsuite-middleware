@@ -55,8 +55,10 @@ import static com.openexchange.chronos.common.CalendarUtils.isInRange;
 import static com.openexchange.chronos.common.CalendarUtils.isSeriesMaster;
 import static com.openexchange.chronos.common.CalendarUtils.truncateTime;
 import static com.openexchange.chronos.impl.Check.requireCalendarPermission;
+import static com.openexchange.chronos.impl.Utils.getTimeZone;
 import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.chronos.impl.Utils.isIgnoreConflicts;
+import static com.openexchange.chronos.impl.Utils.isInPast;
 import static com.openexchange.folderstorage.Permission.CREATE_OBJECTS_IN_FOLDER;
 import static com.openexchange.folderstorage.Permission.NO_PERMISSIONS;
 import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
@@ -76,14 +78,12 @@ import com.openexchange.chronos.EventStatus;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.Period;
 import com.openexchange.chronos.TimeTransparency;
-import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.impl.AttendeeHelper;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.EventMapper;
-import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.service.UserizedEvent;
@@ -229,13 +229,8 @@ public class CreateOperation extends AbstractOperation {
 
     //TODO
     private List<EventConflict> checkConflicts(Event event, List<Attendee> attendees) throws OXException {
-        if (isSeriesMaster(event)) {
-            //TODO: check for "finished" sequence
-        } else {
-            Date today = truncateTime(new Date(), TimeZones.UTC);
-            if (false == isInRange(event, today, null, TimeZones.UTC)) {
-                return Collections.emptyList();
-            }
+        if (isInPast(event, truncateTime(new Date(), TimeZones.UTC), getTimeZone(session))) {
+            return Collections.emptyList();
         }
         List<Attendee> checkedAttendees = new ArrayList<Attendee>();
         checkedAttendees.addAll(filter(attendees, Boolean.TRUE, CalendarUserType.RESOURCE));
@@ -248,8 +243,7 @@ public class CreateOperation extends AbstractOperation {
         Date from;
         Date until;
         if (isSeriesMaster(event)) {
-            DefaultRecurrenceData recurrenceData = new DefaultRecurrenceData(event);
-            Period period = Recurrence.getImplicitSeriesPeriod(recurrenceData, new Period(event));
+            Period period = Recurrence.getImplicitSeriesPeriod(new DefaultRecurrenceData(event), new Period(event));
             from = period.getStartDate();
             until = period.getEndDate();
         } else {
@@ -262,14 +256,14 @@ public class CreateOperation extends AbstractOperation {
     }
 
     private List<EventConflict> getConflicts(Event event, List<Attendee> attendees, List<Event> conflictingEvents) throws OXException {
-        TimeZone timeZone = Utils.getTimeZone(session);
+        TimeZone timeZone = getTimeZone(session);
         List<EventConflict> conflicts = new ArrayList<EventConflict>();
         Period period = new Period(event); // TODO: resolve occurrences
         for (Event conflictingEvent : conflictingEvents) {
             if (event.getId() == conflictingEvent.getId() || TimeTransparency.TRANSPARENT.equals(event.getTransp())) {
                 continue;
             }
-            if (CalendarUtils.isInRange(conflictingEvent, period.getStartDate(), period.getEndDate(), timeZone)) {
+            if (isInRange(conflictingEvent, period.getStartDate(), period.getEndDate(), timeZone)) {
                 List<Attendee> conflictingAttendees = new ArrayList<Attendee>();
                 List<Attendee> allAttendees = storage.getAttendeeStorage().loadAttendees(conflictingEvent.getId());
                 for (Attendee checkedAttendee : attendees) {

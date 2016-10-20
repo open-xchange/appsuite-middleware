@@ -210,6 +210,31 @@ public class Recurrence {
     }
 
     /**
+     * Gets a value indicating whether an event series lies in the past or not, i.e. the end-time of its last occurrence is before the
+     * <i>current</i> time.
+     * <p/>
+     * Therefore, the recurrence rule's <code>UNTIL</code>- and <code>COUNT</code>-parameters are evaluated accordingly; for
+     * <i>never-ending</i> event series, this method always returns <code>false</code>;
+     *
+     * @param recurrenceData The recurrence data to check
+     * @param now The date to consider as <i>now</i> in the comparison
+     * @param timeZone The timezone to consider if the event has <i>floating</i> dates
+     * @return <code>true</code> if the event series is in the past, <code>false</code>, otherwise
+     */
+    public static boolean isInPast(RecurrenceData recurrenceData, Date now, TimeZone timeZone) throws OXException {
+        RecurrenceRuleIterator iterator = getRecurrenceIterator(recurrenceData);
+        iterator.fastForward(now.getTime());
+        if (false == iterator.hasNext()) {
+            return true;
+        }
+        DateTime occurrence = iterator.nextDateTime();
+        if (occurrence.isFloating() || occurrence.isAllDay()) {
+            return now.after(CalendarUtils.getDateInTimeZone(new Date(occurrence.getTimestamp()), timeZone));
+        }
+        return false;
+    }
+
+    /**
      * Initializes a new recurrence iterator for a specific recurrence rule.
      *
      * @param recurrenceData The recurrence data
@@ -217,21 +242,7 @@ public class Recurrence {
      * @throws OXException {@link CalendarExceptionCodes#INVALID_RRULE}
      */
     static RecurrenceRuleIterator getRecurrenceIterator(RecurrenceData recurrenceData) throws OXException {
-        RecurrenceRule rrule = null;
-        try {
-            rrule = new RecurrenceRule(recurrenceData.getRecurrenceRule());
-        } catch (InvalidRecurrenceRuleException e) {
-            throw CalendarExceptionCodes.INVALID_RRULE.create(recurrenceData.getRecurrenceRule());
-        }
-        DateTime start;
-        if (recurrenceData.isAllDay()) {
-            start = new DateTime(TimeZones.UTC, recurrenceData.getSeriesStart()).toAllDay();
-        } else if (null != recurrenceData.getTimeZoneID()) {
-            start = new DateTime(TimeZone.getTimeZone(recurrenceData.getTimeZoneID()), recurrenceData.getSeriesStart());
-        } else {
-            start = new DateTime(recurrenceData.getSeriesStart());
-        }
-        return rrule.iterator(start);
+        return getRecurrenceIterator(recurrenceData, false);
     }
 
     /**
