@@ -179,13 +179,14 @@ public final class NewAction extends ChronosAction {
         UserizedEvent event = getEventConverter().getEvent(session, appointment, null);
         CalendarResult result = session.getCalendarService().createEvent(session, event);
 
-        if (null != result.getCreations() && 0 < result.getCreations().size()) {
-            int id = result.getCreations().get(0).getCreatedEvent().getId();
-            return new AJAXRequestResult(new JSONObject().put(DataFields.ID, id), result.getTimestamp(), "json");
-        } else if (null != result.getConflicts() && 0 < result.getConflicts().size()) {
+        if (false == result.getConflicts().isEmpty()) {
             return getAppointmentConflictResult(session, result.getConflicts());
         }
-        return null; //TODO: conflicts
+        JSONObject resultObject = new JSONObject(1);
+        if (0 < result.getCreations().size()) {
+            resultObject.put(DataFields.ID, result.getCreations().get(0).getCreatedEvent().getId());
+        }
+        return new AJAXRequestResult(resultObject, result.getTimestamp(), "json");
     }
 
 }

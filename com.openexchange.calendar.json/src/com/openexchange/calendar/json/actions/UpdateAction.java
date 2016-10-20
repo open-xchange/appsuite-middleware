@@ -190,12 +190,14 @@ public final class UpdateAction extends ChronosAction {
         UserizedEvent event = getEventConverter().getEvent(session, appointment, eventID);
         CalendarResult result = session.getCalendarService().updateEvent(session, eventID, event);
 
-        if (null != result.getUpdates() && 0 < result.getUpdates().size()) {
-            int id = result.getUpdates().get(0).getUpdate().getId();
-            return new AJAXRequestResult(new JSONObject().put(DataFields.ID, id), result.getTimestamp(), "json");
+        if (false == result.getConflicts().isEmpty()) {
+            return getAppointmentConflictResult(session, result.getConflicts());
         }
-        return null; //TODO: conflicts
-        //        return new AJAXRequestResult(new JSONObject().put(DataFields.ID, result.getUpdate().getId()), result.getTimestamp(), "json");
+        JSONObject resultObject = new JSONObject(1);
+        if (0 < result.getUpdates().size()) {
+            resultObject.put(DataFields.ID, result.getUpdates().get(0).getUpdate().getId());
+        }
+        return new AJAXRequestResult(resultObject, result.getTimestamp(), "json");
     }
 
 }

@@ -563,18 +563,29 @@ public class Utils {
      * <i>never-ending</i> event series, this method always returns <code>false</code>;
      *
      * @param event The event to check
-     * @param now The date to use as <i>now</i> in the comparison, or <code>null</code> to use the current sytem time
+     * @param now The date to consider as <i>now</i> in the comparison
      * @param timeZone The timezone to consider if the event has <i>floating</i> dates
      * @return <code>true</code> if the event is in the past, <code>false</code>, otherwise
      */
     public static boolean isInPast(Event event, Date now, TimeZone timeZone) throws OXException {
-        if (null == now) {
-            now = new Date();
-        }
         if (false == isSeriesMaster(event)) {
             return false == isInRange(event, now, null, timeZone);
         }
         return Recurrence.isInPast(new DefaultRecurrenceData(event), now, timeZone);
+    }
+
+    /**
+     * Gets a value indicating whether an event lies in the past or not, i.e. it's end-time is before the current system time.
+     * <p/>
+     * For event series, the recurrence rule's <code>UNTIL</code>- and <code>COUNT</code>-parameters are evaluated accordingly; for
+     * <i>never-ending</i> event series, this method always returns <code>false</code>;
+     *
+     * @param event The event to check
+     * @param timeZone The timezone to consider if the event has <i>floating</i> dates
+     * @return <code>true</code> if the event is in the past, <code>false</code>, otherwise
+     */
+    public static boolean isInPast(Event event, TimeZone timeZone) throws OXException {
+        return isInPast(event, new Date(), timeZone);
     }
 
 }

@@ -66,8 +66,10 @@ import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.Event;
@@ -81,6 +83,7 @@ import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
 import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.service.CalendarSession;
+import com.openexchange.chronos.service.EventConflict;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -200,10 +203,31 @@ public class UpdateOperation extends AbstractOperation {
         boolean wasUpdated = false;
         Event eventUpdate = prepareEventUpdate(originalEvent, updatedEvent);
         if (null != eventUpdate) {
+            /*
+             * check for conflicts
+             */
+            Event newEvent = originalEvent.clone();
+            EventMapper.getInstance().copy(eventUpdate, newEvent, EventField.values());
+            List<Attendee> newAttendees;
+            if (updatedEvent.containsAttendees()) {
+                newAttendees = new AttendeeHelper(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).apply(originalEvent.getAttendees());
+            } else {
+                newAttendees = originalEvent.getAttendees();
+            }
+            List<EventConflict> conflicts = new ConflictChecker(session, storage).checkConflicts(newEvent, newAttendees);
+            if (null != conflicts && 0 < conflicts.size()) {
+                for (EventConflict eventConflict : conflicts) {
+                    result.addConflict(eventConflict);
+                }
+                return;
+            }
+            /*
+             * perform update
+             */
             storage.getEventStorage().updateEvent(eventUpdate);
-            if (isSeriesMaster(originalEvent) && false == isSeriesMaster(eventUpdate)) {
+            if (isSeriesMaster(originalEvent) && resetChangeExceptions(originalEvent, eventUpdate)) {
                 /*
-                 * series to single event; ensure to also delete any change exceptions
+                 * ensure to also delete any change exceptions if required
                  */
                 deleteExceptions(originalEvent.getSeriesId(), originalEvent.getChangeExceptionDates());
             }
@@ -219,6 +243,20 @@ public class UpdateOperation extends AbstractOperation {
         if (wasUpdated) {
             result.addUpdate(new UpdateResultImpl(originalEvent, i(folder), loadEventData(originalEvent.getId())));
         }
+    }
+
+    private boolean resetChangeExceptions(Event originalEvent, Event eventUpdate) throws OXException {
+        if (false == isSeriesMaster(eventUpdate)) {
+            return true;
+        }
+        Set<EventField> recurrenceRelatedFields = new HashSet<EventField>(java.util.Arrays.asList(EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY));
+        EventField[] updatedFields = EventMapper.getInstance().getAssignedFields(EventMapper.getInstance().getDifferences(originalEvent, eventUpdate));
+        for (EventField updatedField : updatedFields) {
+            if (recurrenceRelatedFields.contains(updatedField)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void updateAttendees(Event originalEvent, Event updatedEvent) throws OXException {

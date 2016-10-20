@@ -143,6 +143,21 @@ public class AttendeeHelper {
         return attendeesToUpdate;
     }
 
+    public List<Attendee> apply(List<Attendee> originalAttendees) throws OXException {
+        List<Attendee> newAttendees = new ArrayList<Attendee>(originalAttendees);
+        newAttendees.removeAll(attendeesToDelete);
+        for (Attendee attendeeToUpdate : attendeesToUpdate) {
+            Attendee originalAttendee = find(originalAttendees, attendeeToUpdate);
+            newAttendees.remove(originalAttendee);
+            Attendee newAttendee = new Attendee();
+            AttendeeMapper.getInstance().copy(originalAttendee, newAttendee, AttendeeField.values());
+            AttendeeMapper.getInstance().copy(attendeeToUpdate, newAttendee, AttendeeField.RSVP, AttendeeField.COMMENT, AttendeeField.PARTSTAT, AttendeeField.ROLE);
+            newAttendees.add(newAttendee);
+        }
+        newAttendees.addAll(attendeesToInsert);
+        return newAttendees;
+    }
+
     private void processNewEvent(List<Attendee> requestedAttendees) throws OXException {
         session.getEntityResolver().prefetch(requestedAttendees);
         /*
