@@ -661,7 +661,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                         contentType = new ContentType(MimeTypes.MIME_DEFAULT);
                     }
                 }
-                if (contentType.startsWith("multipart/")) {
+                if (contentType.startsWith(MULTIPART)) {
                     /*
                      * Compose a new body part with multipart/ data
                      */
@@ -735,7 +735,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                         contentType = new ContentType(MimeTypes.MIME_DEFAULT);
                     }
                 }
-                if (contentType.startsWith("multipart/")) {
+                if (contentType.startsWith(MULTIPART)) {
                     serializeType = STYPE_MIME_BODY_MULTI;
                     serializedContent = getBytesFromMultipart(getMultipartContentFrom(part, contentType.toString()));
                     serializedContentType = contentType.toString();

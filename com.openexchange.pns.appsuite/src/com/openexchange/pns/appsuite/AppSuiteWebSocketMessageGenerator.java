@@ -130,7 +130,7 @@ public class AppSuiteWebSocketMessageGenerator implements PushMessageGenerator {
         }
 
         // From here on it's known that we are supposed to compile a Socket.IO JSON message since
-        // com.openexchange.pns.appsuite.AppSuiteWebSocketToClientResolver only accepts "/socket.io/*"
+        // com.openexchange.pns.appsuite.AppSuiteWebSocketToClientResolver only accepts "/socket.io/appsuite/*"
 
         String topic = notification.getTopic();
         Collection<Object> args;

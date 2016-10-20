@@ -66,7 +66,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-
+import com.openexchange.java.Strings;
 
 /**
  * {@link GetUserCapabilities} - Determines the capabilities for a context.
@@ -95,7 +95,7 @@ public class GetUserCapabilities extends UserAbstraction {
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
         setOptions(parser);
 
-        String successtext = null;
+        String userString = null;
         try {
             parser.ownparse(args);
 
@@ -105,7 +105,7 @@ public class GetUserCapabilities extends UserAbstraction {
             parseAndSetUserId(parser, usr);
             parseAndSetUsername(parser, usr);
 
-            successtext = nameOrIdSetInt(this.userid, this.username, "user");
+            userString = compileUserString(usr, nameOrIdSetInt(this.userid, this.username, "user"));
 
             final Context ctx = contextparsing(parser);
 
@@ -115,26 +115,39 @@ public class GetUserCapabilities extends UserAbstraction {
             final OXUserInterface oxusr = getUserInterface();
 
             Set<String> caps = oxusr.getCapabilities(ctx, usr, auth);
+
+            StringBuilder sb = new StringBuilder(512);
             if (null == caps || caps.isEmpty()) {
-                System.out.println("There are no capabilities set for user " + usr.getId() + " in context " + ctx.getId());
+                sb.append("There are no capabilities set for user ").append(userString).append(" in context ").append(ctx.getId());
             } else {
                 final String lf = System.getProperty("line.separator");
-
-                final StringBuilder sb = new StringBuilder(2048);
-                sb.append("Capabilities for user ").append(usr.getId() != null ? usr.getId() : usr.getName()).append(" in context ").append(ctx.getId()).append(":").append(lf);
-
+                sb.append("Capabilities for user ").append(userString).append(" in context ").append(ctx.getId()).append(":").append(lf);
                 for (final String cap : new TreeSet<String>(caps)) {
                     sb.append(cap).append(lf);
                 }
-
-                System.out.println(sb.toString());
             }
+            System.out.println(sb.toString());
 
             sysexit(0);
         } catch (final Exception e) {
-            printErrors(successtext, ctxid, e, parser);
+            printErrors(userString, ctxid, e, parser);
             sysexit(SYSEXIT_COMMUNICATION_ERROR);
         }
+    }
+
+    /**
+     * Retrieves the user string from the specified {@link User} or the optional string.
+     * If the optional string is empty, then the identifier of the specified user is returned.
+     * If the identifier is <code>null</code> then the name of the user is returned as a fall-back.
+     * 
+     * @param user the {@link User}
+     * @return The user string
+     */
+    private String compileUserString(User user, String optionalString) {
+        if (Strings.isEmpty(optionalString)) {
+            return user.getId() != null ? Integer.toString(user.getId()) : user.getName();
+        }
+        return optionalString;
     }
 
     private Set<String> maincall(Context ctx, Credentials auth) throws MalformedURLException, RemoteException, NotBoundException, InvalidCredentialsException, StorageException, NoSuchContextException, InvalidDataException {

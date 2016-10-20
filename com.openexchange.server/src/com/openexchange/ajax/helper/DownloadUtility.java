@@ -236,46 +236,50 @@ public final class DownloadUtility {
                 if (null == sContentDisposition) {
                     sContentDisposition = "attachment";
                 } else if (toLowerCase(sContentDisposition).startsWith("inline")) {
-                    /*
-                     * Escaping of XML content needed
-                     */
-                    sink = new ThresholdFileHolder();
-                    sink.write(in);
-                    in = null;
-                    String cs = contentType.getCharsetParameter();
-                    if (!CharsetDetector.isValid(cs)) {
-                        cs = CharsetDetector.detectCharset(sink.getStream());
-                        if ("US-ASCII".equalsIgnoreCase(cs)) {
-                            cs = "ISO-8859-1";
-                        }
-                    }
-                    // Escape of XML content
-                    {
-                        final ThresholdFileHolder copy = new ThresholdFileHolder();
-                        OutputStreamWriter w = null;
-                        Reader r = null;
-                        try {
-                            r = new InputStreamReader(sink.getClosingStream(), Charsets.forName(cs));
-                            w = new OutputStreamWriter(copy.asOutputStream(), Charsets.UTF_8);
-                            HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                            final int buflen = 8192;
-                            final char[] cbuf = new char[buflen];
-                            for (int read; (read = r.read(cbuf, 0, buflen)) > 0;) {
-                                String xmlContent = new String(cbuf, 0, read);
-                                xmlContent = htmlService.htmlFormat(xmlContent);
-                                w.write(xmlContent);
+                    if (contentType.startsWith("application/")) {
+                        sContentDisposition = "attachment";
+                    } else {                        
+                        /*
+                         * Escaping of XML content needed
+                         */
+                        sink = new ThresholdFileHolder();
+                        sink.write(in);
+                        in = null;
+                        String cs = contentType.getCharsetParameter();
+                        if (!CharsetDetector.isValid(cs)) {
+                            cs = CharsetDetector.detectCharset(sink.getStream());
+                            if ("US-ASCII".equalsIgnoreCase(cs)) {
+                                cs = "ISO-8859-1";
                             }
-                            w.flush();
-                        } finally {
-                            Streams.close(r, w);
                         }
-                        sink = copy;
+                        // Escape of XML content
+                        {
+                            final ThresholdFileHolder copy = new ThresholdFileHolder();
+                            OutputStreamWriter w = null;
+                            Reader r = null;
+                            try {
+                                r = new InputStreamReader(sink.getClosingStream(), Charsets.forName(cs));
+                                w = new OutputStreamWriter(copy.asOutputStream(), Charsets.UTF_8);
+                                HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                                final int buflen = 8192;
+                                final char[] cbuf = new char[buflen];
+                                for (int read; (read = r.read(cbuf, 0, buflen)) > 0;) {
+                                    String xmlContent = new String(cbuf, 0, read);
+                                    xmlContent = htmlService.htmlFormat(xmlContent);
+                                    w.write(xmlContent);
+                                }
+                                w.flush();
+                            } finally {
+                                Streams.close(r, w);
+                            }
+                            sink = copy;
+                        }
+                        contentType.setSubType("html");
+                        contentType.setCharsetParameter("UTF-8");
+                        sz = sink.getLength();
+                        in = sink.getClosingRandomAccess();
+                        sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                     }
-                    contentType.setSubType("html");
-                    contentType.setCharsetParameter("UTF-8");
-                    sz = sink.getLength();
-                    in = sink.getClosingRandomAccess();
-                    sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                 }
             } else if (contentType.startsWith("text/plain")) {
                 /*-

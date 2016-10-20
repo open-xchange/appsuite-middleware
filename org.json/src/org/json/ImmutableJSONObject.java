@@ -65,10 +65,13 @@ public class ImmutableJSONObject extends JSONObject {
     /**
      * Gets the immutable view for specified JSON object.
      *
-     * @param jsonObject The JSON object
+     * @param jsonObject The source JSON object
      * @return The immutable JSON object
      */
     public static ImmutableJSONObject immutableFor(JSONObject jsonObject) {
+        if (null == jsonObject) {
+            return null;
+        }
         return jsonObject instanceof ImmutableJSONObject ? (ImmutableJSONObject) jsonObject : new ImmutableJSONObject(jsonObject);
     }
 

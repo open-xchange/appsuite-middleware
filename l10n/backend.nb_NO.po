@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-18 12:43+0000\n"
-"PO-Revision-Date: 2016-10-18 10:34+0000\n"
+"POT-Creation-Date: 2016-10-19 08:47+0000\n"
+"PO-Revision-Date: 2016-10-18 17:39+0000\n"
 "Last-Translator: hv@webhuset.no <hv@webhuset.no>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: nb_NO\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1476786881.000000\n"
+"X-POOTLE-MTIME: 1476812384.000000\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:82
@@ -1027,7 +1027,7 @@ msgstr "Din enhetskonfigurasjon"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.cluster.lock/src/com/openexchange/cluster/lock/internal/ClusterLockExceptionMessages.java:61
 msgid "Another node is currently performing the same task. Try again later."
-msgstr ""
+msgstr "En annen node utfører allerede samme oppgave. Prøv igjen senere."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
 msgid "LDAP contacts cannot be deleted."
@@ -1676,7 +1676,7 @@ msgstr "Ingen global database for domenegruppe \"%1$s\" ble funnet."
 #. A DoveAdm error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:62
 msgid "A DoveAdm error occurred: %1$s"
-msgstr ""
+msgstr "Det oppstod en DoveAdm-feil: %1$s"
 
 #. A DoveAdm error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:65
@@ -1684,16 +1684,17 @@ msgid ""
 "A DoveAdm server error occurred with HTTP status code %1$s. Error message: "
 "%2$s"
 msgstr ""
+"En DoveAdm-serverfeil oppstod med HTTP-statuskoden %1$s. Feilmelding: %2$s"
 
 #. Invalid DoveAdm URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:68
 msgid "The provided DoveAdm URL: %1$s is invalid"
-msgstr ""
+msgstr "Den angitte DoveAdm-URL-adressen: %1$s er ugyldig"
 
 #. The DoveAdm resource does not exist: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:71
 msgid "The provided DoveAdm resource does not exist: %1$s"
-msgstr ""
+msgstr "Den angitte DoveAdm-ressursen finnes ikke: %1$s"
 
 #. An I/O error occurred: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:74
@@ -1710,7 +1711,7 @@ msgstr "Godkjenning mislyktes: %1$s"
 #. The DoveAdm resource does not exist
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:80
 msgid "The DoveAdm resource does not exist"
-msgstr ""
+msgstr "Den angitte DoveAdm-ressursen finnes ikke"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.download.limit/src/com/openexchange/download/limit/limiter/exceptions/DownloadLimitedExceptionMessages.java:63
 msgid ""
@@ -1895,11 +1896,11 @@ msgstr "Tomme filer indikert for mappen \"%1$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:97
 msgid "A file named \"%1$s\" already exists at \"%2$s\"."
-msgstr ""
+msgstr "En fil med navnet \"%1$s\" finnes allerede i \"%2$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:98
 msgid "A directory named \"%1$s\" already exists at \"%2$s\"."
-msgstr ""
+msgstr "En mappe med navnet \"%1$s\" finnes allerede i \"%2$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
@@ -2709,7 +2710,7 @@ msgstr "i avdelinger"
 #. The 'user input' part is always prepended, please heed this in translations.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:94
 msgid "in user fields"
-msgstr ""
+msgstr "i brukerfelter"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:98
 msgid "Distribution List"
@@ -3797,7 +3798,7 @@ msgstr "Ugyldig OAuth konto er angitt."
 #. The certificate for domain "%1$s" is untrusted.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:63
 msgid "The certificate for domain \"%1$s\" is untrusted."
-msgstr ""
+msgstr "Sertifikatet for domenet \"%1$s\" er ikke pålitelig."
 
 #. The certificate for domain "%1$s" is untrusted. You can change your general trust level in the settings.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:66
@@ -3805,6 +3806,8 @@ msgid ""
 "The certificate for domain \"%1$s\" is untrusted. You can change your "
 "general trust level in the settings."
 msgstr ""
+"Sertifikatet for domenet \"%1$s\" er ikke pålitelig. Du kan endre det "
+"generelle tillitsnivået i innstillingene."
 
 #.
 #. * The display of a users given and sur name name in e.g. notification mails (Hello John Doe, ...).
@@ -3978,7 +3981,7 @@ msgstr "Angi et visningsnavn."
 #. Please provide at least one scope.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:85
 msgid "Please provide at least one scope."
-msgstr ""
+msgstr "Vennligst oppgi minst ett omfang."
 
 #. The associated OAuth provider denied the request: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:88
@@ -4036,16 +4039,17 @@ msgid ""
 "Your access token for '%1$s' is invalid. You have to reauthorize your "
 "account."
 msgstr ""
+"Tilgangsnøkkelen din for '%1$s' er ugyldig. Du må re-autorisere kontoen din."
 
 #. You need to explicitly authorise %1$s to subscribe to %2$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:112
 msgid "You need to explicitly authorise %1$s to subscribe to %2$s"
-msgstr ""
+msgstr "Du må eksplisitt autorisere %1$s for å abonnere på %2$s"
 
 #. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
 msgid "The scope %1$s is not supported by the provider"
-msgstr ""
+msgstr "Omfanget %1$s er ikke støttet av denne tjenesten"
 
 #. *
 #. * New password too short.
@@ -4934,7 +4938,7 @@ msgstr "Element avkortet: %s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:100
 msgid "Invalid mail address for external participant: %1$s"
-msgstr ""
+msgstr "Ugyldig epostadresse for ekstern deltager: %1$s"
 
 #. You do not have a valid session. Please login again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
@@ -5548,6 +5552,8 @@ msgid ""
 "An E-Mail address is mandatory for external distribution list members. "
 "Please add a valid E-Mail address to the contact \"%1$s\"."
 msgstr ""
+"En epostadresse er obligatorisk for eksterne distribusjonslistemedlemmer. "
+"Vennligst legg til en gyldig epostadresse for kontakten \"%1$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -8369,27 +8375,27 @@ msgstr "Vennligst oppgi en utløpsdato for å opprette en epost med delingslenke
 #. The authentication type selected for a certain mail/transport account is not supported; e.g. user wants to authenticate via OAuth, but IMAP server does not support AUTH=XOAUTH2 capability
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:225
 msgid "The selected authentication type is not supported by server %2$s"
-msgstr ""
+msgstr "Den valgte autentiseringstypen er ikke støttet av tjeneren %2$s "
 
 #. Something is wrong with a subscribed E-Mail account; e.g. invalid credentials. Example: "Please check your mail account: The entered credentials are wrong"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:228
 msgid "Please check your mail account: %2$s"
-msgstr ""
+msgstr "Vennligst sjekk epostkontoen: %2$s"
 
 #. Invalid name specified. Information from mail server: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:231
 msgid "Invalid name specified. Information from mail server: %1$s"
-msgstr ""
+msgstr "Ugyldig navn angitt. Informasjon fra epostserveren: %1$s"
 
 #. Insufficient permissions to perform the operation.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:234
 msgid "Insufficient permissions to perform the operation."
-msgstr ""
+msgstr "Utilstrekkelige rettigheter for å utføre operasjonen."
 
 #. Such a folder already exists.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:237
 msgid "Such a folder already exists."
-msgstr ""
+msgstr "En slik mappe finnes allerede."
 
 #. A non-secure connection is not allowed. Please change mail settings and configure a secure connection (if Transport Layer Security (TLS) is not in use, the client could try STARTTLS).
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:240
@@ -8397,6 +8403,8 @@ msgid ""
 "Please change mail settings and configure a secure connection (if Transport "
 "Layer Security (TLS) is not in use, the client could try STARTTLS)"
 msgstr ""
+"Vennligst endre epostinnstillingene og konfigurer en sikker tilkobling (hvis "
+"Transport Layer Security (TLS) er ikke i bruk kan klienten forsøke STARTTLS)"
 
 #. A temporary failure because a subsystem is down. Please try again later.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:243
@@ -8404,6 +8412,8 @@ msgid ""
 "A temporary failure because a subsystem is down (maybe due to maintenance). "
 "Please try again later."
 msgstr ""
+"En midlertidig feil oppstod fordi et undersystem er utilgjengelig (kanskje "
+"på grunn av vedlikehold). Vennligst forsøk igjen senere."
 
 #. The default name for a file
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
@@ -8463,6 +8473,8 @@ msgid ""
 "Send RFC822 data using primary account's transport. This requires master "
 "authentication to be active."
 msgstr ""
+"Sende RFC822-data med primærkontoens transport. Dette krever at master-"
+"autentisering er aktivert."
 
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
@@ -8706,7 +8718,7 @@ msgstr "Det oppstod et tidsavbrudd under sending til følgende mottaker: %1$s"
 #. The message advertising that everything is fine with checked account
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:71
 msgid "All fine"
-msgstr ""
+msgstr "Alt ser greit ut"
 
 #. The message advertising that authentication against referenced mail account does not work or stopped working
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:74
@@ -8714,6 +8726,8 @@ msgid ""
 "The entered credential or authentication information does not work or are no "
 "longer accepted by provider. Please change them."
 msgstr ""
+"De oppgitte detaljene fungerer ikke, eller er ikke lenger akseptert av "
+"tjenesten. Vennligst endre dem."
 
 #. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
@@ -8868,14 +8882,14 @@ msgstr "Protokollen skal ikke endres fra %1$s til %2$s."
 #. - ...
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/json/osgi/OAuthScopeDescription.java:65
 msgid "Read all your mail accounts."
-msgstr ""
+msgstr "Lese alle epostkontoer."
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete mail accounts.
 #. - ...
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/json/osgi/OAuthScopeDescription.java:70
 msgid "Create, modify and delete mail accounts."
-msgstr ""
+msgstr "Opprette, redigere og slette epostkontoer."
 
 #. Found resource(s) with same identifier \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:78
@@ -10030,12 +10044,12 @@ msgstr "ukjent"
 #. * and %1$d more files.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:271
 msgid "and %1$d more files."
-msgstr ""
+msgstr "og %1$d flere filer."
 
 #. * and 1 more file.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:274
 msgid "and 1 more file."
-msgstr ""
+msgstr "og én annen fil."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:64
 msgid ""

@@ -97,8 +97,8 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
     private volatile CompositeFileStorageAccountManagerProvider compositeAccountManager;
 
     /**
-     * Initialises a new {@link AbstractOAuthFileStorageService}.
-     * 
+     * Initializes a new {@link AbstractOAuthFileStorageService}.
+     *
      * @param services The {@link ServiceLookup} instance
      * @param api The {@link API}
      * @param displayName The display name of the service
@@ -111,8 +111,8 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
     }
 
     /**
-     * Initialises a new {@link AbstractOAuthFileStorageService}.
-     * 
+     * Initializes a new {@link AbstractOAuthFileStorageService}.
+     *
      * @param services The {@link ServiceLookup} instance
      * @param api The {@link API}
      * @param displayName The display name of the service
@@ -132,51 +132,26 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         formDescription = new ReadOnlyDynamicFormDescription(tmpDescription);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.FileStorageService#getFormDescription()
-     */
     @Override
     public DynamicFormDescription getFormDescription() {
         return formDescription;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.FileStorageService#getSecretProperties()
-     */
     @Override
     public Set<String> getSecretProperties() {
         return Collections.emptySet();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.FileStorageService#getId()
-     */
     @Override
     public String getId() {
         return serviceId;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.FileStorageService#getDisplayName()
-     */
     @Override
     public String getDisplayName() {
         return displayName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.FileStorageService#getAccountManager()
-     */
     @Override
     public FileStorageAccountManager getAccountManager() throws OXException {
         final CompositeFileStorageAccountManagerProvider compositeAccountManager = this.compositeAccountManager;
@@ -191,21 +166,11 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthAccountDeleteListener#onBeforeOAuthAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
-     */
     @Override
     public void onBeforeOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
         // Nothing
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.OAuthAccountDeleteListener#onAfterOAuthAccountDeletion(int, java.util.Map, int, int, java.sql.Connection)
-     */
     @Override
     public void onAfterOAuthAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException {
         try {
@@ -236,11 +201,6 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.AccountAware#getAccounts(com.openexchange.file.storage.Session)
-     */
     @Override
     public List<FileStorageAccount> getAccounts(Session session) throws OXException {
         return getAccounts0(session, true);
@@ -248,7 +208,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
     /**
      * Returns the {@link CompositeFileStorageAccountManagerProvider}
-     * 
+     *
      * @return the {@link CompositeFileStorageAccountManagerProvider}
      */
     public CompositeFileStorageAccountManagerProvider getCompositeAccountManager() {
@@ -257,7 +217,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
     /**
      * Retrieves the {@link FileStorageAccount} with the specified identifier for the specified {@link Session}
-     * 
+     *
      * @param session The {@link Session}
      * @param accountId The account identifier
      * @return The {@link FileStorageAccount}
@@ -278,7 +238,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
     /**
      * Gets the accounts
-     * 
+     *
      * @param session
      * @param secretAware
      * @return
@@ -312,7 +272,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
 
     /**
      * Get the FileStorageAccountManager
-     * 
+     *
      * @return the FileStorageAccountManager
      * @throws OXException
      */
@@ -332,7 +292,7 @@ public abstract class AbstractOAuthFileStorageService implements AccountAware, O
     }
 
     /**
-     * 
+     *
      * @param secretAware
      * @return
      * @throws OXException
