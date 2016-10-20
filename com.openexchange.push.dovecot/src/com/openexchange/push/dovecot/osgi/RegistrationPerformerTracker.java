@@ -95,7 +95,7 @@ public class RegistrationPerformerTracker implements ServiceTrackerCustomizer<Re
     @Override
     public synchronized void removedService(ServiceReference<RegistrationPerformer> reference, RegistrationPerformer performer) {
         context.ungetService(reference);
-        if (performers.remove(performer)) {
+        if (performers.remove(new RegistrationPerformerWrapper(performer))) {
             // Was not active
             return;
         }
@@ -123,6 +123,37 @@ public class RegistrationPerformerTracker implements ServiceTrackerCustomizer<Re
             final int thisVal = this.ranking;
             final int anotherVal = o.ranking;
             return (thisVal < anotherVal ? 1 : (thisVal == anotherVal ? 0 : -1));
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ranking;
+            result = prime * result + ((performer == null) ? 0 : performer.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof RegistrationPerformerWrapper)) {
+                return false;
+            }
+            RegistrationPerformerWrapper other = (RegistrationPerformerWrapper) obj;
+            if (ranking != other.ranking) {
+                return false;
+            }
+            if (performer == null) {
+                if (other.performer != null) {
+                    return false;
+                }
+            } else if (!performer.equals(other.performer)) {
+                return false;
+            }
+            return true;
         }
     }
 
