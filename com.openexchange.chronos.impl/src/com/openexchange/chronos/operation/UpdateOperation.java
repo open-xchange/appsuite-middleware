@@ -152,6 +152,9 @@ public class UpdateOperation extends AbstractOperation {
 
     private void updateEvent(Event originalEvent, Event updatedEvent, RecurrenceId recurrenceID) throws OXException {
         if (isSeriesMaster(originalEvent)) {
+            if (null != originalEvent.getDeleteExceptionDates() && originalEvent.getDeleteExceptionDates().contains(new Date(recurrenceID.getValue()))) {
+                throw CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND.create(I(originalEvent.getSeriesId()), recurrenceID);
+            }
             if (null != originalEvent.getChangeExceptionDates() && originalEvent.getChangeExceptionDates().contains(new Date(recurrenceID.getValue()))) {
                 /*
                  * update for existing change exception

@@ -128,6 +128,8 @@ public class EventConverter {
                 return OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_2.create(e, e.getLogArgs()[1]);
             case 4030: // com.openexchange.chronos.exception.CalendarExceptionCodes.NO_READ_PERMISSION
                 return OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.create(e, e.getLogArgs()[0]);
+            case 4042: // com.openexchange.chronos.exception.CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND
+                return OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_POSITION.create();
             default:
                 return e;
         }
