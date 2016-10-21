@@ -49,63 +49,39 @@
 
 package com.openexchange.publish.database;
 
-import com.openexchange.database.AbstractCreateTableImpl;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.CreateIndexUpdateTask;
 
 /**
- * Creates tables necessary to run the publish part of PubSub.
+ * {@link PublicationsAddEntityIndex}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * Adds the index `entity` (`cid`,`module`,`entity`) to the table "publications".
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.3
  */
-public class CreatePublicationTables extends AbstractCreateTableImpl {
+public class PublicationsAddEntityIndex extends CreateIndexUpdateTask {
 
-    public static final String CREATE_USER_AND_PASSWORD_CREATE_STATEMENT =
-        "CREATE TABLE publication_users (" +
-            "cid INT4 UNSIGNED NOT NULL," +
-            "id INT4 UNSIGNED NOT NULL," +
-            "name VARCHAR(255) NOT NULL," +
-        	"password VARCHAR(255) NOT NULL," +
-        	"created INT8 NOT NULL DEFAULT 0," +
-        	"lastModified INT8 NOT NULL DEFAULT 0," +
-        	"PRIMARY KEY (cid,id,name)," +
-        	"FOREIGN KEY (cid,id) REFERENCES publications(cid,id)" +
-        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci";
+    private final DatabaseService databaseService;
 
-    @Override
-    public String[] getCreateStatements() {
-        return new String[] {
-            "CREATE TABLE publications ("
-            + "cid INT4 UNSIGNED NOT NULL,"
-            + "id INT4 UNSIGNED NOT NULL,"
-            + "user_id INT4 UNSIGNED NOT NULL,"
-            + "entity INT4 UNSIGNED NOT NULL,"
-            + "module VARCHAR(255) NOT NULL,"
-            + "configuration_id INT4 UNSIGNED NOT NULL,"
-            + "target_id VARCHAR(255) NOT NULL,"
-            + "enabled BOOLEAN DEFAULT true NOT NULL,"
-            + "created INT8 NOT NULL DEFAULT 0,"
-            + "lastModified INT8 NOT NULL DEFAULT 0,"
-            + "PRIMARY KEY (cid,id),"
-            + "FOREIGN KEY(cid,user_id) REFERENCES user(cid,id),"
-            + "KEY (cid,module,entity)"
-            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
-
-            "CREATE TABLE sequence_publications ("
-            + "cid INT4 UNSIGNED NOT NULL,"
-            + "id INT4 UNSIGNED NOT NULL,"
-            + "PRIMARY KEY (cid)"
-            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci",
-
-            CREATE_USER_AND_PASSWORD_CREATE_STATEMENT
-        };
+    /**
+     * Initializes a new {@link PublicationsAddEntityIndex}.
+     *
+     * @param databaseService A reference to the database service
+     */
+    public PublicationsAddEntityIndex(DatabaseService databaseService) {
+        super("publications", "entity", "cid", "module", "entity");
+        this.databaseService = databaseService;
     }
 
     @Override
-    public String[] requiredTables() {
-        return new String[] { "user" };
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.publish.database.FixPublicationTablePrimaryKey" };
     }
 
     @Override
-    public String[] tablesToCreate() {
-        return new String[] { "publications", "sequence_publications", "publication_users" };
+    protected DatabaseService getDatabaseService() {
+        return databaseService;
     }
+
 }

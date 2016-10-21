@@ -63,6 +63,7 @@ import com.openexchange.publish.database.FixPublicationTablePrimaryKey;
 import com.openexchange.publish.database.PublicationUsersCreatedAndLastModifiedColumn;
 import com.openexchange.publish.database.PublicationWithUsernameAndPasswordUpdateTask;
 import com.openexchange.publish.database.PublicationWithUsernameAndPasswordUpdateTaskRetry;
+import com.openexchange.publish.database.PublicationsAddEntityIndex;
 import com.openexchange.publish.database.PublicationsCreatedAndLastModifiedColumn;
 
 /**
@@ -92,7 +93,8 @@ public class UpdateTaskRegisterer implements ServiceTrackerCustomizer<DatabaseSe
                     new FixPublicationTablePrimaryKey(service),
                     new PublicationWithUsernameAndPasswordUpdateTaskRetry(service),
                     new PublicationsCreatedAndLastModifiedColumn(service),
-                    new PublicationUsersCreatedAndLastModifiedColumn(service));
+                    new PublicationUsersCreatedAndLastModifiedColumn(service),
+                    new PublicationsAddEntityIndex(service));
             }
         }, null);
         return service;
