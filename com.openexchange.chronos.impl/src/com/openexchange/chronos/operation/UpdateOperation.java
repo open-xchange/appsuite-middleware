@@ -72,8 +72,11 @@ import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
+import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
@@ -228,27 +231,29 @@ public class UpdateOperation extends AbstractOperation {
              * perform update
              */
             storage.getEventStorage().updateEvent(eventUpdate);
-            if (isSeriesMaster(originalEvent) && resetChangeExceptions(originalEvent, eventUpdate)) {
+            if (isSeriesMaster(originalEvent) && needsChangeExceptionsReset(originalEvent, eventUpdate)) {
                 /*
                  * ensure to also delete any change exceptions if required
                  */
                 deleteExceptions(originalEvent.getSeriesId(), originalEvent.getChangeExceptionDates());
             }
-            wasUpdated = true;
+            wasUpdated |= true;
         }
         /*
          * process any attendee updates
          */
         if (updatedEvent.containsAttendees()) {
             updateAttendees(originalEvent, updatedEvent);
-            wasUpdated = true;
+            wasUpdated |= true;
+        } else if (null != eventUpdate && needsParticipationStatusReset(originalEvent, eventUpdate)) {
+            wasUpdated |= resetParticipationStatus(originalEvent.getId(), originalEvent.getAttendees());
         }
         if (wasUpdated) {
             result.addUpdate(new UpdateResultImpl(originalEvent, i(folder), loadEventData(originalEvent.getId())));
         }
     }
 
-    private boolean resetChangeExceptions(Event originalEvent, Event eventUpdate) throws OXException {
+    private boolean needsChangeExceptionsReset(Event originalEvent, Event eventUpdate) throws OXException {
         if (false == isSeriesMaster(eventUpdate)) {
             return true;
         }
@@ -256,6 +261,17 @@ public class UpdateOperation extends AbstractOperation {
         EventField[] updatedFields = EventMapper.getInstance().getAssignedFields(EventMapper.getInstance().getDifferences(originalEvent, eventUpdate));
         for (EventField updatedField : updatedFields) {
             if (recurrenceRelatedFields.contains(updatedField)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean needsParticipationStatusReset(Event originalEvent, Event eventUpdate) throws OXException {
+        Set<EventField> timeRelatedFields = new HashSet<EventField>(java.util.Arrays.asList(EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY));
+        EventField[] updatedFields = EventMapper.getInstance().getAssignedFields(EventMapper.getInstance().getDifferences(originalEvent, eventUpdate));
+        for (EventField updatedField : updatedFields) {
+            if (timeRelatedFields.contains(updatedField)) {
                 return true;
             }
         }
@@ -292,6 +308,32 @@ public class UpdateOperation extends AbstractOperation {
             //TODO: any checks prior removal? user a must not add user b if not organizer?
             storage.getAttendeeStorage().insertAttendees(originalEvent.getId(), attendeeHelper.getAttendeesToInsert());
         }
+    }
+
+    /**
+     * Resets the participation status of all individual attendees - excluding the current calendar user - to
+     * {@link ParticipationStatus#NEEDS_ACTION} for a specific event.
+     *
+     * @param objectID The identifier of the event to reste the participation status for
+     * @param attendees The event's attendees
+     * @return <code>true</code> if at least one attendee was updated, <code>false</code>, otherwise
+     */
+    private boolean resetParticipationStatus(int objectID, List<Attendee> attendees) throws OXException {
+        List<Attendee> attendeesToUpdate = new ArrayList<Attendee>();
+        for (Attendee attendee : CalendarUtils.filter(attendees, null, CalendarUserType.INDIVIDUAL)) {
+            if (calendarUser.getId() == attendee.getEntity() || ParticipationStatus.NEEDS_ACTION.equals(attendee.getPartStat())) {
+                continue;
+            }
+            Attendee attendeeUpdate = new Attendee();
+            AttendeeMapper.getInstance().copy(attendee, attendeeUpdate, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
+            attendeeUpdate.setPartStat(ParticipationStatus.NEEDS_ACTION); //TODO: or reset to initial partstat based on folder type?
+            attendeesToUpdate.add(attendeeUpdate);
+        }
+        if (0 < attendeesToUpdate.size()) {
+            storage.getAttendeeStorage().updateAttendees(objectID, attendeesToUpdate);
+            return true;
+        }
+        return false;
     }
 
     private Event prepareEventUpdate(Event originalEvent, Event updatedEvent) throws OXException {
