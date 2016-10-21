@@ -74,7 +74,7 @@ public final class OAuthUtil {
      * the OAuth provider-specific mappings ({@link OAuthScope#getProviderScopes()})
      * as a space separated string. Duplicate OAuth provider-specific scopes will only be
      * present once in the returned string.
-     * 
+     *
      * @param scopes The {@link OAuthScope}s
      * @return a space separated string with all {@link OAuthScope}s in the specified {@link Set}
      */
@@ -92,7 +92,7 @@ public final class OAuthUtil {
     /**
      * Parses the specified {@link Set} with {@link OAuthScope}s and returns
      * the ({@link OAuthScope#getOXScope()}) as a whitespace separated string
-     * 
+     *
      * @param scopes The {@link OAuthScope}s
      * @return a space separated string with all {@link OAuthScope}s in the specified {@link Set}
      */
@@ -106,7 +106,7 @@ public final class OAuthUtil {
 
     /**
      * Creates a whitespace separated list of strings out of the specified {@link Set}
-     * 
+     *
      * @param strings The {@link Set} with the strings
      * @return a whitespace separated list of strings
      */
@@ -124,13 +124,17 @@ public final class OAuthUtil {
 
     /**
      * Builds the 'init' call-back URL for the given {@link OAuthAccount}
-     * 
+     *
      * @param account The {@link OAuthAccount}
-     * 
+     *
      * @return the 'init' call-back URL for the given {@link OAuthAccount}
      */
     public static final String buildCallbackURL(OAuthAccount account) {
         RequestContext requestContext = RequestContextHolder.get();
+        if (null == requestContext) {
+            return null;
+        }
+
         HostData hostData = requestContext.getHostData();
         boolean isSecure = hostData.isSecure();
 
@@ -150,7 +154,7 @@ public final class OAuthUtil {
     /**
      * Tries to determine the hostname by first looking in to {@link HostData},
      * then through Java and if still not available, falls back to 'localhost' as last resort.
-     * 
+     *
      * @param hostData The {@link HostData}
      * @return The hostname
      */
@@ -176,7 +180,7 @@ public final class OAuthUtil {
 
     /**
      * URL encodes the specified string using "ISO-8859-1"
-     * 
+     *
      * @param s The string to encode
      * @return The encoded string
      */
