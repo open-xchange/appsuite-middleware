@@ -127,7 +127,7 @@ public final class ExtendedMimeMessage extends MimeMessage {
             final ContentType ct = getContentType0();
             try {
                 hasAttachment =
-                    Boolean.valueOf(ct.startsWith(MULTI) && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) || deepAttachmentCheck(ct.getSubType())));
+                    Boolean.valueOf(ct.startsWith(MULTI) && deepAttachmentCheck(ct.getSubType()));
             } catch (final OXException e) {
                 LOG.error("", e);
                 hasAttachment = Boolean.valueOf(ct.isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
