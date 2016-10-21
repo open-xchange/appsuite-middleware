@@ -90,6 +90,9 @@ import com.openexchange.session.Session;
  */
 public class GoogleApiClients {
 
+    /** The refresh threshold in seconds: <code>60</code> */
+    public static final int REFRESH_THRESHOLD = 60;
+
     /**
      * Initializes a new {@link GoogleApiClients}.
      */
@@ -141,8 +144,8 @@ public class GoogleApiClients {
 
                 // Check expiry
                 int expiry = scribeOAuthService.getExpiry(defaultAccount.getToken());
-                if (expiry < 300) {
-                    // Less than 5 minutes to live -> refresh token!
+                if (expiry < REFRESH_THRESHOLD) {
+                    // Less than 1 minute to live -> refresh token!
                     ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
                     defaultAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, defaultAccount), new ExponentialBackOffRetryPolicy());
                 }
@@ -204,8 +207,8 @@ public class GoogleApiClients {
 
             // Check expiry
             int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
-            if (expiry < 300) {
-                // Less than 5 minutes to live -> refresh token!
+            if (expiry < REFRESH_THRESHOLD) {
+                // Less than 1 minute to live -> refresh token!
                 ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
                 googleAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount), new ExponentialBackOffRetryPolicy());
             }
@@ -263,8 +266,8 @@ public class GoogleApiClients {
 
         // Check expiry
         int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
-        if (expiry >= 300) {
-            // More than 5 minutes to live
+        if (expiry >= REFRESH_THRESHOLD) {
+            // More than 1 minute to live
             return null;
         }
 
