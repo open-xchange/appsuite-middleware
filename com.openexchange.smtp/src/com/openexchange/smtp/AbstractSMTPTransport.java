@@ -130,6 +130,11 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.exception.SSLExceptionCode;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
+import com.openexchange.oauth.OAuthService;
+import com.openexchange.oauth.OAuthUtil;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.ISMTPProperties;
@@ -635,10 +640,10 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         handlePrivilegedActionException(e);
                     }
                 } else {
-                    transport.connect(server, port, null == login ? "" : login, null == encodedPassword ? "" : encodedPassword);
+                    doConnectTransport(transport, server, port, null == login ? "" : login, null == encodedPassword ? "" : encodedPassword, smtpConfig, session);
                 }
             } else {
-                transport.connect(server, port, null, null);
+                doConnectTransport(transport, server, port, null, null, smtpConfig, session);
             }
 
             Session session = this.session;
@@ -656,6 +661,50 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(server);
             }
             throw handleMessagingException(e, smtpConfig);
+        }
+    }
+
+    /**
+     * Connects specified transport using given arguments
+     *
+     * @param transport The transport to connect
+     * @param host The host name
+     * @param port The port
+     * @param user The user name
+     * @param password The password to use
+     * @throws OXException If connect attempt fails
+     * @throws MessagingException If connect attempt fails
+     */
+    protected static void doConnectTransport(Transport transport, String host, int port, String user, String password, SMTPConfig smtpConfig, Session session) throws OXException, MessagingException {
+        try {
+            transport.connect(host, port, user, password);
+        } catch (javax.mail.AuthenticationFailedException e) {
+            if (null == smtpConfig || null == session) {
+                throw e;
+            }
+
+            if (AuthType.OAUTH.equals(smtpConfig.getAuthType())) {
+                // Determine identifier of the associated OAuth account
+                int oauthAccountId = smtpConfig.getOAuthAccountId();
+                if (oauthAccountId >= 0) {
+                    OAuthService oauthService = Services.optService(OAuthService.class);
+                    if (null == oauthService) {
+                        LOG.warn("Detected failed OAuth authentication, but unable to handle as needed service {} is missing", OAuthService.class.getSimpleName());
+                    } else {
+                        try {
+                            OAuthAccount oAuthAccount = oauthService.getAccount(oauthAccountId, session, session.getUserId(), session.getContextId());
+                            String cburl = OAuthUtil.buildCallbackURL(oAuthAccount);
+                            API api = oAuthAccount.getAPI();
+                            Throwable cause = e.getCause();
+                            throw OAuthExceptionCodes.OAUTH_ACCESS_TOKEN_INVALID.create(cause, api.getShortName(), oAuthAccount.getId(), session.getUserId(), session.getContextId(), api.getFullName(), cburl);
+                        } catch (Exception x) {
+                            LOG.warn("Failed to handle failed OAuth authentication", x);
+                        }
+                    }
+                }
+            }
+
+            throw e;
         }
     }
 
@@ -1520,8 +1569,8 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         }
 
         @Override
-        public Object run() throws MessagingException {
-            transport.connect(server, port, login, pw);
+        public Object run() throws Exception {
+            doConnectTransport(transport, server, port, login, pw, null, null);
             return null;
         }
     } // End of class SaslSmtpLoginAction

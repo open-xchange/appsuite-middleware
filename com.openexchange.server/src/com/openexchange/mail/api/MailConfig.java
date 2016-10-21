@@ -764,6 +764,7 @@ public abstract class MailConfig {
         AuthInfo authInfo = determinePasswordAndAuthType(mailConfig.login, session, account, account.isMailAccount());
         mailConfig.password = authInfo.getPassword();
         mailConfig.authType = authInfo.getAuthType();
+        mailConfig.oauthAccountId = authInfo.getOauthAccountId();
         mailConfig.doCustomParsing(account, session);
     }
 
@@ -783,19 +784,19 @@ public abstract class MailConfig {
             // Do the XOAUTH2 dance...
             MailOAuthService mailOAuthService = ServerServiceRegistry.getInstance().getService(MailOAuthService.class);
             String token = mailOAuthService.getTokenFor(oAuthAccontId, session);
-            return new AuthInfo(login, token, AuthType.OAUTH);
+            return new AuthInfo(login, token, AuthType.OAUTH, oAuthAccontId);
         }
 
         String mailAccountPassword = account.getPassword();
         if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
             // Advertise empty string
-            return new AuthInfo(login, "", AuthType.LOGIN);
+            return new AuthInfo(login, "", AuthType.LOGIN, -1);
         }
 
         // Mail account's password
         String server = forMailAccess ? ((MailAccount) account).getMailServer() : account.getTransportServer();
         String password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), server);
-        return new AuthInfo(login, password, AuthType.LOGIN);
+        return new AuthInfo(login, password, AuthType.LOGIN, -1);
     }
 
     /**
@@ -829,6 +830,7 @@ public abstract class MailConfig {
     protected AuthType authType;
     protected Map<String, Object> authProps;
     protected int accountId;
+    protected int oauthAccountId;
     protected Session session;
     protected String login;
     protected String password;
@@ -842,6 +844,7 @@ public abstract class MailConfig {
      */
     protected MailConfig() {
         super();
+        oauthAccountId = -1;
         requireTls = false;
         authProps = null;
         authType = AuthType.LOGIN;
@@ -857,6 +860,15 @@ public abstract class MailConfig {
      */
     public AuthType getAuthType() {
         return authType;
+    }
+
+    /**
+     * Gets the optional identifier of the associated OAuth account
+     *
+     * @return The identifier of the associated OAuth account or <code>-1</code>
+     */
+    public int getOAuthAccountId() {
+        return oauthAccountId;
     }
 
     /**
