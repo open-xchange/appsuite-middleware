@@ -111,12 +111,11 @@ public class GoogleMailOAuthProvider implements MailOAuthProvider {
         String key = "oauth.google.expiry." + oauthAccount.getId();
 
         // Query session parameters
-        Integer expiry = null;
         {
             Object object = session.getParameter(key);
-            if (object instanceof Integer) {
-                expiry = (Integer) object;
-                if (expiry.intValue() >= REFRESH_THRESHOLD) {
+            if (object instanceof Long) {
+                Long stamp = (Long) object;
+                if ((stamp.longValue() - System.currentTimeMillis()) >= REFRESH_THRESHOLD) {
                     // More than 1 minute to go
                     return oauthAccount.getToken();
                 }
@@ -127,11 +126,11 @@ public class GoogleMailOAuthProvider implements MailOAuthProvider {
         }
 
         // Not cached... Query Google API
-        if (null == expiry) {
-            expiry = Integer.valueOf(GoogleApiClients.getExpiryForGoogleAccount(oauthAccount, session));
-            if (expiry.intValue() >= REFRESH_THRESHOLD) {
+        {
+            int expirySeconds = GoogleApiClients.getExpiryForGoogleAccount(oauthAccount, session);
+            if (expirySeconds >= REFRESH_THRESHOLD) {
                 // More than 1 minute to go
-                session.setParameter(key, expiry);
+                session.setParameter(key, Long.valueOf(System.currentTimeMillis() + (expirySeconds * 1000)));
                 return oauthAccount.getToken();
             }
         }
