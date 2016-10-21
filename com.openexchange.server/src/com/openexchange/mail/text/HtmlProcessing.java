@@ -56,8 +56,11 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -81,6 +84,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import com.google.common.collect.ImmutableSet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
@@ -443,44 +447,86 @@ public final class HtmlProcessing {
         List<Element> htmlElements = source.getAllElements(HTMLElementName.HTML);
         if (null == htmlElements || htmlElements.isEmpty()) {
             // No <html> element
-            replaceAllBodiesIfPresentElseSurround(source, outputDocument, null, cssPrefix);
+            lookUpHeadAndReplaceBody(source, outputDocument, source, cssPrefix);
             return outputDocument.toString().trim();
+
+            //replaceAllBodiesIfPresentElseSurround(source, outputDocument, null, cssPrefix);
+            //return outputDocument.toString().trim();
         }
 
         for (Element htmlElement : htmlElements) {
-            Element headElement = htmlElement.getFirstElement(HTMLElementName.HEAD);
-            List<Element> styleElements = null;
-            if (null != headElement) {
-                styleElements = headElement.getAllElements(HTMLElementName.STYLE);
-            }
-
-            replaceAllBodiesIfPresentElseSurround(source, outputDocument, styleElements, cssPrefix);
-            outputDocument.remove(htmlElement.getStartTag());
-            if (null != headElement) {
-                outputDocument.remove(headElement);
-            }
-            EndTag endTag = htmlElement.getEndTag();
-            if (null != endTag) {
-                outputDocument.remove(endTag);
-            }
+            lookUpHeadAndReplaceBody(source, outputDocument, htmlElement, cssPrefix);
         }
         return outputDocument.toString().trim();
     }
 
-    private static void replaceAllBodiesIfPresentElseSurround(Source source, OutputDocument outputDocument, List<Element> styleElements, String cssPrefix) {
-        List<Element> bodyElements = source.getAllElements(HTMLElementName.BODY);
-        if (null == bodyElements) {
-            // No body
-            outputDocument.insert(0, "<div id=\"" + cssPrefix + "\">");
-            outputDocument.insert(source.length(), "</div>");
-            return;
+    private static Set<String> ALLOWED_IN_HEAD = ImmutableSet.<String> builder().add("head", "title", "style", "base", "link", "meta", "script", "noscript").build();
+
+    private static void lookUpHeadAndReplaceBody(Source source, OutputDocument outputDocument, Segment toLookIn, String cssPrefix) {
+        Element headElement = toLookIn.getFirstElement(HTMLElementName.HEAD);
+
+        List<Element> styleElements = null;
+        List<Element> other = null;
+        if (null != headElement) {
+            // Grab all <style> elements
+            styleElements = headElement.getAllElements(HTMLElementName.STYLE);
+
+            // Check for other content that should not reside in <head>
+            List<Element> allElements = headElement.getChildElements();
+            if (null != allElements) {
+                for (Element element : allElements) {
+                    if (false == ALLOWED_IN_HEAD.contains(Strings.asciiLowerCase(element.getName()))) {
+                        if (null == other) {
+                            other = new ArrayList<>(allElements.size());
+                        }
+                        other.add(element);
+                    }
+                }
+            }
         }
 
-        int numOfBodies = bodyElements.size();
-        if (0 == numOfBodies) {
-            // No body
-            outputDocument.insert(0, "<div id=\"" + cssPrefix + "\">");
+        replaceAllBodiesIfPresentElseSurround(source, outputDocument, styleElements, other, null == headElement ? 0 : headElement.getBegin(), cssPrefix);
+
+        if (toLookIn instanceof Element) {
+            Element element = (Element) toLookIn;
+            outputDocument.remove(element.getStartTag());
+            if (null != headElement) {
+                outputDocument.remove(headElement);
+            }
+            EndTag endTag = element.getEndTag();
+            if (null != endTag) {
+                outputDocument.remove(endTag);
+            }
+        } else {
+            if (null != headElement) {
+                outputDocument.remove(headElement);
+            }
+        }
+    }
+
+    private static void replaceAllBodiesIfPresentElseSurround(Source source, OutputDocument outputDocument, List<Element> styleElements, List<Element> other, int insertPosIfBodyAbsent, String cssPrefix) {
+        List<Element> bodyElements = source.getAllElements(HTMLElementName.BODY);
+        int numOfBodies;
+        if (null == bodyElements || 0 == (numOfBodies = bodyElements.size())) {
+            // No body - Append closing <div>
             outputDocument.insert(source.length(), "</div>");
+
+            // Insert in reverse order
+            if (null != other) {
+                Collections.reverse(other);
+                for (Element element : other) {
+                    outputDocument.insert(insertPosIfBodyAbsent, element);
+                }
+            }
+
+            if (null != styleElements) {
+                Collections.reverse(styleElements);
+                for (Element styleElement : styleElements) {
+                    outputDocument.insert(insertPosIfBodyAbsent, styleElement);
+                }
+            }
+
+            outputDocument.insert(0, "<div id=\"" + cssPrefix + "\">");
             return;
         }
 
@@ -490,7 +536,12 @@ public final class HtmlProcessing {
             StringBuilder sb = new StringBuilder(content.length());
             getDivStartTagHTML(bodyElement.getStartTag(), cssPrefix, sb);
             if (null != styleElements) {
-                for (Element element : styleElements) {
+                for (Element styleElement : styleElements) {
+                    sb.append(styleElement);
+                }
+            }
+            if (null != other) {
+                for (Element element : other) {
                     sb.append(element);
                 }
             }
@@ -505,7 +556,12 @@ public final class HtmlProcessing {
             StringBuilder sb = new StringBuilder(content.length());
             getDivStartTagHTML(bodyElement.getStartTag(), cssPrefix, sb);
             if (null != styleElements) {
-                for (Element element : styleElements) {
+                for (Element styleElement : styleElements) {
+                    sb.append(styleElement);
+                }
+            }
+            if (null != other) {
+                for (Element element : other) {
                     sb.append(element);
                 }
             }
