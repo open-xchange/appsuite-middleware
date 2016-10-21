@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.oauth.google;
 
+import static com.openexchange.google.api.client.GoogleApiClients.REFRESH_THRESHOLD;
 import java.io.IOException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.services.gmail.Gmail;
@@ -106,29 +107,41 @@ public class GoogleMailOAuthProvider implements MailOAuthProvider {
 
     @Override
     public String getTokenFor(OAuthAccount oauthAccount, Session session) throws OXException {
-        OAuthAccount oauthAccountToUse = oauthAccount;
-
         // Ensure not expired
-        int expiry;
+        String key = "oauth.google.expiry." + oauthAccount.getId();
+
+        // Query session parameters
+        Integer expiry = null;
         {
-            String key = "oauth.google.expiry." + oauthAccount.getId();
             Object object = session.getParameter(key);
             if (object instanceof Integer) {
-                expiry = ((Integer) object).intValue();
-            } else {
-                expiry = GoogleApiClients.getExpiryForGoogleAccount(oauthAccount, session);
-                session.setParameter(key, Integer.valueOf(expiry));
+                expiry = (Integer) object;
+                if (expiry.intValue() >= REFRESH_THRESHOLD) {
+                    // More than 1 minute to go
+                    return oauthAccount.getToken();
+                }
+
+                // Expired... Drop cached value.
+                session.setParameter(key, null);
             }
         }
 
-        if (expiry < 300) {
-            // Less than 5 minutes
-            OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(oauthAccountToUse, session);
-            if (null != newAccount) {
-                oauthAccountToUse = newAccount;
+        // Not cached... Query Google API
+        if (null == expiry) {
+            expiry = Integer.valueOf(GoogleApiClients.getExpiryForGoogleAccount(oauthAccount, session));
+            if (expiry.intValue() >= REFRESH_THRESHOLD) {
+                // More than 1 minute to go
+                session.setParameter(key, expiry);
+                return oauthAccount.getToken();
             }
         }
 
+        // Expired...
+        OAuthAccount oauthAccountToUse = oauthAccount;
+        OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(oauthAccountToUse, session);
+        if (null != newAccount) {
+            oauthAccountToUse = newAccount;
+        }
         return oauthAccountToUse.getToken();
     }
 
