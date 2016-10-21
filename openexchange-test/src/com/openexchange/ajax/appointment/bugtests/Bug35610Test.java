@@ -108,7 +108,7 @@ public class Bug35610Test extends AbstractAJAXSession {
 
     public void testTimeChange() throws Exception {
         ctm1.insert(app);
-        ctm2.confirm(app, Appointment.ACCEPT, "yay");
+        ctm2.confirm(ctm2.getPrivateFolder(), app.getObjectID(), app.getLastModified(), Appointment.ACCEPT, "yay");
 
         Appointment exception = ctm1.createIdentifyingCopy(app);
         exception.setRecurrenceType(Appointment.NO_RECURRENCE);
@@ -135,7 +135,7 @@ public class Bug35610Test extends AbstractAJAXSession {
 
     public void testNoTimeChange() throws Exception {
         ctm1.insert(app);
-        ctm2.confirm(app, Appointment.ACCEPT, "yay");
+        ctm2.confirm(ctm2.getPrivateFolder(), app.getObjectID(), app.getLastModified(), Appointment.ACCEPT, "yay");
 
         Appointment exception = ctm1.createIdentifyingCopy(app);
         exception.setRecurrenceType(Appointment.NO_RECURRENCE);
