@@ -105,6 +105,34 @@ public class GoogleMailOAuthProvider implements MailOAuthProvider {
     }
 
     @Override
+    public String getTokenFor(OAuthAccount oauthAccount, Session session) throws OXException {
+        OAuthAccount oauthAccountToUse = oauthAccount;
+
+        // Ensure not expired
+        int expiry;
+        {
+            String key = "oauth.google.expiry." + oauthAccount.getId();
+            Object object = session.getParameter(key);
+            if (object instanceof Integer) {
+                expiry = ((Integer) object).intValue();
+            } else {
+                expiry = GoogleApiClients.getExpiryForGoogleAccount(oauthAccount, session);
+                session.setParameter(key, Integer.valueOf(expiry));
+            }
+        }
+
+        if (expiry < 300) {
+            // Less than 5 minutes
+            OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(oauthAccountToUse, session);
+            if (null != newAccount) {
+                oauthAccountToUse = newAccount;
+            }
+        }
+
+        return oauthAccountToUse.getToken();
+    }
+
+    @Override
     public String getProviderId() {
         return API.GOOGLE.getFullName();
     }

@@ -76,6 +76,7 @@ import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.oauth.MailOAuthService;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -89,9 +90,6 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Password;
-import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
@@ -783,13 +781,9 @@ public abstract class MailConfig {
         int oAuthAccontId = assumeXOauth2For(account, forMailAccess);
         if (oAuthAccontId >= 0) {
             // Do the XOAUTH2 dance...
-            OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
-            if (null == oauthService) {
-                throw ServiceExceptionCode.absentService(OAuthService.class);
-            }
-
-            OAuthAccount oAuthAccount = oauthService.getAccount(oAuthAccontId, session, session.getUserId(), session.getContextId());
-            return new AuthInfo(login, oAuthAccount.getToken(), AuthType.OAUTH);
+            MailOAuthService mailOAuthService = ServerServiceRegistry.getInstance().getService(MailOAuthService.class);
+            String token = mailOAuthService.getTokenFor(oAuthAccontId, session);
+            return new AuthInfo(login, token, AuthType.OAUTH);
         }
 
         String mailAccountPassword = account.getPassword();
