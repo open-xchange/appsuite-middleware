@@ -52,6 +52,7 @@ package com.openexchange.drive.impl;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Pattern;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.groupware.container.FolderObject;
@@ -112,6 +113,11 @@ public class DriveConstants {
      * The base number of milliseconds to wait until retrying
      */
     public static final int RETRY_BASEDELAY = 1000;
+
+    /**
+     * A random number generator
+     */
+    public static final Random RANDOM = new Random();
 
     /**
      * The maximum allowed length of any synchronized path segment, i.e. the parts in a path separated by the {@link #PATH_SEPARATOR}

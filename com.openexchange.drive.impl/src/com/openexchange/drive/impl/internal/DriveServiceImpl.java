@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.locks.LockSupport;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
@@ -188,7 +189,6 @@ public class DriveServiceImpl implements DriveService {
              * get server directories
              */
             final SyncSession driveSession = new SyncSession(session);
-            ;
             try {
                 serverVersions = driveSession.getServerDirectories(maxDirectories);
             } catch (OXException e) {
@@ -200,6 +200,10 @@ public class DriveServiceImpl implements DriveService {
                     List<AbstractAction<DirectoryVersion>> actionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(1);
                     actionsForClient.add(new ErrorDirectoryAction(null, null, null, e, false, true));
                     return new DefaultSyncResult<DirectoryVersion>(actionsForClient, e.getLogMessage());
+                }
+                if (tryAgain(driveSession, e, retryCount, "Error collecting server directories")) {
+                    retryCount++;
+                    continue;
                 }
                 throw e;
             }
@@ -221,16 +225,10 @@ public class DriveServiceImpl implements DriveService {
                 DirectoryActionExecutor executor = new DirectoryActionExecutor(driveSession, true, retryCount < DriveConstants.MAX_RETRIES);
                 actionsForClient = executor.execute(syncResult);
             } catch (OXException e) {
-                if (0 == retryCount || (tryAgain(e) && retryCount < DriveConstants.MAX_RETRIES)) {
+                if (tryAgain(driveSession, e, retryCount, "Error executing server actions")) {
                     retryCount++;
-                    int delay = DriveConstants.RETRY_BASEDELAY * retryCount;
-                    driveSession.trace("Got exception during execution of server actions (" + e.getMessage() + "), trying again in " +
-                        delay + "ms" + (1 == retryCount ? "..." : " (" + retryCount + '/' + DriveConstants.MAX_RETRIES + ")..."));
-                    delay(delay);
                     continue;
                 }
-                driveSession.trace("Got exception during execution of server actions (" + e.getMessage() + ")");
-                LOG.warn("Got exception during execution of server actions\nPrevious sync result:\n{}", syncResult, e);
                 throw e;
             }
             /*
@@ -303,6 +301,10 @@ public class DriveServiceImpl implements DriveService {
                     actionsForClient.add(new ErrorFileAction(null, null, null, path, e, false, true));
                     return new DefaultSyncResult<FileVersion>(actionsForClient, e.getLogMessage());
                 }
+                if (tryAgain(driveSession, e, retryCount, "Error collecting server files")) {
+                    retryCount++;
+                    continue;
+                }
                 throw e;
             }
             /*
@@ -323,12 +325,8 @@ public class DriveServiceImpl implements DriveService {
                 FileActionExecutor executor = new FileActionExecutor(driveSession, true, retryCount < DriveConstants.MAX_RETRIES, path);
                 actionsForClient = executor.execute(syncResult);
             } catch (OXException e) {
-                if (0 == retryCount || (tryAgain(e) && retryCount < DriveConstants.MAX_RETRIES)) {
+                if (tryAgain(driveSession, e, retryCount, "Error executing server actions")) {
                     retryCount++;
-                    int delay = DriveConstants.RETRY_BASEDELAY * retryCount;
-                    driveSession.trace("Got exception during execution of server actions (" + e.getMessage() + "), trying again in " +
-                        delay + "ms" + (1 == retryCount ? "..." : " (" + retryCount + '/' + DriveConstants.MAX_RETRIES + ")..."));
-                    delay(delay);
                     continue;
                 }
                 throw e;
@@ -605,7 +603,31 @@ public class DriveServiceImpl implements DriveService {
         return syncResult;
     }
 
-    private static boolean tryAgain(OXException e) {
+    /**
+     * Checks if the operation may be tried again in case of recoverable errors, based on the excecption's category and the current retry
+     * count. In case it's worth to try again, the thread is sent to sleep for a certain timespan to mimic some kind of exponential
+     * backoff before trying again.
+     *
+     * @param session The sync session
+     * @param e The encountered exception
+     * @param retryCount The current retry count
+     * @param message A custom log message
+     * @return <code>true</code> if the operation may be tried again, <code>false</code>, otherwise
+     */
+    private static boolean tryAgain(SyncSession session, OXException e, int retryCount, String message) {
+        if (0 == retryCount || (mayTryAgain(e) && retryCount <= DriveConstants.MAX_RETRIES)) {
+            int delay = DriveConstants.RETRY_BASEDELAY * retryCount + DriveConstants.RANDOM.nextInt(1000);
+            session.trace(message + " (" + e.getMessage() + "), trying again in " + delay + "ms" +
+                (0 == retryCount ? "..." : " (" + retryCount + '/' + DriveConstants.MAX_RETRIES + ")..."));
+            LockSupport.parkNanos(delay * 1000000L);
+            return true;
+        }
+        session.trace(message + " (" + e.getMessage() + ")");
+        LOG.warn("{} ({})", message, e.getMessage(), e);
+        return false;
+    }
+
+    private static boolean mayTryAgain(OXException e) {
         if (null == e) {
             return false;
         }
@@ -614,15 +636,6 @@ public class DriveServiceImpl implements DriveService {
             "FLD-0008".equals(e.getErrorCode()) || // 'Folder 123 does not exist in context 1'
             "DRV-0007".equals(e.getErrorCode()) // The file "123.txt" with checksum "8fc1a2f5e9a2dbd1d5f4f9e330bd1563" was not found at "/"
         ;
-    }
-
-    private static void delay(long millis) throws OXException {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new OXException(e);
-        }
     }
 
     @Override
