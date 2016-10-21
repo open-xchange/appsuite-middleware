@@ -215,7 +215,7 @@ public class TransactionManager {
     }
 
     /**
-     * Adds a {@link FolderStorage} to the list of storages that need to be commited or rolled back.
+     * Adds a {@link FolderStorage} to the list of storages that need to be committed or rolled-back.
      *
      * @param The {@link FolderStorage}, never <code>null</code>.
      */
@@ -225,7 +225,7 @@ public class TransactionManager {
 
     /**
      * Gets the active database connection, if it is controlled by this {@link TransactionManager}.
-     * A connections is not controlled by the manager, if the {@link StorageParameters} contain a
+     * A connection is not controlled by the manager, if the {@link StorageParameters} contain a
      * {@link ConnectionMode} for type {@link DatabaseFolderType} and key {@link DatabaseParameterConstants#PARAM_CONNECTION}.
      */
     public Connection getConnection() {
