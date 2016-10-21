@@ -3407,18 +3407,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         long start = System.currentTimeMillis();
         String sentFullname = mailAccess.getFolderStorage().getSentFolder();
         String[] uidArr;
-        try {
+        {
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            if ((sentMail instanceof MimeRawSource) && (messageStorage instanceof IMailMessageStorageMimeSupport)) {
-                IMailMessageStorageMimeSupport mimeSupport = (IMailMessageStorageMimeSupport) messageStorage;
-                if (mimeSupport.isMimeSupported()) {
-                    uidArr = mimeSupport.appendMimeMessages(sentFullname, new Message[] { (Message) ((MimeRawSource) sentMail).getPart() });
-                } else {
-                    uidArr = messageStorage.appendMessages(sentFullname, new MailMessage[] { sentMail });
-                }
-            } else {
-                uidArr = messageStorage.appendMessages(sentFullname, new MailMessage[] { sentMail });
-            }
+            uidArr = doAppend2SentFolder(sentMail, sentFullname, messageStorage, true);
             postEventRemote(accountId, sentFullname, true, true);
             try {
                 /*
@@ -3428,12 +3419,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             } catch (OXException e) {
                 LOG.error("", e);
             }
-        } catch (OXException e) {
-            if (e.getMessage().indexOf("quota") != -1) {
-                throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
-            }
-            LOG.warn("Mail with id {} in folder {} sent successfully, but a copy could not be placed in the sent folder.", sentMail.getMailId(), sentMail.getFolder(), e);
-            throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED.create(e, new Object[0]);
         }
         if ((uidArr != null) && (uidArr[0] != null)) {
             /*
@@ -3449,6 +3434,37 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         MailPath retval = new MailPath(mailAccess.getAccountId(), sentFullname, uidArr[0]);
         LOG.debug("Mail copy ({}) appended in {}msec", retval, System.currentTimeMillis() - start);
         return retval;
+    }
+
+    private String[] doAppend2SentFolder(MailMessage sentMail, String sentFullname, IMailMessageStorage messageStorage, boolean retryOnCommunicationError) throws OXException {
+        try {
+            if (!(sentMail instanceof MimeRawSource) || !(messageStorage instanceof IMailMessageStorageMimeSupport)) {
+                return messageStorage.appendMessages(sentFullname, new MailMessage[] { sentMail });
+            }
+
+            IMailMessageStorageMimeSupport mimeSupport = (IMailMessageStorageMimeSupport) messageStorage;
+            if (mimeSupport.isMimeSupported()) {
+                return mimeSupport.appendMimeMessages(sentFullname, new Message[] { (Message) ((MimeRawSource) sentMail).getPart() });
+            }
+
+            // Without MIME support...
+            return messageStorage.appendMessages(sentFullname, new MailMessage[] { sentMail });
+        } catch (OXException e) {
+            if (retryOnCommunicationError && MimeMailException.isCommunicationException(e)) {
+                close(false);
+                initConnection(this.accountId);
+                return doAppend2SentFolder(sentMail, sentFullname, messageStorage, false);
+            }
+            throw handleOXExceptionOnFailedAppend2SentFolder(sentMail, e);
+        }
+    }
+
+    private OXException handleOXExceptionOnFailedAppend2SentFolder(MailMessage sentMail, OXException e) {
+        if (e.getMessage().indexOf("quota") != -1) {
+            return MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
+        }
+        LOG.warn("Mail with id {} in folder {} sent successfully, but a copy could not be placed in the sent folder.", sentMail.getMailId(), sentMail.getFolder(), e);
+        return MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED.create(e, new Object[0]);
     }
 
     private void setFlagForward(MailPath path) throws OXException {

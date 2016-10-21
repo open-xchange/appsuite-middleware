@@ -700,6 +700,66 @@ public class MimeMailException extends OXException {
         return null != commandFailedError;
     }
 
+    /**
+     * Checks if cause of specified exception indicates a communication problem; such as read timeout, EOF, etc.
+     *
+     * @param e The exception to examine
+     * @return <code>true</code> if a communication problem is indicated; otherwise <code>false</code>
+     */
+    public static boolean isCommunicationException(OXException e) {
+        if (null == e) {
+            return false;
+        }
+
+        Throwable next = e.getCause();
+        if (next instanceof OXException) {
+            return isCommunicationException((OXException) next);
+        }
+        if (next instanceof MessagingException) {
+            return isCommunicationException((MessagingException) next);
+        }
+        return isEitherOf(next == null ? e : next, com.sun.mail.iap.ByeIOException.class, java.net.SocketTimeoutException.class, java.io.EOFException.class);
+    }
+
+    /**
+     * Checks if cause of specified messaging exception indicates a communication problem; such as read timeout, EOF, etc.
+     *
+     * @param e The messaging exception to examine
+     * @return <code>true</code> if a communication problem is indicated; otherwise <code>false</code>
+     */
+    public static boolean isCommunicationException(MessagingException e) {
+        if (null == e) {
+            return false;
+        }
+
+        javax.mail.FolderClosedException folderClosedError = lookupNested(e, javax.mail.FolderClosedException.class);
+        if (null != folderClosedError) {
+            return true;
+        }
+
+        javax.mail.StoreClosedException storeClosedError = lookupNested(e, javax.mail.StoreClosedException.class);
+        if (null != storeClosedError) {
+            return true;
+        }
+
+        return isEitherOf(e, com.sun.mail.iap.ByeIOException.class, java.net.SocketTimeoutException.class, java.io.EOFException.class);
+    }
+
+    private static boolean isEitherOf(Throwable e, Class<? extends Exception>... classes) {
+        if (null == e) {
+            return false;
+        }
+
+        for (Class<? extends Exception> clazz : classes) {
+            if (clazz.isInstance(e)) {
+                return true;
+            }
+        }
+
+        Throwable next = (e instanceof MessagingException) ? ((MessagingException) e).getNextException() : e.getCause();
+        return null == next ? false : isEitherOf(next, classes);
+    }
+
     // ------------------------------------------------- SMTP error stuff ----------------------------------------------------------------
 
     private static final class SmtpInfo {
