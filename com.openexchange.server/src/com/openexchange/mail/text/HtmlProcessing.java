@@ -57,7 +57,6 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -439,7 +438,7 @@ public final class HtmlProcessing {
      * @param cssPrefix The CSS prefix
      * @return The HTML content with replaced body tag
      */
-    private static String replaceBodyWithJericho(String htmlContent, String cssPrefix) {
+    static String replaceBodyWithJericho(String htmlContent, String cssPrefix) {
         Source source = new Source(htmlContent);
         source.fullSequentialParse();
         OutputDocument outputDocument = new OutputDocument(source);
@@ -509,24 +508,21 @@ public final class HtmlProcessing {
         int numOfBodies;
         if (null == bodyElements || 0 == (numOfBodies = bodyElements.size())) {
             // No body - Append closing <div>
+            outputDocument.insert(insertPosIfBodyAbsent, "<div id=\"" + cssPrefix + "\">");
             outputDocument.insert(source.length(), "</div>");
 
-            // Insert in reverse order
+            // Insert
+            if (null != styleElements) {
+                for (Element styleElement : styleElements) {
+                    outputDocument.insert(insertPosIfBodyAbsent, styleElement);
+                }
+            }
             if (null != other) {
-                Collections.reverse(other);
                 for (Element element : other) {
                     outputDocument.insert(insertPosIfBodyAbsent, element);
                 }
             }
 
-            if (null != styleElements) {
-                Collections.reverse(styleElements);
-                for (Element styleElement : styleElements) {
-                    outputDocument.insert(insertPosIfBodyAbsent, styleElement);
-                }
-            }
-
-            outputDocument.insert(0, "<div id=\"" + cssPrefix + "\">");
             return;
         }
 
