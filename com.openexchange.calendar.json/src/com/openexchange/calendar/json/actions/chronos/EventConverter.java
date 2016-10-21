@@ -122,6 +122,8 @@ public class EventConverter {
         switch (e.getCode()) {
             case 4224: // com.openexchange.chronos.exception.CalendarExceptionCodes.MOVE_SERIES_NOT_SUPPORTED
                 return OXCalendarExceptionCodes.RECURRING_FOLDER_MOVE.create(e);
+            case 4225: // com.openexchange.chronos.exception.CalendarExceptionCodes.MOVE_OCCURRENCE_NOT_SUPPORTED
+                return OXCalendarExceptionCodes.RECURRING_EXCEPTION_MOVE_EXCEPTION.create();
             case 4221: // com.openexchange.chronos.exception.CalendarExceptionCodes.END_BEFORE_START
                 return OXCalendarExceptionCodes.END_DATE_BEFORE_START_DATE.create(e);
             case 4041: // com.openexchange.chronos.exception.CalendarExceptionCodes.EVENT_NOT_FOUND_IN_FOLDER
@@ -130,6 +132,8 @@ public class EventConverter {
                 return OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_5.create(e, e.getLogArgs()[0]);
             case 4042: // com.openexchange.chronos.exception.CalendarExceptionCodes.EVENT_RECURRENCE_NOT_FOUND
                 return OXCalendarExceptionCodes.UNABLE_TO_CALCULATE_POSITION.create();
+            case 4090: // com.openexchange.chronos.exception.CalendarExceptionCodes.UID_CONFLICT
+                return OXCalendarExceptionCodes.APPOINTMENT_UID_ALREDY_EXISTS.create("", e.getLogArgs()[0]);
             default:
                 return e;
         }
