@@ -928,7 +928,12 @@ public class HzRemoteWebSocketDistributor implements RemoteWebSocketDistributor 
                     }
                 }
 
-                LOGGER.info("Removed {} orphaned entries from Hazelcast map during cleaner task run for user {} in context {}", I(connectionIds.size()), I(userId), I(contextId));
+                int size = connectionIds.size();
+                if (1 == size) {
+                    LOGGER.info("Removed 1 orphaned entry from Hazelcast map during cleaner task run for user {} in context {}", I(userId), I(contextId));
+                } else {
+                    LOGGER.info("Removed {} orphaned entries from Hazelcast map during cleaner task run for user {} in context {}", I(size), I(userId), I(contextId));
+                }
             } catch (Exception e) {
                 LOGGER.warn("Failed to perform cleaner task for user {} in context {}", I(userId), I(contextId), e);
             }
