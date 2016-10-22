@@ -54,8 +54,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.AutoconfigException;
 import com.openexchange.mail.autoconfig.AutoconfigService;
@@ -88,12 +86,12 @@ public class AutoconfigServiceImpl implements AutoconfigService {
     }
 
     @Override
-    public Autoconfig getConfig(final String email, final String password, final User user, final Context context) throws OXException {
-        return getConfig(email, password, user, context, true);
+    public Autoconfig getConfig(final String email, final String password, final int userId, final int contextId) throws OXException {
+        return getConfig(email, password, userId, contextId, true);
     }
 
     @Override
-    public Autoconfig getConfig(final String email, final String password, final User user, final Context context, boolean forceSecure) throws OXException {
+    public Autoconfig getConfig(final String email, final String password, final int userId, final int contextId, boolean forceSecure) throws OXException {
         QuotedInternetAddress internetAddress;
         try {
             internetAddress = new QuotedInternetAddress(email);
@@ -111,7 +109,7 @@ public class AutoconfigServiceImpl implements AutoconfigService {
         }
 
         for (ConfigSource source : sources) {
-            DefaultAutoconfig config = source.getAutoconfig(mailLocalPart, mailDomain, password, user, context, forceSecure);
+            DefaultAutoconfig config = source.getAutoconfig(mailLocalPart, mailDomain, password, userId, contextId, forceSecure);
             if (config != null) {
                 config.setSource(source.getClass().getSimpleName());
                 return config;

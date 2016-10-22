@@ -50,8 +50,6 @@
 package com.openexchange.mail.autoconfig.sources;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.Autoconfig;
 
@@ -68,12 +66,12 @@ public interface ConfigSource {
      * @param emailLocalPart The local part of the Email address; <code>"<b>someone</b>@somewhere.org"</code>
      * @param emailDomain The domain part of the Email address; <code>"someone@<b>somewhere.org</b>"</code>
      * @param password The associated password
-     * @param user The associated user
-     * @param context The associated context
+     * @param userId The identifier of the associated user
+     * @param contextId The identifier of the associated context
      * @return An {@code Autoconfig} instance or <code>null</code> if generation fails.
      * @throws OXException If operation fails for any reason
      */
-    Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException;
+    Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId) throws OXException;
 
     /**
      * Generates an {@code Autoconfig} instance for given arguments.
@@ -81,12 +79,12 @@ public interface ConfigSource {
      * @param emailLocalPart The local part of the Email address; <code>"<b>someone</b>@somewhere.org"</code>
      * @param emailDomain The domain part of the Email address; <code>"someone@<b>somewhere.org</b>"</code>
      * @param password The associated password
-     * @param user The associated user
-     * @param context The associated context
+     * @param userId The identifier of the associated user
+     * @param contextId The identifier of the associated context
      * @param forceSecure <code>true</code> if a secure connection should be enforced; otherwise <code>false</code> to also allow plain ones
      * @return An {@code Autoconfig} instance or <code>null</code> if generation fails.
      * @throws OXException If operation fails for any reason
      */
-    DefaultAutoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context, boolean forceSecure) throws OXException;
+    DefaultAutoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId, boolean forceSecure) throws OXException;
 
 }

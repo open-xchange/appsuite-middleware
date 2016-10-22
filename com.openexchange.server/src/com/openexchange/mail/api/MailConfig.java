@@ -76,6 +76,7 @@ import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.oauth.MailOAuthService;
 import com.openexchange.mail.partmodifier.DummyPartModifier;
 import com.openexchange.mail.partmodifier.PartModifier;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -89,9 +90,6 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.Password;
-import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthService;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPools;
@@ -766,6 +764,7 @@ public abstract class MailConfig {
         AuthInfo authInfo = determinePasswordAndAuthType(mailConfig.login, session, account, account.isMailAccount());
         mailConfig.password = authInfo.getPassword();
         mailConfig.authType = authInfo.getAuthType();
+        mailConfig.oauthAccountId = authInfo.getOauthAccountId();
         mailConfig.doCustomParsing(account, session);
     }
 
@@ -783,25 +782,21 @@ public abstract class MailConfig {
         int oAuthAccontId = assumeXOauth2For(account, forMailAccess);
         if (oAuthAccontId >= 0) {
             // Do the XOAUTH2 dance...
-            OAuthService oauthService = ServerServiceRegistry.getInstance().getService(OAuthService.class);
-            if (null == oauthService) {
-                throw ServiceExceptionCode.absentService(OAuthService.class);
-            }
-
-            OAuthAccount oAuthAccount = oauthService.getAccount(oAuthAccontId, session, session.getUserId(), session.getContextId());
-            return new AuthInfo(login, oAuthAccount.getToken(), AuthType.OAUTH);
+            MailOAuthService mailOAuthService = ServerServiceRegistry.getInstance().getService(MailOAuthService.class);
+            String token = mailOAuthService.getTokenFor(oAuthAccontId, session);
+            return new AuthInfo(login, token, AuthType.OAUTH, oAuthAccontId);
         }
 
         String mailAccountPassword = account.getPassword();
         if (null == mailAccountPassword || mailAccountPassword.length() == 0) {
             // Advertise empty string
-            return new AuthInfo(login, "", AuthType.LOGIN);
+            return new AuthInfo(login, "", AuthType.LOGIN, -1);
         }
 
         // Mail account's password
         String server = forMailAccess ? ((MailAccount) account).getMailServer() : account.getTransportServer();
         String password = MailPasswordUtil.decrypt(mailAccountPassword, session, account.getId(), account.getLogin(), server);
-        return new AuthInfo(login, password, AuthType.LOGIN);
+        return new AuthInfo(login, password, AuthType.LOGIN, -1);
     }
 
     /**
@@ -835,6 +830,7 @@ public abstract class MailConfig {
     protected AuthType authType;
     protected Map<String, Object> authProps;
     protected int accountId;
+    protected int oauthAccountId;
     protected Session session;
     protected String login;
     protected String password;
@@ -848,6 +844,7 @@ public abstract class MailConfig {
      */
     protected MailConfig() {
         super();
+        oauthAccountId = -1;
         requireTls = false;
         authProps = null;
         authType = AuthType.LOGIN;
@@ -863,6 +860,15 @@ public abstract class MailConfig {
      */
     public AuthType getAuthType() {
         return authType;
+    }
+
+    /**
+     * Gets the optional identifier of the associated OAuth account
+     *
+     * @return The identifier of the associated OAuth account or <code>-1</code>
+     */
+    public int getOAuthAccountId() {
+        return oauthAccountId;
     }
 
     /**

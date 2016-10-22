@@ -66,8 +66,6 @@ import org.apache.http.message.BasicNameValuePair;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
@@ -92,12 +90,12 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
     }
 
     @Override
-    public Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context) throws OXException {
-        return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true);
+    public Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, int userId, int contextId) throws OXException {
+        return getAutoconfig(emailLocalPart, emailDomain, password, userId, contextId, true);
     }
 
     @Override
-    public DefaultAutoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context, boolean forceSecure) throws OXException {
+    public DefaultAutoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, int userId, int contextId, boolean forceSecure) throws OXException {
         URL url;
         {
             String sUrl = new StringBuilder("http://autoconfig.").append(emailDomain).append("/mail/config-v1.1.xml").toString();
@@ -121,7 +119,7 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
 
             {
                 ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
-                ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
+                ConfigView view = configViewFactory.getView(userId, contextId);
                 HttpHost proxy = getHttpProxyIfEnabled(httpclient, view);
                 if (null != proxy) {
                     httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);

@@ -193,6 +193,7 @@ import com.openexchange.mail.json.compose.share.internal.ShareLinkGeneratorRegis
 import com.openexchange.mail.loginhandler.MailLoginHandler;
 import com.openexchange.mail.loginhandler.TransportLoginHandler;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.mail.oauth.MailOAuthService;
 import com.openexchange.mail.osgi.MailCapabilityServiceTracker;
 import com.openexchange.mail.osgi.MailProviderServiceTracker;
 import com.openexchange.mail.osgi.MailSessionCacheInvalidator;
@@ -446,6 +447,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // OAuth service
         track(OAuthService.class, new RegistryCustomizer<OAuthService>(context, OAuthService.class));
+        track(MailOAuthService.class, new RegistryCustomizer<MailOAuthService>(context, MailOAuthService.class));
 
         // Push notification service (PNS)
         track(PushNotificationService.class, new RegistryCustomizer<PushNotificationService>(context, PushNotificationService.class));

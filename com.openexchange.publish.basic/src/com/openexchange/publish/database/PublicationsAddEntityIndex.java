@@ -47,42 +47,41 @@
  *
  */
 
-package com.openexchange.mail.autoconfig;
+package com.openexchange.publish.database;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.CreateIndexUpdateTask;
 
 /**
- * {@link AutoconfigService}
+ * {@link PublicationsAddEntityIndex}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * Adds the index `entity` (`cid`,`module`,`entity`) to the table "publications".
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.3
  */
-@SingletonService
-public interface AutoconfigService {
+public class PublicationsAddEntityIndex extends CreateIndexUpdateTask {
+
+    private final DatabaseService databaseService;
 
     /**
-     * Tries to generate an auto-config result just with the given mail address.
+     * Initializes a new {@link PublicationsAddEntityIndex}.
      *
-     * @param email The E-Mail address
-     * @param password The password
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return An auto-config result if generation was successful, <code>null</code> otherwise
-     * @throws OXException If determining auto-config result causes an error
+     * @param databaseService A reference to the database service
      */
-    Autoconfig getConfig(String email, String password, int userId, int contextId) throws OXException;
+    public PublicationsAddEntityIndex(DatabaseService databaseService) {
+        super("publications", "entity", "cid", "module", "entity");
+        this.databaseService = databaseService;
+    }
 
-    /**
-     * Tries to generate an auto-config result just with the given mail address.
-     *
-     * @param email The E-Mail address
-     * @param password The password
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param forceSecure <code>true</code> if a secure connection should be enforced; otherwise <code>false</code> to also allow plain ones
-     * @return An auto-config result if generation was successful, <code>null</code> otherwise
-     * @throws OXException If determining auto-config result causes an error
-     */
-    Autoconfig getConfig(String email, String password, int userId, int contextId, boolean forceSecure) throws OXException;
+    @Override
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.publish.database.FixPublicationTablePrimaryKey" };
+    }
+
+    @Override
+    protected DatabaseService getDatabaseService() {
+        return databaseService;
+    }
 
 }

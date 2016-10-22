@@ -79,4 +79,14 @@ public interface MailOAuthProvider {
      */
     Autoconfig getAutoconfigFor(OAuthAccount oauthAccount, Session session) throws OXException;
 
+    /**
+     * Gets the applicable token for specified OAuth account and associated session.
+     *
+     * @param oauthAccount The OAuth account
+     * @param session The session
+     * @return The applicable token
+     * @throws OXException If applicable token cannot be returned
+     */
+    String getTokenFor(OAuthAccount oauthAccount, Session session) throws OXException;
+
 }

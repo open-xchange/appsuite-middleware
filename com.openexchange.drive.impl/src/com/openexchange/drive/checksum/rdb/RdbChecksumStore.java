@@ -111,7 +111,7 @@ public class RdbChecksumStore implements ChecksumStore {
                 throw DriveExceptionCodes.DB_ERROR.create("File checksum not added: " + fileChecksum);
             }
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backWritable(contextID, connection);
         }
@@ -145,7 +145,7 @@ public class RdbChecksumStore implements ChecksumStore {
                 }
             }
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backWritable(contextID, connection);
         }
@@ -168,7 +168,7 @@ public class RdbChecksumStore implements ChecksumStore {
                 updateFileChecksum(connection, contextID, fileChecksum);
             }
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backWritable(contextID, connection);
         }
@@ -181,7 +181,7 @@ public class RdbChecksumStore implements ChecksumStore {
         try {
             return updateFileChecksumFolders(connection, contextID, folderID, newFolderID);
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backWritable(contextID, connection);
         }
@@ -217,7 +217,7 @@ public class RdbChecksumStore implements ChecksumStore {
             }
             return deleted;
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backWritable(contextID, connection);
         }
@@ -246,7 +246,7 @@ public class RdbChecksumStore implements ChecksumStore {
             }
             return deleted;
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             if (0 < deleted) {
                 databaseService.backWritable(contextID, connection);
@@ -262,7 +262,7 @@ public class RdbChecksumStore implements ChecksumStore {
         try {
             return 0 < deleteFileChecksum(connection, contextID, fileID, version, sequenceNumber);
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backWritable(contextID, connection);
         }
@@ -274,7 +274,7 @@ public class RdbChecksumStore implements ChecksumStore {
         try {
             return deleteFileChecksums(connection, contextID, fileID);
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backWritable(contextID, connection);
         }
@@ -289,7 +289,7 @@ public class RdbChecksumStore implements ChecksumStore {
                 deleted += deleteFileChecksums(connection, contextID, fileID);
             }
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             if (0 < deleted) {
                 databaseService.backWritable(contextID, connection);
@@ -306,7 +306,7 @@ public class RdbChecksumStore implements ChecksumStore {
         try {
             return selectFileChecksum(connection, contextID, fileID, version, sequenceNumber);
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backReadOnly(contextID, connection);
         }
@@ -318,7 +318,7 @@ public class RdbChecksumStore implements ChecksumStore {
         try {
             return selectFileChecksumsInFolder(connection, contextID, folderID);
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backReadOnly(contextID, connection);
         }
@@ -341,7 +341,7 @@ public class RdbChecksumStore implements ChecksumStore {
             }
             return matchingChecksums;
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backReadOnly(contextID, connection);
         }
@@ -379,7 +379,7 @@ public class RdbChecksumStore implements ChecksumStore {
                 }
             }
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backWritable(contextID, connection);
         }
@@ -397,7 +397,7 @@ public class RdbChecksumStore implements ChecksumStore {
                 updateDirectoryChecksum(connection, contextID, directoryChecksum);
             }
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backWritable(contextID, connection);
         }
@@ -415,7 +415,7 @@ public class RdbChecksumStore implements ChecksumStore {
         try {
             return 0 < updateDirectoryChecksumFolder(connection, contextID, folderID, newFolderID);
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backWritable(contextID, connection);
         }
@@ -432,7 +432,7 @@ public class RdbChecksumStore implements ChecksumStore {
         try {
             return deleteDirectoryChecksums(connection, contextID, folderIDs.toArray(new FolderID[folderIDs.size()]));
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backWritable(contextID, connection);
         }
@@ -450,7 +450,7 @@ public class RdbChecksumStore implements ChecksumStore {
         try {
             return selectDirectoryChecksums(connection, contextID, userID, folderIDs.toArray(new FolderID[folderIDs.size()]), view);
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backReadOnly(contextID, connection);
         }
@@ -480,7 +480,7 @@ public class RdbChecksumStore implements ChecksumStore {
                 touched += touchDirectoryChecksums(connection, contextID, uuids);
             }
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             if (0 < touched) {
                 databaseService.backWritable(contextID, connection);
@@ -497,7 +497,7 @@ public class RdbChecksumStore implements ChecksumStore {
         try {
             return selectUnusedDirectoryChecksums(connection, contextID, unusedSince);
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backReadOnly(contextID, connection);
         }
@@ -520,7 +520,7 @@ public class RdbChecksumStore implements ChecksumStore {
             }
             return checksums;
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backReadOnly(contextID, connection);
         }
@@ -551,7 +551,7 @@ public class RdbChecksumStore implements ChecksumStore {
             }
             return deleted;
         } catch (SQLException e) {
-            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+            throw SQL.wrap(e);
         } finally {
             databaseService.backWritable(contextID, connection);
         }
