@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Capabilities JSON Interface
 Bundle-SymbolicName: com.openexchange.capabilities.json
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Activator: com.openexchange.capabilities.json.osgi.CapabilitiesJSONActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -14,6 +14,9 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.sym,
  com.fasterxml.jackson.core.type,
  com.fasterxml.jackson.core.util,
+ com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,
  com.openexchange.capabilities,

@@ -52,10 +52,10 @@ package com.openexchange.oauth.yahoo.internal;
 import java.util.Collection;
 import java.util.Collections;
 import org.scribe.builder.api.Api;
-import org.scribe.builder.api.YahooApi;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.impl.AbstractExtendedScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.yahoo.YahooOAuthScope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -66,10 +66,10 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OAuthServiceMetaDataYahooImpl extends AbstractScribeAwareOAuthServiceMetaData {
+public class OAuthServiceMetaDataYahooImpl extends AbstractExtendedScribeAwareOAuthServiceMetaData {
 
     public OAuthServiceMetaDataYahooImpl(ServiceLookup services) {
-        super(services, API.YAHOO);
+        super(services, API.YAHOO, YahooOAuthScope.values());
     }
 
     @Override
@@ -83,7 +83,15 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractScribeAwareOAuthServi
 
     @Override
     public Class<? extends Api> getScribeService() {
-        return YahooApi.class;
+        return YahooApi2.class;
+    }
+    
+    /* (non-Javadoc)
+     * @see com.openexchange.oauth.impl.AbstractOAuthServiceMetaData#needsRequestToken()
+     */
+    @Override
+    public boolean needsRequestToken() {
+        return false;
     }
 
     @Override
@@ -93,6 +101,6 @@ public class OAuthServiceMetaDataYahooImpl extends AbstractScribeAwareOAuthServi
 
     @Override
     protected Collection<OAuthPropertyID> getExtraPropertyNames() {
-        return Collections.emptyList();
+        return Collections.singletonList(OAuthPropertyID.redirectUrl);
     }
 }

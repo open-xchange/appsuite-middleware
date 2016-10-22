@@ -58,9 +58,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.Dispatchers;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -90,10 +87,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-@Action(method = RequestMethod.PUT, name = "resolve_share_reference", description = "Resolves specified share reference.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-}, requestBody = "A JSON object providing the share reference to resolve: {\"reference\":\"...\"}"
-, responseDescription = "Response: The JSON representation for the resolved share reference.")
 public class ResolveShareReference extends AbstractMailAction {
 
     /**

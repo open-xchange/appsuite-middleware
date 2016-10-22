@@ -69,6 +69,7 @@ import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.report.appsuite.serialization.ReportConfigs;
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
@@ -276,7 +277,7 @@ public class ReportClientBase extends AbstractJMXTools {
                 reportType = "default";
             }
             boolean isSingleTenant = false;
-            Long singeTenantId = 0l;
+            long singeTenantId = 0l;
             boolean isIgnoreAdmin = false;
             boolean isShowDriveMetrics = false;
             boolean isShowMailMetrics = false;
@@ -296,8 +297,7 @@ public class ReportClientBase extends AbstractJMXTools {
                 }
             }
 
-            ReportConfigs reportConfigs = new ReportConfigs(reportType, false, isCustomTimeframe, timeframeStart.getTime(), timeframeEnd.getTime(), isSingleTenant, singeTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics);
-
+            ReportConfigs reportConfigs = new ReportConfigs.ReportConfigsBuilder(reportType).isSingleDeployment(false).isConfigTimerange(isCustomTimeframe).consideredTimeframeStart(timeframeStart.getTime()).consideredTimeframeEnd(timeframeEnd.getTime()).isShowSingleTenant(isSingleTenant).singleTenantId(singeTenantId).isAdminIgnore(isIgnoreAdmin).isShowDriveMetrics(isShowDriveMetrics).isShowMailMetrics(isShowMailMetrics).build();
             //Start the report generation
             System.out.println("Starting the Open-Xchange report client. Note that the report generation may take a little while.");
             final MBeanServerConnection initConnection = initConnection(env);
@@ -664,23 +664,8 @@ public class ReportClientBase extends AbstractJMXTools {
      * @param isShowMailMetrics, calculate mail metrics
      */
     private void runAndDeliverASReport(ReportMode mode, boolean silent, boolean savereport, MBeanServerConnection server, ReportConfigs reportConfig) {
-
         try {
-            String uuid = "";
-            //            if (reportType.equals("oxaas-extended")) {
-            //                uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end, isCustomTimerange, isShowSingleTenant, singleTenantId, isIgnoreAdmin, isShowDriveMetrics, isShowMailMetrics }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Long.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName(), Boolean.class.getCanonicalName() });
-            //                if (uuid == null && isShowSingleTenant) {
-            //                    System.out.println("No contexts for this brand or the sid is invalid. Report generation aborted.");
-            //                    return;
-            //                }
-            //            } else {
-            //                if (isCustomTimerange) {
-            //                    uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportType, start, end }, new String[] { String.class.getCanonicalName(), Date.class.getCanonicalName(), Date.class.getCanonicalName() });
-            //                } else {
-            //                    
-            //                }
-            //            }
-            uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig }, new String[] { CompositeData.class.getCanonicalName() });
+            String uuid = (String) server.invoke(getAppSuiteReportingName(), "run", new Object[] { reportConfig }, new String[] { CompositeData.class.getCanonicalName() });
 
             // Start polling
             boolean done = false;
@@ -688,9 +673,6 @@ public class ReportClientBase extends AbstractJMXTools {
 
             while (!done) {
                 CompositeData[] reports = (CompositeData[]) server.invoke(getAppSuiteReportingName(), "retrievePendingReports", new Object[] { reportConfig.getType() }, new String[] { String.class.getCanonicalName() });
-                //                if ((reports == null) || (reports.length == 0)) {
-                //                    Object o = server.invoke(getAppSuiteReportingName(), "retrieveLastErrorReport", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
-                //                }
 
                 boolean found = false;
                 for (CompositeData report : reports) {
@@ -907,13 +889,41 @@ public class ReportClientBase extends AbstractJMXTools {
             System.out.println("Avg. time per context: " + prettyPrintTimeInterval(timePerContext));
             System.out.println("Report was finished: " + new Date(end));
             System.out.println("\n------ report -------");
-            System.out.println(new JSONObject((String) report.get("data")).toString(4));
+            JSONObject data = new JSONObject((String) report.get("data"));
+            if (data.getBoolean("needsComposition")) {
+                System.out.println("{");
+                for (String string : data.keySet()) {
+                    if (data.get(string) instanceof String) {
+                        System.out.println("  \"" + string + "\" : \"" + data.get(string) + "\",");
+                    } else if (data.get(string) instanceof Boolean) {
+                        System.out.println("  \"" + string + "\" : " + data.get(string) + ",");
+                    } else if (string.equals("macdetail") || string.equals("oxaas")) {
+                        Report.printStoredReportContentToConsole((String) report.get("storageFolderPath"), (String) report.get("uuid"));
+                    } else {
+                        JSONObject obj = (JSONObject) data.get(string);
+                        System.out.println("  \"" + string + "\" : " + obj.toString(2, 1) + ",");
+                    }
+                }
+                System.out.println("}");
+            } else {
+                System.out.println(data.toString(20));
+            }
             System.out.println("------ end -------\n");
         } catch (JSONException e) {
             System.out.println("Illegal data sent from server!");
             e.printStackTrace();
         }
     }
+
+    /**
+     * Fetches the stored report in the storage folder defined by the given path and print the whole
+     * report to console. Very memory friendly because of utilizing {@link Scanner} operations.
+     * 
+     * The whole report-file is identified by the ".report" ending.
+     * 
+     * @param reportFolderPath, the path to the folder where the report-file is stored
+     * @throws IOException
+     */
 
     /**
      * Convert milliseconds to a pretty time output String.

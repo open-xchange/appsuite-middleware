@@ -2,7 +2,7 @@
   put:
     operationId: createResource
     tags:
-      - resources
+      - Resources
     summary: Creates a resource.
     consumes:
       - application/json
@@ -18,6 +18,6 @@
       200:
         description: |
           A JSON object with the ID of the newly created resource. In case of errors the responsible fields in the
-          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/ResourceUpdateResponse"

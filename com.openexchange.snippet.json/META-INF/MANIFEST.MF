@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Snippet JSON Bundle
 Bundle-SymbolicName: com.openexchange.snippet.json
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.fasterxml.jackson.core,
@@ -24,7 +24,6 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.configuration,
  com.openexchange.conversion,
  com.openexchange.documentation,
- com.openexchange.documentation.annotations,
  com.openexchange.exception,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,

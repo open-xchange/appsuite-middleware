@@ -63,7 +63,13 @@ import com.openexchange.exception.OXExceptionFactory;
  */
 public enum ReportExceptionCodes implements OXExceptionCode {
     REPORT_GENERATION_CANCELED("Report generation cancelled by an user.", Category.CATEGORY_USER_INPUT, 1),
-    UNABLE_TO_RETRIEVE_LOCK("Unable to retrieve lock.", Category.CATEGORY_ERROR, 2);
+    UNABLE_TO_RETRIEVE_LOCK("Unable to retrieve lock.", Category.CATEGORY_ERROR, 2),
+    UNABLE_TO_RETRIEVE_ALL_CONTEXT_IDS("Unable to get all context ids for a schema", Category.CATEGORY_ERROR, 3),
+    THREAD_WAS_INTERRUPTED("A schema processing thread was interrupted.", Category.CATEGORY_ERROR, 4),
+    UABLE_TO_RETRIEVE_THREAD_RESULT("Unable to retrieve the computation result of a thread ", Category.CATEGORY_ERROR, 5), 
+    STORED_FILE_NOT_FOUND("A file was not found, where it should be ", Category.CATEGORY_ERROR, 6), 
+    UNABLE_TO_GET_FILELOCK("Unable to get a filelock ", Category.CATEGORY_ERROR, 7);
+    
 
     /**
      * (Log) Message of the exception.

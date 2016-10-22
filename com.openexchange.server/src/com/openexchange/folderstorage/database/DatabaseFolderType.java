@@ -86,7 +86,7 @@ public final class DatabaseFolderType implements FolderType {
 
     @Override
     public boolean servesFolderId(final String folderId) {
-        return DatabaseFolderStorageUtility.getUnsignedInteger(folderId) >= 0 || DatabaseFolderStorageUtility.hasSharedPrefix(folderId);
+        return com.openexchange.java.util.Tools.getUnsignedInteger(folderId) >= 0 || DatabaseFolderStorageUtility.hasSharedPrefix(folderId);
     }
 
     @Override

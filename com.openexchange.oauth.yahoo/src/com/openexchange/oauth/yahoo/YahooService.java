@@ -58,11 +58,31 @@ import com.openexchange.session.Session;
  * {@link YahooService}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a> (Javadoc)
  */
 public interface YahooService {
 
-    public abstract List<Contact> getContacts(Session session, int user, int contextId, int accountId) throws OXException ;
+    /**
+     * Retrieves a list with OX {@link Contact} objects from the Yahoo! provider
+     * 
+     * @param session The groupware {@link Session}
+     * @param user The user identifier
+     * @param contextId The contenxt identifier
+     * @param accountId The account identifier
+     * @return A {@link List} with {@link Contact} objects
+     * @throws OXException if the contacts cannot be retrieved
+     */
+    List<Contact> getContacts(Session session, int user, int contextId, int accountId) throws OXException;
 
-    public abstract String getAccountDisplayName(Session session, int user, int contextId, int accountId);
+    /**
+     * Gets the OX display name of the specified Yahoo! account
+     * 
+     * @param session The groupware {@link Session}
+     * @param user The user identifier
+     * @param contextId The context identifier
+     * @param accountId The account identifier
+     * @return The display name of the Yahoo! account
+     */
+    String getAccountDisplayName(Session session, int user, int contextId, int accountId);
 
 }

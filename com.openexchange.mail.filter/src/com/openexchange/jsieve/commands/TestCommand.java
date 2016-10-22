@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.jsieve.commands;
 
 import java.util.ArrayList;
@@ -57,89 +58,39 @@ import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
 import com.openexchange.jsieve.commands.test.ITestCommand;
 
+/**
+ * A {@link TestCommand} is used as part of a control command. It is used to
+ * specify whether or not the block of code given to the control command is
+ * executed.
+ *
+ * General supported tests: "address", "allof", "anyof", "exists", "false",
+ * "header", "not", "size", and "true"
+ *
+ * Need require "envelope"
+ * <ul>
+ * <li><code>address [ADDRESS-PART] [COMPARATOR] [MATCH-TYPE] &lt;header-list: string-list&gt; &lt;key-list: string-list&gt;</code></li>
+ * <li><code>envelope [COMPARATOR] [ADDRESS-PART] [MATCH-TYPE] &lt;envelope-part: string-list&gt; &lt;key-list: string-list&gt;</code></li>
+ * <li><code>[ADDRESS-PART] = ":localpart" / ":domain" / ":all"</code></li>
+ * <li><code>exists &lt;header-names: string-list&gt;</code></li>
+ * <li><code>false</code></li>
+ * <li><code>true</code></li>
+ * <li><code>not &lt;test&gt;</code></li>
+ * <li><code>size &lt;":over" / ":under"&gt; &lt;limit: number&gt;</code></li>
+ * <li><code>header [COMPARATOR] [MATCH-TYPE] &lt;header-names: string-list&gt; &lt;key-list: string-list&gt;</code></li>
+ * <li><code>allof &lt;tests: test-list&gt;</code> (logical AND)</li>
+ * <li><code>anyof &lt;tests: test-list&gt; </code> (logical OR)</code></li>
+ * <li><code>Match-types are ":is", ":contains", and ":matches"</code></li>
+ * </ul>
+ * 
+ * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ */
 public class TestCommand extends Command {
-    /*
-     * A test command is used as part of a control command. It is used to
-     * specify whether or not the block of code given to the control command is
-     * executed.
-     *
-     * General supported tests: "address", "allof", "anyof", "exists", "false",
-     * "header", "not", "size", and "true"
-     *
-     * Need require "envelope"
-     *
-     * address [ADDRESS-PART] [COMPARATOR] [MATCH-TYPE] <header-list:
-     * string-list> <key-list: string-list>
-     *
-     * envelope [COMPARATOR] [ADDRESS-PART] [MATCH-TYPE] <envelope-part:
-     * string-list> <key-list: string-list>
-     *
-     * [ADDRESS-PART] = ":localpart" / ":domain" / ":all"
-     *
-     * exists <header-names: string-list>
-     *
-     * false
-     *
-     * true
-     *
-     * not <test>
-     *
-     * size <":over" / ":under"> <limit: number>
-     *
-     * header [COMPARATOR] [MATCH-TYPE] <header-names: string-list> <key-list:
-     * string-list>
-     *
-     * allof <tests: test-list> logical AND
-     *
-     * anyof <tests: test-list> logical OR
-     *
-     * Match-types are ":is", ":contains", and ":matches"
-     *
-     */
 
-    // protected static class TagArgument {
-    // private String tag;
-    // private boolean require;
-    //
-    // public final String getTag() {
-    // return tag;
-    // }
-    //
-    // public final boolean isRequire() {
-    // return require;
-    // }
-    //
-    // public final void setTag(String tag) {
-    // this.tag = tag;
-    // }
-    //
-    // public final void setRequire(boolean require) {
-    // this.require = require;
-    // }
-    //
-    // public TagArgument(String tag, boolean require) {
-    // super();
-    // this.tag = tag;
-    // this.require = require;
-    // }
-    //
-    // @Override
-    // public boolean equals(Object obj) {
-    // if (obj instanceof String) {
-    // final String text = (String) obj;
-    // return this.tag.equals(text);
-    // } else if (obj instanceof TagArgument) {
-    // final TagArgument tagArgument = (TagArgument) obj;
-    // return tagArgument.tag.equals(tagArgument.tag) && (tagArgument.require ==
-    // tagArgument.require);
-    // }
-    // return false;
-    // }
-    // }
     public enum Commands implements ITestCommand {
         ADDRESS("address", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardAddressMatchTypes(), standardJSONAddressMatchTypes(), null),
         ENVELOPE("envelope", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "envelope"),
-//        EXITS("exists", 1, 1, null, null, null, null, null),
+        //        EXITS("exists", 1, 1, null, null, null, null, null),
         FALSE("false", 0, 0, null, null, null, null, null),
         TRUE("true", 0, 0, null, null, null, null, null),
         NOT("not", 0, 0, null, null, null, null, null),
@@ -161,8 +112,8 @@ public class TestCommand extends Command {
 
         private static List<String[]> standardJSONSizeMatchTypes() {
             final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(2));
-            standard_match_types.add(new String[]{"", "over"});
-            standard_match_types.add(new String[]{"", "under"});
+            standard_match_types.add(new String[] { "", "over" });
+            standard_match_types.add(new String[] { "", "under" });
             return standard_match_types;
         }
 
@@ -186,6 +137,7 @@ public class TestCommand extends Command {
 
         private static Hashtable<String, String> standardAddressMatchTypes() {
             final Hashtable<String, String> standard_match_types = standardMatchTypes();
+            standard_match_types.putAll(standardAddressPart());
             standard_match_types.put(":user", "subaddress");
             standard_match_types.put(":detail", "subaddress");
             return standard_match_types;
@@ -193,8 +145,8 @@ public class TestCommand extends Command {
 
         private static List<String[]> standardJSONAddressMatchTypes() {
             final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(2));
-            standard_match_types.add(new String[]{"subaddress", "user"});
-            standard_match_types.add(new String[]{"subaddress", "detail"});
+            standard_match_types.add(new String[] { "subaddress", "user" });
+            standard_match_types.add(new String[] { "subaddress", "detail" });
             return standard_match_types;
         }
 
@@ -211,10 +163,10 @@ public class TestCommand extends Command {
 
         private static List<String[]> standardJSONMatchTypes() {
             final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(4));
-            standard_match_types.add(new String[]{"regex", "regex"});
-            standard_match_types.add(new String[]{"", "is"});
-            standard_match_types.add(new String[]{"", "contains"});
-            standard_match_types.add(new String[]{"", "matches"});
+            standard_match_types.add(new String[] { "regex", "regex" });
+            standard_match_types.add(new String[] { "", "is" });
+            standard_match_types.add(new String[] { "", "contains" });
+            standard_match_types.add(new String[] { "", "matches" });
             return standard_match_types;
         }
 
@@ -229,11 +181,11 @@ public class TestCommand extends Command {
 
         private static List<String[]> dateJSONMatchTypes() {
             final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(2));
-            standard_match_types.add(new String[]{"relational", "ge"});
-            standard_match_types.add(new String[]{"relational", "le"});
-            standard_match_types.add(new String[]{"", "is"});
-            standard_match_types.add(new String[]{"", "contains"});
-            standard_match_types.add(new String[]{"", "matches"});
+            standard_match_types.add(new String[] { "relational", "ge" });
+            standard_match_types.add(new String[] { "relational", "le" });
+            standard_match_types.add(new String[] { "", "is" });
+            standard_match_types.add(new String[] { "", "contains" });
+            standard_match_types.add(new String[] { "", "matches" });
             return standard_match_types;
         }
 
@@ -286,8 +238,6 @@ public class TestCommand extends Command {
          * Defines if this command needs a require or not
          */
         private String required;
-
-
 
         Commands(final String commandName, final int numberOfArguments, int maxNumberOfArguments, final Hashtable<String, String> address, final Hashtable<String, String> comparator, final Hashtable<String, String> matchTypes, List<String[]> jsonMatchTypes, final String required) {
             this.commandName = commandName;
@@ -375,7 +325,6 @@ public class TestCommand extends Command {
 
     private final int indexOfComparator = -1;
 
-
     /**
      *
      */
@@ -414,25 +363,25 @@ public class TestCommand extends Command {
             if (tagArray.contains(":comparator")) {
                 throw new SieveException("Sieve comparators aren't supported by this implementation");
             }
-//            final Hashtable<String, String> comparator = this.command.getComparator();
-//            if (null != comparator) {
-//                final boolean comparatorrule = tagarray.remove(":comparator");
-//                if (comparatorrule) {
-//                    // The argument of the comparator is located one after the
-//                    // comparator tag itself
-//                    indexOfComparator = searchcomparator() + 1;
-//                    final Object object = this.arguments.get(indexOfComparator);
-//                    if (object instanceof ArrayList) {
-//                        final ArrayList<String> new_name = (ArrayList<String>) object;
-//                        final String comparatorarg = new_name.get(0);
-//                        if (!comparator.containsKey(comparatorarg)) {
-//                            throw new SieveException(comparatorarg + " is no valid comparator for " + this.command.getCommandname());
-//                        }
-//                    } else {
-//                        throw new SieveException(object + " is no valid comparator for " + this.command.getCommandname());
-//                    }
-//                }
-//            }
+            //            final Hashtable<String, String> comparator = this.command.getComparator();
+            //            if (null != comparator) {
+            //                final boolean comparatorrule = tagarray.remove(":comparator");
+            //                if (comparatorrule) {
+            //                    // The argument of the comparator is located one after the
+            //                    // comparator tag itself
+            //                    indexOfComparator = searchcomparator() + 1;
+            //                    final Object object = this.arguments.get(indexOfComparator);
+            //                    if (object instanceof ArrayList) {
+            //                        final ArrayList<String> new_name = (ArrayList<String>) object;
+            //                        final String comparatorarg = new_name.get(0);
+            //                        if (!comparator.containsKey(comparatorarg)) {
+            //                            throw new SieveException(comparatorarg + " is no valid comparator for " + this.command.getCommandname());
+            //                        }
+            //                    } else {
+            //                        throw new SieveException(object + " is no valid comparator for " + this.command.getCommandname());
+            //                    }
+            //                }
+            //            }
             if (!tagArray.isEmpty()) {
                 throw new SieveException("One of the tagArguments: " + tagArray + " is not valid for " + this.command.getCommandName());
             }

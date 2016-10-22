@@ -95,7 +95,7 @@ public class DriveConstants {
      */
     public static final List<Field> FILE_FIELDS = Arrays.asList(new Field[] {
         Field.ID, Field.FOLDER_ID, Field.LAST_MODIFIED, Field.TITLE, Field.FILENAME, Field.FILE_MD5SUM, Field.FILE_SIZE, Field.VERSION,
-        Field.SEQUENCE_NUMBER, Field.FILE_MIMETYPE, Field.CREATED
+        Field.SEQUENCE_NUMBER, Field.FILE_MIMETYPE, Field.CREATED, Field.CURRENT_VERSION
     });
 
     /**
@@ -131,8 +131,9 @@ public class DriveConstants {
      * 3: .drive-meta
      * 4: subfolders action, sharing
      * 5: push for multiple root folders (listen/subscribe), inline .drive-meta, trash stats, empty trash
+     * 6: moveFile/moveFolder
      */
-    public static final int SUPPORTED_API_VERSION = 5;
+    public static final int SUPPORTED_API_VERSION = 6;
 
     /**
      * The files module identifier.

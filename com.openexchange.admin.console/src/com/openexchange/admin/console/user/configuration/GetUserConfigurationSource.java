@@ -81,8 +81,8 @@ import com.openexchange.cli.AbstractRmiCLI;
  */
 public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
 
-    private static final String OPT_USER_SHORT = "i";
-    private static final String OPT_USER_LONG = "userid";
+    private static final String OPT_USER_SHORT = "u";
+    private static final String OPT_USER_LONG = "user";
     private static final String OPT_CONTEXT_SHORT = "c";
     private static final String OPT_CONTEXT_LONG = "context";
     private static final String OPT_CONFIGURATION_SHORT = "o";
@@ -148,7 +148,7 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
         OXUserInterface oxUserInterface = getUserInterface();
 
         final Context ctx = new Context(parseInt('c', 0, cmd, option));
-        final User user = new User(parseInt('i', 0, cmd, option));
+        final User user = new User(parseInt('u', 0, cmd, option));
         Credentials credentials = new Credentials(cmd.getOptionValue('A'), cmd.getOptionValue('P'));
 
         if (cmd.hasOption(OPT_CONFIGURATION_SHORT)) {

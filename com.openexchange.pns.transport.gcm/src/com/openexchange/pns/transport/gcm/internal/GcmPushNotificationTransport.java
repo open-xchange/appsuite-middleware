@@ -49,6 +49,7 @@
 
 package com.openexchange.pns.transport.gcm.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,6 +58,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
@@ -65,15 +67,21 @@ import org.slf4j.Logger;
 import com.google.android.gcm.Constants;
 import com.google.android.gcm.Message;
 import com.google.android.gcm.Message.Priority;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.android.gcm.MulticastResult;
 import com.google.android.gcm.Notification;
 import com.google.android.gcm.Result;
 import com.google.android.gcm.Sender;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.SortableConcurrentList;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.util.RankedService;
 import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.EnabledKey;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMatch;
@@ -105,6 +113,7 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
 
     // ---------------------------------------------------------------------------------------------------------------
 
+    private final ConfigViewFactory configViewFactory;
     private final PushSubscriptionRegistry subscriptionRegistry;
     private final PushMessageGeneratorRegistry generatorRegistry;
     private final SortableConcurrentList<RankedService<GcmOptionsProvider>> trackedProviders;
@@ -113,8 +122,9 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
     /**
      * Initializes a new {@link ApnPushNotificationTransport}.
      */
-    public GcmPushNotificationTransport(PushSubscriptionRegistry subscriptionRegistry, PushMessageGeneratorRegistry generatorRegistry, BundleContext context) {
+    public GcmPushNotificationTransport(PushSubscriptionRegistry subscriptionRegistry, PushMessageGeneratorRegistry generatorRegistry, ConfigViewFactory configViewFactory, BundleContext context) {
         super(context, GcmOptionsProvider.class, null);
+        this.configViewFactory = configViewFactory;
         this.trackedProviders = new SortableConcurrentList<RankedService<GcmOptionsProvider>>();
         this.subscriptionRegistry = subscriptionRegistry;
         this.generatorRegistry = generatorRegistry;
@@ -182,6 +192,50 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
         return ID;
     }
 
+    private static final Cache<EnabledKey, Boolean> CACHE_AVAILABILITY = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
+
+    /**
+     * Invalidates the <i>enabled cache</i>.
+     */
+    public static void invalidateEnabledCache() {
+        CACHE_AVAILABILITY.invalidateAll();
+    }
+
+    @Override
+    public boolean isEnabled(String topic, String client, int userId, int contextId) throws OXException {
+        EnabledKey key = new EnabledKey(topic, client, userId, contextId);
+        Boolean result = CACHE_AVAILABILITY.getIfPresent(key);
+        if (null == result) {
+            result = Boolean.valueOf(doCheckEnabled(topic, client, userId, contextId));
+            CACHE_AVAILABILITY.put(key, result);
+        }
+        return result.booleanValue();
+    }
+
+    private boolean doCheckEnabled(String topic, String client, int userId, int contextId) throws OXException {
+        ConfigView view = configViewFactory.getView(userId, contextId);
+
+        String basePropertyName = "com.openexchange.pns.transport.gcm.enabled";
+
+        ComposedConfigProperty<Boolean> property;
+        property = null == topic || null == client ? null : view.property(basePropertyName + "." + client + "." + topic, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        property = null == client ? null : view.property(basePropertyName + "." + client, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        property = view.property(basePropertyName, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        return false;
+    }
+
     @Override
     public void transport(PushNotification notification, Collection<PushMatch> matches) throws OXException {
         if (null != notification && null != matches) {
@@ -204,7 +258,7 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
                 return;
             }
 
-            List<String> registrationIDs = new ArrayList<String>(size);
+            final List<String> registrationIDs = new ArrayList<String>(size);
             for (int i = 0; i < size; i += MULTICAST_LIMIT) {
                 // Prepare chunk
                 int length = Math.min(size, i + MULTICAST_LIMIT) - i;
@@ -218,6 +272,21 @@ public class GcmPushNotificationTransport extends ServiceTracker<GcmOptionsProvi
                     MulticastResult result = null;
                     try {
                         result = sender.sendNoRetry(getMessage(client, notification), registrationIDs);
+
+                        // Log it
+                        Object ostr = new Object() {
+
+                            @Override
+                            public String toString() {
+                                StringBuilder sb = new StringBuilder(registrationIDs.size() * 16);
+                                for (String registrationID : registrationIDs) {
+                                    sb.append(registrationID).append(", ");
+                                }
+                                sb.setLength(sb.length() - 2);
+                                return sb.toString();
+                            }
+                        };
+                        LOG.info("Sent notification \"{}\" via transport '{}' for user {} in context {} to registration ID(s): {}", notification.getTopic(), ID, I(notification.getUserId()), I(notification.getContextId()), ostr);
                     } catch (IOException e) {
                         LOG.warn("Error publishing push notification", e);
                     }

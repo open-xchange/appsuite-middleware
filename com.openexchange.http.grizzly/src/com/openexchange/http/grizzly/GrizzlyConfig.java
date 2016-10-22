@@ -105,7 +105,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     private boolean isCometEnabled = false;
 
     /** The max. number of allowed request parameters */
-    private int maxRequestParameters = 30;
+    private int maxRequestParameters = 1000;
 
     /** Unique backend route for every single backend behind the load balancer */
     private String backendRoute = "OX0";
@@ -190,6 +190,9 @@ public class GrizzlyConfig implements Initialization, Reloadable {
 
     private List<String> enabledCiphers = null;
 
+    /** The Web Socket timeout in milliseconds */
+    private long wsTimeoutMillis;
+
 
     @Override
     public void start() throws OXException {
@@ -220,6 +223,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
         this.isCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
         this.isAbsoluteRedirect = configService.getBoolProperty("com.openexchange.http.grizzly.doAbsoluteRedirect", false);
         this.maxHttpHeaderSize = configService.getIntProperty("com.openexchange.http.grizzly.maxHttpHeaderSize", 8192);
+        this.wsTimeoutMillis = configService.getIntProperty("com.openexchange.http.grizzly.wsTimeoutMillis", 900000);
         this.isSslEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasSSLEnabled", false);
         this.keystorePath = configService.getProperty("com.openexchange.http.grizzly.keystorePath", "");
         this.keystorePassword = configService.getProperty("com.openexchange.http.grizzly.keystorePassword", "");
@@ -258,7 +262,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
         }
         this.httpPort = configService.getIntProperty("com.openexchange.connector.networkListenerPort", 8009);
         this.httpsPort = configService.getIntProperty("com.openexchange.connector.networkSslListenerPort", 8010);
-        this.maxRequestParameters = configService.getIntProperty("com.openexchange.connector.maxRequestParameters", 30);
+        this.maxRequestParameters = configService.getIntProperty("com.openexchange.connector.maxRequestParameters", 1000);
         this.backendRoute = configService.getProperty("com.openexchange.server.backendRoute", "OX0");
         this.echoHeader = configService.getProperty("com.openexchange.servlet.echoHeaderName","X-Echo-Header");
 
@@ -552,6 +556,15 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      */
     public int getMaxHttpHeaderSize() {
         return maxHttpHeaderSize;
+    }
+
+    /**
+     * Gets the Web Socket timeout in milliseconds
+     *
+     * @return The timeout
+     */
+    public long getWsTimeoutMillis() {
+        return wsTimeoutMillis;
     }
 
     public boolean isSslEnabled() {

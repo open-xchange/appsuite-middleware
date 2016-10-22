@@ -255,7 +255,7 @@ public abstract class AbstractOneDriveResourceAccess {
                 try {
                     int keepOn = 1;
                     while (keepOn > 0) {
-                        DefaultHttpClient httpClient = (DefaultHttpClient) oneDriveAccess.getClient().client;
+                        DefaultHttpClient httpClient = oneDriveAccess.<DefaultHttpClient> getClient().client;
                         HttpGet method = new HttpGet(buildUri("/me/skydrive", initiateQueryString()));
                         request = method;
                         // HttpClients.setRequestTimeout(3500, method);
@@ -270,7 +270,7 @@ public abstract class AbstractOneDriveResourceAccess {
                             request = null;
                             keepOn = 2;
 
-                            oneDriveAccess.initialise();
+                            oneDriveAccess.initialize();
                         } else {
                             JSONObject jResponse = handleHttpResponse(httpResponse, JSONObject.class);
                             rootFolderId = jResponse.optString("id", null);
@@ -427,7 +427,7 @@ public abstract class AbstractOneDriveResourceAccess {
      * @throws OXException If performing closure fails
      */
     protected <R> R perform(OneDriveClosure<R> closure) throws OXException {
-        return closure.perform(this, (DefaultHttpClient) oneDriveAccess.getClient().client, session);
+        return closure.perform(this, oneDriveAccess.<DefaultHttpClient> getClient().client, session);
     }
 
     /**
@@ -439,7 +439,7 @@ public abstract class AbstractOneDriveResourceAccess {
      */
     protected void handleAuthError(HttpResponseException e, Session session) throws OXException {
         try {
-            oneDriveAccess.initialise();
+            oneDriveAccess.initialize();
         } catch (OXException oxe) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractOneDriveResourceAccess.class);
             logger.warn("Could not re-initialize Microsoft OneDrive access", oxe);

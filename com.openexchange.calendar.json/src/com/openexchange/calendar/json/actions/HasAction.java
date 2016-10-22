@@ -63,9 +63,6 @@ import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.calendar.json.actions.chronos.ChronosAction;
 import com.openexchange.chronos.service.CalendarParameters;
 import com.openexchange.chronos.service.CalendarSession;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
@@ -78,11 +75,6 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-@Action(method = RequestMethod.GET, name = "has", description = "Get appointment information.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "start", description = "Lower inclusive limit of the queried range as a Date. Only appointments which end on or after this date are returned."),
-    @Parameter(name = "end", description = "Upper exclusive limit of the queried range as a Date. Only appointments which start before this date are returned.")
-}, responseDescription = "Response is an array of booleans. Array length is the number of days. Each entry in the array corresponds with one day in the range that was queried, explaining whether there is an appointment on this day or not.")
 @OAuthAction(AppointmentActionFactory.OAUTH_READ_SCOPE)
 public final class HasAction extends ChronosAction {
 

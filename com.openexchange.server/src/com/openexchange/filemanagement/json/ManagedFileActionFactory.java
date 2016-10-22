@@ -51,10 +51,9 @@ package com.openexchange.filemanagement.json;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
@@ -63,7 +62,6 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Module(name = "file", description = "This module offers to store files in server's dedicated download directory for a configureable amount of time. The files are then accessible for further operations like inline images in (html) mails")
 public class ManagedFileActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> actions;
@@ -75,11 +73,12 @@ public class ManagedFileActionFactory implements AJAXActionServiceFactory {
      */
     public ManagedFileActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(4, 0.9f, 1);
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         actions.put("keepalive", new com.openexchange.filemanagement.json.actions.KeepaliveAction());
         actions.put("get", new com.openexchange.filemanagement.json.actions.GetAction());
         actions.put("new", new com.openexchange.filemanagement.json.actions.NewAction());
         actions.put("range", new com.openexchange.filemanagement.json.actions.RangeAction());
+        this.actions = actions.build();
     }
 
     @Override

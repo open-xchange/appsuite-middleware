@@ -68,6 +68,7 @@ import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.services.Services;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -1359,7 +1360,7 @@ public final class IMAPException extends OXException {
             // Delegate to MIME handling
             return MimeMailException.handleMessagingException(e, mailConfig, session, folder);
         }
-        final String message = com.openexchange.java.Strings.toLowerCase(e.getMessage());
+        final String message = Strings.toLowerCase(e.getMessage());
         if (null != message) {
             // Check for absent folder
             if (message.indexOf("not found") >= 0 || (message.indexOf("mailbox") >= 0 && (message.indexOf("doesn't exist") >= 0 || message.indexOf("does not exist") >= 0))) {
@@ -1393,7 +1394,7 @@ public final class IMAPException extends OXException {
     }
 
     private static <V> V getProperty(final String name, final Map<String, Object> props) {
-        if (isEmpty(name) || null == props) {
+        if (Strings.isEmpty(name) || null == props) {
             return null;
         }
         try {
@@ -1401,18 +1402,6 @@ public final class IMAPException extends OXException {
         } catch (final ClassCastException e) {
             return null;
         }
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Character.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private IMAPException() {

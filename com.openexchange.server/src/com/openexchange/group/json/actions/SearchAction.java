@@ -59,9 +59,6 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.fields.SearchFields;
 import com.openexchange.ajax.parser.DataParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
@@ -75,10 +72,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "search", description = "Search groups", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
-}, requestBody = "An object with search parameters as described in Group search.",
-responseDescription = "Response with timestamp: An array of group objects as described in Group data.")
 public final class SearchAction extends AbstractGroupAction {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchAction.class);

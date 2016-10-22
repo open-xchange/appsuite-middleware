@@ -2,11 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: CardDAV
 Bundle-SymbolicName: com.openexchange.carddav
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Activator: com.openexchange.carddav.osgi.CarddavActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.ajax.container,
+Import-Package: com.google.common.io,
+ com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.ajax.requesthandler.oauth,
  com.openexchange.authentication,
@@ -33,15 +34,18 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.ldap,
+ com.openexchange.groupware.notify.hostname,
  com.openexchange.groupware.search,
  com.openexchange.groupware.settings,
  com.openexchange.groupware.tools.mappings,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.i18n,
+ com.openexchange.imagetransformation,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.login,
  com.openexchange.login.internal,
+ com.openexchange.mail.mime,
  com.openexchange.oauth.provider.resourceserver,
  com.openexchange.oauth.provider.resourceserver.scope,
  com.openexchange.osgi,
@@ -73,6 +77,7 @@ Import-Package: com.openexchange.ajax.container,
  javax.servlet.http,
  org.apache.commons.io,
  org.apache.commons.logging,
+ org.apache.http.client.utils,
  org.jdom2,
  org.jdom2.output,
  org.osgi.framework,

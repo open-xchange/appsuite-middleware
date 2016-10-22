@@ -51,6 +51,7 @@ package com.openexchange.client.onboarding.internal;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -222,10 +223,15 @@ public class OnboardingConfig {
             List<String> alternativeIds;
             {
                 Object alternativesValue = values.get("alternatives");
-                if (null == alternativesValue || false == List.class.isInstance(alternativesValue)) {
-                    throw OnboardingExceptionCodes.INVALID_SCENARIO_CONFIGURATION.create(id);
+                //can be null, empty list or list of alternatives
+                if (null == alternativesValue) {
+                    alternativeIds = new ArrayList<String>(0);
+                } else {
+                    if (false == List.class.isInstance(alternativesValue)) {
+                        throw OnboardingExceptionCodes.INVALID_SCENARIO_CONFIGURATION.create(id);
+                    }
+                    alternativeIds = (List<String>) alternativesValue;
                 }
-                alternativeIds = (List<String>) alternativesValue;
             }
 
             // Read icon name

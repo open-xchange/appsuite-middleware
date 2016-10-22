@@ -54,7 +54,7 @@ import java.util.Collections;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.LinkedInApi;
 import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractScribeAwareOAuthServiceMetaData;
+import com.openexchange.oauth.impl.AbstractScribeAwareOAuthServiceMetaData;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -67,7 +67,7 @@ import com.openexchange.server.ServiceLookup;
 public class OAuthServiceMetaDataLinkedInImpl extends AbstractScribeAwareOAuthServiceMetaData {
 
     public OAuthServiceMetaDataLinkedInImpl(ServiceLookup services) {
-        super(services, API.LINKEDIN);
+        super(services, API.LINKEDIN, LinkedInOAuthScope.values());
     }
 
     @Override
@@ -81,11 +81,6 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractScribeAwareOAuthSe
     }
 
     @Override
-    public String getId() {
-        return LinkedInService.SERVICE_ID;
-    }
-
-    @Override
     protected String getEnabledProperty() {
         return "com.openexchange.oauth.linkedin";
     }
@@ -93,11 +88,6 @@ public class OAuthServiceMetaDataLinkedInImpl extends AbstractScribeAwareOAuthSe
     @Override
     public boolean needsRequestToken() {
         return true;
-    }
-
-    @Override
-    public String getScope() {
-        return "r_basicprofile,r_emailaddress";
     }
 
     @Override

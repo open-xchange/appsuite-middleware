@@ -1,0 +1,22 @@
+array:
+  - data:
+      Key: com.openexchange.oauth.modules.enabled.[oauth_provider]
+      Description: >
+        A comma seperated list of enabled oauth modules. 
+        This list can be configured for each individual oauth provider. 
+        To identify the oauth provider replace [oauth_provider] with the last part of the provider id.
+        E.g. com.openexchange.oauth.google -> com.openexchange.oauth.modules.enabled.google
+        Available modules are:
+         -mail
+         -calendar_ro
+         -contacts_ro
+         -calendar
+         -contacts
+         -drive
+         -generic 
+      Default: null
+      Version: 7.8.3
+      Reloadable: true
+      Configcascade_Aware: true
+      Related: 
+      File: oauth.properties

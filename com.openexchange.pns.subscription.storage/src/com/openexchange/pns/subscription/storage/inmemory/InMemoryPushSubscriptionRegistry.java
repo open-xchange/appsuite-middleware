@@ -59,6 +59,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.KnownTopic;
 import com.openexchange.pns.PushExceptionCodes;
 import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushNotifications;
@@ -74,6 +75,8 @@ import com.openexchange.pns.subscription.storage.MapBackedHits;
  * @since v7.8.0
  */
 public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistry {
+
+    private static final String ALL = KnownTopic.ALL.getName();
 
     /** The subscriptions in this list match all events. */
     private final Set<PushSubscriptionWrapper> matchingAllSubscriptions;
@@ -99,22 +102,85 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
     }
 
     @Override
-    public synchronized MapBackedHits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException {
-        Map<ClientAndTransport, List<PushMatch>> map = null;
+    public boolean hasInterestedSubscriptions(int userId, int contextId, String topic) throws OXException {
+        return hasInterestedSubscriptions(null, userId, contextId, topic);
+    }
 
-        // Add subscriptions matching everything
-        map = checkAndAddMatches(userId, contextId, matchingAllSubscriptions, "*", map);
+    @Override
+    public boolean hasInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
+        // Check subscriptions matching everything
+        boolean hasAny = checkMatches(userId, contextId, matchingAllSubscriptions, client);
+        if (hasAny) {
+            return true;
+        }
 
         // Now check for prefix matches
         if (!matchingPrefixTopic.isEmpty()) {
-            int pos = topic.lastIndexOf('/');
+            int pos = topic.lastIndexOf(':');
             while (pos > 0) {
                 String prefix = topic.substring(0, pos);
                 Set<PushSubscriptionWrapper> wrappers = matchingPrefixTopic.get(prefix);
                 if (null != wrappers) {
-                    map = checkAndAddMatches(userId, contextId, wrappers, prefix + "/*", map);
+                    hasAny = checkMatches(userId, contextId, wrappers, client);
+                    if (hasAny) {
+                        return true;
+                    }
                 }
-                pos = prefix.lastIndexOf('/');
+                pos = prefix.lastIndexOf(':');
+            }
+        }
+
+        // Check the subscriptions for matching topic names
+        {
+            Set<PushSubscriptionWrapper> wrappers = matchingTopic.get(topic);
+            if (null != wrappers) {
+                hasAny = checkMatches(userId, contextId, wrappers, client);
+            }
+        }
+
+        return false;
+    }
+
+    private boolean checkMatches(int userId, int contextId, Set<PushSubscriptionWrapper> wrappers, String optMatchingClient) {
+        if (null == wrappers) {
+            return false;
+        }
+
+        for (PushSubscriptionWrapper wrapper : wrappers) {
+            if (wrapper.belongsTo(userId, contextId)) {
+                PushSubscription subscription = wrapper.getSubscription();
+                String client = subscription.getClient();
+                if (null == optMatchingClient || optMatchingClient.equals(client)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    @Override
+    public synchronized MapBackedHits getInterestedSubscriptions(int userId, int contextId, String topic) throws OXException {
+        return getInterestedSubscriptions(null, userId, contextId, topic);
+    }
+
+    @Override
+    public synchronized MapBackedHits getInterestedSubscriptions(String client, int userId, int contextId, String topic) throws OXException {
+        Map<ClientAndTransport, List<PushMatch>> map = null;
+
+        // Add subscriptions matching everything
+        map = checkAndAddMatches(userId, contextId, matchingAllSubscriptions, client, ALL, map);
+
+        // Now check for prefix matches
+        if (!matchingPrefixTopic.isEmpty()) {
+            int pos = topic.lastIndexOf(':');
+            while (pos > 0) {
+                String prefix = topic.substring(0, pos);
+                Set<PushSubscriptionWrapper> wrappers = matchingPrefixTopic.get(prefix);
+                if (null != wrappers) {
+                    map = checkAndAddMatches(userId, contextId, wrappers, client, prefix + ":*", map);
+                }
+                pos = prefix.lastIndexOf(':');
             }
         }
 
@@ -122,37 +188,39 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
         {
             Set<PushSubscriptionWrapper> wrappers = matchingTopic.get(topic);
             if (null != wrappers) {
-                map = checkAndAddMatches(userId, contextId, wrappers, topic, map);
+                map = checkAndAddMatches(userId, contextId, wrappers, client, topic, map);
             }
         }
 
         return null == map ? MapBackedHits.EMPTY : new MapBackedHits(map);
     }
 
-    private Map<ClientAndTransport, List<PushMatch>> checkAndAddMatches(int userId, int contextId, Set<PushSubscriptionWrapper> wrappers, String matchingTopic, Map<ClientAndTransport, List<PushMatch>> map) {
+    private Map<ClientAndTransport, List<PushMatch>> checkAndAddMatches(int userId, int contextId, Set<PushSubscriptionWrapper> wrappers, String optMatchingClient, String matchingTopic, Map<ClientAndTransport, List<PushMatch>> map) {
         if (null == wrappers) {
             return map;
         }
 
         Map<ClientAndTransport, List<PushMatch>> toFill = map;
-        for (PushSubscriptionWrapper wrapper : matchingAllSubscriptions) {
+        for (PushSubscriptionWrapper wrapper : wrappers) {
             if (wrapper.belongsTo(userId, contextId)) {
                 PushSubscription subscription = wrapper.getSubscription();
-                String token = subscription.getToken();
                 String client = subscription.getClient();
-                String transportId = subscription.getTransportId();
+                if (null == optMatchingClient || optMatchingClient.equals(client)) {
+                    String token = subscription.getToken();
+                    String transportId = subscription.getTransportId();
 
-                // Add to appropriate list
-                if (null == toFill) {
-                    toFill = new LinkedHashMap<>(6);
+                    // Add to appropriate list
+                    if (null == toFill) {
+                        toFill = new LinkedHashMap<>(6);
+                    }
+                    ClientAndTransport cat = new ClientAndTransport(client, transportId);
+                    List<PushMatch> matches = toFill.get(cat);
+                    if (null == matches) {
+                        matches = new LinkedList<PushMatch>();
+                        toFill.put(cat, matches);
+                    }
+                    matches.add(new InMemoryPushMatch(userId, contextId, client, transportId, token, matchingTopic));
                 }
-                ClientAndTransport cat = new ClientAndTransport(client, transportId);
-                List<PushMatch> matches = toFill.get(cat);
-                if (null == matches) {
-                    matches = new LinkedList<PushMatch>();
-                    toFill.put(cat, matches);
-                }
-                matches.add(new InMemoryPushMatch(userId, contextId, client, transportId, token, matchingTopic));
             }
         }
 
@@ -167,7 +235,7 @@ public class InMemoryPushSubscriptionRegistry implements PushSubscriptionRegistr
 
         for (Iterator<String> iter = subscription.getTopics().iterator(); iter.hasNext();) {
             String topic = iter.next();
-            if ("*".equals(topic)) {
+            if (ALL.equals(topic)) {
                 matchingAllSubscriptions.add(new PushSubscriptionWrapper(subscription));
             } else {
                 try {

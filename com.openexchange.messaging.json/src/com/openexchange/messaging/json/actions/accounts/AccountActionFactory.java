@@ -50,11 +50,10 @@
 package com.openexchange.messaging.json.actions.accounts;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
 
@@ -64,7 +63,6 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Module(name = "messagingaccount", description = "Management of messaging accounts")
 public class AccountActionFactory implements AJAXActionServiceFactory {
 
     public static volatile AccountActionFactory INSTANCE; // Initialize in Activator
@@ -72,15 +70,14 @@ public class AccountActionFactory implements AJAXActionServiceFactory {
     private final Map<String, AJAXActionService> actions;
 
     public AccountActionFactory(final MessagingServiceRegistry registry) {
-        actions = new HashMap<String, AJAXActionService>(6);
-
-        actions.put("all", new AllAction(registry));
-        actions.put("delete", new DeleteAction(registry));
-        actions.put("get", new GetAction(registry));
-        actions.put("getconfig", new GetConfigAction(registry));
-        actions.put("new", new NewAction(registry));
-        actions.put("update", new UpdateAction(registry));
-
+        ImmutableMap.Builder<String, AJAXActionService> builder = ImmutableMap.builder();
+        builder.put("all", new AllAction(registry));
+        builder.put("delete", new DeleteAction(registry));
+        builder.put("get", new GetAction(registry));
+        builder.put("getconfig", new GetConfigAction(registry));
+        builder.put("new", new NewAction(registry));
+        builder.put("update", new UpdateAction(registry));
+        actions = builder.build();
     }
 
     @Override

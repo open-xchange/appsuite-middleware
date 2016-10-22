@@ -79,6 +79,7 @@ import com.openexchange.mail.api.MailConfig.LoginSource;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -96,7 +97,8 @@ public class IMAPAuthentication implements AuthenticationService {
         IMAP_PORT("IMAP_PORT"),
         USE_MULTIPLE("USE_MULTIPLE"),
         IMAP_USE_SECURE("IMAP_USE_SECURE"),
-        IMAPAUTHENC("com.openexchange.authentication.imap.imapAuthEnc");
+        IMAPAUTHENC("com.openexchange.authentication.imap.imapAuthEnc"),
+        LOWERCASE_FOR_CONTEXT_USER_LOOKUP("LOWERCASE_FOR_CONTEXT_USER_LOOKUP");
 
         /** The name of the property */
         public final String name;
@@ -187,6 +189,11 @@ public class IMAPAuthentication implements AuthenticationService {
                 useFullLoginForContextLookup = Boolean.parseBoolean(((String) props.get(PropertyNames.USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP.name)).trim());
             }
 
+            boolean lowerCaseForContextUserLookup = false;
+            if (props.get(PropertyNames.LOWERCASE_FOR_CONTEXT_USER_LOOKUP.name) != null) {
+                lowerCaseForContextUserLookup = Boolean.parseBoolean(((String) props.get(PropertyNames.LOWERCASE_FOR_CONTEXT_USER_LOOKUP.name)).trim());
+            }
+
             String host = "localhost";
             if (props.get(PropertyNames.IMAP_SERVER.name) != null) {
                 host = IDNA.toASCII((String) props.get(PropertyNames.IMAP_SERVER.name));
@@ -208,6 +215,11 @@ public class IMAPAuthentication implements AuthenticationService {
             // Set user/context info
             String userInfo = useFullLoginForUserLookup ? splitResult.fullLoginInfo : localPart;
             String contextInfo = useFullLoginForContextLookup ? splitResult.fullLoginInfo : splitResult.domainPart;
+            if (lowerCaseForContextUserLookup) {
+                // Use JVM's default locale
+                userInfo = userInfo.toLowerCase();
+                contextInfo = contextInfo.toLowerCase();
+            }
 
             // Support for multiple IMAP servers
             boolean secure = false;
@@ -281,7 +293,8 @@ public class IMAPAuthentication implements AuthenticationService {
             }
 
             ConfigurationService configuration = services.getService(ConfigurationService.class);
-            final String socketFactoryClass = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
+            SSLSocketFactoryProvider factoryProvider = services.getService(SSLSocketFactoryProvider.class);
+            final String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
             final String sPort = port.toString();
             if (secure) {
                 /*

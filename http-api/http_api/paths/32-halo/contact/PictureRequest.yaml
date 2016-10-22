@@ -2,7 +2,7 @@
   get:
     operationId: getHaloContactPicture
     tags:
-      - halo
+      - Halo
     summary: Gets a contact picture.
     description: |
       At least one of the optional search parameters should be set. All parameters are connected by OR during

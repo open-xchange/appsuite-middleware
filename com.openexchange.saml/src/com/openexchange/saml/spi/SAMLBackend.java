@@ -203,4 +203,12 @@ public interface SAMLBackend {
      */
     Authenticated enhanceAuthenticated(Authenticated authenticated, Map<String, String> properties);
 
+    /**
+     * Allows the backend to parse AuthnRequestInfo based on the response and the relayState when using unsolicited responses.
+     * @param response The SAML response
+     * @param relayState The relayState set by the IDP
+     * @return The AuthnRequestInfo
+     */
+    AuthnRequestInfo parseRelayState(Response response, String relayState);
+
 }

@@ -3,7 +3,7 @@
     operationId: initOAuthAccount
     tags:
       - OAuth
-    summary: Initializes the creation of an OAuth account (**available since v6.20**).
+    summary: Initializes the creation of an OAuth account.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
       - in: query
@@ -16,10 +16,11 @@
         type: string
         description: The display name of the account.
         required: true
+      - $ref: "#/parameters/gblQueryParamScopes"
     responses:
       200:
         description: |
           A JSON object containing the resulting interaction providing information to complete account creation.
-          In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/OAuthAccountInteractionResponse"

@@ -66,11 +66,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.mail.internet.idn.IDNA;
 import org.osgi.framework.BundleContext;
 import com.damienmiller.BCrypt;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.OXUserPluginInterface;
+import com.openexchange.admin.plugins.OXUserPluginInterfaceExtended;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.OXContextInterface;
@@ -111,9 +114,6 @@ import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.ConfigurationProperty;
-import com.openexchange.config.cascade.ConfigProperty;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.alias.UserAliasStorage;
@@ -1228,6 +1228,28 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
 
+        // Trigger plugin extensions
+        {
+            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            if (null != pluginInterfaces) {
+                for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
+                    if ((oxuser instanceof OXUserPluginInterfaceExtended) && (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin))) {
+                        OXUserPluginInterfaceExtended oxuserExtended = (OXUserPluginInterfaceExtended) oxuser;
+                        try {
+                            LOGGER.debug("Calling change for plugin: {}", oxuser.getClass().getName());
+                            oxuserExtended.beforeChange(ctx, usrdata, auth);
+                        } catch (final PluginException e) {
+                            LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                            throw StorageException.wrapForRMI(e);
+                        } catch (final RuntimeException e) {
+                            LOGGER.error("Error while calling change for plugin: {}", oxuser.getClass().getName(), e);
+                            throw StorageException.wrapForRMI(e);
+                        }
+                    }
+                }
+            }
+        }
+
         oxu.change(ctx, usrdata);
 
         // Trigger plugin extensions
@@ -1848,11 +1870,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
                 }
             } else {
-                if (destUser > 0) { // Move to master store
-                    if (!tool.existsUser(ctx, destUser)) {
-                        throw new InvalidDataException(String.format("The reassign user with id %1$s does not exist in context %2$s. Please choose a different reassign user.", destUser.intValue(), ctx.getId()));
+                if (destUser.intValue() > 0) { // Move to master store
+                    if (!tool.existsUser(ctx, destUser.intValue())) {
+                        throw new InvalidDataException(String.format("The reassign user with id %1$s does not exist in context %2$s. Please choose a different reassign user.", destUser, ctx.getId()));
                     }
-                    User masterUser = new User(destUser);
+                    if (!tool.isMasterFilestoreOwner(ctx, destUser.intValue())) {
+                        throw new InvalidDataException(String.format("The reassign user with id %1$s is not an owner of a filestore. Please choose a different reassign user.", destUser, ctx.getId()));
+                    }
+                    User masterUser = new User(destUser.intValue());
                     for (User filestoreOwner : filestoreOwners) {
                         LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to filestore of user {}", filestoreOwner.getId(), masterUser.getId());
                         moveFromUserFilestoreToMaster(ctx, filestoreOwner, masterUser, credentials);
@@ -2707,6 +2732,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     /**
+     * Property name black list REGEX. Taken from the oxsysreport
+     */
+    private static final Pattern PROPERTY_BLACK_LIST = Pattern.compile("[pP]assword[[:blank:]]*|[sS]ecret[[:blank:]]*|[kK]ey[[:blank:]]*|secretSource[[:blank:]]*|secretRandom[[:blank:]]*|[sS]alt[[:blank:]]*|SSLKey(Pass|Name)[[:blank:]]*|[lL]ogin[[:blank:]]*");
+
+    /**
      *
      * {@inheritDoc}
      */
@@ -2739,7 +2769,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             List<ConfigurationProperty> capabilitiesSource = capabilityService.getConfigurationSource(user_id, ctx.getId().intValue(), searchPattern);
 
             for (ConfigurationProperty property: capabilitiesSource) {
-                userProperties.add(new UserProperty(property.getScope(), property.getName(), property.getValue()));
+                Matcher m = PROPERTY_BLACK_LIST.matcher(property.getName());
+                String value = m.find() ? "<OBFUSCATED>" : property.getValue();
+                userProperties.add(new UserProperty(property.getScope(), property.getName(), value));
             }
 
             Collections.sort(userProperties, new OXUserPropertySorter());

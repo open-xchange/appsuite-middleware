@@ -61,6 +61,11 @@ public interface TaskManager {
     public static final TaskManager POISON = new TaskManager() {
 
         @Override
+        public boolean isEmpty() {
+            return true;
+        }
+
+        @Override
         public Runnable remove() {
             return null;
         }
@@ -74,9 +79,28 @@ public interface TaskManager {
         public Object getExecuterKey() {
             return null;
         }
+
+        @Override
+        public int size() {
+            return 0;
+        }
     };
 
     // --------------------------------------------------------------------------------------------------
+
+    /**
+     * Gets the number of tasks currently held by this task manager.
+     *
+     * @return The number of tasks
+     */
+    int size();
+
+    /**
+     * Checks if this task manager contains no tasks.
+     *
+     * @return <tt>true</tt> if this task manager contains no tasks; otherwise <code>false</code>
+     */
+    boolean isEmpty();
 
     /**
      * Removes the next available task from this executer

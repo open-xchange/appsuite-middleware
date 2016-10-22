@@ -62,7 +62,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.net.ssl.HttpsURLConnection;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -76,7 +75,6 @@ import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerBlacklister;
 import com.openexchange.subscribe.crawler.CrawlerDescription;
 import com.openexchange.subscribe.crawler.internal.GenericSubscribeService;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * {@link CrawlersActivator}
@@ -121,8 +119,6 @@ public class CrawlersActivator implements BundleActivator {
         for (final ServiceTracker<?,?> tracker : trackers) {
             tracker.open();
         }
-
-        HttpsURLConnection.setDefaultSSLSocketFactory(TrustAllSSLSocketFactory.getDefault());
     }
 
     @Override

@@ -56,14 +56,14 @@ import org.json.JSONValue;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.json.ActiveProviderDetector;
+import com.openexchange.mailaccount.json.MailAccountOAuthConstants;
 import com.openexchange.mailaccount.json.writer.DefaultMailAccountWriter;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
@@ -73,10 +73,7 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.GET, name = "all", description = "Get all mail accounts", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for mail account's are defined in mail account data.")
-}, responseDescription = "An array with attachment data. Each array element describes one mail account and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
+@OAuthAction(MailAccountOAuthConstants.OAUTH_READ_SCOPE)
 public final class AllAction extends AbstractMailAccountAction {
 
     public static final String ACTION = AJAXServlet.ACTION_ALL;
@@ -84,8 +81,8 @@ public final class AllAction extends AbstractMailAccountAction {
     /**
      * Initializes a new {@link AllAction}.
      */
-    public AllAction() {
-        super();
+    public AllAction(ActiveProviderDetector activeProviderDetector) {
+        super(activeProviderDetector);
     }
 
     @Override

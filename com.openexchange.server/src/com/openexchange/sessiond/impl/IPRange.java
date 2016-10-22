@@ -64,7 +64,7 @@ import org.apache.commons.validator.routines.InetAddressValidator;
 import com.googlecode.ipv6.IPv6Address;
 import com.googlecode.ipv6.IPv6AddressRange;
 import com.openexchange.java.Autoboxing;
-import com.openexchange.java.IPAddressUtil;
+import com.openexchange.net.IPAddressUtil;
 import edazdarevic.commons.net.CIDRUtils;
 
 /**

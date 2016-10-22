@@ -49,13 +49,30 @@
 
 package com.openexchange.report.appsuite.serialization;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.ListIterator;
 import java.util.Map;
+import java.util.Scanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.report.appsuite.serialization.osgi.StringParserServiceRegistry;
 import com.openexchange.tools.strings.StringParser;
 
@@ -69,6 +86,7 @@ import com.openexchange.tools.strings.StringParser;
  */
 public class Report implements Serializable {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Report.class);
     private static final long serialVersionUID = 6998213011280390705L;
 
     //--------------------Report output sections and identifiers--------------------
@@ -129,6 +147,10 @@ public class Report implements Serializable {
 
     public static final String TIMEFRAME_END = "end";
 
+    public static final String ERRORS = "errors";
+
+    public static final String IGNORED = "ignored";
+
     //--------------------Report attributes--------------------
 
     private final String uuid;
@@ -146,26 +168,18 @@ public class Report implements Serializable {
     private int pendingTasks;
 
     private LinkedHashMap<String, LinkedHashMap<String, Object>> tenantMap;
-    
-    private int tenantIdCounter;
+
+    private ReportConfigs reportConfig;
 
     private boolean isSingleDeployment = true;
 
-    private Long consideredTimeframeStart;
+    private Long defaultTimeframeStart;
 
-    private Long consideredTimeframeEnd;
+    private Long defaultTimeframeEnd;
 
-    //--------------------OXCS-Report, relevant attributes--------------------
+    private String storageFolderPath;
 
-    private boolean isShowSingleTenant;
-
-    private Long singleTenantId;
-
-    private boolean isAdminIgnore;
-
-    private boolean isShowDriveMetrics;
-
-    private boolean isShowMailMetrics;
+    private boolean needsComposition;
 
     /**
      * Initializes a new {@link Report}.
@@ -180,8 +194,6 @@ public class Report implements Serializable {
         this.startTime = startTime;
         this.tenantMap = new LinkedHashMap<>();
         this.tenantMap.put("deployment", new LinkedHashMap<String, Object>());
-        this.singleTenantId = 0l;
-        this.tenantIdCounter = 0;
     }
 
     /**
@@ -222,55 +234,42 @@ public class Report implements Serializable {
         this.startTime = startTime;
         this.tenantMap = new LinkedHashMap<>();
         this.tenantMap.put("deployment", new LinkedHashMap<String, Object>());
-        this.singleTenantId = 0l;
         if (isCustomTimerange) {
-            this.consideredTimeframeStart = startDate.getTime();
-            this.consideredTimeframeEnd = endDate.getTime();
+            this.defaultTimeframeStart = startDate.getTime();
+            this.defaultTimeframeEnd = endDate.getTime();
         } else {
             Calendar cal = Calendar.getInstance();
             Date ed = cal.getTime();
             cal.add(Calendar.YEAR, -1);
             Date sd = cal.getTime();
-            this.consideredTimeframeStart = sd.getTime();
-            this.consideredTimeframeEnd = ed.getTime();
+            this.defaultTimeframeStart = sd.getTime();
+            this.defaultTimeframeEnd = ed.getTime();
         }
-        this.isShowSingleTenant = isShowSingleTenant;
-        if (isShowSingleTenant) {
-            this.singleTenantId = singleTenantId;
-        }
-        this.isAdminIgnore = isIgnoreAdmin;
-        this.isShowDriveMetrics = isShowDriveMetrics;
-        this.isShowMailMetrics = isShowMailMetrics;
     }
-    
+
     public Report(String uuid, long startTime, ReportConfigs reportConfig) {
         this.uuid = uuid;
         this.type = reportConfig.getType();
         this.startTime = startTime;
         this.tenantMap = new LinkedHashMap<>();
         this.tenantMap.put("deployment", new LinkedHashMap<String, Object>());
-        this.singleTenantId = 0l;
-        if (reportConfig.isConfigTimerange()) {
-            this.consideredTimeframeStart = reportConfig.getConsideredTimeframeStart();
-            this.consideredTimeframeEnd = reportConfig.getConsideredTimeframeEnd();
-        } else {
-            Calendar cal = Calendar.getInstance();
-            Date ed = cal.getTime();
-            cal.add(Calendar.YEAR, -1);
-            Date sd = cal.getTime();
-            this.consideredTimeframeStart = sd.getTime();
-            this.consideredTimeframeEnd = ed.getTime();
-        }
-        this.isShowSingleTenant = reportConfig.isShowSingleTenant();
-        if (isShowSingleTenant) {
-            this.singleTenantId = reportConfig.getSingleTenantId();
-        }
-        this.isAdminIgnore = reportConfig.isAdminIgnore();
-        this.isShowDriveMetrics = reportConfig.isShowDriveMetrics();
-        this.isShowMailMetrics = reportConfig.isShowMailMetrics();
+        this.reportConfig = reportConfig;
+        Calendar cal = Calendar.getInstance();
+        Date ed = cal.getTime();
+        cal.add(Calendar.YEAR, -1);
+        Date sd = cal.getTime();
+        this.defaultTimeframeStart = sd.getTime();
+        this.defaultTimeframeEnd = ed.getTime();
+        this.needsComposition = false;
     }
 
     private static Class[] allowedTypes = new Class[] { Integer.class, Long.class, Float.class, Short.class, Double.class, Byte.class, Boolean.class, String.class };
+
+    public void addError(OXException exception) {
+        HashMap<String, String> errors = get(Report.ERRORS, Report.IGNORED, new HashMap<String, String>(), HashMap.class);
+        errors.put(exception.getExceptionId(), exception.getLogMessage());
+        set(Report.ERRORS, Report.IGNORED, errors);
+    }
 
     private void checkValue(Object value) {
 
@@ -422,13 +421,6 @@ public class Report implements Serializable {
     }
 
     /**
-     * Mark one task as done
-     */
-    public void markTaskAsDone() {
-        this.pendingTasks--;
-    }
-
-    /**
      * Retrieve the number of tasks that remain to be done. A report is complete when this number reaches 0.
      */
     public int getNumberOfPendingTasks() {
@@ -452,71 +444,184 @@ public class Report implements Serializable {
         return isSingleDeployment;
     }
 
-    public void setSingleDeployment(boolean isSingleDeployment) {
-        this.isSingleDeployment = isSingleDeployment;
-    }
-
     public LinkedHashMap<String, LinkedHashMap<String, Object>> getTenantMap() {
         return tenantMap;
     }
+    
+    public ReportConfigs getReportConfig() {
+        return reportConfig;
+    }
 
-    public void setTenantMap(LinkedHashMap<String, LinkedHashMap<String, Object>> tenantMap) {
-        this.tenantMap = tenantMap;
+    public void setReportConfig(ReportConfigs reportConfig) {
+        this.reportConfig = reportConfig;
     }
 
     public Long getConsideredTimeframeStart() {
-        return consideredTimeframeStart;
-    }
-
-    public void setConsideredTimeframeStart(Long consideredTimeframeStart) {
-        this.consideredTimeframeStart = consideredTimeframeStart;
+        Long timeframeStart = defaultTimeframeStart;
+        if (this.reportConfig.isConfigTimerange()) {
+            timeframeStart = this.reportConfig.getConsideredTimeframeStart();
+        }
+        return timeframeStart;
     }
 
     public Long getConsideredTimeframeEnd() {
-        return consideredTimeframeEnd;
-    }
-
-    public void setConsideredTimeframeEnd(Long consideredTimeframeEnd) {
-        this.consideredTimeframeEnd = consideredTimeframeEnd;
+        Long timeframeEnd = defaultTimeframeEnd;
+        if (this.reportConfig.isConfigTimerange()) {
+            timeframeEnd = this.reportConfig.getConsideredTimeframeEnd();
+        }
+        return timeframeEnd;
     }
 
     public boolean isShowSingleTenant() {
-        return isShowSingleTenant;
-    }
-
-    public void setShowSingleTenant(boolean isShowSingleTenant) {
-        this.isShowSingleTenant = isShowSingleTenant;
+        return this.reportConfig.isShowSingleTenant();
     }
 
     public Long getSingleTenantId() {
-        return singleTenantId;
-    }
-
-    public void setSingleTenantId(Long singleTenantId) {
-        this.singleTenantId = singleTenantId;
+        return this.reportConfig.getSingleTenantId();
     }
 
     public boolean isAdminIgnore() {
-        return isAdminIgnore;
-    }
-
-    public void setAdminIgnore(boolean isAdminIgnore) {
-        this.isAdminIgnore = isAdminIgnore;
+        return this.reportConfig.isAdminIgnore();
     }
 
     public boolean isShowDriveMetrics() {
-        return isShowDriveMetrics;
-    }
-
-    public void setShowDriveMetrics(boolean isShowDriveMetrics) {
-        this.isShowDriveMetrics = isShowDriveMetrics;
+        return this.reportConfig.isShowDriveMetrics();
     }
 
     public boolean isShowMailMetrics() {
-        return isShowMailMetrics;
+        return this.reportConfig.isShowMailMetrics();
     }
 
-    public void setShowMailMetrics(boolean isShowMailMetrics) {
-        this.isShowMailMetrics = isShowMailMetrics;
+    public String getStorageFolderPath() {
+        return storageFolderPath;
+    }
+
+    public void setStorageFolderPath(String storageFolderPath) {
+        this.storageFolderPath = storageFolderPath;
+    }
+
+    public boolean isNeedsComposition() {
+        return needsComposition;
+    }
+
+    public void setNeedsComposition(boolean needsComposition) {
+        this.needsComposition = needsComposition;
+    }
+
+    // Attention, if you add values, also correct the composeReportFromStoredPats(...) method
+    public static enum JsonObjectType {
+        MAP, ARRAY
+    };
+
+    /**
+     * Gather all report parts and merge them into a report-file, with a ".report" ending, inside the
+     * reports folder-path. The result is stored in the same folder . The "*.part" files are deleted in the process
+     * after the successful creation of the result.
+     * <br><br>
+     * The <code>rootAttribute</code> will be the first key of the map, the <code>contentContainer</code>
+     * the first value. Every other value will be either an entry in a list or a key/value pair, depending
+     * on the given <code>contentContainerType</code> ({@link JsonObjectType}). The <code>defaultIndentation</code> will add
+     * two whitespace per count to each line.
+     * <br><br>
+     * The result will be stored inside this reports <code>storageFolderPath</code> in a file which name
+     * is <code>uuid</code>.report.
+     * <br><br>
+     * Every .part file will be deleted afterwards.
+     * 
+     * @param contentContainer, the first level container above the content, that is gathered from the .part files
+     * @param contentContainerType, the type of the first level container, either Map or Array
+     * @param rootAttribute, the highest level container, contentContainer will be this containers first entry
+     * @param defaultIndentation, the number of whitespace before each entry * 2
+     */
+    public void composeReportFromStoredParts(String contentContainer, JsonObjectType contentContainerType, String rootAttribute, int defaultIndentation) {
+        // Check for any existing parts inside the reports folder and load filenames into a list
+        File partsFolder = new File(storageFolderPath);
+        int indentationLevel = defaultIndentation;
+        LinkedList<File> parts = new LinkedList<>((Arrays.asList(partsFolder.listFiles(new FilenameFilter() {
+
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".part");
+            }
+        }))));
+        if (parts.size() == 0) {
+            return;
+
+        }
+        if (contentContainer != null && contentContainer.length() > 0 && contentContainerType == null) {
+            return;
+        }
+        File reportContent = new File(storageFolderPath + "/" + uuid + ".report");
+        try (OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(reportContent), "UTF-8")) {
+
+            // create a new line with the rootAttribute and container attribute and open brackets depending on the given JsonObjectType
+            if (rootAttribute != null && rootAttribute.length() > 0) {
+                osw.write(getIndentation(indentationLevel++) + "\"" + rootAttribute + "\"" + " : {\n");
+            }
+            if (contentContainer != null && contentContainer.length() > 0) {
+                osw.write(getIndentation(indentationLevel++) + "\"" + contentContainer + "\"" + " : " + (contentContainerType == JsonObjectType.MAP ? "{" : "[") + "\n");
+            }
+            // Paste the stored files content
+            for (ListIterator<File> fileIterator = parts.listIterator(); fileIterator.hasNext();) {
+                File file = fileIterator.next();
+                // Dont touch parts of other reports
+                if (file.getName().contains(uuid)) {
+                    appendReportParts(osw, file, fileIterator.hasNext(), getIndentation(indentationLevel));
+                }
+            }
+            // Append the closing attributes
+            if (contentContainer != null && contentContainer.length() > 0) {
+                osw.write(getIndentation(--indentationLevel) + (contentContainerType == JsonObjectType.MAP ? "}" : "]") + "\n");
+            }
+            if (rootAttribute != null && rootAttribute.length() > 0) {
+                osw.write(getIndentation(--indentationLevel) + "},\n");
+            }
+        } catch (FileNotFoundException e) {
+            LOG.error("Unable to create the .report file", e);
+        } catch (UnsupportedEncodingException e) {
+            LOG.error("Used encode is not supported." , e);
+        } catch (IOException e) {
+            LOG.error("Unable to write into .report file." , e);
+        }
+        for (File file : parts) {
+            if (file.getName().contains(this.uuid)) {
+                file.delete();
+            }
+        }
+    }
+
+    private void appendReportParts(OutputStreamWriter osw, File appendingFile, boolean hasNext, String indentation) {
+        // load every part-file of the report 
+        try (BufferedReader br = new BufferedReader(new FileReader(appendingFile))) {
+            String line = br.readLine();
+            while (line != null) {
+                osw.write(indentation + line + ((line = br.readLine()) == null && hasNext ? "," : "") + "\n");
+            }
+        } catch (FileNotFoundException e) {
+            LOG.error("Unable to load file: " + appendingFile.getAbsolutePath() , e);
+        } catch (IOException e) {
+            LOG.error("Unable to write into file: " + appendingFile.getAbsolutePath() , e);
+        }
+    }
+
+    public static void printStoredReportContentToConsole(String storageFolderPath, String uuid) {
+
+        try (FileInputStream is = new FileInputStream(storageFolderPath + "/" + uuid + ".report"); Scanner sc = new Scanner(is, "UTF-8")) {
+            while (sc.hasNext()) {
+                System.out.println(sc.nextLine());
+            }
+        } catch (FileNotFoundException e) {
+            LOG.error("Unable to load file: " + storageFolderPath + "/" + uuid + ".report" , e);
+        } catch (IOException e) {
+            LOG.error("Unable to load and write report data to console." , e);
+        }
+    }
+
+    private String getIndentation(int level) {
+        String result = "";
+        for (int i = 0; i < level; i++) {
+            result += "  ";
+        }
+        return result;
     }
 }

@@ -51,6 +51,7 @@ package com.openexchange.drive.impl.internal;
 
 import com.openexchange.drive.DriveShareInfo;
 import com.openexchange.drive.DriveShareTarget;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
@@ -78,7 +79,7 @@ public class DefaultDriveShareInfo implements DriveShareInfo {
     }
 
     @Override
-    public String getShareURL(HostData hostData) {
+    public String getShareURL(HostData hostData) throws OXException {
         return shareInfo.getShareURL(hostData);
     }
 

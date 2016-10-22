@@ -58,8 +58,8 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.googledrive.GoogleDriveConstants;
 import com.openexchange.google.api.client.GoogleApiClients;
-import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.session.Session;
@@ -72,35 +72,27 @@ import com.openexchange.session.Session;
  */
 public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
 
-    private FileStorageAccount fsAccount;
-
-    private Session session;
+    private final FileStorageAccount fsAccount;
 
     /**
      * Initialises a new {@link GoogleDriveOAuthAccess}.
      */
     public GoogleDriveOAuthAccess(FileStorageAccount fsAccount, Session session) throws OXException {
-        super();
+        super(session);
         this.fsAccount = fsAccount;
-        this.session = session;
-
-        int oauthAccountId = getAccountId();
-        // Grab Google OAuth account
-        OAuthAccount googleAccount = GoogleApiClients.getGoogleAccount(oauthAccountId, session, false);
-        setOAuthAccount(googleAccount);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#initialise()
-     */
     @Override
-    public void initialise() throws OXException {
+    public void initialize() throws OXException {
         synchronized (this) {
-            OAuthAccount oauthAccount = getOAuthAccount();
+            // Grab Google OAuth account
+            int oauthAccountId = getAccountId();
+            OAuthAccount oauthAccount = GoogleApiClients.getGoogleAccount(oauthAccountId, getSession(), false);
+            verifyAccount(oauthAccount);
+            setOAuthAccount(oauthAccount);
+
             {
-                OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(oauthAccount, session);
+                OAuthAccount newAccount = GoogleApiClients.ensureNonExpiredGoogleAccount(oauthAccount, getSession());
                 if (null != newAccount) {
                     oauthAccount = newAccount;
                     setOAuthAccount(newAccount);
@@ -108,32 +100,17 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
             }
 
             // Generate appropriate credentials for it
-            GoogleCredential credentials = GoogleApiClients.getCredentials(oauthAccount, session);
+            GoogleCredential credentials = GoogleApiClients.getCredentials(oauthAccount, getSession());
 
             // Establish Drive instance
-            setOAuthClient(new OAuthClient<Drive>(new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName()).build(), getOAuthAccount().getToken()));
+            setOAuthClient(new OAuthClient<Drive>(new Drive.Builder(credentials.getTransport(), credentials.getJsonFactory(), credentials).setApplicationName(GoogleApiClients.getGoogleProductName(getSession())).build(), getOAuthAccount().getToken()));
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#revoke()
-     */
-    @Override
-    public void revoke() throws OXException {
-        // No revoke
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#ping()
-     */
     @Override
     public boolean ping() throws OXException {
         try {
-            Drive drive = (Drive) getClient().client;
+            Drive drive = this.<Drive> getClient().client;
             drive.about().get().execute();
             return true;
         } catch (final HttpResponseException e) {
@@ -148,11 +125,6 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#getAccountId()
-     */
     @Override
     public int getAccountId() throws OXException {
         try {
@@ -162,17 +134,12 @@ public class GoogleDriveOAuthAccess extends AbstractOAuthAccess {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
-     */
     @Override
     public OAuthAccess ensureNotExpired() throws OXException {
         if (isExpired()) {
             synchronized (this) {
                 if (isExpired()) {
-                    initialise();
+                    initialize();
                 }
             }
         }

@@ -50,8 +50,8 @@
 package com.openexchange.capabilities.json.actions;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
@@ -73,9 +73,10 @@ public class CapabilityActionFactory implements AJAXActionServiceFactory {
      */
     public CapabilityActionFactory(ServiceLookup services) {
         super();
-        actions = new HashMap<String, AJAXActionService>(2);
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         actions.put("get", new CapabilityGetAction(services));
         actions.put("all", new CapabilityAllAction(services));
+        this.actions = actions.build();
     }
 
     @Override

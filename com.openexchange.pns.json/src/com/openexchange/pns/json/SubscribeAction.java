@@ -57,11 +57,14 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.pns.DefaultPushSubscription;
 import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.PushExceptionCodes;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -76,7 +79,7 @@ public class SubscribeAction extends AbstractPushJsonAction {
     /**
      * Initializes a new {@link SubscribeAction}.
      */
-    protected SubscribeAction(ServiceLookup services) {
+    public SubscribeAction(ServiceLookup services) {
         super(services);
     }
 
@@ -85,8 +88,20 @@ public class SubscribeAction extends AbstractPushJsonAction {
         JSONObject jRequestBody = (JSONObject) requestData.requireData();
 
         PushSubscriptionRegistry subscriptionRegistry = services.getOptionalService(PushSubscriptionRegistry.class);
+        if (null == subscriptionRegistry) {
+            throw ServiceExceptionCode.absentService(PushSubscriptionRegistry.class);
+        }
 
-        String client = requireStringField("client", jRequestBody);
+        String client = jRequestBody.optString("client", null);
+        if (null == client) {
+            client = session.getClient();
+        } else if (null != session.getClient() && !client.equals(session.getClient())) {
+            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("client", client);
+        }
+        if (Strings.isEmpty(client)) {
+            throw AjaxExceptionCodes.MISSING_FIELD.create("client");
+        }
+
         String token = requireStringField("token", jRequestBody);
         String transportId = requireStringField("transport", jRequestBody);
         JSONArray jTopics = requireArrayField("topics", jRequestBody);
@@ -109,9 +124,9 @@ public class SubscribeAction extends AbstractPushJsonAction {
             .token(token)
             .transportId(transportId)
             .userId(session.getUserId());
-        DefaultPushSubscription subscriptionDesc = builder.build();
+        DefaultPushSubscription subscription = builder.build();
 
-        subscriptionRegistry.registerSubscription(subscriptionDesc);
+        subscriptionRegistry.registerSubscription(subscription);
 
         return new AJAXRequestResult(new JSONObject(2).put("success", true), "json");
     }

@@ -57,13 +57,13 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.DatabaseAccess;
+import com.openexchange.filestore.DatabaseTable;
 import com.openexchange.filestore.swift.SwiftExceptionCode;
+import com.openexchange.filestore.swift.groupware.SwiftCreateTableService;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 
 
 /**
@@ -73,40 +73,49 @@ import com.openexchange.server.ServiceLookup;
  */
 public class RdbChunkStorage implements ChunkStorage {
 
-    private final ServiceLookup services;
+    /**
+     * Gets the required database tables for this storage.
+     *
+     * @return The required tables
+     */
+    public static DatabaseTable[] getRequiredTables() {
+        String[] names = SwiftCreateTableService.getTablesToCreate();
+        String[] stmts = SwiftCreateTableService.getCreateStmts();
+
+        DatabaseTable[] databaseTables = new DatabaseTable[stmts.length];
+        for (int i = 0; i < stmts.length; i++) {
+            databaseTables[i] = new DatabaseTable(names[i], stmts[i]);
+        }
+        return databaseTables;
+    }
+
+    // ------------------------------------------------------------------------------
+
+    private final DatabaseAccess databaseAccess;
     private final int contextId;
     private final int userId;
 
     /**
      * Initializes a new {@link RdbChunkStorage}.
      *
-     * @param A service lookup reference
+     * @param databaseAccess The database access to use
      * @param contextId The context identifier
      * @param userId The user identifier
      */
-    public RdbChunkStorage(ServiceLookup services, int contextId, int userId) {
+    public RdbChunkStorage(DatabaseAccess databaseAccess, int contextId, int userId) {
         super();
-        this.services = services;
+        this.databaseAccess = databaseAccess;
         this.contextId = contextId;
         this.userId = userId;
     }
 
-    private DatabaseService getDbService() throws OXException {
-        DatabaseService service = services.getOptionalService(DatabaseService.class);
-        if (null == service) {
-            throw ServiceExceptionCode.absentService(DatabaseService.class);
-        }
-        return service;
-    }
-
     @Override
     public List<UUID> getDocuments() throws OXException {
-        DatabaseService dbService = getDbService();
-        Connection con = dbService.getReadOnly(contextId);
+        Connection con = databaseAccess.acquireReadOnly();
         try {
             return getDocuments(userId, contextId, con);
         } finally {
-            dbService.backReadOnly(contextId, con);
+            databaseAccess.releaseReadOnly(con);
         }
     }
 
@@ -135,12 +144,11 @@ public class RdbChunkStorage implements ChunkStorage {
 
     @Override
     public List<Chunk> getChunks(UUID documentId) throws OXException {
-        DatabaseService dbService = getDbService();
-        Connection con = dbService.getReadOnly(contextId);
+        Connection con = databaseAccess.acquireReadOnly();
         try {
             return getChunks(documentId, userId, contextId, con);
         } finally {
-            dbService.backReadOnly(contextId, con);
+            databaseAccess.releaseReadOnly(con);
         }
     }
 
@@ -171,12 +179,11 @@ public class RdbChunkStorage implements ChunkStorage {
 
     @Override
     public Chunk getChunk(UUID chunkId) throws OXException {
-        DatabaseService dbService = getDbService();
-        Connection con = dbService.getReadOnly(contextId);
+        Connection con = databaseAccess.acquireReadOnly();
         try {
             return getChunk(chunkId, contextId, con);
         } finally {
-            dbService.backReadOnly(contextId, con);
+            databaseAccess.releaseReadOnly(con);
         }
     }
 
@@ -201,12 +208,11 @@ public class RdbChunkStorage implements ChunkStorage {
 
     @Override
     public Chunk getNextChunk(UUID chunkId, UUID documentId) throws OXException {
-        DatabaseService dbService = getDbService();
-        Connection con = dbService.getReadOnly(contextId);
+        Connection con = databaseAccess.acquireReadOnly();
         try {
             return getNextChunk(chunkId, documentId, userId, contextId, con);
         } finally {
-            dbService.backReadOnly(contextId, con);
+            databaseAccess.releaseReadOnly(con);
         }
     }
 
@@ -235,12 +241,11 @@ public class RdbChunkStorage implements ChunkStorage {
 
     @Override
     public Chunk getLastChunk(UUID documentId) throws OXException {
-        DatabaseService dbService = getDbService();
-        Connection con = dbService.getReadOnly(contextId);
+        Connection con = databaseAccess.acquireReadOnly();
         try {
             return getLastChunk(documentId, userId, contextId, con);
         } finally {
-            dbService.backReadOnly(contextId, con);
+            databaseAccess.releaseReadOnly(con);
         }
     }
 
@@ -266,12 +271,11 @@ public class RdbChunkStorage implements ChunkStorage {
 
     @Override
     public Chunk storeChunk(Chunk chunk) throws OXException {
-        DatabaseService dbService = getDbService();
-        Connection con = dbService.getWritable(contextId);
+        Connection con = databaseAccess.acquireWritable();
         try {
             return storeChunk(chunk, contextId, userId, con);
         } finally {
-            dbService.backWritable(contextId, con);
+            databaseAccess.releaseWritable(con, true);
         }
     }
 
@@ -296,12 +300,13 @@ public class RdbChunkStorage implements ChunkStorage {
 
     @Override
     public boolean deleteChunk(UUID chunkId) throws OXException {
-        DatabaseService dbService = getDbService();
-        Connection con = dbService.getWritable(contextId);
+        Connection con = databaseAccess.acquireWritable();
+        boolean deleted = false;
         try {
-            return deleteChunk(chunkId, contextId, con);
+            deleted = deleteChunk(chunkId, contextId, con);
+            return deleted;
         } finally {
-            dbService.backWritable(contextId, con);
+            databaseAccess.releaseWritable(con, !deleted);
         }
     }
 
@@ -321,12 +326,13 @@ public class RdbChunkStorage implements ChunkStorage {
 
     @Override
     public boolean deleteDocument(UUID documentId) throws OXException {
-        DatabaseService dbService = getDbService();
-        Connection con = dbService.getWritable(contextId);
+        Connection con = databaseAccess.acquireWritable();
+        boolean deleted = false;
         try {
-            return deleteDocument(documentId, userId, contextId, con);
+            deleted = deleteDocument(documentId, userId, contextId, con);
+            return deleted;
         } finally {
-            dbService.backWritable(contextId, con);
+            databaseAccess.releaseWritable(con, !deleted);
         }
     }
 

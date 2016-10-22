@@ -49,6 +49,7 @@
 
 package com.openexchange.pns.transport.apn.internal;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -56,11 +57,17 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.SortableConcurrentList;
 import com.openexchange.osgi.util.RankedService;
@@ -69,10 +76,10 @@ import com.openexchange.pns.PushMatch;
 import com.openexchange.pns.PushMessageGenerator;
 import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushNotification;
-import com.openexchange.pns.PushNotificationField;
 import com.openexchange.pns.PushNotificationTransport;
 import com.openexchange.pns.PushNotifications;
 import com.openexchange.pns.DefaultPushSubscription;
+import com.openexchange.pns.EnabledKey;
 import com.openexchange.pns.KnownTransport;
 import com.openexchange.pns.PushSubscriptionRegistry;
 import com.openexchange.pns.Message;
@@ -112,6 +119,7 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
 
     // ---------------------------------------------------------------------------------------------------------------
 
+    private final ConfigViewFactory configViewFactory;
     private final PushSubscriptionRegistry subscriptionRegistry;
     private final PushMessageGeneratorRegistry generatorRegistry;
     private final SortableConcurrentList<RankedService<ApnOptionsProvider>> trackedProviders;
@@ -120,8 +128,9 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
     /**
      * Initializes a new {@link ApnPushNotificationTransport}.
      */
-    public ApnPushNotificationTransport(PushSubscriptionRegistry subscriptionRegistry, PushMessageGeneratorRegistry generatorRegistry, BundleContext context) {
+    public ApnPushNotificationTransport(PushSubscriptionRegistry subscriptionRegistry, PushMessageGeneratorRegistry generatorRegistry, ConfigViewFactory configViewFactory, BundleContext context) {
         super(context, ApnOptionsProvider.class, null);
+        this.configViewFactory = configViewFactory;
         this.trackedProviders = new SortableConcurrentList<RankedService<ApnOptionsProvider>>();
         this.generatorRegistry = generatorRegistry;
         this.subscriptionRegistry = subscriptionRegistry;
@@ -202,6 +211,50 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
         return ID;
     }
 
+    private static final Cache<EnabledKey, Boolean> CACHE_AVAILABILITY = CacheBuilder.newBuilder().maximumSize(65536).expireAfterWrite(30, TimeUnit.MINUTES).build();
+
+    /**
+     * Invalidates the <i>enabled cache</i>.
+     */
+    public static void invalidateEnabledCache() {
+        CACHE_AVAILABILITY.invalidateAll();
+    }
+
+    @Override
+    public boolean isEnabled(String topic, String client, int userId, int contextId) throws OXException {
+        EnabledKey key = new EnabledKey(topic, client, userId, contextId);
+        Boolean result = CACHE_AVAILABILITY.getIfPresent(key);
+        if (null == result) {
+            result = Boolean.valueOf(doCheckEnabled(topic, client, userId, contextId));
+            CACHE_AVAILABILITY.put(key, result);
+        }
+        return result.booleanValue();
+    }
+
+    private boolean doCheckEnabled(String topic, String client, int userId, int contextId) throws OXException {
+        ConfigView view = configViewFactory.getView(userId, contextId);
+
+        String basePropertyName = "com.openexchange.pns.transport.apn.ios.enabled";
+
+        ComposedConfigProperty<Boolean> property;
+        property = null == topic || null == client ? null : view.property(basePropertyName + "." + client + "." + topic, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        property = null == client ? null : view.property(basePropertyName + "." + client, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        property = view.property(basePropertyName, boolean.class);
+        if (null != property && property.isDefined()) {
+            return property.get().booleanValue();
+        }
+
+        return false;
+    }
+
     @Override
     public void transport(PushNotification notification, Collection<PushMatch> matches) throws OXException {
         if (null != notification && null != matches) {
@@ -212,8 +265,25 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
             for (Map.Entry<String, List<PayloadPerDevice>> clientPayload : clientPayloads.entrySet()) {
                 PushedNotifications notifications = null;
                 try {
+                    // Send to devices
                     ApnOptions options = getHighestRankedApnOptionsFor(clientPayload.getKey());
-                    notifications = Push.payloads(options.getKeystore(), options.getPassword(), options.isProduction(), clientPayload.getValue());
+                    final List<PayloadPerDevice> payloads = clientPayload.getValue();
+                    notifications = Push.payloads(options.getKeystore(), options.getPassword(), options.isProduction(), payloads);
+
+                    // Log it
+                    Object ostr = new Object() {
+
+                        @Override
+                        public String toString() {
+                            StringBuilder sb = new StringBuilder(payloads.size() * 16);
+                            for (PayloadPerDevice payloadPerDevice : payloads) {
+                                sb.append(payloadPerDevice.getDevice().getToken()).append(", ");
+                            }
+                            sb.setLength(sb.length() - 2);
+                            return sb.toString();
+                        }
+                    };
+                    LOG.info("Sent notification \"{}\" via transport '{}' for user {} in context {} to device(s): {}", notification.getTopic(), ID, I(notification.getUserId()), I(notification.getContextId()), ostr);
                 } catch (CommunicationException e) {
                     LOG.warn("error submitting push notifications", e);
                 } catch (KeystoreException e) {
@@ -353,23 +423,6 @@ public class ApnPushNotificationTransport extends ServiceTracker<ApnOptionsProvi
         return payload;
     }
 
-
-    private PushNotificationPayload constructMailPayload(PushNotification notification) throws JSONException {
-        PushNotificationPayload payload = new PushNotificationPayload();
-        payload.addSound("beep.wav");
-
-        String subject = PushNotifications.getValueFor(PushNotificationField.MAIL_SUBJECT, notification);
-        String sender = PushNotifications.getValueFor(PushNotificationField.MAIL_SENDER, notification);
-        String path = PushNotifications.getValueFor(PushNotificationField.MAIL_PATH, notification);
-        Integer unread = PushNotifications.getValueFor(PushNotificationField.MAIL_UNREAD, notification);
-
-        payload.addAlert(new StringBuilder(sender).append("\n").append(subject).toString());
-        if (null != unread) {
-            payload.addBadge(unread.intValue());
-        }
-        payload.addCustomDictionary(PushNotificationField.MAIL_PATH.getId(), path);
-        return payload;
-    }
 
     /**
      * Queries the feedback service and processes the received results, removing reported tokens from the subscription store if needed.

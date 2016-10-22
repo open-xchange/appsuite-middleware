@@ -3,16 +3,15 @@ package com.openexchange.groupware.reminder;
 
 import java.util.Date;
 import java.util.Properties;
-
-import junit.framework.TestCase;
-
 import com.openexchange.api2.ReminderService;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.setuptools.TestConfig;
 import com.openexchange.tools.iterator.SearchIterator;
+import junit.framework.TestCase;
 
 public class ReminderTest extends TestCase {
 
@@ -41,7 +40,8 @@ public class ReminderTest extends TestCase {
 		super.setUp();
 		init();
 
-		final int contextId = ContextStorage.getInstance().getContextId("defaultcontext");
+		final TestConfig config = new TestConfig();
+		final int contextId = ContextStorage.getInstance().getContextId(config.getContextName());
 		context = ContextStorage.getInstance().getContext(contextId);
 
 		reminderSql = new ReminderHandler(context);

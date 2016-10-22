@@ -106,53 +106,23 @@ public class SwiftClient {
     private final EndpointPool endpoints;
     private final HttpClient httpClient;
     private final String prefix;
-    private final int contextId;
-    private final int userId;
     private final TokenStorage tokenStorage;
 
     /**
      * Initializes a new {@link SwiftClient}.
      *
      * @param swiftConfig The Swift configuration
-     * @param contextId The context identifier
-     * @param userId The user identifier
+     * @param prefix The prefix to use
      * @param tokenStorage The token storage
      */
-    public SwiftClient(SwiftConfig swiftConfig, int contextId, int userId, TokenStorage tokenStorage) {
+    public SwiftClient(SwiftConfig swiftConfig, String prefix, TokenStorage tokenStorage) {
         super();
         this.userName = swiftConfig.getUserName();
         this.authValue = swiftConfig.getAuthInfo();
         this.endpoints = swiftConfig.getEndpointPool();
         this.httpClient = swiftConfig.getHttpClient();
-        this.contextId = contextId;
-        this.userId = userId;
         this.tokenStorage = tokenStorage;
-
-        // E.g. "57462ctx5userstore" or "57462ctxstore"
-        StringBuilder sb = new StringBuilder(32).append(contextId).append("ctx");
-        if (userId > 0) {
-            sb.append(userId).append("user");
-        }
-        sb.append("store");
-        prefix = sb.toString();
-    }
-
-    /**
-     * Gets the context identifier
-     *
-     * @return The context identifier
-     */
-    public int getContextId() {
-        return contextId;
-    }
-
-    /**
-     * Gets the user identifier
-     *
-     * @return The user identifier
-     */
-    public int getUserId() {
-        return userId;
+        this.prefix = prefix;
     }
 
     /**
@@ -213,6 +183,7 @@ public class SwiftClient {
                 for (int i = length, c = 0; i-- > 0;) {
                     ids.add(jResponse.getJSONObject(c++).getString("name"));
                 }
+                return ids;
             }
             if (HttpServletResponse.SC_NO_CONTENT == status) {
                 // Successful, but empty
@@ -599,7 +570,7 @@ public class SwiftClient {
      */
     private Endpoint getEndpoint() throws OXException {
         // Grab next end-point to use
-        Endpoint endpoint = endpoints.get(contextId, userId);
+        Endpoint endpoint = endpoints.get(prefix);
         if (endpoint == null) {
             throw SwiftExceptionCode.STORAGE_UNAVAILABLE.create();
         }

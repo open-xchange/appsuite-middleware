@@ -50,21 +50,25 @@
 package com.openexchange.pns.transport.websocket.osgi;
 
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import java.util.List;
+import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Interests;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.Reloadables;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushMessageGeneratorRegistry;
 import com.openexchange.pns.PushNotificationTransport;
-import com.openexchange.pns.PushSubscriptionRegistry;
+import com.openexchange.pns.PushSubscriptionProvider;
+import com.openexchange.pns.transport.websocket.internal.WebSocketClientPushClientChecker;
 import com.openexchange.pns.transport.websocket.internal.WebSocketPushNotificationTransport;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.timer.TimerService;
-import com.openexchange.websockets.WebSocketListener;
+import com.openexchange.push.PushClientChecker;
 import com.openexchange.websockets.WebSocketService;
 
 
@@ -96,22 +100,19 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
 
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
-        try {
-            reinit(configService);
-        } catch (Exception e) {
-            LOG.error("Failed to re-initialize Web Socket transport", e);
-        }
+        // Nothing to do as "com.openexchange.pns.transport.websocket.enabled" is read on-the-fly through config-cascade
     }
 
     @Override
     public Interests getInterests() {
-        return Reloadables.interestsForProperties("com.openexchange.pns.transport.websocket.enabled", "com.openexchange.pns.transport.websocket.delayDuration", "com.openexchange.pns.transport.websocket.timerFrequency");
+        return Reloadables.interestsForProperties(
+            "com.openexchange.pns.transport.websocket.enabled"
+            );
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, PushSubscriptionRegistry.class, PushMessageGeneratorRegistry.class,
-            WebSocketService.class, TimerService.class, ThreadPoolService.class };
+        return new Class<?>[] { ConfigurationService.class, PushMessageGeneratorRegistry.class, WebSocketService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -121,7 +122,24 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
         rememberTracker(resolverTracker);
         openTrackers();
 
-        reinit(getService(ConfigurationService.class));
+        Dictionary<String, Object> props = new Hashtable<>(2);
+        props.put(Constants.SERVICE_RANKING, Integer.valueOf(100));
+        registerService(PushClientChecker.class, new WebSocketClientPushClientChecker(resolverTracker), props);
+
+        reinit();
+
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                WebSocketPushNotificationTransport.invalidateEnabledCache();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return null;
+            }
+        });
     }
 
     @Override
@@ -145,7 +163,7 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
         super.stopBundle();
     }
 
-    private synchronized void reinit(ConfigurationService configService) {
+    private synchronized void reinit() {
         List<ServiceRegistration<?>> serviceRegistrations = this.serviceRegistrations;
         if (null != serviceRegistrations) {
             for (ServiceRegistration<?> serviceRegistration : serviceRegistrations) {
@@ -160,18 +178,12 @@ public class WebSocketPushNotificationTransportActivator extends HousekeepingAct
             webSocketTransport.stop();
         }
 
-        if (!configService.getBoolProperty("com.openexchange.pns.transport.websocket.enabled", true)) {
-            LOG.info("Web Socket push notification transport is disabled per configuration");
-            return;
-        }
-
-        WebSocketPushNotificationTransport.cleanseInits();
         webSocketTransport = new WebSocketPushNotificationTransport(resolverTracker, this);
         this.webSocketTransport = webSocketTransport;
 
         serviceRegistrations = new ArrayList<>(4);
+        serviceRegistrations.add(context.registerService(PushSubscriptionProvider.class, webSocketTransport, null));
         serviceRegistrations.add(context.registerService(PushNotificationTransport.class, webSocketTransport, null));
-        serviceRegistrations.add(context.registerService(WebSocketListener.class, webSocketTransport, null));
         this.serviceRegistrations = serviceRegistrations;
     }
 

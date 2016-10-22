@@ -237,6 +237,11 @@ public class SimUserService implements UserService {
         // Nothing to do
     }
 
+    @Override
+    public void setAttribute(Connection con, String name, String value, int userId, Context context, boolean invalidate) throws OXException {
+        // Nothing to do
+    }
+
     /* (non-Javadoc)
      * @see com.openexchange.user.UserService#searchUserByName(java.lang.String, com.openexchange.groupware.contexts.Context, int)
      */

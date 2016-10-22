@@ -49,6 +49,8 @@
 
 package com.openexchange.processing;
 
+import com.openexchange.exception.OXException;
+
 /**
  * {@link Processor}
  *
@@ -65,6 +67,29 @@ public interface Processor {
      * @return <code>true</code> if successfully scheduled for execution; otherwise <code>false</code> to signal that task cannot be accepted
      */
     boolean execute(Object optKey, Runnable task);
+
+    /**
+     * Gets the number of buffered tasks awaiting being executed.
+     *
+     * @return The number of buffered tasks
+     * @throws OXException If number of buffered tasks cannot be returned
+     */
+    long getNumberOfBufferedTasks() throws OXException;
+
+    /**
+     * Gets the number of tasks that are currently executed.
+     *
+     * @return The number of executing tasks
+     * @throws OXException If number of executing tasks cannot be returned
+     */
+    long getNumberOfExecutingTasks() throws OXException;
+
+    /**
+     * Stops this processor waiting until empty.
+     *
+     * @throws InterruptedException If interrupted while waiting
+     */
+    void stopWhenEmpty() throws InterruptedException;
 
     /**
      * Shuts-down this processor.

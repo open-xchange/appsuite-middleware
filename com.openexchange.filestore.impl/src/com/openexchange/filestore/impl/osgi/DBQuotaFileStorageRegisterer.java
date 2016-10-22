@@ -70,6 +70,8 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Fi
     private final BundleContext context;
     private final Lock lock = new ReentrantLock();
 
+    private final QuotaFileStorageListenerTracker listenerTracker;
+
     private ServiceRegistration<QuotaFileStorageService> registration;
     boolean isRegistered = false;
 
@@ -78,8 +80,9 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Fi
      *
      * @param context The bundle context
      */
-    public DBQuotaFileStorageRegisterer(BundleContext context) {
+    public DBQuotaFileStorageRegisterer(QuotaFileStorageListenerTracker listenerTracker, BundleContext context) {
         super();
+        this.listenerTracker = listenerTracker;
         this.context = context;
     }
 
@@ -95,7 +98,7 @@ public class DBQuotaFileStorageRegisterer implements ServiceTrackerCustomizer<Fi
                 isRegistered = true;
             }
             if (needsRegistration) {
-                QuotaFileStorageService qfss = new DBQuotaFileStorageService(service);
+                QuotaFileStorageService qfss = new DBQuotaFileStorageService(listenerTracker, service);
                 registration = context.registerService(QuotaFileStorageService.class, qfss, null);
                 return service;
             }

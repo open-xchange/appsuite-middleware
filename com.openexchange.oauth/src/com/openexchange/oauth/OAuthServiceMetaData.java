@@ -50,9 +50,10 @@
 package com.openexchange.oauth;
 
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.session.Session;
-
 
 /**
  * {@link OAuthServiceMetaData} - Represents the OAuth service meta data.
@@ -60,6 +61,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface OAuthServiceMetaData {
 
@@ -87,15 +89,8 @@ public interface OAuthServiceMetaData {
     boolean isEnabled(int userId, int contextId) throws OXException;
 
     /**
-     * Use {@link #getAPIKey(Session)} and also please implement {@link #getAPIKey(Session)}
-     *
-     * @return The API key
-     */
-    @Deprecated
-    String getAPIKey();
-
-    /**
      * Gets the API key that belongs to a given session
+     * 
      * @param session
      * @return The API key
      * @throws OXException
@@ -103,14 +98,8 @@ public interface OAuthServiceMetaData {
     String getAPIKey(Session session) throws OXException;
 
     /**
-     * Use {@link #getAPISecret(Session)} and also implement {@link #getAPISecret(Session)}
-     * @return The API secret
-     */
-    @Deprecated
-    String getAPISecret();
-
-    /**
      * Gets the API secret that belongs to a given session
+     * 
      * @param session
      * @return The API key
      * @throws OXException
@@ -119,15 +108,24 @@ public interface OAuthServiceMetaData {
 
     /**
      * Get the consumer key (upsell)
+     * 
      * @return the consumer key
      */
     String getConsumerKey();
 
     /**
      * Get the consumer secret (upsell)
+     * 
      * @return the consumer secret
      */
     String getConsumerSecret();
+
+    /**
+     * Returns the product name of the registered OAuth application
+     * 
+     * @return the product name of the registered OAuth application
+     */
+    String getProductName();
 
     /**
      * Indicates if this meta data needs a request token to obtain authorization URL.
@@ -136,13 +134,6 @@ public interface OAuthServiceMetaData {
      *         <code>null</code>
      */
     boolean needsRequestToken();
-
-    /**
-     * Gets the optional scope; a comma-separated list of scope items.
-     *
-     * @return The scope or <code>null</code>
-     */
-    String getScope();
 
     /**
      * Processes specified authorization URL.
@@ -176,11 +167,11 @@ public interface OAuthServiceMetaData {
      * Gets the optional OAuth token.
      *
      * @param arguments The OAuth arguments
-     * @param session The associated session
+     * @param scopes A {@link Set} with the requested {@link OAuthScope}s
      * @return The OAuth token or <code>null</code>
      * @throws OXException If an error occurs returning the token
      */
-    OAuthToken getOAuthToken(Map<String, Object> arguments) throws OXException;
+    OAuthToken getOAuthToken(Map<String, Object> arguments, Set<OAuthScope> scopes) throws OXException;
 
     /**
      * Initiates contact and returns the initial OAuth interaction.
@@ -208,15 +199,15 @@ public interface OAuthServiceMetaData {
      *
      * @return The API reference
      */
-	API getAPI();
+    API getAPI();
 
-	/**
-	 * Whether to register a token based deferrer.
-	 * <p>
-	 * Note: This method is only considered if {@link #doCustomRegistration(String, CallbackRegistry)} did not return <code>null</code>
-	 *
-	 * @return <code>true</code> to register a token based deferrer; otherwise <code>false</code>
-	 */
+    /**
+     * Whether to register a token based deferrer.
+     * <p>
+     * Note: This method is only considered if {@link #doCustomRegistration(String, CallbackRegistry)} did not return <code>null</code>
+     *
+     * @return <code>true</code> to register a token based deferrer; otherwise <code>false</code>
+     */
     boolean registerTokenBasedDeferrer();
 
     /**
@@ -228,4 +219,13 @@ public interface OAuthServiceMetaData {
      */
     String getRegisterToken(String authUrl);
 
+    /**
+     * Returns an unmodifiable {@link Set} with all available {@link OAuthScope}s
+     * 
+     * @param userId The user id
+     * @param ctxId The context id
+     * @return an unmodifiable {@link Set} with all available {@link OAuthScope}s
+     * @throws OXException if available scopes couldn't be retrieved
+     */
+    Set<OAuthScope> getAvailableScopes(int userId, int ctxId) throws OXException;
 }

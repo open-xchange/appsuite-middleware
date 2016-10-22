@@ -64,6 +64,7 @@ import com.openexchange.share.Links;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.core.ShareConstants;
+import com.openexchange.share.core.exception.ShareCoreExceptionCodes;
 
 
 /**
@@ -106,12 +107,17 @@ public class ShareLinks {
      * @param hostData The host data
      * @param target The personalized share target according to the user for who the link is generated
      * @return The link
+     * @throws OXException in case the link couldn't be generated
      */
-    public static String generateInternal(HostData hostData, ShareTarget target) {
-        String module = Module.getForFolderConstant(target.getModule()).getName();
+    public static String generateInternal(HostData hostData, ShareTarget target) throws OXException {
+        Module module = Module.getForFolderConstant(target.getModule());
+        if(null==module){
+            throw ShareCoreExceptionCodes.UNKOWN_MODULE.create(target.getModule());
+        }
+        String moduleStr = module.getName();
         String folder = target.getFolder();
         String item = target.getItem();
-        return Links.generateInternalLink(module, folder, item, hostData);
+        return Links.generateInternalLink(moduleStr, folder, item, hostData);
     }
 
     /**

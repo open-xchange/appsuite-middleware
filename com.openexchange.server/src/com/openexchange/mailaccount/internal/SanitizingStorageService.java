@@ -114,6 +114,21 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
+    public int acquireId(int userId, Context ctx) throws OXException {
+        return storageService.acquireId(userId, ctx);
+    }
+
+    @Override
+    public String getDefaultFolderPrefix(Session session) throws OXException {
+        return storageService.getDefaultFolderPrefix(session);
+    }
+
+    @Override
+    public char getDefaultSeparator(Session session) throws OXException {
+        return storageService.getDefaultSeparator(session);
+    }
+
+    @Override
     public boolean existsMailAccount(int id, int userId, int contextId) throws OXException {
         return storageService.existsMailAccount(id, userId, contextId);
     }
@@ -303,6 +318,11 @@ final class SanitizingStorageService implements MailAccountStorageService {
     @Override
     public void deleteTransportAccount(int id, int userId, int contextId) throws OXException {
         storageService.deleteTransportAccount(id, userId, contextId);
+    }
+
+    @Override
+    public void deleteTransportAccount(int id, int userId, int contextId, Connection con) throws OXException {
+        storageService.deleteTransportAccount(id, userId, contextId, con);
     }
 
     @Override

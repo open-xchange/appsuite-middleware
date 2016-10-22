@@ -53,9 +53,12 @@ import java.io.IOException;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.bouncycastle.util.encoders.Base64;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.Authenticated;
@@ -65,6 +68,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.state.AuthnRequestInfo;
+import com.openexchange.saml.state.DefaultAuthnRequestInfo;
 import com.openexchange.saml.state.StateManagement;
 import com.openexchange.saml.validation.StrictValidationStrategy;
 import com.openexchange.saml.validation.ValidationStrategy;
@@ -80,6 +84,8 @@ import com.openexchange.saml.validation.ValidationStrategy;
  * @since v7.6.1
  */
 public abstract class AbstractSAMLBackend implements SAMLBackend {
+
+    private static final Logger LOG_ABSTRACT = LoggerFactory.getLogger(AbstractSAMLBackend.class);
 
     /**
      * Initializes the credential provider and returns it.
@@ -182,6 +188,34 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
     @Override
     public void finishLogout(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         doFinishLogout(httpRequest, httpResponse);
+    }
+
+    @Override
+    public AuthnRequestInfo parseRelayState(Response response, String relayState) {
+        LOG_ABSTRACT.debug("RelayState: {}", relayState);
+        DefaultAuthnRequestInfo defaultAuthnRequestInfo = new DefaultAuthnRequestInfo();
+        String string = new String(Base64.decode(relayState.getBytes()));
+        LOG_ABSTRACT.debug("decoded RelayState: {}", string);
+        String[] splitRelayState = string.split(":");
+        for (String s : splitRelayState) {
+            String[] split = s.split("=");
+            if (null != split && split.length == 2) {
+                switch (split[0]) {
+                    case "domain":
+                        defaultAuthnRequestInfo.setDomainName(split[1]);
+                        break;
+                    case "loginpath":
+                        defaultAuthnRequestInfo.setLoginPath(split[1]);
+                        break;
+                    case "client":
+                        defaultAuthnRequestInfo.setClientID(split[1]);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        return defaultAuthnRequestInfo;
     }
 
 }

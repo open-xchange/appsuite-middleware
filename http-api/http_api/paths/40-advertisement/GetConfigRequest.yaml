@@ -1,0 +1,16 @@
+/advertisement?action=get:
+  put:
+    operationId: getAdvertisementConfig
+    tags: 
+      - Advertisement
+    summary: Retrieves the advertisement configuration
+    parameters:
+      - $ref: "#/parameters/gblQueryParamSession"
+    responses:  
+      200:
+        description: |
+          'The configuration as a JSON object or in case of errors the responsible fields in the
+          response are filled (see [Error handling](#error-handling)).'
+        schema: 
+           type: string
+

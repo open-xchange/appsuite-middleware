@@ -2,8 +2,8 @@
   get:
     operationId: doAutoCompleteContacts
     tags:
-      - contacts
-    summary: Auto-complete conntacts (**available since v7.6.1, preliminary**).
+      - Contacts
+    summary: Auto-complete conntacts.
     description: Finds contacts based on a prefix, usually used to auto-complete e-mail recipients while the user is typing.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -27,7 +27,7 @@
       - in: query
         name: sort
         type: string
-        description: "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified. Since 7.8.1: If this parameter is missing, response is sorted by a user-specific use count of contacts, ID of contacts' parent folder and display name."
+        description: "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified. If this parameter is missing, response is sorted by a user-specific use count of contacts, ID of contacts' parent folder and display name."
         required: false
       - in: query
         name: order
@@ -37,7 +37,7 @@
       - in: query
         name: collation
         type: string
-        description: Allows you to specify a collation to sort the contacts by. As of 6.20, only supports "gbk" and "gb2312", not needed for other languages. Parameter sort should be set for this to work. (preliminary, since 6.20)
+        description: Allows you to specify a collation to sort the contacts by. Only supports "gbk" and "gb2312", not needed for other languages. Parameter sort should be set for this to work.
         required: false
         enum:
           - gbk
@@ -57,6 +57,6 @@
         description: |
           A JSON object containing the contact data. Contacts are represented by arrays. The elements of each array contain the
           information specified by the corresponding identifiers in the `columns` parameter. In case of errors the
-          responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/ContactsResponse"

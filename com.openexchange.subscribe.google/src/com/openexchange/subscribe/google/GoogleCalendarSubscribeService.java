@@ -61,6 +61,8 @@ import java.util.TimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
 import com.google.api.services.calendar.model.Events;
@@ -71,7 +73,10 @@ import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.oauth.API;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.scope.OXScope;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.subscribe.Subscription;
@@ -80,6 +85,7 @@ import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.google.internal.CalendarEventParser;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link GoogleCalendarSubscribeService}
@@ -121,24 +127,41 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
             throw ServiceExceptionCode.absentService(ThreadPoolService.class);
         }
 
+        final String calendarId;
+        {
+            final String tmp = (String) subscription.getConfiguration().get("calendarId");
+            calendarId = (tmp == null) ? "primary" : tmp;
+        }
+
+        final ServerSession session = subscription.getSession();
+        final GoogleCredential googleCreds = GoogleApiClients.getCredentials(session);
+        final Calendar googleCalendarService = new Calendar.Builder(googleCreds.getTransport(), googleCreds.getJsonFactory(), googleCreds.getRequestInitializer()).setApplicationName(GoogleApiClients.getGoogleProductName(session)).build();
+
+        // Check if we have permissions
+        try {
+            googleCalendarService.events().list(calendarId).setOauthToken(googleCreds.getAccessToken()).setMaxResults(1).execute();
+        } catch (IOException e) {
+            if (e instanceof GoogleJsonResponseException) {
+                GoogleJsonResponseException ex = (GoogleJsonResponseException) e;
+                if (ex.getStatusCode() == 403) {
+                    GoogleJsonError details = ex.getDetails();
+                    String message = details.getMessage();
+                    if (message.toLowerCase().equals("insufficient permission")) {
+                        throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.GOOGLE.getShortName(), OXScope.calendar_ro.getDisplayName());
+                    }
+                    throw OAuthExceptionCodes.UNEXPECTED_ERROR.create(message);
+                }
+            }
+            throw SubscriptionErrorMessage.IO_ERROR.create(e, e.getMessage());
+        }
+
         // Handle everything in a background thread
         threadPool.submit(new AbstractTask<Void>() {
 
             @Override
             public Void call() throws Exception {
-                GoogleCredential googleCreds = GoogleApiClients.getCredentials(subscription.getSession());
-                final Calendar googleCalendarService = new Calendar.Builder(
-                    googleCreds.getTransport(),
-                    googleCreds.getJsonFactory(),
-                    googleCreds.getRequestInitializer()).setApplicationName(GoogleApiClients.getGoogleProductName()).build();
 
-                final String calendarId;
-                {
-                    final String tmp = (String) subscription.getConfiguration().get("calendarId");
-                    calendarId = (tmp == null) ? "primary" : tmp;
-                }
-
-                final CalendarEventParser parser = new CalendarEventParser(subscription.getSession());
+                final CalendarEventParser parser = new CalendarEventParser(session);
 
                 // Initialize lists
                 final List<CalendarDataObject> changeExceptions = new LinkedList<CalendarDataObject>();
@@ -149,11 +172,10 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
                 if (null == factoryService) {
                     throw ServiceExceptionCode.absentService(AppointmentSqlFactoryService.class);
                 }
-                final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(subscription.getSession());
+                final AppointmentSQLInterface appointmentsql = factoryService.createAppointmentSql(session);
 
                 // Generate list request...
-                Calendar.Events.List list = googleCalendarService.events().list(calendarId).setOauthToken(googleCreds.getAccessToken()).setMaxResults(
-                    pageSize);
+                Calendar.Events.List list = googleCalendarService.events().list(calendarId).setOauthToken(googleCreds.getAccessToken()).setMaxResults(pageSize);
 
                 // ... and do the pagination
                 String nextPageToken = null;

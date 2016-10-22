@@ -86,7 +86,14 @@ public enum AccountField {
      * The interaction type
      */
     INTERACTION_TYPE("type"),
-
+    /**
+     * The enabled OAuth scopes of the account
+     */
+    ENABLED_SCOPES("enabledScopes"),
+    /**
+     * The available scopes of the provider
+     */
+    AVAILABLE_SCOPES("availableScopes"),
     ;
 
     private final String name;

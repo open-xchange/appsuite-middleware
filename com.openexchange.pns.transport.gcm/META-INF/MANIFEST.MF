@@ -2,12 +2,15 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The FCM-backend transport for push notifications
 Bundle-SymbolicName: com.openexchange.pns.transport.gcm
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: 
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.cache,
  com.google.android.gcm,
  com.openexchange.config,
+ com.openexchange.config.cascade,
  com.openexchange.configuration,
  com.openexchange.exception,
  com.openexchange.java,

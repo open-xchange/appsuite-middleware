@@ -165,6 +165,10 @@ public class JolokiaCLT {
 
     private static final String OPT_GENERAL_STATS_LONG = "generalstats";
 
+    private static final String OPT_WS_STATS_LONG = "websocketstats";
+
+    private static final String OPT_PNS_STATS_LONG = "pnsstats";
+
     private static final String OPT_MAILINTERFACE_STATS_LONG = "mailinterfacestats";
 
     private static final String OPT_POOLING_STATS_LONG = "poolingstats";
@@ -217,6 +221,10 @@ public class JolokiaCLT {
 
     private Option generalstats = null;
 
+    private Option wsstats = null;
+
+    private Option pnsstats = null;
+
     private Option mailinterfacestats = null;
 
     private Option poolingstats = null;
@@ -237,7 +245,7 @@ public class JolokiaCLT {
 
     private String password;
 
-    private Options options = new Options();;
+    private final Options options = new Options();;
 
     public static void main(String[] args) {
         final JolokiaCLT jolokiaCLT = new JolokiaCLT();
@@ -381,6 +389,10 @@ public class JolokiaCLT {
         options.addOption(eventadminstats);
         this.generalstats = createLongOption(OPT_GENERAL_STATS_LONG, "shows the open-xchange general stats", false);
         options.addOption(generalstats);
+        this.pnsstats = createLongOption(OPT_PNS_STATS_LONG, "shows the push notification service statistics", false);
+        options.addOption(pnsstats);
+        this.wsstats = createLongOption(OPT_WS_STATS_LONG, "shows the web socket statistics", false);
+        options.addOption(wsstats);
         this.mailinterfacestats = createLongOption(OPT_MAILINTERFACE_STATS_LONG, "shows the open-xchange mailinterface stats", false);
         options.addOption(mailinterfacestats);
         this.poolingstats = createLongOption(OPT_POOLING_STATS_LONG, "shows the open-xchange pooling stats", false);
@@ -448,6 +460,14 @@ public class JolokiaCLT {
         }
         if (cmd.hasOption(getUsableOptionRepresentation(this.eventadminstats)) && 0 == count) {
             System.out.print(showEventAdminData(j4pClient));
+            count++;
+        }
+        if (cmd.hasOption(getUsableOptionRepresentation(this.wsstats)) && 0 == count) {
+            System.out.print(showWebSocketData(j4pClient));
+            count++;
+        }
+        if (cmd.hasOption(getUsableOptionRepresentation(this.pnsstats)) && 0 == count) {
+            System.out.print(showPnsData(j4pClient));
             count++;
         }
         if (cmd.hasOption(getUsableOptionRepresentation(this.allstats)) && 0 == count) {
@@ -871,6 +891,14 @@ public class JolokiaCLT {
 
     static String showEventAdminData(final J4pClient j4pClient) throws MalformedObjectNameException, J4pException {
         return getStats(j4pClient, "org.apache.felix.eventadmin.monitoring", "type", "EventAdminMBean").toString();
+    }
+
+    static String showWebSocketData(final J4pClient j4pClient) throws MalformedObjectNameException, J4pException {
+        return getStats(j4pClient, "com.openexchange.websockets:name=WebSocketMBean").toString();
+    }
+
+    static String showPnsData(final J4pClient j4pClient) throws MalformedObjectNameException, J4pException {
+        return getStats(j4pClient, "com.openexchange.pns:name=PushNotificationMBean").toString();
     }
 
     /**

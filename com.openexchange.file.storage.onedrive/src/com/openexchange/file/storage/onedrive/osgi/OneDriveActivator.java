@@ -55,14 +55,14 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
+import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.onedrive.access.OneDriveEventHandler;
+import com.openexchange.file.storage.oauth.OAuthFileStorageAccountEventHandler;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -85,7 +85,7 @@ public final class OneDriveActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, OAuthService.class, OAuthAccessRegistryService.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, ClusterLockService.class, OAuthService.class, OAuthAccessRegistryService.class };
     }
 
     @Override
@@ -107,10 +107,7 @@ public final class OneDriveActivator extends HousekeepingActivator {
              */
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
-            registerService(EventHandler.class, new OneDriveEventHandler(), serviceProperties);
-
-            OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
-            registryService.add(API.MS_LIVE_CONNECT.getFullName(), new OAuthAccessRegistry(API.MS_LIVE_CONNECT.getFullName()));
+            registerService(EventHandler.class, new OAuthFileStorageAccountEventHandler(this, API.MS_LIVE_CONNECT), serviceProperties);
         } catch (final Exception e) {
             logger.error("", e);
             throw e;

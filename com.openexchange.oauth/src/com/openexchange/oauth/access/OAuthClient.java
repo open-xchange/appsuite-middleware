@@ -52,19 +52,22 @@ package com.openexchange.oauth.access;
 import com.openexchange.java.Strings;
 
 /**
- * {@link OAuthClient}
+ * {@link OAuthClient} - A combination of the actual client instance and its associated token.
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class OAuthClient<T> {
 
+    /** The client instance */
     public final T client;
 
+    /** The client's token */
     public final String token;
 
     /**
-     * Initialises a new {@link OAuthClient}.
-     * 
+     * Initializes a new {@link OAuthClient}.
+     *
      * @param client The OAuth client
      * @param token The OAuth token
      * @throws IllegalArgumentException if the client is '<code>null</code>' or if the token is either '<code>null</code>' or empty.
@@ -80,4 +83,25 @@ public class OAuthClient<T> {
         this.token = token;
         this.client = client;
     }
+
+    // For the sake of order...
+
+    /**
+     * Gets the client
+     *
+     * @return The client
+     */
+    public T getClient() {
+        return client;
+    }
+
+    /**
+     * Gets the token
+     *
+     * @return The token
+     */
+    public String getToken() {
+        return token;
+    }
+
 }

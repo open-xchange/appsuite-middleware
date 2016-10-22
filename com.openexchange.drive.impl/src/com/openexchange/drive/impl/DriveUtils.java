@@ -146,8 +146,11 @@ public class DriveUtils {
      * @throws OXException
      */
     public static boolean isIgnoredPath(SyncSession session, String path) throws OXException {
-        if (session.getTemp().supported() && session.getTemp().getPath(false).equals(path)) {
-            return true; // no temp path
+        if (session.getTemp().supported()) {
+            String tempPath = session.getTemp().getPath(false);
+            if (null != tempPath && tempPath.equals(path)) {
+                return true; // no temp path
+            }
         }
         if (DriveConfig.getInstance().getExcludedDirectoriesPattern().matcher(path).matches()) {
             return true; // no (server-side) excluded paths
@@ -276,6 +279,17 @@ public class DriveUtils {
     public static boolean indicatesFailedSave(OXException e) {
         return "IFO-0100".equals(e.getErrorCode()) || "IFO-2103".equals(e.getErrorCode()) ||
             "FLD-0092".equals(e.getErrorCode()) || "FLD-0064".equals(e.getErrorCode()) || "FLD-1014".equals(e.getErrorCode());
+    }
+
+    /**
+     * Gets a value indicating whether the supplied exception indicates an unrecoverable failed remove operation, e.g. due to insufficient
+     * permissions for a subfolder.
+     *
+     * @param e The exception to check
+     * @return <code>true</code> if the exception indicates a failed remove exception, <code>false</code>, otherwise
+     */
+    public static boolean indicatesFailedRemove(OXException e) {
+        return "FLD-0029".equals(e.getErrorCode()) || "FLD-0074".equals(e.getErrorCode());
     }
 
     /**

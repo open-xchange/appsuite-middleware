@@ -72,6 +72,15 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
         wsTransport = transport;
     }
 
+    /**
+     * Gets the remote end-point.
+     *
+     * @return The remote end-point
+     */
+    public WebSocket getRemoteEndpoint() {
+        return remoteEndpoint;
+    }
+
     // ---------------------------------------------- WebSocketListener stuff ------------------------------------------------------
 
     /**
@@ -174,6 +183,9 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
 
     @Override
     public String onOutboundMessage(WebSocket socket, String message) {
+        Session session = getSession();
+        LOGGER.debug("Session[{}]: text to send: {}", session.getSessionId(), message);
+
         String ns = SocketIOProtocol.DEFAULT_NAMESPACE;
         String name;
         Object[] args;
@@ -190,7 +202,7 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
         }
 
         try {
-            getSession().getConnection().emit(ns, name, args);
+            session.getConnection().emit(ns, name, args);
             return null;
         } catch (SocketIOException e) {
             LOGGER.error("Failed to emit message: {}", message, e);
@@ -275,9 +287,9 @@ public final class WsTransportConnection extends AbstractTransportConnection imp
         }
     }
 
-    private void disconnectEndpoint(WebSocket remote_endpoint ) {
+    private void disconnectEndpoint(WebSocket remoteEndpoint ) {
         try {
-            remote_endpoint.close();
+            remoteEndpoint.close();
         } catch (Exception ex) {
             // ignore
         }

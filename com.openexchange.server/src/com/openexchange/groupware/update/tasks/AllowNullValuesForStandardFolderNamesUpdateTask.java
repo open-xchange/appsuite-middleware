@@ -69,7 +69,12 @@ import com.openexchange.tools.update.Tools;
  */
 public class AllowNullValuesForStandardFolderNamesUpdateTask extends UpdateTaskAdapter {
 
-    private final String TABLE = "user_mail_account";
+    /**
+     * Initializes a new {@link AllowNullValuesForStandardFolderNamesUpdateTask}.
+     */
+    public AllowNullValuesForStandardFolderNamesUpdateTask() {
+        super();
+    }
 
     @Override
     public void perform(PerformParameters params) throws OXException {
@@ -94,7 +99,7 @@ public class AllowNullValuesForStandardFolderNamesUpdateTask extends UpdateTaskA
             columns[11] = new Column("confirmed_spam_fullname", "varchar(256)");
             columns[12] = new Column("confirmed_ham_fullname", "varchar(256)");
             columns[13] = new Column("archive_fullname", "varchar(256)");
-            Tools.modifyColumns(con, TABLE, false, columns);
+            Tools.modifyColumns(con, "user_mail_account", false, columns);
             con.commit();
         } catch (SQLException e) {
             DBUtils.rollback(con);

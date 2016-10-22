@@ -53,9 +53,6 @@ import java.util.Date;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tokenlogin.TokenLoginService;
@@ -68,9 +65,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
-@Action(method = RequestMethod.GET, name = "acquireToken", description = "Get a one-time token for token login",
-    parameters = { @Parameter(name = "session", optional = false, description = "The user's session id") },
-    responseDescription = "The token")
 public class AcquireTokenAction extends TokenLoginAction {
 
     /**

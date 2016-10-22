@@ -118,6 +118,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadPools.TrackableCallable;
 import com.openexchange.threadpool.behavior.AbortBehavior;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.userconf.UserPermissionService;
@@ -1587,21 +1588,12 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
          * Put updated folder
          */
         if (isMove) {
-            /*
-             * Reload folders
+            /*-
+             * Do not reload folders.
+             * 
+             * In case of a cross file storage move (e.g. Dropbox to InfoStore), the previously opened in-transaction connection will not
+             * see the newly created folder (as not yet committed) or read a stale state.
              */
-            Folder f = loadFolder(realTreeId, newFolderId, StorageType.WORKING, true, storageParameters);
-            if (f.isCacheable()) {
-                putFolder(f, realTreeId, storageParameters, true);
-            }
-            f = loadFolder(realTreeId, oldParentId, StorageType.WORKING, true, storageParameters);
-            if (f.isCacheable()) {
-                putFolder(f, realTreeId, storageParameters, true);
-            }
-            f = loadFolder(realTreeId, updatedFolder.getParentID(), StorageType.WORKING, true, storageParameters);
-            if (f.isCacheable()) {
-                putFolder(f, realTreeId, storageParameters, true);
-            }
         } else {
             Folder f = loadFolder(realTreeId, newFolderId, StorageType.WORKING, true, storageParameters);
             if (f.isCacheable()) {
@@ -1743,8 +1735,23 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
     public Folder loadFolder(String treeId, String folderId, StorageType storageType, StorageParameters storageParameters) throws OXException {
         return loadFolder(treeId, folderId, storageType, false, storageParameters);
     }
-
+    
     private Folder loadFolder(String treeId, String folderId, StorageType storageType, boolean readWrite, StorageParameters storageParameters) throws OXException {
+        return loadFolder0(treeId, folderId, storageType, readWrite, storageParameters);
+    }
+    
+    private Folder optLoadFolder(String treeId, String folderId, StorageType storageType, boolean readWrite, StorageParameters storageParameters) throws OXException {
+        try {
+            return loadFolder0(treeId, folderId, storageType, readWrite, storageParameters);
+        } catch (OXException e) {
+            if (OXFolderExceptionCode.NOT_EXISTS.equals(e) || FolderExceptionErrorMessage.NOT_FOUND.equals(e)) {
+                return null;
+            }
+            throw e;
+        }
+    }
+
+    private Folder loadFolder0(String treeId, String folderId, StorageType storageType, boolean readWrite, StorageParameters storageParameters) throws OXException {
         FolderStorage storage = registry.getFolderStorage(treeId, folderId);
         if (null == storage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);

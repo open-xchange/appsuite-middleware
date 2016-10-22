@@ -55,8 +55,8 @@ import java.util.HashSet;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
+import com.openexchange.net.HostList;
 import com.openexchange.rss.osgi.Services;
-import com.openexchange.tools.HostList;
 
 /**
  * 

@@ -52,10 +52,13 @@ package com.openexchange.mail.json.actions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import javax.mail.MessageRemovedException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -65,9 +68,6 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageUtility;
@@ -89,11 +89,6 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.GET, name = "zip_attachments", description = "Get multiple mail attachments as a ZIP file.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "folder", description = "The folder identifier."),
-    @Parameter(name = "id", description = "Object ID of the mail which contains the attachments."),
-    @Parameter(name = "attachment", description = "A comma-separated list of IDs of the requested attachments") }, responseDescription = "The raw byte data of the ZIP file.")
 public final class GetMultipleAttachmentAction extends AbstractMailAction {
 
     /**
@@ -114,7 +109,14 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
              */
             final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
             final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
-            final String[] sequenceIds = req.optStringArray(Mail.PARAMETER_MAILATTCHMENT);
+            String[] sequenceIds = req.optStringArray(Mail.PARAMETER_MAILATTCHMENT);
+
+            /*
+             * Remove duplicate attachment ids
+             */
+            Set<String> attachmentIds = new LinkedHashSet<>(Arrays.asList(sequenceIds));
+            sequenceIds = attachmentIds.toArray(new String[attachmentIds.size()]);
+
             /*
              * Get mail interface
              */

@@ -77,7 +77,15 @@ public enum CapabilityExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * An SQL error occurred: %1$s
      */
-    SQL_ERROR("An SQL error occurred: %1$s", OXExceptionStrings.SQL_ERROR_MSG, CATEGORY_ERROR, 4);
+    SQL_ERROR("An SQL error occurred: %1$s", OXExceptionStrings.SQL_ERROR_MSG, CATEGORY_ERROR, 4),
+    /**
+     * The context identifier '%1$s' is invalid.
+     */
+    INVALID_CONTEXT("The context identifier '%1$s' is invalid.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 5),
+    /**
+     * The user identifier '%1$s' is invalid.
+     */
+    INVALID_USER("The user identifier '%1$s' is invalid.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 6);
 
     /**
      * The error code prefix for capability module.
@@ -87,7 +95,7 @@ public enum CapabilityExceptionCodes implements DisplayableOXExceptionCode {
     private final Category category;
 
     private final int detailNumber;
-    
+
     private final String displayMessage;
 
     private final String message;
@@ -154,7 +162,9 @@ public enum CapabilityExceptionCodes implements DisplayableOXExceptionCode {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
      */
     @Override

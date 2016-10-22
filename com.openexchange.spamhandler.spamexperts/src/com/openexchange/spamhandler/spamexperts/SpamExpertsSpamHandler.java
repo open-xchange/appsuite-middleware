@@ -61,12 +61,12 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.service.MailService;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.spamexperts.exceptions.SpamExpertsExceptionCode;
 import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
-import com.openexchange.spamhandler.spamexperts.osgi.SpamExpertsServiceRegistry;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
+import com.openexchange.spamhandler.spamexperts.osgi.Services;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
@@ -77,9 +77,20 @@ import com.sun.mail.imap.IMAPStore;
  */
 public class SpamExpertsSpamHandler extends SpamHandler {
 
+    private static final Logger LOG = LoggerFactory.getLogger(SpamExpertsSpamHandler.class);
+
     private static final SpamExpertsSpamHandler instance = new SpamExpertsSpamHandler();
 
-    private static final Logger LOG = LoggerFactory.getLogger(SpamExpertsSpamHandler.class);
+    /**
+     * Gets the spam handler instance.
+     *
+     * @return The instance
+     */
+    public static SpamExpertsSpamHandler getInstance() {
+        return instance;
+    }
+
+    // ---------------------------------------------------------------------------------------------------
 
     /**
      * Initializes a new {@link SpamExpertsSpamHandler}.
@@ -88,20 +99,14 @@ public class SpamExpertsSpamHandler extends SpamHandler {
         super();
     }
 
-    public static SpamExpertsSpamHandler getInstance() {
-        return instance;
-    }
-
-    /* (non-Javadoc)
-     * @see com.openexchange.spamhandler.SpamHandler#getSpamHandlerName()
-     */
     @Override
     public String getSpamHandlerName() {
         return "SpamExperts";
     }
 
     private void copyToSpamexpertsFolder(String folder, MailMessage[] messages) throws OXException {
-        final String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+        SSLSocketFactoryProvider factoryProvider = Services.requireService(SSLSocketFactoryProvider.class);
+    final String socketFactoryClass = factoryProvider.getDefault().getClass().getName();
         final URLName imapUrl = SpamExpertsConfig.getInstance().getImapUrl();
         final Properties props = new Properties();
         if( "imaps".equals(imapUrl.getProtocol())) {
@@ -163,7 +168,7 @@ public class SpamExpertsSpamHandler extends SpamHandler {
         LOG.debug("accid: {}, spamfullname: {}, move: {}, session: {}", accountId, spamFullName, move, session.toString());
 
         // get access to internal mailstore
-        final MailService mailService = SpamExpertsServiceRegistry.getInstance().getService(MailService.class);
+        final MailService mailService = Services.optService(MailService.class);
         if (null == mailService) {
             throw SpamExpertsExceptionCode.MAILSERVICE_MISSING.create();
         }
@@ -195,7 +200,7 @@ public class SpamExpertsSpamHandler extends SpamHandler {
         LOG.debug("accid: {}, fullname: {}, move: {}, session: {}", accountId, fullName, move, session.toString());
 
         // get access to internal mailstore
-        final MailService mailService = SpamExpertsServiceRegistry.getInstance().getService(MailService.class);
+        final MailService mailService = Services.optService(MailService.class);
         if (null == mailService) {
             throw SpamExpertsExceptionCode.MAILSERVICE_MISSING.create();
         }

@@ -51,7 +51,7 @@ package com.openexchange.contacts.json;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.contacts.json.actions.AdvancedSearchAction;
@@ -71,7 +71,6 @@ import com.openexchange.contacts.json.actions.NewAction;
 import com.openexchange.contacts.json.actions.SearchAction;
 import com.openexchange.contacts.json.actions.UpdateAction;
 import com.openexchange.contacts.json.actions.UpdatesAction;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
@@ -83,7 +82,6 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-@Module(name = "contact", description = "Provides access to contact information.")
 @OAuthModule
 public class ContactActionFactory implements AJAXActionServiceFactory {
 
@@ -101,7 +99,7 @@ public class ContactActionFactory implements AJAXActionServiceFactory {
 
     public ContactActionFactory(final ServiceLookup serviceLookup) {
         super();
-        actions = new ConcurrentHashMap<String, ContactAction>(15, 0.9f, 1);
+        ImmutableMap.Builder<String, ContactAction> actions = ImmutableMap.builder();
         actions.put("get", new GetAction(serviceLookup));
         actions.put("all", new AllAction(serviceLookup));
         actions.put("list", new ListAction(serviceLookup));
@@ -118,6 +116,7 @@ public class ContactActionFactory implements AJAXActionServiceFactory {
         actions.put("anniversaries", new AnniversariesAction(serviceLookup));
         actions.put("autocomplete", new AutocompleteAction(serviceLookup));
         actions.put("getVcard", new GetVCardAction(serviceLookup));
+        this.actions = actions.build();
     }
 
     @Override

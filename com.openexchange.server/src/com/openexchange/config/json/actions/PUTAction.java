@@ -61,9 +61,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.json.ConfigAJAXRequest;
 import com.openexchange.config.json.ConfigActionFactory;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.SettingExceptionCodes;
@@ -84,9 +81,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "config/path", description = "Set configuration data", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
-}, requestBody = "The new value of the node specified by path.")
 @OAuthAction(ConfigActionFactory.OAUTH_WRITE_SCOPE)
 public final class PUTAction extends AbstractConfigAction {
 

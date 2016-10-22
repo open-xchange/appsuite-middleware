@@ -57,6 +57,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.groupware.upload.Upload;
 import com.openexchange.groupware.upload.UploadFile;
 
 /**
@@ -64,7 +65,7 @@ import com.openexchange.groupware.upload.UploadFile;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class UploadEvent {
+public class UploadEvent implements Upload {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UploadEvent.class);
 
@@ -206,20 +207,18 @@ public class UploadEvent {
         cleanUp();
     }
 
-    /**
-     * Gets the number of upload files.
-     *
-     * @return The number of upload files.
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.upload.impl.Upload#getNumberOfUploadFiles()
      */
+    @Override
     public final int getNumberOfUploadFiles() {
         return createList().size();
     }
 
-    /**
-     * Gets an iterator for upload files.
-     *
-     * @return An iterator for upload files.
+    /* (non-Javadoc)
+     * @see com.openexchange.groupware.upload.impl.Upload#getUploadFilesIterator()
      */
+    @Override
     public final Iterator<UploadFile> getUploadFilesIterator() {
         return createList().iterator();
     }

@@ -71,21 +71,64 @@ public final class Arrays {
     }
 
     /**
+     * Concatenates the specified arrays.
+     * <pre>
+     *   int[] a = {1,2,3};
+     *   int[] b = {4,5,6};
+     *   int[] c = concatenate(a, b);
+     *   System.out.println(Arrays.toString(c))
+     * </pre>
+     * Outputs: <code>{1,2,3,4,5,6}</code>
+     *
+     * @param a The first array
+     * @param b The second array
+     * @return The resulting array
+     */
+    public static int[] concatenate(int[] a, int[] b) {
+        if (a == null) {
+            return clone(b);
+        }
+
+        if (b == null) {
+            return clone(a);
+        }
+
+        int[] c = new int[a.length + b.length];
+        System.arraycopy(a, 0, c, 0, a.length);
+        System.arraycopy(b, 0, c, a.length, b.length);
+        return c;
+    }
+
+    /**
+     * Clones specified array
+     *
+     * @param data The array to clone
+     * @return The cloned array
+     */
+    public static int[] clone(int[] data) {
+        if (data == null) {
+            return null;
+        }
+
+        int[] copy = new int[data.length];
+        System.arraycopy(data, 0, copy, 0, data.length);
+        return copy;
+    }
+
+    /**
      * Searches the given int value in the int array.
      *
      * @param array int array tested for containing the search parameter.
      * @param search this int is tested if the array contains it.
      * @return <code>true</code> if the array contains the int value.
      */
-    public static boolean contains(final int[] array, final int search) {
-        boolean found = false;
-        for (final int test : array) {
-            if (test == search) {
-                found = true;
-                break;
+    public static boolean contains(int[] array, int search) {
+        for (int i = array.length; i-- > 0;) {
+            if (array[i] == search) {
+                return true;
             }
         }
-        return found;
+        return false;
     }
 
     public static int[] addUniquely(final int[] toExtend, final int... other) {

@@ -91,4 +91,13 @@ public class Configuration {
         this.password = password;
     }
 
+    /**
+     * Signals whether this configuration requires no authentication.
+     *
+     * @return <code>true</code> if no authentication is supposed to be performed; otherwise <code>false</code>
+     */
+    public boolean noAuthentication() {
+        return null == login && null == password;
+    }
+
 }

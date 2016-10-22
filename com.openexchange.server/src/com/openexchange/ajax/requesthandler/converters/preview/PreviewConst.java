@@ -63,7 +63,7 @@ import com.openexchange.preview.PreviewDocument;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-final class PreviewConst {
+public final class PreviewConst {
 
     /**
      * Initializes a new {@link PreviewConst}.
@@ -115,7 +115,7 @@ final class PreviewConst {
     }
 
     /** Default thumbnail image */
-    static final byte[] DEFAULT_THUMBNAIL = new byte[] {
+    public static final byte[] DEFAULT_THUMBNAIL = new byte[] {
         (byte) 255, (byte) 216, (byte) 255, (byte) 224, (byte) 0, (byte) 16, (byte) 74, (byte) 70, (byte) 73, (byte) 70, (byte) 0,
         (byte) 1, (byte) 1, (byte) 1, (byte) 0, (byte) 72, (byte) 0, (byte) 72, (byte) 0, (byte) 0, (byte) 255, (byte) 226, (byte) 12,
         (byte) 236, (byte) 73, (byte) 67, (byte) 67, (byte) 95, (byte) 80, (byte) 82, (byte) 79, (byte) 70, (byte) 73, (byte) 76,

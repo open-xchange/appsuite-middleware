@@ -49,21 +49,18 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
-import com.openexchange.oauth.json.Tools;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountParser;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -74,11 +71,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "update", description = "Update an OAuth account", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "The account identifier. May also be provided in request body's JSON OAuth account representation by \"id\" field.")
-}, requestBody = "A JSON object providing the OAuth account fields to update. See OAuth account data. Currently the only values which make sende being updated are \"displayName\" and the \"token\"-\"secret\"-pair. ",
-responseDescription = "The boolean value \"true\" if successful.")
 public final class UpdateAction extends AbstractOAuthAJAXActionService {
 
     /**
@@ -103,7 +95,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
                 }
                 id = data.getInt(AccountField.ID.getName());
             } else {
-                id = Tools.getUnsignedInteger(accountId);
+                id = getUnsignedInteger(accountId);
             }
             if (id < 0) {
                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("id", accountId);
@@ -113,7 +105,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
              * Update account
              */
             final OAuthService oAuthService = getOAuthService();
-            final Map<String, Object> arguments = new HashMap<String, Object>(1);
+            final Map<String, Object> arguments = new HashMap<>(1);
 
             final String displayName = account.getDisplayName();
             if (null != displayName) {
@@ -127,7 +119,7 @@ public final class UpdateAction extends AbstractOAuthAJAXActionService {
 
             if (!arguments.isEmpty()) {
                 arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
-                oAuthService.updateAccount(id, arguments, session.getUserId(), session.getContextId());
+                oAuthService.updateAccount(id, arguments, session.getUserId(), session.getContextId(), account.getEnabledScopes());
             }
 
             /*

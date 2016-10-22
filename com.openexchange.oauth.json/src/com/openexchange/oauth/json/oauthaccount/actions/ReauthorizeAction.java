@@ -49,16 +49,26 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
+import static com.openexchange.java.util.Tools.getUnsignedInteger;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.annotations.Module;
+import com.openexchange.ajax.requesthandler.SecureContentWrapper;
+import com.openexchange.cluster.lock.ClusterLockService;
+import com.openexchange.cluster.lock.ClusterTask;
+import com.openexchange.cluster.lock.policies.ExponentialBackOffRetryPolicy;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.json.Tools;
+import com.openexchange.oauth.access.OAuthAccess;
+import com.openexchange.oauth.access.OAuthAccessRegistry;
+import com.openexchange.oauth.access.OAuthAccessRegistryService;
+import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.oauthaccount.AccountField;
+import com.openexchange.oauth.scope.OAuthScope;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -67,7 +77,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-@Module(name = "oauth", description = "The OAuth module is used to manage multiple OAuth accounts for certian online services for a user. The OAuth mechanism allows the Open-Xchange application to act as behalf of this user using previously obtained access tokens granted by user.")
 public class ReauthorizeAction extends AbstractOAuthTokenAction {
 
     @Override
@@ -77,32 +86,121 @@ public class ReauthorizeAction extends AbstractOAuthTokenAction {
          */
         final String accountId = request.getParameter("id");
         if (null == accountId) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( "id");
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
-        final int id = Tools.getUnsignedInteger(accountId);
+        final int id = getUnsignedInteger(accountId);
         if (id < 0) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("id", Integer.valueOf(id));
         }
 
         final String serviceId = request.getParameter(AccountField.SERVICE_ID.getName());
         if (serviceId == null) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create( AccountField.SERVICE_ID.getName());
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(AccountField.SERVICE_ID.getName());
         }
-        final OAuthService oAuthService = getOAuthService();
 
-        OAuthServiceMetaData service = oAuthService.getMetaDataRegistry().getService(serviceId, session.getUserId(), session.getContextId());
+        ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
+        clusterLockService.runClusterTask(new ReauthorizeClusterTask(request, session, accountId, serviceId), new ExponentialBackOffRetryPolicy());
 
-        Map<String, Object> arguments = processOAuthArguments(request, session, service);
-
-        /*
-         * By now it doesn't matter which interaction type is passed
-         */
-        oAuthService.updateAccount(id, serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId());
         /*
          * Return appropriate result
          */
-        return new AJAXRequestResult(Boolean.TRUE);
+        return new AJAXRequestResult(new SecureContentWrapper(Boolean.TRUE, "boolean"), SecureContentWrapper.CONTENT_TYPE);
 
     }
 
+    private class ReauthorizeClusterTask implements ClusterTask<Void> {
+
+        private final String taskName;
+        private final ServerSession session;
+        private final String accountId;
+        private final String serviceId;
+        private final AJAXRequestData request;
+
+        /**
+         * Initialises a new {@link ReauthorizeAction.ReauthorizeClusterTask}.
+         */
+        public ReauthorizeClusterTask(AJAXRequestData request, ServerSession session, String accountId, String serviceId) {
+            super();
+            this.request = request;
+            this.session = session;
+            this.accountId = accountId;
+            this.serviceId = serviceId;
+
+            StringBuilder builder = new StringBuilder();
+            builder.append(session.getUserId()).append("@");
+            builder.append(session.getContextId());
+            builder.append(":").append(accountId);
+            builder.append(":").append(serviceId);
+
+            taskName = builder.toString();
+        }
+
+        /*
+         * (non-Javadoc)
+         *
+         * @see com.openexchange.cluster.lock.ClusterTask#getTaskName()
+         */
+        @Override
+        public String getTaskName() {
+            return taskName;
+        }
+
+        /*
+         * (non-Javadoc)
+         *
+         * @see com.openexchange.cluster.lock.ClusterTask#perform()
+         */
+        @Override
+        public Void perform() throws OXException {
+            OAuthService oauthService = getOAuthService();
+            OAuthAccount dbOAuthAccount = oauthService.getAccount(Integer.parseInt(accountId), session, session.getUserId(), session.getContextId());
+
+            OAuthAccessRegistryService registryService = Services.getService(OAuthAccessRegistryService.class);
+            OAuthAccessRegistry oAuthAccessRegistry = registryService.get(serviceId);
+            OAuthAccess access = oAuthAccessRegistry.get(session.getContextId(), session.getUserId());
+
+            if (access == null) {
+                performReauthorize(oauthService);
+            } else {
+                // If the OAuth access is not initialised yet reload from DB, as it may have been changed from another node
+                OAuthAccount cachedOAuthAccount = (access.getOAuthAccount() == null) ? oauthService.getAccount(Integer.parseInt(accountId), session, session.getUserId(), session.getContextId()) : access.getOAuthAccount();
+                if (dbOAuthAccount.getToken().equals(cachedOAuthAccount.getToken()) && dbOAuthAccount.getSecret().equals(cachedOAuthAccount.getSecret())) {
+                    performReauthorize(oauthService);
+                } else {
+                    access.initialize();
+                }
+            }
+
+            return null;
+        }
+
+        private void performReauthorize(OAuthService oauthService) throws OXException {
+            OAuthServiceMetaData service = oauthService.getMetaDataRegistry().getService(serviceId, session.getUserId(), session.getContextId());
+            Map<String, Object> arguments = processOAuthArguments(request, session, service);
+            // Get the scopes
+            Set<OAuthScope> scopes = getScopes(request, serviceId);
+            // By now it doesn't matter which interaction type is passed
+            oauthService.updateAccount(Integer.parseInt(accountId), serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId(), scopes);
+        }
+
+        /*
+         * (non-Javadoc)
+         *
+         * @see com.openexchange.cluster.lock.ClusterTask#getContextId()
+         */
+        @Override
+        public int getContextId() {
+            return session.getContextId();
+        }
+
+        /*
+         * (non-Javadoc)
+         *
+         * @see com.openexchange.cluster.lock.ClusterTask#getUserId()
+         */
+        @Override
+        public int getUserId() {
+            return session.getUserId();
+        }
+    }
 }

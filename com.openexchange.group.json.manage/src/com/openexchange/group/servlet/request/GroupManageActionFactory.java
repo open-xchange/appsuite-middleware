@@ -51,10 +51,9 @@ package com.openexchange.group.servlet.request;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.servlet.request.actions.AbstractGroupAction;
 import com.openexchange.server.ServiceLookup;
@@ -64,7 +63,6 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Module(name = "group.json", description = "The group module allows to query available groups. It is mainly used by the dialog for the selection of participants.")
 @com.openexchange.ajax.requesthandler.Module(actions = {"new","update","delete"})
 public final class GroupManageActionFactory implements AJAXActionServiceFactory {
 
@@ -77,10 +75,11 @@ public final class GroupManageActionFactory implements AJAXActionServiceFactory 
      */
     public GroupManageActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractGroupAction>(4, 0.9f, 1);
+        ImmutableMap.Builder<String, AbstractGroupAction> actions = ImmutableMap.builder();
         actions.put("new", new com.openexchange.group.servlet.request.actions.NewAction(services));
         actions.put("update", new com.openexchange.group.servlet.request.actions.UpdateAction(services));
         actions.put("delete", new com.openexchange.group.servlet.request.actions.DeleteAction(services));
+        this.actions = actions.build();
     }
 
     @Override

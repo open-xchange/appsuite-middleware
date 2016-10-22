@@ -116,7 +116,7 @@ public class Quota {
      *
      * The limit applies to this account in this module.
      *
-     * @return A number > 0 or {@value #UNLIMITED} if unlimited.
+     * @return A number > 0, 0 for no quota at all or {@value #UNLIMITED} if unlimited.
      */
     public long getLimit() {
         return limit;
@@ -143,7 +143,7 @@ public class Quota {
      * @return true if exceeded, otherwise false
      */
     public boolean isExceeded() {
-        return (limit > 0) && (usage >= limit);
+        return (limit == 0) || ((limit > 0) && (usage >= limit));
     }
 
     /**
@@ -155,7 +155,7 @@ public class Quota {
         if (isUnlimited()) {
             return false;
         }
-        return (usage + quotaToAdd) > limit;
+        return (limit == 0) || ((usage + quotaToAdd) > limit);
     }
 
     /**

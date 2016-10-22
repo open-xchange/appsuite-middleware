@@ -50,7 +50,6 @@
 package com.openexchange.file.storage.onedrive.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
-
 import com.openexchange.server.ServiceLookup;
 
 /**

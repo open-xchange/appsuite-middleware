@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -107,6 +107,14 @@ if [ ${1:-0} -eq 2 ]; then
     # SoftwareChange_Request-2532
     VALUE=$(ox_read_property com.openexchange.oauth.google.redirectUrl /opt/open-xchange/etc/googleoauth.properties)
     ox_set_property com.openexchange.oauth.google.redirectUrl "$VALUE" /opt/open-xchange/etc/googleoauth.properties
+
+    # SoftwareChange_Request-3506
+    ox_add_property com.openexchange.oauth.dropbox.redirectUrl REPLACE_WITH_REDIRECT_URL /opt/open-xchange/etc/dropboxoauth.properties
+    ox_add_property com.openexchange.oauth.dropbox.productName REPLACE_WITH_YOUR_REGISTERED_DROPBOX_APP /opt/open-xchange/etc/dropboxoauth.properties
+
+    # SoftwareChange_Request-3556
+    ox_add_property com.openexchange.oauth.yahoo.redirectUrl REPLACE_WITH_REDIRECT_URL /opt/open-xchange/etc/yahoooauth.properties
+    ox_add_property com.openexchange.oauth.yahoo.productName REPLACE_WITH_YOUR_REGISTERED_YAHOO_APP /opt/open-xchange/etc/yahoooauth.properties
 fi
 
 %clean
@@ -133,6 +141,10 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/tumblroauth.properties
 
 %changelog
+* Fri Oct 14 2016 Steffen Templin <marcus.klein@open-xchange.com>
+First preview 7.8.3 release
+* Tue Sep 06 2016 Steffen Templin <marcus.klein@open-xchange.com>
+prepare for 7.8.3 release
 * Tue Jul 12 2016 Steffen Templin <marcus.klein@open-xchange.com>
 Second candidate for 7.8.2 release
 * Wed Jul 06 2016 Steffen Templin <marcus.klein@open-xchange.com>

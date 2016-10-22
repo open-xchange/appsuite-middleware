@@ -1,0 +1,14 @@
+type: object
+properties:
+  $ref: ../common/CommonResponseData.yaml
+  data:
+    type: object
+    properties:
+      status:
+        type: string
+        description: The status' identifier, such as "ok" or "invalid_credentials"
+      message:
+        type: string
+        description: An optional human-readable status-related message
+  warnings:
+      $ref: "#/definitions/CommonResponse"

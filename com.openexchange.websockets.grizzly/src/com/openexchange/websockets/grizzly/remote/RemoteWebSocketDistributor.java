@@ -49,7 +49,10 @@
 
 package com.openexchange.websockets.grizzly.remote;
 
+import java.util.Collection;
+import java.util.List;
 import com.openexchange.websockets.WebSocket;
+import com.openexchange.websockets.WebSocketInfo;
 
 /**
  * {@link RemoteWebSocketDistributor} - Sends text messages to remote nodes having an open Web Socket connection for associated user.
@@ -58,6 +61,23 @@ import com.openexchange.websockets.WebSocket;
  * @since v7.8.3
  */
 public interface RemoteWebSocketDistributor  {
+
+    /**
+     * Lists all available Web Socket information from whole cluster.
+     * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;"><b>Expensive operation!</b></div>
+     * <p>
+     *
+     * @return All available Web Socket information or <code>null</code> if operation failed
+     */
+    List<WebSocketInfo> listClusterWebSocketInfo();
+
+    /**
+     * Gets the number of buffered messages that are supposed to be sent to remote cluster members.
+     *
+     * @return The number of buffered messages
+     */
+    long getNumberOfBufferedMessages();
 
     /**
      * Sends the given text message to remote nodes having an open Web Socket connection for specified user.
@@ -81,17 +101,40 @@ public interface RemoteWebSocketDistributor  {
     boolean existsAnyRemote(String pathFilter, int userId, int contextId);
 
     /**
-     * Call-back for a connected Web Socket.
+     * Adds a connected Web Socket.
      *
      * @param socket The Web Socket
      */
-    void onWebSocketConnect(WebSocket socket);
+    void addWebSocket(WebSocket socket);
 
     /**
-     * Call-back for a closed Web Socket.
+     * Adds connected Web Sockets.
+     *
+     * @param sockets The Web Sockets
+     */
+    void addWebSocket(Collection<WebSocket> sockets);
+
+    /**
+     * Removes a closed Web Socket.
      *
      * @param socket The Web Socket
      */
-    void onWebSocketClose(WebSocket socket);
+    void removeWebSocket(WebSocket socket);
+
+    /**
+     * Starts the cleaner task for given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    void startCleanerTaskFor(int userId, int contextId);
+
+    /**
+     * Stops the cleaner task for given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     */
+    void stopCleanerTaskFor(int userId, int contextId);
 
 }

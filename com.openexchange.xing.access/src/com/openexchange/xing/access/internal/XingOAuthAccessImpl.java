@@ -50,11 +50,9 @@
 package com.openexchange.xing.access.internal;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.AbstractOAuthAccess;
 import com.openexchange.oauth.OAuthAccount;
-import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.access.AbstractOAuthAccess;
 import com.openexchange.oauth.access.OAuthAccess;
 import com.openexchange.oauth.access.OAuthClient;
 import com.openexchange.session.Session;
@@ -77,35 +75,28 @@ import com.openexchange.xing.session.WebAuthSession;
  */
 public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements XingOAuthAccess {
 
-    /**
-     * The XING user identifier.
-     */
+    /** The XING user identifier. */
     private String xingUserId;
 
-    /**
-     * The XING user's full name
-     */
+    /** The XING user's full name */
     private String xingUserName;
 
-    private final Session session;
-
     /**
-     * Initialises a new {@link XingOAuthAccessImpl}.
+     * Initializes a new {@link XingOAuthAccessImpl}.
      *
      * @param session The users session
      * @param oauthAccount The associated OAuth account
      * @throws OXException If connect attempt fails
      */
     public XingOAuthAccessImpl(final Session session, final OAuthAccount oauthAccount) throws OXException {
-        super();
-        this.session = session;
+        super(session);
+        verifyAccount(oauthAccount);
         setOAuthAccount(oauthAccount);
-        init(oauthAccount.getToken(), oauthAccount.getSecret());
     }
 
     /**
-     * Initialises a new {@link XingOAuthAccessImpl}.
-     * 
+     * Initializes a new {@link XingOAuthAccessImpl}.
+     *
      * @param session
      * @param token
      * @param secret
@@ -114,8 +105,7 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
     // FIXME: This constructor is only being used for tests. Clean-up and introduce a new way of testing the XING
     //        functionality.
     public XingOAuthAccessImpl(final Session session, final String token, final String secret) throws OXException {
-        super();
-        this.session = session;
+        super(session);
         init(token, secret);
     }
 
@@ -124,10 +114,9 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
      *
      * @return The XING API reference
      */
-    @SuppressWarnings("unchecked")
     @Override
     public XingAPI<WebAuthSession> getXingAPI() throws OXException {
-        return (XingAPI<WebAuthSession>) getClient().client;
+        return this.<XingAPI<WebAuthSession>> getClient().client;
     }
 
     /**
@@ -150,45 +139,19 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
         return xingUserName;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#initialise()
-     */
     @Override
-    public void initialise() throws OXException {
-        OAuthService oAuthService = Services.getService(OAuthService.class);
-        OAuthAccount oAuthAccount = oAuthService.getAccount(getAccountId(), session, session.getUserId(), session.getContextId());
-        
-        init(oAuthAccount.getToken(), oAuthAccount.getSecret());
+    public void initialize() throws OXException {
+        synchronized (this) {
+            OAuthAccount oAuthAccount = getOAuthAccount();
+            init(oAuthAccount.getToken(), oAuthAccount.getSecret());
+        }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#revoke()
-     */
-    @Override
-    public void revoke() throws OXException {
-        // No revoke
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#ensureNotExpired()
-     */
     @Override
     public OAuthAccess ensureNotExpired() throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        return this;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#ping()
-     */
     @Override
     public boolean ping() throws OXException {
         try {
@@ -199,19 +162,14 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.oauth.access.OAuthAccess#getAccountId()
-     */
     @Override
     public int getAccountId() throws OXException {
         return getOAuthAccount().getId();
     }
 
     /**
-     * Initialises the {@link OAuthClient} and {@link OAuthAccount}
-     * 
+     * Initializes the {@link OAuthClient} and {@link OAuthAccount}
+     *
      * @param token The token
      * @param secret the secret
      * @throws OXException if an error is occurred
@@ -219,7 +177,7 @@ public final class XingOAuthAccessImpl extends AbstractOAuthAccess implements Xi
     private void init(String token, String secret) throws OXException {
         try {
             final OAuthServiceMetaData xingOAuthServiceMetaData = Services.getService(OAuthServiceMetaData.class);
-            final AppKeyPair appKeys = new AppKeyPair(xingOAuthServiceMetaData.getAPIKey(session), xingOAuthServiceMetaData.getAPISecret(session));
+            final AppKeyPair appKeys = new AppKeyPair(xingOAuthServiceMetaData.getAPIKey(getSession()), xingOAuthServiceMetaData.getAPISecret(getSession()));
             WebAuthSession webAuthSession = new WebAuthSession(appKeys, new AccessTokenPair(token, secret));
             XingAPI<WebAuthSession> xingApi = new XingAPI<WebAuthSession>(webAuthSession);
             setOAuthClient(new OAuthClient<XingAPI<WebAuthSession>>(xingApi, token));

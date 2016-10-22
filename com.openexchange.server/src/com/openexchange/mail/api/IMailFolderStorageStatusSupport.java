@@ -68,10 +68,10 @@ public interface IMailFolderStorageStatusSupport extends IMailFolderStorage {
     boolean isStatusSupported() throws OXException;
 
     /**
-     * Gets the folder validity for specified full name.
+     * Gets the folder status for specified full name.
      *
      * @param fullName the folder full name
-     * @return The folder validity
+     * @return The folder status
      * @throws OXException If an error occurs
      */
     MailFolderStatus getFolderStatus(String fullName) throws OXException;

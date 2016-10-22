@@ -1469,9 +1469,7 @@ public final class MimeMessageConverter {
                         mailMessage.setHasAttachment(((ExtendedMimeMessage) msg).hasAttachment());
                     } else {
                         try {
-                            mailMessage.setHasAttachment(ct.startsWith(multipart) && (mixed.equalsIgnoreCase(ct.getSubType()) || hasAttachments(
-                                (Multipart) msg.getContent(),
-                                ct.getSubType())));
+                            mailMessage.setHasAttachment(ct.startsWith(multipart) && hasAttachments((Multipart) msg.getContent(), ct.getSubType()));
                         } catch (final ClassCastException e) {
                             // Cast to javax.mail.Multipart failed
                             LOG1.debug(new StringBuilder(256).append(
@@ -1916,8 +1914,7 @@ public final class MimeMessageConverter {
            {
                 ContentType ct = mail.getContentType();
                 if (ct.startsWith(MULTI_PRIMTYPE)) {
-                    if (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType())) {
-                        // For convenience consider multipart/mixed to hold file attachments
+                    if (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType()) && MimeMessageUtility.hasAttachments((Multipart) mail.getContent(), ct.getSubType())) {
                         mail.setHasAttachment(true);
                     } else if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(ct.getSubType())) {
                         // For convenience consider multipart/alternative to hold file attachments if it has more than 2 sub-parts

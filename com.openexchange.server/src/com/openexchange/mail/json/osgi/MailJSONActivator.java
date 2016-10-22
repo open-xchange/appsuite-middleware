@@ -73,6 +73,7 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.contact.ContactService;
@@ -87,6 +88,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
@@ -98,12 +100,16 @@ import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionFactory;
+import com.openexchange.mail.json.MailOAuthConstants;
 import com.openexchange.mail.json.compose.ComposeHandler;
 import com.openexchange.mail.json.compose.ComposeHandlerRegistry;
 import com.openexchange.mail.json.compose.internal.ComposeHandlerRegistryImpl;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.transport.config.TransportReloadable;
+import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
+import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 import com.openexchange.server.ServiceLookup;
@@ -211,6 +217,10 @@ public final class MailJSONActivator extends AJAXModuleActivator {
             composeHandlerRegisty = new ComposeHandlerRegistryImpl(tracker);
         }
 
+        MimeMailExceptionHandlerTracker exceptionHandlerTracker = new MimeMailExceptionHandlerTracker(context);
+        rememberTracker(exceptionHandlerTracker);
+        MimeMailException.setExceptionHandlers(exceptionHandlerTracker);
+
         openTrackers();
 
         registerService(ComposeHandlerRegistry.class, composeHandlerRegisty);
@@ -266,11 +276,20 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
         final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
         registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, fields, this));
+
+        registerService(OAuthScopeProvider.class, new AbstractScopeProvider(MailOAuthConstants.OAUTH_SEND_DATA, OAuthScopeDescription.SEND_DATA) {
+
+            @Override
+            public boolean canBeGranted(CapabilitySet capabilities) {
+                return capabilities.contains(Permission.WEBMAIL.getCapabilityName());
+            }
+        });
     }
 
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
+        MimeMailException.unsetExceptionHandlers();
         ServerServiceRegistry.getInstance().removeService(ComposeHandlerRegistry.class);
         DefaultMailAttachmentStorageRegistry.dropInstance();
         MailActionFactory.releaseActionFactory();

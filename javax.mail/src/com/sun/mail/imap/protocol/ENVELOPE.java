@@ -78,6 +78,7 @@ public class ENVELOPE implements Item {
 
     // Used to parse dates
     private static final MailDateFormat mailDateFormat = new MailDateFormat();
+    private static final java.util.concurrent.locks.Lock mailDateFormatLock = new java.util.concurrent.locks.ReentrantLock();
 
     // special debugging output to debug parsing errors
     private static final boolean parseDebug =
@@ -97,9 +98,15 @@ public class ENVELOPE implements Item {
 	if (s != null) {
 	    Date d;
 	    try {
-            synchronized (mailDateFormat) {
-                d = mailDateFormat.parse(s);
-            }
+	        if (mailDateFormatLock.tryLock()) {
+	            try {
+	                d = mailDateFormat.parse(s);
+	            } finally {
+	                mailDateFormatLock.unlock();
+	            }
+	        } else {
+	            d = new MailDateFormat().parse(s);
+	        }
 	    } catch (ParseException pex) {
 	        d = null;
 	    }

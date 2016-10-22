@@ -2,7 +2,7 @@
   post:
     operationId: changeIP
     tags:
-      - login
+      - Login
     summary: Change IP of client host in a session.
     description: |
       The following request is especially for integration with systems located in the providers
@@ -22,6 +22,6 @@
         required: true
     responses:
       200:
-        description: A JSON object containing the string "1" as data attribute. In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        description: A JSON object containing the string "1" as data attribute. In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/ChangeIPResponse"

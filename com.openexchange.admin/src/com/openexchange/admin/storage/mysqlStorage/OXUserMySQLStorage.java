@@ -2030,7 +2030,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 flags |= UserSettingMail.INT_SHOW_GRAPHIC_EMOTICONS;
                 flags |= UserSettingMail.INT_USE_COLOR_QUOTE;
                 flags |= UserSettingMail.INT_NOTIFY_APPOINTMENTS_CONFIRM_OWNER;
-                flags |= UserSettingMail.INT_NOTIFY_APPOINTMENTS_CONFIRM_PARTICIPANT;
                 flags |= UserSettingMail.INT_NOTIFY_TASKS_CONFIRM_OWNER;
                 flags |= UserSettingMail.INT_NOTIFY_TASKS_CONFIRM_PARTICIPANT;
 
@@ -2737,7 +2736,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         } else if (paramtype.equalsIgnoreCase("java.lang.Long")) {
                             long longValue = rs.getLong(fieldname);
                             if ("MaxQuota".equals(methodnamewithoutset)) {
-                                if (longValue != -1) {
+                                if (rs.wasNull()) {
+                                    longValue = -1;
+                                } else if (longValue != -1) {
                                     longValue = longValue >> 20;
                                 }
                             }

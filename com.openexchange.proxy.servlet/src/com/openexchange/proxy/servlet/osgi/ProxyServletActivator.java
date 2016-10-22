@@ -58,6 +58,7 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.osgi.AbstractSessionServletActivator;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
 import com.openexchange.proxy.ProxyRegistry;
 import com.openexchange.proxy.servlet.Constants;
@@ -91,6 +92,7 @@ public class ProxyServletActivator extends AbstractSessionServletActivator {
             trackers = new ArrayList<ServiceTracker<?,?>>(4);
             trackers.add(new ServiceTracker<TimerService,TimerService>(context, TimerService.class, new TimerServiceCustomizer(context)));
             trackers.add(new ServiceTracker<SessiondService,SessiondService>(context, SessiondService.class, new RegistryServiceTrackerCustomizer<SessiondService>(context, ServiceRegistry.getInstance(), SessiondService.class)));
+            trackers.add(new ServiceTracker<SSLSocketFactoryProvider,SSLSocketFactoryProvider>(context, SSLSocketFactoryProvider.class, new RegistryServiceTrackerCustomizer<SSLSocketFactoryProvider>(context, ServiceRegistry.getInstance(), SSLSocketFactoryProvider.class)));
             for (final ServiceTracker<?,?> serviceTracker : trackers) {
                 serviceTracker.open();
             }

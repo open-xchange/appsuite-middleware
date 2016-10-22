@@ -1,0 +1,37 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Net SSL bundle
+Bundle-SymbolicName: com.openexchange.net.ssl
+Bundle-Version: 7.8.3
+Bundle-Activator: com.openexchange.net.ssl.osgi.SSLActivator
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.log,
+ com.openexchange.net,
+ com.openexchange.net.ssl.config,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.server,
+ com.openexchange.tools.ssl,
+ javax.naming,
+ javax.naming.directory,
+ javax.naming.ldap,
+ javax.net,
+ javax.net.ssl,
+ javax.security.auth.x500,
+ org.apache.http.conn.ssl,
+ org.apache.http.conn.util,
+ org.osgi.framework,
+ org.osgi.service.http,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-ClassPath: .
+Export-Package: com.openexchange.net.ssl,
+ com.openexchange.net.ssl.exception

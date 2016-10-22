@@ -54,8 +54,21 @@ package com.openexchange.tools.exceptions;
  */
 public class OXAborted extends RuntimeException {
 
-    /**
-	 *
-	 */
     private static final long serialVersionUID = 8334216056095164302L;
+
+    /**
+     * Initializes a new {@link OXAborted}.
+     */
+    public OXAborted() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link OXAborted}.
+     *
+     * @param cause The cause
+     */
+    public OXAborted(Throwable cause) {
+        super(cause);
+    }
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.imagetransformation.java.transformations;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -93,25 +94,116 @@ public class ScaleTransformation implements ImageTransformation {
     @Override
     public BufferedImage perform(BufferedImage sourceImage, TransformationContext transformationContext, ImageInformation imageInformation) throws IOException {
         DimensionConstrain constrain;
+        boolean shrinkOnly = this.shrinkOnly;
         switch (scaleType) {
-        case COVER:
-            constrain = new CoverDimensionConstrain(maxWidth, maxHeight);
-            break;
-        case CONTAIN:
-            constrain = new ContainDimensionConstrain(maxWidth, maxHeight);
-            break;
-        default:
-            constrain = new AutoDimensionConstrain(maxWidth, maxHeight);
-            break;
+            case COVER_AND_CROP:
+                shrinkOnly=true;
+                constrain = new CoverDimensionConstrain(maxWidth, maxHeight);
+                break;
+            case COVER:
+                constrain = new CoverDimensionConstrain(maxWidth, maxHeight);
+                break;
+            case CONTAIN_FORCE_DIMENSION:
+                // fall-through
+            case CONTAIN:
+                constrain = new ContainDimensionConstrain(maxWidth, maxHeight);
+                break;
+            default:
+                constrain = new AutoDimensionConstrain(maxWidth, maxHeight);
+                break;
         }
         transformationContext.addExpense(ImageTransformations.HIGH_EXPENSE);
         Dimension dimension = constrain.getDimension(new Dimension(sourceImage.getWidth(), sourceImage.getHeight()));
         int targetWidth = (int) dimension.getWidth();
         int targetHeight = (int) dimension.getHeight();
-        if (shrinkOnly && null != sourceImage && maxWidth >= sourceImage.getWidth() && maxHeight >= sourceImage.getHeight()) {
+        if (shrinkOnly && maxWidth >= sourceImage.getWidth() && maxHeight >= sourceImage.getHeight()) {
+            if(ScaleType.COVER_AND_CROP ==  scaleType){
+                return extentImageIfNeeded(sourceImage, maxWidth, maxHeight);
+            }
             return sourceImage; // nothing to do
         }
-        return Scalr.resize(sourceImage, Method.AUTOMATIC, targetWidth, targetHeight);
+
+        BufferedImage resized = Scalr.resize(sourceImage, Method.AUTOMATIC, targetWidth, targetHeight);
+        if(ScaleType.COVER_AND_CROP ==  scaleType && (resized.getWidth()>maxWidth || resized.getHeight() > maxHeight)){
+            if(resized.getWidth()>maxWidth){
+                int x = (int) Math.floor((resized.getWidth()-maxWidth) / 2d);
+                resized = Scalr.crop(resized, x, 0, maxWidth, maxHeight);
+            } else {
+                int y = (int) Math.floor((resized.getHeight()-maxHeight) / 2d);
+                resized = Scalr.crop(resized, 0, y, maxWidth, maxHeight);
+            }
+        }
+
+        if (ScaleType.CONTAIN_FORCE_DIMENSION == scaleType || ScaleType.COVER_AND_CROP ==  scaleType) {
+            resized = extentImageIfNeeded(resized, maxWidth, maxHeight);
+        }
+        return resized;
+    }
+
+    /**
+     * Resizes an image to a specific size and adds white lines in respect to the ratio.
+     * <p>
+     * See <a href="http://www.programcreek.com/java-api-examples/index.php?source_dir=proudcase-master/src/java/com/proudcase/util/ImageScale.java">this code example</a> from which this routine was derived
+     *
+     * @param resizedImage The previously resized image using {@link ScaleType#CONTAIN CONTAIN} policy
+     * @param resultWidth The desired width
+     * @param resultHeight The desired height
+     * @return The resized image with smaller sides padded
+     */
+    private BufferedImage extentImageIfNeeded(BufferedImage resizedImage, int resultWidth, int resultHeight) {
+        // First, get the width and the height of the image
+        BufferedImage paddedImage = resizedImage;
+        int originWidth = paddedImage.getWidth();
+        int originHeight = paddedImage.getHeight();
+
+        // Check which sides need padding
+        if (originWidth < resultWidth) {
+            // Padding on the width axis
+            int paddingSize = (resultWidth - originWidth) / 2;
+            if (paddingSize > 0) {
+                paddedImage = extentImage(paddedImage, paddingSize, true);
+            }
+        }
+        if (originHeight < resultHeight) {
+            // Padding on the height axis
+            int paddingSize = (resultHeight - originHeight) / 2;
+            if (paddingSize > 0) {
+                paddedImage = extentImage(paddedImage, paddingSize, false);
+            }
+        }
+
+        return paddedImage;
+    }
+
+    private BufferedImage extentImage(BufferedImage resizedImage, int paddingSize, boolean extentWidth) {
+
+        // Add the padding to the image
+        BufferedImage outputImage = Scalr.pad(resizedImage, paddingSize, Color.white);
+
+        // Crop the image since padding was added to all sides
+        int x = 0, y = 0, width = 0, height = 0;
+        if (extentWidth) {
+            x = 0;
+            y = paddingSize;
+            width = outputImage.getWidth();
+            height = outputImage.getHeight() - (2 * paddingSize);
+        } else {
+            x = paddingSize;
+            y = 0;
+            width = outputImage.getWidth() - (2 * paddingSize);
+            height = outputImage.getHeight();
+        }
+
+        if (width > 0 && height > 0) {
+            outputImage = Scalr.crop(outputImage, x, y, width, height);
+        }
+
+        // Flush both images
+        resizedImage.flush();
+        outputImage.flush();
+
+        // Return the final image
+        return outputImage;
     }
 
     @Override
@@ -128,18 +220,22 @@ public class ScaleTransformation implements ImageTransformation {
     public Dimension getRequiredResolution(Dimension originalResolution) {
         DimensionConstrain constrain;
         switch (scaleType) {
-        case COVER:
-            constrain = new CoverDimensionConstrain(maxWidth, maxHeight);
-            break;
-        case CONTAIN:
-            if (null != originalResolution && maxWidth >= originalResolution.getWidth() && maxHeight >= originalResolution.getHeight()) {
-                return originalResolution; // nothing to do
-            }
-            constrain = new ContainDimensionConstrain(maxWidth, maxHeight);
-            break;
-        default:
-            constrain = new AutoDimensionConstrain(maxWidth, maxHeight);
-            break;
+            case COVER_AND_CROP:
+                // fall-through
+            case COVER:
+                constrain = new CoverDimensionConstrain(maxWidth, maxHeight);
+                break;
+            case CONTAIN_FORCE_DIMENSION:
+                // fall-through
+            case CONTAIN:
+                if (null != originalResolution && maxWidth >= originalResolution.getWidth() && maxHeight >= originalResolution.getHeight()) {
+                    return originalResolution; // nothing to do
+                }
+                constrain = new ContainDimensionConstrain(maxWidth, maxHeight);
+                break;
+            default:
+                constrain = new AutoDimensionConstrain(maxWidth, maxHeight);
+                break;
         }
         return constrain.getDimension(originalResolution);
     }

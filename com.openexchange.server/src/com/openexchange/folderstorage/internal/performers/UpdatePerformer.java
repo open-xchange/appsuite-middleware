@@ -380,15 +380,26 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                             realStorage.updateFolder(folder, storageParameters);
                             storage.updateFolder(folder, storageParameters);
 
-                            if(comparedPermissions.hasRemovedUsers()){
+                            if (comparedPermissions.hasRemovedUsers() || comparedPermissions.hasModifiedUsers()) {
                                 if (realStorage instanceof LockCleaningFolderStorage) {
                                     List<Permission> removedPermissions = comparedPermissions.getRemovedUserPermissions();
-                                    int[] removedUserPermissions = new int[removedPermissions.size()];
-                                    int x=0;
+                                    int[] userIdRemoved = new int[removedPermissions.size()];
+                                    int x = 0;
                                     for(Permission perm: removedPermissions){
-                                        removedUserPermissions[x++] = perm.getEntity();
+                                        userIdRemoved[x++] = perm.getEntity();
                                     }
-                                    ((LockCleaningFolderStorage)realStorage).cleanLocksFor(folder, removedUserPermissions, storageParameters);
+
+                                    List<Permission> modifiedPermissions = comparedPermissions.getModifiedUserPermissions();
+                                    int[] userIdModified = new int[modifiedPermissions.size()];
+                                    x = 0;
+                                    for (Permission perm : modifiedPermissions) {
+                                        if (perm.getWritePermission() == Permission.NO_PERMISSIONS || perm.getWritePermission() == Permission.WRITE_OWN_OBJECTS) {
+                                            userIdModified[x++] = perm.getEntity();
+                                        }
+                                    }
+
+                                    int[] merged = com.openexchange.tools.arrays.Arrays.concatenate(userIdRemoved, userIdModified);
+                                    ((LockCleaningFolderStorage) realStorage).cleanLocksFor(folder, merged, storageParameters);
                                 }
                             }
                         }

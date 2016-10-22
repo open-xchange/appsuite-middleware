@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Box.com file storage bundle
 Bundle-SymbolicName: com.openexchange.file.storage.boxcom
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.fasterxml.jackson.annotation,
@@ -18,11 +18,14 @@ Import-Package: com.fasterxml.jackson.annotation,
  com.fasterxml.jackson.databind.jsontype,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
+ com.openexchange.cluster.lock,
+ com.openexchange.cluster.lock.policies,
  com.openexchange.config,
  com.openexchange.datatypes.genericonf,
  com.openexchange.exception,
  com.openexchange.file.storage,
  com.openexchange.file.storage.generic,
+ com.openexchange.file.storage.oauth,
  com.openexchange.file.storage.search,
  com.openexchange.groupware,
  com.openexchange.groupware.results,
@@ -32,6 +35,8 @@ Import-Package: com.fasterxml.jackson.annotation,
  com.openexchange.mime,
  com.openexchange.oauth,
  com.openexchange.oauth.access,
+ com.openexchange.oauth.impl,
+ com.openexchange.oauth.impl.access.impl,
  com.openexchange.osgi,
  com.openexchange.rest.client.httpclient,
  com.openexchange.server,
@@ -108,6 +113,7 @@ Import-Package: com.fasterxml.jackson.annotation,
  org.apache.http.pool,
  org.apache.http.protocol,
  org.apache.http.util,
+ org.json,
  org.osgi.framework,
  org.osgi.service.event,
  org.osgi.util.tracker,
@@ -120,6 +126,7 @@ Import-Package: com.fasterxml.jackson.annotation,
  org.scribe.services,
  org.scribe.utils,
  org.slf4j
-Bundle-ClassPath: lib/box-java-sdk-v2-3.0.11.jar,
- .
+Bundle-ClassPath: .,
+ lib/minimal-json-0.9.1.jar,
+ lib/box-java-sdk-2.2.1.jar
 Bundle-Activator: com.openexchange.file.storage.boxcom.osgi.BoxActivator

@@ -49,10 +49,9 @@
 
 package com.openexchange.file.storage.boxcom;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import com.box.boxjavalibv2.exceptions.AuthFatalFailureException;
-import com.box.boxjavalibv2.exceptions.BoxServerException;
-import com.box.restclientv2.exceptions.BoxRestException;
+import com.box.sdk.BoxAPIException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.boxcom.access.BoxOAuthAccess;
@@ -76,15 +75,12 @@ public abstract class BoxClosure<R> {
     /**
      * Performs the actual operation
      *
-     * @param boxAccess The Box.com access to use
      * @return The return value
      * @throws OXException If an Open-Xchange error occurred
-     * @throws BoxRestException If a REST error occurred
-     * @throws BoxServerException If a server error occurred
-     * @throws AuthFatalFailureException If an authentication error occurred
+     * @throws BoxAPIException If a Box API error is occurred
      * @throws UnsupportedEncodingException If an encoding problem occurred
      */
-    protected abstract R doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxRestException, BoxServerException, AuthFatalFailureException, UnsupportedEncodingException;
+    protected abstract R doPerform() throws OXException, BoxAPIException, UnsupportedEncodingException;
 
     /**
      * Performs this closure's operation.
@@ -107,24 +103,43 @@ public abstract class BoxClosure<R> {
 
     private R innerPerform(boolean handleAuthError, AbstractBoxResourceAccess resourceAccess, BoxOAuthAccess boxAccess, Session session) throws OXException {
         try {
-            return doPerform(boxAccess);
-        } catch (BoxRestException e) {
-            throw AbstractBoxResourceAccess.handleRestError(e);
-        } catch (BoxServerException e) {
-            if (handleAuthError && SC_UNAUTHORIZED == e.getStatusCode()) {
-                BoxOAuthAccess newBoxAccess = resourceAccess.handleAuthError(e, session);
-                return innerPerform(false, resourceAccess, newBoxAccess, session);
-            }
-            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getMessage());
-        } catch (AuthFatalFailureException e) {
-            if (!handleAuthError) {
+            return doPerform();
+        } catch (BoxAPIException e) {
+            int statusCode = e.getResponseCode();
+            if (statusCode == SC_UNAUTHORIZED) {
+                if (handleAuthError) {
+                    BoxOAuthAccess newBoxAccess = resourceAccess.handleAuthError(e, session);
+                    return innerPerform(false, resourceAccess, newBoxAccess, session);
+                }
                 throw FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(e, resourceAccess.account.getId(), BoxConstants.ID, e.getMessage());
             }
-            BoxOAuthAccess newBoxAccess = resourceAccess.handleAuthError(e, session);
-            return innerPerform(false, resourceAccess, newBoxAccess, session);
+            if (e.getCause() instanceof IOException) {
+                throw handleRestError(e);
+            }
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", statusCode + " " + e.getResponse());
         } catch (final UnsupportedEncodingException | RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Handles given API error.
+     *
+     * @param e The {@link BoxAPIException} error
+     * @return The resulting exception
+     */
+    private OXException handleRestError(BoxAPIException e) {
+        Throwable cause = e.getCause();
+
+        if (cause == null) {
+            return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getResponseCode() + " " + e.getResponse());
+        }
+
+        if (cause instanceof IOException) {
+            return FileStorageExceptionCodes.IO_ERROR.create(cause, cause.getMessage());
+        }
+
+        return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, BoxConstants.ID, e.getMessage());
     }
 
 }

@@ -48,16 +48,15 @@
  */
 package com.openexchange.tools.update;
 
-import com.openexchange.groupware.Init;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.server.impl.DBPool;
-
-import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
-
+import com.openexchange.groupware.Init;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.server.impl.DBPool;
+import com.openexchange.setuptools.TestConfig;
 import junit.framework.TestCase;
 
 /**
@@ -71,7 +70,8 @@ public class ForeignKeyTest extends TestCase {
 	public void setUp() throws Exception {
 		Init.startServer();
 		final ContextStorage ctxstor = ContextStorage.getInstance();
-        final int contextId = ctxstor.getContextId("defaultcontext");
+        final TestConfig config = new TestConfig();
+        final int contextId = ctxstor.getContextId(config.getContextName());
         ctx = ctxstor.getContext(contextId);
 		con = DBPool.pickupWriteable(ctx);
 

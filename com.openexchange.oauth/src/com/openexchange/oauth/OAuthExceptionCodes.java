@@ -86,8 +86,7 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Account not found with identifier %1$s for user %2$s in context %3$s.
      */
-    ACCOUNT_NOT_FOUND("Account not found with identifier %1$s for user %2$s in context %3$s.", CATEGORY_USER_INPUT, 6,
-        OAuthExceptionMessages.ACCOUNT_NOT_FOUND_MSG),
+    ACCOUNT_NOT_FOUND("Account not found with identifier %1$s for user %2$s in context %3$s.", CATEGORY_USER_INPUT, 6, OAuthExceptionMessages.ACCOUNT_NOT_FOUND_MSG),
     /**
      * Unsupported OAuth service: %1$s
      */
@@ -99,9 +98,7 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
      */
-    TOKEN_EXPIRED("Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, "
-        + "go to Configuration -> My Social Configuration -> Accounts. Then try again.", CATEGORY_TRY_AGAIN, 9,
-        OAuthExceptionMessages.TOKEN_EXPIRED_MSG),
+    TOKEN_EXPIRED("Your '%1$s' password changed. You have to authorize the server to use your account with the new password. To do so, " + "go to Configuration -> My Social Configuration -> Accounts. Then try again.", CATEGORY_TRY_AGAIN, 9, OAuthExceptionMessages.TOKEN_EXPIRED_MSG),
     /**
      * An OAuth error occurred: %1$s
      */
@@ -109,8 +106,7 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * "The address %1 is not white-listed as for the %2 OAuth API"
      */
-    NOT_A_WHITELISTED_URL("The address %1$s is not white-listed as for the %2$s OAuth API", CATEGORY_PERMISSION_DENIED, 11,
-        OAuthExceptionMessages.NOT_A_WHITELISTED_URL_MSG),
+    NOT_A_WHITELISTED_URL("The address %1$s is not white-listed as for the %2$s OAuth API", CATEGORY_PERMISSION_DENIED, 11, OAuthExceptionMessages.NOT_A_WHITELISTED_URL_MSG),
     /**
      * The request sent was missing its body
      */
@@ -130,8 +126,7 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The associated OAuth provider denied the request: %1$s.
      */
-    DENIED_BY_PROVIDER("The associated OAuth provider denied the request: %1$s.", CATEGORY_USER_INPUT, 15,
-        OAuthExceptionMessages.DENIED_BY_PROVIDER_MSG),
+    DENIED_BY_PROVIDER("The associated OAuth provider denied the request: %1$s.", CATEGORY_USER_INPUT, 15, OAuthExceptionMessages.DENIED_BY_PROVIDER_MSG),
     /**
      * The OAuth authentication process has been canceled.
      */
@@ -203,7 +198,7 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The oauth timestamp value is unacceptable to the service provider. Acceptable timestamp: %1$s.
      */
-    OAUTH_PROBLEM_TIMESTAMP_REFUSED("The oauth timestamp value is unacceptable to the service provider. Acceptable timestamp: %1$s.",CATEGORY_ERROR, 30, null),
+    OAUTH_PROBLEM_TIMESTAMP_REFUSED("The oauth timestamp value is unacceptable to the service provider. Acceptable timestamp: %1$s.", CATEGORY_ERROR, 30, null),
 
     /**
      * The %1$s oauth token has expired.
@@ -249,6 +244,24 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
      * The OAuth provider refused to permit this Consumer to access the protected resources.
      */
     OAUTH_PROBLEM_ACCESS_DENIED("The OAuth provider refused to permit this Consumer to access the protected resources.", CATEGORY_PERMISSION_DENIED, 39, null),
+
+    /**
+     * The OAuth access token for the '%1$s' OAuth account with id '%2$s' of user '%3$s' in context '%4$s' is invalid. Reauthorization is required.
+     */
+    OAUTH_ACCESS_TOKEN_INVALID("The OAuth access token for the '%1$s' OAuth account with id '%2$s' of user '%3$s' in context '%4$s' is invalid. Reauthorization is required.", CATEGORY_ERROR, 40, OAuthExceptionMessages.OAUTH_TOKEN_INVALID),
+
+    /**
+     * Please provide at least one scope.
+     */
+    MISSING_SCOPE("Please provide at least one scope.", CATEGORY_USER_INPUT, 40, OAuthExceptionMessages.MISSING_SCOPE_MSG),
+    /**
+     * The user needs to authorize the '%1$s' provider to gain access to '%2$s'
+     */
+    NO_SCOPE_PERMISSION("The user needs to authorize the '%1$s' provider to gain access to '%2$s'", CATEGORY_PERMISSION_DENIED, 41, OAuthExceptionMessages.NO_SCOPE_PERMISSION),
+    /**
+     * The provider does not support the demanded scope '%1$s'
+     */
+    NO_SUCH_SCOPE_AVAILABLE("The provider does not support the demanded scope '%1$s'", CATEGORY_PERMISSION_DENIED, 42, OAuthExceptionMessages.NO_SUCH_SCOPE_AVAILABLE),
 
     ;
 

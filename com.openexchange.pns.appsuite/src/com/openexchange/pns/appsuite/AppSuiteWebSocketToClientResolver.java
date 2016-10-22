@@ -50,9 +50,10 @@
 package com.openexchange.pns.appsuite;
 
 import java.util.Collections;
-import java.util.Set;
+import java.util.Map;
 import com.openexchange.ajax.Client;
 import com.openexchange.exception.OXException;
+import com.openexchange.pns.transport.websocket.WebSocketClient;
 import com.openexchange.pns.transport.websocket.WebSocketToClientResolver;
 import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSockets;
@@ -65,8 +66,8 @@ import com.openexchange.websockets.WebSockets;
  */
 public class AppSuiteWebSocketToClientResolver implements WebSocketToClientResolver {
 
-    /** The path filter expression for App Suite UI: <code>"/socket.io/*"</code> */
-    private static final String PATH_FILTER_APPSUITE_UI = "/socket.io/*";
+    /** The path filter expression for App Suite UI: <code>"/socket.io/appsuite/*"</code> */
+    private static final String PATH_FILTER_APPSUITE_UI = "/socket.io/appsuite/*";
 
     /**
      * Initializes a new {@link AppSuiteWebSocketToClientResolver}.
@@ -94,8 +95,8 @@ public class AppSuiteWebSocketToClientResolver implements WebSocketToClientResol
     }
 
     @Override
-    public Set<String> getSupportedClients() {
-        return Collections.singleton(Client.APPSUITE_UI.getClientId());
+    public Map<String, WebSocketClient> getSupportedClients() {
+        return Collections.singletonMap(Client.APPSUITE_UI.getClientId(), new WebSocketClient(Client.APPSUITE_UI.getClientId(), PATH_FILTER_APPSUITE_UI, true));
     }
 
 }

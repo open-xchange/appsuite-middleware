@@ -3268,10 +3268,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     final MimeMessage newMessage;
                     final Message removed = filteredMsgs.remove(0);
                     if (removed instanceof ReadableMime) {
-                        newMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), ((ReadableMime) removed).getMimeStream());
+                        newMessage = MimeMessageUtility.newMimeMessage(((ReadableMime) removed).getMimeStream(), removed.getReceivedDate());
                         newMessage.setFlags(removed.getFlags(), true);
                     } else {
-                        newMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), MimeMessageUtility.getStreamFromPart(removed));
+                        newMessage = MimeMessageUtility.cloneMessage(removed, removed.getReceivedDate());
                         newMessage.setFlags(removed.getFlags(), true);
                     }
                     newMessage.setHeader(MessageHeaders.HDR_X_OX_MARKER, fold(13, hash));
@@ -3373,10 +3373,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
             }
             throw handleMessagingException(destFullName, e);
-        } catch (final MessageRemovedIOException e) {
-            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-        } catch (final IOException e) {
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         } finally {

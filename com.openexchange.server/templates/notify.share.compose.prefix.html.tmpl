@@ -1,13 +1,133 @@
 <#include "notify.common.button.tmpl">
+
+<style>
+    body { margin: 16px; max-width: 700px; }
+
+    .base,
+    .base table {
+        border-spacing: 0;
+        border-collapse: collapse;
+    }
+    .base td,
+    .base th {
+        padding: 0;
+    }
+
+    .item {
+        border: white 8px solid;
+		vertical-align: top;
+    }
+
+    .item--image {
+        display: block;
+        border: 0;
+        max-width: 100%;
+    }
+
+    .base--row {
+        vertical-align: top;
+        margin: auto;
+    }
+
+    .base .item--text {
+        font-family: arial, sans-serif;
+        font-size: 14px;
+        color: #333;
+        padding-top: 10px;
+        text-align: center;
+        max-width: 100px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    .item--row {
+        vertical-align: top;
+    }
+
+    .item--image {
+       -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+
+    /* space equally shared */
+    @media only screen and (max-width : 768px) {
+        .item {
+            width: 15%;
+            max-width: 100%;
+        }
+    }
+
+    /* two column grid */
+    @media only screen and (max-width : 480px) {
+        .item {
+            width: 50%;
+            float: left;
+            -moz-box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+        .item table,
+        .item--image {
+            width: 100%;
+        }
+    }
+
+    /* one column list */
+    @media only screen and (max-width : 320px) {
+        .base .item {
+            width: 100%;
+            display: block;
+            float: none;
+            border-left: 0;
+        }
+        .item--row {
+            display: table-cell;
+            width: 60%;
+        }
+        .item--row:first-child {
+            width: 40%;
+        }
+        .base .item--text {
+            padding-left: 8px;
+        }
+        body {
+            margin: 12px;
+        }
+    }
+</style>
+
 <p>
   ${intro}
-  <ul>
-    <#list filenames as filename>
-    <li>${filename}</li>
-    </#list>
-  </ul>
 </p>
-<p id="view_items" style="padding:10px 0;margin:20px 0;">
+<table class="base">
+  <tr>
+    <td>
+      <table>
+        <tr class="base--row">
+          <#list previews?keys as key>
+            <td class="item">
+              <table>
+                <tr class="item--row">
+                  <td align="left"><img class="item--image" src="${previews[key]}" alt="" /></td>
+                </tr>
+                <tr class="item--row">
+                  <td align="left" class="item--text">
+                    ${filenames[key]}
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </#list>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<p style="clear:both">
+  <#if more?has_content>${more}</#if>
+</p>
+<p>
   <@styledButton link=link>${link_text}</@styledButton>
 </p>
 <#if expiration?has_content || password?has_content>
@@ -16,3 +136,4 @@
     <#if password?has_content>${password}</#if>
   </p>
 </#if>
+<hr>

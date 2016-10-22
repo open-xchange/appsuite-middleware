@@ -16,5 +16,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.hazelcast.serialization"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.report.appsuite.serialization"/>
+	<classpathentry kind="src" path="/com.openexchange.configread"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

@@ -92,6 +92,10 @@ public enum VCardExceptionCodes implements DisplayableOXExceptionCode {
      * The vCard exceeds the maximum allowed size and can't be imported.
      */
     MAXIMUM_SIZE_EXCEEDED("Maximum vCard size of %1$d bytes exceeded", VCardExceptionMessages.MAXIMUM_SIZE_EXCEEDED_MSG, Category.CATEGORY_USER_INPUT, 6),
+    /**
+     * The original vCard could not be stored: %1$s
+     */
+    ORIGINAL_VCARD_NOT_STORED("The original vCard could not be stored: %1$s", MESSAGE, Category.CATEGORY_WARNING, 7),
 
     ;
 

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Xing API Bundle
 Bundle-SymbolicName: com.openexchange.xing
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.fasterxml.jackson.core,
@@ -22,6 +22,8 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.http.deferrer,
  com.openexchange.java,
  com.openexchange.log,
+ com.openexchange.net.ssl,
+ com.openexchange.net.ssl.config,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,

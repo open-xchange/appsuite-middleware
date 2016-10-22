@@ -1,3 +1,15 @@
+open-xchange-eas-provisioning (7.8.3-1) stable; urgency=medium
+
+  * First preview 7.8.3 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 14 Oct 2016 15:21:40 +0200
+
+open-xchange-eas-provisioning (7.8.3-0) unstable; urgency=medium
+
+  * prepare for 7.8.3 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 06 Sep 2016 11:26:30 +0200
+
 open-xchange-eas-provisioning (7.8.2-4) stable; urgency=medium
 
   * Second candidate for 7.8.2 release

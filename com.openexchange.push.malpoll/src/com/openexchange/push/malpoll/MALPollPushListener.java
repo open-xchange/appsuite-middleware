@@ -51,6 +51,8 @@ package com.openexchange.push.malpoll;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -61,10 +63,17 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.pns.DefaultPushNotification;
+import com.openexchange.pns.KnownTopic;
+import com.openexchange.pns.PushNotification;
+import com.openexchange.pns.PushNotificationField;
+import com.openexchange.pns.PushNotificationService;
+import com.openexchange.push.PushEventConstants;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.malpoll.services.MALPollServiceRegistry;
@@ -238,13 +247,14 @@ public final class MALPollPushListener implements PushListener {
             LOG.debug("Listener still in process for user {} in context {}. Return immediately.", userId, contextId);
             return;
         }
-        final ContextService contextService = MALPollServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
-        final Context context = contextService.getContext(contextId);
-        if (context.isReadOnly()) {
-            return;
-        }
         try {
-            final MailService mailService = MALPollServiceRegistry.getServiceRegistry().getService(MailService.class, true);
+            ContextService contextService = MALPollServiceRegistry.getServiceRegistry().getService(ContextService.class, true);
+            Context context = contextService.getContext(contextId);
+            if (context.isReadOnly()) {
+                return;
+            }
+
+            MailService mailService = MALPollServiceRegistry.getServiceRegistry().getService(MailService.class, true);
             if (started) {
                 subsequentRun(mailService);
             } else {
@@ -260,19 +270,23 @@ public final class MALPollPushListener implements PushListener {
         /*
          * First run
          */
-        final String fullname = folder;
-        UUID hash = MALPollDBUtility.getHash(contextId, userId, ACCOUNT_ID, fullname);
-        boolean loadDBIDs = true;
-        if (null == hash) {
-            /*
-             * Insert hash
-             */
-            hash = MALPollDBUtility.insertHash(contextId, userId, ACCOUNT_ID, fullname);
-            loadDBIDs = false;
-        }
-        /*
-         * Synchronize
-         */
+        String fullname = folder;
+
+        UUID hash;
+        boolean loadDBIDs;
+        do {
+            hash = MALPollDBUtility.getHash(contextId, userId, ACCOUNT_ID, fullname);
+            loadDBIDs = true;
+            if (null == hash) {
+                // Insert new hash
+                hash = MALPollDBUtility.insertHash(contextId, userId, ACCOUNT_ID, fullname);
+                if (null != hash) {
+                    loadDBIDs = false;
+                }
+            }
+        } while (null == hash);
+
+        // Synchronize
         synchronizeIDs(mailService, hash, loadDBIDs);
     }
 
@@ -351,11 +365,23 @@ public final class MALPollPushListener implements PushListener {
         try {
             mailAccess = mailService.getMailAccess(session, ACCOUNT_ID);
             mailAccess.connect();
-            final String fullname = folder;
-            final MailMessage[] messages =
-                mailAccess.getMessageStorage().searchMessages(fullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS);
-            final Set<String> uidSet = new HashSet<String>(messages.length);
-            for (final MailMessage mailMessage : messages) {
+            String fullname = folder;
+
+            /*-
+             *
+            IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
+            if (folderStorage instanceof com.openexchange.mail.api.IMailFolderStorageStatusSupport) {
+                com.openexchange.mail.api.IMailFolderStorageStatusSupport statusSupport = (com.openexchange.mail.api.IMailFolderStorageStatusSupport) folderStorage;
+                MailFolderStatus folderStatus = statusSupport.getFolderStatus(fullname);
+                folderStatus.getNextId()
+            }
+             *
+             */
+
+            IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            MailMessage[] messages = messageStorage.searchMessages(fullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, null, FIELDS);
+            Set<String> uidSet = new HashSet<String>(messages.length);
+            for (MailMessage mailMessage : messages) {
                 uidSet.add(mailMessage.getMailId());
             }
             return uidSet;
@@ -368,7 +394,34 @@ public final class MALPollPushListener implements PushListener {
 
     @Override
     public void notifyNewMail() throws OXException {
-        PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(ACCOUNT_ID, folder), session);
+        String folderId = MailFolderUtility.prepareFullname(ACCOUNT_ID, folder);
+
+        MALPollServiceRegistry serviceRegistry = MALPollServiceRegistry.getServiceRegistry();
+        PushNotificationService pushNotificationService = serviceRegistry.getService(PushNotificationService.class);
+        if (null != pushNotificationService) {
+            PushNotification notification = createNotification(folderId);
+            if (null != notification) {
+                pushNotificationService.handle(notification);
+            }
+        }
+
+        Map<String, Object> props = new LinkedHashMap<>(2);
+        props.put(PushEventConstants.PROPERTY_NO_FORWARD, Boolean.TRUE); // Do not redistribute through com.openexchange.pns.impl.event.PushEventHandler!
+        PushUtility.triggerOSGiEvent(folderId, session, props, true, false);
+    }
+
+    private PushNotification createNotification(String folderId) {
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+
+        Map<String, Object> messageData = new LinkedHashMap<>(2);
+        messageData.put(PushNotificationField.FOLDER.getId(), folderId);
+        return DefaultPushNotification.builder()
+            .contextId(contextId)
+            .userId(userId)
+            .topic(KnownTopic.MAIL_NEW.getName())
+            .messageData(messageData)
+            .build();
     }
 
     /**

@@ -26,7 +26,9 @@
 
 package com.openexchange.socketio.server;
 
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.*;
 import com.openexchange.timer.TimerService;
 
@@ -86,6 +88,35 @@ public final class SocketIOManager {
     }
 
     /**
+     * Gets the number of currently active Socket.IO sessions.
+     *
+     * @return The number of sessions
+     */
+    public long getNumberOfSessions() {
+        return sessions.size();
+    }
+
+    /**
+     * Gets the identifiers of all of currently active Socket.IO sessions.
+     *
+     * @return The session identifiers
+     */
+    public Set<String> getSessionIds() {
+        return new LinkedHashSet<String>(sessions.keySet());
+    }
+
+    /**
+     * Gets the names of such namespaces that are in use by specified session
+     *
+     * @param sessionId The session identifier
+     * @return The namespace names or <code>null</code> if no such session exists
+     */
+    public Set<String> getNamespaceNames(String sessionId) {
+        Session session = sessions.get(sessionId);
+        return null == session ? null : session.getNamespaceNames();
+    }
+
+    /**
      * Creates new session
      *
      * @return new session
@@ -100,7 +131,7 @@ public final class SocketIOManager {
      * Finds existing session
      *
      * @param sessionId session id
-     * @return session object or null if not found
+     * @return session object or <code>null</code> if not found
      */
     public Session getSession(String sessionId) {
         return sessions.get(sessionId);
@@ -138,4 +169,5 @@ public final class SocketIOManager {
     public void setTransportProvider(TransportProvider transportProvider) {
         this.transportProvider = transportProvider;
     }
+
 }

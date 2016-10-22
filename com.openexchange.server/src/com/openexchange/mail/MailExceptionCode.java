@@ -358,6 +358,10 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     DUPLICATE_FOLDER_EXT("A folder named %1$s already exists on server %2$s with login %3$s (user=%4$s, context=%5$s).",
         MailExceptionStrings.DUPLICATE_FOLDER_MSG, CATEGORY_PERMISSION_DENIED, 63),
     /**
+     * Such a folder already exists.
+     */
+    DUPLICATE_FOLDER_SIMPLE("Such a folder already exists.", MailExceptionStrings.DUPLICATE_FOLDER_SIMPLE_MSG, CATEGORY_PERMISSION_DENIED, 63),
+    /**
      * No create access on mail folder %1$s.
      */
     NO_CREATE_ACCESS("No create access on mail folder %1$s.", MailExceptionStrings.NO_CREATE_ACCESS_MSG, CATEGORY_PERMISSION_DENIED, 64),
@@ -571,6 +575,34 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      * User %1$s in context %2$s did not specify an expiration date for a share compose message, but is required to do so
      */
     EXPIRATION_DATE_MISSING("User %1$s in context %2$s did not specify an expiration date for a share compose message, but is required to do so", MailExceptionStrings.EXPIRATION_DATE_MISSING_MSG, CATEGORY_USER_INPUT, 107),
+    /**
+     * Authentication type "%1$s" is not supported by server %2$s
+     */
+    AUTH_TYPE_NOT_SUPPORTED("Authentication type \"%1$s\" is not supported by server %2$s", MailExceptionStrings.AUTH_TYPE_NOT_SUPPORTED_MSG, CATEGORY_CONFIGURATION, 108),
+    /**
+     * An account status response providing no information for a user
+     */
+    ACCOUNT_STATUS("Account status is \"%1$s\".", CATEGORY_SERVICE_DOWN, 109),
+    /**
+     * An account status response providing information for a user. Account status is "%1$s". User info: %2$s
+     */
+    ACCOUNT_STATUS_WITH_INFO("Account status is \"%1$s\". User info: %2$s", MailExceptionStrings.ACCOUNT_STATUS_WITH_INFO_MSG, ACCOUNT_STATUS.getCategory(), ACCOUNT_STATUS.getNumber()), // Yapp, same error code
+    /**
+     * Invalid name specified. Information from mail server: %1$s
+     */
+    INVALID_FOLDER_NAME_SIMPLE("Invalid name specified. Information from mail server: %1$s", MailExceptionStrings.INVALID_FOLDER_NAME_SIMPLE_MSG, INVALID_FOLDER_NAME.getCategory(), INVALID_FOLDER_NAME.getNumber()),
+    /**
+     * Insufficient permissions to perform the operation.
+     */
+    INSUFFICIENT_PERMISSIONS("Insufficient permissions to perform the operation.", MailExceptionStrings.INSUFFICIENT_PERMISSIONS_MSG, CATEGORY_PERMISSION_DENIED, 110),
+    /**
+     * A non-secure connection is not allowed. Please change mail settings and configure a secure connection (if Transport Layer Security (TLS) is not in use, the client could try STARTTLS).
+     */
+    NONSECURE_CONNECTION_DENIED("A non-secure connection is not allowed. Please change mail settings and configure a secure connection (if Transport Layer Security (TLS) is not in use, the client could try STARTTLS).", MailExceptionStrings.NONSECURE_CONNECTION_DENIED_MSG, CATEGORY_PERMISSION_DENIED, 111),
+    /**
+     * A temporary failure because a subsystem is down.
+     */
+    SUBSYSTEM_DOWN("A temporary failure because a subsystem is down.", MailExceptionStrings.SUBSYSTEM_DOWN_MSG, CATEGORY_SERVICE_DOWN, 112)
     ;
 
     private static final String PREFIX = "MSG";

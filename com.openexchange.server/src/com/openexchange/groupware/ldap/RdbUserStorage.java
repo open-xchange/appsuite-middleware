@@ -50,12 +50,7 @@
 package com.openexchange.groupware.ldap;
 
 import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.tools.sql.DBUtils.IN_LIMIT;
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import static com.openexchange.tools.sql.DBUtils.getIN;
-import static com.openexchange.tools.sql.DBUtils.rollback;
-import static com.openexchange.tools.sql.DBUtils.startTransaction;
+import static com.openexchange.tools.sql.DBUtils.*;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -253,7 +248,7 @@ public class RdbUserStorage extends UserStorage {
                         setStringOrNull(i++, stmt, null); // filestore_password
                     }
                 }
-                stmt.setLong(i++, user.getFileStorageQuota() <= 0 ? 0 : user.getFileStorageQuota()); // quota_max
+                stmt.setLong(i++, user.getFileStorageQuota() < 0 ? -1 : user.getFileStorageQuota()); // quota_max
             } else {
                 stmt.setInt(i++, 0); // filestore_id
                 stmt.setInt(i++, 0); // filestore_owner
@@ -562,7 +557,13 @@ public class RdbUserStorage extends UserStorage {
                             String passwd = result.getString(pos++);
                             user.setFilestoreAuth(new String[] { login, passwd });
                         }
-                        user.setFileStorageQuota(result.getLong(pos++));
+                        {
+                            long quotaMax = result.getLong(pos++);
+                            if (result.wasNull()) {
+                                quotaMax = -1L;
+                            }
+                            user.setFileStorageQuota(quotaMax);
+                        }
 
                         users.put(user.getId(), user);
                         if (false == user.isGuest()) {
@@ -995,6 +996,11 @@ public class RdbUserStorage extends UserStorage {
         } else {
             insertOrUpdateAttribute(name, value, userId, context, con);
         }
+    }
+
+    @Override
+    public void setAttribute(Connection con, String name, String value, int userId, Context context, boolean invalidate) throws OXException {
+        setAttribute(con, name, value, userId, context);
     }
 
     /**

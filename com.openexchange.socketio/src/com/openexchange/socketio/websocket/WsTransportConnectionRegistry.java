@@ -49,6 +49,7 @@
 
 package com.openexchange.socketio.websocket;
 
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
@@ -68,6 +69,7 @@ import com.openexchange.websockets.WebSocketListener;
  */
 public class WsTransportConnectionRegistry implements WebSocketListener {
 
+    /** The logger constant */
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(WsTransportConnectionRegistry.class);
 
     private final ConcurrentMap<String, WsTransportConnection> registeredConnections;
@@ -80,6 +82,13 @@ public class WsTransportConnectionRegistry implements WebSocketListener {
     public WsTransportConnectionRegistry() {
         super();
         registeredConnections = new ConcurrentHashMap<>(512, 0.9F, 1);
+    }
+
+    /**
+     * Shuts-down this connection registry.
+     */
+    public void shutDown() {
+        // Nothing to do so far
     }
 
     /**
@@ -126,6 +135,15 @@ public class WsTransportConnectionRegistry implements WebSocketListener {
         return null != registeredConnections.remove(connection.getSession().getSessionId());
     }
 
+    /**
+     * Gets the number of registered connections.
+     *
+     * @return The number of registered connections
+     */
+    public long getNumberOfRegisteredConnections() {
+        return registeredConnections.size();
+    }
+
     // ------------------------------------------------------ WebSocketListener stuff ---------------------------------------
 
     private boolean isAppropriateWebSocket(WebSocket socket) {
@@ -151,13 +169,13 @@ public class WsTransportConnectionRegistry implements WebSocketListener {
             // Not registered, yet
             SocketIOManager socketIOManager = this.socketIOManager;
             if (null == socketIOManager) {
-                LOGGER.warn("Not initialized, yet", sessionId);
+                LOGGER.warn("Not initialized, yet");
                 return;
             }
 
             WsTransport transport = this.transport;
             if (null == transport) {
-                LOGGER.warn("Not initialized, yet", sessionId);
+                LOGGER.warn("Not initialized, yet");
                 return;
             }
 
@@ -215,6 +233,7 @@ public class WsTransportConnectionRegistry implements WebSocketListener {
     private void applyToConnection(WsTransportConnection connection, WebSocket socket) {
         connection.onWebSocketConnect(socket);
         socket.setMessageTranscoder(connection);
+        socket.getWebSocketSession().setAttribute(EngineIOProtocol.SESSION_ID, connection.getSession().getSessionId());
     }
 
     @Override
@@ -225,17 +244,33 @@ public class WsTransportConnectionRegistry implements WebSocketListener {
 
         String sessionId = socket.getParameter(EngineIOProtocol.SESSION_ID);
         if (null == sessionId) {
-            LOGGER.warn("Missing {} parameter for socket.io Web Socket.", EngineIOProtocol.SESSION_ID);
-            return;
+            sessionId = socket.getWebSocketSession().getAttribute(EngineIOProtocol.SESSION_ID);
         }
 
-        WsTransportConnection connection = registeredConnections.get(sessionId);
-        if (null == connection) {
-            LOGGER.warn("No such socket.io session: {}", sessionId);
-            return;
+        WsTransportConnection connection = null;
+        if (null != sessionId) {
+            // Get connection by session identifier
+            connection = registeredConnections.remove(sessionId);
+            if (null == connection) {
+                LOGGER.warn("No such socket.io session: {}", sessionId);
+                return;
+            }
+
+            connection.onWebSocketClose(socket);
+        } else {
+            for (Iterator<WsTransportConnection> it = registeredConnections.values().iterator(); null == connection && it.hasNext();) {
+                WsTransportConnection wsCon = it.next();
+                if (socket.equals(wsCon.getRemoteEndpoint())) {
+                    connection = wsCon;
+                    it.remove();
+                }
+            }
+
+            if (null != connection) {
+                connection.onWebSocketClose(socket);
+            }
         }
 
-        connection.onWebSocketClose(socket);
         socket.setMessageTranscoder(null);
     }
 

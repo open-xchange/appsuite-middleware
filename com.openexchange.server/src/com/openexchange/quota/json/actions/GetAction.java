@@ -61,9 +61,6 @@ import org.osgi.framework.ServiceReference;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.quota.AccountQuota;
@@ -80,14 +77,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-@Action(method = RequestMethod.GET, name = "get", description = "Get quota information", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "module", optional = true, description = "The module identifier to get quota information for."),
-    @Parameter(name = "account", optional = true, description = "The account identifier within the module to get quota information for, required if account is set.")
-}, responseDescription = "A JSON object containing the requested quota information. If no \"module\" was specified, all defined " +
-    "modules quotas are set in the JSON object, each one mapped to it's module identifier. If the quota from a \"module\" was " +
-    "requested, a JSON array containing all account quotas of this module are returned. If both a \"module\" and \"account\" were " +
-    "requested, a JSON object representing the account quota is returned.")
 public class GetAction implements AJAXActionService {
 
     private final BundleContext context;

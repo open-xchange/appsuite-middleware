@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Microformats Subscription Plug-in
 Bundle-SymbolicName: com.openexchange.subscribe.microformats
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Activator: com.openexchange.subscribe.microformats.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -20,6 +20,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.log,
+ com.openexchange.net.ssl,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.subscribe,

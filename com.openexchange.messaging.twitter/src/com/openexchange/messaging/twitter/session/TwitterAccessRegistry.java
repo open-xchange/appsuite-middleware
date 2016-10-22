@@ -161,6 +161,23 @@ public final class TwitterAccessRegistry {
     }
 
     /**
+     * Purges specified user's twitter accesses.
+     *
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @return <code>true</code> if a twitter access for given user-context-pair was found and purged; otherwise <code>false</code>
+     */
+    public void purgeUserAccess(int contextId, int userId) {
+        final SimpleKey key = SimpleKey.valueOf(contextId, userId);
+        final ConcurrentMap<Integer, TwitterAccess> inner = map.get(key);
+        if (null == inner) {
+            return;
+        }
+
+        inner.clear();
+    }
+
+    /**
      * Gets a {@link Iterator iterator} over the twitter accesses in this registry.
      *
      * @return A {@link Iterator iterator} over the twitter accesses in this registry.

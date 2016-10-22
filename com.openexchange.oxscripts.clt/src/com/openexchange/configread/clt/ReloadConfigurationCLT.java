@@ -49,13 +49,12 @@
 
 package com.openexchange.configread.clt;
 
-import javax.management.MBeanException;
-import javax.management.MBeanServerConnection;
+import java.rmi.RemoteException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import com.openexchange.auth.mbean.AuthenticatorMBean;
-import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.config.mbean.ConfigReloadMBean;
+import com.openexchange.auth.rmi.RemoteAuthenticator;
+import com.openexchange.cli.AbstractRmiCLI;
+import com.openexchange.config.rmi.RemoteConfigurationService;
 
 /**
  * {@link ReloadConfigurationCLT}
@@ -63,7 +62,7 @@ import com.openexchange.config.mbean.ConfigReloadMBean;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since 7.6.0
  */
-public class ReloadConfigurationCLT extends AbstractMBeanCLI<Void> {
+public class ReloadConfigurationCLT extends AbstractRmiCLI<Void> {
 
     /**
      * Initializes a new {@link ReloadConfigurationCLT}.
@@ -86,12 +85,7 @@ public class ReloadConfigurationCLT extends AbstractMBeanCLI<Void> {
 
     @Override
     protected boolean requiresAdministrativePermission() {
-        return true;
-    }
-
-    @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
-        authenticator.doAuthentication(login, password);
+        return false;
     }
 
     @Override
@@ -110,10 +104,14 @@ public class ReloadConfigurationCLT extends AbstractMBeanCLI<Void> {
     }
 
     @Override
-    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        ConfigReloadMBean configReloadMBean = getMBean(mbsc, ConfigReloadMBean.class, ConfigReloadMBean.DOMAIN);
-        configReloadMBean.reloadConfiguration();
-        System.out.println("Configuration reloaded.");
+    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
+        // nothing to do
+    }
+
+    @Override
+    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
+        RemoteConfigurationService remoteConfigService = getRmiStub(optRmiHostName, RemoteConfigurationService.RMI_NAME);
+        remoteConfigService.reloadConfiguration();
         return null;
     }
 

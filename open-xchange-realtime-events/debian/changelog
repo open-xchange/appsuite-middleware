@@ -1,3 +1,15 @@
+open-xchange-realtime-events (7.8.3-1) stable; urgency=medium
+
+  * First preview 7.8.3 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Fri, 14 Oct 2016 15:22:26 +0200
+
+open-xchange-realtime-events (7.8.3-0) unstable; urgency=medium
+
+  * prepare for 7.8.3 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Tue, 06 Sep 2016 11:26:56 +0200
+
 open-xchange-realtime-events (7.8.2-4) stable; urgency=medium
 
   * Second candidate for 7.8.2 release

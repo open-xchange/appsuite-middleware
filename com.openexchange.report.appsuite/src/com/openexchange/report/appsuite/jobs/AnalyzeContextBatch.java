@@ -65,13 +65,14 @@ import com.openexchange.report.appsuite.ReportService;
 import com.openexchange.report.appsuite.ReportUserHandler;
 import com.openexchange.report.appsuite.UserReport;
 import com.openexchange.report.appsuite.UserReportCumulator;
+import com.openexchange.report.appsuite.internal.ReportProperties;
 import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.user.UserService;
 
 /**
  * The {@link AnalyzeContextBatch} class is the workhorse of the reporting system. It runs the reports on a batch of
- * context ids and is distributed cluster-wide via hazelcasts executor service.
+ * context ids.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:vitali.sjablow@open-xchange.com">Vitali Sjablow</a>
@@ -89,41 +90,26 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
 
     /**
      *
-     * Initializes a new {@link AnalyzeContextBatch}.
+     * Initializes a new {@link AnalyzeContextBatch} with a report instead of just a report-type.
+     * This means, additional options are selected and stored in the report object.
      *
      * @param uuid The uuid of the report we're running
      * @param reportType The type of report that is being run
      * @param chunk a list of context IDs to analyze
      */
-    public AnalyzeContextBatch(String uuid, String reportType, List<Integer> chunk) {
+    public AnalyzeContextBatch(String uuid, Report report, List<Integer> chunk) {
         super();
         this.uuid = uuid;
-        this.reportType = reportType;
+        this.report = report;
+        this.reportType = report.getType();
         this.contextIds = chunk;
     }
-    
-    /**
-    *
-    * Initializes a new {@link AnalyzeContextBatch} with a report instead of just a report-type.
-    * This means, additional options are selected and stored in the report object.
-    *
-    * @param uuid The uuid of the report we're running
-    * @param reportType The type of report that is being run
-    * @param chunk a list of context IDs to analyze
-    */
-   public AnalyzeContextBatch(String uuid, Report report, List<Integer> chunk) {
-       super();
-       this.uuid = uuid;
-       this.report = report;
-       this.reportType = report.getType();
-       this.contextIds = chunk;
-   }
 
     @Override
     public Integer call() throws Exception {
         Thread currentThread = Thread.currentThread();
         int previousPriority = currentThread.getPriority();
-        currentThread.setPriority(Thread.MIN_PRIORITY);
+        currentThread.setPriority(ReportProperties.getThreadPriority());
 
         try {
             if (reportType == null) {
@@ -148,7 +134,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
                         break;
                     }
                     if (oxException.similarTo(ReportExceptionCodes.REPORT_GENERATION_CANCELED)) {
-                        LOG.info("Stop execution of report generation due to an user intruction!");
+                        LOG.info("Stop execution of report generation due to an user instruction!" , oxException);
                         contextIds = Collections.emptyList();
                         reportService.abortGeneration(uuid, reportType, "Cancelled report generation based on user interaction.");
                         break;
@@ -192,29 +178,37 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
     private void handleUsersGuestsLinks(Context ctx, ContextReport contextReport) throws OXException {
         // Next, let's look at all the users in this context
         User[] loadUsers = loadUsers(ctx);
+        
         for (User user : loadUsers) {
+            boolean skip = false;
             UserReport userReport = new UserReport(uuid, reportType, ctx, user, contextReport);
             // Are extended options available?
             if (this.report != null) {
                 if (report.isAdminIgnore() && ctx.getMailadmin() == user.getId()) {
                     continue;
                 }
-                userReport.setShowDriveMetrics(this.report.isShowDriveMetrics());
-                userReport.setShowMailMetrics(this.report.isShowMailMetrics());
-                userReport.setConsideredTimeframeStart(this.report.getConsideredTimeframeStart());
-                userReport.setConsideredTimeframeEnd(this.report.getConsideredTimeframeEnd());
+                userReport.setReportConfig(this.report.getReportConfig());
                 //Add user to context
                 contextReport.getUserList().add(user.getId());
-                contextReport.setShowDriveMetrics(this.report.isShowDriveMetrics());
-                contextReport.setShowMailMetrics(this.report.isShowMailMetrics());
-                contextReport.setConsideredTimeframeStart(this.report.getConsideredTimeframeStart());
-                contextReport.setConsideredTimeframeEnd(this.report.getConsideredTimeframeEnd());
+                contextReport.setReportConfig(this.report.getReportConfig());
             }
             // Run User Analyzers
             for (ReportUserHandler userHandler : Services.getUserHandlers()) {
                 if (userHandler.appliesTo(reportType)) {
-                    userHandler.runUserReport(userReport);
+                    try {
+                        userHandler.runUserReport(userReport);
+                    } catch (OXException e) {
+                        LOG.error("", e);
+                        contextReport.getUserList().remove((Integer) user.getId());
+                        skip = true;
+                        if (this.report != null) {
+                            this.report.addError(e);
+                        }
+                    }
                 }
+            }
+            if (skip) {
+                continue;
             }
             // Compact User Analysis and add to context report
             for (UserReportCumulator cumulator : Services.getUserReportCumulators()) {
@@ -223,6 +217,7 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
                 }
             }
         }
+
     }
 
     protected User[] loadUsers(Context ctx) throws OXException {

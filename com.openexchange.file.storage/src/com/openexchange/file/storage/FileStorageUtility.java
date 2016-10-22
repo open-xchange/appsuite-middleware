@@ -295,6 +295,20 @@ public final class FileStorageUtility {
         return tmp.intValue();
     }
 
+    /**
+     * Checks of passed file meta-data hints to an encrypted file.
+     * <ul>
+     * <li>MIME type is equal to <code>"application/pgp-encrypted"</code> or
+     * <li>File name ends with <code>".pgp"</code> extension
+     * </ul>
+     *
+     * @param document The file meta-data to check
+     * @return <code>true</code> if given file meta-data hints to an encrypted file; otherwise <code>false</code>
+     */
+    public static boolean isEncryptedFile(File document) {
+        return (null != document) && ("application/pgp-encrypted".equalsIgnoreCase(document.getFileMIMEType()) || (Strings.isNotEmpty(document.getFileName()) && Strings.toLowerCase(document.getFileName()).endsWith(".pgp")));
+    }
+
     static {
         FileStorageConfigReloadable.getInstance().addReloadable(new Reloadable() {
 

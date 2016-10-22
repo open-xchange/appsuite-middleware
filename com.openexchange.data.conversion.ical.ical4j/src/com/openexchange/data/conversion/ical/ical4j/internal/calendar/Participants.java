@@ -67,22 +67,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
-import net.fortuna.ical4j.model.Parameter;
-import net.fortuna.ical4j.model.ParameterList;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.PropertyList;
-import net.fortuna.ical4j.model.TextList;
-import net.fortuna.ical4j.model.component.CalendarComponent;
-import net.fortuna.ical4j.model.parameter.Cn;
-import net.fortuna.ical4j.model.parameter.CuType;
-import net.fortuna.ical4j.model.parameter.PartStat;
-import net.fortuna.ical4j.model.parameter.Role;
-import net.fortuna.ical4j.model.parameter.Rsvp;
-import net.fortuna.ical4j.model.parameter.XParameter;
-import net.fortuna.ical4j.model.property.Attendee;
-import net.fortuna.ical4j.model.property.Resources;
-import net.fortuna.ical4j.model.property.XProperty;
-import net.fortuna.ical4j.util.Uris;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ConversionWarning.Code;
@@ -110,6 +94,22 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
 import com.openexchange.server.ServiceExceptionCode;
+import net.fortuna.ical4j.model.Parameter;
+import net.fortuna.ical4j.model.ParameterList;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.PropertyList;
+import net.fortuna.ical4j.model.TextList;
+import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.parameter.Cn;
+import net.fortuna.ical4j.model.parameter.CuType;
+import net.fortuna.ical4j.model.parameter.PartStat;
+import net.fortuna.ical4j.model.parameter.Role;
+import net.fortuna.ical4j.model.parameter.Rsvp;
+import net.fortuna.ical4j.model.parameter.XParameter;
+import net.fortuna.ical4j.model.property.Attendee;
+import net.fortuna.ical4j.model.property.Resources;
+import net.fortuna.ical4j.model.property.XProperty;
+import net.fortuna.ical4j.util.Uris;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -301,6 +301,9 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                     break;
                 case CalendarObject.TENTATIVE:
                     parameters.add(PartStat.TENTATIVE);
+                    break;
+                case CalendarObject.NONE:
+                    parameters.add(PartStat.NEEDS_ACTION);
                     break;
                 default:
                     break;
@@ -557,7 +560,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             cObj.setProperty("com.openexchange.data.conversion.ical.participants.privateComment", privateCommentProperty.getValue());
         }
     }
-    
+
     private void addMail(int index, String mail, Map<String, ICalParticipant> mails, Attendee attendee, String comment, List<ConversionWarning> warnings) {
         try {
             new InternetAddress(mail).validate();

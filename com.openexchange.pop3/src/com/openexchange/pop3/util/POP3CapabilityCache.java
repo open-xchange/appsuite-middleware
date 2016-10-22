@@ -64,10 +64,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
 import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.config.IPOP3Properties;
 import com.openexchange.pop3.services.POP3ServiceRegistry;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * {@link POP3CapabilityCache} - A cache for CAPA responses from POP3 servers.
@@ -357,7 +357,8 @@ public final class POP3CapabilityCache {
             try {
                 try {
                     if (isSecure) {
-                        s = TrustAllSSLSocketFactory.getDefault().createSocket();
+                        SSLSocketFactoryProvider factoryProvider = POP3ServiceRegistry.getServiceRegistry().getService(SSLSocketFactoryProvider.class);
+                        s = factoryProvider.getDefault().createSocket();
                     } else {
                         s = new Socket();
                     }

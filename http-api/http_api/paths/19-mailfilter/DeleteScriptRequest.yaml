@@ -2,7 +2,7 @@
   put:
     operationId: deleteScript
     tags:
-      - mailfilter
+      - Mailfilter
     summary: Deletes the whole mail filter script.
     description: This call is only used as workaround for parsing errors in the backend, so that the user is able to kick a whole script if it contains errors in the grammar.
     parameters:
@@ -14,6 +14,6 @@
         required: false
     responses:
       200:
-        description: In case of errors the responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+        description: In case of errors the responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/CommonResponse"

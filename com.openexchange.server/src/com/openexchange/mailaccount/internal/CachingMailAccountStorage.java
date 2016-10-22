@@ -310,6 +310,21 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public int acquireId(int userId, Context ctx) throws OXException {
+        return delegate.acquireId(userId, ctx);
+    }
+
+    @Override
+    public String getDefaultFolderPrefix(Session session) throws OXException {
+        return delegate.getDefaultFolderPrefix(session);
+    }
+
+    @Override
+    public char getDefaultSeparator(Session session) throws OXException {
+        return delegate.getDefaultSeparator(session);
+    }
+
+    @Override
     public MailAccount getDefaultMailAccount(int userId, int contextId) throws OXException {
         CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
@@ -391,24 +406,9 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
                 return (MailAccount) object;
             }
 
-            RdbMailAccountStorage d = delegate;
-            try {
-                MailAccount mailAccount = d.getMailAccount(id, userId, contextId);
-                cache.put(key, mailAccount, false);
-                return mailAccount;
-            } catch (OXException e) {
-                if (!MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
-                    throw e;
-                }
-                Connection wcon = Database.get(contextId, true);
-                try {
-                    MailAccount mailAccount = d.getMailAccount(id, userId, contextId, wcon);
-                    cache.put(key, mailAccount, false);
-                    return mailAccount;
-                } finally {
-                    Database.backAfterReading(contextId, wcon);
-                }
-            }
+            MailAccount mailAccount = delegate.getMailAccount(id, userId, contextId);
+            cache.put(key, mailAccount, false);
+            return mailAccount;
         } finally {
             lock.unlock();
         }
@@ -732,7 +732,13 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
         dropSessionParameter(userId, contextId);
         delegate.deleteTransportAccount(id, userId, contextId);
         invalidateMailAccount(id, userId, contextId);
+    }
 
+    @Override
+    public void deleteTransportAccount(int id, int userId, int contextId, Connection con) throws OXException {
+        dropSessionParameter(userId, contextId);
+        delegate.deleteTransportAccount(id, userId, contextId, con);
+        invalidateMailAccount(id, userId, contextId);
     }
 
     @Override
@@ -758,24 +764,9 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
                 return (TransportAccount) object;
             }
 
-            RdbMailAccountStorage d = delegate;
-            try {
-                TransportAccount transportAccount = d.getTransportAccount(accountId, userId, contextId, con);
-                cache.put(key, transportAccount, false);
-                return transportAccount;
-            } catch (OXException e) {
-                if (!MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
-                    throw e;
-                }
-                Connection wcon = Database.get(contextId, true);
-                try {
-                    TransportAccount transportAccount = d.getTransportAccount(accountId, userId, contextId, wcon);
-                    cache.put(key, transportAccount, false);
-                    return transportAccount;
-                } finally {
-                    Database.backAfterReading(contextId, wcon);
-                }
-            }
+            TransportAccount transportAccount = delegate.getTransportAccount(accountId, userId, contextId, con);
+            cache.put(key, transportAccount, false);
+            return transportAccount;
         } finally {
             lock.unlock();
         }
@@ -822,24 +813,9 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
                 return (TransportAccount) object;
             }
 
-            RdbMailAccountStorage d = delegate;
-            try {
-                TransportAccount transportAccount = d.getTransportAccount(accountId, userId, contextId);
-                cache.put(key, transportAccount, false);
-                return transportAccount;
-            } catch (OXException e) {
-                if (!MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
-                    throw e;
-                }
-                Connection wcon = Database.get(contextId, true);
-                try {
-                    TransportAccount transportAccount = d.getTransportAccount(accountId, userId, contextId, wcon);
-                    cache.put(key, transportAccount, false);
-                    return transportAccount;
-                } finally {
-                    Database.backAfterReading(contextId, wcon);
-                }
-            }
+            TransportAccount transportAccount = delegate.getTransportAccount(accountId, userId, contextId);
+            cache.put(key, transportAccount, false);
+            return transportAccount;
         } finally {
             lock.unlock();
         }

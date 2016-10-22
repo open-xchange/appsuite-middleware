@@ -46,11 +46,12 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.setuptools;
 
-import com.openexchange.exception.OXException;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.GroupParticipant;
@@ -70,7 +71,7 @@ import com.openexchange.sessiond.impl.SessionObjectWrapper;
  */
 public class TestContextToolkit {
 
-    public int resolveUser(final String username) {
+    public int resolveUser(final String username) throws OXException {
         return resolveUser(username, getDefaultContext());
     }
 
@@ -86,7 +87,7 @@ public class TestContextToolkit {
         }
     }
 
-    public int resolveResource(final String resource) {
+    public int resolveResource(final String resource) throws OXException {
         return resolveResource(resource, getDefaultContext());
     }
 
@@ -101,12 +102,12 @@ public class TestContextToolkit {
         }
     }
 
-    public int resolveGroup(final String group) {
+    public int resolveGroup(final String group) throws OXException {
         return resolveGroup(group, getDefaultContext());
     }
 
     public int resolveGroup(final String group, final Context ctx) {
-       GroupStorage gStorage = null;
+        GroupStorage gStorage = null;
         try {
             gStorage = GroupStorage.getInstance();
             return gStorage.searchGroups(group, true, ctx)[0].getIdentifier();
@@ -116,8 +117,10 @@ public class TestContextToolkit {
         }
     }
 
-    public Context getDefaultContext() {
-        return getContextByName("defaultcontext");
+    public Context getDefaultContext() throws OXException {
+        final TestConfig config = new TestConfig();
+
+        return getContextByName(config.getContextName());
     }
 
     public Context getContextByName(final String name) {
@@ -132,7 +135,7 @@ public class TestContextToolkit {
 
     public int[] getGroups(final int user, final Context ctx) {
         try {
-            return UserConfigurationStorage.getInstance().getUserConfiguration(user,ctx).getGroups();
+            return UserConfigurationStorage.getInstance().getUserConfiguration(user, ctx).getGroups();
         } catch (final OXException e) {
             e.printStackTrace();
             return new int[0];
@@ -141,7 +144,7 @@ public class TestContextToolkit {
 
     public Session getSessionForUser(final String user, final Context ctx) {
         final int userId = resolveUser(user, ctx);
-        return SessionObjectWrapper.createSessionObject(userId,ctx,"session for "+user);
+        return SessionObjectWrapper.createSessionObject(userId, ctx, "session for " + user);
     }
 
     public Group loadGroup(final int id, final Context ctx) {
@@ -166,35 +169,35 @@ public class TestContextToolkit {
         }
     }
 
-    public List<UserParticipant> users(final Context ctx, final String...users) {
+    public List<UserParticipant> users(final Context ctx, final String... users) {
         final List<UserParticipant> participants = new ArrayList<UserParticipant>(users.length);
         final TestContextToolkit tools = new TestContextToolkit();
-        for(final String user : users) {
+        for (final String user : users) {
             final int id = tools.resolveUser(user, ctx);
             final UserParticipant participant = new UserParticipant(id);
-            participants.add( participant );
+            participants.add(participant);
         }
         return participants;
     }
 
-    public List<ResourceParticipant> resources(final Context ctx, final String...resources) {
+    public List<ResourceParticipant> resources(final Context ctx, final String... resources) {
         final List<ResourceParticipant> participants = new ArrayList<ResourceParticipant>(resources.length);
         final TestContextToolkit tools = new TestContextToolkit();
-        for(final String resource : resources) {
+        for (final String resource : resources) {
             final int id = tools.resolveResource(resource, ctx);
             final ResourceParticipant participant = new ResourceParticipant(id);
-            participants.add( participant );
+            participants.add(participant);
         }
         return participants;
     }
 
-    public List<GroupParticipant> groups(final Context ctx, final String...groups) {
+    public List<GroupParticipant> groups(final Context ctx, final String... groups) {
         final List<GroupParticipant> participants = new ArrayList<GroupParticipant>(groups.length);
         final TestContextToolkit tools = new TestContextToolkit();
-        for(final String group : groups) {
+        for (final String group : groups) {
             final int id = tools.resolveGroup(group, ctx);
             final GroupParticipant participant = new GroupParticipant(id);
-            participants.add( participant );
+            participants.add(participant);
         }
         return participants;
     }

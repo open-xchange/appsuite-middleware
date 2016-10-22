@@ -731,7 +731,7 @@ public class IMAPDefaultFolderChecker {
                 } else {
                     // Full name specified
                     if (fullName.indexOf(sep) > 0 || !fullName.equals(names[i])) {
-                        // E.g. name=Sent, but fullName=INBOX/Sent or fullName=Zent
+                        // E.g. name=Sent, but fullName=INBOX/Sent or fullName=Sent
 
                         String expectedFullName = null;
                         if (null != checkedIndexes) {
@@ -1336,7 +1336,7 @@ public class IMAPDefaultFolderChecker {
     }
 
     /** Gets fall-back name */
-    protected static String getFallbackName(int index) {
+    public static String getFallbackName(int index) {
         switch (index) {
         case StorageUtility.INDEX_CONFIRMED_HAM:
             return DefaultFolderNamesProvider.DEFAULT_PROVIDER.getConfirmedHam();

@@ -17,7 +17,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1356,45 +1356,13 @@ ox_add_property com.openexchange.ajax.login.checkPunyCodeLoginString false /opt/
 ox_add_property com.openexchange.ical.updateTimezones true /opt/open-xchange/etc/server.properties
 
 # SoftwareChange_Request-3406
-TMPFILE=$(mktemp)
-rm -f $TMPFILE
-cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/appender[@name=\'FILE\']/encoder/pattern -r -
-<configuration>
-    <appender name="FILE">
-        <encoder>
-            <pattern>%date{"yyyy-MM-dd'T'HH:mm:ss,SSSZ"} %-5level [%thread] %class.%method\(%class{0}.java:%line\)%n%sanitisedMessage%n%lmdc%exception{full}</pattern>
-        </encoder>
-    </appender>
-</configuration>
-EOF
-if [ -e $TMPFILE ]; then
-    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
-    rm -f $TMPFILE
-fi
-cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/appender[@name=\'FILE_COMPAT\']/encoder/pattern -r -
-<configuration>
-    <appender name="FILE_COMPAT">
-        <encoder>
-            <pattern>%d{"MMM dd, yyyy H:mm:ss a"} %class.%method\(%class{0}.java:%line\)%n%level: %sanitisedMessage%n%lmdc%exception{full}</pattern>
-        </encoder>
-    </appender>
-</configuration>
-EOF
-if [ -e $TMPFILE ]; then
-    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
-    rm -f $TMPFILE
-fi
-cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/appender[@name=\'SYSLOG\']/suffixPattern -r -
-<configuration>
-    <appender name="SYSLOG">
-        <suffixPattern>%date open-xchange %-5level [%logger][%thread]: %class.%method\(%class{0}.java:%line\)%n%lmdc %n %sanitisedMessage%n</suffixPattern>
-    </appender>
-</configuration>
-EOF
-if [ -e $TMPFILE ]; then
-    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
-    rm -f $TMPFILE
-fi
+# search from the named appender up to the next closing pattern or
+# suffixPattern and replace only %message with %sanitisedMessage in that
+# context
+logconfig=/opt/open-xchange/etc/logback.xml
+sed -r -i '/<appender .*name="FILE".*>/,/<\/pattern>/ s/%message/%sanitisedMessage/g' $logconfig
+sed -r -i '/<appender .*name="FILE_COMPAT".*>/,/<\/pattern>/ s/%message/%sanitisedMessage/g' $logconfig
+sed -r -i '/<appender .*name="SYSLOG".*>/,/<\/suffixPattern>/ s/%message/%sanitisedMessage/g' $logconfig
 
 # SoftwareChange_Request-3421
 ox_remove_property com.openexchange.mail.transport.enablePublishOnExceededQuota /opt/open-xchange/etc/transport.properties
@@ -1407,6 +1375,37 @@ ox_remove_property com.openexchange.mail.transport.externalRecipientsLocale /opt
 # SoftwareChange_Request-3482
 ox_add_property com.openexchange.secret.recovery.fast.enabled true /opt/open-xchange/etc/secret.properties
 
+# SoftwareChange_Request-3528
+ox_add_property html.tag.code '""' /opt/open-xchange/etc/whitelist.properties
+
+# Bug #45347
+old_key=io.ox.calendar//participantBlacklist
+new_key=io.ox/calendar//participantBlacklist
+propfile=/opt/open-xchange/etc/settings/participant-blacklist.properties
+
+if ! ox_exists_property ${new_key} ${propfile}
+then
+    if ox_exists_property ${old_key} ${propfile}
+    then
+        value=$(ox_read_property ${old_key} ${propfile})
+        ox_remove_property ${old_key} ${propfile}
+        ox_add_property ${new_key} "${value}" ${propfile}
+    else
+        ox_comment ${old_key} remove ${propfile}
+        ox_remove_property ${old_key} ${propfile}
+        ox_add_property ${new_key} "" ${propfile}
+    fi
+fi
+
+# SoftwareChange_Request-3616
+ox_add_property com.openexchange.mail.compose.share.preview.timeout 1000 /opt/open-xchange/etc/mail-compose.properties
+
+# SoftwareChange_Request-3637
+VALUE=$(ox_read_property com.openexchange.connector.maxRequestParameters /opt/open-xchange/etc/server.properties)
+if [ "30" = "$VALUE" ]; then
+    ox_set_property com.openexchange.connector.maxRequestParameters 1000 /opt/open-xchange/etc/server.properties
+fi
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
@@ -1416,6 +1415,7 @@ ox_update_permissions "/opt/open-xchange/etc/ox-scriptconf.sh" root:root 644
 ox_update_permissions "/opt/open-xchange/osgi" open-xchange:root 750
 ox_update_permissions "/var/spool/open-xchange/uploads" open-xchange:root 750
 ox_update_permissions "/var/log/open-xchange" open-xchange:root 750
+ox_update_permissions "/opt/open-xchange/sbin/reloadconfiguration" root:open-xchange 740
 exit 0
 
 %clean
@@ -1444,8 +1444,13 @@ exit 0
 %dir %attr(750, open-xchange, root) /var/spool/open-xchange/uploads
 %doc docs/
 %doc com.openexchange.server/doc/examples
+%doc com.openexchange.database/doc/examples
 
 %changelog
+* Fri Oct 14 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First preview 7.8.3 release
+* Tue Sep 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.3 release
 * Tue Jul 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.8.2 release
 * Wed Jul 06 2016 Marcus Klein <marcus.klein@open-xchange.com>

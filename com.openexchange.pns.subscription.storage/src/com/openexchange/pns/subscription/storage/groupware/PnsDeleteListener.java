@@ -70,11 +70,14 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class PnsDeleteListener implements DeleteListener {
 
+    private final RdbPushSubscriptionRegistry registry;
+
     /**
      * Initializes a new {@link PnsDeleteListener}.
      */
-    public PnsDeleteListener() {
+    public PnsDeleteListener(RdbPushSubscriptionRegistry registry) {
         super();
+        this.registry = registry;
     }
 
     @Override
@@ -85,7 +88,7 @@ public final class PnsDeleteListener implements DeleteListener {
             List<byte[]> ids = getSubscriptionIds(userId, contextId, writeCon);
             if (!ids.isEmpty()) {
                 for (byte[] id : ids) {
-                    RdbPushSubscriptionRegistry.deleteById(id, writeCon);
+                    registry.deleteById(id, null, writeCon);
                 }
             }
         } else if (DeleteEvent.TYPE_CONTEXT == event.getType()) {
@@ -93,7 +96,7 @@ public final class PnsDeleteListener implements DeleteListener {
             List<byte[]> ids = getSubscriptionIds(0, contextId, writeCon);
             if (!ids.isEmpty()) {
                 for (byte[] id : ids) {
-                    RdbPushSubscriptionRegistry.deleteById(id, writeCon);
+                    registry.deleteById(id, null, writeCon);
                 }
             }
         }

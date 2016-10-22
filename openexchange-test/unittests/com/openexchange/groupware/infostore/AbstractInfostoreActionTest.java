@@ -47,7 +47,7 @@ public abstract class AbstractInfostoreActionTest extends AbstractActionTest {
         ctx = null == ctxName || ctxName.trim().length() == 0 ? tools.getDefaultContext() : tools.getContextByName(ctxName);
         final int userId = tools.resolveUser(userName, ctx);
 
-		ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
+		ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(ctxName));
 		user = UserStorage.getInstance().getUser(userId, ctx);
 
 		initDocMeta();

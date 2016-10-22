@@ -145,12 +145,19 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
     }
 
     @Override
-    protected User authenticateUser(GuestInfo guest, LoginInfo loginInfo, Context context) throws OXException {
+    protected User resolveUser(GuestInfo guest, Context context) throws OXException {
         // Resolve the user
         UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
-        User user = userService.getUser(guest.getGuestID(), context);
+        return userService.getUser(guest.getGuestID(), context);
+    }
+
+    @Override
+    protected void authenticateUser(LoginInfo loginInfo, User user, Context context) throws OXException {
+        // Check credentials
+        UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
         if (Strings.isEmpty(user.getUserPassword()) && Strings.isEmpty(loginInfo.getPassword())) {
-            return user;
+            // Nothing to do
+            return;
         }
 
         // Authenticate the user
@@ -168,8 +175,6 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
         if (!loginInfo.getUsername().equals(user.getMail())) {
             throw INVALID_CREDENTIALS.create();
         }
-
-        return user;
     }
 
 }

@@ -9,38 +9,19 @@ import javax.management.openmbean.CompositeType;
 import javax.management.openmbean.OpenDataException;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class ReportConfigs implements Serializable, CompositeData{
+public class ReportConfigs implements Serializable, CompositeData {
 
     /**
      * serialVersionUID
      */
     private static final long serialVersionUID = 4288681340803505052L;
+    private static final Logger LOG = LoggerFactory.getLogger(ReportConfigs.class);
 
-    private String type;
-
-    private boolean isSingleDeployment = true;
-
-    private Long consideredTimeframeStart;
-
-    private Long consideredTimeframeEnd;
-
-    private boolean isConfigTimerange;
-
-    //--------------------OXCS-Report, relevant attributes--------------------
-
-    private boolean isShowSingleTenant;
-
-    private Long singleTenantId;
-
-    private boolean isAdminIgnore;
-
-    private boolean isShowDriveMetrics;
-
-    private boolean isShowMailMetrics;
-    
     private HashMap<String, Object> attributeMap;
-    
+
     @Override
     public CompositeType getCompositeType() {
         CompositeType compType = null;
@@ -49,7 +30,7 @@ public class ReportConfigs implements Serializable, CompositeData{
                                                                          , new String[] {"type", "isSingleDeployment", "consideredTimeframeStart", "consideredTimeframeEnd", "isConfigTimerange", "isShowSingleTenant", "singleTenantId", "isAdminIgnore", "isShowDriveMetrics", "isShowMailMetrics"}
                                                                          , new OpenType[] {SimpleType.STRING, SimpleType.LONG, SimpleType.LONG, SimpleType.BOOLEAN, SimpleType.BOOLEAN, SimpleType.LONG, SimpleType.BOOLEAN, SimpleType.BOOLEAN, SimpleType.BOOLEAN, SimpleType.BOOLEAN});
         } catch (OpenDataException e) {
-            e.printStackTrace();
+            LOG.error("Unable to create CompositeType of report", e);
         }
         return compType;
     }
@@ -61,7 +42,6 @@ public class ReportConfigs implements Serializable, CompositeData{
 
     @Override
     public Object[] getAll(String[] keys) {
-        // TODO Auto-generated method stub
         return null;
     }
 
@@ -72,7 +52,6 @@ public class ReportConfigs implements Serializable, CompositeData{
 
     @Override
     public boolean containsValue(Object value) {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -81,32 +60,28 @@ public class ReportConfigs implements Serializable, CompositeData{
         return (Collection<?>) this.attributeMap;
     }
     //--------------------Constructors--------------------
-    
+
     public static ReportConfigs from(CompositeData cd) {
-        return new ReportConfigs((String) cd.get("type"), 
-                                (boolean) cd.get("isSingleDeployment"), 
-                                (boolean) cd.get("isConfigTimerange"), 
-                                (Long) cd.get("consideredTimeframeStart"), 
-                                (Long) cd.get("consideredTimeframeEnd"), 
-                                (boolean) cd.get("isShowSingleTenant"), 
-                                (Long) cd.get("singleTenantId"), 
-                                (boolean) cd.get("isAdminIgnore"), 
-                                (boolean) cd.get("isShowDriveMetrics"), 
-                                (boolean) cd.get("isShowMailMetrics"));
+        return new ReportConfigsBuilder((String) cd.get("type")).isSingleDeployment((boolean) cd.get("isSingleDeployment")).isConfigTimerange((boolean) cd.get("isConfigTimerange")).consideredTimeframeStart((long) cd.get("consideredTimeframeStart")).consideredTimeframeEnd((long) cd.get("consideredTimeframeEnd")).isShowSingleTenant((boolean) cd.get("isShowSingleTenant")).singleTenantId((long) cd.get("singleTenantId")).isAdminIgnore((boolean) cd.get("isAdminIgnore")).isShowDriveMetrics((boolean) cd.get("isShowDriveMetrics")).isShowMailMetrics((boolean) cd.get("isShowMailMetrics")).build();
     }
 
-    public ReportConfigs(String type, boolean isSingleDeployment, boolean isConfigTimerange, Long consideredTimeframeStart, Long consideredTimeframeEnd, boolean isShowSingleTenant, Long singleTenantId, boolean isAdminIgnore, boolean isShowDriveMetrics, boolean isShowMailMetrics) {
+    private ReportConfigs(ReportConfigsBuilder builder) {
         super();
-        this.type = type;
-        this.isSingleDeployment = isSingleDeployment;
-        this.isConfigTimerange = isConfigTimerange;
-        this.consideredTimeframeStart = consideredTimeframeStart;
-        this.consideredTimeframeEnd = consideredTimeframeEnd;
-        this.isShowSingleTenant = isShowSingleTenant;
-        this.singleTenantId = singleTenantId;
-        this.isAdminIgnore = isAdminIgnore;
-        this.isShowDriveMetrics = isShowDriveMetrics;
-        this.isShowMailMetrics = isShowMailMetrics;
+        this.attributeMap = new HashMap<>();
+        this.attributeMap.put("type", builder.type);
+        this.attributeMap.put("isSingleDeployment", builder.isSingleDeployment);
+        this.attributeMap.put("isConfigTimerange", builder.isConfigTimerange);
+        this.attributeMap.put("consideredTimeframeStart", builder.consideredTimeframeStart);
+        this.attributeMap.put("consideredTimeframeEnd", builder.consideredTimeframeEnd);
+        this.attributeMap.put("isShowSingleTenant", builder.isShowSingleTenant);
+        this.attributeMap.put("singleTenantId", builder.singleTenantId);
+        this.attributeMap.put("isAdminIgnore", builder.isAdminIgnore);
+        this.attributeMap.put("isShowDriveMetrics", builder.isShowDriveMetrics);
+        this.attributeMap.put("isShowMailMetrics", builder.isShowMailMetrics);
+    }
+
+    private ReportConfigs(String type, boolean isSingleDeployment, boolean isConfigTimerange, long consideredTimeframeStart, long consideredTimeframeEnd, boolean isShowSingleTenant, long singleTenantId, boolean isAdminIgnore, boolean isShowDriveMetrics, boolean isShowMailMetrics) {
+        super();
         this.attributeMap = new HashMap<>();
         this.attributeMap.put("type", type);
         this.attributeMap.put("isSingleDeployment", isSingleDeployment);
@@ -118,93 +93,114 @@ public class ReportConfigs implements Serializable, CompositeData{
         this.attributeMap.put("isAdminIgnore", isAdminIgnore);
         this.attributeMap.put("isShowDriveMetrics", isShowDriveMetrics);
         this.attributeMap.put("isShowMailMetrics", isShowMailMetrics);
-        
     }
 
     //--------------------Getters and Setters--------------------
 
     public String getType() {
-        if (this.type == null)
-           this.type = "default"; 
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
+        return (String) this.attributeMap.get("type");
     }
 
     public boolean isSingleDeployment() {
-        return isSingleDeployment;
+        return (boolean) this.attributeMap.get("isSingleDeployment");
     }
 
-    public void setSingleDeployment(boolean isSingleDeployment) {
-        this.isSingleDeployment = isSingleDeployment;
+    public long getConsideredTimeframeStart() {
+        return (long) this.attributeMap.get("consideredTimeframeStart");
     }
 
-    public Long getConsideredTimeframeStart() {
-        return consideredTimeframeStart;
-    }
-
-    public void setConsideredTimeframeStart(Long consideredTimeframeStart) {
-        this.consideredTimeframeStart = consideredTimeframeStart;
-    }
-
-    public Long getConsideredTimeframeEnd() {
-        return consideredTimeframeEnd;
-    }
-
-    public void setConsideredTimeframeEnd(Long consideredTimeframeEnd) {
-        this.consideredTimeframeEnd = consideredTimeframeEnd;
+    public long getConsideredTimeframeEnd() {
+        return (long) this.attributeMap.get("consideredTimeframeEnd");
     }
 
     public boolean isShowSingleTenant() {
-        return isShowSingleTenant;
+        return (boolean) this.attributeMap.get("isShowSingleTenant");
     }
 
-    public void setShowSingleTenant(boolean isShowSingleTenant) {
-        this.isShowSingleTenant = isShowSingleTenant;
-    }
-
-    public Long getSingleTenantId() {
-        return singleTenantId;
-    }
-
-    public void setSingleTenantId(Long singleTenantId) {
-        this.singleTenantId = singleTenantId;
+    public long getSingleTenantId() {
+        return (long) this.attributeMap.get("singleTenantId");
     }
 
     public boolean isAdminIgnore() {
-        return isAdminIgnore;
-    }
-
-    public void setAdminIgnore(boolean isAdminIgnore) {
-        this.isAdminIgnore = isAdminIgnore;
+        return (boolean) this.attributeMap.get("isAdminIgnore");
     }
 
     public boolean isShowDriveMetrics() {
-        return isShowDriveMetrics;
-    }
-
-    public void setShowDriveMetrics(boolean isShowDriveMetrics) {
-        this.isShowDriveMetrics = isShowDriveMetrics;
+        return (boolean) this.attributeMap.get("isShowDriveMetrics");
     }
 
     public boolean isShowMailMetrics() {
-        return isShowMailMetrics;
-    }
-
-    public void setShowMailMetrics(boolean isShowMailMetrics) {
-        this.isShowMailMetrics = isShowMailMetrics;
+        return (boolean) this.attributeMap.get("isShowMailMetrics");
     }
 
     public boolean isConfigTimerange() {
-        return isConfigTimerange;
+        return (boolean) this.attributeMap.get("isConfigTimerange");
     }
 
-    public void setConfigTimerange(boolean isConfigTimerange) {
-        this.isConfigTimerange = isConfigTimerange;
+    public static class ReportConfigsBuilder {
+
+        private String type;
+        private boolean isSingleDeployment;
+        private boolean isConfigTimerange;
+        private long consideredTimeframeStart;
+        private long consideredTimeframeEnd;
+        private boolean isShowSingleTenant;
+        private long singleTenantId;
+        private boolean isAdminIgnore;
+        private boolean isShowDriveMetrics;
+        private boolean isShowMailMetrics;
+
+        public ReportConfigsBuilder(String type) {
+            this.type = type;
+        }
+
+        public ReportConfigsBuilder isSingleDeployment(boolean isSingleDeployment) {
+            this.isSingleDeployment = isSingleDeployment;
+            return this;
+        }
+
+        public ReportConfigsBuilder isConfigTimerange(boolean isConfigTimerange) {
+            this.isConfigTimerange = isConfigTimerange;
+            return this;
+        }
+
+        public ReportConfigsBuilder consideredTimeframeStart(long consideredTimeframeStart) {
+            this.consideredTimeframeStart = consideredTimeframeStart;
+            return this;
+        }
+
+        public ReportConfigsBuilder consideredTimeframeEnd(long consideredTimeframeEnd) {
+            this.consideredTimeframeEnd = consideredTimeframeEnd;
+            return this;
+        }
+
+        public ReportConfigsBuilder isShowSingleTenant(boolean isShowSingleTenant) {
+            this.isShowSingleTenant = isShowSingleTenant;
+            return this;
+        }
+
+        public ReportConfigsBuilder singleTenantId(long singleTenantId) {
+            this.singleTenantId = singleTenantId;
+            return this;
+        }
+
+        public ReportConfigsBuilder isAdminIgnore(boolean isAdminIgnore) {
+            this.isAdminIgnore = isAdminIgnore;
+            return this;
+        }
+
+        public ReportConfigsBuilder isShowDriveMetrics(boolean isShowDriveMetrics) {
+            this.isShowDriveMetrics = isShowDriveMetrics;
+            return this;
+        }
+
+        public ReportConfigsBuilder isShowMailMetrics(boolean isShowMailMetrics) {
+            this.isShowMailMetrics = isShowMailMetrics;
+            return this;
+        }
+
+        public ReportConfigs build() {
+            return new ReportConfigs(this);
+        }
     }
-
-   
-
 }

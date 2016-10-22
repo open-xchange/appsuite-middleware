@@ -61,6 +61,7 @@ import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
+import com.openexchange.filestore.QuotaFileStorageListener;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.filestore.StorageInfo;
 import com.openexchange.filestore.impl.osgi.Services;
@@ -70,6 +71,7 @@ import com.openexchange.groupware.filestore.Filestore;
 import com.openexchange.groupware.filestore.FilestoreExceptionCodes;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.user.UserService;
 
 /**
@@ -81,15 +83,18 @@ import com.openexchange.user.UserService;
 public class DBQuotaFileStorageService implements QuotaFileStorageService {
 
     private final FileStorageService fileStorageService;
+    private final ServiceListing<QuotaFileStorageListener> listeners;
     private final String regionName = "QuotaFileStorages";
 
     /**
      * Initializes a new {@link DBQuotaFileStorageService}.
      *
+     * @param listeners The listeners
      * @param fileStorageService The file storage service
      */
-    public DBQuotaFileStorageService(FileStorageService fileStorageService) {
+    public DBQuotaFileStorageService(ServiceListing<QuotaFileStorageListener> listeners, FileStorageService fileStorageService) {
         super();
+        this.listeners = listeners;
         this.fileStorageService = fileStorageService;
     }
 
@@ -156,7 +161,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
         }
 
         // Return appropriate unlimited quota file storage
-        return new DBQuotaFileStorage(contextId, optOwner > 0 ? optOwner : 0, Long.MAX_VALUE, fileStorageService.getFileStorage(uri), uri);
+        return new DBQuotaFileStorage(contextId, optOwner > 0 ? optOwner : 0, Long.MAX_VALUE, fileStorageService.getFileStorage(uri), uri, listeners);
     }
 
     @Override
@@ -233,7 +238,7 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
                 URI uri = new URI(null == scheme ? "file" : scheme, baseUri.getAuthority(), FileStorages.ensureEndingSlash(baseUri.getPath()) + info.getName(), baseUri.getQuery(), baseUri.getFragment());
 
                 // Create appropriate file storage instance
-                storage = new DBQuotaFileStorage(contextId, info.getOwner(), info.getQuota(), fileStorageService.getFileStorage(uri), uri);
+                storage = new DBQuotaFileStorage(contextId, info.getOwner(), info.getQuota(), fileStorageService.getFileStorage(uri), uri, listeners);
 
                 // Put it into cache
                 putCachedFileStorage(userId, contextId, storage);

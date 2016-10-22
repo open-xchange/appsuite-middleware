@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.jackrabbit.webdav.client.methods.DeleteMethod;
 import org.junit.After;
 import org.junit.Assert;
@@ -62,6 +63,7 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -174,6 +176,16 @@ public class Bug46811Test extends CalDAVTest {
             Assert.assertEquals("response code wrong", 204, getWebDAVClient().executeMethod(delete));
         } finally {
             release(delete);
+        }
+        /*
+         * try to access the deleted exception again on client as user a
+         */
+        GetMethod get = null;
+        try {
+            get = new GetMethod(getBaseUri() + href);
+            Assert.assertEquals("response code wrong", StatusCodes.SC_NOT_FOUND, getWebDAVClient().executeMethod(get));
+        } finally {
+            release(get);
         }
         /*
          * verify appointment exception on server as user b

@@ -1,4 +1,5 @@
 # The YAML configuration file for on-boarding scenarios
+# A template (client-onboarding-scenarios-template.yml) with up-to-date configuration examples can be found at /usr/share/doc
 #
 # Notation/meaning is:
 # <unique-scenario-identifier>:

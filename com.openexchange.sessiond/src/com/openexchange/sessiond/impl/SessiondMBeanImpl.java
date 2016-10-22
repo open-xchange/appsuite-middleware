@@ -52,9 +52,9 @@ package com.openexchange.sessiond.impl;
 import java.util.Set;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
-import javax.management.StandardMBean;
 import com.openexchange.exception.OXException;
-import com.openexchange.sessiond.SessiondMBean;
+import com.openexchange.management.AnnotatedStandardMBean;
+import com.openexchange.sessiond.mbean.SessiondMBean;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.sessionstorage.SessionStorageService;
@@ -64,7 +64,7 @@ import com.openexchange.sessionstorage.SessionStorageService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class SessiondMBeanImpl extends StandardMBean implements SessiondMBean {
+public final class SessiondMBeanImpl extends AnnotatedStandardMBean implements SessiondMBean {
 
     /**
      * Initializes a new {@link SessiondMBeanImpl}
@@ -73,12 +73,29 @@ public final class SessiondMBeanImpl extends StandardMBean implements SessiondMB
      *             does not implement the specified interface.
      */
     public SessiondMBeanImpl() throws NotCompliantMBeanException {
-        super(SessiondMBean.class);
+        super("Management Bean for SessionD service", SessiondMBean.class);
     }
 
     @Override
     public int clearUserSessions(final int userId, final int contextId) {
         return SessionHandler.removeUserSessions(userId, contextId).length;
+    }
+
+    @Override
+    public void clearUserSessionsGlobally(int userId, int contextId) throws MBeanException {
+        try {
+            SessionHandler.removeUserSessionsGlobal(userId, contextId);
+        } catch (Exception e) {
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(SessiondMBeanImpl.class);
+            logger.error("", e);
+            String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    @Override
+    public int getNumberOfUserSessons(int userId, int contextId) throws MBeanException {
+        return SessionHandler.getNumOfUserSessions(userId, contextId, false);
     }
 
     @Override

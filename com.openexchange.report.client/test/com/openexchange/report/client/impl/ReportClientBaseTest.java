@@ -49,8 +49,8 @@
 
 package com.openexchange.report.client.impl;
 
-import static org.hamcrest.Matchers.any;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,9 +59,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeSet;
 import java.util.UUID;
-import java.util.Map.Entry;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.InvalidAttributeValueException;
@@ -84,7 +84,7 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.openexchange.report.appsuite.serialization.ReportConfigs;
+import com.openexchange.report.client.configuration.ReportConfiguration;
 import com.openexchange.report.client.container.ClientLoginCount;
 import com.openexchange.report.client.container.ContextDetail;
 import com.openexchange.report.client.container.ContextModuleAccessCombination;
@@ -100,12 +100,12 @@ import com.openexchange.report.client.transport.TransportHandler;
  * @since 7.8.0
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest({ ObjectHandler.class, VersionHandler.class })
+@PrepareForTest({ ObjectHandler.class, VersionHandler.class, ReportClientBase.class })
 public class ReportClientBaseTest {
 
     private static final String UUID_CONST = UUID.randomUUID().toString();
 
-    private static final String APPSUITE_REPORT = "{\"macdetail\":{\"capabilitySets\":[{\"total\":2,\"capabilities\":[\"auto_publish_attachments\",\"autologin\",\"caldav\",\"carddav\",\"drive\",\"infostore\",\"mailfilter\",\"oauth\",\"oauth-grants\",\"pop3\",\"printing\",\"publish_mail_attachments\",\"rss\",\"search\",\"twitter\",\"xing\",\"xingjson\"],\"quota\":1073741824,\"admin\":0,\"disabled\":0},{\"total\":11,\"capabilities\":[\"active_sync\",\"auto_publish_attachments\",\"autologin\",\"caldav\",\"calendar\",\"carddav\",\"collect_email_addresses\",\"conflict_handling\",\"contacts\",\"delegate_tasks\",\"drive\",\"edit_password\",\"edit_public_folders\",\"edit_resource\",\"filestore\",\"freebusy\",\"gab\",\"groupware\",\"ical\",\"infostore\",\"mailfilter\",\"mobility\",\"multiple_mail_accounts\",\"oauth\",\"oauth-grants\",\"olox20\",\"participants_dialog\",\"pim\",\"pop3\",\"portal\",\"printing\",\"publication\",\"publish_mail_attachments\",\"read_create_shared_folders\",\"rss\",\"search\",\"subscription\",\"tasks\",\"twitter\",\"usm\",\"vcard\",\"webdav\",\"webdav_xml\",\"webmail\",\"xing\",\"xingjson\"],\"quota\":1073741824,\"admin\":3,\"disabled\":0},{\"total\":6,\"capabilities\":[\"active_sync\",\"auto_publish_attachments\",\"autologin\",\"caldav\",\"calendar\",\"carddav\",\"collect_email_addresses\",\"conflict_handling\",\"contacts\",\"delegate_tasks\",\"drive\",\"edit_password\",\"edit_public_folders\",\"edit_resource\",\"freebusy\",\"gab\",\"groupware\",\"ical\",\"infostore\",\"mailfilter\",\"mobility\",\"multiple_mail_accounts\",\"oauth\",\"oauth-grants\",\"olox20\",\"participants_dialog\",\"pim\",\"pop3\",\"portal\",\"printing\",\"publication\",\"publish_mail_attachments\",\"read_create_shared_folders\",\"rss\",\"search\",\"subscription\",\"tasks\",\"twitter\",\"usm\",\"vcard\",\"webdav\",\"webdav_xml\",\"webmail\",\"xing\",\"xingjson\"],\"quota\":1073741824,\"admin\":2,\"disabled\":0}]},\"total\":{\"guests\":22,\"contexts\":5,\"users\":19,\"report-format\":\"appsuite-short\"},\"clientlogincountyear\":{\"appsuite\":\"7\",\"olox2\":\"0\",\"caldav\":\"0\",\"usm-eas\":\"0\",\"mobileapp\":\"0\",\"ox6\":\"9\",\"carddav\":\"1\"},\"clientlogincount\":{\"appsuite\":\"4\",\"olox2\":\"0\",\"caldav\":\"0\",\"usm-eas\":\"0\",\"mobileapp\":\"0\",\"ox6\":\"2\",\"carddav\":\"1\"},\"uuid\":\"af15880a836a4d66870f469a9daa2bee\",\"reportType\":\"default\",\"timestamps\":{\"start\":1436186159042,\"stop\":1436186159858},\"version\":{\"version\":\"7.8.0-Rev0\",\"buildDate\":\"develop\"},\"configs\":{\"com.openexchange.mail.adminMailLoginEnabled\":\"true\"}}";
+    private static final String APPSUITE_REPORT = "{\"macdetail\":{\"capabilitySets\":[{\"total\":2,\"capabilities\":[\"auto_publish_attachments\",\"autologin\",\"caldav\",\"carddav\",\"drive\",\"infostore\",\"mailfilter\",\"oauth\",\"oauth-grants\",\"pop3\",\"printing\",\"publish_mail_attachments\",\"rss\",\"search\",\"twitter\",\"xing\",\"xingjson\"],\"quota\":1073741824,\"admin\":0,\"disabled\":0},{\"total\":11,\"capabilities\":[\"active_sync\",\"auto_publish_attachments\",\"autologin\",\"caldav\",\"calendar\",\"carddav\",\"collect_email_addresses\",\"conflict_handling\",\"contacts\",\"delegate_tasks\",\"drive\",\"edit_password\",\"edit_public_folders\",\"edit_resource\",\"filestore\",\"freebusy\",\"gab\",\"groupware\",\"ical\",\"infostore\",\"mailfilter\",\"mobility\",\"multiple_mail_accounts\",\"oauth\",\"oauth-grants\",\"olox20\",\"participants_dialog\",\"pim\",\"pop3\",\"portal\",\"printing\",\"publication\",\"publish_mail_attachments\",\"read_create_shared_folders\",\"rss\",\"search\",\"subscription\",\"tasks\",\"twitter\",\"usm\",\"vcard\",\"webdav\",\"webdav_xml\",\"webmail\",\"xing\",\"xingjson\"],\"quota\":1073741824,\"admin\":3,\"disabled\":0},{\"total\":6,\"capabilities\":[\"active_sync\",\"auto_publish_attachments\",\"autologin\",\"caldav\",\"calendar\",\"carddav\",\"collect_email_addresses\",\"conflict_handling\",\"contacts\",\"delegate_tasks\",\"drive\",\"edit_password\",\"edit_public_folders\",\"edit_resource\",\"freebusy\",\"gab\",\"groupware\",\"ical\",\"infostore\",\"mailfilter\",\"mobility\",\"multiple_mail_accounts\",\"oauth\",\"oauth-grants\",\"olox20\",\"participants_dialog\",\"pim\",\"pop3\",\"portal\",\"printing\",\"publication\",\"publish_mail_attachments\",\"read_create_shared_folders\",\"rss\",\"search\",\"subscription\",\"tasks\",\"twitter\",\"usm\",\"vcard\",\"webdav\",\"webdav_xml\",\"webmail\",\"xing\",\"xingjson\"],\"quota\":1073741824,\"admin\":2,\"disabled\":0}]},\"total\":{\"guests\":22,\"contexts\":5,\"users\":19,\"report-format\":\"appsuite-short\"},\"clientlogincountyear\":{\"appsuite\":\"7\",\"olox2\":\"0\",\"caldav\":\"0\",\"usm-eas\":\"0\",\"mobileapp\":\"0\",\"ox6\":\"9\",\"carddav\":\"1\"},\"clientlogincount\":{\"appsuite\":\"4\",\"olox2\":\"0\",\"caldav\":\"0\",\"usm-eas\":\"0\",\"mobileapp\":\"0\",\"ox6\":\"2\",\"carddav\":\"1\"},\"uuid\":\"af15880a836a4d66870f469a9daa2bee\",\"reportType\":\"default\",\"timestamps\":{\"start\":1436186159042,\"stop\":1436186159858},\"version\":{\"version\":\"7.8.0-Rev0\",\"buildDate\":\"develop\"},\"configs\":{\"com.openexchange.mail.adminMailLoginEnabled\":\"true\"},\"needsComposition\":false}";
     private static final String APPSUITE_REPORT_DIAGNOSTICS_UUID = "UUID: ";
     private static final String APPSUITE_REPORT_DIAGNOSTIC_TYPE = "    Type: appsuite";
     private static final String APPSUITE_REPORT_DIAGNOSTICS_TIME = "    Current elapsed time: 0 hours, 0 minutes";
@@ -188,6 +188,9 @@ public class ReportClientBaseTest {
 
     @Rule
     public final SystemOutRule systemOutRule = new SystemOutRule().enableLog();
+    
+    @Mock
+    private ReportConfiguration reportConfiguration;
 
     //------------------------------------ SETUP ---------------------------------------------------------
     @Before
@@ -211,7 +214,7 @@ public class ReportClientBaseTest {
         setUpAppsuiteReport();
     }
 
-    private void setUpAppsuiteReport() throws InstanceNotFoundException, MBeanException, ReflectionException, IOException {
+    private void setUpAppsuiteReport() throws Exception {
         Mockito.doReturn(new CompositeData[] { report }).when(serverConnection).invoke(reportClientBase.getAppSuiteReportingName(), "retrievePendingReports", new Object[] { "default" }, new String[] { String.class.getCanonicalName() });
         Mockito.when(serverConnection.invoke(reportClientBase.getAppSuiteReportingName(), "retrieveLastReport", new Object[] { "default" }, new String[] { String.class.getCanonicalName() })).thenReturn(report);
         Mockito.when(serverConnection.invoke(reportClientBase.getAppSuiteReportingName(), "run", new Object[] { "default" }, new String[] { String.class.getCanonicalName() })).thenReturn(UUID_CONST);
@@ -223,6 +226,7 @@ public class ReportClientBaseTest {
         Mockito.when(report.get("uuid")).thenReturn(UUID_CONST);
         Mockito.when(report.get("type")).thenReturn("appsuite");
         Mockito.when(report.get("data")).thenReturn(APPSUITE_REPORT);
+        PowerMockito.whenNew(ReportConfiguration.class).withAnyArguments().thenReturn(reportConfiguration);
     }
 
     private void setUpOldReportStyle() throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, NullPointerException, InvalidAttributeValueException {

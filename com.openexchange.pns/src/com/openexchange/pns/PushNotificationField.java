@@ -71,12 +71,26 @@ public enum PushNotificationField {
     // -------------------------------- Mail-related fields --------------------------------
     /** The subject of a mail; type is <code>java.lang.String</code> */
     MAIL_SUBJECT("subject"),
-    /** The sender of a mail; type is <code>java.lang.String</code> */
-    MAIL_SENDER("sender"),
+    /** The sender's address of a mail; type is <code>java.lang.String</code> */
+    MAIL_SENDER_EMAIL("email"),
+    /** The sender's address of a mail; type is <code>java.lang.String</code> */
+    MAIL_SENDER_PERSONAL("displayname"),
     /** The unread count; type is <code>java.lang.Integer</code> */
     MAIL_UNREAD("unread"),
     /** The key providing the mail path; type is <code>java.lang.String</code> */
     MAIL_PATH("cid"),
+    /** The teaser for the mail text; type is <code>java.lang.String</code> */
+    MAIL_TEASER("teaser"),
+
+    // -------------------------------- Calendar-related fields ----------------------------
+    /** The title of an appointment; type is <code>java.lang.String</code> */
+    APPOINTMENT_TITLE("title"),
+    /** The location of an appointment; type is <code>java.lang.String</code> */
+    APPOINTMENT_LOCATION("location"),
+    /** The start date of an appointment; type is <code>java.util.Date</code> */
+    APPOINTMENT_START_DATE("start_date"),
+    /** The end date of an appointment; type is <code>java.util.Date</code> */
+    APPOINTMENT_END_DATE("end_date"),
 
     ;
 

@@ -146,8 +146,14 @@ public interface CustomPortable extends Portable {
      *   &bull; 110 --> com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableStartPermanentListenerCallable
      *   &bull; 107 --> com.openexchange.mail.attachment.impl.portable.PortableCheckForAttachmentToken
      *   &bull; 108 --> com.openexchange.mail.attachment.impl.portable.PortableAttachmentToken
-     *   &bull; 200 --> com.openexchange.office.hazelcast.serialization.PortableID
-     *   &bull; 201 --> com.openexchange.office.hazelcast.serialization.PortableDocumentState
+     *   &bull; 200 --> com.openexchange.office.hazelcast.serialization.document.PortableID
+     *   &bull; 201 --> com.openexchange.office.hazelcast.serialization.document.PortableDocumentState
+     *   &bull; 202 --> com.openexchange.office.hazelcast.serialization.document.PortableDocSaveState
+     *   &bull; 204 --> com.openexchange.office.hazelcast.serialization.document.PortableDocumentResources
+     *   &bull; 205 --> com.openexchange.office.hazelcast.serialization.document.PortableResourceID
+     *   &bull; 206 --> com.openexchange.office.hazelcast.serialization.document.PortableRestoreID
+     *   &bull; 207 --> com.openexchange.office.hazelcast.serialization.document.PortableCleanupStatus
+     *   &bull; 208 --> com.openexchange.office.hazelcast.serialization.document.PortableMemberPredicate
      *   &bull; 300 --> com.openexchange.saml.impl.hz.PortableAuthnRequestInfo
      *   &bull; 301 --> com.openexchange.saml.impl.hz.PortableLogoutRequestInfo
      *   &bull; 400 --> com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck

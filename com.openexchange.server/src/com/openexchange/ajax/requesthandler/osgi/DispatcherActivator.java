@@ -83,6 +83,7 @@ import com.openexchange.ajax.requesthandler.converters.Bean2JSONConverter;
 import com.openexchange.ajax.requesthandler.converters.DebugConverter;
 import com.openexchange.ajax.requesthandler.converters.Native2JSONConverter;
 import com.openexchange.ajax.requesthandler.converters.NativeConverter;
+import com.openexchange.ajax.requesthandler.converters.SecureContentResultConverter;
 import com.openexchange.ajax.requesthandler.converters.cover.CoverExtractor;
 import com.openexchange.ajax.requesthandler.converters.cover.CoverExtractorRegistry;
 import com.openexchange.ajax.requesthandler.converters.cover.CoverResultConverter;
@@ -100,6 +101,7 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServlet;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.PreviewResponseRenderer;
+import com.openexchange.ajax.requesthandler.responseRenderers.SecureContentAPIResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.StringResponseRenderer;
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -110,6 +112,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.filestore.FileLocationHandler;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.mail.mime.utils.ImageMatcher;
+import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
 import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
 import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -157,7 +160,8 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         for (final ResultConverter converter : BasicTypeJsonConverter.CONVERTERS) {
             defaultConverter.addConverter(converter);
         }
-        
+
+        defaultConverter.addConverter(new SecureContentResultConverter());
         defaultConverter.addConverter(new Bean2JSONConverter());
         /*
          * Add cover extractor converter
@@ -234,7 +238,9 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
         Multiple.setDispatcher(dispatcher);
         DispatcherServlet.setDispatcher(dispatcher);
-        DispatcherServlet.registerRenderer(new APIResponseRenderer());
+        APIResponseRenderer apiResponseRenderer = new APIResponseRenderer();
+        DispatcherServlet.registerRenderer(apiResponseRenderer);
+        DispatcherServlet.registerRenderer(new SecureContentAPIResponseRenderer(apiResponseRenderer));
         final FileResponseRenderer fileRenderer = new FileResponseRenderer();
         DispatcherServlet.registerRenderer(fileRenderer);
         DispatcherServlet.registerRenderer(new StringResponseRenderer());
@@ -363,6 +369,20 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 		});
 
         track(DispatcherListener.class, dispatcherListenerRegistry);
+
+        track(UserAwareSSLConfigurationService.class, new SimpleRegistryListener<UserAwareSSLConfigurationService>() {
+
+            @Override
+            public void added(ServiceReference<UserAwareSSLConfigurationService> reference, UserAwareSSLConfigurationService service) {
+                ServerServiceRegistry.getInstance().addService(UserAwareSSLConfigurationService.class, service);
+            }
+
+            @Override
+            public void removed(ServiceReference<UserAwareSSLConfigurationService> reference, UserAwareSSLConfigurationService service) {
+                ServerServiceRegistry.getInstance().removeService(UserAwareSSLConfigurationService.class);
+            }
+
+        });
 
         openTrackers();
 

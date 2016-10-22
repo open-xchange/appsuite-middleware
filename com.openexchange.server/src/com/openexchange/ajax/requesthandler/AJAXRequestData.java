@@ -69,6 +69,7 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -100,6 +101,8 @@ import com.openexchange.tools.strings.StringParser;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AJAXRequestData {
+
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AJAXRequestData.class);
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
@@ -213,6 +216,9 @@ public class AJAXRequestData {
     /** The maximum allowed size of a complete request or <code>-1</code> */
     private long maxUploadSize = -1L;
 
+    /** Internal flag to remember whether request body has already been loaded (if any) */
+    private boolean requestBodyLoaded;
+
     /**
      * Initializes a new {@link AJAXRequestData}.
      *
@@ -285,6 +291,7 @@ public class AJAXRequestData {
         copy.userAgent = userAgent;
         copy.serverPort = serverPort;
         copy.prefix = prefix;
+        copy.requestBodyLoaded = requestBodyLoaded;
 
         /*
          * Not sure about following members, therefore leave to null
@@ -674,6 +681,24 @@ public class AJAXRequestData {
     }
 
     /**
+     * Checks whether request body was already attempted being loaded.
+     *
+     * @return <code>true</code> if loaded; otherwise <code>false</code>
+     */
+    boolean isRequestBodyLoaded() {
+        return requestBodyLoaded;
+    }
+
+    /**
+     * Sets the whether request body was already attempted being loaded.
+     *
+     * @param requestBodyLoaded <code>true</code> if loaded; otherwise <code>false</code>
+     */
+    void setRequestBodyLoaded(boolean requestBodyLoaded) {
+        this.requestBodyLoaded = requestBodyLoaded;
+    }
+
+    /**
      * Returns any extra path information associated with the URL the client sent when it made this request. The extra path information
      * follows the servlet path but precedes the query string and will start with a "/" character.
      * <p>
@@ -725,6 +750,10 @@ public class AJAXRequestData {
      * @throws NullPointerException If name is <code>null</code>
      */
     public void putParameter(final @Nullable String name, final @Nullable String value) {
+        putParameter0(name, value, true);
+    }
+
+    private void putParameter0(final @Nullable String name, final @Nullable String value, boolean writeThrough) {
         if (null == name) {
             throw new NullPointerException("name is null");
         }
@@ -733,10 +762,16 @@ public class AJAXRequestData {
         } else {
             params.put(name, value);
         }
-        final Parameterizable parameterizable = this.parameterizable;
-        if (null != parameterizable) {
-            // Write-though
-            parameterizable.putParameter(name, value);
+        if (writeThrough) {
+            Parameterizable parameterizable = this.parameterizable;
+            if (null != parameterizable) {
+                // Write-though
+                try {
+                    parameterizable.putParameter(name, value);
+                } catch (Exception e) {
+                    LOGGER.debug("Failed to add parameter {} to underlying {} instance", name, parameterizable.getClass().getName(), e);
+                }
+            }
         }
     }
 
@@ -1031,7 +1066,7 @@ public class AJAXRequestData {
     public @Nullable Object getData() {
         return data;
     }
-    
+
     public @Nullable <T> T getData(Class<T> klazz) throws OXException {
         final Object local = this.data;
         if ((local == null) || (klazz == null)) {
@@ -1152,6 +1187,15 @@ public class AJAXRequestData {
      */
     public void setUploadStreamProvider(final @Nullable InputStreamProvider uploadStreamProvider) {
         this.uploadStreamProvider = uploadStreamProvider;
+    }
+
+    /**
+     * Checks if this request data has an upload stream provider set.
+     *
+     * @return <code>true</code> if an upload stream provider is available; otherwise <code>false</code>
+     */
+    public boolean hasUploadStreamProvider() {
+        return null != this.uploadStreamProvider;
     }
 
     /**
@@ -1363,7 +1407,7 @@ public class AJAXRequestData {
         synchronized (thisFiles) {
             UploadEvent uploadEvent = this.uploadEvent;
             if (null == uploadEvent) {
-                uploadEvent = AJAXServlet.processUploadStatic(httpServletRequest, maxFileSize, maxOverallSize);
+                uploadEvent = AJAXServlet.processUploadStatic(httpServletRequest, maxFileSize, maxOverallSize, session);
                 this.uploadEvent = uploadEvent;
                 final Iterator<UploadFile> iterator = uploadEvent.getUploadFilesIterator();
                 while (iterator.hasNext()) {
@@ -1372,7 +1416,7 @@ public class AJAXRequestData {
                 final Iterator<String> names = uploadEvent.getFormFieldNames();
                 while (names.hasNext()) {
                     final String name = names.next();
-                    putParameter(name, uploadEvent.getFormField(name));
+                    putParameter0(name, uploadEvent.getFormField(name), false);
                 }
             }
         }
@@ -1608,7 +1652,7 @@ public class AJAXRequestData {
      * Gets the normalized module, e.g. <code>"files/myFile.txt"</code> will return <code>"files"</code>.
      * <p>
      * With '/' concatenated module identifiers will still be returned as they are, e. g. <code>"oauth/account"</code> will stay as it is.
-     * 
+     *
      * @return The normalized module
      */
     public String getNormalizedModule() {

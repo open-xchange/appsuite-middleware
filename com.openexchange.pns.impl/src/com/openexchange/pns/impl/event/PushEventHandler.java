@@ -64,7 +64,8 @@ import com.openexchange.push.Container;
 import com.openexchange.push.PushEventConstants;
 
 /**
- * {@link PushEventHandler} - Handles legacy push events and schedules them into notification service.
+ * {@link PushEventHandler} - Handles legacy push events and schedules them into notification service;
+ * unless <code>PushEventConstants.PROPERTY_NO_FORWARD</code> is set to <code>true</code>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
@@ -115,7 +116,7 @@ public class PushEventHandler implements org.osgi.service.event.EventHandler {
                 .build();
             notificationService.handle(notification);
         } catch (Exception e) {
-            LOG.warn("Failed to handle incoming legacy push event", e);
+            LOG.warn("Failed to handle incoming \"{}\" push event", KnownTopic.MAIL_NEW.getName(), e);
         }
     }
 

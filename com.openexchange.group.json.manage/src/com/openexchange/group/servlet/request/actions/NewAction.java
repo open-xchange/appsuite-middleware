@@ -54,9 +54,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.GroupFields;
 import com.openexchange.ajax.parser.GroupParser;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
@@ -69,10 +66,6 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "new", description = "Create a group", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
-}, requestBody = "Group object as described in Group data. The field id is not present.",
-responseDescription = "A json objekt with attribute id of the newly created group.")
 public final class NewAction extends AbstractGroupAction {
 
     /**

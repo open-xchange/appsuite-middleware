@@ -49,7 +49,7 @@
 
 package com.openexchange.pns.transport.websocket;
 
-import java.util.Set;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.websockets.WebSocket;
 
@@ -66,7 +66,7 @@ public interface WebSocketToClientResolver {
      *
      * @return The supported clients
      */
-    Set<String> getSupportedClients();
+    Map<String, WebSocketClient> getSupportedClients();
 
     /**
      * Resolves the given open Web Socket to a client identifier that is associated with it.

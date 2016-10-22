@@ -381,8 +381,8 @@ public class FileResponseRendererTest extends TestCase {
         final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
         resp.setOutputStream(servletOutputStream);
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
-        final String expectedCT = "application/octet-stream"; // force download
-        assertEquals("Wrong Content-Type", expectedCT, resp.getContentType());
+        final String expectedCD = "attachment"; // force download
+        assertTrue("Wrong Content-Disposition: " + resp.getHeader("Content-Disposition") + "; expected: " + expectedCD, resp.getHeader("Content-Disposition").startsWith(expectedCD));
     }
 
     public void testXSSVuln_Bug26373_view() throws IOException {
@@ -496,6 +496,36 @@ public class FileResponseRendererTest extends TestCase {
         assertEquals("Wrong Content-Type", "application/octet-stream", resp.getContentType());
     }
 
+    public void testBug48559() throws IOException {
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(
+            "48559.svg",
+            "application/xml",
+            Delivery.view,
+            Disposition.inline,
+            "fake.pdf");
+
+        final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+        final AJAXRequestData requestData = new AJAXRequestData();
+        requestData.setSession(new SimServerSession(1, 1));
+        final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+
+        final SimHttpServletRequest req = new SimHttpServletRequest();
+        final SimHttpServletResponse resp = new SimHttpServletResponse();
+        final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+        fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationProvider()));
+        fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+
+        // Faked SVG image should be processed as XML, which is output as HTML in case inline/view requested
+
+        assertNotNull("Header content-type not found", resp.getContentType());
+        assertTrue("Wrong Content-Type", resp.getContentType().startsWith("application/html"));
+
+        String content = new String(servletOutputStream.toByteArray());
+        assertTrue("Processed XML/SVG content contains JavaScript content, but shouldn't:\n" + content, content.indexOf("<script") < 0);
+        assertTrue("Processed XML/SVG content contains unsanitized JavaScript content, but shouldn't:\n" + content, content.indexOf("&lt;/script&gt;") > 0);
+    }
+
     public void testTikaShouldDetectCorrectContenType_Bug26153() throws IOException, OXException {
         ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder(
             "Rotate_90CW.jpg",
@@ -566,7 +596,7 @@ public class FileResponseRendererTest extends TestCase {
         fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationProvider()));
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
         requestData.setSession(new SimServerSession(1, 1));
-        assertEquals("Wrong Content-Type", "text/html", resp.getContentType());
+        assertTrue("Wrong Content-Type", resp.getContentType().startsWith("text/html"));
     }
 
     public void testSanitizingFileArguments() throws Exception {
@@ -819,6 +849,22 @@ public class FileResponseRendererTest extends TestCase {
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
         assertEquals("get() not called", 1, resourceCache.callsToGet);
         assertEquals("save() called", 1, resourceCache.callsToSave);
+    }
+
+    public void testXSSVuln_Bug49159() throws IOException {
+        final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
+        ByteArrayFileHolder fileHolder = FileResponseRendererTools.getFileHolder("ox.html.txt", "text/plain", Delivery.view, Disposition.inline, "ox.html.txt");
+        final AJAXRequestData requestData = new AJAXRequestData();
+        requestData.putParameter("content_type", "text/html");
+        final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
+        final SimHttpServletRequest req = new SimHttpServletRequest();
+        req.setParameter("content_type", "text/html");
+        final SimHttpServletResponse resp = new SimHttpServletResponse();
+        final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+        fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
+        final String expectedCT = "text/plain";
+        assertTrue("Wrong Content-Type", resp.getContentType().startsWith(expectedCT));
     }
 
     private static final class TestableResourceCache implements ResourceCache {

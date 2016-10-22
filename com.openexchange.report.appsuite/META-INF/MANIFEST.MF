@@ -2,11 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Report Generation Framework
 Bundle-SymbolicName: com.openexchange.report.appsuite
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Activator: com.openexchange.report.appsuite.osgi.ReportActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Eclipse-RegisterBuddy: com.hazelcast
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,
  com.fasterxml.jackson.core.format,
@@ -16,18 +15,17 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.type,
  com.fasterxml.jackson.core.util,
  com.google.common.cache,
- com.hazelcast.core,
  com.openexchange.ajax.tools,
  com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.context,
  com.openexchange.database,
  com.openexchange.exception,
+ com.openexchange.filestore,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.contexts.impl,
  com.openexchange.groupware.filestore,
  com.openexchange.groupware.ldap,
- com.openexchange.hazelcast.serialization,
  com.openexchange.java.util,
  com.openexchange.log,
  com.openexchange.logging,

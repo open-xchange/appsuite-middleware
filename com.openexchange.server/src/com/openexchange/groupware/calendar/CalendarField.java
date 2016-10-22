@@ -87,34 +87,34 @@ public enum CalendarField {
     PRIVATEFLAG ( Appointment.PRIVATE_FLAG , "PrivateFlag", "pflag" ),
     FULLTIME ( Appointment.FULL_TIME , "FullTime", "intfield07" ),
     NOTE ( Appointment.NOTE , CalendarFieldStrings.NOTE, "field04" ),
-    RECURRENCETYPE ( Appointment.RECURRENCE_TYPE , "RecurrenceType", null),
-    INTERVAL ( Appointment.INTERVAL , "Interval", null ),
-    DAYS ( Appointment.DAYS , "Days", null ),
-    DAYINMONTH ( Appointment.DAY_IN_MONTH , "DayInMonth", null ),
-    MONTH ( Appointment.MONTH , "Month", null ),
-    UNTIL ( Appointment.UNTIL , "Until", null ),
-    OCCURRENCE ( Appointment.RECURRENCE_COUNT , "Occurrence", null ),
-    RECURRENCEDATEPOSITION ( Appointment.RECURRENCE_DATE_POSITION , "RecurrenceDatePosition", null ),
-    RECURRENCEPOSITION ( Appointment.RECURRENCE_POSITION , "RecurrencePosition", null ),
+    RECURRENCETYPE ( Appointment.RECURRENCE_TYPE , "RecurrenceType", (String[]) null),
+    INTERVAL ( Appointment.INTERVAL , "Interval", (String[]) null ),
+    DAYS ( Appointment.DAYS , "Days", (String[]) null ),
+    DAYINMONTH ( Appointment.DAY_IN_MONTH , "DayInMonth", (String[]) null ),
+    MONTH ( Appointment.MONTH , "Month", (String[]) null ),
+    UNTIL ( Appointment.UNTIL , "Until", (String[]) null ),
+    OCCURRENCE ( Appointment.RECURRENCE_COUNT , "Occurrence", (String[]) null ),
+    RECURRENCEDATEPOSITION ( Appointment.RECURRENCE_DATE_POSITION , "RecurrenceDatePosition", (String[]) null ),
+    RECURRENCEPOSITION ( Appointment.RECURRENCE_POSITION , "RecurrencePosition", (String[]) null ),
     TIMEZONE ( Appointment.TIMEZONE , CalendarFieldStrings.TIMEZONE, "timezone" ),
     CHANGEEXCEPTION ( Appointment.CHANGE_EXCEPTIONS, "ChangeExceptions", "field08" ),
     DELETEEXCEPTION ( Appointment.DELETE_EXCEPTIONS, "DeleteExceptions", "field07" ),
-    PARTICIPANTS ( Appointment.PARTICIPANTS, "Participants", null ),
-    USERS ( Appointment.USERS, "Users", null ),
+    PARTICIPANTS ( Appointment.PARTICIPANTS, CalendarFieldStrings.PARTICIPANTS, "reason", "displayName", "mailAddress" ),
+    USERS ( Appointment.USERS, "Users", (String[]) null ),
     RECURRENCECALCULATOR ( Appointment.RECURRENCE_CALCULATOR, "RecurrenceCalculator", "intfield04"),
-    ALARM ( Appointment.ALARM, "Alarm", null);
+    ALARM ( Appointment.ALARM, "Alarm", (String[]) null);
 
     private final int appointmentObjectID; //this is the ID of AppointmentObject
     private final String name;             //this is the name of the internal variable (as used by setters & getters)
-    private final String dbField;
+    private final String[] dbFields;
 
     /**
      * Initializes a new {@link CalendarField}.
      */
-    private CalendarField(int appointmentObjectID, String name, String dbField){
+    private CalendarField(int appointmentObjectID, String name, String...dbFields){
         this.appointmentObjectID = appointmentObjectID;
         this.name = name;
-        this.dbField = dbField;
+        this.dbFields = dbFields;
     }
 
     public static CalendarField getByAppointmentObjectId(final int id){
@@ -140,8 +140,12 @@ public enum CalendarField {
             return null;
         }
         for (CalendarField field : values()) {
-            if (dbField.equals(field.dbField)) {
-                return field;
+            if (null != field.dbFields) {
+                for (String s : field.dbFields) {
+                    if (dbField.equals(s)) {
+                        return field;
+                    }
+                }
             }
         }
         return null;
@@ -163,7 +167,7 @@ public enum CalendarField {
         return name; //TODO get real ICAL element name
     }
 
-    public String getdbField() {
-        return dbField;
+    public String[] getdbFields() {
+        return dbFields;
     }
 }

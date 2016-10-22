@@ -92,7 +92,7 @@ public class JSONProtocolHandler {
      * @param acknowledgements List for acknowledgements to use while handling incoming Stanzas
      * @throws RealtimeException 
      */
-    public void handleIncomingMessages(ID constructedId, ServerSession serverSession, StateEntry entry, List<JSONObject> stanzas, List<Long> acknowledgements) throws RealtimeException {
+    public void handleIncomingMessages(ID constructedId, ServerSession serverSession, StateEntry entry, List<JSONObject> stanzas, List<Long> acknowledgements, StanzaProcessor postProcessor) throws RealtimeException {
         for (JSONObject json : stanzas) {
             if (json.has("type")) {
                 String type = json.optString("type");
@@ -125,7 +125,9 @@ public class JSONProtocolHandler {
             // Handle regular message
             StanzaBuilder<? extends Stanza> stanzaBuilder = StanzaBuilderSelector.getBuilder(constructedId, serverSession, json);
             Stanza stanza = stanzaBuilder.build();
-
+            if (postProcessor != null) {
+            	postProcessor.process(stanza);
+            }
             if (stanza.traceEnabled()) {
                 stanza.trace("received in backend");
             }

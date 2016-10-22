@@ -49,8 +49,8 @@
 
 package com.openexchange.tools.servlet.http;
 
-import static com.openexchange.java.IPAddressUtil.textToNumericFormatV4;
-import static com.openexchange.java.IPAddressUtil.textToNumericFormatV6;
+import static com.openexchange.net.IPAddressUtil.textToNumericFormatV4;
+import static com.openexchange.net.IPAddressUtil.textToNumericFormatV6;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Arrays;
@@ -67,7 +67,6 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.services.ServerServiceRegistry;
 
-
 /**
  * {@link Cookies} - Utility class for {@link Cookie}.
  *
@@ -82,7 +81,7 @@ public final class Cookies {
         super();
     }
 
-    private static final Set<String> LOCALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("localhost", "127.0.0.1","::1")));
+    private static final Set<String> LOCALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("localhost", "127.0.0.1", "::1")));
 
     /**
      * Checks if specified request's server name is considered as part of local LAN.
@@ -259,7 +258,7 @@ public final class Cookies {
         if (start > 0) {
             final int end = id.lastIndexOf('.');
             if (end > start) {
-                return urlDecode(id.substring(start+1, end));
+                return urlDecode(id.substring(start + 1, end));
             }
         }
         return null;
@@ -321,8 +320,7 @@ public final class Cookies {
         if (null == req) {
             return Collections.emptyMap();
         }
-        @SuppressWarnings("unchecked")
-        Map<String, Cookie> m = (Map<String, Cookie>) req.getAttribute("__cookie.map");
+        @SuppressWarnings("unchecked") Map<String, Cookie> m = (Map<String, Cookie>) req.getAttribute("__cookie.map");
         if (null != m) {
             return m;
         }

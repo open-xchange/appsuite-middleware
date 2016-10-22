@@ -158,8 +158,8 @@ public interface WebSocket {
      * <p>
      * A previously set {@link MessageTranscoder transcoder} kicks-in.
      *
-     * @param text       the text being sent.
-     * @param handler the handler which will be notified of progress.
+     * @param text The text being sent.
+     * @param handler The handler which will be notified of progress.
      * @throws IllegalArgumentException if the text or the handler is {@code null}.
      */
     SendControl sendMessageAsync(String message) throws OXException;

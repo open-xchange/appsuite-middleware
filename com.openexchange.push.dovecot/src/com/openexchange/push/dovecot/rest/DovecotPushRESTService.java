@@ -12,6 +12,8 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.mail.MessagingException;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
@@ -29,6 +31,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.pns.DefaultPushNotification;
@@ -220,19 +223,35 @@ public class DovecotPushRESTService {
         {
             String from = data.optString("from", null);
             if (null != from) {
-                messageData.put(PushNotificationField.MAIL_SENDER.getId(), from);
+                try {
+                    InternetAddress fromAddress = QuotedInternetAddress.parseHeader(from, true)[0];
+                    messageData.put(PushNotificationField.MAIL_SENDER_EMAIL.getId(), fromAddress.getAddress());
+                    String personal = fromAddress.getPersonal();
+                    if (Strings.isNotEmpty(personal)) {
+                        messageData.put(PushNotificationField.MAIL_SENDER_PERSONAL.getId(), personal);
+                    }
+                } catch (AddressException e) {
+                    LOGGER.warn("Failed to parse \"from\" address: {}", from, e);
+                    messageData.put(PushNotificationField.MAIL_SENDER_EMAIL.getId(),  MimeMessageUtility.decodeEnvelopeSubject(from));
+                }
             }
         }
         {
             String subject = data.optString("subject", null);
             if (null != subject) {
-                messageData.put(PushNotificationField.MAIL_SUBJECT.getId(), subject);
+                messageData.put(PushNotificationField.MAIL_SUBJECT.getId(), MimeMessageUtility.decodeEnvelopeSubject(subject));
             }
         }
         {
             int unread = data.optInt("unread", -1);
             if (unread >= 0) {
                 messageData.put(PushNotificationField.MAIL_UNREAD.getId(), Integer.valueOf(unread));
+            }
+        }
+        {
+            String snippet = data.optString("snippet", null);
+            if (null != snippet) {
+                messageData.put(PushNotificationField.MAIL_TEASER.getId(), snippet);
             }
         }
 
@@ -260,7 +279,7 @@ public class DovecotPushRESTService {
     private MailMessage asMessage(long uid, String fullName, String from, String subject, int unread) throws MessagingException {
         MailMessage mailMessage = new IDMailMessage(Long.toString(uid), fullName);
         mailMessage.addFrom(QuotedInternetAddress.parseHeader(from, true));
-        mailMessage.setSubject(subject);
+        mailMessage.setSubject(null == subject ? null : MimeMessageUtility.decodeEnvelopeSubject(subject));
         if (unread >= 0) {
             mailMessage.setUnreadMessages(unread);
         }

@@ -70,6 +70,10 @@ public enum KnownTransport {
      * The transport by Google Cloud Messaging service (GCM).
      */
     GCM("gcm"),
+    /**
+     * The transport by Windows Push Notification Services (WNS).
+     */
+    WNS("wns"),
 
     ;
 

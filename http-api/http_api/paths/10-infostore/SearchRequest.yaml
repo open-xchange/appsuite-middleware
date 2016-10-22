@@ -2,7 +2,7 @@
   put:
     operationId: searchInfoItems
     tags:
-      - infostore
+      - Infostore
     summary: Search for infoitems.
     consumes:
       - application/json
@@ -37,7 +37,7 @@
       - in: query
         name: includeSubfolders
         type: boolean
-        description: If set to \"true\" and a \"folder\" is specified, this folder and all of its subfolders are considered by the search.
+        description: 'If set to `true` and a `folder` is specified, this folder and all of its subfolders are considered by the search.'
         required: false
       - in: body
         name: body
@@ -50,6 +50,6 @@
         description: |
           A JSON object containing an array with matching infoitems. Infoitems are represented by arrays. The elements of each array contain the
           information specified by the corresponding identifiers in the `columns` parameter. In case of errors the
-          responsible fields in the response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          responsible fields in the response are filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/InfoItemsResponse"

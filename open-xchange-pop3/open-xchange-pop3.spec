@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -63,10 +63,16 @@ if [ ${1:-0} -eq 2 ]; then
     fi
 
     # SoftwareChange_Request-1931
-    ox_add_property com.openexchange.pop3.ssl.protocols "SSLv3 TLSv1" $PFILE
+    ox_add_property com.openexchange.pop3.ssl.protocols "" $PFILE
 
     # SoftwareChange_Request-2016
     ox_add_property com.openexchange.pop3.ssl.ciphersuites "" $PFILE
+
+    # SoftwareChange_Request-3636
+    VALUE=$(ox_read_property com.openexchange.pop3.ssl.protocols $PFILE)
+    if [ "SSLv3 TLSv1" = "$VALUE" ]; then
+        ox_set_property com.openexchange.pop3.ssl.protocols "" $PFILE
+    fi
 fi
 
 %clean
@@ -83,6 +89,10 @@ fi
 
 
 %changelog
+* Fri Oct 14 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First preview 7.8.3 release
+* Tue Sep 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.3 release
 * Tue Jul 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.8.2 release
 * Wed Jul 06 2016 Marcus Klein <marcus.klein@open-xchange.com>

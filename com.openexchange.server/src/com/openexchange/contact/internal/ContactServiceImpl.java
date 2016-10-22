@@ -794,12 +794,20 @@ public class ContactServiceImpl extends DefaultContactService {
          * check supplied search
          */
         Check.validateSearch(contactSearch);
+
+        /*
+         * determine and filter search folders
+         */
+        List<String> folders = contactSearch.hasFolders() ? Tools.toStringList(contactSearch.getFolders()) : Tools.getSearchFolders(contextID, userID, contactSearch.isEmailAutoComplete());
+
+        if (contactSearch.hasExcludeFolders()) {
+            folders.removeAll(Tools.toStringList(contactSearch.getExcludeFolders()));
+        }
+
         /*
          * determine queried storages according to searched folders
          */
-        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
-                contactSearch.hasFolders() ? Tools.toStringList(contactSearch.getFolders()) :
-                    Tools.getSearchFolders(contextID, userID, contactSearch.isEmailAutoComplete()));
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, folders);
         Check.hasStorages(queriedStorages);
         /*
          * prepare fields and sort options

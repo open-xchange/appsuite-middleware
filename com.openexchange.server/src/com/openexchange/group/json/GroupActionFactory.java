@@ -51,10 +51,9 @@ package com.openexchange.group.json;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.json.actions.AbstractGroupAction;
 import com.openexchange.server.ServiceLookup;
@@ -64,7 +63,6 @@ import com.openexchange.server.ServiceLookup;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Module(name = "group", description = "The group module allows to query available groups. It is mainly used by the dialog for the selection of participants.")
 @com.openexchange.ajax.requesthandler.Module(actions = {"get","all","list","search","updates"})
 public class GroupActionFactory implements AJAXActionServiceFactory {
 
@@ -77,12 +75,13 @@ public class GroupActionFactory implements AJAXActionServiceFactory {
      */
     public GroupActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractGroupAction>(5, 0.9f, 1);
+        ImmutableMap.Builder<String, AbstractGroupAction> actions = ImmutableMap.builder();
         actions.put("get", new com.openexchange.group.json.actions.GetAction(services));
         actions.put("all", new com.openexchange.group.json.actions.AllAction(services));
         actions.put("list", new com.openexchange.group.json.actions.ListAction(services));
         actions.put("search", new com.openexchange.group.json.actions.SearchAction(services));
         actions.put("updates", new com.openexchange.group.json.actions.UpdatesAction(services));
+        this.actions = actions.build();
     }
 
     @Override

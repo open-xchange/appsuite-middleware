@@ -229,4 +229,18 @@ public class DefaultPushNotification implements PushNotification {
         return true;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append("{userId=").append(userId).append(", contextId=").append(contextId).append(", ");
+        if (topic != null) {
+            sb.append("topic=").append(topic).append(", ");
+        }
+        if (messageData != null) {
+            sb.append("messageData=").append(messageData);
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+
 }

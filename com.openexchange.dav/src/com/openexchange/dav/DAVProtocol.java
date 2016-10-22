@@ -54,6 +54,9 @@ import org.jdom2.Namespace;
 import com.openexchange.dav.reports.PrinicpalPropertySearchReport;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.framework.request.RequestContext;
+import com.openexchange.framework.request.RequestContextHolder;
+import com.openexchange.tools.webdav.WebDAVRequestContext;
 import com.openexchange.webdav.action.WebdavAction;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -168,6 +171,19 @@ public abstract class DAVProtocol extends Protocol {
         } else {
             return protocolException(url, e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Gets the WebDAV request context for the current thread.
+     *
+     * @return The WebDAV request context, or <code>null</code> if not available
+     */
+    public static WebDAVRequestContext getRequestContext() {
+        RequestContext requestContext = RequestContextHolder.get();
+        if (null != requestContext && WebDAVRequestContext.class.isInstance(requestContext)) {
+            return (WebDAVRequestContext) requestContext;
+        }
+        return null;
     }
 
     /**

@@ -68,8 +68,9 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
  * {@link URLMailAttachmentDataSource}
@@ -83,11 +84,14 @@ public final class URLMailAttachmentDataSource implements DataSource {
      */
     private static final int DEFAULT_TIMEOUT = 10000;
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link URLMailAttachmentDataSource}.
      */
-    public URLMailAttachmentDataSource() {
+    public URLMailAttachmentDataSource(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -125,7 +129,8 @@ public final class URLMailAttachmentDataSource implements DataSource {
              */
             urlCon = url.openConnection();
             if ("https".equalsIgnoreCase(url.getProtocol())) {
-                ((HttpsURLConnection) urlCon).setSSLSocketFactory(TrustAllSSLSocketFactory.getDefault());
+                SSLSocketFactoryProvider factoryProvider = services.getService(SSLSocketFactoryProvider.class);
+                ((HttpsURLConnection) urlCon).setSSLSocketFactory(factoryProvider.getDefault());
             }
             urlCon.setConnectTimeout(timeoutMillis);
             urlCon.setReadTimeout(timeoutMillis);

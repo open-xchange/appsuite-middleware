@@ -86,8 +86,6 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "Response: A JSON Object containing the category identifiers and the corresponding unread count as key value pairs")
 public class UnreadAction extends AbstractCategoriesAction {
 
-    private static final String ACTION = "categories";
-
     private static final String PARAMETER_CATEGORY_IDS = "category_ids";
 
     /**
@@ -106,10 +104,6 @@ public class UnreadAction extends AbstractCategoriesAction {
         MailCategoriesConfigService categoriesConfigService = services.getService(MailCategoriesConfigService.class);
         if (categoriesConfigService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class.getSimpleName());
-        }
-
-        if (!categoriesConfigService.isEnabled(session)) {
-            throw AjaxExceptionCodes.DISABLED_ACTION.create(ACTION);
         }
 
         String idsString = requestData.getParameter(PARAMETER_CATEGORY_IDS);

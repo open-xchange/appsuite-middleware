@@ -92,4 +92,10 @@ public @interface DispatcherNotes {
      * @return Whether to allow access without secret
      */
 	boolean noSecretCallback() default false;
+
+	/**
+     * Indicates whether this action prefers reading/parsing request body stream by itself.
+     * @return Whether to prefer reading/parsing request body stream by itself
+     */
+    boolean preferStream() default false;
 }

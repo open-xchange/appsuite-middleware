@@ -239,9 +239,21 @@ public class ImageMagickImageTransformations implements ImageTransformations {
             case CONTAIN:
                 op.scale(Integer.valueOf(maxWidth), Integer.valueOf(maxHeight));
                 break;
+            case CONTAIN_FORCE_DIMENSION:
+                // http://www.imagemagick.org/Usage/resize/
+                // http://www.imagemagick.org/Usage/thumbnails/#fit_summery
+                op.resize(Integer.valueOf(maxWidth), Integer.valueOf(maxHeight), Character.valueOf('>'));
+                op.gravity("center");
+                op.extent(Integer.valueOf(maxWidth), Integer.valueOf(maxHeight));
+                break;
             case COVER:
                 op.thumbnail(Integer.valueOf(maxWidth), Integer.valueOf(maxHeight));
                 break;
+            case COVER_AND_CROP:
+                // Fill Area Flag ('^' flag)
+                op.resize(Integer.valueOf(maxWidth), Integer.valueOf(maxHeight), Character.valueOf('^'));
+                op.gravity("center");
+                op.extent(Integer.valueOf(maxWidth), Integer.valueOf(maxHeight));
             case AUTO:
                 // fall-through
             default:

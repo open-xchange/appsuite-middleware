@@ -67,37 +67,43 @@ public class LogLevelServiceImpl implements LogLevelService {
     /** The logger */
     protected static Logger LOG = LoggerFactory.getLogger(LogLevelServiceImpl.class);
 
-    private ConcurrentHashMap<String, ch.qos.logback.classic.Level> changedLogLevels = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, ch.qos.logback.classic.Level> changedLogLevels = new ConcurrentHashMap<>();
 
     @Override
-    public void set(String className, Level logLevel) {
+    public boolean set(String className, Level logLevel) {
         if (Strings.isEmpty(className)) {
             LOG.info("Class name is empty. Abort change.");
-            return;
+            return false;
         }
         ch.qos.logback.classic.Logger lLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(className);
 
         if (lLogger == null) {
             LOG.warn("Not able to check (and set) the log level for class {} to {} as no logger is defined.", className, logLevel.getName());
-            return;
+            return false;
         }
 
         ch.qos.logback.classic.Level effectiveLevel = lLogger.getEffectiveLevel();
         if (effectiveLevel == null) {
             LOG.warn("No log level found for class {}. Skipping change as we are not able to reset previous status.", className);
-            return;
+            return false;
         }
 
         ch.qos.logback.classic.Level newLevel = asSlf4jLevel(logLevel);
         lLogger.setLevel(newLevel);
-        this.changedLogLevels.putIfAbsent(className, effectiveLevel);
+        ch.qos.logback.classic.Level existing = this.changedLogLevels.putIfAbsent(className, effectiveLevel);
+        if (null != existing) {
+            LOG.warn("Not able to check (and set) the log level for class {} to {}. Another thread set log level {} concurrently", className, logLevel.getName(), existing.levelStr);
+            return false;
+        }
 
         LOG.info("Configured log level for class {} as {}.", className, logLevel.getName());
+        return true;
     }
 
     private static ch.qos.logback.classic.Level asSlf4jLevel(java.util.logging.Level lbLevel) {
-        if (lbLevel == null)
+        if (lbLevel == null) {
             throw new IllegalArgumentException("Unexpected level [null]");
+        }
 
         int levelInt = lbLevel.intValue();
         if (levelInt == java.util.logging.Level.ALL.intValue()) {
@@ -126,7 +132,7 @@ public class LogLevelServiceImpl implements LogLevelService {
             return;
         }
 
-        ch.qos.logback.classic.Level level = this.changedLogLevels.get(className);
+        ch.qos.logback.classic.Level level = this.changedLogLevels.remove(className);
         if (level == null) {
             LOG.warn("Cannot reset log level for class {}. No previous change found.", className);
             return;
@@ -134,7 +140,6 @@ public class LogLevelServiceImpl implements LogLevelService {
         ch.qos.logback.classic.Logger lLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(className);
         if (lLogger != null) {
             lLogger.setLevel(level);
-            this.changedLogLevels.remove(className);
         }
     }
 }

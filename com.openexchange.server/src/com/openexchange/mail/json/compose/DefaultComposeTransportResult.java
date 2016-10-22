@@ -65,19 +65,21 @@ public class DefaultComposeTransportResult implements ComposeTransportResult {
 
     private final List<? extends ComposedMailMessage> transportMessages;
     private final ComposedMailMessage sentMessage;
+    private final boolean transportEqualToSent;
 
     /**
      * Initializes a new {@link DefaultComposeTransportResult} with sanitizing passed messages.
      */
-    public DefaultComposeTransportResult(List<? extends ComposedMailMessage> transportMessages, ComposedMailMessage sentMessage) {
-        this(transportMessages, sentMessage, true);
+    public DefaultComposeTransportResult(List<? extends ComposedMailMessage> transportMessages, ComposedMailMessage sentMessage, boolean transportEqualToSent) {
+        this(transportMessages, sentMessage, transportEqualToSent, true);
     }
 
     /**
      * Initializes a new {@link DefaultComposeTransportResult}.
      */
-    public DefaultComposeTransportResult(List<? extends ComposedMailMessage> transportMessages, ComposedMailMessage sentMessage, boolean sanitize) {
+    public DefaultComposeTransportResult(List<? extends ComposedMailMessage> transportMessages, ComposedMailMessage sentMessage, boolean transportEqualToSent, boolean sanitize) {
         super();
+        this.transportEqualToSent = transportEqualToSent;
         Validate.notNull(transportMessages, "Transport messages must not be null");
         Validate.notNull(sentMessage, "Sent message must not be null");
 
@@ -96,6 +98,11 @@ public class DefaultComposeTransportResult implements ComposeTransportResult {
         } else {
             this.sentMessage = sentMessage;
         }
+    }
+
+    @Override
+    public boolean isTransportEqualToSent() {
+        return transportEqualToSent;
     }
 
     @Override

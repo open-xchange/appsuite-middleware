@@ -62,13 +62,14 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.http.deferrer.DeferringURLService;
 import com.openexchange.oauth.OAuthServiceMetaData;
+import com.openexchange.oauth.msliveconnect.MSLiveConnectOAuthScope;
 import com.openexchange.oauth.msliveconnect.MsLiveConnectOAuthServiceMetaData;
 import com.openexchange.oauth.msliveconnect.groupware.RemoveOAuthAccountsTask;
+import com.openexchange.oauth.scope.OAuthScopeRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
-
 
 /**
  * {@link MsLiveConnectOAuthActivator} - The activator for MS Live Connect OAuth service.
@@ -83,7 +84,7 @@ public final class MsLiveConnectOAuthActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, DeferringURLService.class, CapabilityService.class, DispatcherPrefixService.class, DatabaseService.class };
+        return new Class<?>[] { ConfigurationService.class, DeferringURLService.class, CapabilityService.class, DispatcherPrefixService.class, DatabaseService.class, OAuthScopeRegistry.class };
     }
 
     @Override
@@ -98,6 +99,7 @@ public final class MsLiveConnectOAuthActivator extends HousekeepingActivator {
             final Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "msliveconnect");
             registerService(CapabilityChecker.class, new CapabilityChecker() {
+
                 @Override
                 public boolean isEnabled(String capability, Session ses) throws OXException {
                     if ("msliveconnect".equals(capability)) {
@@ -118,6 +120,10 @@ public final class MsLiveConnectOAuthActivator extends HousekeepingActivator {
             // Register the update task
             final DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new RemoveOAuthAccountsTask());
             registerService(UpdateTaskProviderService.class.getName(), providerService);
+
+            // Register the scope
+            OAuthScopeRegistry scopeRegistry = getService(OAuthScopeRegistry.class);
+            scopeRegistry.registerScopes(msLiveConnectService.getAPI(), MSLiveConnectOAuthScope.values());
 
             log.info("Successfully initialized MS Live Connect OAuth service");
         } catch (final Exception e) {

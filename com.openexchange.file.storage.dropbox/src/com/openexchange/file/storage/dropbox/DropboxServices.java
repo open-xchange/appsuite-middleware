@@ -50,7 +50,6 @@
 package com.openexchange.file.storage.dropbox;
 
 import java.util.concurrent.atomic.AtomicReference;
-
 import com.openexchange.server.ServiceLookup;
 
 /**

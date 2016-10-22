@@ -2387,7 +2387,7 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
                              * Independent entries ('one-offs') must contain a valid e-mail address
                              */
                             if (null == member.getEmailaddress() || 0 == member.getEmailaddress().trim().length()) {
-                                throw ContactExceptionCodes.EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS.create();
+                                throw ContactExceptionCodes.EMAIL_MANDATORY_FOR_EXTERNAL_MEMBERS.create(member.getDisplayname());
                             }
                             try {
                                 new QuotedInternetAddress(member.getEmailaddress()).validate();

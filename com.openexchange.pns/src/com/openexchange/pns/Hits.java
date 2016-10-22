@@ -49,14 +49,30 @@
 
 package com.openexchange.pns;
 
+import java.util.Collections;
+import java.util.Iterator;
 
 /**
- * {@link Hits} -  A collection of hits while a hit is the associated of certain matches to a client and transport pair.
+ * {@link Hits} - A collection of hits while a hit is the association of certain matches to a client and transport pair.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
 public interface Hits extends Iterable<Hit> {
+
+    /** The empty hits */
+    public static final Hits EMPTY_HITS = new Hits() {
+
+        @Override
+        public Iterator<Hit> iterator() {
+            return Collections.emptyIterator();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+    };
 
     /**
      * Checks if this instance is empty.

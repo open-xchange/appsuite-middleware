@@ -2,7 +2,7 @@
   get:
     operationId: getMailCount
     tags:
-      - mail
+      - Mail
     summary: Gets the mail count.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
@@ -11,6 +11,6 @@
       200:
         description: |
           'A JSON object containing an integer value representing the folder's mail count. Not IMAP: with timestamp. In case of errors the responsible fields in the
-          response are filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).'
+          response are filled (see [Error handling](#error-handling)).'
         schema:
           $ref: "#/definitions/MailCountResponse"

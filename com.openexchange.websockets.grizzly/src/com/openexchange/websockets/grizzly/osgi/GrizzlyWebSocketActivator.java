@@ -49,12 +49,21 @@
 
 package com.openexchange.websockets.grizzly.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
+import org.osgi.util.tracker.ServiceTracker;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Interests;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -65,8 +74,8 @@ import com.openexchange.websockets.WebSocketService;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketApplication;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketService;
 import com.openexchange.websockets.grizzly.GrizzlyWebSocketSessionToucher;
+import com.openexchange.websockets.grizzly.auth.GrizzlyWebSocketAuthenticator;
 import com.openexchange.websockets.grizzly.remote.HzRemoteWebSocketDistributor;
-import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributor;
 import com.openexchange.websockets.grizzly.remote.portable.PortableMessageDistributorFactory;
 
 /**
@@ -91,7 +100,7 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigurationService.class, WebApplicationService.class, SessiondService.class, TimerService.class, ThreadPoolService.class,
-            ContextService.class, UserService.class};
+            ContextService.class, UserService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -105,25 +114,51 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
         this.remoteDistributor = remoteDistributor;
 
         WebSocketListenerTracker listenerTracker = new WebSocketListenerTracker(context);
-        track(WebSocketListener.class, listenerTracker);
-        track(HazelcastInstance.class, new HzTracker(remoteDistributor, this, context));
-        openTrackers();
-
-        registerService(CustomPortableFactory.class, new PortableMessageDistributorFactory(), null);
+        ServiceTracker<WebSocketListener, WebSocketListener> st = track(WebSocketListener.class, listenerTracker);
+        st.open();
 
         GrizzlyWebSocketApplication app = this.app;
         if (null == app) {
             WebApplicationService webApplicationService = getService(WebApplicationService.class);
-            app = new GrizzlyWebSocketApplication(listenerTracker, remoteDistributor, this);
+            app = GrizzlyWebSocketApplication.initializeGrizzlyWebSocketApplication(listenerTracker, remoteDistributor, this);
             listenerTracker.setApplication(app);
             webApplicationService.registerWebSocketApplication("", "/*", app, null);
             registerService(WebSocketService.class, new GrizzlyWebSocketService(app, remoteDistributor));
             this.app = app;
 
-            PortableMessageDistributor.setGrizzlyWebSocketApplication(app);
-
             long period = GrizzlyWebSocketSessionToucher.getTouchPeriod(getService(ConfigurationService.class));
             sessionToucherTask = getService(TimerService.class).scheduleAtFixedRate(new GrizzlyWebSocketSessionToucher(app), period, period);
+        }
+
+        track(HazelcastInstance.class, new HzTracker(remoteDistributor, this, context));
+        track(GrizzlyWebSocketAuthenticator.class, new GrizzlyWebSocketAuthenticatorTracker(context));
+        openTrackers();
+
+        registerService(ForcedReloadable.class, new ForcedReloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                GrizzlyWebSocketApplication.invalidateEnabledCache();
+            }
+
+            @Override
+            public Interests getInterests() {
+                return null;
+            }
+        });
+
+        registerService(CustomPortableFactory.class, new PortableMessageDistributorFactory(), null);
+
+        {
+            Dictionary<String, Object> props = new Hashtable<>(2);
+            props.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
+            registerService(EventHandler.class, new GrizzlyWebSocketEventHandler(), props);
+        }
+
+        {
+            Dictionary<String, Object> props = new Hashtable<>(2);
+            props.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
+            registerService(EventHandler.class, new CleanerStoppingEventHandler(remoteDistributor), props);
         }
     }
 
@@ -143,7 +178,7 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
                 }
             }
 
-            PortableMessageDistributor.setGrizzlyWebSocketApplication(null);
+            GrizzlyWebSocketApplication.unsetGrizzlyWebSocketApplication();
 
             WebApplicationService webApplicationService = getService(WebApplicationService.class);
             if (null != webApplicationService) {
@@ -164,13 +199,11 @@ public class GrizzlyWebSocketActivator extends HousekeepingActivator {
 
     @Override
     public <S> boolean addService(Class<S> clazz, S service) {
-        // TODO Auto-generated method stub
         return super.addService(clazz, service);
     }
 
     @Override
     public <S> boolean removeService(Class<? extends S> clazz) {
-        // TODO Auto-generated method stub
         return super.removeService(clazz);
     }
 

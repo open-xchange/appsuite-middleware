@@ -2,14 +2,14 @@
   get:
     operationId: getAllCapabilities
     tags:
-      - capabilities
-    summary: Gets all capabilities (**available since v7.4.2**).
+      - Capabilities
+    summary: Gets all capabilities.
     parameters:
       - $ref: "#/parameters/gblQueryParamSession"
     responses:
       200:
         description: |
           A JSON object containing an array with data for all capabilities. In case of errors the responsible fields in the response are
-          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/CapabilitiesResponse"

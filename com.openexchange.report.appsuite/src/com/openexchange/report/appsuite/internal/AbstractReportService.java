@@ -49,7 +49,6 @@
 
 package com.openexchange.report.appsuite.internal;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.report.appsuite.ReportService;
 import com.openexchange.report.appsuite.serialization.Report;
 

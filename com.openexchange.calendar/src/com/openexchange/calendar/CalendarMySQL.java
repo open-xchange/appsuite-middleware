@@ -170,7 +170,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static final String select = "SELECT intfield01, timestampfield01, timestampfield02, field01 FROM prg_dates ";
 
-    private static final String FREE_BUSY_SELECT = "SELECT intfield01, timestampfield01, timestampfield02, intfield07, intfield06, field01, fid, pflag, created_from, intfield02, intfield04, field06, field07, field08, timezone, intfield05, intfield03, field09 FROM prg_dates ";
+    private static final String FREE_BUSY_SELECT = "SELECT intfield01, timestampfield01, timestampfield02, intfield07, intfield06, field01, fid, pflag, created_from, intfield02, intfield04, field06, field07, field08, timezone, intfield05, intfield03, field09, field02 FROM prg_dates ";
 
     private static final String RANGE_SELECT = "SELECT intfield01, timestampfield01, timestampfield02, intfield02, intfield04, field06, field07, field08, timezone, intfield07 FROM prg_dates ";
 
@@ -1768,7 +1768,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         Quota amountQuota = CalendarQuotaProvider.getAmountQuota(session, connection, viewFactory, this);
         long limit = amountQuota.getLimit();
         long usage = amountQuota.getUsage();
-        if (limit > 0 && amountQuota.getUsage() >= limit) {
+        if (limit == 0 || (limit > 0 && amountQuota.getUsage() >= limit)) {
             throw QuotaExceptionCodes.QUOTA_EXCEEDED_CALENDAR.create(usage, limit);
         }
     }
@@ -5096,6 +5096,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                         }
                         final CalendarDataObject update = new CalendarDataObject();
                         update.setContext(ctx);
+                        update.setActionFolder(fid);
                         update.setObjectID(edao.getRecurrenceID());
                         if (deleted_exceptions != null) {
                             final List<Date> asList = Arrays.asList(deleted_exceptions);
@@ -5320,7 +5321,17 @@ public class CalendarMySQL implements CalendarSqlImp {
     private final void triggerDeleteEvent(final Connection con, final int oid, final int fid, final Session so, final Context ctx, final CalendarDataObject edao) throws OXException {
         final CalendarDataObject ao;
         if (edao == null) {
-            ao = new CalendarDataObject();
+            // fix for bug 48598 where we previously sent a shallow CalenderDataObject that only
+            // contained the objectID and parentFolderID (as of the setters invoked below), but that
+            // made it impossible to compute recurrence information in event listeners; hence, for
+            // those cases where this method gets called without the CalenderDataObject, we need to
+            // retrieve the complete Appointment object that is to be deleted:
+            final AppointmentSQLInterface calendarSql = FACTORY_REF.get().createAppointmentSql(so);
+            try {
+                ao = calendarSql.getObjectById(oid, fid);
+            } catch (final SQLException e) {
+                throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);
+            }
         } else {
             ao = edao.clone();
         }

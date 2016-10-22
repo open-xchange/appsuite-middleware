@@ -102,13 +102,12 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
      * Initializes a new {@link GrizzlyWebSocketHttpServletRequest}.
      *
      * @param requestPacket The associated HTTP request packet
+     * @param cookies The cookies
      * @param parameters The parsed parameters
      */
-    public GrizzlyWebSocketHttpServletRequest(HttpRequestPacket requestPacket, Parameters parameters) {
+    public GrizzlyWebSocketHttpServletRequest(HttpRequestPacket requestPacket, Cookies cookies, Parameters parameters) {
         super();
         this.requestPacket = requestPacket;
-        Cookies cookies = new Cookies();
-        cookies.setHeaders(requestPacket.getHeaders());
         this.cookies = cookies;
         this.parameters = parameters;
     }
@@ -119,7 +118,7 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
     }
 
     @Override
-    public Enumeration getAttributeNames() {
+    public Enumeration<String> getAttributeNames() {
         final Iterator<String> attributeNames = requestPacket.getAttributeNames().iterator();
         return new Enumeration<String>() {
 
@@ -166,7 +165,7 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
     }
 
     @Override
-    public Enumeration getParameterNames() {
+    public Enumeration<String> getParameterNames() {
         final Iterator<String> iterator = parameters.getParameterNames().iterator();
         return new Enumeration<String>() {
 
@@ -188,7 +187,7 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
     }
 
     @Override
-    public Map getParameterMap() {
+    public Map<String, String[]> getParameterMap() {
         Set<String> parameterNames = parameters.getParameterNames();
         Map<String, String[]> parameterMap = new LinkedHashMap<>(parameterNames.size());
         for (String name : parameterNames) {
@@ -255,7 +254,7 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
     }
 
     @Override
-    public Enumeration getLocales() {
+    public Enumeration<Locale> getLocales() {
         Iterable<String> values = requestPacket.getHeaders().values(Header.AcceptLanguage);
 
         List<Locale> locales = new LinkedList<>();
@@ -375,7 +374,7 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
     }
 
     @Override
-    public Enumeration getHeaders(String name) {
+    public Enumeration<String> getHeaders(String name) {
         final Iterator<String> iter = requestPacket.getHeaders().values(name).iterator();
         return new Enumeration<String>() {
 
@@ -392,7 +391,7 @@ public class GrizzlyWebSocketHttpServletRequest implements HttpServletRequest {
     }
 
     @Override
-    public Enumeration getHeaderNames() {
+    public Enumeration<String> getHeaderNames() {
         final Iterator<String> iter = requestPacket.getHeaders().names().iterator();
         return new Enumeration<String>() {
 

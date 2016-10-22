@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Administration
 Bundle-SymbolicName: com.openexchange.admin
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Activator: com.openexchange.admin.osgi.AdminActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Vendor: OX Software GmbH
@@ -92,6 +92,8 @@ Export-Package: com.openexchange.admin.daemons,
  com.openexchange.admin.plugins,
  com.openexchange.admin.properties,
  com.openexchange.admin.rmi.impl,
+ com.openexchange.admin.schemacache,
+ com.openexchange.admin.schemacache.inmemory,
  com.openexchange.admin.storage.interfaces,
  com.openexchange.admin.storage.mysqlStorage,
  com.openexchange.admin.storage.sqlStorage,

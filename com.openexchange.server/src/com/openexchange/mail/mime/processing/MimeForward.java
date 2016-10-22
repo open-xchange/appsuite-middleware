@@ -403,15 +403,17 @@ public final class MimeForward extends AbstractMimeProcessing {
             }
             new MailMessageParser().setInlineDetectorBehavior(true).parseMailMessage(originalMsg, handler);
             for (final MailPart mailPart : handler.getNonInlineParts()) {
-                mailPart.getContentDisposition().setDisposition(Part.ATTACHMENT);
-                if (!isHtml) {
-                    // Drop any inline information; such as "Content-Id" header
-                    mailPart.removeContentId();
-                    mailPart.removeHeader(MessageHeaders.HDR_CONTENT_ID);
+                if (false == mailPart.getContentType().startsWith("application/pgp-signature")) {
+                    mailPart.getContentDisposition().setDisposition(Part.ATTACHMENT);
+                    if (!isHtml) {
+                        // Drop any inline information; such as "Content-Id" header
+                        mailPart.removeContentId();
+                        mailPart.removeHeader(MessageHeaders.HDR_CONTENT_ID);
+                    }
+                    mailPart.getFileName(); // Enforce to set file name possibly extracted from Content-Type header
+                    mailPart.getContentType().removeNameParameter(); // Remove name parameter
+                    compositeMail.addAdditionalParts(mailPart);
                 }
-                mailPart.getFileName(); // Enforce to set file name possibly extracted from Content-Type header
-                mailPart.getContentType().removeNameParameter(); // Remove name parameter
-                compositeMail.addAdditionalParts(mailPart);
             }
             forwardMail = compositeMail;
         } else if (originalContentType.startsWith(TEXT) && !MimeProcessingUtility.isSpecial(originalContentType.getBaseType())) {

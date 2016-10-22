@@ -49,10 +49,13 @@
 
 package com.openexchange.websockets.grizzly;
 
+import java.util.List;
 import java.util.concurrent.Future;
 import com.openexchange.exception.OXException;
 import com.openexchange.websockets.SendControl;
+import com.openexchange.websockets.WebSocket;
 import com.openexchange.websockets.WebSocketExceptionCodes;
+import com.openexchange.websockets.WebSocketInfo;
 import com.openexchange.websockets.WebSocketService;
 import com.openexchange.websockets.WebSockets;
 import com.openexchange.websockets.grizzly.remote.RemoteWebSocketDistributor;
@@ -81,15 +84,15 @@ public class GrizzlyWebSocketService implements WebSocketService {
 
     @Override
     public boolean exists(int userId, int contextId) throws OXException {
-        if (localApp.existsAny(null, userId, contextId)) {
-            return true;
-        }
-
-        return remoteDistributor.existsAnyRemote(null, userId, contextId);
+        return exists(null, userId, contextId);
     }
 
     @Override
-    public boolean exists(String pathFilter, int userId, int contextId) {
+    public boolean exists(String pathFilter, int userId, int contextId) throws OXException {
+        if (false == WebSockets.validatePath(pathFilter)) {
+            throw WebSocketExceptionCodes.INVALID_PATH_FILTER.create(pathFilter);
+        }
+
         if (localApp.existsAny(pathFilter, userId, contextId)) {
             return true;
         }
@@ -115,7 +118,7 @@ public class GrizzlyWebSocketService implements WebSocketService {
             throw WebSocketExceptionCodes.INVALID_PATH_FILTER.create(pathFilter);
         }
 
-        localApp.sendToUser(message, pathFilter, userId, contextId);
+        localApp.sendToUser(message, pathFilter, false, userId, contextId);
         remoteDistributor.sendRemote(message, pathFilter, userId, contextId, asyncRemoteDistribution);
     }
 
@@ -125,8 +128,45 @@ public class GrizzlyWebSocketService implements WebSocketService {
             throw WebSocketExceptionCodes.INVALID_PATH_FILTER.create(pathFilter);
         }
 
-        Future<Void> f = localApp.sendToUserAsync(message, pathFilter, userId, contextId);
+        Future<Void> f = localApp.sendToUserAsync(message, pathFilter, false, userId, contextId);
         remoteDistributor.sendRemote(message, pathFilter, userId, contextId, true);
         return new SendControlImpl<Void>(f);
     }
+
+    // -------------------------------------------------------------------------------------------------------------
+
+    @Override
+    public List<WebSocketInfo> listClusterWebSocketInfo() throws OXException {
+        List<WebSocketInfo> infos = remoteDistributor.listClusterWebSocketInfo();
+        if (null == infos) {
+            // Only locally available...
+            infos = localApp.listWebSocketInfo();
+        }
+        return infos;
+    }
+
+    @Override
+    public List<WebSocket> listLocalWebSockets() throws OXException {
+        return localApp.listLocalWebSockets();
+    }
+
+    @Override
+    public long getNumberOfBufferedMessages() throws OXException {
+        return remoteDistributor.getNumberOfBufferedMessages();
+    }
+
+    @Override
+    public void closeWebSockets(int userId, int contextId, String pathFilter) throws OXException {
+        if (false == WebSockets.validatePath(pathFilter)) {
+            throw WebSocketExceptionCodes.INVALID_PATH_FILTER.create(pathFilter);
+        }
+
+        localApp.closeWebSockets(userId, contextId, pathFilter);
+    }
+
+    @Override
+    public long getNumberOfWebSockets() throws OXException {
+        return localApp.getNumberOfWebSockets();
+    }
+
 }

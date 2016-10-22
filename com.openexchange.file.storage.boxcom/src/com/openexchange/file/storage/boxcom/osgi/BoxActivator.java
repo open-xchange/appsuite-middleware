@@ -55,15 +55,15 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.slf4j.Logger;
+import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.boxcom.Services;
-import com.openexchange.file.storage.boxcom.access.BoxEventHandler;
+import com.openexchange.file.storage.oauth.OAuthFileStorageAccountEventHandler;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
-import com.openexchange.oauth.access.OAuthAccessRegistry;
 import com.openexchange.oauth.access.OAuthAccessRegistryService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondEventConstants;
@@ -86,7 +86,7 @@ public final class BoxActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, OAuthService.class, OAuthAccessRegistryService.class };
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class, MimeTypeMap.class, TimerService.class, OAuthService.class, ClusterLockService.class, OAuthAccessRegistryService.class };
     }
 
     @Override
@@ -108,12 +108,7 @@ public final class BoxActivator extends HousekeepingActivator {
              */
             final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_LAST_SESSION);
-            registerService(EventHandler.class, new BoxEventHandler(), serviceProperties);
-            /*
-             * Register the access registry
-             */
-            OAuthAccessRegistryService oAuthAccessRegistryService = Services.getService(OAuthAccessRegistryService.class);
-            oAuthAccessRegistryService.add(API.BOX_COM.getFullName(), new OAuthAccessRegistry(API.BOX_COM.getFullName()));
+            registerService(EventHandler.class, new OAuthFileStorageAccountEventHandler(this, API.BOX_COM), serviceProperties);
         } catch (final Exception e) {
             logger.error("", e);
             throw e;

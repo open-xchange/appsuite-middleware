@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 4
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -62,6 +62,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-3327
     ox_add_property USE_FULL_LOGIN_INFO_FOR_CONTEXT_LOOKUP false /opt/open-xchange/etc/imapauth.properties
+
+    # SoftwareChange_Request-3554
+    ox_add_property LOWERCASE_FOR_CONTEXT_USER_LOOKUP false /opt/open-xchange/etc/imapauth.properties
 fi
 
 %clean
@@ -78,6 +81,10 @@ fi
 %doc com.openexchange.authentication.imap/ChangeLog
 
 %changelog
+* Fri Oct 14 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First preview 7.8.3 release
+* Tue Sep 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.3 release
 * Tue Jul 12 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.8.2 release
 * Wed Jul 06 2016 Marcus Klein <marcus.klein@open-xchange.com>

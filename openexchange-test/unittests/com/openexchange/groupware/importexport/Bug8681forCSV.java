@@ -65,6 +65,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
+import com.openexchange.setuptools.TestConfig;
 import junit.framework.JUnit4TestAdapter;
 
 public class Bug8681forCSV extends AbstractContactTest {
@@ -77,7 +78,8 @@ public class Bug8681forCSV extends AbstractContactTest {
     @BeforeClass
     public static void initialize() throws Exception {
         AbstractContactTest.initialize();
-        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId("defaultcontext"));
+        final TestConfig config = new TestConfig();
+        ctx = ContextStorage.getInstance().getContext(ContextStorage.getInstance().getContextId(config.getContextName()));
     }
 
     @Test

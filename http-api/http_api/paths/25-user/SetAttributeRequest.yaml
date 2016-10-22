@@ -2,11 +2,11 @@
   put:
     operationId: setUserAttribute
     tags:
-      - user
-    summary: Sets a user attribute (**available since v6.20**).
+      - User
+    summary: Sets a user attribute.
     description: |
       Sets a custom user attribute consisting of a name and a value. The attribute can later be
-      retrieved using the `/user?action=getAttribute` request.
+      retrieved using the [/user?action=getAttribute](#operation--user-action-getAttribute-get) request.
     consumes:
       - application/json
     parameters:
@@ -31,6 +31,6 @@
       200:
         description: |
           A JSON object providing the information whether the attribute could be set. In case of errors the responsible fields in the response are
-          filled (see [Error handling](https://documentation.open-xchange.com/latest/middleware/http_api/1_introduction.html#error-handling)).
+          filled (see [Error handling](#error-handling)).
         schema:
           $ref: "#/definitions/UserAttributionResponse"

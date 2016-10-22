@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Tasks JSON Bundle
 Bundle-SymbolicName: com.openexchange.tasks.json
-Bundle-Version: 7.8.2
+Bundle-Version: 7.8.3
 Bundle-Activator: com.openexchange.tasks.json.osgi.TaskJSONActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -14,6 +14,9 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.sym,
  com.fasterxml.jackson.core.type,
  com.fasterxml.jackson.core.util,
+ com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.collect,
  com.openexchange.ajax,
  com.openexchange.ajax.fields,
  com.openexchange.ajax.parser,
@@ -25,7 +28,6 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.conversion,
  com.openexchange.data.conversion.ical,
  com.openexchange.documentation,
- com.openexchange.documentation.annotations,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.container,

@@ -11,6 +11,7 @@ import org.junit.Test;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.serialization.Report;
+import com.openexchange.report.appsuite.serialization.ReportConfigs;
 
 public class TotalTest {
 
@@ -86,8 +87,8 @@ public class TotalTest {
 
     private void initReport() {
         report = new Report(UUID.randomUUID().toString(), "default", new Date().getTime());
-        report.setConsideredTimeframeStart(new Date().getTime() - 100000);
-        report.setConsideredTimeframeEnd(new Date().getTime());
+        ReportConfigs rc = new ReportConfigs.ReportConfigsBuilder("default").consideredTimeframeStart(new Date().getTime() - 100000).consideredTimeframeEnd(new Date().getTime()).isConfigTimerange(true).build();
+        report.setReportConfig(rc);
     }
 
     private void fillReport() {

@@ -55,7 +55,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
-import com.openexchange.sessiond.SessiondMBean;
+import com.openexchange.sessiond.mbean.SessiondMBean;
 
 /**
  * {@link CloseSessionsCLT} - Command-Line access clear all sessions belonging to a given context.

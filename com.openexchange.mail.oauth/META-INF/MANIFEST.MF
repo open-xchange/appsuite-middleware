@@ -1,0 +1,21 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The bundle for resolving an OAuth account to mail data
+Bundle-SymbolicName: com.openexchange.mail.oauth
+Bundle-Version: 7.8.3
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.mail.autoconfig,
+ com.openexchange.oauth,
+ com.openexchange.oauth.access,
+ com.openexchange.oauth.scope,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.server,
+ com.openexchange.session,
+ org.osgi.framework,
+ org.osgi.util.tracker
+Export-Package: com.openexchange.mail.oauth
+Bundle-Activator: com.openexchange.mail.oauth.osgi.MailOAuthActivator

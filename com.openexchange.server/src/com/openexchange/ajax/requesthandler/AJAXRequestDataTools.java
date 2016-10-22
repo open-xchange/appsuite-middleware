@@ -50,6 +50,8 @@
 package com.openexchange.ajax.requesthandler;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -148,6 +150,23 @@ public class AJAXRequestDataTools {
      * @throws OXException If an OX error occurs
      */
     public AJAXRequestData parseRequest(final HttpServletRequest req, final boolean preferStream, final boolean isFileUpload, final ServerSession session, final String prefix, final HttpServletResponse optResp) throws IOException, OXException {
+        return parseRequest(req, preferStream, isFileUpload, true, session, prefix, optResp);
+    }
+
+    /**
+     * Parses an appropriate {@link AJAXRequestData} instance from specified arguments.
+     *
+     * @param req The HTTP Servlet request
+     * @param preferStream Whether to prefer request's stream instead of parsing its body data to an appropriate (JSON) object
+     * @param isFileUpload Whether passed request is considered as a file upload
+     * @param session The associated session
+     * @param prefix The part of request's URI considered as prefix; &lt;prefix&gt; + <code>'/'</code> + &lt;module&gt;
+     * @param optResp The optional HTTP Servlet response
+     * @return An appropriate {@link AJAXRequestData} instance
+     * @throws IOException If an I/O error occurs
+     * @throws OXException If an OX error occurs
+     */
+    public AJAXRequestData parseRequest(HttpServletRequest req, boolean preferStream, boolean isFileUpload, boolean preLoadRequestBody, ServerSession session, String prefix, HttpServletResponse optResp) throws IOException, OXException {
         final AJAXRequestData retval = new AJAXRequestData().setHttpServletResponse(optResp);
         retval.setUserAgent(req.getHeader("user-agent"));
         parseHostName(retval, req, session);
@@ -213,21 +232,56 @@ public class AJAXRequestDataTools {
             retval.setUploadStreamProvider(new HTTPRequestInputStreamProvider(req));
         } else {
             /*
-             * Guess an appropriate body object
+             * Load request body now or let request data be loaded through loadRequestBody() later on
              */
-            final BodyParserRegistry registry = REGISTRY.get();
-            if (null == registry) {
-                DefaultBodyParser.getInstance().setBody(retval, req);
-            } else {
-                final BodyParser bodyParser = registry.getParserFor(retval);
-                if (null == bodyParser) {
+            if (preLoadRequestBody) {
+                /*
+                 * Guess an appropriate body object
+                 */
+                final BodyParserRegistry registry = REGISTRY.get();
+                if (null == registry) {
                     DefaultBodyParser.getInstance().setBody(retval, req);
                 } else {
-                    bodyParser.setBody(retval, req);
+                    final BodyParser bodyParser = registry.getParserFor(retval);
+                    if (null == bodyParser) {
+                        DefaultBodyParser.getInstance().setBody(retval, req);
+                    } else {
+                        bodyParser.setBody(retval, req);
+                    }
                 }
+                retval.setRequestBodyLoaded(true);
             }
         }
         return retval;
+    }
+
+    /**
+     * Loads and sets the request body.
+     *
+     * @param requestData The request data whose body is supposed to be loaded
+     * @throws OXException If body cannot be loaded
+     */
+    public static void loadRequestBody(AJAXRequestData requestData) throws OXException {
+        if (null == requestData || requestData.isRequestBodyLoaded() || null != requestData.getData() || requestData.hasUploadStreamProvider()) {
+            return;
+        }
+
+        HttpServletRequest req = requestData.optHttpServletRequest();
+        if (null == req) {
+            return;
+        }
+
+        BodyParserRegistry registry = REGISTRY.get();
+        if (null == registry) {
+            DefaultBodyParser.getInstance().setBody(requestData, req);
+        } else {
+            final BodyParser bodyParser = registry.getParserFor(requestData);
+            if (null == bodyParser) {
+                DefaultBodyParser.getInstance().setBody(requestData, req);
+            } else {
+                bodyParser.setBody(requestData, req);
+            }
+        }
     }
 
     /**
@@ -429,6 +483,14 @@ public class AJAXRequestDataTools {
         }
 
         String pathInfo = req.getRequestURI();
+        if (pathInfo.indexOf('%') >= 0) {
+            try {
+                pathInfo = URLDecoder.decode(pathInfo, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                // Should never happen
+                LOG.error(e.getMessage(), e);
+            }
+        }
         final int lastIndex = pathInfo.lastIndexOf(';');
         if (lastIndex > 0) {
             pathInfo = pathInfo.substring(0, lastIndex);

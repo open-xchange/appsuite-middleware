@@ -49,6 +49,8 @@
 
 package com.openexchange.rest.client.osgi;
 
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.client.endpointpool.EndpointManagerFactory;
 import com.openexchange.rest.client.endpointpool.internal.EndpointManagerFactoryImpl;
@@ -72,13 +74,29 @@ public class RestClientActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return null;
+        return new Class<?>[] { TimerService.class, SSLSocketFactoryProvider.class, SSLConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        trackService(TimerService.class);
+        RestClientServices.setServices(this);
         registerService(EndpointManagerFactory.class, new EndpointManagerFactoryImpl(this));
+
+        // Avoid annoying WARN logging
+        //System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.http.client.protocol.ResponseProcessCookies", "fatal");
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        try {
+            // Clean-up
+            cleanUp();
+            // Clear service registry
+            RestClientServices.setServices(null);
+        } catch (final Exception e) {
+            org.slf4j.LoggerFactory.getLogger(RestClientActivator.class).error("", e);
+            throw e;
+        }
     }
 
 }

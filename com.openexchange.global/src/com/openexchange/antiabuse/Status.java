@@ -69,6 +69,8 @@ public class Status {
     // ------------------------------------------------------------------------------------------------------------------------ //
 
     private final int status;
+    private final String message;
+    private final Map<String, Object> attributes;
     private final Map<String, String> properties;
 
     /**
@@ -77,7 +79,7 @@ public class Status {
      * @param status The status code returned by Anti-Abuse service
      */
     public Status(int status) {
-        this(status, null);
+        this(status, null, null, null);
     }
 
     /**
@@ -87,8 +89,22 @@ public class Status {
      * @param properties The optional properties returned by Anti-Abuse service
      */
     public Status(int status, Map<String, String> properties) {
+        this(status, null, null, properties);
+    }
+
+    /**
+     * Initializes a new {@link Status}.
+     *
+     * @param status The status code returned by Anti-Abuse service
+     * @param message The optional message
+     * @param attributes Additional attributes
+     * @param properties The optional properties returned by Anti-Abuse service
+     */
+    public Status(int status, String message, Map<String, Object> attributes, Map<String, String> properties) {
         super();
         this.status = status;
+        this.message = message;
+        this.attributes = null == attributes ? Collections.<String, Object> emptyMap() : attributes;
         this.properties = null == properties ? Collections.<String, String> emptyMap() : properties;
     }
 
@@ -126,6 +142,24 @@ public class Status {
      */
     public int getStatus() {
         return status;
+    }
+
+    /**
+     * Gets the attributes
+     *
+     * @return The attributes or an empty map
+     */
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    /**
+     * Gets the message
+     *
+     * @return The message or <code>null</code>
+     */
+    public String getMessage() {
+        return message;
     }
 
     /**

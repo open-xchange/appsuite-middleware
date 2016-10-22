@@ -4,7 +4,7 @@ Name:           open-xchange-meta
 BuildArch:      noarch
 #!BuildIgnore:  post-build-checks
 Version:        @OXVERSION@
-%define         ox_release 4
+%define         ox_release 1
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -18,6 +18,20 @@ Summary:        Open-Xchange Meta packages
 %define all_lang_ui_appsuite open-xchange-appsuite-help-de-de, open-xchange-appsuite-help-en-us, open-xchange-appsuite-l10n-cs-cz, open-xchange-appsuite-l10n-de-de, open-xchange-appsuite-l10n-en-us, open-xchange-appsuite-l10n-es-es, open-xchange-appsuite-l10n-es-mx, open-xchange-appsuite-l10n-fr-ca, open-xchange-appsuite-l10n-fr-fr, open-xchange-appsuite-l10n-hu-hu, open-xchange-appsuite-l10n-it-it, open-xchange-appsuite-l10n-ja-jp, open-xchange-appsuite-l10n-lv-lv, open-xchange-appsuite-l10n-nl-nl, open-xchange-appsuite-l10n-pl-pl, open-xchange-appsuite-l10n-ro-ro, open-xchange-appsuite-l10n-sk-sk, open-xchange-appsuite-l10n-zh-cn, open-xchange-appsuite-l10n-zh-tw
 
 %define all_lang_backend open-xchange-l10n-de-de, open-xchange-l10n-cs-cz, open-xchange-l10n-es-es, open-xchange-l10n-hu-hu, open-xchange-l10n-it-it, open-xchange-l10n-ja-jp, open-xchange-l10n-lv-lv, open-xchange-l10n-nl-nl, open-xchange-l10n-pl-pl, open-xchange-l10n-sk-sk, open-xchange-l10n-zh-cn, open-xchange-l10n-zh-tw
+
+# ----------------------------------------------------------------------------------------------------
+%package -n     open-xchange-meta-appsuite-push
+Group:          Applications/Productivity
+Summary:        The Open-Xchange Meta package for App Suite push
+Requires:       open-xchange-pns-impl
+Requires:       open-xchange-pns-transport-websockets
+
+%description -n open-xchange-meta-appsuite-push
+The Open-Xchange Meta package for App Suite push
+
+Authors:
+--------
+    Open-Xchange
 
 # ----------------------------------------------------------------------------------------------------
 %package -n     open-xchange-meta-server
@@ -352,6 +366,10 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Fri Oct 14 2016 Carsten Hoeger <choeger@open-xchange.com>
+First preview 7.8.3 release
+* Tue Sep 06 2016 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 7.8.3 release
 * Tue Jul 12 2016 Carsten Hoeger <choeger@open-xchange.com>
 Second candidate for 7.8.2 release
 * Wed Jul 06 2016 Carsten Hoeger <choeger@open-xchange.com>

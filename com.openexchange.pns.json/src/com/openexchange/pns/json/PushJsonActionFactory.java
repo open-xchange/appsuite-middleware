@@ -51,7 +51,7 @@ package com.openexchange.pns.json;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
@@ -88,19 +88,23 @@ public class PushJsonActionFactory implements AJAXActionServiceFactory {
     }
 
     private Map<String, AJAXActionService> initActions(ServiceLookup services) {
-        Map<String, AJAXActionService> tmp = new ConcurrentHashMap<>(8);
+        ImmutableMap.Builder<String, AJAXActionService> tmp = ImmutableMap.builder();
         {
             SubscribeAction subscribeAction = new SubscribeAction(services);
             tmp.put(subscribeAction.getAction(), subscribeAction);
         }
-        return tmp;
+        {
+            UnsubscribeAction unsubscribeAction = new UnsubscribeAction(services);
+            tmp.put(unsubscribeAction.getAction(), unsubscribeAction);
+        }
+        return tmp.build();
     }
 
     @Override
     public AJAXActionService createActionService(String action) throws OXException {
         AJAXActionService retval = actions.get(action);
         if (null == retval) {
-            throw AjaxExceptionCodes.UNKNOWN_ACTION.create(action);
+            throw AjaxExceptionCodes.UNKNOWN_ACTION_IN_MODULE.create(action, getModule());
         }
         return retval;
     }

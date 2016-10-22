@@ -51,7 +51,7 @@ package com.openexchange.drive.json.action;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
@@ -67,7 +67,7 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
 
     public DriveActionFactory() {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(32, 0.9f, 1);
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
         actions.put("syncfolders", new SyncFoldersAction());
         actions.put("syncfiles", new SyncFilesAction());
         actions.put("upload", new UploadAction());
@@ -95,6 +95,9 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
         actions.put("autocomplete", new AutocompleteAction());
         actions.put("trashStats", new TrashStatsAction());
         actions.put("emptyTrash", new EmptyTrashAction());
+        actions.put("moveFile", new MoveFileAction());
+        actions.put("moveFolder", new MoveFolderAction());
+        this.actions = actions.build();
     }
 
     @Override

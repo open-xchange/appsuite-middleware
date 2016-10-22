@@ -63,7 +63,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.folderstorage.cache.CacheServiceRegistry;
-import com.openexchange.folderstorage.internal.Tools;
+import com.openexchange.java.util.Tools;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -417,7 +417,7 @@ public final class FolderMapManagement {
                 List<String> keys = new ArrayList<String>();
                 keys.add(treeId);
                 for (String folderId : folderIds) {
-                    if (false == Tools.isGlobalId(folderId)) {
+                    if (false == com.openexchange.folderstorage.internal.Tools.isGlobalId(folderId)) {
                         keys.add(folderId);
                     }
                 }
