@@ -64,6 +64,7 @@ import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
+import com.openexchange.share.servlet.internal.AbstractShareServlet;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.share.servlet.utils.LoginLocation;
 import com.openexchange.share.servlet.utils.LoginLocationRegistry;
@@ -133,7 +134,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
             GuestInfo guestInfo = shareRequest.getGuest();
             User sharingUser = ShareServiceLookup.getService(UserService.class, true).getUser(guestInfo.getCreatedBy(), guestInfo.getContextID());
             TranslatorFactory factory = ShareServiceLookup.getService(TranslatorFactory.class, true);
-            Translator translator = factory.translatorFor(guestInfo.getLocale());
+            Translator translator = factory.translatorFor(AbstractShareServlet.determineLocale(request, guestInfo));
 
             ShareTargetPath targetPath = shareRequest.getTargetPath();
             if (shareRequest.isInvalidTarget()) {
