@@ -191,8 +191,7 @@ public class LoginLocation {
      * @return
      */
     public LoginLocation loginName(String name) {
-        parameter("login_name", name);
-        return this;
+        return parameter("login_name", name);
     }
 
     /**
