@@ -95,13 +95,24 @@ public interface QuotaFileStorageListener {
      * <p>
      * <b>Note</b>: This call-back should not throw an exception.
      *
-     * @param id The identifier of the file in storage causing the exceeded quota
+     * @param optId The optional identifier of the file in storage causing the exceeded quota or <code>null</code>
      * @param toIncrement The value that exceeded the quota limit
      * @param currentUsage The current quota usage
      * @param quota The quota limit
      * @param userId The (optional) user identifier or <code>0</code> (zero) if storage is not user-specific
      * @param contextId The context identifier
      */
-    void onQuotaExceeded(String id, long toIncrement, long currentUsage, long quota, int userId, int contextId);
+    void onQuotaExceeded(String optId, long toIncrement, long currentUsage, long quota, int userId, int contextId);
+
+    /**
+     * Called in case no quota is available for associated user and consequently the operation is about to be aborted.
+     * <p>
+     * <b>Note</b>: This call-back should not throw an exception.
+     *
+     * @param optId The optional identifier of the file in storage causing the exceeded quota or <code>null</code>
+     * @param userId The (optional) user identifier or <code>0</code> (zero) if storage is not user-specific
+     * @param contextId The context identifier
+     */
+    void onNoQuotaAvailable(String optId, int userId, int contextId);
 
 }

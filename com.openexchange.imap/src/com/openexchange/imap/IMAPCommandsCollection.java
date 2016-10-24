@@ -50,6 +50,7 @@
 package com.openexchange.imap;
 
 import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
+import static com.openexchange.java.Strings.asciiLowerCase;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.mime.utils.MimeStorageUtility.getFetchProfile;
 import java.io.IOException;
@@ -3218,7 +3219,7 @@ public final class IMAPCommandsCollection {
                     }
                 }
 
-                if (null == bodystructure || isApplicationSmil(bodystructure)) {
+                if (null == bodystructure || ignorable(bodystructure).booleanValue()) {
                     return null;
                 }
 
@@ -3279,8 +3280,36 @@ public final class IMAPCommandsCollection {
                 return toMailPart(byteArray, bid.bodystructure, imapFolder.getFullName());
             }
 
+            private Boolean ignorable(BODYSTRUCTURE bodystructure) {
+                if (false == bodystructure.isMulti()) {
+                    return Boolean.valueOf(isSignedData(bodystructure));
+                }
+
+                // Multipart...
+                if (isMultipartSigned(bodystructure) || isApplicationSmil(bodystructure)) {
+                    return Boolean.TRUE;
+                }
+
+                for (BODYSTRUCTURE body : bodystructure.bodies) {
+                    Boolean isSigned = ignorable(body);
+                    if (null != isSigned) {
+                        return isSigned;
+                    }
+                }
+
+                return Boolean.FALSE;
+            }
+
             private boolean isApplicationSmil(final BODYSTRUCTURE bodystructure) {
-                return bodystructure.isMulti() && "related".equals(com.openexchange.java.Strings.toLowerCase(bodystructure.subtype)) && "application/smil".equals(com.openexchange.java.Strings.toLowerCase(MimeMessageUtility.decodeEnvelopeHeader(bodystructure.cParams.get("type"))));
+                return /*bodystructure.isMulti() &&*/ "related".equals(asciiLowerCase(bodystructure.subtype)) && "application/smil".equals(asciiLowerCase(MimeMessageUtility.decodeEnvelopeHeader(bodystructure.cParams.get("type"))));
+            }
+
+            private boolean isSignedData(BODYSTRUCTURE bodystructure) {
+                return "application".equals(asciiLowerCase(bodystructure.type)) && "pkcs7-mime".equals(asciiLowerCase(bodystructure.subtype)) && "signed-data".equals(asciiLowerCase(bodystructure.cParams.get("smime-type"))) && "smime.p7m".equals(asciiLowerCase(bodystructure.cParams.get("name")));
+            }
+
+            private boolean isMultipartSigned(BODYSTRUCTURE bodystructure) {
+                return /*bodystructure.isMulti() &&*/ "signed".equals(asciiLowerCase(bodystructure.subtype)) && "application/pkcs7-signature".equals(asciiLowerCase(bodystructure.cParams.get("protocol")));
             }
 
         }));

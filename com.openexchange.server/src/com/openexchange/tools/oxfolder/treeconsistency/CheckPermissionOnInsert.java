@@ -112,24 +112,35 @@ public final class CheckPermissionOnInsert extends CheckPermission {
             /*
              * Auto-insert system-folder-read permission to make possible non-visible parent folders visible in folder tree
              */
-            if (!map.isEmpty()) {
+            int mapSize = map.size();
+            if (mapSize > 0) {
                 final TIntObjectIterator<ToDoPermission> it = map.iterator();
-                for ( int i = map.size(); i-- > 0; ) {
+                for ( int i = mapSize; i-- > 0; ) {
                     it.advance();
                     final int folderId = it.key();
                     /*
                      * Insert read permissions
                      */
                     final ToDoPermission toDoPermission = it.value();
-                    final int[] users = toDoPermission.getUsers();
-                    for (int j = 0; j < users.length; j++) {
-                        LOG.debug("Auto-Insert system-folder-read permission for user {} to folder {}", users[j], folderId);
-                        addSystemFolderReadPermission(folderId, users[j], false);
+                    {
+                        int[] users = toDoPermission.getUsers();
+                        int length = users.length;
+                        if (length > 0) {
+                            for (int j = length; j-- > 0;) {
+                                LOG.debug("Auto-Insert system-folder-read permission for user {} to folder {}", users[j], folderId);
+                                addSystemFolderReadPermission(folderId, users[j], false);
+                            }
+                        }
                     }
-                    final int[] groups = toDoPermission.getGroups();
-                    for (int j = 0; j < groups.length; j++) {
-                        LOG.debug("Auto-Insert system-folder-read permission for group {} to folder {}", groups[j], folderId);
-                        addSystemFolderReadPermission(folderId, groups[j], true);
+                    {
+                        int[] groups = toDoPermission.getGroups();
+                        int length = groups.length;
+                        if (length > 0) {
+                            for (int j = length; j-- > 0;) {
+                                LOG.debug("Auto-Insert system-folder-read permission for group {} to folder {}", groups[j], folderId);
+                                addSystemFolderReadPermission(folderId, groups[j], true);
+                            }
+                        }
                     }
                     /*
                      * Update folders last-modified
