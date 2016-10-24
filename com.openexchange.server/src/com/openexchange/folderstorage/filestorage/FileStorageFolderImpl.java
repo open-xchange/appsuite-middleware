@@ -96,6 +96,9 @@ public final class FileStorageFolderImpl extends AbstractFolder {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FileStorageFolderImpl.class);
 
+    private static final String CAPABILITY_ZIPPABLE_FOLDER = Strings.asciiLowerCase(FileStorageCapability.ZIPPABLE_FOLDER.name());
+    private static final String CAPABILITY_FILE_VERSIONS = Strings.asciiLowerCase(FileStorageCapability.FILE_VERSIONS.name());
+
     /**
      * <code>"9"</code>
      */
@@ -278,7 +281,15 @@ public final class FileStorageFolderImpl extends AbstractFolder {
             } else {
                 supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
             }
-            supportedCapabilities.add(Strings.asciiLowerCase(FileStorageCapability.ZIPPABLE_FOLDER.name()));
+            supportedCapabilities.add(CAPABILITY_ZIPPABLE_FOLDER);
+        }
+        if (optCheckCapability(fsFolder.getId(), FileStorageCapability.FILE_VERSIONS, folderAccess)) {
+            if (null == supportedCapabilities) {
+                supportedCapabilities = new LinkedHashSet<>(2);
+            } else {
+                supportedCapabilities = new LinkedHashSet<>(supportedCapabilities);
+            }
+            supportedCapabilities.add(CAPABILITY_FILE_VERSIONS);
         }
         this.supportedCapabilities = supportedCapabilities;
         lastModified = fsFolder.getLastModifiedDate();
