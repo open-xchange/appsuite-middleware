@@ -322,6 +322,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     @Override
     public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+        boolean addVersion = null != modifiedFields && modifiedFields.contains(Field.VERSION_COMMENT);
         String path = FileStorageFileAccess.NEW == file.getId() ? null : toPath(file.getFolderId(), file.getId());
         try {
             final long fileSize = file.getFileSize();
@@ -341,7 +342,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                     boolean retry = true;
                     while (retry) {
                         try {
-                            entry = dropboxAPI.putFile(new StringBuilder(file.getFolderId()).append('/').append(fileName).toString(), sink.getStream(), length, null, null);
+                            if (addVersion) {
+                                entry = dropboxAPI.putFileOverwrite(new StringBuilder(file.getFolderId()).append('/').append(fileName).toString(), sink.getStream(), length, null);
+                            } else {
+                                entry = dropboxAPI.putFile(new StringBuilder(file.getFolderId()).append('/').append(fileName).toString(), sink.getStream(), length, null, null);
+                            }
                             retry = false;
                         } catch (DropboxServerException e) {
                             if (SC_CONFLICT != e.error) {
