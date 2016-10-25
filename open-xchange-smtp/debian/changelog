@@ -1,3 +1,9 @@
+open-xchange-smtp (7.8.1-24) stable; urgency=medium
+
+  * Build for patch 2016-10-24 (3629)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 17 Oct 2016 12:04:02 +0200
+
 open-xchange-smtp (7.8.1-23) stable; urgency=medium
 
   * Build for patch 2016-10-10 (3596)

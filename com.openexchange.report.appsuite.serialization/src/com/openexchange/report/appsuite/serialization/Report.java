@@ -255,16 +255,9 @@ public class Report implements Serializable {
         this.pendingTasks = numberOfTasks;
     }
 
-    void setTaskState(int numberOfTasks, int pendingTasks) {
+    public void setTaskState(int numberOfTasks, int pendingTasks) {
         this.numberOfTasks = numberOfTasks;
         this.pendingTasks = pendingTasks;
-    }
-
-    /**
-     * Mark one task as done
-     */
-    public void markTaskAsDone() {
-        this.pendingTasks--;
     }
 
     /**

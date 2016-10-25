@@ -100,9 +100,9 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
 
     @Override
     public Void call() throws Exception {
-        int previousPriority = Thread.currentThread().getPriority();
-        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-
+        Thread currentThread = Thread.currentThread();
+        int previousPriority = currentThread.getPriority();
+        currentThread.setPriority(Thread.MIN_PRIORITY);
         try {
             if (reportType == null) {
                 reportType = "default";
@@ -125,7 +125,6 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
                         break;
                     }
                     LOG.error("Exception thrown while loading context. Skip report for context {}. Move to next context", ctxId, oxException);
-                    Orchestration.getInstance().abort(uuid, reportType);
                     continue;
                 } catch (Exception e) {
                     LOG.error("Unexpected error while context report generation!", e);
@@ -133,6 +132,7 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
             }
         } finally {
             Thread.currentThread().setPriority(previousPriority);
+            finishSchema(this.contextIds.size());
         }
         return null;
     }
@@ -195,6 +195,10 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
                 }
             }
         }
+    }
+    
+    private void finishSchema(int processedContexts) {
+        Orchestration.getInstance().updateProcessedContexts(processedContexts, this.reportType, this.uuid);
     }
 
     protected User[] loadUsers(Context ctx) throws OXException {
