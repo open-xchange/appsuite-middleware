@@ -4,6 +4,7 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sql"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.json"/>
+	<classpathentry exported="true" kind="lib" path="testlib/mockito-core-1.9.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/awaitility-1.6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/hamcrest-core-1.3.jar" sourcepath="testlib/source/hamcrest-core-1.3-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/system-rules-1.12.0.jar" sourcepath="system-rules-1.12.0-sources.jar"/>
@@ -11,11 +12,6 @@
 	<classpathentry exported="true" kind="lib" path="testlib/objenesis-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/junit-4.11.jar" sourcepath="testlib/source/junit-4.11-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/jchronic-0.2.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="testlib/mockito-all-1.9.5.jar" sourcepath="testlib/source/mockito-all-1.9.5-sources.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="jar:platform:/resource/com.openexchange.test/testlib/source/mockito-all-1.9.5-sources.jar!/"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="testlib/powermock-mockito-1.5.4-full.jar"/>
 	<classpathentry kind="lib" path="testlib/cglib-nodep-2.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/junit-addons-1.4.jar" sourcepath="testlib/source/junit-addons-1.4-src.jar"/>
