@@ -226,6 +226,9 @@ public final class DownloadUtility {
                     sz = tmp.length;
                     in = new ByteArrayRandomAccess(tmp);
                 }
+            } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "svg") || fileNameImpliesSvg(fileName)) {
+                // Treat all SVG content as harmful
+                sContentDisposition = "attachment";
             } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "xml") || fileNameImpliesXml(fileName)) {
                 /*
                  * XML content requested for download...
@@ -350,9 +353,6 @@ public final class DownloadUtility {
                         sink = null; // Set to null to avoid premature closing at the end of try-finally clause
                     }
                 }
-            } else if (Strings.startsWithAny(toLowerCase(contentType.getSubType()), "svg") || fileNameImpliesSvg(fileName)) {
-                // Treat all SVG content as harmful
-                sContentDisposition = "attachment";
             } else if (contentType.startsWith("image/") || fileNameImpliesImage(fileName)) {
                 /*
                  * Image content requested for download...

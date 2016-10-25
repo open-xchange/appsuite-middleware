@@ -50,6 +50,7 @@
 package com.openexchange.folderstorage.mail;
 
 import static com.openexchange.folderstorage.mail.MailFolderStorage.closeMailAccess;
+import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import gnu.trove.map.hash.TIntIntHashMap;
 import java.util.EnumSet;
@@ -225,8 +226,18 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         } else {
             localizedName = folderName;
         }
-        // FolderObject.SYSTEM_PRIVATE_FOLDER_ID
-        parent = mailFolder.isRootFolder() ? FolderStorage.PRIVATE_ID : MailFolderUtility.prepareFullname(accountId, mailFolder.getParentFullname());
+        // Determine the parent...
+        if (mailFolder.isRootFolder()) {
+            parent = FolderStorage.PRIVATE_ID;
+        } else {
+            String parentFullName = MailFolderUtility.prepareFullname(accountId, mailFolder.getParentFullname());
+            if (parentFullName.equals(id)) {
+                parent = determineParentFrom(accountId, mailFolder.getParentFullname(), mailFolder.containsSeparator() ? mailFolder.getSeparator() : mailAccess.getRootFolder().getSeparator());
+                LOG.warn("Mail folder \"{}\" references itself as parent. Assuming \"{}\" instead... (user={}, context={})", id, parent, I(userId), I(contextId));
+            } else {
+                parent = parentFullName;
+            }
+        }
         final MailPermission[] mailPermissions = mailFolder.getPermissions();
         permissions = new Permission[mailPermissions.length];
         for (int i = 0; i < mailPermissions.length; i++) {
@@ -337,6 +348,23 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
         }
         cacheable = cache;
+    }
+
+    /**
+     * Determines the parent from specified full name path.
+     *
+     * @param accountId The account identifier
+     * @param fullName The full name to determine the parent from
+     * @return The parent full name
+     */
+    private String determineParentFrom(int accountId, String fullName, char separator) {
+        int index = fullName.lastIndexOf(separator);
+
+        if (index >= 0) {
+            return MailFolderUtility.prepareFullname(accountId, fullName.substring(0, index));
+        }
+
+        return MailFolder.DEFAULT_FOLDER_ID.equals(fullName) ? FolderStorage.PRIVATE_ID : MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID);
     }
 
     private MailFolderType determineMailFolderType(String folderName, MailFolder mailFolder, MailAccess<?, ?> mailAccess, MailAccount mailAccount, User user, DefaultFolderFullnameProvider fullnameProvider, boolean translatePrimaryAccountDefaultFolders) throws OXException {

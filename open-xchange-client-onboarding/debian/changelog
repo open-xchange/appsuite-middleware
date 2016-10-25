@@ -1,3 +1,9 @@
+open-xchange-client-onboarding (7.8.2-13) stable; urgency=medium
+
+  * Build for patch 2016-10-24 (3630)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Mon, 17 Oct 2016 10:55:21 +0200
+
 open-xchange-client-onboarding (7.8.2-12) stable; urgency=medium
 
   * Build for patch 2016-10-10 (3597)
