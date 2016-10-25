@@ -68,7 +68,7 @@ public class DropboxOAuthServiceMetaData extends AbstractExtendedScribeAwareOAut
      * Initialises a new {@link DropboxOAuthServiceMetaData}.
      */
     public DropboxOAuthServiceMetaData(ServiceLookup serviceLookup) {
-        super(serviceLookup, API.DROPBOX);
+        super(serviceLookup, API.DROPBOX, DropboxOAuthScope.values());
     }
 
     /*
