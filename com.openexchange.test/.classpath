@@ -4,7 +4,7 @@
 	<classpathentry kind="src" path="test"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sql"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/org.json"/>
-	<classpathentry exported="true" kind="lib" path="testlib/mockito-core-1.9.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="testlib/mockito-core-1.9.5.jar" sourcepath="testlib/source/mockito-core-1.9.5-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/awaitility-1.6.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/hamcrest-core-1.3.jar" sourcepath="testlib/source/hamcrest-core-1.3-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/system-rules-1.12.0.jar" sourcepath="system-rules-1.12.0-sources.jar"/>
