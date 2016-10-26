@@ -50,7 +50,9 @@ package com.openexchange.authorization;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-
+/**
+ * A utility class that provides {@link #getService() static access} to the tracked instance of {@link AuthorizationService}.
+ */
 public final class Authorization {
 
     private static final AtomicReference<AuthorizationService> SERVICE_REF = new AtomicReference<AuthorizationService>();
@@ -63,21 +65,29 @@ public final class Authorization {
     }
 
     /**
-     * @return the service
+     * Gets the tracked instance of {@code AuthorizationService}.
+     *
+     * @return The service or <code>null</code> if no instance of <code>AuthorizationService</code> appeared yet
      */
     public static AuthorizationService getService() {
         return SERVICE_REF.get();
     }
 
     /**
-     * @param service the service to set
+     * Sets the given service instance.
+     *
+     * @param service The service to set
+     * @return <code>true</code> if given service instance could be successfully set; otherwise <code>false</code> if a concurrent modification occurred
      */
     public static boolean setService(final AuthorizationService service) {
         return SERVICE_REF.compareAndSet(null, service);
     }
 
     /**
-     * @param service the service to set
+     * Unsets the given service in case that service is currently active.
+     *
+     * @param service The service to unset
+     * @return <code>true</code> if service could be successfully unset; otherwise <code>false</code>
      */
     public static boolean dropService(final AuthorizationService service) {
         return SERVICE_REF.compareAndSet(service, null);

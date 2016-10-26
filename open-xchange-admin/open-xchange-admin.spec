@@ -258,6 +258,9 @@ if [ ${1:-0} -eq 2 ]; then
     if [ "infostore,deniedportal,readcreatesharedfolders,editpublicfolders" = "$VALUE" ]; then
         ox_set_property drive 'infostore,deniedportal,contacts,collectemailaddresses' $PFILE
     fi
+
+    # SoftwareChange_Request-3676
+    ox_add_property DEFAULT_TIMEZONE Europe/Berlin /opt/open-xchange/etc/AdminUser.properties
 fi
 
 %clean

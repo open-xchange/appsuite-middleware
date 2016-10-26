@@ -3036,15 +3036,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Check if destination folder supports user flags
                  */
-                final boolean supportsUserFlags = UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId);
-                if (!supportsUserFlags) {
+                if (false == imapFolder.getPermanentFlags().contains(Flags.Flag.USER)) {
                     /*
                      * Remove all user flags from messages before appending to folder
                      */
-                    for (final Message message : msgs) {
-                        if (null != message) {
-                            removeUserFlagsFromMessage(message);
-                        }
+                    for (int i = 0; i < msgs.length; i++) {
+                        msgs[i] = removeUserFlagsFromMessage(msgs[i]);
                     }
                 }
                 /*
@@ -3233,15 +3230,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Check if destination folder supports user flags
                  */
-                boolean supportsUserFlags = UserFlagsCache.supportsUserFlags(imapFolder, true, session, accountId);
-                if (!supportsUserFlags) {
-                    /*
-                     * Remove all user flags from messages before appending to folder
-                     */
-                    for (final Message message : msgs) {
-                        if (null != message) {
-                            removeUserFlagsFromMessage(message);
-                        }
+                if (false == imapFolder.getPermanentFlags().contains(Flags.Flag.USER)) {
+                    for (int i = 0; i < msgs.length; i++) {
+                        msgs[i] = removeUserFlagsFromMessage(msgs[i]);
                     }
                 }
                 /*
@@ -4157,22 +4148,44 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      *
      * @param message The message whose user flags shall be removed
      * @throws MessagingException If removing user flags fails
+     * @throws OXException If removing user flags fails
      */
-    private static void removeUserFlagsFromMessage(final Message message) throws MessagingException {
-        final String[] userFlags = message.getFlags().getUserFlags();
+    private static Message removeUserFlagsFromMessage(Message message) throws MessagingException, OXException {
+        if (null == message) {
+            return null;
+        }
+
+        String[] userFlags = message.getFlags().getUserFlags();
         if (userFlags.length > 0) {
             /*
              * Create a new flags container necessary for later removal
              */
-            final Flags remove = new Flags();
+            Flags remove = new Flags();
             for (final String userFlag : userFlags) {
                 remove.add(userFlag);
             }
             /*
              * Remove gathered user flags from message's flags; flags which do not occur in flags object are unaffected.
              */
-            message.setFlags(remove, false);
+            try {
+                message.setFlags(remove, false);
+            } catch (MessagingException e) {
+                // Is read-only -- create a copy from first message
+                LOG.trace("", e);
+                final MimeMessage newMessage;
+                if (message instanceof ReadableMime) {
+                    newMessage = MimeMessageUtility.newMimeMessage(((ReadableMime) message).getMimeStream(), message.getReceivedDate());
+                    Flags flags = new Flags(message.getFlags()).removeAllUserFlags();
+                    newMessage.setFlags(flags, true);
+                } else {
+                    newMessage = MimeMessageUtility.cloneMessage(message, message.getReceivedDate());
+                    Flags flags = new Flags(message.getFlags()).removeAllUserFlags();
+                    newMessage.setFlags(flags, true);
+                }
+                return newMessage;
+            }
         }
+        return message;
     }
 
     /**

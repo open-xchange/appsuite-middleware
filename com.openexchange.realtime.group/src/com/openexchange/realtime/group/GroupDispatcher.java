@@ -61,11 +61,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.base.Optional;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.Component.EvictionPolicy;
 import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.cleanup.GlobalRealtimeCleanup;
+import com.openexchange.realtime.dispatch.DispatchExceptionCode;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
@@ -157,13 +159,14 @@ public class GroupDispatcher implements ComponentHandle {
         } catch(RealtimeException re){
             handleException(stanza, re);
         } catch(Throwable t) {
+            ExceptionUtils.handleThrowable(t);
             handleException(stanza, RealtimeExceptionCodes.STANZA_PROCESSING_FAILED.create(t, groupId, stanza.getFrom(), stanza.getTo()));
         }
     }
 
     /**
      * Handle the exception by logging it and informing the sender about it.
-     * 
+     *
      * @param stanza The Stanza that caused and Exception
      * @param e The caused exception
      */
@@ -175,7 +178,11 @@ public class GroupDispatcher implements ComponentHandle {
         try {
             relayToID(stanza, sender);
         } catch (OXException e1) {
-            LOG.error("Failed to inform sender about exception: {} because of {}", exception, e1);
+            if (DispatchExceptionCode.RESOURCE_OFFLINE.equals(e1)) {
+                LOG.debug("Failed to inform sender about exception: {} because of {}", exception, e1);
+            } else {
+                LOG.error("Failed to inform sender about exception: {} because of {}", exception, e1);
+            }
         }
     }
 

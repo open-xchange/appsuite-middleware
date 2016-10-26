@@ -211,42 +211,6 @@ public class Report implements Serializable {
         return this;
     }
 
-    /**
-     * Initializes a new {@link Report}. With all fields needed for either timeframe considered only "default" report or
-     * "oxcs-etended" report-type with additional parameters. If no timeframe is given, the last year from today is used
-     * as timeframe.
-     * 
-     * @param uuid
-     * @param reportType
-     * @param startTime
-     * @param startDate
-     * @param endDate
-     * @param isCustomTimerange
-     * @param isShowSingleTenant
-     * @param singleTenantId
-     * @param isIgnoreAdmin
-     * @param isShowDriveMetrics
-     * @param isShowMailMetrics
-     */
-    public Report(String uuid, String reportType, long startTime, Date startDate, Date endDate, Boolean isCustomTimerange, Boolean isShowSingleTenant, Long singleTenantId, Boolean isIgnoreAdmin, Boolean isShowDriveMetrics, Boolean isShowMailMetrics) {
-        this.uuid = uuid;
-        this.type = reportType;
-        this.startTime = startTime;
-        this.tenantMap = new LinkedHashMap<>();
-        this.tenantMap.put("deployment", new LinkedHashMap<String, Object>());
-        if (isCustomTimerange) {
-            this.defaultTimeframeStart = startDate.getTime();
-            this.defaultTimeframeEnd = endDate.getTime();
-        } else {
-            Calendar cal = Calendar.getInstance();
-            Date ed = cal.getTime();
-            cal.add(Calendar.YEAR, -1);
-            Date sd = cal.getTime();
-            this.defaultTimeframeStart = sd.getTime();
-            this.defaultTimeframeEnd = ed.getTime();
-        }
-    }
-
     public Report(String uuid, long startTime, ReportConfigs reportConfig) {
         this.uuid = uuid;
         this.type = reportConfig.getType();
@@ -470,26 +434,6 @@ public class Report implements Serializable {
             timeframeEnd = this.reportConfig.getConsideredTimeframeEnd();
         }
         return timeframeEnd;
-    }
-
-    public boolean isShowSingleTenant() {
-        return this.reportConfig.isShowSingleTenant();
-    }
-
-    public Long getSingleTenantId() {
-        return this.reportConfig.getSingleTenantId();
-    }
-
-    public boolean isAdminIgnore() {
-        return this.reportConfig.isAdminIgnore();
-    }
-
-    public boolean isShowDriveMetrics() {
-        return this.reportConfig.isShowDriveMetrics();
-    }
-
-    public boolean isShowMailMetrics() {
-        return this.reportConfig.isShowMailMetrics();
     }
 
     public String getStorageFolderPath() {

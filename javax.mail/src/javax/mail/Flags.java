@@ -445,6 +445,16 @@ public class Flags implements Cloneable, Serializable {
     }
 
     /**
+     * Removes all user flags from this Flags object.
+     *
+     * @return This Flags object with all user flags removed
+     */
+    public Flags removeAllUserFlags() {
+        user_flags = null;
+        return this;
+    }
+
+    /**
      * Returns a clone of this Flags object.
      */
     @SuppressWarnings("unchecked")

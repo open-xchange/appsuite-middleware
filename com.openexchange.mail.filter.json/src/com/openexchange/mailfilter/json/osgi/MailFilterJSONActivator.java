@@ -52,8 +52,6 @@ package com.openexchange.mailfilter.json.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.service.http.HttpService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
@@ -113,17 +111,9 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        Logger LOG = LoggerFactory.getLogger(MailFilterJSONActivator.class);
-        try {
-            super.stopBundle();
-            MailFilterServletInit.getInstance().stop();
-            Services.setServiceLookup(null);
-
-            cleanUp();
-        } catch (final Exception e) {
-            LOG.error("", e);
-            throw e;
-        }
+        MailFilterServletInit.getInstance().stop();
+        Services.setServiceLookup(null);
+        super.stopBundle();
     }
 
     /**
