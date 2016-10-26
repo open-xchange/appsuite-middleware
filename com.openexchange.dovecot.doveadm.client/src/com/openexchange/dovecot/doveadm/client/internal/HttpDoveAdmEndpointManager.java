@@ -147,12 +147,16 @@ public class HttpDoveAdmEndpointManager {
         List<String> l = Arrays.asList(Strings.splitByComma(endPoints.trim()));
 
         // Read properties for HTTP connections/pooling
+        int resetLen = propPrefix.length();
         int totalConnections = configService.getIntProperty(propPrefix.append("totalConnections").toString(), 100);
+        propPrefix.setLength(resetLen);
         int maxConnectionsPerRoute = configService.getIntProperty(propPrefix.append("maxConnectionsPerRoute").toString(), 0);
         if (maxConnectionsPerRoute <= 0) {
             maxConnectionsPerRoute = totalConnections / l.size();
         }
+        propPrefix.setLength(resetLen);
         int readTimeout = configService.getIntProperty(propPrefix.append("readTimeout").toString(), 2500);
+        propPrefix.setLength(resetLen);
         int connectTimeout = configService.getIntProperty(propPrefix.append("connectTimeout").toString(), 1500);
 
         // Initialize HTTP client for the listing
