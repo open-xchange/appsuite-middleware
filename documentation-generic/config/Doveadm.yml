@@ -6,17 +6,17 @@ Specifies the URIs to the Dovecot DoveAdm REST interface end-points.
 e.g. "http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081, http://dovecot3.host.invalid:8081"
 
 Moreover connection-related attributes are allowed to be specified to influence HTTP connection and pooling behavior
-com.openexchange.mailaccount.dovecot.endpoints.totalConnections        The number of total connections held in HTTP connection pool
-com.openexchange.mailaccount.dovecot.endpoints.maxConnectionsPerRoute  The number of connections per route held in HTTP connection pool; or less than/equal to 0 (zero) for auto-determining
-com.openexchange.mailaccount.dovecot.endpoints.readTimeout             The read time-out in milliseconds
-com.openexchange.mailaccount.dovecot.endpoints.connectTimeout          The connect time-out in milliseconds
+com.openexchange.dovecot.dovecot.endpoints.totalConnections        The number of total connections held in HTTP connection pool
+com.openexchange.dovecot.dovecot.endpoints.maxConnectionsPerRoute  The number of connections per route held in HTTP connection pool; or less than/equal to 0 (zero) for auto-determining
+com.openexchange.dovecot.dovecot.endpoints.readTimeout             The read time-out in milliseconds
+com.openexchange.dovecot.dovecot.endpoints.connectTimeout          The connect time-out in milliseconds
 
 Full example :
-com.openexchange.mailaccount.dovecot.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081
-com.openexchange.mailaccount.dovecot.endpoints.totalConnections=100
-com.openexchange.mailaccount.dovecot.endpoints.maxConnectionsPerRoute=0 (max. connections per route is then determined automatically by specified end-points)
-com.openexchange.mailaccount.dovecot.endpoints.readTimeout=2500
-com.openexchange.mailaccount.dovecot.endpoints.connectTimeout=1500
+com.openexchange.dovecot.dovecot.endpoints=http://dovecot1.host.invalid:8081, http://dovecot2.host.invalid:8081
+com.openexchange.dovecot.dovecot.endpoints.totalConnections=100
+com.openexchange.dovecot.dovecot.endpoints.maxConnectionsPerRoute=0 (max. connections per route is then determined automatically by specified end-points)
+com.openexchange.dovecot.dovecot.endpoints.readTimeout=2500
+com.openexchange.dovecot.dovecot.endpoints.connectTimeout=1500
 
 The values can be configured within a dedicated .properties file; e.g. 'doveadm.properties'.
       Default: 
