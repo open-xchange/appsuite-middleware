@@ -208,6 +208,9 @@ public enum MailField {
             }
         }
         LIST_FIELDS_MAP.put(MailListField.FLAG_SEEN, MailField.FLAGS);
+        LIST_FIELDS_MAP.put(MailListField.FLAG_ANSWERED, MailField.FLAGS);
+        LIST_FIELDS_MAP.put(MailListField.FLAG_DRAFT, MailField.FLAGS);
+        LIST_FIELDS_MAP.put(MailListField.FLAG_FLAGGED, MailField.FLAGS);
     }
 
     /**
