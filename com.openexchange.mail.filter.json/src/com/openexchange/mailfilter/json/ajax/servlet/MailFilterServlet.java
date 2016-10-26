@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax;
+package com.openexchange.mailfilter.json.ajax.servlet;
 
 import com.openexchange.mailfilter.json.ajax.actions.MailFilterAction;
 import com.openexchange.mailfilter.json.ajax.actions.MailFilterRequest;
