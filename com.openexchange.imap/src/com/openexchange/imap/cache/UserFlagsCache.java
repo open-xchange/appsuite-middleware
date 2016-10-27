@@ -102,12 +102,10 @@ public final class UserFlagsCache {
                     if (Folder.READ_WRITE == f.getMode()) {
                         entry.setValue(Boolean.valueOf(f.getPermanentFlags().contains(Flags.Flag.USER)));
                     } else {
-                        final String[] userFlags = f.getAvailableFlags().getUserFlags();
-                        if (null != userFlags && userFlags.length > 0) {
-                            entry.setValue(Boolean.TRUE);
-                        } else {
-                            entry.setValue(Boolean.valueOf(supportsUserDefinedFlags(f)));
-                        }
+                        // Close & reopen in read-write mode
+                        f.close(false);
+                        f.open(Folder.READ_WRITE);
+                        entry.setValue(Boolean.valueOf(f.getPermanentFlags().contains(Flags.Flag.USER)));
                     }
                 } else {
                     entry.setValue(Boolean.valueOf(supportsUserDefinedFlags(f)));

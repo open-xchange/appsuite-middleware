@@ -1,3 +1,9 @@
+open-xchange-file-distribution (7.8.2-14) stable; urgency=medium
+
+  * Build for patch 2016-09-08 (3699)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 26 Oct 2016 14:37:58 +0200
+
 open-xchange-file-distribution (7.8.2-13) stable; urgency=medium
 
   * Build for patch 2016-10-24 (3630)
