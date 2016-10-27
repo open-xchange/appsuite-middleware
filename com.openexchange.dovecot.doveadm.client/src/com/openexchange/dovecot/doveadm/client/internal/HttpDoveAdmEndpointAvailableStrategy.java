@@ -58,6 +58,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.slf4j.Logger;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
@@ -72,6 +73,8 @@ import com.openexchange.rest.client.endpointpool.EndpointAvailableStrategy;
  * @since v7.8.3
  */
 public class HttpDoveAdmEndpointAvailableStrategy implements EndpointAvailableStrategy {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HttpDoveAdmEndpointAvailableStrategy.class);
 
     private final String authorizationHeaderValue;
 
@@ -90,28 +93,36 @@ public class HttpDoveAdmEndpointAvailableStrategy implements EndpointAvailableSt
 
     @Override
     public AvailableResult isEndpointAvailable(Endpoint endpoint, HttpClient httpClient) throws OXException {
+        URI uri;
+        try {
+            uri = HttpDoveAdmClient.buildUri(new URI(endpoint.getBaseUri()), null, null);
+        } catch (URISyntaxException e) {
+            // ignore
+            LOG.warn("The URI to check for re-availability is wrong", e);
+            return AvailableResult.NONE;
+        }
+
         HttpGet get = null;
         HttpResponse response = null;
         try {
-            get = new HttpGet(HttpDoveAdmClient.buildUri(new URI(endpoint.getBaseUri()), null, null));
+            get = new HttpGet(uri);
             setCommonHeaders(get);
             response = httpClient.execute(get);
             int status = response.getStatusLine().getStatusCode();
             if (200 == status) {
+                LOG.info("DoveAdm end-point {} is re-available and will therefore removed from black-list", uri);
                 return AvailableResult.AVAILABLE;
             }
             if (401 == status) {
                 return AvailableResult.NONE;
             }
-        } catch (URISyntaxException e) {
-            // ignore
-            return AvailableResult.NONE;
         } catch (IOException e) {
             // ignore
         } finally {
             close(get, response);
         }
 
+        LOG.info("DoveAdm end-point {} is (still) not available and will therefore removed from black-list", uri);
         return AvailableResult.UNAVAILABLE;
     }
 
