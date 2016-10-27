@@ -51,6 +51,8 @@ package com.openexchange.mailfilter.json.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
 import org.osgi.service.http.HttpService;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
@@ -71,7 +73,6 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.HeaderTestC
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.NotTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.SizeTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.TrueTestCommandParser;
-import com.openexchange.mailfilter.json.ajax.servlet.MailFilterServletInit;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
 
@@ -98,9 +99,16 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        registerTestCommandParserRegistry();
 
-        MailFilterServletInit.getInstance().start();
+        // Dependently registers Servlets
+        {
+            Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
+            ServletRegisterer registerer = new ServletRegisterer(context);
+            track(filter, registerer);
+        }
+        openTrackers();
+
+        registerTestCommandParserRegistry();
 
         getService(CapabilityService.class).declareCapability(MailFilterChecker.CAPABILITY);
 
@@ -111,7 +119,6 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        MailFilterServletInit.getInstance().stop();
         Services.setServiceLookup(null);
         super.stopBundle();
     }

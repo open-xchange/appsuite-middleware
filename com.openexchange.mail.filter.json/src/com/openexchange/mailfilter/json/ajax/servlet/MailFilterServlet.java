@@ -49,43 +49,34 @@
 
 package com.openexchange.mailfilter.json.ajax.servlet;
 
-import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
+import com.openexchange.mailfilter.json.ajax.actions.MailFilterAction;
+import com.openexchange.mailfilter.json.ajax.actions.MailFilterRequest;
 
 /**
- * {@link MailFilterReloadable}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * @author d7
  */
-public class MailFilterReloadable implements Reloadable {
+public class MailFilterServlet extends AbstractMailFilterServlet {
 
     /**
-     * Initializes a new {@link MailFilterReloadable}.
+     *
      */
-    public MailFilterReloadable() {
+    private static final long serialVersionUID = 1472856427482243156L;
+
+    /**
+     * Default constructor.
+     */
+    public MailFilterServlet() {
         super();
     }
 
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        if (MailFilterServletInit.getInstance().isStarted()) {
-            MailFilterServletInit.getInstance().stop();
-            try {
-                MailFilterServletInit.getInstance().start();
-            } catch (Exception e) {
-                Logger logger = org.slf4j.LoggerFactory.getLogger(MailFilterReloadable.class);
-                logger.error("Error reloading configuration for bundle com.openexchange.mail.filter: {}", e);
-            }
-        }
+    protected MailFilterAction getAction() {
+        return MailFilterAction.getInstance();
     }
 
     @Override
-    public Interests getInterests() {
-        return Reloadables.interestsForFiles("mailfilter.properties");
+    protected MailFilterRequest createRequest() {
+        return new MailFilterRequest();
     }
-
 }

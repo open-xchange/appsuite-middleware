@@ -47,36 +47,72 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax;
+package com.openexchange.dovecot.doveadm.client.internal;
 
-import com.openexchange.mailfilter.json.ajax.actions.MailFilterAction;
-import com.openexchange.mailfilter.json.ajax.actions.MailFilterRequest;
+import static com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmClient.close;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+import com.google.common.io.BaseEncoding;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
+import com.openexchange.rest.client.endpointpool.Endpoint;
+import com.openexchange.rest.client.endpointpool.EndpointAvailableStrategy;
+
 
 /**
+ * {@link HttpDoveAdmEndpointAvailableStrategy}
  *
- * @author d7
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class MailFilterServlet extends AbstractMailFilterServlet {
+public class HttpDoveAdmEndpointAvailableStrategy implements EndpointAvailableStrategy {
+
+    private final String authorizationHeaderValue;
 
     /**
-     *
+     * Initializes a new {@link HttpDoveAdmEndpointAvailableStrategy}.
      */
-    private static final long serialVersionUID = 1472856427482243156L;
-
-    /**
-     * Default constructor.
-     */
-    public MailFilterServlet() {
+    public HttpDoveAdmEndpointAvailableStrategy(String apiKey) {
         super();
+        String encodedApiKey = BaseEncoding.base64().encode(apiKey.getBytes(Charsets.UTF_8));
+        authorizationHeaderValue = "X-Dovecot-API " + encodedApiKey;
+    }
+
+    private void setCommonHeaders(HttpRequestBase request) {
+        request.setHeader(HttpHeaders.AUTHORIZATION, authorizationHeaderValue);
     }
 
     @Override
-    protected MailFilterAction getAction() {
-        return MailFilterAction.getInstance();
+    public AvailableResult isEndpointAvailable(Endpoint endpoint, HttpClient httpClient) throws OXException {
+        HttpGet get = null;
+        HttpResponse response = null;
+        try {
+            get = new HttpGet(HttpDoveAdmClient.buildUri(new URI(endpoint.getBaseUri()), null, null));
+            setCommonHeaders(get);
+            response = httpClient.execute(get);
+            int status = response.getStatusLine().getStatusCode();
+            if (200 == status) {
+                return AvailableResult.AVAILABLE;
+            }
+            if (401 == status) {
+                return AvailableResult.NONE;
+            }
+        } catch (URISyntaxException e) {
+            // ignore
+            return AvailableResult.NONE;
+        } catch (IOException e) {
+            // ignore
+        } finally {
+            close(get, response);
+        }
+
+        return AvailableResult.UNAVAILABLE;
     }
 
-    @Override
-    protected MailFilterRequest createRequest() {
-        return new MailFilterRequest();
-    }
 }

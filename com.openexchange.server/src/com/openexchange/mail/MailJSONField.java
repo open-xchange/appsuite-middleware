@@ -225,6 +225,22 @@ public enum MailJSONField {
      * @since v7.8.0
      */
     ORIGINAL_FOLDER_ID("original_folder_id"),
+    /**
+     * Flag \ANSWERED
+     */
+    ANSWERED("answered"),
+    /**
+     * Flag \FORWARDED
+     */
+    FORWARDED("forwarded"),
+    /**
+     * Flag \DRAFT
+     */
+    DRAFT("draft"),
+    /**
+     * Flag \FLAGGED
+     */
+    FLAGGED("flagged"),
     ;
 
 

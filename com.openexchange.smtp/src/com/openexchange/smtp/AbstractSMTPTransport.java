@@ -627,6 +627,18 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
      * @throws OXException If connect attempt fails
      */
     protected void connectTransport(Transport transport, SMTPConfig smtpConfig) throws OXException {
+        connectTransport(transport, smtpConfig, false);
+    }
+
+    /**
+     * Connects the given <code>Transport</code> instance.
+     *
+     * @param transport The instance to connect
+     * @param smtpConfig The associated SMTP configuration
+     * @param knownExternal <code>true</code> if it is known that a connection is supposed to be established to an external SMTP service, otherwise <code>false</code> if not known
+     * @throws OXException If connect attempt fails
+     */
+    protected void connectTransport(Transport transport, SMTPConfig smtpConfig, boolean knownExternal) throws OXException {
         final String server = IDNA.toASCII(smtpConfig.getServer());
         final int port = smtpConfig.getPort();
         final String login = smtpConfig.getLogin();
@@ -650,7 +662,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             if (session != null) {
                 AuditLogService auditLogService = Services.optService(AuditLogService.class);
                 if (null != auditLogService) {
-                    String eventId = MailAccount.DEFAULT_ID == accountId ? "smtp.primary.login" : "smtp.external.login";
+                    String eventId = knownExternal ? "smtp.external.login" : (MailAccount.DEFAULT_ID == accountId ? "smtp.primary.login" : "smtp.external.login");
                     auditLogService.log(eventId, DefaultAttribute.valueFor(Name.LOGIN, session.getLoginName()), DefaultAttribute.valueFor(Name.IP_ADDRESS, session.getLocalIp()), DefaultAttribute.timestampFor(new Date()), DefaultAttribute.arbitraryFor("smtp.login", null == login ? "<none>" : login), DefaultAttribute.arbitraryFor("smtp.server", server), DefaultAttribute.arbitraryFor("smtp.port", Integer.toString(port)));
                 }
             }
@@ -946,7 +958,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         boolean close = false;
         SMTPConfig config = getTransportConfig();
         try {
-            connectTransport(transport, config);
+            connectTransport(transport, config, true);
             close = true;
         } finally {
             if (close) {

@@ -181,10 +181,25 @@ public enum MailListField {
      * @since v7.8.0
      */
     MIME_TYPE(656, MailJSONField.CONTENT_TYPE.getKey()),
+    /**
+     * Flag \ANSWERED (657)
+     */
+    FLAG_ANSWERED(657, MailJSONField.ANSWERED.getKey()),
+    /**
+     * Flag \FORWARDED (658)
+     */
+    FLAG_FORWARDED(658, MailJSONField.FORWARDED.getKey()),
+    /**
+     * Flag \DRAFT (659)
+     */
+    FLAG_DRAFT(659, MailJSONField.DRAFT.getKey()),
+    /**
+     * Flag \FLAGGED (660)
+     */
+    FLAG_FLAGGED(660, MailJSONField.FLAGGED.getKey()),
     ;
 
     private final int field;
-
     private final String key;
 
     private MailListField(final int field, final String jsonKey) {
