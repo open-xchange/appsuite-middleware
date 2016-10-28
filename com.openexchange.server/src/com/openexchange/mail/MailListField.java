@@ -139,7 +139,9 @@ public enum MailListField {
      */
     FOLDER(650, MailJSONField.FOLDER.getKey()),
     /**
-     * Flag \SEEN (651)
+     * Flag \SEEN (651).
+     * <p>
+     * Acts as a special sort field for the purpose of having retrieved mails sorted by seen/unseen status.
      */
     FLAG_SEEN(651, MailJSONField.SEEN.getKey()),
     /**
@@ -182,19 +184,31 @@ public enum MailListField {
      */
     MIME_TYPE(656, MailJSONField.CONTENT_TYPE.getKey()),
     /**
-     * Flag \ANSWERED (657)
+     * Flag \ANSWERED (657).
+     * <p>
+     * Acts as a special sort field for the purpose of having retrieved mails sorted by answered/unanswered status.
      */
     FLAG_ANSWERED(657, MailJSONField.ANSWERED.getKey()),
     /**
-     * Flag \FORWARDED (658)
+     * Flag \FORWARDED (658).
+     * <p>
+     * Acts as a special sort field for the purpose of having retrieved mails sorted by forwarded/not forwarded status.
+     * <p>
+     * <b>Note</b>:<br>
+     * To serve that sort field, the backing mail service is required to either support a <code>\Forwarded</code> system flag or
+     * a <code>$Forwarded</code> user flag. For the latter, the user flags capability is needed; otherwise an error is returned.
      */
     FLAG_FORWARDED(658, MailJSONField.FORWARDED.getKey()),
     /**
-     * Flag \DRAFT (659)
+     * Flag \DRAFT (659).
+     * <p>
+     * Acts as a special sort field for the purpose of having retrieved mails sorted by draft flag.
      */
     FLAG_DRAFT(659, MailJSONField.DRAFT.getKey()),
     /**
-     * Flag \FLAGGED (660)
+     * Flag \FLAGGED (660).
+     * <p>
+     * Acts as a special sort field for the purpose of having retrieved mails sorted by flagged/unflagged status.
      */
     FLAG_FLAGGED(660, MailJSONField.FLAGGED.getKey()),
     ;
