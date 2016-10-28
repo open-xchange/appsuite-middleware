@@ -414,6 +414,11 @@ specific field data of single or multiple objects.
 ||cid | String | The value of the "Content-ID" header, if the header is present.|
 |654 | original_id | String | The original mail identifier (e.g. if fetched from "virtual/all" folder).|
 |655 | original_folder_id | String | The original folder identifier (e.g. if fetched from "virtual/all" folder).|
+|656 | content_type | String | The Content-Type of a mail; e.g. multipart/mixed; boundary="-0123456abcdefg--".|
+|657 | answered | String | Special field to sort mails by answered status.|
+|658 | forwarded | String | Special field to sort mails by forwarded status. Note that mail service needs either support a \Forwarded system flag or a $Forwared user flag |
+|659 | draft | String | Special field to sort mails by draft flag.|
+|660 | flagged | String | Special field to sort mails by flagged status.|
 
 ### Mail system flags
 

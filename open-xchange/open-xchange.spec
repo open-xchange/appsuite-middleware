@@ -39,7 +39,7 @@ Requires(post):   systemd
 Requires(preun):  systemd
 Requires(postun): systemd
 %endif
-%if 0%{?rhel_version}
+%if 0%{?rhel_version} && 0%{?rhel_version} < 700
 # Bug #23216
 Requires:         redhat-lsb
 %endif

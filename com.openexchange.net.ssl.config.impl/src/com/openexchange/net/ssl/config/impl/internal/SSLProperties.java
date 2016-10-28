@@ -49,6 +49,13 @@
 
 package com.openexchange.net.ssl.config.impl.internal;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.net.HostList;
@@ -80,6 +87,16 @@ public enum SSLProperties {
 
     private static final String EMPTY_STRING = "";
 
+    private static final AtomicReference<String[]> DEFAULT_CIPHER_SUITES_REFERENCE = new AtomicReference<String[]>(null);
+
+    /**
+     * Initializes the JVM's default cipher suites.
+     */
+    public static void initJvmDefaultCipherSuites() {
+        String[] jvmDefaults = ((javax.net.ssl.SSLSocketFactory) javax.net.ssl.SSLSocketFactory.getDefault()).getDefaultCipherSuites();
+        DEFAULT_CIPHER_SUITES_REFERENCE.set(jvmDefaults);
+    }
+
     static final String SECURE_CONNECTIONS_DEBUG_LOGS_KEY = "com.openexchange.net.ssl.debug.logs";
 
     static final String DEFAULT_TRUSTSTORE_ENABLED_KEY = "com.openexchange.net.ssl.default.truststore.enabled";
@@ -91,7 +108,7 @@ public enum SSLProperties {
     static final String CUSTOM_TRUSTSTORE_PASSWORD_KEY = "com.openexchange.net.ssl.custom.truststore.password";
 
     static final String HOSTNAME_VERIFICATION_ENABLED_KEY = "com.openexchange.net.ssl.hostname.verification.enabled";
-    
+
     //---------- Reloadable Properties -------------//
 
     static final String TRUST_LEVEL_KEY = "com.openexchange.net.ssl.trustlevel";
@@ -148,8 +165,6 @@ public enum SSLProperties {
 
     static final String CIPHERS_KEY = "com.openexchange.net.ssl.ciphersuites";
 
-    static final String CIPHERS_DEFAULT = "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, TLS_RSA_WITH_AES_128_CBC_SHA, TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA, TLS_ECDH_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_RSA_WITH_AES_128_CBC_SHA, TLS_DHE_DSS_WITH_AES_128_CBC_SHA, TLS_EMPTY_RENEGOTIATION_INFO_SCSV";
-
     private static volatile String[] ciphers;
 
     protected static String[] supportedCipherSuites() {
@@ -161,15 +176,47 @@ public enum SSLProperties {
                     ConfigurationService service = Services.optService(ConfigurationService.class);
                     if (null == service) {
                         org.slf4j.LoggerFactory.getLogger(SSLProperties.class).info("ConfigurationService not yet available. Use default value for 'com.openexchange.net.ssl.ciphersuites'.");
-                        return Strings.splitByComma(CIPHERS_DEFAULT);
+                        return getJvmApplicableCipherSuites(CIPHERS_DEFAULT_DESIRED, true);
                     }
-                    String prop = service.getProperty(CIPHERS_KEY, CIPHERS_DEFAULT);
-                    tmp = Strings.splitByComma(prop);
+                    String prop = service.getProperty(CIPHERS_KEY);
+                    tmp = null == prop ? getJvmApplicableCipherSuites(CIPHERS_DEFAULT_DESIRED, true) : getJvmApplicableCipherSuites(Arrays.asList(Strings.splitByComma(prop)), false);
                     ciphers = tmp;
                 }
             }
         }
         return tmp;
+    }
+
+    static final List<String> CIPHERS_DEFAULT_DESIRED = ImmutableList.<String> builder().add("TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_ECDH_ECDSA_WITH_AES_128_CBC_SHA", "TLS_ECDH_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_RSA_WITH_AES_128_CBC_SHA", "TLS_DHE_DSS_WITH_AES_128_CBC_SHA", "TLS_EMPTY_RENEGOTIATION_INFO_SCSV").build();
+
+    private static String[] getJvmApplicableCipherSuites(List<String> desiredCipherSuites, boolean allowDefaultOnes) {
+        // Get the cipher suites actually supported by running JVM
+        String[] jvmDefaults = DEFAULT_CIPHER_SUITES_REFERENCE.get();
+        Set<String> supportedCipherSuites = new HashSet<>(jvmDefaults.length);
+        for (String jvmDefaultCipherSuite : jvmDefaults) {
+            supportedCipherSuites.add(Strings.toUpperCase(jvmDefaultCipherSuite));
+        }
+
+        // Grab the desired ones from JVM's default cipher suites
+        List<String> defaultCipherSuites = new ArrayList<>(desiredCipherSuites.size());
+        for (String desiredCipherSuite : desiredCipherSuites) {
+            if (supportedCipherSuites.contains(desiredCipherSuite)) {
+                defaultCipherSuites.add(desiredCipherSuite);
+            }
+        }
+
+        if (defaultCipherSuites.isEmpty()) {
+            // None of desired cipher suites is supported by JVM...
+            if (allowDefaultOnes) {
+                // Just use JVM default ones
+                return jvmDefaults;
+            }
+
+            // Illegal configuration
+            throw new IllegalStateException("None of the desired cipher suites is actually supported by the Java Virtual Machine. Please list supported ones in value for 'com.openexchange.net.ssl.ciphersuites'.");
+        }
+
+        return defaultCipherSuites.toArray(new String[defaultCipherSuites.size()]);
     }
 
     static final String TRUSTSTORE_WHITELIST_KEY = "com.openexchange.net.ssl.whitelist";
