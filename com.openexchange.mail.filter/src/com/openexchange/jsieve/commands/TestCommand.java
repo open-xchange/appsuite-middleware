@@ -194,8 +194,11 @@ public class TestCommand extends Command {
 
         private static List<String[]> standardJSONAddressMatchTypes() {
             final List<String[]> standard_match_types = Collections.synchronizedList(new ArrayList<String[]>(2));
-            standard_match_types.add(new String[]{"subaddress", "user"});
-            standard_match_types.add(new String[]{"subaddress", "detail"});
+            standard_match_types.add(new String[] { "subaddress", "user" });
+            standard_match_types.add(new String[] { "subaddress", "detail" });
+            standard_match_types.add(new String[] { "", "all" });
+            standard_match_types.add(new String[] { "", "domain" });
+            standard_match_types.add(new String[] { "", "localpart" });
             return standard_match_types;
         }
 
