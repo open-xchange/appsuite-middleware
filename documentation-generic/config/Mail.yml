@@ -22,4 +22,15 @@ If set to 'true' the ox middleware will only set special use flags if no special
       Configcascade_Aware: true
       Related: 
       File: imap.properties
+  - data:
+      Key: com.openexchange.mail.preferSentDate
+      Description: >
+Specifies what to consider as the date of a mail; either the internal received date or mail's sent date (as given by "Date" header).
+This property is considered in case a client passes special "date" (661) column to "columns" parameter and/or "sort" parameter.
+      Default: false
+      Version: 7.8.3
+      Reloadable: false
+      Configcascade_Aware: false
+      Related: 
+      File: mail.properties
   		
