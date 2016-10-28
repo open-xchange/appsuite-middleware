@@ -211,6 +211,12 @@ public enum MailListField {
      * Acts as a special sort field for the purpose of having retrieved mails sorted by flagged/unflagged status.
      */
     FLAG_FLAGGED(660, MailJSONField.FLAGGED.getKey()),
+    /**
+     * The date of a mail message. As configured, either the internal received date or mail's sent date (as given by <code>"Date"</code> header).
+     * <p>
+     * This field is only considered in JSON layer and is not supposed to be treated in actual MAL implementations.
+     */
+    DATE(661, MailJSONField.DATE.getKey()),
     ;
 
     private final int field;

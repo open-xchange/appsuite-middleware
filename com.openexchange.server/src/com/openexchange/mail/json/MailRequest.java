@@ -62,8 +62,13 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.Tools;
+import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailJSONField;
+import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.utils.Column;
 import com.openexchange.mail.json.utils.ColumnCollection;
@@ -213,6 +218,7 @@ public final class MailRequest {
     /**
      * Checks for columns.
      *
+     * @param requestData The associated request data
      * @return The column collection
      * @throws OXException If parameter is missing
      */
@@ -232,7 +238,19 @@ public final class MailRequest {
             l = new ArrayList<Column>(sa.length);
             for (String s : sa) {
                 int field = Tools.getUnsignedInteger(s);
-                l.add(field > 0 ? Column.field(field) : Column.header(s));
+                if (field > 0) {
+                    if (field == MailListField.DATE.getField()) {
+                        field = MailProperties.getInstance().isPreferSentDate() ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField();
+                    }
+                    l.add(Column.field(field));
+                } else {
+                    if (MailJSONField.DATE.getKey().equalsIgnoreCase(s)) {
+                        field = MailProperties.getInstance().isPreferSentDate() ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField();
+                        l.add(Column.field(field));
+                    } else {
+                        l.add(Column.header(s));
+                    }
+                }
             }
         }
 
@@ -292,6 +310,35 @@ public final class MailRequest {
             }
         }
         return ret;
+    }
+
+    /**
+     * Gets the appropriate sort field for given sort string.
+     *
+     * @param sort The sort string to examine
+     * @return The appropriate sort field
+     * @throws OXException If sort field cannot be returned
+     */
+    public int getSortFieldFor(String sort) throws OXException {
+        if (Strings.isEmpty(sort)) {
+            return MailListField.RECEIVED_DATE.getField();
+        }
+        String parseMe = sort.trim();
+
+        if (MailJSONField.DATE.getKey().equalsIgnoreCase(parseMe)) {
+            return MailProperties.getInstance().isPreferSentDate() ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField();
+        }
+
+        try {
+            int field = Integer.parseInt(parseMe);
+            if (MailListField.DATE.getField() == field) {
+                return (MailProperties.getInstance().isPreferSentDate() ? MailListField.SENT_DATE.getField() : MailListField.RECEIVED_DATE.getField());
+            }
+
+            return field < 0 ? MailListField.RECEIVED_DATE.getField() : field;
+        } catch (NumberFormatException e) {
+            throw MailExceptionCode.INVALID_INT_VALUE.create(e, AJAXServlet.PARAMETER_SORT);
+        }
     }
 
     /**

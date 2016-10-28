@@ -382,7 +382,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
              * Start response
              */
             long start = System.currentTimeMillis();
-            int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
+            int sortCol = req.getSortFieldFor(sort);
             if (!filterApplied) {
                 List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, cache, sortCol, orderDir, columns, headers, fromToIndices, lookAhead, null);
                 return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");

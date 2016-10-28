@@ -241,6 +241,10 @@ public enum MailJSONField {
      * Flag \FLAGGED
      */
     FLAGGED("flagged"),
+    /**
+     * The date of a mail message. As configured, either the internal received date or mail's sent date (as given by <code>"Date"</code> header).
+     */
+    DATE("date")
     ;
 
 

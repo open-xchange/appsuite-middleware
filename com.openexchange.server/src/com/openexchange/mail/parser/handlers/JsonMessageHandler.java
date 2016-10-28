@@ -90,6 +90,7 @@ import com.openexchange.mail.MailPath;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
 import com.openexchange.mail.attachment.AttachmentTokenService;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -1373,7 +1374,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
     @Override
     public boolean handleReceivedDate(final Date receivedDate) throws OXException {
         try {
-            jsonObject.put(MailJSONField.RECEIVED_DATE.getKey(), receivedDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(receivedDate.getTime(), getTimeZone())));
+            Object value = receivedDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(receivedDate.getTime(), getTimeZone()));
+            jsonObject.put(MailJSONField.RECEIVED_DATE.getKey(), value);
+            if (false == MailProperties.getInstance().isPreferSentDate()) {
+                jsonObject.put(MailJSONField.DATE.getKey(), value);
+            }
             return true;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1383,7 +1388,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
     @Override
     public boolean handleSentDate(final Date sentDate) throws OXException {
         try {
-            jsonObject.put(MailJSONField.SENT_DATE.getKey(), sentDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(sentDate.getTime(), getTimeZone())));
+            Object value = sentDate == null ? JSONObject.NULL : Long.valueOf(MessageWriter.addUserTimezone(sentDate.getTime(), getTimeZone()));
+            jsonObject.put(MailJSONField.SENT_DATE.getKey(), value);
+            if (MailProperties.getInstance().isPreferSentDate()) {
+                jsonObject.put(MailJSONField.DATE.getKey(), value);
+            }
             return true;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
