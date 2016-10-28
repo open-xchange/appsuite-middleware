@@ -214,7 +214,10 @@ public enum MailListField {
     /**
      * The date of a mail message. As configured, either the internal received date or mail's sent date (as given by <code>"Date"</code> header).
      * <p>
+     * <div style="margin-left: 0.1in; margin-right: 0.5in; margin-bottom: 0.1in; background-color:#FFDDDD;">
      * This field is only considered in JSON layer and is not supposed to be treated in actual MAL implementations.
+     * </div>
+     * <p>
      */
     DATE(661, MailJSONField.DATE.getKey()),
     ;
