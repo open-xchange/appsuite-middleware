@@ -400,7 +400,7 @@ public class MimeMessage extends Message implements MimePart {
 	if (address == null)
 	    removeHeader("From");
 	else
-	    setHeader("From", address.toString());
+	    setHeader("From", MimeUtility.fold(6, address.toString()));
     }
 
     /**
@@ -504,7 +504,7 @@ public class MimeMessage extends Message implements MimePart {
 	if (address == null)
 	    removeHeader("Sender");
 	else
-	    setHeader("Sender", address.toString());
+	    setHeader("Sender", MimeUtility.fold(8, address.toString()));
     }
 
     /**
@@ -1035,7 +1035,7 @@ public class MimeMessage extends Message implements MimePart {
     }
 
     /**
-     * Returns the value of the "Content-Disposition" header field.
+     * Returns the disposition from the "Content-Disposition" header field.
      * This represents the disposition of this part. The disposition
      * describes how the part should be presented to the user. <p>
      *
@@ -1053,9 +1053,9 @@ public class MimeMessage extends Message implements MimePart {
     }
 
     /**
-     * Set the "Content-Disposition" header field of this Message.
-     * If <code>disposition</code> is null, any existing "Content-Disposition"
-     * header field is removed.
+     * Set the disposition in the "Content-Disposition" header field
+     * of this body part.  If the disposition is null, any existing
+     * "Content-Disposition" header field is removed.
      *
      * @exception	IllegalWriteException if the underlying
      *			implementation does not support modification
@@ -1693,11 +1693,11 @@ public class MimeMessage extends Message implements MimePart {
 	Address a[] = getReplyTo();
 	reply.setRecipients(Message.RecipientType.TO, a);
 	if (replyToAll) {
-	    Vector v = new Vector();
+	    List<Address> v = new ArrayList<Address>();
 	    // add my own address to list
 	    InternetAddress me = InternetAddress.getLocalAddress(session);
 	    if (me != null)
-		v.addElement(me);
+		v.add(me);
 	    // add any alternate names I'm known by
 	    String alternates = null;
 	    if (session != null)
@@ -1781,15 +1781,15 @@ public class MimeMessage extends Message implements MimePart {
      * Return a new array without the duplicates.  Add any new
      * addresses to v.  Note that the input array may be modified.
      */
-    private Address[] eliminateDuplicates(Vector v, Address[] addrs) {
+    private Address[] eliminateDuplicates(List<Address> v, Address[] addrs) {
 	if (addrs == null)
 	    return null;
 	int gone = 0;
 	for (int i = 0; i < addrs.length; i++) {
 	    boolean found = false;
-	    // search the vector for this address
+	    // search the list for this address
 	    for (int j = 0; j < v.size(); j++) {
-		if (((InternetAddress)v.elementAt(j)).equals(addrs[i])) {
+		if (((InternetAddress)v.get(j)).equals(addrs[i])) {
 		    // found it; count it and remove it from the input array
 		    found = true;
 		    gone++;
@@ -1798,7 +1798,7 @@ public class MimeMessage extends Message implements MimePart {
 		}
 	    }
 	    if (!found)
-		v.addElement(addrs[i]);	// add new address to vector
+		v.add(addrs[i]);	// add new address to list
 	}
 	// if we found any duplicates, squish the array
 	if (gone != 0) {
@@ -2007,6 +2007,7 @@ public class MimeMessage extends Message implements MimePart {
      * @exception  MessagingException for failures
      * @see 	javax.mail.internet.MimeUtility
      */
+    @SuppressWarnings("rawtypes")
     public Enumeration getAllHeaders() throws MessagingException {
 	return headers.getAllHeaders();	
     }
@@ -2018,6 +2019,7 @@ public class MimeMessage extends Message implements MimePart {
      *
      * @exception  MessagingException for failures
      */
+    @SuppressWarnings("rawtypes")
     public Enumeration getMatchingHeaders(String[] names)
 			throws MessagingException {
 	return headers.getMatchingHeaders(names);
@@ -2030,6 +2032,7 @@ public class MimeMessage extends Message implements MimePart {
      *
      * @exception  MessagingException for failures
      */
+    @SuppressWarnings("rawtypes")
     public Enumeration getNonMatchingHeaders(String[] names)
 			throws MessagingException {
 	return headers.getNonMatchingHeaders(names);
@@ -2055,6 +2058,7 @@ public class MimeMessage extends Message implements MimePart {
      *
      * @exception  	MessagingException for failures
      */
+    @SuppressWarnings("rawtypes")
     public Enumeration getAllHeaderLines() throws MessagingException {
 	return headers.getAllHeaderLines();
     }

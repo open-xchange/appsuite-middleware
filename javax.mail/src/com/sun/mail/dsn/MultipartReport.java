@@ -293,6 +293,7 @@ public class MultipartReport extends MimeMultipart {
      * @exception	MessagingException for failures
      * @deprecated	use getReport instead
      */
+    @Deprecated
     public synchronized DeliveryStatus getDeliveryStatus()
 				throws MessagingException {
 	if (getCount() < 2)

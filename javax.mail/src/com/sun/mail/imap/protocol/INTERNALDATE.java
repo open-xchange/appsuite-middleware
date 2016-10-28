@@ -53,7 +53,7 @@ import com.sun.mail.iap.*;
 
 
 /**
- * This class 
+ * An INTERNALDATE FETCH item.
  *
  * @author  John Mani
  */

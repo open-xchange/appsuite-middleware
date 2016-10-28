@@ -403,7 +403,7 @@ public class Flags implements Cloneable, Serializable {
      * @return	array of Flags.Flag objects representing system flags
      */
     public Flag[] getSystemFlags() {
-	Vector v = new Vector();
+	Vector<Flag> v = new Vector<Flag>();
 	if ((system_flags & ANSWERED_BIT) != 0)
 	    v.addElement(Flag.ANSWERED);
 	if ((system_flags & DELETED_BIT) != 0)

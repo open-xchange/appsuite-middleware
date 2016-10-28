@@ -1156,9 +1156,9 @@ public class IMAPProtocol extends Protocol {
 	    serviceHost = host;
     if (saslAuthenticator == null) {
 	    try {
-		final Class sac = Class.forName(
+		Class<?> sac = Class.forName(
 		    "com.sun.mail.imap.protocol.IMAPSaslAuthenticator");
-		final Constructor c = sac.getConstructor(new Class[] {
+		Constructor<?> c = sac.getConstructor(new Class<?>[] {
 					IMAPProtocol.class,
 					String.class,
 					Properties.class,
@@ -1229,11 +1229,11 @@ public class IMAPProtocol extends Protocol {
      * @exception	ProtocolException	for protocol failures
      * @since	JavaMail 1.5.5
      */
-    void handleLoginResult(Response r) throws ProtocolException {
+    protected void handleLoginResult(Response r) throws ProtocolException {
 	if (hasCapability("LOGIN-REFERRALS") &&
 		(!r.isOK() || referralException))
 	    checkReferral(r);
-	super.handleResult(r);
+	handleResult(r);
     }
 
     /**
@@ -1425,7 +1425,7 @@ public class IMAPProtocol extends Protocol {
     /**
      * EXAMINE Command with QRESYNC data.
      *
-     * @param	mbox	the mailbox name
+     * @param	mbox1	the mailbox name
      * @param	rd	the ResyncData
      * @return		MailboxInfo if successful
      * @exception	ProtocolException	for protocol failures
@@ -1591,7 +1591,7 @@ public class IMAPProtocol extends Protocol {
     /**
      * CREATE Command.
      *
-     * @param	mbox	the mailbox to create
+     * @param	mbox1	the mailbox to create
      * @exception	ProtocolException	for protocol failures
      * @see "RFC2060, section 6.3.3"
      */
@@ -2347,6 +2347,7 @@ public class IMAPProtocol extends Protocol {
      * @param	msgno	the message number
      * @return		the MODSEQ
      * @exception	ProtocolException	for protocol failures
+     * @since	JavaMail 1.5.1
      */
     public MODSEQ fetchMODSEQ(int msgno) throws ProtocolException {
 	Response[] r = fetch(msgno, "MODSEQ");
