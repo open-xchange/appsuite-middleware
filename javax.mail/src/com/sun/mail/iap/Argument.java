@@ -254,6 +254,7 @@ public class Argument {
     DataOutputStream os = (DataOutputStream)protocol.getOutputStream();
 
     boolean first = true;
+    List<Object> items = null == this.items ? java.util.Collections.emptyList() : this.items;
     for (Object o : items) {
         if (first) {
             first = false;

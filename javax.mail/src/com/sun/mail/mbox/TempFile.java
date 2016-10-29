@@ -94,8 +94,11 @@ class TempFile {
     }
 
     protected void finalize() throws Throwable {
-	super.finalize();
-	close();
+	try {
+	    close();
+	} finally {
+	    super.finalize();
+	}
     }
 }
 

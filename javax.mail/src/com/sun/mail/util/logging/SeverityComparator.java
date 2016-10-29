@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013-2015 Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2013-2015 Jason Mehrens. All rights reserved.
+ * Copyright (c) 2013-2016 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013-2016 Jason Mehrens. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -62,10 +62,11 @@ import java.util.logging.LogRecord;
  * {@linkplain Level#intValue level}.
  * <li> The expected recovery order of {@linkplain LogRecord#getThrown() thrown}
  * property of a LogRecord and its cause chain. This ordering is derived from
- * the JLS 11.5 The Exception Hierarchy. This is performed by
- * {@linkplain #apply(java.lang.Throwable) finding} the throwable that best
- * describes the entire cause chain. Once a specific throwable of each chain is
- * identified it is then ranked lowest to highest by the following rules:
+ * the JLS 11.1.1. The Kinds of Exceptions and JLS 11.5 The Exception Hierarchy.
+ * This is performed by {@linkplain #apply(java.lang.Throwable) finding} the
+ * throwable that best describes the entire cause chain. Once a specific
+ * throwable of each chain is identified it is then ranked lowest to highest by
+ * the following rules:
  *
  * <ul>
  * <li>All LogRecords with a {@code Throwable} defined as
@@ -97,8 +98,12 @@ public class SeverityComparator implements Comparator<LogRecord>, Serializable {
 
     /**
      * A single instance that is shared among the logging package.
+     * The field is declared as java.util.Comparator so
+     * WebappClassLoader.clearReferencesStaticFinal() method will ignore this
+     * field.
      */
-    private static final SeverityComparator INSTANCE = new SeverityComparator();
+    private static final Comparator<LogRecord> INSTANCE
+            = new SeverityComparator();
 
     /**
      * A shared instance of a SeverityComparator. This is package private so the
@@ -107,7 +112,7 @@ public class SeverityComparator implements Comparator<LogRecord>, Serializable {
      * @return a shared instance of a SeverityComparator.
      */
     static SeverityComparator getInstance() {
-        return INSTANCE;
+        return (SeverityComparator) INSTANCE;
     }
 
     /**
@@ -205,6 +210,7 @@ public class SeverityComparator implements Comparator<LogRecord>, Serializable {
             }
 
             //Rank the two unidenticial throwables using the rules from
+            //JLS 11.1.1. The Kinds of Exceptions and
             //JLS 11.5 The Exception Hierarchy.
             if (t1 instanceof Error) {
                 return t2 instanceof Error ? 0 : 1;
@@ -227,6 +233,7 @@ public class SeverityComparator implements Comparator<LogRecord>, Serializable {
      * argument is less than, equal to, or greater than the second.
      * @throws NullPointerException if either argument is null.
      */
+    @SuppressWarnings("override") //JDK-6954234
     public int compare(final LogRecord o1, final LogRecord o2) {
         if (o1 == null || o2 == null) { //Don't allow null.
             throw new NullPointerException(toString(o1, o2));

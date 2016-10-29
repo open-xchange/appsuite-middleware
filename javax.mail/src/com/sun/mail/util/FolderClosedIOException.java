@@ -87,6 +87,8 @@ public class FolderClosedIOException extends IOException {
 
     /**
      * Returns the dead Folder object
+     *
+     * @return	the dead Folder
      */
     public Folder getFolder() {
 	return folder;

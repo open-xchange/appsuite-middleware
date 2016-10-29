@@ -73,7 +73,7 @@ public class multipart_report implements DataContentHandler {
      * Return the Transfer Data of type DataFlavor from InputStream.
      *
      * @param df The DataFlavor
-     * @param ins The InputStream corresponding to the data
+     * @param ds The DataSource corresponding to the data
      * @return String object
      */
     public Object getTransferData(DataFlavor df, DataSource ds)

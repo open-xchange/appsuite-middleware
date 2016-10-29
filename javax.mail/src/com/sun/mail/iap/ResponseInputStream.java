@@ -155,7 +155,7 @@ public class ResponseInputStream {
 		while (count > 0) {
 		    actual = bin.read(buffer, idx, count);
 		    if (actual < 0) {
-			    throw new IOException("Connection dropped by server?");
+		        throw new ByeIOException("Received EOF from IMAP server. Connection dropped by server?");
 			}
 		    count -= actual;
 		    idx += actual;

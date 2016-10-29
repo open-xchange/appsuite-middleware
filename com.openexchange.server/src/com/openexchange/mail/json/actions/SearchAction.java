@@ -67,7 +67,6 @@ import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
-import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -214,7 +213,7 @@ public final class SearchAction extends AbstractMailAction {
                             }
                         }
                     } else {
-                        final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
+                        int sortCol = req.getSortFieldFor(sort);
 
                         mailInterface.openFor(folderId);
                         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
@@ -285,7 +284,7 @@ public final class SearchAction extends AbstractMailAction {
                 }
             }
 
-            int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
+            int sortCol = req.getSortFieldFor(sort);
 
             mailInterface.openFor(folderId);
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();

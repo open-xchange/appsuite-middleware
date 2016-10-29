@@ -1081,18 +1081,18 @@ public final class UserSettingMail implements Cloneable, Serializable {
     }
 
     /**
-     * Gets the user ID.
+     * Gets the user identifier.
      *
-     * @return The user ID
+     * @return The user identifier
      */
     public int getUserId() {
         return userId;
     }
 
     /**
-     * Gets the context ID.
+     * Gets the context identifier.
      *
-     * @return The context ID
+     * @return The context identifier
      */
     public int getCid() {
         return cid;

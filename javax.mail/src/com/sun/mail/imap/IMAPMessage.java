@@ -1009,7 +1009,8 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
     /**
      * Get all headers.
      */
-    public Enumeration getAllHeaders() throws MessagingException {
+    @SuppressWarnings("unchecked")
+    public Enumeration<Header> getAllHeaders() throws MessagingException {
 	checkExpunged();
 	loadHeaders();
 	return super.getAllHeaders();
@@ -1018,7 +1019,8 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
     /**
      * Get matching headers.
      */
-    public Enumeration getMatchingHeaders(String[] names)
+    @SuppressWarnings("unchecked")
+    public Enumeration<Header> getMatchingHeaders(String[] names)
 			throws MessagingException {
 	checkExpunged();
 	loadHeaders();
@@ -1028,7 +1030,8 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
     /**
      * Get non-matching headers.
      */
-    public Enumeration getNonMatchingHeaders(String[] names)
+    @SuppressWarnings("unchecked")
+    public Enumeration<Header> getNonMatchingHeaders(String[] names)
 			throws MessagingException {
 	checkExpunged();
 	loadHeaders();
@@ -1042,7 +1045,8 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
     /**
      * Get all header-lines.
      */
-    public Enumeration getAllHeaderLines() throws MessagingException {
+    @SuppressWarnings("unchecked")
+    public Enumeration<String> getAllHeaderLines() throws MessagingException {
 	checkExpunged();
 	loadHeaders();
 	return super.getAllHeaderLines();
@@ -1051,7 +1055,8 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
     /**
      * Get all matching header-lines.
      */
-    public Enumeration getMatchingHeaderLines(String[] names)
+    @SuppressWarnings("unchecked")
+    public Enumeration<String> getMatchingHeaderLines(String[] names)
 			throws MessagingException {
 	checkExpunged();
 	loadHeaders();
@@ -1061,7 +1066,8 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
     /**
      * Get all non-matching headerlines.
      */
-    public Enumeration getNonMatchingHeaderLines(String[] names)
+    @SuppressWarnings("unchecked")
+    public Enumeration<String> getNonMatchingHeaderLines(String[] names)
 			throws MessagingException {
 	checkExpunged();
 	loadHeaders();
@@ -1726,7 +1732,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 	if (aa == null)
 	    return null;
 	else
-	    return (InternetAddress[])aa.clone();
+	    return aa.clone();
     }
 
     private Flags _getFlags() {
