@@ -1,3 +1,9 @@
+open-xchange-drive-client-windows (7.8.3-2) stable; urgency=medium
+
+  * Second preview for 7.8.3 release
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Sat, 29 Oct 2016 09:47:12 +0200
+
 open-xchange-drive-client-windows (7.8.3-1) stable; urgency=medium
 
   * First preview 7.8.3 release
