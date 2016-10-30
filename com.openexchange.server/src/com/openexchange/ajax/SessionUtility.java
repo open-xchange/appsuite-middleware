@@ -819,13 +819,13 @@ public final class SessionUtility {
                 final int hlen = tmp.length();
                 if (hlen > 0) {
                     tmp.setLength(hlen - 2);
-                    LOG.info("Didn't find an appropriate Cookie for expected name \"{}\" (CookieHashSource={}) which provides the session secret. Remembered hash: {}. Available hashes: {}", expectedSecretCookieName, hashSource.toString(), hash, tmp.toString());
+                    LOG.debug("Didn't find an appropriate Cookie for expected name \"{}\" (CookieHashSource={}) which provides the session secret. Remembered hash: {}. Available hashes: {}", expectedSecretCookieName, hashSource.toString(), hash, tmp.toString());
                 } else {
-                    LOG.info("Didn't find an appropriate Cookie for expected name \"{}\" (CookieHashSource={}) which provides the session secret. Remembered hash={}. No available hashes.", expectedSecretCookieName, hashSource.toString(), hash);
+                    LOG.debug("Didn't find an appropriate Cookie for expected name \"{}\" (CookieHashSource={}) which provides the session secret. Remembered hash={}. No available hashes.", expectedSecretCookieName, hashSource.toString(), hash);
                 }
             }
         } else {
-            LOG.info("Missing Cookies in HTTP request. No session secret can be looked up.");
+            LOG.debug("Missing Cookies in HTTP request. No session secret can be looked up.");
         }
         return null;
     }
