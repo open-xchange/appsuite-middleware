@@ -50,9 +50,11 @@
 package com.openexchange.image;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import javax.servlet.http.HttpServletResponse;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -61,7 +63,9 @@ import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataProperties;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionCode;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -156,15 +160,34 @@ public class ImageGetAction implements AJAXActionService {
             }
             return requestResult;
         } catch (OXException e) {
-            if (ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e) || MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND.equals(e)) {
+            if (signalAsNotFound(e)) {
                 throw AjaxExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(HttpServletResponse.SC_NOT_FOUND), e.getSoleMessage());
             }
-            LOG.warn("Retrieving image failed.", e);
+            if (Category.CATEGORY_PERMISSION_DENIED == e.getCategory()) {
+                throw AjaxExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(HttpServletResponse.SC_FORBIDDEN), e.getSoleMessage());
+            }
             throw AjaxExceptionCodes.BAD_REQUEST.create(e, new Object[0]);
         } catch (IllegalArgumentException e) {
             LOG.warn("Retrieving image failed.", e);
             throw AjaxExceptionCodes.BAD_REQUEST.create(e, new Object[0]);
         }
+    }
+
+    private static final List<OXExceptionCode> NOT_FOUND_CODES = ImmutableList.<OXExceptionCode> builder()
+        .add(ContactExceptionCodes.CONTACT_NOT_FOUND)
+        .add(MailExceptionCode.IMAGE_ATTACHMENT_NOT_FOUND)
+        .add(MailExceptionCode.ATTACHMENT_NOT_FOUND)
+        .add(MailExceptionCode.MAIL_NOT_FOUND)
+        .add(MailExceptionCode.FOLDER_NOT_FOUND)
+        .build();
+
+    private static boolean signalAsNotFound(OXException e) {
+        for (OXExceptionCode code : NOT_FOUND_CODES) {
+            if (code.equals(e)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static void obtainImageData(ImageDataSource dataSource, ImageLocation imageLocation, Session session, AJAXRequestResult requestResult) throws OXException {
