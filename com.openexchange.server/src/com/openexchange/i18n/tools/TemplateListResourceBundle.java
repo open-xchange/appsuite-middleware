@@ -83,7 +83,7 @@ public abstract class TemplateListResourceBundle extends ResourceBundle {
 
     protected static final List<String> keys = new ArrayList<String>();
 
-    private static Lock INIT_LOCK = new ReentrantLock();
+    private static final Lock INIT_LOCK = new ReentrantLock();
 
     protected static volatile boolean initialized;
 
