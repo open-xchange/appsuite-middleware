@@ -117,8 +117,10 @@ public abstract class TemplateListResourceBundle extends ResourceBundle {
                 is = null;
 
                 final File[] templateFiles = templatePath.listFiles(new StartsWithFilter(uniqueName()));
-                for (final File template : templateFiles) {
-                    parseTemplate(template);
+                if (null != templateFiles) {
+                    for (final File template : templateFiles) {
+                        parseTemplate(template);
+                    }
                 }
             } catch (final IOException e) {
                 LOG.error("", e);
