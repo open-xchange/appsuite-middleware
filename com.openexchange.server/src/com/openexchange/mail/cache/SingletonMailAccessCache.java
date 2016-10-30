@@ -94,8 +94,9 @@ public final class SingletonMailAccessCache implements IMailAccessCache {
         if (null == singleton) {
             synchronized (SingletonMailAccessCache.class) {
                 if (null == singleton) {
-                    singleton = new SingletonMailAccessCache();
-                    singleton.initCache();
+                    SingletonMailAccessCache tmp = new SingletonMailAccessCache();
+                    tmp.initCache();
+                    singleton = tmp;
                 }
             }
         }
