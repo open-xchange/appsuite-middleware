@@ -94,7 +94,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class VCardExporter implements Exporter {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VCardExporter.class);
     protected final static int[] _contactFields = {
         DataObject.OBJECT_ID,
         DataObject.CREATED_BY,
@@ -138,6 +137,7 @@ public class VCardExporter implements Exporter {
         Contact.IMAGE1_CONTENT_TYPE,
         Contact.MANAGER_NAME,
         Contact.MARITAL_STATUS,
+        Contact.MARK_AS_DISTRIBUTIONLIST,
         Contact.MIDDLE_NAME,
         Contact.NICKNAME,
         Contact.NOTE,
@@ -296,6 +296,7 @@ public class VCardExporter implements Exporter {
         } else {
             // In this case the original vCard must not be merged. Since the ContactMapper does not even map the VCARD_ID column it will not be considered when exporting.
             fields = ContactMapper.getInstance().getFields(fieldsToBeExported);
+            fields = ensureContained(fields, ContactField.MARK_AS_DISTRIBUTIONLIST);
         }
 
         // Get required contact service
@@ -372,5 +373,18 @@ public class VCardExporter implements Exporter {
             return false;
         }
         return (object instanceof Boolean ? ((Boolean) object).booleanValue() : Boolean.parseBoolean(object.toString().trim()));
+    }
+
+    private ContactField[] ensureContained(ContactField[] fields, ContactField fieldToAdd) {
+        for (ContactField field : fields) {
+            if (field == fieldToAdd) {
+                return fields;
+            }
+        }
+
+        ContactField[] retval = new ContactField[fields.length + 1];
+        System.arraycopy(fields, 0, retval, 0, fields.length);
+        retval[fields.length] = fieldToAdd;
+        return retval;
     }
 }
