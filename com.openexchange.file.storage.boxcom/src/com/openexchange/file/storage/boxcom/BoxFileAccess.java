@@ -99,7 +99,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  */
 public class BoxFileAccess extends AbstractBoxResourceAccess implements ThumbnailAware, FileStorageLockedFileAccess {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BoxFileAccess.class);
+    static final Logger LOGGER = LoggerFactory.getLogger(BoxFileAccess.class);
 
     private final BoxAccountAccess accountAccess;
     final int userId;
