@@ -119,7 +119,7 @@ public class CookieRefresher implements SessionServletInterceptor {
     }
 
     private boolean needsCookieRefresh(Session session) {
-        Long stamp = (Long) session.getParameter(PARAM_COOKIE_REFRESH_TIMESTAMP);
+        Stamp stamp = (Stamp) session.getParameter(PARAM_COOKIE_REFRESH_TIMESTAMP);
         if (null == stamp) {
             // No time stamp available, yet
             if (session instanceof PutIfAbsent) {
@@ -132,10 +132,10 @@ public class CookieRefresher implements SessionServletInterceptor {
 
         int intervalMillis = ((conf.getCookieExpiry() / 7) * 1000);
         long now = System.currentTimeMillis();
-        if ((now - intervalMillis) > stamp.longValue()) {
+        if ((now - intervalMillis) > stamp.stamp) {
             // Needs refresh
             synchronized (stamp) {
-                Long check = (Long) session.getParameter(PARAM_COOKIE_REFRESH_TIMESTAMP);
+                Stamp check = (Stamp) session.getParameter(PARAM_COOKIE_REFRESH_TIMESTAMP);
                 if (!stamp.equals(check)) {
                     // Concurrent update. Another thread already initiated cookie refresh
                     return false;
@@ -151,9 +151,8 @@ public class CookieRefresher implements SessionServletInterceptor {
         return false;
     }
 
-    private Long createNewStamp() {
-        // Explicitly use "new Long()" constructor!
-        return new Long(System.currentTimeMillis());
+    private Stamp createNewStamp() {
+        return new Stamp(System.currentTimeMillis());
     }
 
     private boolean needsSessionCookieRefresh(Session session) {
@@ -169,6 +168,37 @@ public class CookieRefresher implements SessionServletInterceptor {
 
         session.setParameter(PARAM_REFRESH_SESSION_COOKIE_FLAG, Boolean.TRUE);
         return true;
+    }
+
+    // ----------------------------------------------------------------------------------
+
+    private static final class Stamp {
+        final long stamp;
+
+        Stamp(long stamp) {
+            super();
+            this.stamp = stamp;
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * 1 + (int) (stamp ^ (stamp >>> 32));
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Stamp)) {
+                return false;
+            }
+            Stamp other = (Stamp) obj;
+            if (stamp != other.stamp) {
+                return false;
+            }
+            return true;
+        }
     }
 
 }
