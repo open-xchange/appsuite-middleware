@@ -322,7 +322,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         boolean keepOn = true;
                         while (keepOn) {
                             keepOn = false;
-                            // TODO: Expensive as it needs to iterate through all the files in a folder... 
+                            // TODO: Expensive as it needs to iterate through all the files in a folder...
                             //       Consider the possibility of checking if the file exists in the folder with the exists method
                             for (com.box.sdk.BoxItem.Info info : boxFolder) {
                                 // Check for filename clashes and append a number at the end of the filename
@@ -451,8 +451,6 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                                         throw e;
                                     }
                                     fileName = FileStorageUtility.enhance(name, ++count);
-                                } finally {
-                                    Streams.close(sink);
                                 }
                             }
                         } finally {
@@ -713,11 +711,11 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
     /*-
      * Deprecated versions-related methods:
      *
-    
+
     @Override
     public String[] removeVersion(String folderId, final String id, final String[] versions) throws OXException {
         return perform(new BoxClosure<String[]>() {
-    
+
             @Override
             protected String[] doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
                 List<String> undeletable = new ArrayList<String>();
@@ -732,29 +730,29 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                 }
                 return undeletable.toArray(new String[undeletable.size()]);
             }
-    
+
         });
     }
-    
+
     @Override
     public TimedResult<File> getVersions(String folderId, String id) throws OXException {
         return getVersions(folderId, id, null);
     }
-    
+
     @Override
     public TimedResult<File> getVersions(String folderId, String id, List<Field> fields) throws OXException {
         return getVersions(folderId, id, fields, null, SortDirection.DEFAULT);
     }
-    
+
     @Override
     public TimedResult<File> getVersions(final String folderId, final String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
         return perform(new BoxClosure<TimedResult<File>>() {
-    
+
             @Override
             protected TimedResult<File> doPerform(BoxOAuthAccess boxAccess) throws OXException, BoxAPIException, UnsupportedEncodingException {
                 List<BoxFileVersion> versions = boxAccess.getBoxClient().getFilesManager().getFileVersions(id, null);
                 MimeTypeMap map = Services.getService(MimeTypeMap.class);
-    
+
                 List<File> files = new LinkedList<File>();
                 for (BoxFileVersion version : versions) {
                     com.openexchange.file.storage.boxcom.BoxFile file = new com.openexchange.file.storage.boxcom.BoxFile(folderId, id, userId, rootFolderId);
@@ -775,7 +773,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                 }
                 return new FileTimedResult(files);
             }
-    
+
         });
     }
      *
@@ -820,7 +818,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see com.box.sdk.ProgressListener#onProgressChanged(long, long)
          */
         @Override
