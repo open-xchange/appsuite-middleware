@@ -1,3 +1,9 @@
+open-xchange-system (7.8.2-15) stable; urgency=medium
+
+  * Build for patch 2016-11-07 (3678)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 31 Oct 2016 11:08:43 +0100
+
 open-xchange-system (7.8.2-14) stable; urgency=medium
 
   * Build for patch 2016-09-08 (3699)
