@@ -68,11 +68,11 @@ public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationS
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UserAwareSSLConfigurationImpl.class);
 
-    private UserService userService;
+    private final UserService userService;
 
-    private ContextService contextService;
+    private final ContextService contextService;
 
-    private ConfigViewFactory configViewFactory;
+    private final ConfigViewFactory configViewFactory;
 
     public UserAwareSSLConfigurationImpl(UserService userService, ContextService contextService, ConfigViewFactory configViewFactory) {
         this.userService = userService;
