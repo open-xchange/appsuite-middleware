@@ -433,7 +433,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         ThresholdFileHolder sink = null;
                         try {
                             sink = new ThresholdFileHolder();
-                            sink.write(data);
+                            sink.write(data); // Implicitly closes 'data' input stream
 
                             int count = 0;
                             String name = file.getFileName();
@@ -457,9 +457,13 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                             Streams.close(sink);
                         }
                     } else {
-                        boxFile.uploadVersion(data, file.getLastModified(), file.getFileSize(), new UploadProgressListener());
-                        fileInfo = boxFile.getInfo();
-                        checkFileValidity(fileInfo);
+                        try {
+                            boxFile.uploadVersion(data, file.getLastModified(), file.getFileSize(), new UploadProgressListener());
+                            fileInfo = boxFile.getInfo();
+                            checkFileValidity(fileInfo);
+                        } finally {
+                            Streams.close(data);
+                        }
                     }
 
                     if (null == fileInfo) {
