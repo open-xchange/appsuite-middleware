@@ -73,6 +73,18 @@ import com.openexchange.user.UserService;
  */
 public class SSLConfigActivator extends HousekeepingActivator {
 
+    /**
+     * Initializes a new {@link SSLConfigActivator}.
+     */
+    public SSLConfigActivator() {
+        super();
+    }
+
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { UserService.class, ContextService.class, ConfigurationService.class, ConfigViewFactory.class };
