@@ -1,16 +1,17 @@
 type: object
+required: 
+- token
+- transport
+- topics
 properties:
   client:
     type: string
-    required: false
     description: The client identifier; e.g. "open-xchange-appsuite". If not specified, session-associated client identifier is considered
   token:
     type: string
-    required: true
     description: The token to use when sending out notifications using specified transport
   transport:
     type: string
-    required: true
     description: |
       The identifer of the transport; currently supported:
       - "apn"
@@ -19,7 +20,6 @@ properties:
       - "websocket"
   topics:
     type: array
-    required: true
     description: |
       An array of topic identifiers or wild-cards, to which the subscription signals interest.
       E.g. ["ox:mail:*","ox:calendar:new"] interest for all mail-related events and for newly created appointments
