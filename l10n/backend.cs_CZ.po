@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-06-13 00:27+0200\n"
+"PO-Revision-Date: 2016-10-29 19:02+0100\n"
 "Last-Translator: Robert Kratky <kratky@rob.cz>\n"
 "Language-Team: Czech <>\n"
 "Language: cs\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Poedit 1.8.7\n"
+"X-Generator: Lokalize 2.0\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Lokalize 1.4\n"
 
@@ -53,6 +53,14 @@ msgstr "předběžně přijal(a)"
 msgctxt "adjective"
 msgid "tentatively accepted"
 msgstr "předběžně přijal(a)"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.apps.manifests.json/src/com/openexchange/apps/manifests/json/exception/ManifestsExceptionStrings.java:61
+msgid ""
+"The server configuration cannot be retrieved due to an internal server "
+"error. Please try again later."
+msgstr ""
+"Konfiguraci serveru se nepodařilo získat kvůli interní chybě serveru. Zkuste"
+" to, prosím, později."
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -137,6 +145,7 @@ msgstr "Místo"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:71
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/templating/Strings.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:67
 msgid "Participants"
 msgstr "Účastníci"
 
@@ -1021,6 +1030,11 @@ msgstr ""
 msgid "Your device configuration"
 msgstr "Nastavení vašeho zařízení"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.cluster.lock/src/com/openexchange/cluster/lock/internal/ClusterLockExceptionMessages.java:61
+msgid "Another node is currently performing the same task. Try again later."
+msgstr ""
+"Stejnou činnost právě provádí jiný člen sítě. Zkuste to, prosím, později."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
 msgid "LDAP contacts cannot be deleted."
 msgstr "Kontakty LDAP nelze smazat."
@@ -1665,6 +1679,54 @@ msgid "No global database for context group \"%1$s\" found."
 msgstr ""
 "Nepodařilo se nalézt žádnou globální databázi pro skupinu kontextů „%1$s“."
 
+#. A DoveAdm error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:62
+msgid "A DoveAdm error occurred: %1$s"
+msgstr "Došlo k chybě DoveAdm: %1$s"
+
+#. A DoveAdm error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:65
+msgid ""
+"A DoveAdm server error occurred with HTTP status code %1$s. Error message: "
+"%2$s"
+msgstr ""
+"Došlo k chybě serveru DoveAdm. Stavový kód HTTP: %1$s. Chybová zpráva %2$s"
+
+#. Invalid DoveAdm URL: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:68
+msgid "The provided DoveAdm URL: %1$s is invalid"
+msgstr "Zadané URL služby DoveAdm (%1$s) není platné"
+
+#. The DoveAdm resource does not exist: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:71
+msgid "The provided DoveAdm resource does not exist: %1$s"
+msgstr "Zadaný zdroj služby DoveAdm neexistuje: %1$s"
+
+#. An I/O error occurred: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:74
+msgid "An I/O error occurred: %1$s"
+msgstr "Došlo k chybě I/O: %1$s"
+
+#. Authentication failed: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:77
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:77
+msgid "Authentication failed: %1$s"
+msgstr "Autentizace selhala: %1$s"
+
+#. The DoveAdm resource does not exist
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.dovecot.doveadm.client/src/com/openexchange/dovecot/doveadm/client/DoveAdmClientExceptionMessages.java:80
+msgid "The DoveAdm resource does not exist"
+msgstr "Zdroj DoveAdm neexistuje"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.download.limit/src/com/openexchange/download/limit/limiter/exceptions/DownloadLimitedExceptionMessages.java:63
+msgid ""
+"Download denied because download limits have been exceeded. Please try again "
+"later."
+msgstr ""
+"Stahování zamítnuto kvůli překročení limitu stahování. Zkuste, prosím, znovu "
+"později."
+
 #. * e.g. "Uploaded with OX Drive (Ottos Laptop)"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive.impl/src/com/openexchange/drive/impl/DriveStrings.java:64
 msgid "Uploaded with %1$s (%2$s)"
@@ -1847,9 +1909,18 @@ msgstr "Klíč \"%1$s\" je již zaregistrovaný."
 msgid "Empty files indicated for directory \"%1$s\"."
 msgstr "V adresáři „%1$s“ jsou prázdné soubory."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:97
+msgid "A file named \"%1$s\" already exists at \"%2$s\"."
+msgstr "Soubor s názvem „%1$s“ již existuje v „%2$s“."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:98
+msgid "A directory named \"%1$s\" already exists at \"%2$s\"."
+msgstr "Adrresář s názvem „%1$s“ již existuje v „%2$s“."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.oauth/src/com/openexchange/file/storage/oauth/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.onedrive/src/com/openexchange/file/storage/onedrive/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging.twitter/src/com/openexchange/messaging/twitter/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.google/src/com/openexchange/subscribe/google/FormStrings.java:61
@@ -1860,23 +1931,13 @@ msgstr "Vyberte existující účet"
 
 #. The name for the virtual folder containing all attachments from all messages
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:67
-msgid "All attachments"
-msgstr "Všechny přílohy"
+msgid "My attachments"
+msgstr "Mé přílohy"
 
-#. The name for the virtual folder containing all attachments of received messages
+#. The name for the virtual folder containing all attachments of a certain folder/mailbox
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:70
-msgid "Received attachments"
-msgstr "Přijaté přílohy"
-
-#. The name for the virtual folder containing all attachments of sent messages
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:73
-msgid "Sent attachments"
-msgstr "Odeslané přílohy"
-
-#. The account display name
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.mail/src/com/openexchange/file/storage/mail/MailDriveStrings.java:76
-msgid "Mail Drive"
-msgstr "Mail Drive"
+msgid "In %1$s"
+msgstr "V %1$s"
 
 #. Search in From sender.
 #. Search for mails sent from ...
@@ -2617,7 +2678,7 @@ msgid "last year"
 msgstr "minulý rok"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:96
 msgid "Contact"
 msgstr "Kontakt"
 
@@ -2656,7 +2717,14 @@ msgstr "v adresách"
 msgid "in departments"
 msgstr "v odděleních"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:93
+#. Context: Searching in contacts.
+#. Displayed as: [Search for] 'user input' in user fields.
+#. The 'user input' part is always prepended, please heed this in translations.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:94
+msgid "in user fields"
+msgstr "v uživatelských polích"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/contacts/ContactsStrings.java:98
 msgid "Distribution List"
 msgstr "Distribuční seznam"
 
@@ -2982,44 +3050,49 @@ msgstr ""
 "Na serveru došlo k dočasné chybě, která zabránila tomu, aby byl požadavek "
 "proveden. Zkuste to, prosím, později."
 
-#. The general message for a conflicting update operation.
+#. The default message displayed to user when processing was intentionally denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:72
+msgid "The server is refusing to process the request."
+msgstr "Server odmítá požadavek zpracovat."
+
+#. The general message for a conflicting update operation.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:75
 msgid "The object has been changed in the meantime."
 msgstr "Mezitím byl objekt změněn."
 
 #. The general message for a missing object.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:78
 msgid "Object not found. %1$s"
 msgstr "Objekt nenalezen. %1$s"
 
 #. The general message if a user has no access to a certain module (e.g. calendar)
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:81
 msgid "No permission for module: %1$s."
 msgstr "Nemám oprávnění pro modul: %1$s."
 
 #. The general message if a user has no permission to access a certain folder.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:81
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:84
 msgid "No folder permission."
 msgstr "Žádná oprávnění k složce."
 
 #. The general message for a missing field.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:87
 msgid "Missing field: %s"
 msgstr "Chybějící pole: %s"
 
 #. The general message if an error occurred while reading or writing to the database
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:87
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:90
 msgid "Error while reading/writing data from/to the database."
 msgstr "Chyba při čtení/zápisu dat z/do databáze."
 
 #. General message if a setting cannot be put into database because it exceeds a column's capacity constraints
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:93
 msgid "Data cannot be stored into the database because it is too big"
 msgstr ""
 "Data se nepodařillo uložit do databáze, protože jde o příliš velký objem"
 
 #. The request sent by the client was syntactically incorrect
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/exception/OXExceptionStrings.java:96
 msgid "The request sent by the client was syntactically incorrect"
 msgstr "Odeslaný požadavek nebyl syntakticky správný"
 
@@ -3111,16 +3184,6 @@ msgstr "Zadané URL služby Guard (%1$s) není platné"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:71
 msgid "The provided Guard resource does not exist: %1$s"
 msgstr "Zadaný zdroj služby Guard neexistuje: %1$s"
-
-#. An I/O error occurred: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:74
-msgid "An I/O error occurred: %1$s"
-msgstr "Došlo k chybě I/O: %1$s"
-
-#. Authentication failed: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:77
-msgid "Authentication failed: %1$s"
-msgstr "Autentizace selhala: %1$s"
 
 #. The Guard resource does not exist
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.guard.api/src/com/openexchange/guard/api/GuardApiExceptionMessages.java:80
@@ -3750,6 +3813,20 @@ msgstr "Zpráva %1$s nebyla ve složce %2$s nalezena."
 msgid "Invalid OAuth account specified."
 msgstr "Zadán neplatný účet OAuth."
 
+#. The certificate for domain "%1$s" is untrusted.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:63
+msgid "The certificate for domain \"%1$s\" is untrusted."
+msgstr "Certifikát pro doménu „%1$s“ není důvěryhodný."
+
+#. The certificate for domain "%1$s" is untrusted. You can change your general trust level in the settings.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:66
+msgid ""
+"The certificate for domain \"%1$s\" is untrusted. You can change your "
+"general trust level in the settings."
+msgstr ""
+"Certifikát pro doménu „%1$s“ není důvěryhodný. Úroveň důvěry můžete změnit v"
+" Nastavení."
+
 #.
 #. * The display of a users given and sur name name in e.g. notification mails (Hello John Doe, ...).
 #. * The placeholders mean $givenname $surname.
@@ -3915,36 +3992,41 @@ msgstr "Účet „%1$s“ není platný, vytvořte ho, prosím, znovu."
 msgid "Please provide a display name."
 msgstr "Zadejte, prosím, jméno k zobrazení."
 
-#. The associated OAuth provider denied the request: %1$s.
+#. Please provide at least one scope.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:85
+msgid "Please provide at least one scope."
+msgstr "Zadejte, prosím, alespoň jeden rozsah."
+
+#. The associated OAuth provider denied the request: %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:88
 msgid "The associated OAuth provider denied the request: %1$s."
 msgstr "Přiřazený poskytovatel OAuth požadavek zamítl: %1$s."
 
 #. The OAuth authentication process has been canceled.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:91
 msgid "The OAuth authentication process has been canceled."
 msgstr "Autentizační proces OAuth byl zrušen."
 
 #. Could not get a valid response from the associated OAuth provider.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:94
 msgid "Could not get a valid response from the associated OAuth provider."
 msgstr ""
 "Nepodařilo se získat platnou reakci od přiřazeného poskytovatele OAuth."
 
 #. There was a problem while creating a connection to the remote service.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:97
 msgid "There was a problem while creating a connection to the remote service."
 msgstr "Došlo k chybě při pokusu o navázání spojení se vzdálenou službou."
 
 #. You need to grant additional %1$s permissions to access the resource.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:100
 msgid "You need to grant additional %1$s permissions to access the resource."
 msgstr ""
 "Pro přístup k tomuto zdroji musíte uživateli %1$s nejprve přidělit další "
 "práva."
 
 #. Your '%1$s' access was rejected. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:103
 msgid ""
 "Your '%1$s' access was rejected. You have to reauthorize the server to use "
 "your account with a new password. To do so, go to Configuration -> My Social "
@@ -3955,7 +4037,7 @@ msgstr ""
 "Účty. Pak to zkuste znovu."
 
 #. Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:106
 msgid ""
 "Your '%1$s' access was revoked. You have to reauthorize the server to use "
 "your account with a new password. To do so, go to Configuration -> My Social "
@@ -3964,6 +4046,19 @@ msgstr ""
 "Váš účet ‚%1$s‘ byl zneplatněn. Musíte server znovu autorizovat k použití "
 "vašeho účtu s novým heslem. Jděte do Nastavení -> Mé sociální nastavení -> "
 "Účty. Pak to zkuste znovu."
+
+#. Your access token for '%1$s' is invalid. You have to reauthorize your account.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:109
+msgid ""
+"Your access token for '%1$s' is invalid. You have to reauthorize your "
+"account."
+msgstr ""
+"Váš přístupové token ‚%1$s‘ není platný. Musíte svůj účet znovu autorizovat."
+
+#. You need to explicitly authorise %1$s to subscribe to %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:112
+msgid "You need to explicitly authorise %1$s to subscribe to %2$s"
+msgstr "Chcete-li odebírat %2$s, musíte výslovně autorizovat %1$s"
 
 #. *
 #. * New password too short.
@@ -3992,6 +4087,11 @@ msgstr "Heslo bylo úspěšně změněno. Odhlaste se, prosím, a znovu se přih
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.passwordchange.servlet/src/com/openexchange/passwordchange/servlet/PasswordChangeServletExceptionMessage.java:70
 msgid "Password was not changed."
 msgstr "Heslo nebylo změněno."
+
+#. The topic(s) of interest is/are invalid
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pns/src/com/openexchange/pns/PushExceptionMessages.java:63
+msgid "One or more specified topics are invalid."
+msgstr "Jedno nebo více zvolených témat není platné."
 
 #. *
 #. * User %1$s has no mail module access due to user configuration
@@ -4805,37 +4905,37 @@ msgstr ""
 "„podmínka:činnost“"
 
 #. Unable to convert task status "%1$s".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:69
 msgid "Unable to convert task status \"%1$s\"."
 msgstr "Nemohu konvertovat stav úkolu „%1$s“."
 
 #. Unable to convert task priority %1$d.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:72
 msgid "Unable to convert task priority %d."
 msgstr "Nemohu konvertovat priority úkolu %d."
 
 #. Parsing error parsing ical: %s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:75
 msgid "Parsing error parsing ical: %s"
 msgstr "Chyba při parsování iCal: %s"
 
 #. Unknown Class: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:78
 msgid "Unknown Class: %1$s"
 msgstr "Neznámá třída: %1$s"
 
 #. Cowardly refusing to convert confidential classified objects.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:81
 msgid "Cowardly refusing to convert confidential classified objects."
 msgstr "Zbaběle odmítám konvertovat důvěrné utajované objekty."
 
 #. Missing DTStart in appointment
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:84
 msgid "Missing DTSTART"
 msgstr "Chybí DTSTART"
 
 #. Private Appointments can not have attendees. Removing attendees and accepting appointment anyway.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:87
 msgid ""
 "Private appointments can not have attendees. Removing attendees and "
 "accepting appointment anyway."
@@ -4844,23 +4944,27 @@ msgstr ""
 "schůzku."
 
 #. Not supported recurrence pattern: BYMONTH
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:90
 msgid "Not supported recurrence pattern: BYMONTH"
 msgstr "Nepodporovaný druh opakování: BYMONTH"
 
 #. This does not look like an iCal file. Please check the file.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:93
 msgid "This does not look like an iCal file. Please check the file."
 msgstr "Tohle nevypadá jako iCal soubor. Zkontrolujte, prosím, soubor."
 
 #. Empty "CLASS" element.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:96
 msgid "Empty \"CLASS\" element."
 msgstr "Prázdný prvek „CLASS“."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:99
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:98
 msgid "Element truncated: %s"
 msgstr "Prvek zkrácen: %s"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:100
+msgid "Invalid mail address for external participant: %1$s"
+msgstr "Neplatná e-mailová adresa externího účastníka: %1$s"
 
 #. You do not have a valid session. Please login again.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:62
@@ -5468,10 +5572,10 @@ msgstr "Nemáte oprávnění k úpravě tohoto kontaktu"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:119
 msgid ""
 "An E-Mail address is mandatory for external distribution list members. "
-"Please add a valid E-Mail address."
+"Please add a valid E-Mail address to the contact \"%1$s\"."
 msgstr ""
-"Pro externí členy distribučního seznamu je povinná e-mailová adresa. "
-"Zadejte, prosím, platnou e-mailovou adresu."
+"Pro externí členy distribučního seznamu je povinná e-mailová adresa. Zadejte,"
+" prosím, platnou e-mailovou adresu pro kontakt „%1$s“."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:121
 msgid ""
@@ -7830,8 +7934,14 @@ msgstr ""
 "Typ obsahu nahraného souboru „%1$s“ neodpovídá danému souborovému filtru "
 "„%2$s“."
 
+#. Upload file is invalid or illegal
+#. Thrown to indicate that currently uploaded file is not accepted for being saved due to illegal and/or harmful content
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:105
+msgid "Upload file is invalid or illegal."
+msgstr "Nahraný soubor je poškozený nebo není povolený."
+
 #. Request rejected because its size exceeds the maximum configured size of %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:104
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:108
 msgid ""
 "Request rejected because its size exceeds the maximum configured size of "
 "%1$s."
@@ -7840,12 +7950,12 @@ msgstr ""
 "velikost %2$s."
 
 #. Connection has been closed unexpectedly. Please try again.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:111
 msgid "Connection has been closed unexpectedly. Please try again."
 msgstr "Spojení bylo neočekávaně ukončeno. Zkuste to, prosím, znovu."
 
 #. Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:114
 msgid ""
 "Request rejected because file size (%1$s) exceeds the maximum configured "
 "file size of %2$s."
@@ -7854,7 +7964,7 @@ msgstr ""
 "nastavenou velikost (%2$s)."
 
 #. Request rejected because file size exceeds the maximum configured file size of %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:113
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:117
 msgid ""
 "Request rejected because file size exceeds the maximum configured file size "
 "of %1$s."
@@ -7863,7 +7973,7 @@ msgstr ""
 "velikost %1$s."
 
 #. Read timed out. Waited too long for incoming data from client.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:120
 msgid "Read timed out. Waited too long for incoming data from client."
 msgstr ""
 "Při pokusu o čtení vypršela lhůta. Čekání na data přicházející od klienta "
@@ -8275,6 +8385,49 @@ msgstr ""
 "Pro sestavení zprávy obsahující odkazy ke sdílení specifikujte, prosím, "
 "datum exspirace"
 
+#. The authentication type selected for a certain mail/transport account is not supported; e.g. user wants to authenticate via OAuth, but IMAP server does not support AUTH=XOAUTH2 capability
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:225
+msgid "The selected authentication type is not supported by server %2$s"
+msgstr "Zvolený druh autentizace server %2$s nepodporuje"
+
+#. Something is wrong with a subscribed E-Mail account; e.g. invalid credentials. Example: "Please check your mail account: The entered credentials are wrong"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:228
+msgid "Please check your mail account: %2$s"
+msgstr "Zkontrolujte, prosím, svůj e-mailový účet: %2$s"
+
+#. Invalid name specified. Information from mail server: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:231
+msgid "Invalid name specified. Information from mail server: %1$s"
+msgstr "Zadáno neplatné jméno. Informace z poštovního serveru: %1$s"
+
+#. Insufficient permissions to perform the operation.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:234
+msgid "Insufficient permissions to perform the operation."
+msgstr "Pro vykonání operace nemáte dostatečná oprávnění."
+
+#. Such a folder already exists.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:237
+msgid "Such a folder already exists."
+msgstr "Taková složka již existuje."
+
+#. A non-secure connection is not allowed. Please change mail settings and configure a secure connection (if Transport Layer Security (TLS) is not in use, the client could try STARTTLS).
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:240
+msgid ""
+"Please change mail settings and configure a secure connection (if Transport "
+"Layer Security (TLS) is not in use, the client could try STARTTLS)"
+msgstr ""
+"Upravte, prosím, nastavení pošty a použijte zabezpečené spojení (pokud se"
+" nepoužívá TLS, klient by mohl zkusit STARTTLS)."
+
+#. A temporary failure because a subsystem is down. Please try again later.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:243
+msgid ""
+"A temporary failure because a subsystem is down (maybe due to maintenance). "
+"Please try again later."
+msgstr ""
+"Dočasné selhání kvůli výpadku subsystému (možná kvůli údržbě). Zkuste to,"
+" prosím, později."
+
 #. The default name for a file
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:73
 msgid "File"
@@ -8286,39 +8439,55 @@ msgstr "Soubor"
 msgid "My shared mail attachments"
 msgstr "Moje sdílené přílohy e-mailů"
 
-#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-#. Hints to the available attachments for affected message
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:80
+msgid "%1$s has shared the following file with you:"
+msgstr "%1$s s vámi sdílel(a) následující soubor:"
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:82
-msgid ""
-"The available attachments for this E-Mail can be accessed via the link %1$s"
-msgstr ""
-"Dostupné přílohy k tomuto e-mailu jsou k dispozici prostřednictvím odkazu "
-"%1$s"
+msgid "%1$s has shared the following files with you:"
+msgstr "%1$s s vámi sdílel(a) následující soubory:"
+
+#. * View file
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:218
+msgid "View file"
+msgstr "Zobrazit soubor"
+
+#. * View files
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:221
+msgid "View files"
+msgstr "Zobrazit soubory"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the elapsed date for affected message's attachments
 #. * The link will expire on 01/01/16 *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:86
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:236
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:236
 msgid "The link will expire on %1$s"
 msgstr "Odkaz vyprší %1$s"
 
 #. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
 #. Indicates the password for affected message's attachments
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:90
-msgid "Please use the following password to access the attachments %1$s"
-msgstr "Použijte, prosím, následující heslo pro přístup k přílohám %1$s "
-
-#. The internationalized text put into text body of an email of which attachments exceed user's quota limitation
-#. Indicates the file names for affected message's attachments
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:94
-msgid "The following attachments are accessible:"
-msgstr "Následující přílohy jsou dostupné:"
+msgid "Please use the following password: %1$s"
+msgstr "Použijte, prosím, následující heslo: %1$s"
 
 #. Fall-back name if a file has no valid name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/compose/share/ShareComposeStrings.java:97
 msgid "Unnamed"
 msgstr "Bez názvu"
+
+#. Application 'xyz' requires following permissions:
+#. - Send RFC822 data using primary account's transport. This requires master authentication to be active.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/json/osgi/OAuthScopeDescription.java:65
+msgid ""
+"Send RFC822 data using primary account's transport. This requires master "
+"authentication to be active."
+msgstr ""
+"Pošlete data RFC288 prostřednictvím primárního účtu. To vyžaduje aktivní"
+" hlavní autentizaci."
 
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
@@ -8557,6 +8726,20 @@ msgstr ""
 msgid "Timeout while trying to send to the following recipient: %1$s"
 msgstr "Při pokusu o zaslání následujícímu příjemci vypršel čas: %1$s"
 
+#. The message advertising that everything is fine with checked account
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:71
+msgid "All fine"
+msgstr "Vše v pořádku"
+
+#. The message advertising that authentication against referenced mail account does not work or stopped working
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/KnownStatusMessage.java:74
+msgid ""
+"The entered credential or authentication information does not work or are no "
+"longer accepted by provider. Please change them."
+msgstr ""
+"Zadané přístupové údaje nefungují nebo je poskytovatel již neakceptuje."
+" Změňte je, prosím."
+
 #. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
 msgid "Cannot find mail account for user \"%2$s\"."
@@ -8703,6 +8886,20 @@ msgstr "Jméno hostitele „%1$s“ není povolené."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:128
 msgid "The protocol must not changed from %1$s to %2$s."
 msgstr "Protokol nesmí být změněn z %1$s na %2$s."
+
+#. Application 'xyz' requires following permissions:
+#. - Read all your mail accounts.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/json/osgi/OAuthScopeDescription.java:65
+msgid "Read all your mail accounts."
+msgstr "Číst všechny e-mailové účty."
+
+#. Application 'xyz' requires following permissions:
+#. - Create, modify and delete mail accounts.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/json/osgi/OAuthScopeDescription.java:70
+msgid "Create, modify and delete mail accounts."
+msgstr "Vytvářet, upravovat a mazat e-mailové účty."
 
 #. Found resource(s) with same identifier \"%1$s\".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/resource/ResourceExceptionMessage.java:78
@@ -9103,440 +9300,6 @@ msgstr "Autentizace s uživatelským jménem %1$s selhala"
 msgid "No session found for identifier: %1$s"
 msgstr "Pro identifikátor %1$s nebylo nalezeno žádné sezení"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.limit/src/com/openexchange/share/limit/limiter/exceptions/DownloadLimitedExceptionMessages.java:63
-msgid ""
-"Download denied because download limits have been exceeded. Please try again "
-"later."
-msgstr ""
-"Stahování zamítnuto kvůli překročení limitu stahování. Zkuste, prosím, znovu "
-"později."
-
-#. subject
-#. * $username has shared file "$filename" with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:65
-msgid "%1$s has shared the file \"%2$s\" with you."
-msgstr "%1$s s vámi sdílel(a) soubor „%2$s“."
-
-#. * $username has shared $number_of_files files with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:68
-msgid "%1$s has shared %2$s files with you."
-msgstr "%1$s s vámi sdílel(a) %2$s souborů."
-
-#. * $username has shared image "$filename" with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:71
-msgid "%1$s has shared the image \"%2$s\" with you."
-msgstr "%1$s s vámi sdílel(a) obrázek „%2$s“."
-
-#. * $username has shared $number_of_images images with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:74
-msgid "%1$s has shared %2$s images with you."
-msgstr "%1$s s vámi sdílel(a) %2$s obrázků."
-
-#. * $username has shared item "$filename" with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:77
-msgid "%1$s has shared the item \"%2$s\" with you."
-msgstr "%1$s s vámi sdílel(a) položku „%2$s“."
-
-#. * $username has shared $number items with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:80
-msgid "%1$s has shared %2$s items with you."
-msgstr "%1$s s vámi sdílel(a) %2$s položek."
-
-#. * $username has shared folder "$folder" with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:83
-msgid "%1$s has shared the folder \"%2$s\" with you."
-msgstr "%1$s s vámi sdílel(a) složku „%2$s“."
-
-#. * $username has shared $number folders with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:86
-msgid "%1$s has shared %2$d folders with you."
-msgstr "%1$s s vámi sdílel(a) %2$s složek."
-
-#. * $username has shared file "$filename" with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:89
-msgid "%1$s has shared the file \"%2$s\" with the group \"%3$s\"."
-msgstr "%1$s sdílel(a) soubor „%2$s“ se skupinou „%3$s“."
-
-#. * $username has shared $number_of_files files with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:92
-msgid "%1$s has shared %2$s files with the group \"%3$s\"."
-msgstr "%1$s sdílel(a) %2$s souborů se skupinou „%3$s“."
-
-#. * $username has shared image "$filename" with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:95
-msgid "%1$s has shared the image \"%2$s\" with the group \"%3$s\"."
-msgstr "%1$s sdílel(a) obrázek „%2$s“ se skupinou „%3$s“."
-
-#. * $username has shared $number_of_images images with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:98
-msgid "%1$s has shared %2$s images with the group \"%3$s\"."
-msgstr "%1$s sdílel(a) %2$s obrázků se skupinou „%3$s“."
-
-#. * $username has shared item "$filename" with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:101
-msgid "%1$s has shared the item \"%2$s\" with the group \"%3$s\"."
-msgstr "%1$s sdílel(a) položku „%2$s“ se skupinou „%3$s“."
-
-#. * $username has shared $number items with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:104
-msgid "%1$s has shared %2$s items with the group \"%3$s\"."
-msgstr "%1$s sdílel(a) %2$s položek se skupinou „%3$s“."
-
-#. * $username has shared folder "$folder" with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:107
-msgid "%1$s has shared the folder \"%2$s\" with the group \"%3$s\"."
-msgstr "%1$s sdílel(a) složku „%2$s“ se skupinou „%3$s“."
-
-#. * $username has shared $number folders with the group "Sales Dept.".
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:110
-msgid "%1$s has shared %2$d folders with the group \"%3$s\"."
-msgstr "%1$s sdílel(a) %2$s složek se skupinou „%3$s“."
-
-#. detailed body
-#. * $username ($user_email) has shared file "$filename" with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:114
-msgid ""
-"%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button "
-"below to view it."
-msgstr ""
-"%1$s (%2$s) s vámi sdílel(a) soubor „%3$s“. Klikněte, prosím, na tlačítko "
-"níže, chcete-li soubor prohlédnout."
-
-#. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:117
-msgid ""
-"%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
-"view them."
-msgstr ""
-"%1$s (%2$s) s vámi sdílel(a) %3$s souborů. Klikněte, prosím, na tlačítko "
-"níže, chcete-li soubory prohlédnout."
-
-#. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:120
-msgid ""
-"%1$s (%2$s) has shared the image \"%3$s\" with you. Please click the button "
-"below to view it."
-msgstr ""
-"%1$s (%2$s) s vámi sdílel(a) obrázek „$s“. Klikněte, prosím, na tlačítko "
-"níže, chcete-li obrázek prohlédnout."
-
-#. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:123
-msgid ""
-"%1$s (%2$s) has shared %3$s images with you. Please click the button below "
-"to view them."
-msgstr ""
-"%1$s (%2$s) s vámi sdílel(a) %3$s obrázků. Klikněte, prosím, na tlačítko "
-"níže, chcete-li obrázky prohlédnout."
-
-#. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:126
-msgid ""
-"%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
-"below to view it."
-msgstr ""
-"%1$s (%2$s) s vámi sdílel(a) položku „$s“. Klikněte, prosím, na tlačítko "
-"níže, chcete-li ji prohlédnout."
-
-#. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:129
-msgid ""
-"%1$s (%2$s) has shared %3$s items with you. Please click the button below to "
-"view them."
-msgstr ""
-"%1$s (%2$s) s vámi sdílel(a) %3$s položek. Klikněte, prosím, na tlačítko "
-"níže, chcete-li je prohlédnout."
-
-#. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:132
-msgid ""
-"%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button "
-"below to view it."
-msgstr ""
-"%1$s (%2$s) s vámi sdílel(a) složku „$s“. Klikněte, prosím, na tlačítko "
-"níže, chcete-li ji prohlédnout."
-
-#. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:135
-msgid ""
-"%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
-"to view them."
-msgstr ""
-"%1$s (%2$s) s vámi sdílel(a) %3$s složek. Klikněte, prosím, na tlačítko "
-"níže, chcete-li je prohlédnout."
-
-#. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:138
-msgid ""
-"%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\". Please "
-"click the button below to view it."
-msgstr ""
-"%1$s (%2$s) sdílel(a) soubor „%3$s“ se skupinou „%4$s“. Klikněte, prosím, na "
-"tlačítko níže, chcete-li soubor prohlédnout."
-
-#. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept.". Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:141
-msgid ""
-"%1$s (%2$s) has shared %3$s files with the group \"%4$s\". Please click the "
-"button below to view them."
-msgstr ""
-"%1$s (%2$s) sdílel(a) %3$s souborů se skupinou „%4$s“. Klikněte, prosím, na "
-"tlačítko níže, chcete-li soubory prohlédnout."
-
-#. * $username ($user_email) has shared image "$filename" with the group "Sales Dept.". Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:144
-msgid ""
-"%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\". Please "
-"click the button below to view it."
-msgstr ""
-"%1$s (%2$s) sdílel(a) obrázek „%3$s“ se skupinou „%4$s“. Klikněte, prosím, "
-"na tlačítko níže, chcete-li obrázek prohlédnout."
-
-#. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept.". Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:147
-msgid ""
-"%1$s (%2$s) has shared %3$s images with the group \"%4$s\". Please click the "
-"button below to view them."
-msgstr ""
-"%1$s (%2$s) sdílel(a) %3$s obrázků se skupinou „%4$s“. Klikněte, prosím, na "
-"tlačítko níže, chcete-li obrázky prohlédnout."
-
-#. * $username ($user_email) has shared item "$filename" with the group "Sales Dept.". Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:150
-msgid ""
-"%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\". Please "
-"click the button below to view it."
-msgstr ""
-"%1$s (%2$s) sdílel(a) položku „%3$s“ se skupinou „%4$s“. Klikněte, prosím, "
-"na tlačítko níže, chcete-li položku prohlédnout."
-
-#. * $username ($user_email) has shared $number items with the group "Sales Dept.". Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:153
-msgid ""
-"%1$s (%2$s) has shared %3$s items with the group \"%4$s\". Please click the "
-"button below to view them."
-msgstr ""
-"%1$s (%2$s) sdílel(a) %3$s položek se skupinou „%4$s“. Klikněte, prosím, na "
-"tlačítko níže, chcete-li položky prohlédnout."
-
-#. * $username ($user_email) has shared folder $folder with the group "Sales Dept.". Please click the button below to view it.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:156
-msgid ""
-"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\". Please "
-"click the button below to view it."
-msgstr ""
-"%1$s (%2$s) sdílel(a) složku „%3$s“ se skupinou „%4$s“. Klikněte, prosím, na "
-"tlačítko níže, chcete-li složku prohlédnout."
-
-#. * $username ($user_email) has shared folder $number folders with the group "Sales Dept.". Please click the button below to view them.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:159
-msgid ""
-"%1$s (%2$s) has shared %3$ folders with the group \"%4$s\". Please click the "
-"button below to view them."
-msgstr ""
-"%1$s (%2$s) sdílel(a) %3$s složek se skupinou „%4$s“. Klikněte, prosím, na "
-"tlačítko níže, chcete-li složky prohlédnout."
-
-#. * $username ($user_email) has shared file "$filename" with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:163
-msgid ""
-"%1$s (%2$s) has shared the file \"%3$s\" with you and left you a message:"
-msgstr "%1$s (%2$s) s vámi sdílel(a) soubor „%3$s“ a připojil(a) zprávu:"
-
-#. * $username ($user_email) has shared $number_of_files files with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:166
-msgid "%1$s (%2$s) has shared %3$s files with you and left you a message:"
-msgstr "%1$s (%2$s) s vámi sdílel(a) %3$s souborů a připojil(a) zprávu:"
-
-#. * $username ($user_email) has shared photo "$filename" with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:169
-msgid ""
-"%1$s (%2$s) has shared the image \"%3$s\" with you and left you a message:"
-msgstr "%1$s (%2$s) s vámi sdílel(a) obrázek „%3$s“ a připojil(a) zprávu:"
-
-#. * $username ($user_email) has shared $number_of_images images with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:172
-msgid "%1$s (%2$s) has shared %3$s images with you and left you a message:"
-msgstr "%1$s (%2$s) s vámi sdílel(a) %3$s obrázků a připojil(a) zprávu:"
-
-#. * $username ($user_email) has shared a folder with you and left you a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:175
-msgid ""
-"%1$s (%2$s) has shared the folder \"%3$s\" with you and left you a message:"
-msgstr "%1$s (%2$s) s vámi sdílel(a) složku „%3$s“ a připojil(a) zprávu:"
-
-#. * $username ($user_email) has shared item "$filename" with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:178
-msgid ""
-"%1$s (%2$s) has shared the item \"%3$s\" with you and left you a message:"
-msgstr "%1$s (%2$s) s vámi sdílel(a) položku „%3$s“ a připojil(a) zprávu:"
-
-#. * $username ($user_email) has shared $number_of_items items with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:181
-msgid "%1$s (%2$s) has shared %3$d items with you and left you a message:"
-msgstr "%1$s (%2$s) s vámi sdílel(a) %3$s položek a připojil(a) zprávu:"
-
-#. * $username ($user_email) has shared $number_of_folder items with you.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:184
-msgid "%1$s (%2$s) has shared %3$d folders with you and left you a message:"
-msgstr "%1$s (%2$s) s vámi sdílel(a) %3$s složek a připojil(a) zprávu:"
-
-#. * $username ($user_email) has shared file "$filename" with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:187
-msgid ""
-"%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\" and left a "
-"message:"
-msgstr ""
-"%1$s (%2$s) sdílel(a) soubor „%3$s“ se skupinou „%4$s“ a připojil(a) zprávu:"
-
-#. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:190
-msgid ""
-"%1$s (%2$s) has shared %3$s files with the group \"%4$s\" and left a message:"
-msgstr ""
-"%1$s (%2$s) sdílel(a) %3$s souborů se skupinou „%4$s“ a připojil(a) zprávu:"
-
-#. * $username ($user_email) has shared photo "$filename" with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:193
-msgid ""
-"%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\" and left a "
-"message:"
-msgstr ""
-"%1$s (%2$s) sdílel(a) obrázek „%3$s“ se skupinou „%4$s“ a připojil(a) zprávu:"
-
-#. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:196
-msgid ""
-"%1$s (%2$s) has shared %3$s images with the group \"%4$s\" and left a "
-"message:"
-msgstr ""
-"%1$s (%2$s) sdílel(a) %3$s obrázků se skupinou „%4$s“ a připojil(a) zprávu:"
-
-#. * $username ($user_email) has shared a folder with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:199
-msgid ""
-"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\" and left "
-"a message:"
-msgstr ""
-"%1$s (%2$s) sdílel(a) složku „%3$s“ se skupinou „%4$s“ a připojil(a) zprávu:"
-
-#. * $username ($user_email) has shared item "$filename" with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:202
-msgid ""
-"%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\" and left a "
-"message:"
-msgstr ""
-"%1$s (%2$s) sdílel(a) položku „%3$s“ se skupinou „%4$s“ a připojil(a) zprávu:"
-
-#. * $username ($user_email) has shared $number_of_items items with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:205
-msgid ""
-"%1$s (%2$s) has shared %3$d items with the group \"%4$s\" and left a message:"
-msgstr ""
-"%1$s (%2$s) sdílel(a) %3$s položek se skupinou „%4$s“ a připojil(a) zprávu:"
-
-#. * $username ($user_email) has shared $number_of_folder items with the group "Sales Dept." and left a message:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:208
-msgid ""
-"%1$s (%2$s) has shared %3$d folders with the group \"%4$s\" and left a "
-"message:"
-msgstr ""
-"%1$s (%2$s) sdílel(a) %3$s složek se skupinou „%4$s“ a připojil(a) zprávu:"
-
-#. button with label
-#. * View image
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:212
-msgid "View image"
-msgstr "Zobrazit obrázek"
-
-#. * View images
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:215
-msgid "View images"
-msgstr "Zobrazit obrázky"
-
-#. * View file
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:218
-msgid "View file"
-msgstr "Zobrazit soubor"
-
-#. * View files
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:221
-msgid "View files"
-msgstr "Zobrazit soubory"
-
-#. * View folder
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:224
-msgid "View folder"
-msgstr "Zobrazit složku"
-
-#. * View folders
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:227
-msgid "View folders"
-msgstr "Zobrazit složky"
-
-#. * View item
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:230
-msgid "View item"
-msgstr "Zobrazit položku"
-
-#. * View items
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:233
-msgid "View items"
-msgstr "Zobrazit položky"
-
-#. * The link is password protected. To see it you must use the following password: kac7Nede *
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:239
-msgid ""
-"This link is password protected. You need the following password to open it:"
-msgstr "Odkaz je chráněný heslem. Pro otevření potřebujete následující heslo:"
-
-#.
-#. * Password reset confirm mails
-#.
-#. *
-#. * OX App Suite - Forgot your password?
-#.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:248
-msgid "%1$s - Forgot your password?"
-msgstr "%1$s - Zapomněl(a) jste své heslo?"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:250
-msgid "Hello,"
-msgstr "Dobrý den,"
-
-#. * we got informed that you forgot your password. You can set a new password here:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:253
-msgid ""
-"we got informed that you forgot your password. You can set a new password "
-"here:"
-msgstr ""
-"byli jsme informováni, že jste zapomněl(a) své heslo. Zde můžete nastavit "
-"nové:"
-
-#. * Set password
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:256
-msgid "Set password"
-msgstr "Nastavit heslo"
-
-#. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:259
-msgid ""
-"If you didn't request this, please ignore this email. Your password won't "
-"change until you access the button above and set a new one."
-msgstr ""
-"Pokud jste nežádal o změnu hesla, ignorujte tuto zprávu. Vaše heslo se "
-"nezmění, dokud nekliknete na tlačítko výše a nenastavíte nové."
-
-#. * This is an automated message, please do not reply.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:262
-msgid "This is an automated message, please do not reply."
-msgstr "Toto je automatická zpráva. Neodpovídejte, prosím."
-
-#. An error occurred for user 'unknown'
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:265
-msgid "unknown"
-msgstr "neznámé"
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:62
 msgid "guest"
 msgstr "host"
@@ -9855,6 +9618,435 @@ msgstr "Oprávnění nastavená pro tento odkaz jsou neplatná."
 msgid "image"
 msgstr "obrázek"
 
+#. subject
+#. * $username has shared file "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:65
+msgid "%1$s has shared the file \"%2$s\" with you."
+msgstr "%1$s s vámi sdílel(a) soubor „%2$s“."
+
+#. * $username has shared $number_of_files files with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:68
+msgid "%1$s has shared %2$s files with you."
+msgstr "%1$s s vámi sdílel(a) %2$s souborů."
+
+#. * $username has shared image "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:71
+msgid "%1$s has shared the image \"%2$s\" with you."
+msgstr "%1$s s vámi sdílel(a) obrázek „%2$s“."
+
+#. * $username has shared $number_of_images images with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:74
+msgid "%1$s has shared %2$s images with you."
+msgstr "%1$s s vámi sdílel(a) %2$s obrázků."
+
+#. * $username has shared item "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:77
+msgid "%1$s has shared the item \"%2$s\" with you."
+msgstr "%1$s s vámi sdílel(a) položku „%2$s“."
+
+#. * $username has shared $number items with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:80
+msgid "%1$s has shared %2$s items with you."
+msgstr "%1$s s vámi sdílel(a) %2$s položek."
+
+#. * $username has shared folder "$folder" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:83
+msgid "%1$s has shared the folder \"%2$s\" with you."
+msgstr "%1$s s vámi sdílel(a) složku „%2$s“."
+
+#. * $username has shared $number folders with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:86
+msgid "%1$s has shared %2$d folders with you."
+msgstr "%1$s s vámi sdílel(a) %2$s složek."
+
+#. * $username has shared file "$filename" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:89
+msgid "%1$s has shared the file \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s sdílel(a) soubor „%2$s“ se skupinou „%3$s“."
+
+#. * $username has shared $number_of_files files with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:92
+msgid "%1$s has shared %2$s files with the group \"%3$s\"."
+msgstr "%1$s sdílel(a) %2$s souborů se skupinou „%3$s“."
+
+#. * $username has shared image "$filename" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:95
+msgid "%1$s has shared the image \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s sdílel(a) obrázek „%2$s“ se skupinou „%3$s“."
+
+#. * $username has shared $number_of_images images with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:98
+msgid "%1$s has shared %2$s images with the group \"%3$s\"."
+msgstr "%1$s sdílel(a) %2$s obrázků se skupinou „%3$s“."
+
+#. * $username has shared item "$filename" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:101
+msgid "%1$s has shared the item \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s sdílel(a) položku „%2$s“ se skupinou „%3$s“."
+
+#. * $username has shared $number items with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:104
+msgid "%1$s has shared %2$s items with the group \"%3$s\"."
+msgstr "%1$s sdílel(a) %2$s položek se skupinou „%3$s“."
+
+#. * $username has shared folder "$folder" with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:107
+msgid "%1$s has shared the folder \"%2$s\" with the group \"%3$s\"."
+msgstr "%1$s sdílel(a) složku „%2$s“ se skupinou „%3$s“."
+
+#. * $username has shared $number folders with the group "Sales Dept.".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:110
+msgid "%1$s has shared %2$d folders with the group \"%3$s\"."
+msgstr "%1$s sdílel(a) %2$s složek se skupinou „%3$s“."
+
+#. detailed body
+#. * $username ($user_email) has shared file "$filename" with you. Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:114
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) s vámi sdílel(a) soubor „%3$s“. Klikněte, prosím, na tlačítko "
+"níže, chcete-li soubor prohlédnout."
+
+#. * $username ($user_email) has shared $number_of_files files with you. Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:117
+msgid ""
+"%1$s (%2$s) has shared %3$s files with you. Please click the button below to "
+"view them."
+msgstr ""
+"%1$s (%2$s) s vámi sdílel(a) %3$s souborů. Klikněte, prosím, na tlačítko "
+"níže, chcete-li soubory prohlédnout."
+
+#. * $username ($user_email) has shared image "$filename" with you. Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:120
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) s vámi sdílel(a) obrázek „$s“. Klikněte, prosím, na tlačítko "
+"níže, chcete-li obrázek prohlédnout."
+
+#. * $username ($user_email) has shared $number_of_images images with you. Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:123
+msgid ""
+"%1$s (%2$s) has shared %3$s images with you. Please click the button below "
+"to view them."
+msgstr ""
+"%1$s (%2$s) s vámi sdílel(a) %3$s obrázků. Klikněte, prosím, na tlačítko "
+"níže, chcete-li obrázky prohlédnout."
+
+#. * $username ($user_email) has shared item "$filename" with you. Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:126
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) s vámi sdílel(a) položku „$s“. Klikněte, prosím, na tlačítko "
+"níže, chcete-li ji prohlédnout."
+
+#. * $username ($user_email) has shared $number items with you. Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:129
+msgid ""
+"%1$s (%2$s) has shared %3$s items with you. Please click the button below to "
+"view them."
+msgstr ""
+"%1$s (%2$s) s vámi sdílel(a) %3$s položek. Klikněte, prosím, na tlačítko "
+"níže, chcete-li je prohlédnout."
+
+#. * $username ($user_email) has shared folder $folder with you. Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:132
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with you. Please click the button "
+"below to view it."
+msgstr ""
+"%1$s (%2$s) s vámi sdílel(a) složku „$s“. Klikněte, prosím, na tlačítko "
+"níže, chcete-li ji prohlédnout."
+
+#. * $username ($user_email) has shared folder $number folders with you. Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:135
+msgid ""
+"%1$s (%2$s) has shared %3$ folders with you. Please click the button below "
+"to view them."
+msgstr ""
+"%1$s (%2$s) s vámi sdílel(a) %3$s složek. Klikněte, prosím, na tlačítko "
+"níže, chcete-li je prohlédnout."
+
+#. * $username ($user_email) has shared file "$filename" with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:138
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr ""
+"%1$s (%2$s) sdílel(a) soubor „%3$s“ se skupinou „%4$s“. Klikněte, prosím, na "
+"tlačítko níže, chcete-li soubor prohlédnout."
+
+#. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:141
+msgid ""
+"%1$s (%2$s) has shared %3$s files with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr ""
+"%1$s (%2$s) sdílel(a) %3$s souborů se skupinou „%4$s“. Klikněte, prosím, na "
+"tlačítko níže, chcete-li soubory prohlédnout."
+
+#. * $username ($user_email) has shared image "$filename" with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:144
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr ""
+"%1$s (%2$s) sdílel(a) obrázek „%3$s“ se skupinou „%4$s“. Klikněte, prosím, "
+"na tlačítko níže, chcete-li obrázek prohlédnout."
+
+#. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:147
+msgid ""
+"%1$s (%2$s) has shared %3$s images with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr ""
+"%1$s (%2$s) sdílel(a) %3$s obrázků se skupinou „%4$s“. Klikněte, prosím, na "
+"tlačítko níže, chcete-li obrázky prohlédnout."
+
+#. * $username ($user_email) has shared item "$filename" with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:150
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr ""
+"%1$s (%2$s) sdílel(a) položku „%3$s“ se skupinou „%4$s“. Klikněte, prosím, "
+"na tlačítko níže, chcete-li položku prohlédnout."
+
+#. * $username ($user_email) has shared $number items with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:153
+msgid ""
+"%1$s (%2$s) has shared %3$s items with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr ""
+"%1$s (%2$s) sdílel(a) %3$s položek se skupinou „%4$s“. Klikněte, prosím, na "
+"tlačítko níže, chcete-li položky prohlédnout."
+
+#. * $username ($user_email) has shared folder $folder with the group "Sales Dept.". Please click the button below to view it.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:156
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\". Please "
+"click the button below to view it."
+msgstr ""
+"%1$s (%2$s) sdílel(a) složku „%3$s“ se skupinou „%4$s“. Klikněte, prosím, na "
+"tlačítko níže, chcete-li složku prohlédnout."
+
+#. * $username ($user_email) has shared folder $number folders with the group "Sales Dept.". Please click the button below to view them.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:159
+msgid ""
+"%1$s (%2$s) has shared %3$ folders with the group \"%4$s\". Please click the "
+"button below to view them."
+msgstr ""
+"%1$s (%2$s) sdílel(a) %3$s složek se skupinou „%4$s“. Klikněte, prosím, na "
+"tlačítko níže, chcete-li složky prohlédnout."
+
+#. * $username ($user_email) has shared file "$filename" with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:163
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with you and left you a message:"
+msgstr "%1$s (%2$s) s vámi sdílel(a) soubor „%3$s“ a připojil(a) zprávu:"
+
+#. * $username ($user_email) has shared $number_of_files files with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:166
+msgid "%1$s (%2$s) has shared %3$s files with you and left you a message:"
+msgstr "%1$s (%2$s) s vámi sdílel(a) %3$s souborů a připojil(a) zprávu:"
+
+#. * $username ($user_email) has shared photo "$filename" with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:169
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with you and left you a message:"
+msgstr "%1$s (%2$s) s vámi sdílel(a) obrázek „%3$s“ a připojil(a) zprávu:"
+
+#. * $username ($user_email) has shared $number_of_images images with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:172
+msgid "%1$s (%2$s) has shared %3$s images with you and left you a message:"
+msgstr "%1$s (%2$s) s vámi sdílel(a) %3$s obrázků a připojil(a) zprávu:"
+
+#. * $username ($user_email) has shared a folder with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:175
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with you and left you a message:"
+msgstr "%1$s (%2$s) s vámi sdílel(a) složku „%3$s“ a připojil(a) zprávu:"
+
+#. * $username ($user_email) has shared item "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:178
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with you and left you a message:"
+msgstr "%1$s (%2$s) s vámi sdílel(a) položku „%3$s“ a připojil(a) zprávu:"
+
+#. * $username ($user_email) has shared $number_of_items items with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:181
+msgid "%1$s (%2$s) has shared %3$d items with you and left you a message:"
+msgstr "%1$s (%2$s) s vámi sdílel(a) %3$s položek a připojil(a) zprávu:"
+
+#. * $username ($user_email) has shared $number_of_folder items with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:184
+msgid "%1$s (%2$s) has shared %3$d folders with you and left you a message:"
+msgstr "%1$s (%2$s) s vámi sdílel(a) %3$s složek a připojil(a) zprávu:"
+
+#. * $username ($user_email) has shared file "$filename" with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:187
+msgid ""
+"%1$s (%2$s) has shared the file \"%3$s\" with the group \"%4$s\" and left a "
+"message:"
+msgstr ""
+"%1$s (%2$s) sdílel(a) soubor „%3$s“ se skupinou „%4$s“ a připojil(a) zprávu:"
+
+#. * $username ($user_email) has shared $number_of_files files with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:190
+msgid ""
+"%1$s (%2$s) has shared %3$s files with the group \"%4$s\" and left a message:"
+msgstr ""
+"%1$s (%2$s) sdílel(a) %3$s souborů se skupinou „%4$s“ a připojil(a) zprávu:"
+
+#. * $username ($user_email) has shared photo "$filename" with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:193
+msgid ""
+"%1$s (%2$s) has shared the image \"%3$s\" with the group \"%4$s\" and left a "
+"message:"
+msgstr ""
+"%1$s (%2$s) sdílel(a) obrázek „%3$s“ se skupinou „%4$s“ a připojil(a) zprávu:"
+
+#. * $username ($user_email) has shared $number_of_images images with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:196
+msgid ""
+"%1$s (%2$s) has shared %3$s images with the group \"%4$s\" and left a "
+"message:"
+msgstr ""
+"%1$s (%2$s) sdílel(a) %3$s obrázků se skupinou „%4$s“ a připojil(a) zprávu:"
+
+#. * $username ($user_email) has shared a folder with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:199
+msgid ""
+"%1$s (%2$s) has shared the folder \"%3$s\" with the group \"%4$s\" and left "
+"a message:"
+msgstr ""
+"%1$s (%2$s) sdílel(a) složku „%3$s“ se skupinou „%4$s“ a připojil(a) zprávu:"
+
+#. * $username ($user_email) has shared item "$filename" with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:202
+msgid ""
+"%1$s (%2$s) has shared the item \"%3$s\" with the group \"%4$s\" and left a "
+"message:"
+msgstr ""
+"%1$s (%2$s) sdílel(a) položku „%3$s“ se skupinou „%4$s“ a připojil(a) zprávu:"
+
+#. * $username ($user_email) has shared $number_of_items items with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:205
+msgid ""
+"%1$s (%2$s) has shared %3$d items with the group \"%4$s\" and left a message:"
+msgstr ""
+"%1$s (%2$s) sdílel(a) %3$s položek se skupinou „%4$s“ a připojil(a) zprávu:"
+
+#. * $username ($user_email) has shared $number_of_folder items with the group "Sales Dept." and left a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:208
+msgid ""
+"%1$s (%2$s) has shared %3$d folders with the group \"%4$s\" and left a "
+"message:"
+msgstr ""
+"%1$s (%2$s) sdílel(a) %3$s složek se skupinou „%4$s“ a připojil(a) zprávu:"
+
+#. button with label
+#. * View image
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:212
+msgid "View image"
+msgstr "Zobrazit obrázek"
+
+#. * View images
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:215
+msgid "View images"
+msgstr "Zobrazit obrázky"
+
+#. * View folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:224
+msgid "View folder"
+msgstr "Zobrazit složku"
+
+#. * View folders
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:227
+msgid "View folders"
+msgstr "Zobrazit složky"
+
+#. * View item
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:230
+msgid "View item"
+msgstr "Zobrazit položku"
+
+#. * View items
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:233
+msgid "View items"
+msgstr "Zobrazit položky"
+
+#. * The link is password protected. To see it you must use the following password: kac7Nede *
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:239
+msgid ""
+"This link is password protected. You need the following password to open it:"
+msgstr "Odkaz je chráněný heslem. Pro otevření potřebujete následující heslo:"
+
+#.
+#. * Password reset confirm mails
+#.
+#. *
+#. * OX App Suite - Forgot your password?
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:248
+msgid "%1$s - Forgot your password?"
+msgstr "%1$s - Zapomněl(a) jste své heslo?"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:250
+msgid "Hello,"
+msgstr "Dobrý den,"
+
+#. * we got informed that you forgot your password. You can set a new password here:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:253
+msgid ""
+"we got informed that you forgot your password. You can set a new password "
+"here:"
+msgstr ""
+"byli jsme informováni, že jste zapomněl(a) své heslo. Zde můžete nastavit "
+"nové:"
+
+#. * Set password
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:256
+msgid "Set password"
+msgstr "Nastavit heslo"
+
+#. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:259
+msgid ""
+"If you didn't request this, please ignore this email. Your password won't "
+"change until you access the button above and set a new one."
+msgstr ""
+"Pokud jste nežádal o změnu hesla, ignorujte tuto zprávu. Vaše heslo se "
+"nezmění, dokud nekliknete na tlačítko výše a nenastavíte nové."
+
+#. * This is an automated message, please do not reply.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:262
+msgid "This is an automated message, please do not reply."
+msgstr "Toto je automatická zpráva. Neodpovídejte, prosím."
+
+#. An error occurred for user 'unknown'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:265
+msgid "unknown"
+msgstr "neznámé"
+
+#.
+#. * Drive Mail notifications
+#.
+#. * and %1$d more files.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:271
+msgid "and %1$d more files."
+msgstr "a %1$d dalších souborů."
+
+#. * and 1 more file.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/NotificationStrings.java:274
+msgid "and 1 more file."
+msgstr "a jeden další soubor."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:64
 msgid ""
 "No notification mail could be sent to user \"%1$s\". We don't know his email "
@@ -9992,39 +10184,39 @@ msgid "The OAuth Account to use"
 msgstr "OAuth účet, který se má použít"
 
 #. The message displayed if the requested cannot be found.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:62
 msgid "Cannot find the requested subscription."
 msgstr "Nelze nalézt požadované přihlášení k odběru."
 
 #. The message displayed if the server is not able to access the 3rd party service with the given credentials.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:65
 msgid "The login/password combination you entered is wrong."
 msgstr "Zadaná kombinace přihlašovacího jména a hesla je chybná."
 
 #. The message displayed if a required service (e. g. for adding a subscription) is currently not available.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:68
 msgid "A required service is currently not available. Please try again later."
 msgstr "Požadovaná služba není dostupná. Zkuste to, prosím, později."
 
 #. The message displayed if an argument is missing. %1$s defines the missing argument.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:71
 msgid "The argument %1$s is missing."
 msgstr "Chybí parametr %1$s."
 
 #. The message displayed if the user misses some permissions.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:74
 msgid "You do not have the appropriate permissions to complete this operation."
 msgstr "Nemáte příslušná oprávnění k dokončení této operace."
 
 #. The message displayed if a non valid email address is inserted.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:78
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:77
 msgid "Please specify your full E-Mail address as login name."
 msgstr ""
 "Zadejte, prosím, svou celou e-mailovou adresu, bude použita jako "
 "přihlašovací jméno."
 
 #. The message displayed if a required service (e. g. for adding a subscription) is currently not available.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:81
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:80
 msgid ""
 "The source the subscription belongs to is currently inactive, and cannot "
 "provide data."
@@ -10033,17 +10225,17 @@ msgstr ""
 "době neaktivní a nemůže poskytovat data."
 
 #. The message displayed if the user would like to access the service but does not have an OAuth account.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:84
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:83
 msgid "You need to create an OAuth-account first to access this service."
 msgstr "Pro přístup k této službě si musíte nejprve vytvořit účet OAuth."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:86
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:85
 msgid "Your account needs to be verified: %1$s"
 msgstr "Váš účet je nutné ověřit: %1$s"
 
 #. The service provider asked for an identity confirmation. This happens for some accounts and cannot fixed by us.
 #. It is in the provider's responsibility. For this reason, the subscription cannot be completed.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:89
 msgid ""
 "The service provider asked for an identity confirmation. This happens for "
 "some accounts and cannot fixed by us. It is in the provider's "
@@ -10054,21 +10246,21 @@ msgstr ""
 "nelze přihlášení k odběru dokončit."
 
 #. You already have such a subscription.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:92
 msgid "You already have such a subscription."
 msgstr "Takové přihlášení k odběru již máte."
 
 #. Application 'xyz' requires following permissions:
 #. - Read all your tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/OAuthScopeDescription.java:9
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/OAuthScopeDescription.java:59
 msgid "Read all your tasks."
 msgstr "Čtení všech vašich úkolů."
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete tasks.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/OAuthScopeDescription.java:14
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/OAuthScopeDescription.java:64
 msgid "Create, modify and delete tasks."
 msgstr "Vytváření, úpravy a mazání úkolů."
 
@@ -12416,6 +12608,38 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid "All attachments"
+#~ msgstr "Všechny přílohy"
+
+#~ msgid "Received attachments"
+#~ msgstr "Přijaté přílohy"
+
+#~ msgid "Sent attachments"
+#~ msgstr "Odeslané přílohy"
+
+#~ msgid "Mail Drive"
+#~ msgstr "Mail Drive"
+
+#~ msgid ""
+#~ "An E-Mail address is mandatory for external distribution list members. "
+#~ "Please add a valid E-Mail address."
+#~ msgstr ""
+#~ "Pro externí členy distribučního seznamu je povinná e-mailová adresa. "
+#~ "Zadejte, prosím, platnou e-mailovou adresu."
+
+#~ msgid ""
+#~ "The available attachments for this E-Mail can be accessed via the link "
+#~ "%1$s"
+#~ msgstr ""
+#~ "Dostupné přílohy k tomuto e-mailu jsou k dispozici prostřednictvím odkazu "
+#~ "%1$s"
+
+#~ msgid "Please use the following password to access the attachments %1$s"
+#~ msgstr "Použijte, prosím, následující heslo pro přístup k přílohám %1$s "
+
+#~ msgid "The following attachments are accessible:"
+#~ msgstr "Následující přílohy jsou dostupné:"
 
 #~ msgid "Invalid E-Mail address."
 #~ msgstr "Neplatná e-mailová adresa."
