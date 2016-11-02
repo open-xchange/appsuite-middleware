@@ -63,3 +63,8 @@ The JVM's default trust store can be disabled. In this case, a custom trust stor
 
     # Disable the JVM's default trust store. It only makes sense, if a custom trust store is enabled
     com.openexchange.net.ssl.default.truststore.enabled=false
+
+# Known issues
+
+## Mailaccount autoconfiguration
+External mail accounts can be autoconfigured by using a database hosted by Mozilla Messaging. The certificate for domain ``live.mozillamessaging.com`` must be added to a custom trust store, if JVM's default trust store is disabled.
