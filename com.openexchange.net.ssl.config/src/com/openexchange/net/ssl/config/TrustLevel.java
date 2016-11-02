@@ -61,9 +61,9 @@ public enum TrustLevel {
 
     TRUST_RESTRICTED("restricted");
 
-    private String level;
+    private final String level;
 
-    TrustLevel(String level) {
+    private TrustLevel(String level) {
         this.level = level;
     }
 
