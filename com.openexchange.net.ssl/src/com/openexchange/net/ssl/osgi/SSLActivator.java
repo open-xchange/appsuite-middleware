@@ -70,7 +70,7 @@ public class SSLActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { UserAwareSSLConfigurationService.class, SSLConfigurationService.class };
+        return new Class[] { SSLConfigurationService.class };
     }
 
     @Override
@@ -78,6 +78,9 @@ public class SSLActivator extends HousekeepingActivator {
         try {
             org.slf4j.LoggerFactory.getLogger(SSLActivator.class).info("starting bundle: \"com.openexchange.net.ssl\"");
             Services.setServiceLookup(this);
+
+            trackService(UserAwareSSLConfigurationService.class);
+            openTrackers();
 
             TrustedSSLSocketFactory.init();
 

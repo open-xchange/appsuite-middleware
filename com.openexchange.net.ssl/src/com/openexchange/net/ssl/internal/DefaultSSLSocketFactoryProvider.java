@@ -96,6 +96,12 @@ public class DefaultSSLSocketFactoryProvider implements SSLSocketFactoryProvider
             return TrustAllSSLSocketFactory.getDefault();
         }
 
+        UserAwareSSLConfigurationService userSSLConfig = Services.getService(UserAwareSSLConfigurationService.class);
+        if (null == userSSLConfig) {
+            // Absent user-aware SSL config service. This happens for setups w/o a user/context service.
+            return TrustAllSSLSocketFactory.getDefault();
+        }
+
         // Try to determine by user
         int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
         int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
@@ -104,7 +110,6 @@ public class DefaultSSLSocketFactoryProvider implements SSLSocketFactoryProvider
             return TrustedSSLSocketFactory.getDefault();
         }
 
-        UserAwareSSLConfigurationService userSSLConfig = Services.getService(UserAwareSSLConfigurationService.class);
         return userSSLConfig.isTrustAll(user, context) ? TrustAllSSLSocketFactory.getDefault() : TrustedSSLSocketFactory.getDefault();
     }
 }
