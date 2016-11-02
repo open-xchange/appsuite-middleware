@@ -174,7 +174,8 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
             LOG.debug("Could not retrieve config XML.", e);
             return null;
         } catch (IOException e) {
-            LOG.warn("Could not retrieve config XML.", e);
+            // Apparently an I/O communication problem occurred while trying to connect to/read from deduced end-point from auto-config data
+            LOG.debug("Could not retrieve config XML.", e);
             return null;
         } finally {
             // When HttpClient instance is no longer needed,
