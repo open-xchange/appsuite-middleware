@@ -95,10 +95,7 @@ public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationS
 
         try {
             String userTrustsAll = this.userService.getUserAttribute(USER_ATTRIBUTE_NAME, userId, this.contextService.getContext(contextId));
-            if (userTrustsAll == null) {
-                return false;
-            }
-            return Boolean.parseBoolean(userTrustsAll);
+            return userTrustsAll == null ? false : userTrustsAll.equalsIgnoreCase("true");
         } catch (OXException e) {
             LOG.error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, userId, contextId);
         }
@@ -114,10 +111,7 @@ public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationS
         try {
             ConfigView view = this.configViewFactory.getView(userId, contextId);
             Boolean isUserAllowedToDefineTrustlevel = view.property(USER_CONFIG_ENABLED_PROPERTY, Boolean.class).get();
-            if (isUserAllowedToDefineTrustlevel == null) {
-                return false;
-            }
-            return isUserAllowedToDefineTrustlevel.booleanValue();
+            return isUserAllowedToDefineTrustlevel == null ? false : isUserAllowedToDefineTrustlevel.booleanValue();
         } catch (OXException e) {
             LOG.error("Unable to retrieve trust level based on user attribute {} for user {} in context {}", e, USER_ATTRIBUTE_NAME, userId, contextId);
         }
@@ -129,8 +123,8 @@ public class UserAwareSSLConfigurationImpl implements UserAwareSSLConfigurationS
         if (context == null) {
             return;
         }
-        boolean allowedToDefineTrustLevel = isAllowedToDefineTrustLevel(userId, context.getContextId());
 
+        boolean allowedToDefineTrustLevel = isAllowedToDefineTrustLevel(userId, context.getContextId());
         if (!allowedToDefineTrustLevel) {
             return;
         }
