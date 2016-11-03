@@ -50,6 +50,7 @@
 package com.openexchange.mail.mime;
 
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
+import java.io.IOException;
 import java.net.SocketException;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
@@ -524,6 +525,11 @@ public class MimeMailException extends OXException {
                     return handled;
                 }
 
+                Throwable protocolError = pe.getCause();
+                if (protocolError instanceof IOException) {
+                    return handleIOException((IOException) protocolError, mailConfig, session, folder);
+                }
+
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.PROCESSING_ERROR_EXT.create(
                         nextException,
@@ -535,16 +541,7 @@ public class MimeMailException extends OXException {
                 }
                 return MimeMailExceptionCode.PROCESSING_ERROR.create(nextException, appendInfo(nextException.getMessage(), folder));
             } else if (nextException instanceof java.io.IOException) {
-                if (null != mailConfig && null != session) {
-                    return MimeMailExceptionCode.IO_ERROR_EXT.create(
-                        nextException,
-                        appendInfo(nextException.getMessage(), folder),
-                        mailConfig.getServer(),
-                        mailConfig.getLogin(),
-                        Integer.valueOf(session.getUserId()),
-                        Integer.valueOf(session.getContextId()));
-                }
-                return MimeMailExceptionCode.IO_ERROR.create(nextException, appendInfo(nextException.getMessage(), folder));
+                return handleIOException((IOException) nextException, mailConfig, session, folder);
             } else if (toLowerCase(e.getMessage(), "").indexOf(ERR_QUOTA) != -1) {
                 return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, getInfo(skipTag(e.getMessage())));
             }
@@ -668,6 +665,19 @@ public class MimeMailException extends OXException {
             authenticationFailedException,
             mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
                 authenticationFailedException.getMessage());
+    }
+
+    private static OXException handleIOException(IOException ioException, MailConfig mailConfig, Session session, Folder folder) {
+        if (null != mailConfig && null != session) {
+            return MimeMailExceptionCode.IO_ERROR_EXT.create(
+                ioException,
+                appendInfo(ioException.getMessage(), folder),
+                mailConfig.getServer(),
+                mailConfig.getLogin(),
+                Integer.valueOf(session.getUserId()),
+                Integer.valueOf(session.getContextId()));
+        }
+        return MimeMailExceptionCode.IO_ERROR.create(ioException, appendInfo(ioException.getMessage(), folder));
     }
 
     /**
