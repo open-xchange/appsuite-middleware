@@ -359,7 +359,7 @@ public class Patches {
          */
         public static void adjustTaskStart(Task originalTask, Task updatedTask) {
             Date startDate = updatedTask.containsStartDate() ? updatedTask.getStartDate() : originalTask.getStartDate();
-            if (null != startDate && updatedTask.containsEndDate() && updatedTask.getEndDate().before(startDate)) {
+            if (null != startDate && updatedTask.containsEndDate() && null != updatedTask.getEndDate() && updatedTask.getEndDate().before(startDate)) {
                 /*
                  * remove currently set start date
                  */
