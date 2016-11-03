@@ -3128,11 +3128,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         imapFolder.appendMessages(filteredMsgs.toArray(new Message[filteredMsgs.size()]));
                     }
                 } catch (final MessagingException e) {
-                    final Exception nextException = e.getNextException();
-                    if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
+                    if (MimeMailException.isOverQuotaException(e)) {
+                        throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
+                    }
+                    
+                    OXException oxe = handleMessagingException(destFullName, e);
+                    if (MimeMailExceptionCode.PROCESSING_ERROR.equals(oxe)) {
                         throw IMAPException.create(IMAPException.Code.INVALID_MESSAGE, imapConfig, session, e, new Object[0]);
                     }
-                    throw e;
+                    throw oxe;
                 }
                 if (null != newUids && newUids.length > 0) {
                     /*
@@ -3316,6 +3320,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         imapFolder.appendMessages(filteredMsgs.toArray(new Message[filteredMsgs.size()]));
                     }
                 } catch (final MessagingException e) {
+                    if (MimeMailException.isOverQuotaException(e)) {
+                        throw MailExceptionCode.COPY_TO_SENT_FOLDER_FAILED_QUOTA.create(e, new Object[0]);
+                    }
+                    
                     OXException oxe = handleMessagingException(destFullName, e);
                     if (MimeMailExceptionCode.PROCESSING_ERROR.equals(oxe)) {
                         throw IMAPException.create(IMAPException.Code.INVALID_MESSAGE, imapConfig, session, e, new Object[0]);

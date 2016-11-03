@@ -207,7 +207,7 @@ public class Geo extends Property {
     public final void setValue(final String aValue) {
         final String latitudeString = aValue.substring(0, aValue.indexOf(';'));
         if (StringUtils.isNotBlank(latitudeString)) {
-            latitude = new BigDecimal(latitudeString);
+            latitude = new BigDecimal(StringUtils.replaceChars(latitudeString, ',', '.'));
         }
         else {
             latitude = BigDecimal.valueOf(0);
@@ -215,7 +215,7 @@ public class Geo extends Property {
         
         final String longitudeString = aValue.substring(aValue.indexOf(';') + 1);
         if (StringUtils.isNotBlank(longitudeString)) {
-            longitude = new BigDecimal(longitudeString);
+            longitude = new BigDecimal(StringUtils.replaceChars(longitudeString, ',', '.'));
         }
         else {
             longitude = BigDecimal.valueOf(0);

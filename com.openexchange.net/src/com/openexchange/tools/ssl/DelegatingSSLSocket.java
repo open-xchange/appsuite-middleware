@@ -391,7 +391,7 @@ public class DelegatingSSLSocket extends SSLSocket {
         } catch (javax.net.ssl.SSLException e) {
             if (matchesException(e, java.security.InvalidAlgorithmParameterException.class, "the trustAnchors parameter must be non-empty")) {
                 throw new javax.net.ssl.SSLException("The JVM cannot find the truststore required for SSL, or it does not contain the required certificates."
-                    + " Please check JVM's trsutstore configuration; e.g. specified via \"javax.net.ssl.trustStore\" JVM argument (if \"com.openexchange.net.ssl.default.truststore.enabled\" is true)"
+                    + " Please check JVM's truststore configuration; e.g. specified via \"javax.net.ssl.trustStore\" JVM argument (if \"com.openexchange.net.ssl.default.truststore.enabled\" is true)"
                     + " or \"com.openexchange.net.ssl.custom.truststore.path\" property (if \"com.openexchange.net.ssl.custom.truststore.enabled\" is true)", e);
             }
 

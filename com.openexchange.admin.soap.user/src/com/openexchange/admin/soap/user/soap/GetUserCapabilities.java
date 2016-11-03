@@ -47,38 +47,78 @@
  *
  */
 
-package com.openexchange.html.vulntests;
+package com.openexchange.admin.soap.user.soap;
 
-import org.junit.Test;
-import com.openexchange.html.AbstractSanitizing;
-import com.openexchange.html.AssertionHelper;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import com.openexchange.admin.soap.user.dataobjects.Context;
+import com.openexchange.admin.soap.user.dataobjects.Credentials;
+import com.openexchange.admin.soap.user.dataobjects.User;
+
 
 /**
- * {@link Bug49014VulTest}
+ * <p>Java-Klasse f\u00fcr anonymous complex type.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+ *
+ * <pre>
+ * &lt;complexType>
+ *   &lt;complexContent>
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       &lt;sequence>
+ *         &lt;element name="ctx" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Context" minOccurs="0"/>
+ *         &lt;element name="user" type="{http://dataobjects.soap.admin.openexchange.com/xsd}User" minOccurs="0"/>
+ *         &lt;element name="auth" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}Credentials" minOccurs="0"/>
+ *       &lt;/sequence>
+ *     &lt;/restriction>
+ *   &lt;/complexContent>
+ * &lt;/complexType>
+ * </pre>
+ *
+ *
  */
-public class Bug49014VulTest extends AbstractSanitizing {
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "", propOrder = {
+    "ctx",
+    "user",
+    "auth"
+})
+@XmlRootElement(name = "getUserCapabilities")
+public class GetUserCapabilities {
 
-    public Bug49014VulTest() {
-        super();
+    @XmlElement(nillable = true)
+    protected Context ctx;
+    @XmlElement(nillable = true)
+    protected User user;
+    @XmlElement(nillable = true)
+    protected Credentials auth;
+
+
+    public Context getCtx() {
+        return ctx;
     }
 
-    @Test
-    public void testStartTagSanitizing1() {
-        String content = "<!DOCTYPE html>\n" +
-            "<html><head>\n" +
-            "    <meta charset=\"UTF-8\">\n" +
-            "</head><body><p><br><a< onmouseover='prompt(document.domain)' src=x>Just another XSS!<br></p></body></html>";
-        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "onmouseover");
+    public void setCtx(Context value) {
+        this.ctx = value;
     }
 
-    @Test
-    public void testStartTagSanitizing2() {
-        String content = "<!DOCTYPE html>\n" +
-            "<html><head>\n" +
-            "    <meta charset=\"UTF-8\">\n" +
-            "</head><body><p><br><a~ ~onmouseover='prompt(document.domain)' src=x>Just another XSS!<br></p></body></html>";
-        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "onmouseover");
+    public User getUser() {
+        return user;
     }
+
+    public void setUser(User value) {
+        this.user = value;
+    }
+
+    public Credentials getAuth() {
+        return auth;
+    }
+
+    public void setAuth(Credentials value) {
+        this.auth = value;
+    }
+
 }

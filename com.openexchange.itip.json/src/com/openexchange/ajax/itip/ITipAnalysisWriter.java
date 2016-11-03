@@ -52,11 +52,9 @@ package com.openexchange.ajax.itip;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.TimeZone;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
@@ -239,17 +237,21 @@ public class ITipAnalysisWriter {
 
         final Difference difference = (Difference) extraInfo;
         if (difference.getField() != Difference.COMMON) {
-            JSONObject json = new JSONObject();
-            CalendarDataObject calendarDataObject = new CalendarDataObject();
-            calendarDataObject.set(difference.getField(), difference.getAdded());
-            appointmentWriter.writeAppointment(calendarDataObject, json);
-            extraInfoObject.put("added", json.get(CalendarField.getByColumn(difference.getField()).getJsonName()));
+            if (null != difference.getAdded() || !difference.getAdded().isEmpty()) {
+                JSONObject json = new JSONObject();
+                CalendarDataObject calendarDataObject = new CalendarDataObject();
+                calendarDataObject.set(difference.getField(), difference.getAdded());
+                appointmentWriter.writeAppointment(calendarDataObject, json);
+                extraInfoObject.put("added", json.get(CalendarField.getByColumn(difference.getField()).getJsonName()));
+            }
 
-            json = new JSONObject();
-            calendarDataObject = new CalendarDataObject();
-            calendarDataObject.set(difference.getField(), difference.getRemoved());
-            appointmentWriter.writeAppointment(calendarDataObject, json);
-            extraInfoObject.put("removed", json.get(CalendarField.getByColumn(difference.getField()).getJsonName()));
+            if (null != difference.getRemoved() || !difference.getRemoved().isEmpty()) {
+                JSONObject json = new JSONObject();
+                CalendarDataObject calendarDataObject = new CalendarDataObject();
+                calendarDataObject.set(difference.getField(), difference.getRemoved());
+                appointmentWriter.writeAppointment(calendarDataObject, json);
+                extraInfoObject.put("removed", json.get(CalendarField.getByColumn(difference.getField()).getJsonName()));
+            }
 
             final List<Change> changed = difference.getChanged();
             final JSONArray jsonChanges = new JSONArray();
