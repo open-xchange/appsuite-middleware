@@ -470,7 +470,7 @@ public class MimeMailException extends OXException {
                 return MimeMailExceptionCode.QUOTA_EXCEEDED.create(nextException, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
             } else if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
                 com.sun.mail.iap.CommandFailedException cfe = (com.sun.mail.iap.CommandFailedException) nextException;
-                OXException handled = handleProtocolException(cfe, mailConfig, session, folder);
+                OXException handled = handleProtocolExceptionByResponseCode(cfe, mailConfig, session, folder);
                 if (null != handled) {
                     return handled;
                 }
@@ -502,7 +502,7 @@ public class MimeMailException extends OXException {
                 return MimeMailExceptionCode.PROCESSING_ERROR_WE.create(nextException, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
             } else if (nextException instanceof com.sun.mail.iap.BadCommandException) {
                 com.sun.mail.iap.BadCommandException bce = (com.sun.mail.iap.BadCommandException) nextException;
-                OXException handled = handleProtocolException(bce, mailConfig, session, folder);
+                OXException handled = handleProtocolExceptionByResponseCode(bce, mailConfig, session, folder);
                 if (null != handled) {
                     return handled;
                 }
@@ -519,7 +519,7 @@ public class MimeMailException extends OXException {
                 return MimeMailExceptionCode.PROCESSING_ERROR.create(nextException, appendInfo(nextException.getMessage(), folder));
             } else if (nextException instanceof com.sun.mail.iap.ProtocolException) {
                 com.sun.mail.iap.ProtocolException pe = (com.sun.mail.iap.ProtocolException) nextException;
-                OXException handled = handleProtocolException(pe, mailConfig, session, folder);
+                OXException handled = handleProtocolExceptionByResponseCode(pe, mailConfig, session, folder);
                 if (null != handled) {
                     return handled;
                 }
@@ -572,7 +572,7 @@ public class MimeMailException extends OXException {
      * @param folder The optional folder
      * @return The {@link OXException} instance suitable for response code or <code>null</code>
      */
-    public static OXException handleProtocolException(com.sun.mail.iap.ProtocolException pe, MailConfig mailConfig, Session session, Folder folder) {
+    public static OXException handleProtocolExceptionByResponseCode(com.sun.mail.iap.ProtocolException pe, MailConfig mailConfig, Session session, Folder folder) {
         com.sun.mail.iap.ResponseCode rc = pe.getKnownResponseCode();
         if (null == rc) {
             return null;
