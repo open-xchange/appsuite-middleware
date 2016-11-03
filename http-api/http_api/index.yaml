@@ -149,6 +149,8 @@ tags:
     description: Via the advertisement module the client can retrieve the advertisement configuration
   - name: Clientonboarding
     description: Via the client on-boarding module the client can retrieve possible on-boarding configurations
+  - name: Pns
+    description: The interface to add/remove notification subscriptions associated with a token for certain topics
 # References to the definitions, "global" parameters and paths
 definitions:
   $ref: ./definitions/index.yaml

@@ -49,14 +49,9 @@
 
 package com.openexchange.pns.monitoring.osgi;
 
-import javax.management.ObjectName;
-import org.slf4j.Logger;
 import com.openexchange.management.ManagementService;
-import com.openexchange.management.Managements;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.pns.PushNotificationService;
-import com.openexchange.pns.monitoring.PushNotificationMBean;
-import com.openexchange.pns.monitoring.impl.PushNotificationMBeanImpl;
 import com.openexchange.timer.TimerService;
 
 
@@ -67,8 +62,6 @@ import com.openexchange.timer.TimerService;
  * @since v7.8.3
  */
 public class PushNotificationMonitoringActivator extends HousekeepingActivator {
-
-    private PushNotificationMBeanImpl mbean;
 
     /**
      * Initializes a new {@link PushNotificationMonitoringActivator}.
@@ -84,46 +77,13 @@ public class PushNotificationMonitoringActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ManagementService.class, PushNotificationService.class, TimerService.class };
+        return new Class<?>[] { ManagementService.class, TimerService.class };
     }
 
     @Override
     protected synchronized void startBundle() throws Exception {
-        Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationMonitoringActivator.class);
-
-        ManagementService managementService = getService(ManagementService.class);
-        try {
-            ObjectName objectName = Managements.getObjectName(PushNotificationMBean.class.getName(), PushNotificationMBean.DOMAIN);
-            PushNotificationMBeanImpl mbean = new PushNotificationMBeanImpl(getService(PushNotificationService.class), getService(TimerService.class));
-            this.mbean = mbean;
-            managementService.registerMBean(objectName, mbean);
-            logger.warn("Registered MBean {}", PushNotificationMBean.class.getName());
-        } catch (Exception e) {
-            logger.warn("Could not register MBean {}", PushNotificationMBean.class.getName(), e);
-        }
-    }
-
-    @Override
-    protected synchronized void stopBundle() throws Exception {
-        Logger logger = org.slf4j.LoggerFactory.getLogger(PushNotificationMonitoringActivator.class);
-
-        ManagementService managementService = getService(ManagementService.class);
-        if (null != managementService) {
-            try {
-                managementService.unregisterMBean(Managements.getObjectName(PushNotificationMBean.class.getName(), PushNotificationMBean.DOMAIN));
-                logger.warn("Unregistered MBean {}", PushNotificationMBean.class.getName());
-            } catch (Exception e) {
-                logger.warn("Could not un-register MBean {}", PushNotificationMBean.class.getName(), e);
-            }
-        }
-
-        PushNotificationMBeanImpl mbean = this.mbean;
-        if (null != mbean) {
-            this.mbean = null;
-            mbean.stop();
-        }
-
-        super.stopBundle();
+        track(PushNotificationService.class, new PusNotificationServiceTracker(getService(ManagementService.class), getService(TimerService.class), context));
+        openTrackers();
     }
 
 }

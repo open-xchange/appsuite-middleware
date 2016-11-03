@@ -99,6 +99,7 @@ public class DropboxOAuth2Access extends AbstractOAuthAccess {
             DbxClientV2 dbxClient = new DbxClientV2(config, accessToken);
             OAuthClient<DbxClientV2> oAuthClient = new OAuthClient<DbxClientV2>(dbxClient, accessToken);
             setOAuthClient(oAuthClient);
+            setOAuthAccount(oauthAccount);
         } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

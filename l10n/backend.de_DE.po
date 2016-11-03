@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-10-11 15:43+0200\n"
+"PO-Revision-Date: 2016-10-26 10:04+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -1057,7 +1057,6 @@ msgid "Your device configuration"
 msgstr "Ihre Gerätekonfiguration"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.cluster.lock/src/com/openexchange/cluster/lock/internal/ClusterLockExceptionMessages.java:61
-#, fuzzy
 msgid "Another node is currently performing the same task. Try again later."
 msgstr ""
 "Ein weiterer Node führt derzeit die gleiche Aufgabe aus. Versuchen Sie es "
@@ -3947,13 +3946,11 @@ msgstr "Es wurde ein ungültiger OAuth-Account angegeben."
 
 #. The certificate for domain "%1$s" is untrusted.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:63
-#, fuzzy
 msgid "The certificate for domain \"%1$s\" is untrusted."
 msgstr "Das Zertifikat für die Domäne \"%1$s\" ist nicht vertrauenswürdig."
 
 #. The certificate for domain "%1$s" is untrusted. You can change your general trust level in the settings.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.net.ssl/src/com/openexchange/net/ssl/exception/SSLExceptionMessages.java:66
-#, fuzzy
 msgid ""
 "The certificate for domain \"%1$s\" is untrusted. You can change your "
 "general trust level in the settings."
@@ -4134,9 +4131,8 @@ msgstr "Bitte geben Sie einen Anzeigenamen an."
 
 #. Please provide at least one scope.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:85
-#, fuzzy
 msgid "Please provide at least one scope."
-msgstr "Bitte geben Sie mindestens einen Bereich an."
+msgstr "Bitte legen Sie mindestens eine Aktion fest."
 
 #. The associated OAuth provider denied the request: %1$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:88
@@ -4193,7 +4189,6 @@ msgstr ""
 
 #. Your access token for '%1$s' is invalid. You have to reauthorize your account.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:109
-#, fuzzy
 msgid ""
 "Your access token for '%1$s' is invalid. You have to reauthorize your "
 "account."
@@ -4205,6 +4200,11 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:112
 msgid "You need to explicitly authorise %1$s to subscribe to %2$s"
 msgstr "Sie müssen %1$s explizit ermächtigen, %2$s zu abonnieren"
+
+#. Thrown in case an OAuth provider is requested to access certain data, but such data is not available at all. For instance Dropbox is requested to access E-Mails.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:115
+msgid "The scope %1$s is not supported by the provider"
+msgstr "%1$s wird vom Provider nicht unterstützt"
 
 #. *
 #. * New password too short.
@@ -8836,6 +8836,8 @@ msgid ""
 "Send RFC822 data using primary account's transport. This requires master "
 "authentication to be active."
 msgstr ""
+"Senden von RFC822-Daten durch den Transport des primären Accounts. Dies "
+"erfordert eine aktive Master-Authentifizierung."
 
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with

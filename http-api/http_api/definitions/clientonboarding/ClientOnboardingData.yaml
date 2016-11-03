@@ -1,79 +1,81 @@
-platforms:
-  type: array
-  items:
-    type: object
-    properties:
-      id:
-        type: string
-      enabled:
-        type: boolean
-      name:
-        type: string
-      description:
-        type: string
-      icon:
-        type: array
-        items:
+type: object
+properties:
+  platforms:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
           type: string
-devices:
-  type: array
-  items:
-    type: object
-    properties:
-      id:
-        type: string
-      enabled:
-        type: boolean
-      platform:
-        type: string
-      name:
-        type: string
-      description:
-        type: string
-      icon:
-        type: array
-        items:
+        enabled:
+          type: boolean
+        name:
           type: string
-      scenarios:
-        type: array
-        items:
+        description:
           type: string
-scenarios:
-  type: array
-  items:
-    type: object
-    properties:
-      id:
-        type: string
-      enabled:
-        type: boolean
-      name:
-        type: string
-      description:
-        type: string
-      icon:
-        type: array
-        items:
+        icon:
+          type: array
+          items:
+            type: string
+  devices:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
           type: string
-actions:
-  type: array
-  items:
-    type: object
-    properties:
-      id:
-        type: string
-      default:
-        type: string
-matching:
-  type: array
-  items:
-    type: object
-    properties:
-      id:
-        type: string
-      enabled:
-        type: boolean
-      actions:
-        type: array
-        items:
+        enabled:
+          type: boolean
+        platform:
           type: string
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: array
+          items:
+            type: string
+        scenarios:
+          type: array
+          items:
+            type: string
+  scenarios:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
+          type: string
+        enabled:
+          type: boolean
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: array
+          items:
+            type: string
+  actions:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
+          type: string
+        default:
+          type: string
+  matching:
+    type: array
+    items:
+      type: object
+      properties:
+        id:
+          type: string
+        enabled:
+          type: boolean
+        actions:
+          type: array
+          items:
+            type: string

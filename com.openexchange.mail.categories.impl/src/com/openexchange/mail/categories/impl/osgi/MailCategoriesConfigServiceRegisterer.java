@@ -134,7 +134,7 @@ public class MailCategoriesConfigServiceRegisterer implements ServiceTrackerCust
     @Override
     public synchronized void removedService(ServiceReference<MailCategoriesRuleEngine> reference, MailCategoriesRuleEngine engine) {
         RankedService<MailCategoriesRuleEngine> oldEngine = trackedEngines.get(0);
-        if (false == trackedEngines.remove(engine)) {
+        if (false == trackedEngines.remove(RankedService.newRankedService(reference, engine))) {
             context.ungetService(reference);
             return;
         }

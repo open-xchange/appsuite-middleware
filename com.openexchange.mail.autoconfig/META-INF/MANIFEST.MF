@@ -6,8 +6,6 @@ Bundle-Version: 7.8.3
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.exception,
- com.openexchange.groupware.contexts,
- com.openexchange.groupware.ldap,
  com.openexchange.i18n,
  com.openexchange.osgi.annotation,
  org.xmlpull.v1

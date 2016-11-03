@@ -130,10 +130,14 @@
 <p>
   <@styledButton link=link>${link_text}</@styledButton>
 </p>
-<#if expiration?has_content || password?has_content>
+<#if password?has_content>
   <p>
-    <#if expiration?has_content>${expiration}</#if>
-    <#if password?has_content>${password}</#if>
+    ${password}
+  </p>
+</#if>
+<#if expiration?has_content>
+  <p>
+    ${expiration}
   </p>
 </#if>
 <hr>

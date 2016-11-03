@@ -51,13 +51,8 @@ package com.openexchange.cluster.lock.osgi;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.cluster.lock.ClusterLockService;
-import com.openexchange.cluster.lock.internal.ClusterLockServiceHazelcastImpl;
-import com.openexchange.cluster.lock.internal.Unregisterer;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link HazelcastClusterLockServiceTracker}
@@ -67,18 +62,13 @@ import com.openexchange.server.ServiceLookup;
 public class HazelcastClusterLockServiceTracker implements ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> {
 
     private BundleContext bundleContext;
-    private ServiceLookup services;
-    private Unregisterer unregisterer;
-    private ServiceRegistration<ClusterLockService> registration;
 
     /**
      * Initialises a new {@link HazelcastClusterLockServiceTracker}.
      */
-    public HazelcastClusterLockServiceTracker(BundleContext bundleContext, ServiceLookup services, Unregisterer unregisterer) {
+    public HazelcastClusterLockServiceTracker(BundleContext bundleContext) {
         super();
         this.bundleContext = bundleContext;
-        this.services = services;
-        this.unregisterer = unregisterer;
     }
 
     /*
@@ -89,7 +79,6 @@ public class HazelcastClusterLockServiceTracker implements ServiceTrackerCustomi
     @Override
     public HazelcastInstance addingService(ServiceReference<HazelcastInstance> ref) {
         HazelcastInstance hzInstance = bundleContext.getService(ref);
-        registration = bundleContext.registerService(ClusterLockService.class, new ClusterLockServiceHazelcastImpl(services, unregisterer), null);
         return hzInstance;
     }
 
@@ -110,10 +99,6 @@ public class HazelcastClusterLockServiceTracker implements ServiceTrackerCustomi
      */
     @Override
     public void removedService(ServiceReference<HazelcastInstance> ref, HazelcastInstance service) {
-        if (registration != null) {
-            registration.unregister();
-            registration = null;
-        }
         bundleContext.ungetService(ref);
     }
 }

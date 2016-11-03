@@ -51,6 +51,7 @@ package com.openexchange.share.impl;
 
 import java.util.Date;
 import java.util.Locale;
+import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.AuthenticationMode;
@@ -86,7 +87,7 @@ public class InternalGroupShareInfo extends AbstractShareInfo {
     }
 
     @Override
-    public String getShareURL(HostData hostData) {
+    public String getShareURL(HostData hostData) throws OXException {
         return ShareLinks.generateInternal(hostData, getDestinationTarget());
     }
 
@@ -158,7 +159,7 @@ public class InternalGroupShareInfo extends AbstractShareInfo {
             }
 
             @Override
-            public String generateLink(HostData hostData, ShareTargetPath targetPath) {
+            public String generateLink(HostData hostData, ShareTargetPath targetPath) throws OXException {
                 return ShareLinks.generateInternal(hostData, getDestinationTarget());
             }
         };

@@ -236,6 +236,17 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
     }
 
     /**
+     * Optionally gets the folder access.
+     *
+     * @param folderID The folder identifier to get the file access for
+     * @return The folder access or <code>null</code> if not already initialized before
+     */
+    protected FileStorageFolderAccess optFolderAccess(FolderID folderID) throws OXException {
+        FileStorageAccountAccess accountAccess = getAccountAccess(folderID.getService(), folderID.getAccountId());
+        return null == accountAccess ? null : accountAccess.getFolderAccess();
+    }
+
+    /**
      * Gets the file access.
      *
      * @param serviceId The service identifier
@@ -247,13 +258,24 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
     }
 
     /**
-     * Gets the folder access.
+     * Gets the file access.
      *
      * @param folderID The folder identifier to get the file access for
-     * @return The folder access
+     * @return The file access
      */
     protected FileStorageFileAccess getFileAccess(FolderID folderID) throws OXException {
         return getFileAccess(folderID.getService(), folderID.getAccountId());
+    }
+
+    /**
+     * Optionally gets the file access.
+     *
+     * @param folderID The folder identifier to get the file access for
+     * @return The file access or <code>null</code> if not already initialized before
+     */
+    protected FileStorageFileAccess optFileAccess(FolderID folderID) throws OXException {
+        FileStorageAccountAccess accountAccess = getAccountAccess(folderID.getService(), folderID.getAccountId());
+        return null == accountAccess ? null : accountAccess.getFileAccess();
     }
 
     /**
@@ -272,6 +294,18 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
             return connect(accountAccess, id);
         }
         return accountAccess;
+    }
+
+    /**
+     * Optionally gets the account access for a specific account in a service.
+     *
+     * @param serviceId The service identifier
+     * @param accountId The account identifier
+     * @return The account access or <code>null</code>
+     */
+    protected FileStorageAccountAccess optAccountAccess(String serviceId, String accountId) {
+        String id = new StringBuilder(serviceId).append('/').append(accountId).toString();
+        return connectedAccounts.get().get(id);
     }
 
     /**

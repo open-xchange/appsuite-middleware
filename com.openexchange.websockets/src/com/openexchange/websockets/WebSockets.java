@@ -100,7 +100,7 @@ public class WebSockets {
     }
 
     /**
-     * Checks if specified path filter matches given socket.
+     * Checks if specified path filter matches given socket path.
      *
      * <pre>
      * Examples:

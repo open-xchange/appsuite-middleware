@@ -39,6 +39,11 @@ Architecture: all
 Depends: open-xchange-publish, open-xchange-subscribe
 Description: The Open-Xchange Meta package for Publish and Subscribe
 
+Package: open-xchange-meta-appsuite-push
+Architecture: all
+Depends: open-xchange-pns-impl, open-xchange-pns-transport-websockets
+Description: The Open-Xchange Meta package for App Suite push
+
 Package: open-xchange-meta-messaging
 Architecture: all
 Depends: open-xchange-unifiedmail, open-xchange-messaging

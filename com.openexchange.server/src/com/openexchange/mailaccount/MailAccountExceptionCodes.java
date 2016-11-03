@@ -171,9 +171,9 @@ public enum MailAccountExceptionCodes implements DisplayableOXExceptionCode {
      */
     SECURE_BUT_DEFAULT_TRANSPORT("Secure port specified for transport protocol \"%1$s\", but SSL is not enabled. Please review if appropriate.", CATEGORY_WARNING, 25, MailAccountExceptionStrings.SECURE_BUT_DEFAULT_TRANSPORT_MSG_DISPLAY),
     /**
-     * Mail account creation denied. The host/server name "%1$s" is covered by specified IP range back-list.
+     * Mail account creation denied. The host/server name "%1$s" is covered by specified IP range black-list.
      */
-    BLACKLISTED_SERVER("Mail account creation denied. The host/server name \"%1$s\" is covered by specified IP range back-list.", CATEGORY_WARNING, 25, MailAccountExceptionStrings.BLACKLISTED_SERVER_MSG_DISPLAY),
+    BLACKLISTED_SERVER("Mail account creation denied. The host/server name \"%1$s\" is covered by specified IP range black-list.", CATEGORY_WARNING, 25, MailAccountExceptionStrings.BLACKLISTED_SERVER_MSG_DISPLAY),
     /**
      * The protocol must not changed from %1$s to %2$s for user %3$s in context %4$s.
      */

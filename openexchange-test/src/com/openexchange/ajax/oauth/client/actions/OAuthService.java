@@ -56,9 +56,9 @@ package com.openexchange.ajax.oauth.client.actions;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public enum OAuthService {
-    GOOGLE("google", "com.openexchange.oauth.google", "com.openexchange.file.storage.googledrive"),
-    DROPBOX("dropbox", "com.openexchange.oauth.dropbox", "com.openexchange.file.storage.dropbox"),
-    BOXCOM("box_com", "com.openexchange.oauth.boxcom", "com.openexchange.file.storage.boxcom");
+    GOOGLE("google", "com.openexchange.oauth.google", "googledrive"),
+    DROPBOX("dropbox", "com.openexchange.oauth.dropbox", "dropbox"),
+    BOXCOM("box_com", "com.openexchange.oauth.boxcom", "boxcom");
 
     private String provider;
     private String oAuthServiceId;

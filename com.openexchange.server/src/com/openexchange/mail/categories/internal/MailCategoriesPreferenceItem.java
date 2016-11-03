@@ -225,7 +225,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                         try {
                             service.updateConfigurations(newConfigs, session, user.getLocale());
                         } catch (OXException e) {
-                            throw SettingExceptionCodes.NOT_ALLOWED.create();
+                            throw SettingExceptionCodes.NOT_ALLOWED.create(e, new Object[0]);
                         }
                     }
                 } catch (JSONException e) {

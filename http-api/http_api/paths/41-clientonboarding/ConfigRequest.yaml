@@ -1,5 +1,5 @@
 /onboarding?action=config:
-  put:
+  get:
     operationId: getClientOnboardingConfig
     tags: 
       - Clientonboarding

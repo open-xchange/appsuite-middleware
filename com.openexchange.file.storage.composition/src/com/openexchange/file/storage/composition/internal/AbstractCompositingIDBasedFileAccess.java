@@ -1106,7 +1106,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                         FileStorageIgnorableVersionFileAccess fileAccess = (FileStorageIgnorableVersionFileAccess) access;
                         result = fileAccess.saveDocumentTryAddVersion(document, data, sequenceNumber, modifiedColumns);
                     } else {
-                        addWarning(FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(access.getAccountAccess().getService().getId()));
                         result = access.saveDocument(document, data, sequenceNumber, modifiedColumns);
                     }
                 } else {

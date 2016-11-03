@@ -65,11 +65,20 @@ public class Bug49014VulTest extends AbstractSanitizing {
     }
 
     @Test
-    public void testStartTagSanitizing() {
+    public void testStartTagSanitizing1() {
         String content = "<!DOCTYPE html>\n" +
             "<html><head>\n" +
             "    <meta charset=\"UTF-8\">\n" +
             "</head><body><p><br><a< onmouseover='prompt(document.domain)' src=x>Just another XSS!<br></p></body></html>";
+        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "onmouseover");
+    }
+
+    @Test
+    public void testStartTagSanitizing2() {
+        String content = "<!DOCTYPE html>\n" +
+            "<html><head>\n" +
+            "    <meta charset=\"UTF-8\">\n" +
+            "</head><body><p><br><a~ ~onmouseover='prompt(document.domain)' src=x>Just another XSS!<br></p></body></html>";
         AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "onmouseover");
     }
 }

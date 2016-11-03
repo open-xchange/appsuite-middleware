@@ -222,4 +222,5 @@ com.openexchange.nosql.cassandra/build
 com.openexchange.file.storage/doc
 http-api/build
 http-api/codegen/*/clients
+http-api/http_api/swagger.json
 documentation/docu/configuration/properties.md

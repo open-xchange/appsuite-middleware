@@ -52,7 +52,6 @@ package com.openexchange.osgi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -63,6 +62,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import com.google.common.collect.ImmutableList;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.annotation.SingletonService;
@@ -173,7 +173,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                 serviceProvider.addService(service, ranking);
 
                 // Signal availability
-                signalAvailability(index, clazz);
+                signalAvailability(index, clazz, context);
                 updateServiceState();
                 return service;
             } catch (Exception e) {
@@ -186,7 +186,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         @Override
         public void removedService(org.osgi.framework.ServiceReference<S> reference, S service) {
             // Signal unavailability
-            signalUnavailability(index, clazz, stopOnUnavailability);
+            signalUnavailability(index, clazz, stopOnUnavailability, context);
 
             // ... and remove from services
             ConcurrentMap<Class<?>, ServiceProvider<?>> services = DeferredActivator.this.services;
@@ -195,7 +195,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             }
 
             updateServiceState();
-            super.removedService(reference, service);
+            Tools.ungetServiceSafe(reference, context);
         }
 
     }
@@ -304,7 +304,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(1, 0.9f, 1);
             neededServiceTrackers = new ServiceTracker[0];
             availability = allAvailable = 0;
-            startUp();
+            startUp(context);
         } else {
             final int len = classes.length;
             if (len > 0 && new HashSet<Class<?>>(Arrays.asList(classes)).size() != len) {
@@ -337,15 +337,17 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                 }
             }
             if (len == 0) {
-                startUp();
+                startUp(context);
             }
         }
     }
 
     /**
      * Resets this deferred activator's members.
+     *
+     * @param context The bundle context
      */
-    private final void reset() {
+    private final void reset(BundleContext context) {
         // Close trackers
         ServiceTracker<?, ?>[] neededServiceTrackers = this.neededServiceTrackers;
         if (null != neededServiceTrackers) {
@@ -375,7 +377,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         }
 
         // Release context reference
-        context = null;
+        this.context = null;
     }
 
     /**
@@ -390,8 +392,8 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             STATE_LOOKUP.setState(context.getBundle().getSymbolicName(), new ArrayList<String>(0), new ArrayList<String>());
             return;
         }
-        final List<String> missing = new ArrayList<String>(classes.length);
-        final List<String> present = new ArrayList<String>(classes.length);
+        final ImmutableList.Builder<String> missing = ImmutableList.builder();
+        final ImmutableList.Builder<String> present = ImmutableList.builder();
 
         ConcurrentMap<Class<?>, ServiceProvider<?>> services = this.services;
         for (final Class<?> clazz : classes) {
@@ -401,7 +403,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                 missing.add(clazz.getName());
             }
         }
-        STATE_LOOKUP.setState(context.getBundle().getSymbolicName(), missing, present);
+        STATE_LOOKUP.setState(context.getBundle().getSymbolicName(), missing.build(), present.build());
     }
 
     /**
@@ -413,8 +415,9 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      *
      * @param index The class' index
      * @param clazz The service's class
+     * @param context The associated bundle context
      */
-    protected final void signalAvailability(final int index, final Class<?> clazz) {
+    protected final void signalAvailability(final int index, final Class<?> clazz, BundleContext context) {
         availability |= (1L << index);
         if (started.get()) {
             /*
@@ -427,7 +430,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                  * Start bundle
                  */
                 try {
-                    startUp();
+                    startUp(context);
                 } catch (final Exception e) {
                     Throwable t = e;
                     if (t.getCause() instanceof BundleException) {
@@ -439,24 +442,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                         errorMsg = t.getClass().getName();
                     }
                     LOG.error("{}Start-up of bundle \"{}\" failed: {}", Strings.getLineSeparator(), bundle.getSymbolicName(), errorMsg, t);
-                    reset();
-                    /*
-                     * Shut-down
-                     */
-                    if (Bundle.STARTING == bundle.getState()) {
-                        /*
-                         * Bundle cannot be stopped by same thread if still in STARTING state
-                         */
-                        new Thread(new Runnable() {
-
-                            @Override
-                            public void run() {
-                                shutDownBundle(bundle);
-                            }
-                        }).start();
-                    } else {
-                        shutDownBundle(bundle);
-                    }
+                    reset(context);
                 }
             }
         }
@@ -487,13 +473,14 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @param index The class' index
      * @param clazz The service's class
      * @param stop Whether to stop this activator
+     * @param context The associated bundle context
      */
-    final void signalUnavailability(int index, Class<?> clazz, boolean stop) {
+    final void signalUnavailability(int index, Class<?> clazz, boolean stop, BundleContext context) {
         availability &= ~(1L << index);
         if (started.get()) {
             if (stop) {
                 try {
-                    doStop();
+                    doStop(context);
                 } catch (Exception e) {
                     LOG.error("", e);
                 }
@@ -517,8 +504,9 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         }
     }
 
-    private void startUp() throws Exception {
+    private void startUp(BundleContext context) throws Exception {
         stopPerformed = false;
+        this.context = context;
         startBundle();
         started.set(true);
     }
@@ -538,24 +526,25 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     @Override
     public void stop(final BundleContext context) throws Exception {
         try {
-            this.context = context;
-            doStop();
+            doStop(context);
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;
         } finally {
             stopPerformed = true;
-            reset();
+            reset(context);
         }
     }
 
     /**
      * Performs the stop operation.
      *
+     * @param context The bundle context
      * @throws Exception If stop operation fails
      */
-    private void doStop() throws Exception {
+    private void doStop(BundleContext context) throws Exception {
         if (started.compareAndSet(true, false)) {
+            this.context = context;
             stopBundle();
         }
     }

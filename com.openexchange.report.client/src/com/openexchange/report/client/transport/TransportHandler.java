@@ -112,7 +112,7 @@ public class TransportHandler {
 
         try {
             if (metadata.getBoolean("needsComposition") == true) {
-                sendComposedReport(metadata, savereport);
+                metadata.remove("macdetail");
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -127,14 +127,6 @@ public class TransportHandler {
             saveReportToHardDrive(metadata);
         } else {
             sendReport(true, reportConfiguration, metadata);
-        }
-    }
-
-    private void sendComposedReport(JSONObject metadata, boolean savereport) throws JSONException {
-        if (metadata.getString("reportType").contains("oxaas")) {
-            metadata.remove("oxaas");
-        } else {
-            metadata.remove("macdetail");
         }
     }
 

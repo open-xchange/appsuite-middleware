@@ -90,6 +90,9 @@ import com.openexchange.session.Session;
  */
 public class GoogleApiClients {
 
+    /** The refresh threshold in seconds: <code>60</code> */
+    public static final int REFRESH_THRESHOLD = 60;
+
     /**
      * Initializes a new {@link GoogleApiClients}.
      */
@@ -141,8 +144,8 @@ public class GoogleApiClients {
 
                 // Check expiry
                 int expiry = scribeOAuthService.getExpiry(defaultAccount.getToken());
-                if (expiry < 300) {
-                    // Less than 5 minutes to live -> refresh token!
+                if (expiry < REFRESH_THRESHOLD) {
+                    // Less than 1 minute to live -> refresh token!
                     ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
                     defaultAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, defaultAccount), new ExponentialBackOffRetryPolicy());
                 }
@@ -204,8 +207,8 @@ public class GoogleApiClients {
 
             // Check expiry
             int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
-            if (expiry < 300) {
-                // Less than 5 minutes to live -> refresh token!
+            if (expiry < REFRESH_THRESHOLD) {
+                // Less than 1 minute to live -> refresh token!
                 ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
                 googleAccount = clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount), new ExponentialBackOffRetryPolicy());
             }
@@ -263,13 +266,43 @@ public class GoogleApiClients {
 
         // Check expiry
         int expiry = scribeOAuthService.getExpiry(googleAccount.getToken());
-        if (expiry >= 300) {
-            // More than 5 minutes to live
+        if (expiry >= REFRESH_THRESHOLD) {
+            // More than 1 minute to live
             return null;
         }
 
         ClusterLockService clusterLockService = Services.getService(ClusterLockService.class);
         return clusterLockService.runClusterTask(new GoogleReauthorizeClusterTask(session, googleAccount), new ExponentialBackOffRetryPolicy());
+    }
+
+    /**
+     * Gets the expiry (in seconds) for given Google OAuth account
+     *
+     * @param googleAccount The Google OAuth account to check
+     * @param session The associated session
+     * @return The expiry in seconds or <code>-1</code> if access token is already expired
+     * @throws OXException If expiry cannot be returned
+     * @throws IllegalArgumentException If provided account is <code>null</code>
+     */
+    public static int getExpiryForGoogleAccount(final OAuthAccount googleAccount, final Session session) throws OXException {
+        if (null == googleAccount) {
+            throw new IllegalArgumentException("Account must not be null");
+        }
+
+        // Get OAuth service
+        final OAuthService oAuthService = Services.optService(OAuthService.class);
+        if (null == oAuthService) {
+            throw ServiceExceptionCode.absentService(OAuthService.class);
+        }
+
+        // Create Scribe Google OAuth service
+        final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
+        serviceBuilder.apiKey(googleAccount.getMetaData().getAPIKey(session)).apiSecret(googleAccount.getMetaData().getAPISecret(session));
+        final Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
+
+        // Check expiry
+        int expirySeconds = scribeOAuthService.getExpiry(googleAccount.getToken());
+        return expirySeconds;
     }
 
     private static String parseErrorFrom(String message) {

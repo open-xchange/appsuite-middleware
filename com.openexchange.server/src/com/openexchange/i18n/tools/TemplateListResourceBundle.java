@@ -83,7 +83,7 @@ public abstract class TemplateListResourceBundle extends ResourceBundle {
 
     protected static final List<String> keys = new ArrayList<String>();
 
-    private static Lock INIT_LOCK = new ReentrantLock();
+    private static final Lock INIT_LOCK = new ReentrantLock();
 
     protected static volatile boolean initialized;
 
@@ -117,8 +117,10 @@ public abstract class TemplateListResourceBundle extends ResourceBundle {
                 is = null;
 
                 final File[] templateFiles = templatePath.listFiles(new StartsWithFilter(uniqueName()));
-                for (final File template : templateFiles) {
-                    parseTemplate(template);
+                if (null != templateFiles) {
+                    for (final File template : templateFiles) {
+                        parseTemplate(template);
+                    }
                 }
             } catch (final IOException e) {
                 LOG.error("", e);

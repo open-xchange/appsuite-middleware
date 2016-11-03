@@ -44,6 +44,7 @@ import java.io.*;
 import java.net.*;
 import java.util.concurrent.*;
 import java.nio.channels.SocketChannel;
+import java.lang.reflect.*;
 
 /**
  * A special Socket that uses a ScheduledExecutorService to
@@ -115,6 +116,22 @@ public class WriteTimeoutSocket extends Socket {
     @Override
     public void bind(SocketAddress local) throws IOException {
 	socket.bind(local);
+    }
+
+    @Override
+    public SocketAddress getRemoteSocketAddress() {
+	return socket.getRemoteSocketAddress();
+    }
+
+    @Override
+    public SocketAddress getLocalSocketAddress() {
+	return socket.getLocalSocketAddress();
+    }
+
+    @Override
+    public void setPerformancePreferences(int connectionTime, int latency,
+                                          int bandwidth) {
+        socket.setPerformancePreferences(connectionTime, latency, bandwidth);
     }
 
     @Override
@@ -295,6 +312,18 @@ public class WriteTimeoutSocket extends Socket {
     @Override
     public boolean isOutputShutdown() {
         return socket.isOutputShutdown();
+    }
+
+    /**
+     * KLUDGE for Android, which has this illegal non-Java Compatible method.
+     */
+    public FileDescriptor getFileDescriptor$() {
+	try {
+	    Method m = Socket.class.getDeclaredMethod("getFileDescriptor$");
+	    return (FileDescriptor)m.invoke(socket);
+	} catch (Exception ex) {
+	    return null;
+	}
     }
 }
 

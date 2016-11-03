@@ -120,7 +120,7 @@ public final class SessionImpl implements PutIfAbsent {
         this.hash = hash;
         this.client = client;
         this.tranzient = tranzient;
-        parameters = new ConcurrentHashMap<String, Object>();
+        parameters = new ConcurrentHashMap<String, Object>(8, 0.9F, 1);
         parameters.put(PARAM_LOCK, new ReentrantLock());
         parameters.put(PARAM_COUNTER, new AtomicInteger());
         parameters.put(PARAM_ALTERNATIVE_ID, UUIDSessionIdGenerator.randomUUID());

@@ -60,7 +60,7 @@ import java.util.Collection;
 public interface WnsOptionsProvider {
 
     /**
-     * Gets the options to communicate with Google Cloud Messaging (GCM) for given client.
+     * Gets the options to communicate with Windows Push Notification service (WNS) for given client.
      *
      * @param client The client identifier
      * @return The options

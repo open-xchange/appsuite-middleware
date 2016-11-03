@@ -1,3 +1,15 @@
+open-xchange-grizzly (7.8.3-2) stable; urgency=medium
+
+  * Second preview for 7.8.3 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Sat, 29 Oct 2016 09:46:39 +0200
+
+open-xchange-grizzly (7.8.3-1) stable; urgency=medium
+
+  * First preview 7.8.3 release
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Fri, 14 Oct 2016 15:21:37 +0200
+
 open-xchange-grizzly (7.8.3-0) unstable; urgency=medium
 
   * prepare for 7.8.3 release

@@ -184,9 +184,6 @@ public class AnalyzeContextBatch implements Callable<Integer>, Serializable {
             UserReport userReport = new UserReport(uuid, reportType, ctx, user, contextReport);
             // Are extended options available?
             if (this.report != null) {
-                if (report.isAdminIgnore() && ctx.getMailadmin() == user.getId()) {
-                    continue;
-                }
                 userReport.setReportConfig(this.report.getReportConfig());
                 //Add user to context
                 contextReport.getUserList().add(user.getId());

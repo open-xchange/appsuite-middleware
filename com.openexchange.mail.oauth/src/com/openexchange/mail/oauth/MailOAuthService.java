@@ -72,4 +72,15 @@ public interface MailOAuthService {
      * @throws OXException If appropriate auto-configuration cannot be returned
      */
     Autoconfig getAutoconfigFor(int oauthAccountId, Session session) throws OXException;
+
+    /**
+     * Gets the applicable token for specified OAuth account and associated session.
+     *
+     * @param oauthAccountId The identifier of the OAuth account
+     * @param session The session
+     * @return The applicable token
+     * @throws OXException If applicable token cannot be returned
+     */
+    String getTokenFor(int oauthAccountId, Session session) throws OXException;
+
 }

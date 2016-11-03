@@ -376,9 +376,13 @@ public abstract class Message implements Part {
      */
     public void setRecipient(RecipientType type, Address address)
                                 throws MessagingException {
-	Address[] a = new Address[1];
-	a[0] = address;
-	setRecipients(type, a);
+	if (address == null)
+	    setRecipients(type, null);
+	else {
+	    Address[] a = new Address[1];
+	    a[0] = address;
+	    setRecipients(type, a);
+	}
     }
 
     /**

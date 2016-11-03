@@ -73,6 +73,7 @@ import com.openexchange.hazelcast.HazelcastMBeanImpl;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.management.ManagementService;
+import com.openexchange.osgi.Tools;
 
 /**
  * {@link HazelcastActivator} - The activator for Hazelcast bundle (registers a {@link HazelcastInstance} for this JVM)
@@ -152,7 +153,7 @@ public class HazelcastActivator implements BundleActivator {
 
             @Override
             public void removedService(ServiceReference<HazelcastConfigurationService> reference, HazelcastConfigurationService service) {
-                context.ungetService(reference);
+                Tools.ungetServiceSafe(reference, context);
                 stop();
             }
         };
@@ -167,7 +168,7 @@ public class HazelcastActivator implements BundleActivator {
 
             @Override
             public void removedService(ServiceReference<HazelcastInstanceNotActiveException> reference, HazelcastInstanceNotActiveException service) {
-                context.ungetService(reference);
+                Tools.ungetServiceSafe(reference, context);
             }
 
             @Override

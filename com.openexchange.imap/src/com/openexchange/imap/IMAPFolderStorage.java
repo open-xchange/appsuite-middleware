@@ -104,6 +104,7 @@ import com.openexchange.imap.cache.RootSubfoldersEnabledCache;
 import com.openexchange.imap.cache.UserFlagsCache;
 import com.openexchange.imap.command.CopyIMAPCommand;
 import com.openexchange.imap.command.FlagsIMAPCommand;
+import com.openexchange.imap.command.MoveIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.converters.IMAPFolderConverter;
@@ -2492,6 +2493,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     }
                     if (backup) {
                         try {
+                            final boolean supportsMove = imapConfig.asMap().containsKey("MOVE");
+                            if(supportsMove){
+                                new MoveIMAPCommand(f, trashFullname).doCommand();
+                                return;
+                            }
                             new CopyIMAPCommand(f, trashFullname).doCommand();
                         } catch (final MessagingException e) {
                             if (e.getNextException() instanceof CommandFailedException) {

@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -258,6 +258,9 @@ if [ ${1:-0} -eq 2 ]; then
     if [ "infostore,deniedportal,readcreatesharedfolders,editpublicfolders" = "$VALUE" ]; then
         ox_set_property drive 'infostore,deniedportal,contacts,collectemailaddresses' $PFILE
     fi
+
+    # SoftwareChange_Request-3676
+    ox_add_property DEFAULT_TIMEZONE Europe/Berlin /opt/open-xchange/etc/AdminUser.properties
 fi
 
 %clean
@@ -282,6 +285,10 @@ fi
 %doc com.openexchange.admin.rmi/javadoc
 
 %changelog
+* Sat Oct 29 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second preview for 7.8.3 release
+* Fri Oct 14 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First preview 7.8.3 release
 * Tue Sep 06 2016 Marcus Klein <marcus.klein@open-xchange.com>
 prepare for 7.8.3 release
 * Tue Jul 12 2016 Marcus Klein <marcus.klein@open-xchange.com>

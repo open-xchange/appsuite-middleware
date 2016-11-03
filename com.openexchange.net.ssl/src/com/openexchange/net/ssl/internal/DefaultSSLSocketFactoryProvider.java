@@ -53,6 +53,7 @@ import javax.net.ssl.SSLSocketFactory;
 import com.openexchange.java.util.Tools;
 import com.openexchange.log.LogProperties;
 import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.TrustedSSLSocketFactory;
 import com.openexchange.net.ssl.config.SSLConfigurationService;
 import com.openexchange.net.ssl.config.TrustLevel;
 import com.openexchange.net.ssl.config.UserAwareSSLConfigurationService;
@@ -90,24 +91,25 @@ public class DefaultSSLSocketFactoryProvider implements SSLSocketFactoryProvider
     @Override
     public SSLSocketFactory getDefault() {
         SSLConfigurationService sslConfigService = Services.getService(SSLConfigurationService.class);
-
         if (sslConfigService.getTrustLevel().equals(TrustLevel.TRUST_ALL)) {
+            // Globally configured to user trust-all socket factory
             return TrustAllSSLSocketFactory.getDefault();
         }
+
+        UserAwareSSLConfigurationService userSSLConfig = Services.getService(UserAwareSSLConfigurationService.class);
+        if (null == userSSLConfig) {
+            // Absent user-aware SSL config service. This happens for setups w/o a user/context service.
+            return TrustAllSSLSocketFactory.getDefault();
+        }
+
+        // Try to determine by user
         int user = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_USER_ID));
         int context = Tools.getUnsignedInteger(LogProperties.get(LogProperties.Name.SESSION_CONTEXT_ID));
         if ((user == -1) || (context == -1)) {
+            // No user-specific socket factory selectable
             return TrustedSSLSocketFactory.getDefault();
         }
 
-        boolean isUserAllowedToConfigureTrustlevel = Services.getService(UserAwareSSLConfigurationService.class).isTrustAll(user, context);
-        if (isUserAllowedToConfigureTrustlevel) {
-            UserAwareSSLConfigurationService userSSLConfig = Services.getService(UserAwareSSLConfigurationService.class);
-
-            if (userSSLConfig.isTrustAll(user, context)) {
-                return TrustAllSSLSocketFactory.getDefault();
-            }
-        }
-        return TrustedSSLSocketFactory.getDefault();
+        return userSSLConfig.isTrustAll(user, context) ? TrustAllSSLSocketFactory.getDefault() : TrustedSSLSocketFactory.getDefault();
     }
 }

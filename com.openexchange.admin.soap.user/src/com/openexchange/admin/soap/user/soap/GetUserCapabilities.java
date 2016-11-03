@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,36 +47,78 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax;
+package com.openexchange.admin.soap.user.soap;
 
-import com.openexchange.mailfilter.json.ajax.actions.MailFilterAction;
-import com.openexchange.mailfilter.json.ajax.actions.MailFilterRequest;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import com.openexchange.admin.soap.user.dataobjects.Context;
+import com.openexchange.admin.soap.user.dataobjects.Credentials;
+import com.openexchange.admin.soap.user.dataobjects.User;
+
 
 /**
+ * <p>Java-Klasse f\u00fcr anonymous complex type.
  *
- * @author d7
+ * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+ *
+ * <pre>
+ * &lt;complexType>
+ *   &lt;complexContent>
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *       &lt;sequence>
+ *         &lt;element name="ctx" type="{http://dataobjects.soap.admin.openexchange.com/xsd}Context" minOccurs="0"/>
+ *         &lt;element name="user" type="{http://dataobjects.soap.admin.openexchange.com/xsd}User" minOccurs="0"/>
+ *         &lt;element name="auth" type="{http://dataobjects.rmi.admin.openexchange.com/xsd}Credentials" minOccurs="0"/>
+ *       &lt;/sequence>
+ *     &lt;/restriction>
+ *   &lt;/complexContent>
+ * &lt;/complexType>
+ * </pre>
+ *
+ *
  */
-public class MailFilterServlet extends AbstractMailFilterServlet {
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "", propOrder = {
+    "ctx",
+    "user",
+    "auth"
+})
+@XmlRootElement(name = "getUserCapabilities")
+public class GetUserCapabilities {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1472856427482243156L;
+    @XmlElement(nillable = true)
+    protected Context ctx;
+    @XmlElement(nillable = true)
+    protected User user;
+    @XmlElement(nillable = true)
+    protected Credentials auth;
 
-    /**
-     * Default constructor.
-     */
-    public MailFilterServlet() {
-        super();
+
+    public Context getCtx() {
+        return ctx;
     }
 
-    @Override
-    protected MailFilterAction getAction() {
-        return MailFilterAction.getInstance();
+    public void setCtx(Context value) {
+        this.ctx = value;
     }
 
-    @Override
-    protected MailFilterRequest createRequest() {
-        return new MailFilterRequest();
+    public User getUser() {
+        return user;
     }
+
+    public void setUser(User value) {
+        this.user = value;
+    }
+
+    public Credentials getAuth() {
+        return auth;
+    }
+
+    public void setAuth(Credentials value) {
+        this.auth = value;
+    }
+
 }

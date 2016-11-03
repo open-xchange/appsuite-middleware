@@ -99,7 +99,6 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
-import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
@@ -122,7 +121,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageVersionedFileAccess, FileStorageIgnorableVersionFileAccess {
+public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageVersionedFileAccess {
 
     private static final Logger LOG = LoggerFactory.getLogger(DropboxFileAccess.class);
 
@@ -136,7 +135,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /**
      * Initialises a new {@link DropboxFileAccess}.
-     * 
+     *
      * @throws OXException
      */
     public DropboxFileAccess(final AbstractOAuthAccess dropboxOAuthAccess, final FileStorageAccount account, final Session session, final DropboxAccountAccess accountAccess) throws OXException {
@@ -147,7 +146,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#exists(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
@@ -169,7 +168,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getFileMetadata(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
@@ -196,7 +195,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#saveFileMetadata(com.openexchange.file.storage.File, long)
      */
     @Override
@@ -206,7 +205,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#saveFileMetadata(com.openexchange.file.storage.File, long, java.util.List)
      */
     @Override
@@ -271,7 +270,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#copy(com.openexchange.file.storage.FileStorageFileAccess.IDTuple, java.lang.String, java.lang.String, com.openexchange.file.storage.File, java.io.InputStream, java.util.List)
      */
     @Override
@@ -311,7 +310,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#move(com.openexchange.file.storage.FileStorageFileAccess.IDTuple, java.lang.String, long, com.openexchange.file.storage.File, java.util.List)
      */
     @Override
@@ -339,7 +338,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getDocument(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
@@ -356,7 +355,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#saveDocument(com.openexchange.file.storage.File, java.io.InputStream, long)
      */
     @Override
@@ -366,37 +365,17 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#saveDocument(com.openexchange.file.storage.File, java.io.InputStream, long, java.util.List)
      */
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        return saveDocument(file, data, false);
+        return saveDocument(file, data, null != modifiedFields && modifiedFields.contains(Field.VERSION_COMMENT));
     }
 
     /*
      * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess#saveDocument(com.openexchange.file.storage.File, java.io.InputStream, long, java.util.List, boolean)
-     */
-    @Override
-    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields, boolean ignoreVersion) throws OXException {
-        return saveDocument(file, data, !ignoreVersion);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess#saveDocumentTryAddVersion(com.openexchange.file.storage.File, java.io.InputStream, long, java.util.List)
-     */
-    @Override
-    public IDTuple saveDocumentTryAddVersion(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
-        return saveDocument(file, data, true);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#removeDocument(java.lang.String, long)
      */
     @Override
@@ -423,7 +402,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#removeDocument(java.util.List, long)
      */
     @Override
@@ -433,7 +412,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#removeDocument(java.util.List, long, boolean)
      */
     @Override
@@ -457,7 +436,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#touch(java.lang.String, java.lang.String)
      */
     @Override
@@ -467,7 +446,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.lang.String)
      */
     @Override
@@ -494,7 +473,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.lang.String, java.util.List)
      */
     @Override
@@ -504,7 +483,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.lang.String, java.util.List, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection)
      */
     @Override
@@ -531,7 +510,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getDocuments(java.util.List, java.util.List)
      */
     @Override
@@ -585,7 +564,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getDelta(java.lang.String, long, java.util.List, boolean)
      */
     @Override
@@ -595,7 +574,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getDelta(java.lang.String, long, java.util.List, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection, boolean)
      */
     @Override
@@ -605,7 +584,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#search(java.lang.String, java.util.List, java.lang.String, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection, int, int)
      */
     @Override
@@ -615,7 +594,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#search(java.lang.String, java.util.List, java.lang.String, boolean, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection, int, int)
      */
     @Override
@@ -638,7 +617,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageFileAccess#getAccountAccess()
      */
     @Override
@@ -648,7 +627,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.tx.TransactionAware#startTransaction()
      */
     @Override
@@ -658,7 +637,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.tx.TransactionAware#commit()
      */
     @Override
@@ -668,7 +647,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.tx.TransactionAware#rollback()
      */
     @Override
@@ -678,7 +657,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.tx.TransactionAware#finish()
      */
     @Override
@@ -688,7 +667,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.tx.TransactionAware#setTransactional(boolean)
      */
     @Override
@@ -698,7 +677,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.tx.TransactionAware#setRequestTransactional(boolean)
      */
     @Override
@@ -708,7 +687,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.tx.TransactionAware#setCommitsTransaction(boolean)
      */
     @Override
@@ -718,7 +697,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageVersionedFileAccess#removeVersion(java.lang.String, java.lang.String, java.lang.String[])
      */
     @Override
@@ -741,7 +720,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageVersionedFileAccess#getVersions(java.lang.String, java.lang.String)
      */
     @Override
@@ -751,7 +730,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageVersionedFileAccess#getVersions(java.lang.String, java.lang.String, java.util.List)
      */
     @Override
@@ -761,7 +740,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageVersionedFileAccess#getVersions(java.lang.String, java.lang.String, java.util.List, com.openexchange.file.storage.File.Field, com.openexchange.file.storage.FileStorageFileAccess.SortDirection)
      */
     @Override
@@ -793,7 +772,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.FileStorageSequenceNumberProvider#getSequenceNumbers(java.util.List)
      */
     @Override
@@ -814,7 +793,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.file.storage.ThumbnailAware#getThumbnailStream(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
@@ -855,7 +834,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /**
      * Saves the specified data
-     * 
+     *
      * @param file The {@link File} containing all metadata information
      * @param data The actual data to save
      * @param addVersion Flag determining whether a new version of the file will be added
@@ -890,7 +869,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /**
      * Uploads the specified file in chunks
-     * 
+     *
      * @param file The {@link File} to upload
      * @param data The {@link InputStream} containing the actual data
      * @return The {@link IDTuple} of the uploaded file
@@ -938,7 +917,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /**
      * Uploads the specified file in a single request
-     * 
+     *
      * @param file The {@link File} to upload
      * @param data The {@link InputStream} containing the actual data
      * @return The {@link IDTuple} of the uploaded file
@@ -982,7 +961,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /**
      * Search under the specified folder for the specified pattern
-     * 
+     *
      * @param pattern The pattern to search for
      * @param folderId The folder identifier (full path)
      * @param includeSubfolders If the sub-folders will be included in the search
@@ -1009,7 +988,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /**
      * Retrieves all files from the specified folder.
-     * 
+     *
      * @param folderId The folder path
      * @param recursive If set to true then it retrieves all files recursively from all folders under the specified folder
      * @return A list with {@link File}s
@@ -1040,7 +1019,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /**
      * Searches in the specified folder for the specified pattern (fires the actual search request to Dropbox.
-     * 
+     *
      * @param folderId The folder identifier (full path)
      * @param pattern The pattern to search for
      * @param includeSubfolders If the sub-folders will be included in the search
@@ -1074,7 +1053,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     /**
      * Returns a sub-list starting from the specified index and ending to the specified index
-     * 
+     *
      * @param files The {@link List} of {@link File}s
      * @param startIndex The start index
      * @param endIndex The end index

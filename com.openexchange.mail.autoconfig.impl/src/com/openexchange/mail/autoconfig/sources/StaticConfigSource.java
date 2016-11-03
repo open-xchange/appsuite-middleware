@@ -50,8 +50,6 @@
 package com.openexchange.mail.autoconfig.sources;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.Autoconfig;
 
@@ -99,14 +97,14 @@ public abstract class StaticConfigSource implements ConfigSource {
     }
 
     @Override
-    public final Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context) throws OXException {
-        return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true);
+    public final Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId) throws OXException {
+        return getAutoconfig(emailLocalPart, emailDomain, password, userId, contextId, true);
     }
 
     @Override
-    public final DefaultAutoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context, boolean forceSecure) throws OXException {
+    public final DefaultAutoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId, boolean forceSecure) throws OXException {
         if (null != filter && filter.accept(emailDomain)) {
-            return getStaticAutoconfig(emailLocalPart, emailDomain, password, user, context, forceSecure);
+            return getStaticAutoconfig(emailLocalPart, emailDomain, password, userId, contextId, forceSecure);
         }
         return null;
     }
@@ -116,13 +114,13 @@ public abstract class StaticConfigSource implements ConfigSource {
      *
      * @param emailLocalPart The local part
      * @param emailDomain The domain part
-     * @param password Tha password
-     * @param user The associated user
-     * @param context The context
+     * @param password The password
+     * @param user The identifier of the associated user
+     * @param context The identifier of the context
      * @param forceSecure <code>true</code> if a secure connection should be enforced; otherwise <code>false</code> to also allow plain ones
      * @return The auto-config or <code>null</code>
      * @throws OXException If an error occurs
      */
-    protected abstract DefaultAutoconfig getStaticAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context, boolean forceSecure) throws OXException;
+    protected abstract DefaultAutoconfig getStaticAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId, boolean forceSecure) throws OXException;
 
 }

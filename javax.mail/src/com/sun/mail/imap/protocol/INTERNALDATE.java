@@ -53,7 +53,7 @@ import com.sun.mail.iap.*;
 
 
 /**
- * This class 
+ * An INTERNALDATE FETCH item.
  *
  * @author  John Mani
  */
@@ -73,6 +73,7 @@ public class INTERNALDATE implements Item {
      * dates in RFC 822 format.
      */
     private static final MailDateFormat mailDateFormat = new MailDateFormat();
+    private static final java.util.concurrent.locks.Lock mailDateFormatLock = new java.util.concurrent.locks.ReentrantLock();
 
     /**
      * Constructor.
@@ -87,11 +88,17 @@ public class INTERNALDATE implements Item {
 	if (s == null)
 	    throw new ParsingException("INTERNALDATE is NIL");
 	try {
-	    synchronized (mailDateFormat) {
-            date = mailDateFormat.parse(s);
-        }
+	    if (mailDateFormatLock.tryLock()) {
+	        try {
+	            date = mailDateFormat.parse(s);
+	        } finally {
+	            mailDateFormatLock.unlock();
+	        }
+	    } else {
+	        date = new MailDateFormat().parse(s);
+	    }
 	} catch (ParseException pex) {
-	    throw new ParsingException("INTERNALDATE parse error");
+	    throw new ParsingException("INTERNALDATE parse error", pex);
 	}
     }
 

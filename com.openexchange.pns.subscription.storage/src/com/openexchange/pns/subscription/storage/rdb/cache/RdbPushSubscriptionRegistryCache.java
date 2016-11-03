@@ -80,7 +80,7 @@ public class RdbPushSubscriptionRegistryCache {
     private final RdbPushSubscriptionRegistry registry;
     private final CacheEventService cacheEventService;
     private final CacheService cacheService;
-    private final ConcurrentMap<Integer, ConcurrentMap<Integer, Future<InMemoryPushSubscriptionCollection>>> cache;
+    private final ConcurrentMap<Integer, ConcurrentMap<Integer, Future<CachedPushSubscriptionCollection>>> cache;
 
     /**
      * Initializes a new {@link RdbPushSubscriptionRegistryCache}.
@@ -113,19 +113,19 @@ public class RdbPushSubscriptionRegistryCache {
      * @return The user-associated in-memory collection
      * @throws OXException If collection cannot be created
      */
-    public InMemoryPushSubscriptionCollection getCollectionFor(int userId, int contextId) throws OXException {
-        ConcurrentMap<Integer, Future<InMemoryPushSubscriptionCollection>> userCache = cache.get(contextId);
+    public CachedPushSubscriptionCollection getCollectionFor(int userId, int contextId) throws OXException {
+        ConcurrentMap<Integer, Future<CachedPushSubscriptionCollection>> userCache = cache.get(contextId);
         if (null == userCache) {
-            ConcurrentMap<Integer, Future<InMemoryPushSubscriptionCollection>> newUserCache = new ConcurrentHashMap<>();
+            ConcurrentMap<Integer, Future<CachedPushSubscriptionCollection>> newUserCache = new ConcurrentHashMap<>();
             userCache = cache.putIfAbsent(contextId, newUserCache);
             if (null == userCache) {
                 userCache = newUserCache;
             }
         }
 
-        Future<InMemoryPushSubscriptionCollection> f = userCache.get(userId);
+        Future<CachedPushSubscriptionCollection> f = userCache.get(userId);
         if (null == f) {
-            FutureTask<InMemoryPushSubscriptionCollection> ft = new FutureTask<>(new LoadInMemoryPushSubscriptionCollectionCallable(userId, contextId, registry));
+            FutureTask<CachedPushSubscriptionCollection> ft = new FutureTask<>(new LoadInMemoryPushSubscriptionCollectionCallable(userId, contextId, registry));
             f = userCache.putIfAbsent(userId, ft);
             if (null == f) {
                 f = ft;
@@ -143,18 +143,18 @@ public class RdbPushSubscriptionRegistryCache {
      */
     public void addAndInvalidateIfPresent(PushSubscription subscription) throws OXException {
         int contextId = subscription.getContextId();
-        ConcurrentMap<Integer, Future<InMemoryPushSubscriptionCollection>> userCache = cache.get(contextId);
+        ConcurrentMap<Integer, Future<CachedPushSubscriptionCollection>> userCache = cache.get(contextId);
         if (null == userCache) {
             return;
         }
 
         int userId = subscription.getUserId();
-        Future<InMemoryPushSubscriptionCollection> f = userCache.get(userId);
+        Future<CachedPushSubscriptionCollection> f = userCache.get(userId);
         if (null == f) {
             return;
         }
 
-        InMemoryPushSubscriptionCollection collection = ThreadPools.getFrom(f);
+        CachedPushSubscriptionCollection collection = ThreadPools.getFrom(f);
         collection.addSubscription(subscription);
         fireInvalidateCacheEvent(userId, contextId);
     }
@@ -167,18 +167,18 @@ public class RdbPushSubscriptionRegistryCache {
      */
     public void removeAndInvalidateIfPresent(PushSubscription subscription) throws OXException {
         int contextId = subscription.getContextId();
-        ConcurrentMap<Integer, Future<InMemoryPushSubscriptionCollection>> userCache = cache.get(contextId);
+        ConcurrentMap<Integer, Future<CachedPushSubscriptionCollection>> userCache = cache.get(contextId);
         if (null == userCache) {
             return;
         }
 
         int userId = subscription.getUserId();
-        Future<InMemoryPushSubscriptionCollection> f = userCache.get(userId);
+        Future<CachedPushSubscriptionCollection> f = userCache.get(userId);
         if (null == f) {
             return;
         }
 
-        InMemoryPushSubscriptionCollection collection = ThreadPools.getFrom(f);
+        CachedPushSubscriptionCollection collection = ThreadPools.getFrom(f);
         collection.removeSubscription(subscription);
         fireInvalidateCacheEvent(userId, contextId);
     }
@@ -209,7 +209,7 @@ public class RdbPushSubscriptionRegistryCache {
                 // Drop for whole context
                 cache.remove(contextId);
             } else {
-                ConcurrentMap<Integer, Future<InMemoryPushSubscriptionCollection>> userCache = cache.get(contextId);
+                ConcurrentMap<Integer, Future<CachedPushSubscriptionCollection>> userCache = cache.get(contextId);
                 if (null != userCache) {
                     userCache.remove(userId);
                 }

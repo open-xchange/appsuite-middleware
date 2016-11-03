@@ -49,6 +49,7 @@
 
 package com.openexchange.share;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 
 /**
@@ -85,7 +86,8 @@ public interface ShareInfo {
      *
      * @param hostData The host data of the current HTTP request to determine protocol, hostname and servlet prefix
      * @return The share URL as used to access the share as guest
+     * @throws OXException in case the url cannot be generated.
      */
-    String getShareURL(HostData hostData);
+    String getShareURL(HostData hostData) throws OXException;
 
 }

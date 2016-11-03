@@ -56,44 +56,49 @@ import com.openexchange.authorization.Authorization;
 import com.openexchange.authorization.AuthorizationService;
 
 /**
- * Puts a found {@link AuthorizationService} into the according registry {@link Authorization}.
+ * Puts a found imstance of {@link AuthorizationService} into the according registry {@link Authorization}.
  *
  * @author <a href="mailto:carsten.hoeger@open-xchange.com">Carsten Hoeger</a>
  */
 public class AuthorizationCustomizer implements ServiceTrackerCustomizer<AuthorizationService, AuthorizationService> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthorizationCustomizer.class);
-
     private final BundleContext context;
 
-    public AuthorizationCustomizer(final BundleContext context) {
+    /**
+     * Initializes a new {@link AuthorizationCustomizer}.
+     *
+     * @param context The bundle context
+     */
+    public AuthorizationCustomizer(BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public AuthorizationService addingService(final ServiceReference<AuthorizationService> reference) {
-        final AuthorizationService auth = context.getService(reference);
-        if (null == Authorization.getService()) {
-            Authorization.setService(auth);
+    public AuthorizationService addingService(ServiceReference<AuthorizationService> reference) {
+        AuthorizationService auth = context.getService(reference);
+        if (Authorization.setService(auth)) {
             return auth;
         }
+
         context.ungetService(reference);
-        LOG.error("Several authorization services found. Remove all except one!");
+        org.slf4j.LoggerFactory.getLogger(AuthorizationCustomizer.class).error("Several authorization services found. Remove all except one!");
         return null;
     }
 
     @Override
-    public void modifiedService(final ServiceReference<AuthorizationService> reference, final AuthorizationService service) {
+    public void modifiedService(ServiceReference<AuthorizationService> reference, AuthorizationService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(final ServiceReference<AuthorizationService> reference, final AuthorizationService service) {
-        if (Authorization.dropService(service)) {
-            LOG.error("Removed authorization service was not active!");
-        } else {
+    public void removedService(ServiceReference<AuthorizationService> reference, AuthorizationService service) {
+        if (null != service) {
+            if (false == Authorization.dropService(service)) {
+                org.slf4j.LoggerFactory.getLogger(AuthorizationCustomizer.class).error("Disappearing authorization service was not active!");
+            }
             context.ungetService(reference);
         }
     }
+
 }

@@ -2188,11 +2188,17 @@ public class CalendarMySQL implements CalendarSqlImp {
                                     reminder = new Date(cdao.getStartDate().getTime() - la);
                                 }
                             }
+                            /*
+                             * Bug 47094 - Missing reminder for appointment from series
+                             *
+                             * In case of an exception on a series appointment the resulting reminders were bound to the creators folder ID.
+                             * This caused all other participants in not having the permission for the exception.                             * 
+                             */
                             if (null != reminder) {
                                 changeReminder(
                                     cdao.getObjectID(),
                                     user.getIdentifier(),
-                                    cdao.getEffectiveFolderId(),
+                                    FolderObject.PUBLIC == cdao.getFolderType() ? cdao.getEffectiveFolderId() : user.getPersonalFolderId(), 
                                     cdao.getContext(),
                                     cdao.isSequence(true),
                                     cdao.getEndDate(),

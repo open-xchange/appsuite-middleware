@@ -8,13 +8,13 @@ The client accesses the server through HTTP GET, POST and PUT requests. HTTP coo
 Text encoding is always UTF-8. Data is sent from the server to the client as text/javascript and interpreted by the client to obtain an ECMAScript object. The HTTP API uses only a small subset of the ECMAScript syntax. This subset is roughly described by the following BNF:
 
 ```
-Value   ::= "null" | Boolean | Number | String | Array | Object
-Boolean ::= "true" | "false"
-Number  ::= see NumericLiteral in ECMA 262 3rd edition
-String  ::= \"([^"\n\\]|\\["\n\\])*\"
-Array   ::= "[]" | "[" Value ("," Value)* "]"
-Object  ::= "{}" | "{" Name ":" Value ("," Name ":" Value)* "}"
-Name    ::= [A-Fa-f][0-9A-Fa-f_]*
+Value	::= "null" | Boolean | Number | String | Array | Object
+Boolean	::= "true" | "false"
+Number	::= see NumericLiteral in ECMA 262 3rd edition
+String	::= \"([^"\n\\]|\\["\n\\])*\"
+Array	::= "[]" | "[" Value ("," Value)* "]"
+Object	::= "{}" | "{" Name ":" Value ("," Name ":" Value)* "}"
+Name	::= [A-Fa-f][0-9A-Fa-f_]*
 ```
 
 Numbers are the standard signed integer and floating point numbers. Strings can contain any character, except double quotes, newlines and backslashes, which must be escaped by a backslash. Control characters in strings (other than newline) are not supported. Whitespace is allowed between any two tokens. See [JSON](http://json.org/) and [ECMA 262, 3rd edition](http://www.ecma-international.org/publications/standards/Ecma-262.htm) for the formal definition.

@@ -61,7 +61,7 @@ import com.openexchange.net.ssl.config.TrustLevel;
  */
 public class SSLConfigurationServiceImpl implements SSLConfigurationService {
 
-    private ConfigurationService configService;
+    private final ConfigurationService configService;
 
     public SSLConfigurationServiceImpl(ConfigurationService configService) {
         this.configService = configService;

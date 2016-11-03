@@ -49,14 +49,9 @@
 
 package com.openexchange.websockets.monitoring.osgi;
 
-import javax.management.ObjectName;
-import org.slf4j.Logger;
 import com.openexchange.management.ManagementService;
-import com.openexchange.management.Managements;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.websockets.WebSocketService;
-import com.openexchange.websockets.monitoring.WebSocketMBean;
-import com.openexchange.websockets.monitoring.impl.WebSocketMBeanImpl;
 
 
 /**
@@ -81,38 +76,13 @@ public class WebSocketMonitoringActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ManagementService.class, WebSocketService.class };
+        return new Class<?>[] { ManagementService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        Logger logger = org.slf4j.LoggerFactory.getLogger(WebSocketMonitoringActivator.class);
-
-        ManagementService managementService = getService(ManagementService.class);
-        try {
-            ObjectName objectName = Managements.getObjectName(WebSocketMBean.class.getName(), WebSocketMBean.DOMAIN);
-            managementService.registerMBean(objectName, new WebSocketMBeanImpl(getService(WebSocketService.class)));
-            logger.warn("Registered MBean {}", WebSocketMBean.class.getName());
-        } catch (Exception e) {
-            logger.warn("Could not register MBean {}", WebSocketMBean.class.getName(), e);
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        Logger logger = org.slf4j.LoggerFactory.getLogger(WebSocketMonitoringActivator.class);
-
-        ManagementService managementService = getService(ManagementService.class);
-        if (null != managementService) {
-            try {
-                managementService.unregisterMBean(Managements.getObjectName(WebSocketMBean.class.getName(), WebSocketMBean.DOMAIN));
-                logger.warn("Unregistered MBean {}", WebSocketMBean.class.getName());
-            } catch (Exception e) {
-                logger.warn("Could not un-register MBean {}", WebSocketMBean.class.getName(), e);
-            }
-        }
-
-        super.stopBundle();
+        track(WebSocketService.class, new WebSocketServiceTracker(getService(ManagementService.class), context));
+        openTrackers();
     }
 
 }

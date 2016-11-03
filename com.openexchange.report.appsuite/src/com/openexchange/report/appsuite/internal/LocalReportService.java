@@ -251,21 +251,7 @@ public class LocalReportService extends AbstractReportService {
         List<Integer> allContextIds = new ArrayList<Integer>();
 
         // Set up an AnalyzeContextBatch instance for every chunk of contextIds
-        if (reportConfig.isShowSingleTenant()) {
-            ContextLoader dataloaderMySQL = new ContextLoader();
-            try {
-                allContextIds = dataloaderMySQL.getAllContextsForSid(reportConfig.getSingleTenantId());
-            } catch (SQLException e) {
-                LOG.error("Failed to execute SQL to retrieve all context ids", e);
-            }
-            if (allContextIds.isEmpty()) {
-                LOG.error("No contexts for this brand or the sid is invalid.");
-                return null;
-            }
-        } else {
-            allContextIds = Services.getService(ContextService.class).getAllContextIds();
-        }
-
+        allContextIds = Services.getService(ContextService.class).getAllContextIds();
         // Set up the report instance
         Report report = new Report(uuid, System.currentTimeMillis(), reportConfig);
         report.setStorageFolderPath(ReportProperties.getStoragePath());

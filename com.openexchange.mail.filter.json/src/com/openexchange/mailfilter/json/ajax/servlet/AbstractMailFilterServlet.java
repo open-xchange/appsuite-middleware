@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax;
+package com.openexchange.mailfilter.json.ajax.servlet;
 
 import java.io.IOException;
 import java.util.Locale;
@@ -66,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
+import com.openexchange.mailfilter.json.ajax.Parameter;
 import com.openexchange.mailfilter.json.ajax.actions.AbstractAction;
 import com.openexchange.mailfilter.json.ajax.actions.AbstractRequest;
 import com.openexchange.mailfilter.json.osgi.Services;

@@ -278,7 +278,7 @@ specific field data of single or multiple objects.
 |547 |Telephone company | telephone_company | String ||
 |548 |Telephone home 1 | telephone_home1 | String ||
 |549 |Telephone home 2 | telephone_home2 | String ||
-|550 |FAX home | fax_home |	String|
+|550 |FAX home | fax_home |	String||
 |551 |Cellular telephone 1 | cellular_telephone1 | String ||
 |552 |Cellular telephone 2 | cellular_telephone2 | String ||
 |553 |Telephone other | telephone_other | String ||
@@ -414,6 +414,12 @@ specific field data of single or multiple objects.
 ||cid | String | The value of the "Content-ID" header, if the header is present.|
 |654 | original_id | String | The original mail identifier (e.g. if fetched from "virtual/all" folder).|
 |655 | original_folder_id | String | The original folder identifier (e.g. if fetched from "virtual/all" folder).|
+|656 | content_type | String | The Content-Type of a mail; e.g. multipart/mixed; boundary="-0123456abcdefg--".|
+|657 | answered | String | Special field to sort mails by answered status.|
+|658 | forwarded | String | Special field to sort mails by forwarded status. Note that mail service needs either support a \Forwarded system flag or a $Forwarded user flag |
+|659 | draft | String | Special field to sort mails by draft flag.|
+|660 | flagged | String | Special field to sort mails by flagged status.|
+|661 | date | String | The date of a mail message. As configured, either the internal received date or mail's sent date (as given by <code>"Date"</code> header). Supposed to be the replacement for ``sent_date`` (609) or ``received_date`` (610) to let the Open-Xchange Middleware decide based on configuration for ``com.openexchange.mail.preferSentDate`` property what to consider. Supported at both - ``columns`` parameter and ``sort`` parameter.|
 
 ### Mail system flags
 

@@ -1,3 +1,15 @@
+open-xchange-messaging-sms (7.8.3-2) stable; urgency=medium
+
+  * Second preview for 7.8.3 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Sat, 29 Oct 2016 09:47:06 +0200
+
+open-xchange-messaging-sms (7.8.3-1) stable; urgency=medium
+
+  * First preview 7.8.3 release
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 14 Oct 2016 15:22:08 +0200
+
 open-xchange-messaging-sms (7.8.3-0) unstable; urgency=medium
 
   * prepare for 7.8.3 release

@@ -523,10 +523,14 @@ public final class ResponseWriter {
          * Put argument JSON array for compatibility reasons
          */
         {
-            Object[] args = exception.getLogArgs();
+            Object[] args = exception.getDisplayArgs();
+            /*-
+             * Only check display arguments to keep the ones for log message intact
+             *
             if ((null == args) || (0 == args.length)) {
-                args = exception.getDisplayArgs();
+                args = exception.getLogArgs();
             }
+            */
             // For compatibility
             if ((null == args) || (0 == args.length)) {
                 json.put(ERROR_PARAMS, new JSONArray(0));
@@ -869,10 +873,14 @@ public final class ResponseWriter {
          * Put argument JSON array for compatibility reasons
          */
         {
-            Object[] args = exc.getLogArgs();
+            Object[] args = exc.getDisplayArgs();
+            /*-
+             * Only check display arguments to keep the ones for log message intact
+             *
             if ((null == args) || (0 == args.length)) {
-                args = exc.getDisplayArgs();
+                args = exc.getLogArgs();
             }
+            */
             // For compatibility
             if ((null == args) || (0 == args.length)) {
                 writer.key(ResponseFields.ERROR_PARAMS).value(new JSONArray(0));
@@ -925,13 +933,6 @@ public final class ResponseWriter {
         writeTruncated(exc, writer);
         if (includeArguments()) {
             writeArguments(exc, writer);
-        }
-        if (exc.getLogArgs() != null) {
-            final JSONArray array = new JSONArray();
-            for (final Object tmp : exc.getLogArgs()) {
-                array.put(tmp);
-            }
-            writer.key(ResponseFields.ERROR_PARAMS).value(array);
         }
         // Write stack trace
         if (includeStackTraceOnError || includeStackTraceOnError()) {

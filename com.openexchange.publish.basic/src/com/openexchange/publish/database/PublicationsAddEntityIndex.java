@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,45 +47,41 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.servlet;
+package com.openexchange.publish.database;
 
-import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Interests;
-import com.openexchange.config.Reloadable;
-import com.openexchange.config.Reloadables;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.CreateIndexUpdateTask;
 
 /**
- * {@link MailFilterReloadable}
+ * {@link PublicationsAddEntityIndex}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since 7.6.0
+ * Adds the index `entity` (`cid`,`module`,`entity`) to the table "publications".
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.3
  */
-public class MailFilterReloadable implements Reloadable {
+public class PublicationsAddEntityIndex extends CreateIndexUpdateTask {
+
+    private final DatabaseService databaseService;
 
     /**
-     * Initializes a new {@link MailFilterReloadable}.
+     * Initializes a new {@link PublicationsAddEntityIndex}.
+     *
+     * @param databaseService A reference to the database service
      */
-    public MailFilterReloadable() {
-        super();
+    public PublicationsAddEntityIndex(DatabaseService databaseService) {
+        super("publications", "entity", "cid", "module", "entity");
+        this.databaseService = databaseService;
     }
 
     @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        if (MailFilterServletInit.getInstance().isStarted()) {
-            MailFilterServletInit.getInstance().stop();
-            try {
-                MailFilterServletInit.getInstance().start();
-            } catch (Exception e) {
-                Logger logger = org.slf4j.LoggerFactory.getLogger(MailFilterReloadable.class);
-                logger.error("Error reloading configuration for bundle com.openexchange.mail.filter: {}", e);
-            }
-        }
+    public String[] getDependencies() {
+        return new String[] { "com.openexchange.publish.database.FixPublicationTablePrimaryKey" };
     }
 
     @Override
-    public Interests getInterests() {
-        return Reloadables.interestsForFiles("mailfilter.properties");
+    protected DatabaseService getDatabaseService() {
+        return databaseService;
     }
 
 }

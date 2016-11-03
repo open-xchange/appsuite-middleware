@@ -750,7 +750,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
                 msg.setContentType(new ContentType(MimeTypes.MIME_DEFAULT));
                 msg.addHeader("Content-Type", MimeTypes.MIME_DEFAULT);
             }
-            msg.setHasAttachment(bs.isMulti() && (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(bs.subtype) || MimeMessageUtility.hasAttachments(bs)));
+            msg.setHasAttachment(bs.isMulti() && MimeMessageUtility.hasAttachments(bs));
         }
 
         @Override
@@ -771,9 +771,7 @@ public final class SimpleFetchIMAPCommand extends AbstractIMAPCommand<TLongObjec
             } else {
                 try {
                     final ContentType ct = new ContentType(contentType);
-                    msg.setHasAttachment(ct.startsWith("multipart/") && ("mixed".equalsIgnoreCase(ct.getSubType()) || MimeMessageUtility.hasAttachments(
-                        (Multipart) message.getContent(),
-                        ct.getSubType())));
+                    msg.setHasAttachment(ct.startsWith("multipart/") && MimeMessageUtility.hasAttachments((Multipart) message.getContent(),ct.getSubType()));
                 } catch (final IOException e) {
                     throw new MessagingException(e.getMessage(), e);
                 }

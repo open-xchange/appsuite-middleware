@@ -55,6 +55,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.cluster.lock.ClusterLockService;
 import com.openexchange.cluster.lock.internal.ClusterLockServiceDatabaseImpl;
+import com.openexchange.cluster.lock.internal.ClusterLockServiceHazelcastImpl;
 import com.openexchange.cluster.lock.internal.Unregisterer;
 import com.openexchange.cluster.lock.internal.groupware.ClusterLockCreateTableTask;
 import com.openexchange.cluster.lock.internal.groupware.CreateClusterLockTable;
@@ -97,10 +98,15 @@ public class ClusterLockActivator extends HousekeepingActivator implements Unreg
             registerService(CreateTableService.class, new CreateClusterLockTable(), null);
             registerService(ClusterLockService.class, new ClusterLockServiceDatabaseImpl(this));
         } else {
-            final BundleContext context = this.context;
-            tracker = track(HazelcastInstance.class, new HazelcastClusterLockServiceTracker(context, ClusterLockActivator.this, ClusterLockActivator.this));
+            registerService(ClusterLockService.class, new ClusterLockServiceHazelcastImpl(this, this));
+            tracker = track(HazelcastInstance.class, new HazelcastClusterLockServiceTracker(context));
             openTrackers();
         }
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        unregisterService(ClusterLockService.class);
     }
 
     @Override

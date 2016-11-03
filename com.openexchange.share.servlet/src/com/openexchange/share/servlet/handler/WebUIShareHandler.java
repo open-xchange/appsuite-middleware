@@ -64,6 +64,7 @@ import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
+import com.openexchange.share.servlet.internal.AbstractShareServlet;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.share.servlet.utils.LoginLocation;
 import com.openexchange.share.servlet.utils.LoginLocationRegistry;
@@ -102,6 +103,11 @@ public class WebUIShareHandler extends AbstractShareHandler {
         AuthenticationMode authMode = guest.getAuthentication();
         switch (authMode) {
             case ANONYMOUS:
+                if (shareRequest.isInvalidTarget()) {
+                    // Deny handling for invalid targets in case the AuthenticationMode is ANONYMOUS. See bug #49464
+                    return ShareHandlerReply.DENY;
+                }
+                //$FALL-THROUGH$
             case GUEST:
             {
                 if (shareRequest.isInvalidTarget()) {
@@ -128,7 +134,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
             GuestInfo guestInfo = shareRequest.getGuest();
             User sharingUser = ShareServiceLookup.getService(UserService.class, true).getUser(guestInfo.getCreatedBy(), guestInfo.getContextID());
             TranslatorFactory factory = ShareServiceLookup.getService(TranslatorFactory.class, true);
-            Translator translator = factory.translatorFor(guestInfo.getLocale());
+            Translator translator = factory.translatorFor(AbstractShareServlet.determineLocale(request, guestInfo));
 
             ShareTargetPath targetPath = shareRequest.getTargetPath();
             if (shareRequest.isInvalidTarget()) {

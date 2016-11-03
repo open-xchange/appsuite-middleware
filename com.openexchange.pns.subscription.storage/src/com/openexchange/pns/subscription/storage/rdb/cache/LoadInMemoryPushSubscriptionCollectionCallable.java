@@ -61,7 +61,7 @@ import com.openexchange.pns.subscription.storage.rdb.RdbPushSubscriptionRegistry
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.3
  */
-public class LoadInMemoryPushSubscriptionCollectionCallable implements Callable<InMemoryPushSubscriptionCollection> {
+public class LoadInMemoryPushSubscriptionCollectionCallable implements Callable<CachedPushSubscriptionCollection> {
 
     private final int userId;
     private final int contextId;
@@ -82,9 +82,9 @@ public class LoadInMemoryPushSubscriptionCollectionCallable implements Callable<
     }
 
     @Override
-    public InMemoryPushSubscriptionCollection call() throws OXException {
+    public CachedPushSubscriptionCollection call() throws OXException {
         List<PushSubscription> subscriptions = registry.loadSubscriptionsFor(userId, contextId);
-        InMemoryPushSubscriptionCollection collection = new InMemoryPushSubscriptionCollection(userId, contextId);
+        CachedPushSubscriptionCollection collection = new CachedPushSubscriptionCollection(userId, contextId);
         collection.addSubscription(subscriptions);
         return collection;
     }

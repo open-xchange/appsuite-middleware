@@ -1,3 +1,15 @@
+open-xchange-imageserver (7.8.2-6) stable; urgency=medium
+
+  * Second preview for 7.8.3 release
+
+ -- Kai Ahrens <kai.ahrens@open-xchange.com>  Sat, 29 Oct 2016 09:46:59 +0200
+
+open-xchange-imageserver (7.8.2-5) stable; urgency=medium
+
+  * First preview 7.8.3 release
+
+ -- Kai Ahrens <kai.ahrens@open-xchange.com>  Fri, 14 Oct 2016 15:22:00 +0200
+
 open-xchange-imageserver (7.8.2-4) unstable; urgency=medium
 
   * initial packaging for open-xchange-imageserver

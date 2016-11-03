@@ -93,8 +93,15 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
- * EventClient
+ * Responsible for advertising {@link CommonEvent common Groupware events} to several notification/event mechanisms
+ * <ul>
+ * <li>Posting an {@link Event event} using <code>org.osgi.service.event.EventAdmin</code></li>
+ * <li>Legacy <code>com.openexchange.event.impl.EventQueue</code></li>
+ * <li><code>com.openexchange.pns.PushNotificationService</code></li>
+ * </ul>
+ *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public class EventClient {
 
@@ -109,13 +116,18 @@ public class EventClient {
     public static final int CONFIRM_TENTATIVE = 11;
     public static final int CONFIRM_WAITING = 11;
 
+    // -----------------------------------------------------------------------------------------
+
     private final Session session;
-
     private final int userId;
-
     private final int contextId;
 
-    public EventClient(final Session session) {
+    /**
+     * Initializes a new {@link EventClient} using specified session.
+     *
+     * @param session The session
+     */
+    public EventClient(Session session) {
         this.session = session;
         userId = session.getUserId();
         contextId = session.getContextId();
@@ -147,27 +159,36 @@ public class EventClient {
         PushNotificationService pushNotificationService = ServerServiceRegistry.getInstance().getService(PushNotificationService.class);
         if (null != pushNotificationService) {
             for (Map.Entry<Integer, Set<Integer>> entry : affectedUsers.entrySet()) {
-                int userId = entry.getKey().intValue();
-                Integer folderId = entry.getValue().iterator().next();
-                Date[] startAndEndDate = determineStartAndEndDate(appointment);
-
-                Map<String, Object> messageData = PushNotifications.messageDataBilder()
-                    .put(PushNotificationField.ID, Integer.valueOf(appointment.getObjectID()))
-                    .put(PushNotificationField.FOLDER, folderId)
-                    .put(PushNotificationField.APPOINTMENT_TITLE, appointment.getTitle())
-                    .put(PushNotificationField.APPOINTMENT_LOCATION, appointment.getLocation())
-                    .put(PushNotificationField.APPOINTMENT_START_DATE, startAndEndDate[0])
-                    .put(PushNotificationField.APPOINTMENT_END_DATE, startAndEndDate[1])
-                    .build();
-
-                PushNotification notification = DefaultPushNotification.builder()
-                    .contextId(contextId)
-                    .userId(userId)
-                    .topic(KnownTopic.CALENDAR_NEW.getName())
-                    .messageData(messageData)
-                    .build();
-                pushNotificationService.handle(notification);
+                Set<Integer> folderIds = entry.getValue();
+                if (false == folderIds.isEmpty()) {
+                    postNotification(appointment, folderIds.iterator().next(), entry.getKey().intValue(), pushNotificationService);
+                }
             }
+        }
+    }
+
+    private void postNotification(Appointment appointment, Integer folderId, int userId, PushNotificationService pushNotificationService) {
+        try {
+            Date[] startAndEndDate = determineStartAndEndDate(appointment);
+
+            Map<String, Object> messageData = PushNotifications.messageDataBilder()
+                .put(PushNotificationField.ID, Integer.valueOf(appointment.getObjectID()))
+                .put(PushNotificationField.FOLDER, folderId)
+                .put(PushNotificationField.APPOINTMENT_TITLE, appointment.getTitle())
+                .put(PushNotificationField.APPOINTMENT_LOCATION, appointment.getLocation())
+                .put(PushNotificationField.APPOINTMENT_START_DATE, startAndEndDate[0])
+                .put(PushNotificationField.APPOINTMENT_END_DATE, startAndEndDate[1])
+                .build();
+
+            PushNotification notification = DefaultPushNotification.builder()
+                .contextId(contextId)
+                .userId(userId)
+                .topic(KnownTopic.CALENDAR_NEW.getName())
+                .messageData(messageData)
+                .build();
+            pushNotificationService.handle(notification);
+        } catch (Exception e) {
+            LOG.warn("Failed to deliver \"{}\" event to user {} in context {}", KnownTopic.CALENDAR_NEW.getName(), Integer.valueOf(userId), Integer.valueOf(contextId), e);
         }
     }
 

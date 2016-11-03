@@ -102,6 +102,13 @@ public class CapabilitiesRESTService {
             throw ServiceExceptionCode.absentService(CapabilityService.class);
         }
 
+        if (context <= 0) {
+            throw CapabilityExceptionCodes.INVALID_CONTEXT.create(context);
+        }
+        if (user <= 0) {
+            throw CapabilityExceptionCodes.INVALID_USER.create(user);
+        }
+
         try {
             CapabilitySet capabilities = capService.getCapabilities(user, context);
             return CapabilitiesJsonWriter.toJson(capabilities.asSet());

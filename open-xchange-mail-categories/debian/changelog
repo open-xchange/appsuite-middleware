@@ -1,3 +1,15 @@
+open-xchange-mail-categories (7.8.3-2) stable; urgency=medium
+
+  * Second preview for 7.8.3 release
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Sat, 29 Oct 2016 09:47:03 +0200
+
+open-xchange-mail-categories (7.8.3-1) stable; urgency=medium
+
+  * First preview 7.8.3 release
+
+ -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Fri, 14 Oct 2016 15:22:05 +0200
+
 open-xchange-mail-categories (7.8.3-0) unstable; urgency=medium
 
   * prepare for 7.8.3 release

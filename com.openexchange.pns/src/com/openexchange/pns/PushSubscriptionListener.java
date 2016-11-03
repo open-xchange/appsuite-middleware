@@ -89,7 +89,7 @@ public interface PushSubscriptionListener {
     /**
      * Invoked when a subscription provider is about to be added to registry.
      *
-     * @param subscription The subscription provider to add
+     * @param provider The subscription provider to add
      * @return <code>true</code> to allow given subscription provider being added; otherwise <code>false</code>
      * @throws OXException If handling fails
      */
@@ -98,7 +98,7 @@ public interface PushSubscriptionListener {
     /**
      * Invoked when a subscription provider was successfully added to registry.
      *
-     * @param subscription The added subscription provider
+     * @param provider The added subscription provider
      * @throws OXException If handling fails
      */
     void addedProvider(PushSubscriptionProvider provider) throws OXException;

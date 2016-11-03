@@ -143,15 +143,16 @@ public final class TrustAllSSLSocketFactory extends SSLSocketFactory {
     }
 
     private static Socket checkProtocols(final Socket socket) {
-        if (socket instanceof SSLSocket) {
-            final SSLSocket sslSocket = (SSLSocket) socket;
-
-            tryAddProtocol("SSLv3", sslSocket);
-            tryAddProtocol("SSLv2", sslSocket);
-            tryAddProtocol("TLSv1", sslSocket);
-            tryAddProtocol("SSLv23", sslSocket);
+        if (!(socket instanceof SSLSocket)) {
+            return socket;
         }
-        return socket;
+
+        SSLSocket sslSocket = (SSLSocket) socket;
+        tryAddProtocol("SSLv3", sslSocket);
+        tryAddProtocol("SSLv2", sslSocket);
+        tryAddProtocol("TLSv1", sslSocket);
+        tryAddProtocol("SSLv23", sslSocket);
+        return new DelegatingSSLSocket(sslSocket);
     }
 
     private static boolean tryAddProtocol(final String protocol, final SSLSocket sslSocket) {

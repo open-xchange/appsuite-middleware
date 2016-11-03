@@ -56,8 +56,6 @@ import java.io.FilenameFilter;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
@@ -82,14 +80,14 @@ public class ConfigurationFile extends AbstractConfigSource {
     }
 
     @Override
-    public Autoconfig getAutoconfig(String emailLocalPart, final String emailDomain, String password, User user, Context context) throws OXException {
-        return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true);
+    public Autoconfig getAutoconfig(String emailLocalPart, final String emailDomain, String password, int userId, int contextId) throws OXException {
+        return getAutoconfig(emailLocalPart, emailDomain, password, userId, contextId, true);
     }
 
     @Override
-    public DefaultAutoconfig getAutoconfig(String emailLocalPart, final String emailDomain, String password, User user, Context context, boolean forceSecure) throws OXException {
+    public DefaultAutoconfig getAutoconfig(String emailLocalPart, final String emailDomain, String password, int userId, int contextId, boolean forceSecure) throws OXException {
         ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
-        ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
+        ConfigView view = configViewFactory.getView(userId, contextId);
         String fileLocation = view.get(locationProperty, String.class);
         if (fileLocation == null) {
             return null;

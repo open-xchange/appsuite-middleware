@@ -65,8 +65,6 @@ import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.DefaultAutoconfig;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.IndividualAutoconfig;
@@ -103,14 +101,14 @@ public class ISPDB extends AbstractProxyAwareConfigSource {
     }
 
     @Override
-    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException {
-        return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true);
+    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId) throws OXException {
+        return getAutoconfig(emailLocalPart, emailDomain, password, userId, contextId, true);
     }
 
     @Override
-    public DefaultAutoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context, boolean forceSecure) throws OXException {
+    public DefaultAutoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, int userId, int contextId, boolean forceSecure) throws OXException {
         ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
-        ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
+        ConfigView view = configViewFactory.getView(userId, contextId);
 
         String sUrl = view.get(PROPERTY_ISPDB_URL, String.class);
         if (sUrl == null) {

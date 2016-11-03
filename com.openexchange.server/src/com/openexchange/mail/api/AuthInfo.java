@@ -60,6 +60,7 @@ public class AuthInfo {
     private final String login;
     private final String password;
     private final AuthType authType;
+    private final int oauthAccountId;
 
     /**
      * Initializes a new {@link AuthInfo}.
@@ -67,12 +68,14 @@ public class AuthInfo {
      * @param login The login string
      * @param password The password or OAuth token
      * @param authType The authentication type
+     * @param oauthAccountId The optional identifier of the associated OAuth account
      */
-    public AuthInfo(String login, String password, AuthType authType) {
+    public AuthInfo(String login, String password, AuthType authType, int oauthAccountId) {
         super();
         this.login = login;
         this.password = password;
         this.authType = null == authType ? AuthType.LOGIN : authType;
+        this.oauthAccountId = oauthAccountId < 0 ? -1 : oauthAccountId;
     }
 
     /**
@@ -100,6 +103,15 @@ public class AuthInfo {
      */
     public AuthType getAuthType() {
         return authType;
+    }
+
+    /**
+     * Gets the optional identifier of the associated OAuth account
+     *
+     * @return The identifier of the associated OAuth account or <code>-1</code>
+     */
+    public int getOauthAccountId() {
+        return oauthAccountId;
     }
 
 }

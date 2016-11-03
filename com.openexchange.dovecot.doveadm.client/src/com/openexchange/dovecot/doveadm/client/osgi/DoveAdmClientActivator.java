@@ -54,6 +54,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dovecot.doveadm.client.DoveAdmClient;
 import com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmClient;
+import com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmEndpointAvailableStrategy;
 import com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmEndpointManager;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -100,7 +101,8 @@ public class DoveAdmClientActivator extends HousekeepingActivator {
         // Initialize the end-point manager
         EndpointManagerFactory factory = getService(EndpointManagerFactory.class);
         HttpDoveAdmEndpointManager endpointManager = new HttpDoveAdmEndpointManager();
-        boolean anyAvailable = endpointManager.init(factory, getService(ConfigurationService.class));
+        HttpDoveAdmEndpointAvailableStrategy availableStrategy = new HttpDoveAdmEndpointAvailableStrategy(apiSecret);
+        boolean anyAvailable = endpointManager.init(factory, availableStrategy, getService(ConfigurationService.class));
         if (false == anyAvailable) {
             logger.error("Missing end-points for Dovecot DoveAdm REST interface. DoveAdm client will not be initialized.");
             return;

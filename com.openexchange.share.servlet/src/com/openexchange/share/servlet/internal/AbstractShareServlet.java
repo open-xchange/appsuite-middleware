@@ -74,7 +74,7 @@ public class AbstractShareServlet extends HttpServlet {
      * @param guestInfo The guest info or <code>null</code>
      * @return The locale
      */
-    protected static Locale determineLocale(HttpServletRequest request, GuestInfo guestInfo) {
+    public static Locale determineLocale(HttpServletRequest request, GuestInfo guestInfo) {
         String langParam = request.getParameter("language");
         if (Strings.isNotEmpty(langParam)) {
             return new Locale(langParam);

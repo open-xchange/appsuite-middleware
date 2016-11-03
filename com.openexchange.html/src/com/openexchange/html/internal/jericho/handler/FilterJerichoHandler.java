@@ -122,6 +122,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private static volatile Map<String, Set<String>> staticStyleMap;
 
+    private static volatile Map<String, Set<String>> staticHeightWidthStyleMap;
+
     // A decimal digit: [0-9]
     private static final Pattern PAT_NUMERIC = Pattern.compile("\\p{Digit}+");
 
@@ -675,7 +677,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
             if (null != width) {
                 String height = attrMap.get("height");
                 if (null != height) {
-                    prependToStyle(mapFor("width", width + "px", "height", height + "px"), attrMap);
+                    prependWidthHeightToStyleIfAbsent(mapFor("width", width + "px", "height", height + "px"), attrMap);
                 }
             }
         } else if (HTMLElementName.TABLE == tagName) {
@@ -857,18 +859,31 @@ public final class FilterJerichoHandler implements JerichoHandler {
         attrMap.put("style", style);
     }
 
-    private void prependToStyle(Map<String, String> styleNvps, Map<String, String> attrMap) {
+    private void prependWidthHeightToStyleIfAbsent(Map<String, String> styleNvps, Map<String, String> attrMap) {
         String style = attrMap.get("style");
         if (null == style) {
             style = generateStyleString(styleNvps);
         } else {
+            // Filter out all, but "width"/"height"
+            CSSMatcher.checkCSSElements(cssBuffer.append(style), staticHeightWidthStyleMap, true);
+            String toCheck = cssBuffer.toString();
+            cssBuffer.setLength(0);
+            if (Strings.isEmpty(toCheck)) {
+                // Need to prepend width & height
+                style = generateStyleString(styleNvps) + " " + style;
+            }
+
             // Filter out existing entries
+            /*-
+             *
             Map<String, Set<String>> styleMap = new HashMap<>(this.styleMap);
             styleMap.keySet().removeAll(styleNvps.keySet());
-            CSSMatcher.checkCSSElements(cssBuffer.append(style), styleMap, true);
+            CSSMatcher.checkCSSElements(cssBuffer.append(style), styleMap, true);s
             style = cssBuffer.toString();
             cssBuffer.setLength(0);
             style = generateStyleString(styleNvps) + " " + style;
+             *
+             */
         }
         attrMap.put("style", style);
     }
@@ -1444,6 +1459,8 @@ public final class FilterJerichoHandler implements JerichoHandler {
                 }
                 staticHTMLMap = Collections.unmodifiableMap(map);
                 staticStyleMap = Collections.unmodifiableMap(parseStyleMap(mapStr));
+                String heightWidthStyle = "html.style.height=\"N,auto,\"\n" + "html.style.width=\"N,auto,\"\n";
+                staticHeightWidthStyleMap = Collections.unmodifiableMap(parseStyleMap(heightWidthStyle));
             }
         }
     }
@@ -1455,6 +1472,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
         synchronized (HTMLFilterHandler.class) {
             staticHTMLMap = null;
             staticStyleMap = null;
+            staticHeightWidthStyleMap = null;
         }
     }
 

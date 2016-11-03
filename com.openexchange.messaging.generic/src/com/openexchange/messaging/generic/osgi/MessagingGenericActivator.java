@@ -69,6 +69,7 @@ import com.openexchange.messaging.generic.internal.CachingMessagingAccountStorag
 import com.openexchange.messaging.generic.secret.MessagingSecretHandling;
 import com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry;
 import com.openexchange.messaging.registry.MessagingServiceRegistry;
+import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
@@ -140,6 +141,7 @@ public class MessagingGenericActivator extends HousekeepingActivator {
             });
             registerService(CreateTableService.class, createTableTask, null);
             registerService(DeleteListener.class, new MessagingGenericDeleteListener(), null);
+            registerService(OAuthAccountDeleteListener.class, CachingMessagingAccountStorage.getInstance());
 
 
             // Secret Handling

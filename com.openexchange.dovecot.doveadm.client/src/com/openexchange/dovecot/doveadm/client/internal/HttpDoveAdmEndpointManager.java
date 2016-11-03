@@ -49,10 +49,7 @@
 
 package com.openexchange.dovecot.doveadm.client.internal;
 
-import static com.openexchange.dovecot.doveadm.client.internal.HttpDoveAdmClient.close;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
@@ -62,14 +59,11 @@ import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScheme;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.AuthState;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.ExecutionContext;
@@ -142,57 +136,32 @@ public class HttpDoveAdmEndpointManager {
         return HttpClients.getHttpClient(clientConfig);
     }
 
-    private static EndpointListing listingFor(String endPoints, EndpointManagerFactory factory, StringBuilder propPrefix, ConfigurationService configService) throws OXException {
+    private static EndpointListing listingFor(String endPoints, EndpointManagerFactory factory, EndpointAvailableStrategy availableStrategy, StringBuilder propPrefix, ConfigurationService configService) throws OXException {
         // Parse end-point list
         List<String> l = Arrays.asList(Strings.splitByComma(endPoints.trim()));
 
         // Read properties for HTTP connections/pooling
+        int resetLen = propPrefix.length();
         int totalConnections = configService.getIntProperty(propPrefix.append("totalConnections").toString(), 100);
+        propPrefix.setLength(resetLen);
         int maxConnectionsPerRoute = configService.getIntProperty(propPrefix.append("maxConnectionsPerRoute").toString(), 0);
         if (maxConnectionsPerRoute <= 0) {
             maxConnectionsPerRoute = totalConnections / l.size();
         }
+        propPrefix.setLength(resetLen);
         int readTimeout = configService.getIntProperty(propPrefix.append("readTimeout").toString(), 2500);
+        propPrefix.setLength(resetLen);
         int connectTimeout = configService.getIntProperty(propPrefix.append("connectTimeout").toString(), 1500);
 
         // Initialize HTTP client for the listing
         DefaultHttpClient httpClient = newHttpClient(totalConnections, maxConnectionsPerRoute, readTimeout, connectTimeout);
 
         // Setup end-point manager for the listing
-        EndpointManager endpointManager = factory.createEndpointManager(l, httpClient, AVAILABILITY_STRATEGY, 60, TimeUnit.SECONDS);
+        EndpointManager endpointManager = factory.createEndpointManager(l, httpClient, availableStrategy, 60, TimeUnit.SECONDS);
 
         // Return listing for bundled HTTP client & end-point manager
         return new EndpointListing(httpClient, endpointManager);
     }
-
-    private static final EndpointAvailableStrategy AVAILABILITY_STRATEGY = new EndpointAvailableStrategy() {
-
-        @Override
-        public AvailableResult isEndpointAvailable(Endpoint endpoint, HttpClient httpClient) throws OXException {
-            HttpGet get = null;
-            HttpResponse response = null;
-            try {
-                get = new HttpGet(HttpDoveAdmClient.buildUri(new URI(endpoint.getBaseUri()), null, "/downloader/search"));
-                response = httpClient.execute(get);
-                int status = response.getStatusLine().getStatusCode();
-                if (200 == status) {
-                    return AvailableResult.AVAILABLE;
-                }
-                if (401 == status) {
-                    return AvailableResult.NONE;
-                }
-            } catch (URISyntaxException e) {
-                // ignore
-                return AvailableResult.NONE;
-            } catch (IOException e) {
-                // ignore
-            } finally {
-                close(get, response);
-            }
-
-            return AvailableResult.UNAVAILABLE;
-        }
-    };
 
     // -------------------------------------------------------------------------------------------------------------------------------
 
@@ -210,11 +179,12 @@ public class HttpDoveAdmEndpointManager {
      * Initializes this instance.
      *
      * @param factory The end-point factory to use
+     * @param availableStrategy The strategy to use for checking re-accessible end-points
      * @param configService The configuration service to read properties from
      * @return <code>true</code> if at least one valid end-point is specified; otherwise <code>false</code>
      * @throws OXException If initialization fails
      */
-    public boolean init(EndpointManagerFactory factory, ConfigurationService configService) throws OXException {
+    public boolean init(EndpointManagerFactory factory, EndpointAvailableStrategy availableStrategy, ConfigurationService configService) throws OXException {
         org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(HttpDoveAdmEndpointManager.class);
 
         EnumMap<HttpDoveAdmCall, EndpointListing> endpoints = new EnumMap<HttpDoveAdmCall, EndpointListing>(HttpDoveAdmCall.class);
@@ -233,11 +203,11 @@ public class HttpDoveAdmEndpointManager {
                         return false;
                     }
 
-                    fallBackEntry = listingFor(endPoints, factory, new StringBuilder(fallBackName.length() + 1).append(fallBackName).append('.'), configService);
+                    fallBackEntry = listingFor(endPoints, factory, availableStrategy, new StringBuilder(fallBackName.length() + 1).append(fallBackName).append('.'), configService);
                 }
                 endpoints.put(call, fallBackEntry);
             } else {
-                endpoints.put(call, listingFor(endPoints, factory, new StringBuilder(propName.length() + 1).append(propName).append('.'), configService));
+                endpoints.put(call, listingFor(endPoints, factory, availableStrategy, new StringBuilder(propName.length() + 1).append(propName).append('.'), configService));
             }
         }
 
