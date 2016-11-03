@@ -309,7 +309,7 @@ public class IMAPStore extends Store
     static class ConnectionPool {
 
         // container for the pool's IMAP protocol objects
-        private final Vector<IMAPProtocol> authenticatedConnections = new Vector<IMAPProtocol>();
+        final Vector<IMAPProtocol> authenticatedConnections = new Vector<IMAPProtocol>();
 
         // vectore of open folders
         private Vector<IMAPFolder> folders;
@@ -1233,6 +1233,31 @@ public class IMAPStore extends Store
      */
     public synchronized void setPassword(String password) {
 	this.password = password;
+    }
+
+    @Override
+    public boolean isSetAndGetReadTimeoutSupported() {
+        return true;
+    }
+
+    @Override
+    public int setAndGetReadTimeout(int readTimeout) throws MessagingException {
+        synchronized (pool) {
+            Vector<IMAPProtocol> authenticatedConnections = pool.authenticatedConnections;
+            if (authenticatedConnections.isEmpty()) {
+                throw new IllegalStateException("Not connected");
+            }
+            
+            try {
+                int to = -1;
+                for (IMAPProtocol imapProtocol : authenticatedConnections) {
+                    to = imapProtocol.setAndGetReadTimeout(readTimeout);
+                }
+                return to;
+            } catch (ProtocolException pex) {
+                throw new MessagingException(pex.getMessage(), pex);
+            }
+        }
     }
 
     /*

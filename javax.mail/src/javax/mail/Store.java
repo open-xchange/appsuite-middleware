@@ -322,4 +322,25 @@ public abstract class Store extends Service {
 	FolderEvent e = new FolderEvent(this, oldF, newF,FolderEvent.RENAMED);
 	queueEvent(e, folderListeners);
     }
+
+    /**
+     * Checks if setting SO_TIMEOUT is supported.
+     *
+     * @return <code>true</code> if supported; otherwise <code>false</code>
+     */
+    public boolean isSetAndGetReadTimeoutSupported() {
+        return false;
+    }
+
+    /**
+     * Sets the specified read timeout and returns the previously applicable SO_TIMEOUT value.
+     *
+     * @param readTimeout The new SO_TIMEOUT in milliseconds. A timeout of zero is interpreted as an infinite timeout.
+     * @return The previously applicable SO_TIMEOUT value or <code>-1</code> if given read timeout could not be set
+     * @throws MessagingException If SO_TIMEOUT cannot be set
+     * @throws IllegalStateException If this store is not connected or setting SO_TIMEOUT is not supported
+     */
+    public int setAndGetReadTimeout(int readTimeout) throws MessagingException {
+        throw new IllegalStateException("Setting SO_TIMEOUT is not supporte");
+    }
 }
