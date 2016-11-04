@@ -133,7 +133,7 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
 
     @Override
     protected AJAXRequestData initializeRequestData(HttpServletRequest httpRequest, HttpServletResponse httpResponse, boolean preferStream) throws OXException, IOException {
-        Dispatcher dispatcher = DISPATCHER.get();
+        Dispatcher dispatcher = getDispatcher();
         AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
         String module = requestDataTools.getModule(prefix + "oauth/modules/", httpRequest);
         String action = requestDataTools.getAction(httpRequest);
