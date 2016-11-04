@@ -339,6 +339,7 @@ public abstract class Store extends Service {
      * @return The previously applicable SO_TIMEOUT value or <code>-1</code> if given read timeout could not be set
      * @throws MessagingException If SO_TIMEOUT cannot be set
      * @throws IllegalStateException If this store is not connected or setting SO_TIMEOUT is not supported
+     * @see #isSetAndGetReadTimeoutSupported()
      */
     public int setAndGetReadTimeout(int readTimeout) throws MessagingException {
         throw new IllegalStateException("Setting SO_TIMEOUT is not supporte");
