@@ -335,7 +335,7 @@ public abstract class Store extends Service {
     /**
      * Sets the specified read timeout and returns the previously applicable SO_TIMEOUT value.
      *
-     * @param readTimeout The new SO_TIMEOUT in milliseconds. A timeout of zero is interpreted as an infinite timeout.
+     * @param readTimeout The new SO_TIMEOUT in milliseconds. A timeout of zero is interpreted as an infinite timeout. A value of less than zero is ignored
      * @return The previously applicable SO_TIMEOUT value or <code>-1</code> if given read timeout could not be set
      * @throws MessagingException If SO_TIMEOUT cannot be set
      * @throws IllegalStateException If this store is not connected or setting SO_TIMEOUT is not supported
