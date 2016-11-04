@@ -50,7 +50,6 @@
 package com.openexchange.imap;
 
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.Arrays;
 import java.util.Date;
@@ -174,6 +173,15 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      * a server-port-pair will throw an appropriate exception.
      */
     private static volatile Map<HostAndPort, Long> timedOutServers;
+
+    /**
+     * Gets the timedOutServers
+     *
+     * @return The timedOutServers
+     */
+    public static Map<HostAndPort, Long> getTimedOutServers() {
+        return timedOutServers;
+    }
 
     /**
      * Remembers whether a certain IMAP server supports the ACL extension.
@@ -803,16 +811,13 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Check for a SocketTimeoutException
                  */
-                if (tmpDownEnabled) {
-                    final Exception nextException = e.getNextException();
-                    if (SocketTimeoutException.class.isInstance(nextException)) {
-                        /*
-                         * Remember a timed-out IMAP server on connect attempt
-                         */
-                        final Map<HostAndPort, Long> map = timedOutServers;
-                        if (null != map) {
-                            map.put(new HostAndPort(config.getServer(), config.getPort()), Long.valueOf(System.currentTimeMillis()));
-                        }
+                if (tmpDownEnabled && MimeMailException.isTimeoutException(e)) {
+                    /*
+                     * Remember a timed-out IMAP server on connect attempt
+                     */
+                    final Map<HostAndPort, Long> map = timedOutServers;
+                    if (null != map) {
+                        map.put(new HostAndPort(config.getServer(), config.getPort()), Long.valueOf(System.currentTimeMillis()));
                     }
                 }
                 {
@@ -1280,14 +1285,19 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return true;
     }
 
-    private static final class HostAndPort {
+    /** Simple class to hold host and port for an IMAP end-point */
+    public static final class HostAndPort {
 
         private final String host;
-
         private final int port;
-
         private final int hashCode;
 
+        /**
+         * Initializes a new {@link HostAndPort}.
+         *
+         * @param host The host name or IP address of the IMAP server
+         * @param port The port
+         */
         public HostAndPort(final String host, final int port) {
             super();
             if (port < 0 || port > 0xFFFF) {

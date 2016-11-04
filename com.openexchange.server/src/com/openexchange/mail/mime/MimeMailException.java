@@ -897,6 +897,22 @@ public class MimeMailException extends OXException {
         return isEitherOf(e, com.sun.mail.iap.ByeIOException.class, java.net.SocketTimeoutException.class, java.io.EOFException.class);
     }
 
+    /**
+     * Checks if cause of specified messaging exception indicates a timeout problem.
+     *
+     * @param e The messaging exception to examine
+     * @return <code>true</code> if a timeout problem is indicated; otherwise <code>false</code>
+     */
+    public static boolean isTimeoutException(MessagingException e) {
+        if (null == e) {
+            return false;
+        }
+
+        return isEitherOf(e, java.net.SocketTimeoutException.class);
+    }
+
+    //java.net.SocketTimeoutException
+
     private static boolean isEitherOf(Throwable e, Class<? extends Exception>... classes) {
         if (null == e) {
             return false;
