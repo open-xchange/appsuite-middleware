@@ -55,10 +55,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.collect.ImmutableMap;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.java.Strings;
 import com.openexchange.serverconfig.ClientServerConfigFilter;
@@ -75,17 +75,24 @@ public class ServerConfigImpl implements ServerConfig {
 
     private static final Logger LOG = LoggerFactory.getLogger(ServerConfigImpl.class);
 
-    private final Map<String, Object> mappings;
+    private final ImmutableMap<String, Object> mappings;
     private final List<ClientServerConfigFilter> clientServerConfigFilters;
 
+    /**
+     * Initializes a new {@link ServerConfigImpl}.
+     *
+     * @param mappings The collected mappings
+     * @param clientServerConfigFilters The optional filters
+     */
     public ServerConfigImpl(Map<String, Object> mappings, List<ClientServerConfigFilter> clientServerConfigFilters) {
-        this.mappings = mappings;
+        super();
+        this.mappings = ImmutableMap.<String, Object> copyOf(mappings);
         this.clientServerConfigFilters = clientServerConfigFilters;
     }
 
     @Override
     public Map<String, Object> asMap() {
-        return new HashMap<>(mappings);
+        return mappings;
     }
 
     @SuppressWarnings("unchecked")
@@ -96,7 +103,7 @@ public class ServerConfigImpl implements ServerConfig {
 
     @Override
     public boolean isForceHttps() {
-        return (boolean) mappings.get("forceHttps");
+        return ((Boolean) mappings.get("forceHttps")).booleanValue();
     }
 
     @Override
@@ -148,15 +155,20 @@ public class ServerConfigImpl implements ServerConfig {
 
     @Override
     public Map<String, Object> forClient() {
-        Map<String, Object> forClient = new HashMap<>(mappings);
+        Map<String, Object> mappingsForClient = new HashMap<>(mappings);
+
+        // Apply possible filters
         for(ClientServerConfigFilter filter : clientServerConfigFilters) {
-            filter.apply(forClient);
+            filter.apply(mappingsForClient);
         }
 
-        forClient.remove("notificationMails");
-        return forClient;
+        // Drop "notificationMails" settings
+        mappingsForClient.remove("notificationMails");
+
+        return mappingsForClient;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public NotificationMailConfig getNotificationMailConfig() {
         NotificationMailConfigImpl mailConfig = new NotificationMailConfigImpl();
@@ -201,9 +213,9 @@ public class ServerConfigImpl implements ServerConfig {
                 String value = (String) object;
                 if (COLOR_CODE.matcher(value).matches()) {
                     return value.trim();
-                } else {
-                    LOG.warn("Color code for key '{}' has invalid syntax, please fix 'as-config.yml'. Falling back to default '{}'.", key, defaultValue);
                 }
+
+                LOG.warn("Color code for key '{}' has invalid syntax, please fix 'as-config.yml'. Falling back to default '{}'.", key, defaultValue);
             } else {
                 LOG.warn("Color code for key '{}' is not a valid string, please fix 'as-config.yml'. Falling back to default '{}'.", key, defaultValue);
             }
