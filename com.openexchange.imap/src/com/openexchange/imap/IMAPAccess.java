@@ -817,7 +817,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                      */
                     final Map<HostAndPort, Long> map = timedOutServers;
                     if (null != map) {
-                        map.put(new HostAndPort(config.getServer(), config.getPort()), Long.valueOf(System.currentTimeMillis()));
+                        map.put(newHostAndPort(config), Long.valueOf(System.currentTimeMillis()));
                     }
                 }
                 {
@@ -1099,7 +1099,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         }
 
         MailConfig mailConfig = getMailConfig();
-        HostAndPort key = new HostAndPort(mailConfig.getServer(), mailConfig.getPort());
+        HostAndPort key = newHostAndPort(mailConfig);
         Long range = map.get(key);
         if (range != null) {
             if (System.currentTimeMillis() - range.longValue() <= imapConfProps.getImapTemporaryDown()) {
@@ -1285,6 +1285,27 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         return true;
     }
 
+    /**
+     * Creates a new <code>HostAndPort</code> instance from given arguments.
+     *
+     * @param config The configuration providing host name or IP address of the IMAP server as well as port
+     * @return The new instance
+     */
+    public static HostAndPort newHostAndPort(MailConfig config) {
+        return newHostAndPort(config.getServer(), config.getPort());
+    }
+
+    /**
+     * Creates a new <code>HostAndPort</code> instance from given arguments.
+     *
+     * @param host The host name or IP address of the IMAP server
+     * @param port The port
+     * @return The new instance
+     */
+    public static HostAndPort newHostAndPort(String host, int port) {
+        return new HostAndPort(host, port);
+    }
+
     /** Simple class to hold host and port for an IMAP end-point */
     public static final class HostAndPort {
 
@@ -1298,7 +1319,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          * @param host The host name or IP address of the IMAP server
          * @param port The port
          */
-        public HostAndPort(final String host, final int port) {
+        HostAndPort(final String host, final int port) {
             super();
             if (port < 0 || port > 0xFFFF) {
                 throw new IllegalArgumentException("port out of range:" + port);
