@@ -50,6 +50,7 @@
 package com.openexchange.mail.json.actions;
 
 import static com.openexchange.java.Strings.toLowerCase;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -443,7 +444,7 @@ public final class GetAction extends AbstractMailAction {
                             if (fileHolder.isInMemory()) {
                                 jMail.put("source", new String(fileHolder.toByteArray(), Charsets.UTF_8));
                             } else {
-                                jMail.put("source", new InputStreamReader(fileHolder.getClosingStream(), Charsets.UTF_8));
+                                jMail.put("source", new BufferedReader(new InputStreamReader(fileHolder.getClosingStream(), Charsets.UTF_8), 65536));
                                 fileHolder = null; // Avoid preliminary closing
                             }
                         }

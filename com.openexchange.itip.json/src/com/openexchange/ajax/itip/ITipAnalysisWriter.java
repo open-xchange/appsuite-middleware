@@ -242,7 +242,10 @@ public class ITipAnalysisWriter {
                 CalendarDataObject calendarDataObject = new CalendarDataObject();
                 calendarDataObject.set(difference.getField(), difference.getAdded());
                 appointmentWriter.writeAppointment(calendarDataObject, json);
-                extraInfoObject.put("added", json.get(CalendarField.getByColumn(difference.getField()).getJsonName()));
+                Object opt = json.opt(CalendarField.getByColumn(difference.getField()).getJsonName());
+                if (null != opt) {
+                    extraInfoObject.put("added", opt);
+                }
             }
 
             if (null != difference.getRemoved() || !difference.getRemoved().isEmpty()) {
@@ -250,11 +253,14 @@ public class ITipAnalysisWriter {
                 CalendarDataObject calendarDataObject = new CalendarDataObject();
                 calendarDataObject.set(difference.getField(), difference.getRemoved());
                 appointmentWriter.writeAppointment(calendarDataObject, json);
-                extraInfoObject.put("removed", json.get(CalendarField.getByColumn(difference.getField()).getJsonName()));
+                Object opt = json.opt(CalendarField.getByColumn(difference.getField()).getJsonName());
+                if (null != opt) {
+                    extraInfoObject.put("removed", opt);
+                }
             }
 
             final List<Change> changed = difference.getChanged();
-            final JSONArray jsonChanges = new JSONArray();
+            final JSONArray jsonChanges = new JSONArray(changed.size());
             for (final Change change : changed) {
                 if (!ConfirmationChange.class.isInstance(change)) {
                     continue;
@@ -263,7 +269,10 @@ public class ITipAnalysisWriter {
                 final JSONObject jsonChange = new JSONObject();
                 jsonChange.put("id", confirmationChange.getIdentifier());
                 if (confirmationChange.getNewMessage() != null) {
-                    jsonChange.put("oldMessage", confirmationChange.getOldMessage());
+                    String oldMessage = confirmationChange.getOldMessage();
+                    if (null != oldMessage) {
+                        jsonChange.put("oldMessage", oldMessage);
+                    }
                     jsonChange.put("newMessage", confirmationChange.getNewMessage());
                 }
                 if (confirmationChange.getNewStatus() != -1) {
