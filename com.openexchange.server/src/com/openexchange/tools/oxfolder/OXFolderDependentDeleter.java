@@ -61,6 +61,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
@@ -72,9 +73,11 @@ import com.openexchange.share.ShareService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.iterator.TIntIterator;
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
@@ -311,36 +314,98 @@ public class OXFolderDependentDeleter {
     }
 
     private static int deletePublications(Connection connection, int cid, String module, List<Integer> entities) throws SQLException {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("DELETE FROM publications WHERE cid=? AND module=? AND entity");
-        appendPlaceholdersForWhere(stringBuilder, entities.size()).append(';');
+        StringBuilder stringBuilder = new StringBuilder(96);
+        stringBuilder.append("SELECT id FROM publications WHERE cid=? AND module=? AND entity");
+        appendPlaceholdersForWhere(stringBuilder, entities.size());
+
+        TIntList ids;
+        {
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = connection.prepareStatement(stringBuilder.toString());
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setString(pos++, module);
+                for (Integer entity : entities) {
+                    stmt.setInt(pos++, entity.intValue());
+                }
+                rs = stmt.executeQuery();
+                if (false == rs.next()) {
+                    return 0;
+                }
+
+                ids = new TIntLinkedList();
+                pos = 1;
+                do {
+                    ids.add(rs.getInt(pos));
+                } while (rs.next());
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+            }
+        }
+
+        stringBuilder.setLength(0);
+        stringBuilder.append("DELETE FROM publications WHERE cid=? AND id");
+        appendPlaceholdersForWhere(stringBuilder, ids.size());
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, cid);
-            stmt.setString(parameterIndex++, module);
-            for (Integer entity : entities) {
-                stmt.setInt(parameterIndex++, entity.intValue());
+            TIntIterator iterator = ids.iterator();
+            for (int j = ids.size(); j-- > 0;) {
+                stmt.setInt(parameterIndex++, iterator.next());
             }
             return stmt.executeUpdate();
         }
     }
 
     private static int deleteSubscriptions(Connection connection, int cid, List<Integer> folderIDs) throws SQLException {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("DELETE FROM subscriptions WHERE cid=? AND folder_id");
-        appendPlaceholdersForWhere(stringBuilder, folderIDs.size()).append(';');
+        StringBuilder stringBuilder = new StringBuilder(96);
+        stringBuilder.append("SELECT id FROM subscriptions WHERE cid=? AND folder_id");
+        appendPlaceholdersForWhere(stringBuilder, folderIDs.size());
+
+        TIntList ids;
+        {
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = connection.prepareStatement(stringBuilder.toString());
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                for (Integer folderID : folderIDs) {
+                    stmt.setInt(pos++, folderID.intValue());
+                }
+                rs = stmt.executeQuery();
+                if (false == rs.next()) {
+                    return 0;
+                }
+
+                ids = new TIntLinkedList();
+                pos = 1;
+                do {
+                    ids.add(rs.getInt(pos));
+                } while (rs.next());
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
+            }
+        }
+
+        stringBuilder.setLength(0);
+        stringBuilder.append("DELETE FROM subscriptions WHERE cid=? AND id");
+        appendPlaceholdersForWhere(stringBuilder, ids.size());
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, cid);
-            for (Integer entity : folderIDs) {
-                stmt.setInt(parameterIndex++, entity.intValue());
+            TIntIterator iterator = ids.iterator();
+            for (int j = ids.size(); j-- > 0;) {
+                stmt.setInt(parameterIndex++, iterator.next());
             }
             return stmt.executeUpdate();
         }
     }
 
     private static int deleteObjectPermissions(Connection connection, int cid, int module, List<Integer> folderIDs) throws SQLException {
-        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder(128);
         stringBuilder.append("DELETE FROM object_permission WHERE cid=? AND module=? AND folder_id");
         appendPlaceholdersForWhere(stringBuilder, folderIDs.size()).append(';');
         try (PreparedStatement stmt = connection.prepareStatement(stringBuilder.toString())) {

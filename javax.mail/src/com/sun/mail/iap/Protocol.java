@@ -686,4 +686,21 @@ public class Protocol {
     public int getPort() {
         return port;
     }
+    
+    /**
+     * Sets the specified read timeout and returns the previously applicable SO_TIMEOUT value.
+     *
+     * @param readTimeout The new SO_TIMEOUT to set. A timeout of zero is interpreted as an infinite timeout.
+     * @return The previously applicable SO_TIMEOUT value
+     * @throws ProtocolException If SO_TIMEOUT cannot be set
+     */
+    public int setAndGetReadTimeout(int readTimeout) throws ProtocolException {
+        try {
+            int to = socket.getSoTimeout();
+            socket.setSoTimeout(readTimeout);
+            return to;
+        } catch (SocketException ex) {
+            throw new ProtocolException("can't set read timeout", ex);
+        }
+    }
 }
