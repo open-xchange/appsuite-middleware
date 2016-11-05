@@ -47,65 +47,76 @@
  *
  */
 
-package com.openexchange.spamhandler.osgi;
+package com.openexchange.subscribe.linkedin.osgi;
 
+import java.util.Arrays;
+import java.util.Collection;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.spamhandler.SpamHandler;
-import com.openexchange.spamhandler.SpamHandlerRegistry;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
+import com.openexchange.subscribe.linkedin.groupware.DropLinkedInSubscriptionsUpdateTask;
 
 /**
- * Service tracker for mail providers
+ * {@link DatabaseUpdateTaskServiceTracker}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class SpamHandlerServiceTracker implements ServiceTrackerCustomizer<SpamHandler,SpamHandler> {
+public class DatabaseUpdateTaskServiceTracker implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SpamHandlerServiceTracker.class);
+    private BundleContext bundleContext;
 
-    private final BundleContext context;
+    private ServiceRegistration<UpdateTaskProviderService> registration;
 
     /**
-     * Initializes a new {@link SpamHandlerServiceTracker}
+     * Initialises a new {@link DatabaseUpdateTaskServiceTracker}.
      */
-    public SpamHandlerServiceTracker(final BundleContext context) {
+    public DatabaseUpdateTaskServiceTracker(BundleContext bundleContext) {
         super();
-        this.context = context;
+        this.bundleContext = bundleContext;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#addingService(org.osgi.framework.ServiceReference)
+     */
     @Override
-    public SpamHandler addingService(final ServiceReference<SpamHandler> reference) {
-        SpamHandler spamHandler = context.getService(reference);
-        Object registrationName = reference.getProperty("name");
-        if (null == registrationName) {
-            LOG.error("Missing registration name in spam handler service: {}", spamHandler.getClass().getName());
-            context.ungetService(reference);
-            return null;
-        }
+    public DatabaseService addingService(ServiceReference<DatabaseService> reference) {
+        final DatabaseService databaseService = bundleContext.getService(reference);
+        registration = bundleContext.registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
-        if (SpamHandlerRegistry.registerSpamHandler(registrationName.toString(), spamHandler)) {
-            LOG.info("Spam handler registered for name '{}", registrationName);
-            return spamHandler;
-        }
+            @Override
+            public Collection<? extends UpdateTaskV2> getUpdateTasks() {
+                return Arrays.asList(new DropLinkedInSubscriptionsUpdateTask(databaseService));
+            }
 
-        LOG.warn("Spam handler could not be registered for name '{}. Another spam handler has already been registered for the same name.", registrationName);
-        context.ungetService(reference);
-        return null;
+        }, null);
+        return databaseService;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#modifiedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
     @Override
-    public void modifiedService(final ServiceReference<SpamHandler> reference, final SpamHandler service) {
-        // Ignore
+    public void modifiedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        // Nothing to do
+
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.osgi.util.tracker.ServiceTrackerCustomizer#removedService(org.osgi.framework.ServiceReference, java.lang.Object)
+     */
     @Override
-    public void removedService(final ServiceReference<SpamHandler> reference, final SpamHandler service) {
-        try {
-            SpamHandlerRegistry.unregisterSpamHandler(service);
-        } finally {
-            context.ungetService(reference);
-        }
+    public void removedService(ServiceReference<DatabaseService> reference, DatabaseService service) {
+        registration.unregister();
+        bundleContext.ungetService(reference);
     }
-
 }

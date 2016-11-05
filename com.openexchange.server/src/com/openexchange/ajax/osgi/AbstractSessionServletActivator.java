@@ -52,8 +52,8 @@ package com.openexchange.ajax.osgi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Dictionary;
-import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServlet;
@@ -80,53 +80,62 @@ public abstract class AbstractSessionServletActivator extends AbstractServletAct
     }
 
     /**
-     * Registers given Servlet.
+     * Registers given Servlet instance.
      *
      * @param alias The Servlet's alias
      * @param servlet The Servlet instance
      * @param configKeys The Servlet's initial parameters
      */
     protected void registerSessionServlet(final String alias, final HttpServlet servlet, final String... configKeys) {
-        final List<String> allKeys = new ArrayList<String>(Arrays.asList(configKeys));
-        allKeys.add(Property.IP_CHECK.getPropertyName());
-        allKeys.add(Property.COOKIE_HASH.getPropertyName());
-        allKeys.add(Property.IP_CHECK_WHITELIST.getPropertyName());
-        allKeys.add(Property.IP_MASK_V4.getPropertyName());
-        allKeys.add(Property.IP_MASK_V6.getPropertyName());
-
         try {
-            final Dictionary<String, String> initParams = new Hashtable<String, String>();
-            final ConfigurationService configurationService = getService(ConfigurationService.class);
-            if (configurationService != null) {
-                for (final String configKey : allKeys) {
-                    String property = configurationService.getProperty(configKey);
-                    if (property == null) {
-                        final StringBuilder sb = new StringBuilder("Missing initialization parameter \"");
-                        sb.append(configKey);
-                        sb.append("\". Problem during registration of servlet \"");
-                        sb.append(servlet.getClass().getName());
-                        sb.append("\" into the URI namespace \"");
-                        sb.append(alias);
-                        sb.append("\".");
-                        final IllegalStateException e = new IllegalStateException(sb.toString());
-                        LOG.warn("", e);
-                        property = "";
-                    }
-                    initParams.put(configKey, property);
-                }
+            // Determine keys to read from config service
+            List<String> allKeys = null == configKeys || configKeys.length == 0 ? new ArrayList<String>(6) : new ArrayList<String>(Arrays.asList(configKeys));
+            allKeys.add(Property.IP_CHECK.getPropertyName());
+            allKeys.add(Property.COOKIE_HASH.getPropertyName());
+            allKeys.add(Property.IP_CHECK_WHITELIST.getPropertyName());
+            allKeys.add(Property.IP_MASK_V4.getPropertyName());
+            allKeys.add(Property.IP_MASK_V6.getPropertyName());
 
-                final String whitelistFile = configurationService.getText(SessionServlet.SESSION_WHITELIST_FILE);
-                if (whitelistFile != null) {
-                    initParams.put(SessionServlet.SESSION_WHITELIST_FILE, whitelistFile);
-                }
-            }
+            // Fill Servlet's init parameters with keys' values
+            Dictionary<String, String> initParams = createInitParameters(allKeys, alias, servlet);
 
+            // Register Servlet instance using HttpService
             registerServlet(alias, servlet, initParams, getService(HttpService.class));
         } catch (final IllegalStateException e) {
             LOG.error("", e);
         }
     }
 
+    private Dictionary<String, String> createInitParameters(List<String> keys, String alias, HttpServlet servlet) {
+        ConfigurationService configurationService = getService(ConfigurationService.class);
+        if (configurationService == null) {
+            return new Hashtable<String, String>(0);
+        }
+
+        Dictionary<String, String> initParams = new Hashtable<String, String>(keys.size());
+        for (String configKey : keys) {
+            String property = configurationService.getProperty(configKey);
+            if (property == null) {
+                LOG.warn("Missing initialization parameter \"{}\". Problem during registration of servlet \"{}\" using the URI namespace \"{}\".", configKey, servlet.getClass().getName(), alias, new IllegalStateException("Missing initialization parameter"));
+                property = "";
+            }
+            initParams.put(configKey, property);
+        }
+
+        String whitelistFile = configurationService.getText(SessionServlet.SESSION_WHITELIST_FILE);
+        if (whitelistFile != null) {
+            initParams.put(SessionServlet.SESSION_WHITELIST_FILE, whitelistFile);
+        }
+
+        return initParams;
+    }
+
+    /**
+     * Registers given Servlet instance using <code>HttpService</code>.
+     *
+     * @param alias The alias
+     * @param servlet The Servlet instance
+     */
     protected void registerServlet(final String alias, final HttpServlet servlet) {
         registerServlet(alias, servlet, getService(HttpService.class));
     }
@@ -137,27 +146,24 @@ public abstract class AbstractSessionServletActivator extends AbstractServletAct
      */
     @Override
     protected final Class<?>[] getNeededServices() {
-        final Set<Class<?>> neededServices = new HashSet<Class<?>>();
+        Set<Class<?>> neededServices = new LinkedHashSet<Class<?>>(6);
         neededServices.add(HttpService.class);
         neededServices.add(ConfigurationService.class);
         neededServices.add(CapabilityService.class);
-        /*
-         * Additional needed services
-         */
-        final Class<?>[] additionalNeededServices = getAdditionalNeededServices();
+
+        // Add additional needed services (if any)
+        Class<?>[] additionalNeededServices = getAdditionalNeededServices();
         if (additionalNeededServices != null) {
-            for (final Class<?> clazz : additionalNeededServices) {
+            for (Class<?> clazz : additionalNeededServices) {
                 neededServices.add(clazz);
             }
         }
-        /*
-         * Return
-         */
+
         return neededServices.toArray(new Class<?>[neededServices.size()]);
     }
 
     /**
-     * Gets additionally needed services beside <tt>HttpService</tt> & <tt>ConfigurationService</tt>.
+     * Gets additionally needed services beside <tt>HttpService</tt>, <tt>ConfigurationService</tt> and <tt>CapabilityService</tt>.
      *
      * @return The additionally needed services
      */

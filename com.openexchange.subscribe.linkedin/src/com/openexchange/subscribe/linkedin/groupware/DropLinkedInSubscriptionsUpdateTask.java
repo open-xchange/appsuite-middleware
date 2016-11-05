@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,35 @@
  *
  */
 
-package com.openexchange.oauth.dropbox.internal.groupware;
+package com.openexchange.subscribe.linkedin.groupware;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.impl.internal.groupware.OAuthCreateTableTask2;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link OAuthDropboxDropTokensTask}
+ * {@link DropLinkedInSubscriptionsUpdateTask}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OAuthDropboxDropTokensTask extends UpdateTaskAdapter {
+public class DropLinkedInSubscriptionsUpdateTask extends UpdateTaskAdapter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DropLinkedInSubscriptionsUpdateTask.class);
 
     private final DatabaseService databaseService;
 
     /**
-     * Initialises a new {@link OAuthDropboxDropTokensTask}.
+     * Initialises a new {@link DropLinkedInSubscriptionsUpdateTask}.
      */
-    public OAuthDropboxDropTokensTask(DatabaseService databaseService) {
+    public DropLinkedInSubscriptionsUpdateTask(DatabaseService databaseService) {
         super();
         this.databaseService = databaseService;
     }
@@ -86,7 +88,6 @@ public class OAuthDropboxDropTokensTask extends UpdateTaskAdapter {
     @Override
     public void perform(PerformParameters params) throws OXException {
         int contextId = params.getContextId();
-
         // Get the writeable connection
         Connection writeConnection = null;
         try {
@@ -98,15 +99,14 @@ public class OAuthDropboxDropTokensTask extends UpdateTaskAdapter {
         // Perform the task
         PreparedStatement statement = null;
         try {
-            String dropTokensSQL = "UPDATE oauthAccounts SET accessToken = ? AND accessSecret = ? WHERE serviceId = ?";
+            String dropTokensSQL = "DELETE FROM subscriptions WHERE source_id = ?";
             statement = writeConnection.prepareStatement(dropTokensSQL);
 
             int parameterIndex = 1;
-            statement.setString(parameterIndex++, "");
-            statement.setString(parameterIndex++, "");
-            statement.setString(parameterIndex++, API.DROPBOX.getFullName());
+            statement.setString(parameterIndex++, "com.openexchange.subscribe.socialplugin.linkedin");
 
-            statement.execute();
+            int rows = statement.executeUpdate();
+            LOGGER.debug("{} subscription entries were removed from the 'subscriptions' table", rows);
         } catch (SQLException e) {
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
@@ -122,6 +122,6 @@ public class OAuthDropboxDropTokensTask extends UpdateTaskAdapter {
      */
     @Override
     public String[] getDependencies() {
-        return new String[] { OAuthCreateTableTask2.class.getName() };
+        return new String[0];
     }
 }

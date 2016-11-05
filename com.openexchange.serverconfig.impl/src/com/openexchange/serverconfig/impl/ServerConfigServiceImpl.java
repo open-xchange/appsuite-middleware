@@ -101,20 +101,20 @@ public class ServerConfigServiceImpl implements ServerConfigService {
 
     @Override
     public ServerConfig getServerConfig(String hostName, int userID, int contextID) throws OXException {
-        return getServerConfig0(hostName, userID, contextID, null);
+        return createNewServerConfig0(hostName, userID, contextID, null);
     }
 
     @Override
     public ServerConfig getServerConfig(String hostName, Session session) throws OXException {
-        return getServerConfig0(hostName, session.getUserId(), session.getContextId(), session);
+        return createNewServerConfig0(hostName, session.getUserId(), session.getContextId(), session);
     }
 
     @SuppressWarnings("unchecked")
-    private ServerConfig getServerConfig0(String hostName, int userID, int contextID, Session session) throws OXException {
+    private ServerConfig createNewServerConfig0(String hostName, int userID, int contextID, Session session) throws OXException {
         ConfigurationService configService = serviceLookup.getService(ConfigurationService.class);
 
         // The resulting brand/server configuration
-        Map<String, Object> serverConfiguration = new HashMap<String, Object>(4);
+        Map<String, Object> serverConfiguration = new HashMap<String, Object>(32, 0.9F);
 
         // Get configured brands/server configurations
         Map<String, Object> configurations = (Map<String, Object>)configService.getYaml("as-config.yml");
@@ -197,8 +197,7 @@ public class ServerConfigServiceImpl implements ServerConfigService {
 
         serverConfiguration = correctLanguageConfiguration(serverConfiguration);
 
-        ServerConfigImpl serverConfigImpl = new ServerConfigImpl(serverConfiguration, serverConfigServicesLookup.getClientFilters());
-        return serverConfigImpl;
+        return new ServerConfigImpl(serverConfiguration, serverConfigServicesLookup.getClientFilters());
     }
 
     /**

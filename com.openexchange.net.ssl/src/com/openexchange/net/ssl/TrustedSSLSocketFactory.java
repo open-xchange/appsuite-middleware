@@ -142,7 +142,7 @@ public class TrustedSSLSocketFactory extends SSLSocketFactory implements Handsha
     private static SSLSocketFactory newAdapteeFactory(SSLContext sslcontext) throws KeyManagementException {
         List<TrustManager> trustManagers = TRUST_MANAGERS.get();
         if (trustManagers.isEmpty()) {
-            LOG.error("No trust managers configured, maybe configuration error. Going to use default one for now. Please enable default or custom trust store.");
+            LOG.error("No trust managers available, maybe configuration error. Going to use default one for now. Please enable default or custom trust store.");
             sslcontext.init(null, null, null);
             return sslcontext.getSocketFactory();
         }
