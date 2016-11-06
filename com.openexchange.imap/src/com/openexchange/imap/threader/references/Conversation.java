@@ -140,12 +140,7 @@ public final class Conversation {
                     messageIdsEmpty = false;
                 }
             }
-            /*
-            final String inReplyTo = message.getInReplyTo();
-            if (null != inReplyTo) {
-                references.add(inReplyTo);
-            }
-            */
+
             final String[] sReferences = message.getReferences();
             if (null != sReferences) {
                 for (final String sReference : sReferences) {
@@ -153,6 +148,13 @@ public final class Conversation {
                         if (references.add(sReference)) {
                             referencesEmpty = false;
                         }
+                    }
+                }
+            } else {
+                String inReplyTo = message.getInReplyTo();
+                if (null != inReplyTo) {
+                    if (references.add(inReplyTo)) {
+                        referencesEmpty = false;
                     }
                 }
             }
