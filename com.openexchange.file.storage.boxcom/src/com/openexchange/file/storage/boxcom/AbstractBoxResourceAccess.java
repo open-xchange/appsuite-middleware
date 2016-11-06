@@ -71,6 +71,15 @@ import com.openexchange.session.Session;
  */
 public abstract class AbstractBoxResourceAccess {
 
+    /** Status code (400) indicating a bad request. */
+    protected static final int SC_BAD_REQUEST = 400;
+
+    /** Status code (401) indicating that the request requires HTTP authentication. */
+    protected static final int SC_UNAUTHORIZED = 401;
+
+    /** Status code (404) indicating that the requested resource is not available. */
+    protected static final int SC_NOT_FOUND = 404;
+
     protected final BoxOAuthAccess boxAccess;
     protected final Session session;
     protected final FileStorageAccount account;
@@ -110,7 +119,7 @@ public abstract class AbstractBoxResourceAccess {
 
     /**
      * Checks (recursively) whether the specified box folder has a trashed parent
-     * 
+     *
      * @param boxFolder The box folder
      * @return <code>true</code> if the parent folder is trashed; otherwise <code>false</code>
      */
@@ -137,7 +146,7 @@ public abstract class AbstractBoxResourceAccess {
 
     /**
      * Checks the file's validity
-     * 
+     *
      * @param fileInfo The file's validity
      * @throws OXException if the specified file was trashed
      */
@@ -166,15 +175,6 @@ public abstract class AbstractBoxResourceAccess {
             throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, BoxConstants.ID, e.getMessage());
         }
     }
-
-    /** Status code (400) indicating a bad request. */
-    private static final int SC_BAD_REQUEST = 400;
-
-    /** Status code (401) indicating that the request requires HTTP authentication. */
-    private static final int SC_UNAUTHORIZED = 401;
-
-    /** Status code (404) indicating that the requested resource is not available. */
-    private static final int SC_NOT_FOUND = 404;
 
     /**
      * Handles given HTTP response error.
@@ -231,7 +231,7 @@ public abstract class AbstractBoxResourceAccess {
 
     /**
      * Get a {@link BoxAPIConnection} from the {@link OAuthAccess}
-     * 
+     *
      * @return A {@link BoxAPIException}
      * @throws OXException if the API connection cannot be retrieved
      */
