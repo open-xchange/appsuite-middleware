@@ -55,8 +55,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -68,11 +68,10 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * This is a library with little helpers needed when preparing
- * the parsing of a CSV file.
+ * This is a library with little helpers needed when preparing the parsing of a CSV file.
  *
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias 'Tierlieb' Prinz</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CSVLibrary {
 
@@ -83,6 +82,9 @@ public final class CSVLibrary {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CSVLibrary.class);
     public static final char CELL_DELIMITER = ',';
     public static final char ROW_DELIMITER = '\n';
+
+    /** The special readable title for <b>"Mark as distribution list"</b> */
+    public static final String READABLE_TITLE_MARK_AS_DISTRIBUTION_LIST = "Mark as distribution list";
 
     /**
      * Maps {@link ContactField}s to their readable titles. Taken over from previous mapping
@@ -188,6 +190,7 @@ public final class CSVLibrary {
         readableTitles.put(ContactField.USERFIELD18, "Dynamic Field 18");
         readableTitles.put(ContactField.USERFIELD19, "Dynamic Field 19");
         readableTitles.put(ContactField.USERFIELD20, "Dynamic Field 20");
+        readableTitles.put(ContactField.MARK_AS_DISTRIBUTIONLIST, READABLE_TITLE_MARK_AS_DISTRIBUTION_LIST);
         readableTitles.put(ContactField.DISTRIBUTIONLIST, "Distribution list");
         readableTitles.put(ContactField.CONTEXTID, "Context id");
         readableTitles.put(ContactField.NUMBER_OF_DISTRIBUTIONLIST, "Number of distributionlists");
@@ -243,7 +246,7 @@ public final class CSVLibrary {
       * @return The readable titles as list
       */
     public static List<String> convertToList(ContactField[] fields) {
-        final List<String> l = new LinkedList<String>();
+        List<String> l = new ArrayList<String>(fields.length);
         for(ContactField field : fields) {
             l.add(READABLE_TITLES.get(field));
         }
@@ -258,15 +261,14 @@ public final class CSVLibrary {
             boolean isUTF8 = encoding.equalsIgnoreCase("UTF-8");
             boolean firstPartSpecialTreatment = isUTF8;
             final char[] buf = new char[512];
-            int length = -1;
-            while ((length = isr.read(buf)) > 0) {
-            	if(firstPartSpecialTreatment){
-            		firstPartSpecialTreatment = false;
-            		int offset = lengthOfBOM(buf);
-            		bob.append(buf, offset, length - offset);
-            	} else {
-            		bob.append(buf, 0, length);
-            	}
+            for (int length; (length = isr.read(buf)) > 0;) {
+                if (firstPartSpecialTreatment) {
+                    firstPartSpecialTreatment = false;
+                    int offset = lengthOfBOM(buf);
+                    bob.append(buf, offset, length - offset);
+                } else {
+                    bob.append(buf, 0, length);
+                }
             }
             return bob.toString();
         } catch (final UnsupportedEncodingException e) {
