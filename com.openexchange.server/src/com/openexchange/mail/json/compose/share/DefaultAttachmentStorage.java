@@ -328,16 +328,21 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      */
     protected File prepareMetadata(MailPart attachment, Item folder, Date expiry, Locale locale) {
         // Determine & (possibly) decode attachment file name
-        String name = sanitizeName(attachment.getFileName(), StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FILE));
-        name = MimeMessageUtility.decodeMultiEncodedHeader(name);
+        String fileName = attachment.getFileName();
+        if (Strings.isEmpty(fileName)) {
+            fileName = StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FILE);
+        } else {
+            fileName = MimeMessageUtility.decodeMultiEncodedHeader(fileName);
+            fileName = sanitizeName(fileName, StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FILE));
+        }
 
         // Create a file instance for it
         File file = new DefaultFile();
         file.setId(FileStorageFileAccess.NEW);
         file.setFolderId(folder.getId());
-        file.setFileName(name);
+        file.setFileName(fileName);
         file.setFileMIMEType(attachment.getContentType().getBaseType());
-        file.setTitle(name);
+        file.setTitle(fileName);
         file.setFileSize(attachment.getSize());
         if (null != expiry) {
             file.setMeta(mapFor("expiration-date-" + getId(), Long.valueOf(expiry.getTime())));
