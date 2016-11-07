@@ -182,7 +182,7 @@ public class CreateOperation extends AbstractOperation {
         Consistency.adjustAllDayDates(event);
         Consistency.setTimeZone(event, calendarUser);
         /*
-         * classification, status, transparency
+         * classification, status, transparency, color
          */
         if (eventData.containsClassification() && null != eventData.getClassification()) {
             event.setClassification(Check.classificationIsValid(eventData.getClassification(), folder));
@@ -191,6 +191,7 @@ public class CreateOperation extends AbstractOperation {
         }
         event.setStatus(eventData.containsStatus() && null != eventData.getStatus() ? eventData.getStatus() : EventStatus.CONFIRMED);
         event.setTransp(eventData.containsTransp() && null != eventData.getTransp() ? eventData.getTransp() : TimeTransparency.OPAQUE);
+        event.setColor(eventData.containsColor() ? eventData.getColor() : null);
         /*
          * recurrence related fields
          */
@@ -204,7 +205,7 @@ public class CreateOperation extends AbstractOperation {
         /*
          * copy over further (unchecked) event fields
          */
-        EventMapper.getInstance().copy(eventData, event, EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.CATEGORIES, EventField.COLOR);
+        EventMapper.getInstance().copy(eventData, event, EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.CATEGORIES);
         return event;
     }
 
