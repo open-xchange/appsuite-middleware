@@ -68,8 +68,10 @@ import java.util.List;
 import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
+import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.common.DefaultRecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.Check;
@@ -149,9 +151,9 @@ public class DeleteOperation extends AbstractOperation {
      * @return The result
      */
     private void deleteEvent(Event originalEvent) throws OXException {
-        if (isOrganizer(originalEvent, calendarUser.getId())) {
+        if (isOrganizer(originalEvent, calendarUser.getId()) || isLastUserAttendee(originalEvent.getAttendees(), calendarUser.getId())) {
             /*
-             * deletion as organizer
+             * deletion by organizer / last user attendee
              */
             if (isSeriesException(originalEvent)) {
                 deleteException(originalEvent);
@@ -163,7 +165,7 @@ public class DeleteOperation extends AbstractOperation {
         Attendee userAttendee = find(originalEvent.getAttendees(), calendarUser.getId());
         if (null != userAttendee) {
             /*
-             * deletion as attendee
+             * deletion as one of the attendees
              */
             if (isSeriesException(originalEvent)) {
                 deleteException(originalEvent, userAttendee);
@@ -427,6 +429,21 @@ public class DeleteOperation extends AbstractOperation {
          * track new change exception date in master
          */
         addChangeExceptionDate(originalMasterEvent, recurrenceID);
+    }
+
+    /**
+     * Gets a value indicating whether a specific user is the only / the last internal user attendee in an attendee list.
+     *
+     * @param attendees The attendees to check
+     * @param userID The identifier of the user to lookup in the attendee list
+     * @return <code>true</code> if there are no other internal user attendees despite the specified one, <code>false</code>, otherwise
+     */
+    private static boolean isLastUserAttendee(List<Attendee> attendees, int userID) {
+        List<Attendee> userAttendees = CalendarUtils.filter(attendees, Boolean.TRUE, CalendarUserType.INDIVIDUAL);
+        if (1 == userAttendees.size() && userID == userAttendees.get(0).getEntity()) {
+            return true;
+        }
+        return false;
     }
 
 }
