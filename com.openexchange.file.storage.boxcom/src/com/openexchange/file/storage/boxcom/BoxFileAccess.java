@@ -101,6 +101,8 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
     static final Logger LOGGER = LoggerFactory.getLogger(BoxFileAccess.class);
 
+    // --------------------------------------------------------------------------------------------
+
     private final BoxAccountAccess accountAccess;
     final int userId;
 
@@ -160,7 +162,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     checkFileValidity(file.getInfo("trashed_at"));
                     return Boolean.TRUE;
                 } catch (final BoxAPIException e) {
-                    if (404 == e.getResponseCode()) {
+                    if (SC_NOT_FOUND == e.getResponseCode()) {
                         return Boolean.FALSE;
                     }
                     throw e;
@@ -420,11 +422,11 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     try {
                         boxFile.canUploadVersion(file.getFileName(), file.getFileSize(), boxFolderId);
                     } catch (BoxAPIException e) {
-                        if (e.getResponseCode() == 404) {
-                            LOGGER.debug("Pre-flight check: File does not exist.");
-                        } else {
+                        if (e.getResponseCode() != SC_NOT_FOUND) {
                             throw handleHttpResponseError(file.getId(), account.getId(), e);
                         }
+
+                        LOGGER.debug("Pre-flight check: File does not exist.");
                     }
 
                     // Upload new
@@ -524,7 +526,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                         com.box.sdk.BoxFile boxFile = new com.box.sdk.BoxFile(apiConnection, idTuple.getId());
                         boxFile.delete();
                     } catch (BoxAPIException e) {
-                        if (404 != e.getResponseCode()) {
+                        if (SC_NOT_FOUND != e.getResponseCode()) {
                             throw e;
                         }
                     }
@@ -814,21 +816,17 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
     private static final class UploadProgressListener implements ProgressListener {
 
         /**
-         * Initialises a new {@link BoxFileAccess.UploadProgressListener}.
+         * Initializes a new {@link BoxFileAccess.UploadProgressListener}.
          */
-        public UploadProgressListener() {
+        UploadProgressListener() {
             super();
         }
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see com.box.sdk.ProgressListener#onProgressChanged(long, long)
-         */
         @Override
         public void onProgressChanged(long numBytes, long totalBytes) {
-            long l = numBytes / totalBytes;
-            LOGGER.debug("Uploading :{}%", l);
+            if (totalBytes > 0) {
+                LOGGER.debug("Uploaded {} of {} bytes in total", numBytes, totalBytes);
+            }
         }
 
     }
