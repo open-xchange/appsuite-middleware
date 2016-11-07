@@ -52,9 +52,10 @@ package com.openexchange.version;
 import com.openexchange.version.internal.Numbers;
 
 /**
- * Stores the version of the backend
+ * Stores the version of the Middleware.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public class Version {
 
@@ -84,15 +85,31 @@ public class Version {
         super();
     }
 
+    /**
+     * Sets the numbers for this version instance.
+     *
+     * @param numbers The number to set
+     */
     public void setNumbers(Numbers numbers) {
         this.numbers = numbers;
         versionString = null;
     }
 
+    /**
+     * Sets the build date for this version instance.
+     *
+     * @param buildDate The build date to set
+     */
     public void setBuildDate(String buildDate) {
         this.buildDate = buildDate;
     }
 
+    /**
+     * Gets the build date.
+     *
+     * @return The build date
+     * @throws IllegalStateException if version instance is not yet initialized
+     */
     public String getBuildDate() {
         if (null == buildDate) {
             IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
@@ -102,6 +119,12 @@ public class Version {
         return buildDate;
     }
 
+    /**
+     * Gets the major number.
+     *
+     * @return The major number
+     * @throws IllegalStateException if version instance is not yet initialized
+     */
     public int getMajor() {
         if (null == numbers) {
             IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
@@ -111,6 +134,12 @@ public class Version {
         return numbers.getMajor();
     }
 
+    /**
+     * Gets the minor number.
+     *
+     * @return The minor number
+     * @throws IllegalStateException if version instance is not yet initialized
+     */
     public int getMinor() {
         if (null == numbers) {
             IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
@@ -120,6 +149,12 @@ public class Version {
         return numbers.getMinor();
     }
 
+    /**
+     * Gets the patch number.
+     *
+     * @return The patch number
+     * @throws IllegalStateException if version instance is not yet initialized
+     */
     public int getPatch() {
         if (null == numbers) {
             IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
@@ -129,6 +164,12 @@ public class Version {
         return numbers.getPatch();
     }
 
+    /**
+     * Gets the version string; e.g. <code>"7.8.3-Rev2"</code>.
+     *
+     * @return The version string
+     * @throws IllegalStateException if version instance is not yet initialized
+     */
     public String getVersionString() {
         String tmp = this.versionString;
         if (null == tmp) {
