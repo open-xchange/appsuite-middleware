@@ -96,6 +96,7 @@ import com.openexchange.mail.json.compose.ComposeContext;
 import com.openexchange.mail.json.compose.ComposeRequest;
 import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.spi.AttachmentStorage;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -326,8 +327,9 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
      * @return The resulting <code>File</code> instance
      */
     protected File prepareMetadata(MailPart attachment, Item folder, Date expiry, Locale locale) {
-        // Determine attachment file name
+        // Determine & (possibly) decode attachment file name
         String name = sanitizeName(attachment.getFileName(), StringHelper.valueOf(locale).getString(ShareComposeStrings.DEFAULT_NAME_FILE));
+        name = MimeMessageUtility.decodeMultiEncodedHeader(name);
 
         // Create a file instance for it
         File file = new DefaultFile();
@@ -355,6 +357,7 @@ public class DefaultAttachmentStorage implements AttachmentStorage {
             toSanitize = defaultName;
         } else {
             toSanitize = toSanitize.trim();
+
             boolean sanitize = true;
             while (sanitize) {
                 sanitize = false;
