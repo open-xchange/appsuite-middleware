@@ -96,6 +96,8 @@ public class SSLSocketFactoryProviderTest {
         PowerMockito.when(Services.getService(UserAwareSSLConfigurationService.class)).thenReturn(this.userAwareSSLConfigurationService);
 
         PowerMockito.mockStatic(LogProperties.class);
+        
+        TrustedSSLSocketFactory.init();
     }
 
     @Test
