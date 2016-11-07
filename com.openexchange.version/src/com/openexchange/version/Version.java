@@ -65,9 +65,33 @@ public class Version {
 
     public static final Version SINGLETON = new Version();
 
-    private Numbers numbers = null;
-    private String buildDate = null;
-    private String versionString = null;
+    /**
+     * Gets the version instance
+     *
+     * @return The version instance
+     */
+    public static final Version getInstance() {
+        return SINGLETON;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+
+    private volatile Numbers numbers = null;
+    private volatile String buildDate = null;
+    private volatile String versionString = null;
+
+    protected Version() {
+        super();
+    }
+
+    public void setNumbers(Numbers numbers) {
+        this.numbers = numbers;
+        versionString = null;
+    }
+
+    public void setBuildDate(String buildDate) {
+        this.buildDate = buildDate;
+    }
 
     public String getBuildDate() {
         if (null == buildDate) {
@@ -76,29 +100,6 @@ public class Version {
             throw e;
         }
         return buildDate;
-    }
-
-    public String getVersionString() {
-        synchronized (this) {
-            if (null == versionString) {
-                if (null == numbers) {
-                    IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
-                    LOG.error("", e);
-                    throw e;
-                }
-                versionString = numbers.getVersion() + "-Rev" + numbers.getBuildNumber();
-            }
-        }
-        return versionString;
-    }
-
-    /**
-     * Optionally gets the version string.
-     *
-     * @return The version string, or <code>null</code> if it is not yet initialized
-     */
-    public String optVersionString() {
-        return versionString;
     }
 
     public int getMajor() {
@@ -128,19 +129,35 @@ public class Version {
         return numbers.getPatch();
     }
 
-    protected Version() {
-        super();
+    public String getVersionString() {
+        String tmp = this.versionString;
+        if (null == tmp) {
+            // Acquire lock...
+            synchronized (this) {
+                // ... and try again
+                tmp = this.versionString;
+                if (null == tmp) {
+                    // Initialize version string
+                    if (null == numbers) {
+                        IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
+                        LOG.error("", e);
+                        throw e;
+                    }
+                    tmp = numbers.getVersion() + "-Rev" + numbers.getBuildNumber();
+                    this.versionString = tmp;
+                }
+            }
+        }
+        return tmp;
     }
 
-    public static final Version getInstance() {
-        return SINGLETON;
+    /**
+     * Optionally gets the version string.
+     *
+     * @return The version string, or <code>null</code> if it is not yet initialized
+     */
+    public String optVersionString() {
+        return versionString;
     }
 
-    public void setNumbers(Numbers numbers) {
-        this.numbers = numbers;
-    }
-
-    public void setBuildDate(String buildDate) {
-        this.buildDate = buildDate;
-    }
 }
