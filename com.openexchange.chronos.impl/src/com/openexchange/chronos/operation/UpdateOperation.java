@@ -66,10 +66,8 @@ import static com.openexchange.folderstorage.Permission.WRITE_OWN_OBJECTS;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Set;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
@@ -84,9 +82,11 @@ import com.openexchange.chronos.impl.AttendeeHelper;
 import com.openexchange.chronos.impl.AttendeeMapper;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.Consistency;
+import com.openexchange.chronos.impl.DefaultItemUpdate;
 import com.openexchange.chronos.impl.EventMapper;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.service.EventConflict;
+import com.openexchange.chronos.service.ItemUpdate;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -207,13 +207,13 @@ public class UpdateOperation extends AbstractOperation {
          * update event data
          */
         boolean wasUpdated = false;
-        Event eventUpdate = prepareEventUpdate(originalEvent, updatedEvent);
+        ItemUpdate<Event, EventField> eventUpdate = prepareEventUpdate(originalEvent, updatedEvent);
         if (null != eventUpdate) {
             /*
              * check for conflicts
              */
             Event newEvent = originalEvent.clone();
-            EventMapper.getInstance().copy(eventUpdate, newEvent, EventField.values());
+            EventMapper.getInstance().copy(eventUpdate.getUpdate(), newEvent, EventField.values());
             List<Attendee> newAttendees;
             if (updatedEvent.containsAttendees()) {
                 newAttendees = new AttendeeHelper(session, folder, originalEvent.getAttendees(), updatedEvent.getAttendees()).apply(originalEvent.getAttendees());
@@ -230,14 +230,18 @@ public class UpdateOperation extends AbstractOperation {
             /*
              * perform update
              */
-            storage.getEventStorage().updateEvent(eventUpdate);
-            if (isSeriesMaster(originalEvent) && needsChangeExceptionsReset(originalEvent, eventUpdate)) {
+            Consistency.setModified(timestamp, eventUpdate.getUpdate(), session.getUser().getId());
+            if (needsSequenceNumberIncrement(eventUpdate)) {
+                eventUpdate.getUpdate().setSequence(originalEvent.getSequence() + 1);
+            }
+            storage.getEventStorage().updateEvent(eventUpdate.getUpdate());
+            if (isSeriesMaster(originalEvent) && needsChangeExceptionsReset(eventUpdate)) {
                 /*
                  * ensure to also delete any change exceptions if required
                  */
                 deleteExceptions(originalEvent.getSeriesId(), originalEvent.getChangeExceptionDates());
             }
-            wasUpdated |= true;
+            wasUpdated = true;
         }
         /*
          * process any attendee updates
@@ -245,7 +249,7 @@ public class UpdateOperation extends AbstractOperation {
         if (updatedEvent.containsAttendees()) {
             updateAttendees(originalEvent, updatedEvent);
             wasUpdated |= true;
-        } else if (null != eventUpdate && needsParticipationStatusReset(originalEvent, eventUpdate)) {
+        } else if (null != eventUpdate && needsParticipationStatusReset(eventUpdate)) {
             wasUpdated |= resetParticipationStatus(originalEvent.getId(), originalEvent.getAttendees());
         }
         if (wasUpdated) {
@@ -253,27 +257,46 @@ public class UpdateOperation extends AbstractOperation {
         }
     }
 
-    private boolean needsChangeExceptionsReset(Event originalEvent, Event eventUpdate) throws OXException {
-        if (false == isSeriesMaster(eventUpdate)) {
-            return true;
-        }
-        Set<EventField> recurrenceRelatedFields = new HashSet<EventField>(java.util.Arrays.asList(EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY));
-        EventField[] updatedFields = EventMapper.getInstance().getAssignedFields(EventMapper.getInstance().getDifferences(originalEvent, eventUpdate));
-        for (EventField updatedField : updatedFields) {
-            if (recurrenceRelatedFields.contains(updatedField)) {
-                return true;
-            }
-        }
-        return false;
+    /**
+     * Gets a value indicating whether a recurring master event's change exceptions should be reset along with the update or not.
+     *
+     * @param eventUpdate The event update to evaluate
+     * @return <code>true</code> if the change exceptions should be reseted, <code>false</code>, otherwise
+     */
+    private boolean needsChangeExceptionsReset(ItemUpdate<Event, EventField> eventUpdate) throws OXException {
+        return eventUpdate.containsAnyChangeOf(new EventField[] {
+            EventField.RECURRENCE_ID, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY
+        });
     }
 
-    private boolean needsParticipationStatusReset(Event originalEvent, Event eventUpdate) throws OXException {
-        Set<EventField> timeRelatedFields = new HashSet<EventField>(java.util.Arrays.asList(EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY));
-        EventField[] updatedFields = EventMapper.getInstance().getAssignedFields(EventMapper.getInstance().getDifferences(originalEvent, eventUpdate));
-        for (EventField updatedField : updatedFields) {
-            if (timeRelatedFields.contains(updatedField)) {
-                return true;
-            }
+    /**
+     * Gets a value indicating whether the participation status of the event's attendees needs to be reset along with the update or not.
+     *
+     * @param eventUpdate The event update to evaluate
+     * @return <code>true</code> if the attendee's participation status should be reseted, <code>false</code>, otherwise
+     */
+    private boolean needsParticipationStatusReset(ItemUpdate<Event, EventField> eventUpdate) throws OXException {
+        return eventUpdate.containsAnyChangeOf(new EventField[] {
+            EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY
+        });
+    }
+
+    /**
+     * Gets a value indicating whether the event's sequence number ought to be incremented along with the update or not.
+     *
+     * @param eventUpdate The event update to evaluate
+     * @return <code>true</code> if the event's sequence number should be updated, <code>false</code>, otherwise
+     */
+    private boolean needsSequenceNumberIncrement(ItemUpdate<Event, EventField> eventUpdate) throws OXException {
+        if (eventUpdate.containsAnyChangeOf(new EventField[] {
+            EventField.SUMMARY, EventField.LOCATION, EventField.RECURRENCE_RULE, EventField.START_DATE, EventField.END_DATE, EventField.START_TIMEZONE, EventField.END_TIMEZONE, EventField.ALL_DAY
+        })) {
+            return true;
+        }
+        AttendeeHelper attendeeHelper = new AttendeeHelper(session, folder, eventUpdate.getOriginal().getAttendees(), eventUpdate.getUpdate().getAttendees());
+        if (0 < attendeeHelper.getAttendeesToDelete().size() || 0 < attendeeHelper.getAttendeesToInsert().size() || 0 < attendeeHelper.getAttendeesToUpdate().size()) {
+            //TODO: more distinct evaluation of attendee updates
+            return true;
         }
         return false;
     }
@@ -336,7 +359,7 @@ public class UpdateOperation extends AbstractOperation {
         return false;
     }
 
-    private Event prepareEventUpdate(Event originalEvent, Event updatedEvent) throws OXException {
+    private ItemUpdate<Event, EventField> prepareEventUpdate(Event originalEvent, Event updatedEvent) throws OXException {
         /*
          * determine & check modified fields
          */
@@ -421,8 +444,7 @@ public class UpdateOperation extends AbstractOperation {
         }
         EventMapper.getInstance().copy(originalEvent, eventUpdate, EventField.ID);
         Consistency.setModified(timestamp, eventUpdate, session.getUser().getId());
-        eventUpdate.setSequence(1 + originalEvent.getSequence());
-        return eventUpdate;
+        return new DefaultItemUpdate<Event, EventField>(EventMapper.getInstance(), originalEvent, eventUpdate);
     }
 
 }
