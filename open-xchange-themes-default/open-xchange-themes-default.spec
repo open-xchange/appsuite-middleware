@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:	@OXVERSION@
-%define        ox_release 15
+%define        ox_release 14
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        Creative Commons Attribution-Noncommercial-Share Alike 2.5 Generic
@@ -59,8 +59,6 @@ fi
 %config(noreplace) /opt/open-xchange/etc/settings/*
 
 %changelog
-* Mon Oct 31 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-11-07 (3678)
 * Wed Oct 26 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-09-08 (3699)
 * Mon Oct 17 2016 Marcus Klein <marcus.klein@open-xchange.com>
