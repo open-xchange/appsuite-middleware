@@ -65,22 +65,22 @@ public interface MailAccountDeleteListener {
      *
      * @param id The mail account ID
      * @param eventProps Optional properties for delete event
-     * @param user The user ID
-     * @param cid The context ID
+     * @param userId The user ID
+     * @param contextId The context ID
      * @param con The used connection <i>in transactional state</i>
      * @throws OXException If a critical error occurs which should abort mail account deletion
      */
-    public void onBeforeMailAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException;
+    public void onBeforeMailAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException;
 
     /**
      * Handles the event <i>after</i> the denoted mail account is deleted.
      *
      * @param id The mail account ID
      * @param eventProps Optional properties for delete event
-     * @param user The user ID
-     * @param cid The context ID
+     * @param userId The user ID
+     * @param contextId The context ID
      * @param con The used connection <i>in transactional state</i>
      * @throws OXException If a critical error occurs which should abort mail account deletion
      */
-    public void onAfterMailAccountDeletion(int id, Map<String, Object> eventProps, int user, int cid, Connection con) throws OXException;
+    public void onAfterMailAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException;
 }
