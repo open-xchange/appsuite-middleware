@@ -164,6 +164,12 @@ import com.openexchange.mail.transport.config.TransportPropertiesInit;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
+import com.openexchange.net.ssl.SSLSocketFactoryProvider;
+import com.openexchange.net.ssl.TrustedSSLSocketFactory;
+import com.openexchange.net.ssl.config.SSLConfigurationService;
+import com.openexchange.net.ssl.config.impl.internal.SSLConfigurationServiceImpl;
+import com.openexchange.net.ssl.config.impl.internal.SSLProperties;
+import com.openexchange.net.ssl.internal.DefaultSSLSocketFactoryProvider;
 import com.openexchange.osgi.util.ServiceCallWrapperModifier;
 import com.openexchange.passwordmechs.PasswordMechFactoryImpl;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
@@ -567,8 +573,19 @@ public final class Init {
 
     private static void startAndInjectNetSSLBundle() {
         SimpleServiceLookup myServices = new SimpleServiceLookup();
-        myServices.add(ConfigurationService.class, services.get(ConfigurationService.class));
+        Object configurationService = services.get(ConfigurationService.class);
+        myServices.add(ConfigurationService.class, configurationService);
+        myServices.add(SSLConfigurationService.class, new SSLConfigurationServiceImpl((ConfigurationService) configurationService));
         com.openexchange.net.ssl.osgi.Services.setServiceLookup(myServices);
+
+        services.put(SSLSocketFactoryProvider.class, DefaultSSLSocketFactoryProvider.getInstance());
+        services.put(SSLConfigurationService.class, new SSLConfigurationServiceImpl((ConfigurationService) configurationService));
+
+        TestServiceRegistry.getInstance().addService(SSLSocketFactoryProvider.class, DefaultSSLSocketFactoryProvider.getInstance());
+        TestServiceRegistry.getInstance().addService(SSLConfigurationService.class, new SSLConfigurationServiceImpl((ConfigurationService) configurationService));
+
+        TrustedSSLSocketFactory.init();
+        SSLProperties.initJvmDefaultCipherSuites();
     }
 
     private static void startAndInjectThreadPoolBundle() {

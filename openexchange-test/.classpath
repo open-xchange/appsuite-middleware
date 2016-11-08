@@ -151,6 +151,8 @@
 	<classpathentry kind="lib" path="lib/okhttp-3.4.1.jar" sourcepath="lib/source/okhttp-3.4.1-sources.jar"/>
 	<classpathentry kind="lib" path="lib/okhttp-ws-3.4.1.jar" sourcepath="lib/source/okhttp-ws-3.4.1-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.net.ssl"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.net.ssl.config"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.net.ssl.config.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.mail.autoconfig"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
