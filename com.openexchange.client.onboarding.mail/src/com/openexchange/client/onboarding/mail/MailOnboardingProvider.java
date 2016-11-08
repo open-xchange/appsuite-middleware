@@ -430,6 +430,12 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         // If not present in the payload, and the account is set up to require authentication for outgoing email, the device prompts for this string during profile installation.
         if (needsAuthentication) {
             payloadContent.addStringValue("OutgoingMailServerUsername", configurations.smtpConfig.login);
+
+            if (Strings.isNotEmpty(configurations.smtpConfig.password) && Strings.isNotEmpty(configurations.imapConfig.password) && configurations.smtpConfig.password.equals(configurations.imapConfig.password)) {
+                payloadContent.addBooleanValue("OutgoingPasswordSameAsIncomingPassword", true);
+            }
+        } else {
+            payloadContent.addBooleanValue("OutgoingPasswordSameAsIncomingPassword", true);
         }
 
         // Further options (currently not used)

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,47 +47,44 @@
  *
  */
 
-package com.openexchange.html.vulntests;
+package com.openexchange.ajax.version;
 
-import org.junit.Test;
-import com.openexchange.html.AbstractSanitizing;
-import com.openexchange.html.AssertionHelper;
+import java.util.Collection;
+import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link Bug49014VulTest}
+ * {@link VersionActionFactory}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.3
  */
-public class Bug49014VulTest extends AbstractSanitizing {
+public class VersionActionFactory implements AJAXActionServiceFactory {
 
-    public Bug49014VulTest() {
+    private final Map<String, AJAXActionService> actions;
+
+    /**
+     * Initializes a new {@link VersionActionFactory}.
+     */
+    public VersionActionFactory() {
         super();
+        ImmutableMap.Builder<String, AJAXActionService> actions = ImmutableMap.builder();
+        actions.put("version", new VersionAction());
+        this.actions = actions.build();
     }
 
-    @Test
-    public void testStartTagSanitizing1() {
-        String content = "<!DOCTYPE html>\n" +
-            "<html><head>\n" +
-            "    <meta charset=\"UTF-8\">\n" +
-            "</head><body><p><br><a< onmouseover='prompt(document.domain)' src=x>Just another XSS!<br></p></body></html>";
-        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "onmouseover");
+    @Override
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
     }
 
-    @Test
-    public void testStartTagSanitizing2() {
-        String content = "<!DOCTYPE html>\n" +
-            "<html><head>\n" +
-            "    <meta charset=\"UTF-8\">\n" +
-            "</head><body><p><br><a~ ~onmouseover='prompt(document.domain)' src=x>Just another XSS!<br></p></body></html>";
-        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "onmouseover");
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
-    @Test
-    public void testStartTagSanitizing3() {
-        String content = "<!DOCTYPE html>\n" +
-            "<html><head>\n" +
-            "    <meta charset=\"UTF-8\">\n" +
-            "</head><body><p><a href=\"http://google.de\">bar</a></p><img/ src=x ~onerror='alert(1)'></body></html>";
-        AssertionHelper.assertSanitizedDoesNotContain(getHtmlService(), content, "onerror");
-    }
 }

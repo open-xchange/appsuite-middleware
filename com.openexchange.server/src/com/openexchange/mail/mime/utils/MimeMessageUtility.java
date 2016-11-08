@@ -752,7 +752,7 @@ public final class MimeMessageUtility {
         } else if (MULTI_SUBTYPE_RELATED.equalsIgnoreCase(subtype) || MULTI_SUBTYPE_MIXED.equalsIgnoreCase(subtype)) {
             return hasAttachments0(mp, mp.getEnclosedCount());
         }
-        
+
         if (mp.getContentType().getBaseType().startsWith("application") && mp.getContentType().getSubType().endsWith("-signature")) {
             return false;
         } else if (hasAttachmentInMetadata(mp)) {
@@ -779,7 +779,7 @@ public final class MimeMessageUtility {
                 ct.setContentType(MimeMessageUtility.unfold(tmp[0]));
                 if (ct.startsWith("multipart/")) {
                     found |= hasAttachments(part, ct.getSubType());
-                } 
+                }
             }
         }
         return found;
@@ -824,7 +824,7 @@ public final class MimeMessageUtility {
         } else if (MULTI_SUBTYPE_RELATED.equalsIgnoreCase(subtype) || MULTI_SUBTYPE_MIXED.equalsIgnoreCase(subtype)) {
             return hasAttachments0(mp, mp.getCount());
         }
-        
+
         // TODO: Think about special check for multipart/signed
         /*
          * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) { if (mp.getCount() > 2) { return true; } return hasAttachments0(mp); }
@@ -851,7 +851,7 @@ public final class MimeMessageUtility {
                 ct.setContentType(MimeMessageUtility.unfold(tmp[0]));
                 if (ct.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
                     found |= hasAttachments((Multipart) part.getContent(), ct.getSubType());
-                } 
+                }
             }
         }
         return found;
@@ -900,7 +900,7 @@ public final class MimeMessageUtility {
             }
             return hasAttachments0(bodystructure);
         }
-        
+
         if (!(bodystructure.type.toLowerCase().startsWith("application") && bodystructure.subtype.toLowerCase().endsWith("-signature"))) {
             if (bodystructure.disposition != null && bodystructure.disposition.equals(Part.ATTACHMENT)) {
                 return true;
@@ -1809,10 +1809,11 @@ public final class MimeMessageUtility {
             return null;
         }
 
-        String s = PATTERN_UNFOLD.matcher(headerLine).replaceAll("$1$3");
+        boolean hasEncodingMark = headerLine.indexOf("?=", 0) >= 0;
+        String s = hasEncodingMark ? PATTERN_UNFOLD.matcher(headerLine).replaceAll("$1$3") : headerLine;
 
         int i;
-        if ((i = headerLine.indexOf('\r')) < 0 && (i = headerLine.indexOf('\n')) < 0) {
+        if ((i = headerLine.indexOf('\r', 0)) < 0 && (i = headerLine.indexOf('\n', 0)) < 0) {
             return s;
         }
         /*-
@@ -1827,7 +1828,7 @@ public final class MimeMessageUtility {
          * In this case the SPACE character is not part of the header and should
          * be discarded.
          */
-        if (headerLine.indexOf("=?") < 0) {
+        if (!hasEncodingMark) {
             s = headerLine;
         } else {
             s = unfoldEncodedWords(headerLine);

@@ -621,7 +621,7 @@ public final class HtmlServiceImpl implements HtmlService {
         return sb.toString();
     }
 
-    private static final Pattern PATTERN_EXTRA_CHAR = Pattern.compile("(<[a-zA-Z_0-9-]++)([^\\s>/])");
+    private static final Pattern PATTERN_EXTRA_CHAR = Pattern.compile("(<[a-zA-Z_0-9-]++)(/\\s[^>]|[^\\s>/])");
 
     /**
      * Attempts to drop any illegal, extraneous character that is trailing a valid tag start sequence;<br>
@@ -642,8 +642,14 @@ public final class HtmlServiceImpl implements HtmlService {
             return html;
         }
         StringBuffer sb = new StringBuffer(html.length());
+        String extraneous;
         do {
-            m.appendReplacement(sb, "$1");
+            extraneous = m.group(2);
+            if (extraneous.length() == 1) {
+                m.appendReplacement(sb, "$1");
+            } else {
+                m.appendReplacement(sb, "$1" + extraneous.substring(1));
+            }
         } while (m.find());
         m.appendTail(sb);
         return sb.toString();
