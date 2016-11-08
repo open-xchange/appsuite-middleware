@@ -1,7 +1,6 @@
 package com.openexchange.report.appsuite.serialization;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -9,6 +8,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Date;
@@ -16,7 +16,6 @@ import java.util.LinkedList;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import com.openexchange.report.appsuite.serialization.Report;
 
 public class ReportTest {
     
@@ -57,8 +56,8 @@ public class ReportTest {
         assertTrue("Report content was not composed. ",result.exists());
         File expected = new File(STORAGE_PATH + "expected.result");
         try {
-            assertTrue("Composed report-content is not like expected. Actual result: " + "\n" + Files.readAllLines(result.toPath()) + "\n" + "expectedResult" + "\n" + Files.readAllLines(expected.toPath()), 
-                Files.readAllLines(result.toPath()).equals(Files.readAllLines(expected.toPath())));
+            assertTrue("Composed report-content is not like expected. Actual result: " + "\n" + Files.readAllLines(result.toPath(), Charset.defaultCharset()) + "\n" + "expectedResult" + "\n" + Files.readAllLines(expected.toPath(), Charset.defaultCharset()), 
+                Files.readAllLines(result.toPath(), Charset.defaultCharset()).equals(Files.readAllLines(expected.toPath(), Charset.defaultCharset())));
         } catch (IOException e) {
             e.printStackTrace();
         }
