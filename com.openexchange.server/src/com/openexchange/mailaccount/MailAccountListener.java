@@ -51,37 +51,33 @@ package com.openexchange.mailaccount;
 
 import java.sql.Connection;
 import java.util.Map;
-import com.openexchange.exception.OXException;
 
 /**
- * {@link MailAccountDeleteListener} - Listener interface for mail account deletion.
+ * {@link MailAccountListener} - Listener interface for mail account deletion.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface MailAccountDeleteListener {
+public interface MailAccountListener extends MailAccountDeleteListener {
 
     /**
-     * Handles the event <i>before</i> the denoted mail account is deleted.
+     * Handles the event <i>after</i> the denoted mail account is created.
      *
      * @param id The mail account ID
-     * @param eventProps Optional properties for delete event
+     * @param eventProps Optional properties for creation event
      * @param userId The user ID
      * @param contextId The context ID
      * @param con The used connection <i>in transactional state</i>
-     * @throws OXException If a critical error occurs which should abort mail account deletion
      */
-    void onBeforeMailAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException;
+    void onMailAccountCreated(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con);
 
     /**
-     * Handles the event <i>after</i> the denoted mail account is deleted.
+     * Handles the event <i>after</i> the denoted mail account is modified.
      *
      * @param id The mail account ID
-     * @param eventProps Optional properties for delete event
+     * @param eventProps Optional properties for modification event
      * @param userId The user ID
      * @param contextId The context ID
      * @param con The used connection <i>in transactional state</i>
-     * @throws OXException If a critical error occurs which should abort mail account deletion
      */
-    void onAfterMailAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException;
-
+    void onMailAccountModified(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con);
 }

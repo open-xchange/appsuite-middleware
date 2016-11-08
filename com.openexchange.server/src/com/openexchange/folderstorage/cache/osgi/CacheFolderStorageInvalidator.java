@@ -65,7 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.java.util.Tools;
-import com.openexchange.mailaccount.MailAccountDeleteListener;
+import com.openexchange.mailaccount.MailAccountListener;
 
 
 /**
@@ -73,7 +73,7 @@ import com.openexchange.mailaccount.MailAccountDeleteListener;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CacheFolderStorageInvalidator implements CacheListener, ServiceTrackerCustomizer<CacheEventService, CacheEventService>, MailAccountDeleteListener {
+public class CacheFolderStorageInvalidator implements CacheListener, ServiceTrackerCustomizer<CacheEventService, CacheEventService>, MailAccountListener {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(CacheFolderStorageInvalidator.class);
 
@@ -96,7 +96,17 @@ public class CacheFolderStorageInvalidator implements CacheListener, ServiceTrac
 
     @Override
     public void onAfterMailAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException {
-        FolderMapManagement.getInstance().dropFor(userId, contextId, false);
+        FolderMapManagement.getInstance().dropFor(userId, contextId, true);
+    }
+
+    @Override
+    public void onMailAccountCreated(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) {
+        FolderMapManagement.getInstance().dropFor(userId, contextId, true);
+    }
+
+    @Override
+    public void onMailAccountModified(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) {
+        FolderMapManagement.getInstance().dropFor(userId, contextId, true);
     }
 
     @Override

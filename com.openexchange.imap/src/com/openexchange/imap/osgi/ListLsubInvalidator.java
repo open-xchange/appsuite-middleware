@@ -68,7 +68,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.java.util.Pair;
 import com.openexchange.java.util.Tools;
-import com.openexchange.mailaccount.MailAccountDeleteListener;
+import com.openexchange.mailaccount.MailAccountListener;
 
 
 /**
@@ -77,7 +77,7 @@ import com.openexchange.mailaccount.MailAccountDeleteListener;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public final class ListLsubInvalidator implements CacheListener, ServiceTrackerCustomizer<CacheEventService, CacheEventService>, MailAccountDeleteListener {
+public final class ListLsubInvalidator implements CacheListener, ServiceTrackerCustomizer<CacheEventService, CacheEventService>, MailAccountListener {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ListLsubInvalidator.class);
 
@@ -102,6 +102,16 @@ public final class ListLsubInvalidator implements CacheListener, ServiceTrackerC
 
     @Override
     public void onAfterMailAccountDeletion(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) throws OXException {
+        ListLsubCache.dropFor(userId, contextId, true);
+    }
+
+    @Override
+    public void onMailAccountCreated(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) {
+        ListLsubCache.dropFor(userId, contextId, true);
+    }
+
+    @Override
+    public void onMailAccountModified(int id, Map<String, Object> eventProps, int userId, int contextId, Connection con) {
         ListLsubCache.dropFor(userId, contextId, true);
     }
 

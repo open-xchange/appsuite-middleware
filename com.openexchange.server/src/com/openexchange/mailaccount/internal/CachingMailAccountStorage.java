@@ -269,6 +269,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public void propagateEvent(com.openexchange.mailaccount.Event event, int id, Map<String, Object> eventProps, int userId, int contextId) throws OXException {
+        delegate.propagateEvent(event, id, eventProps, userId, contextId);
+    }
+
+    @Override
     public void deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId, boolean deletePrimary, Connection con) throws OXException {
         dropSessionParameter(userId, contextId);
 
