@@ -164,6 +164,21 @@ public abstract class AbstractComposeContext implements ComposeContext {
     }
 
     @Override
+    public boolean isPlainText() {
+        TextBodyMailPart textPart = this.textPart;
+        if (null == textPart) {
+            // Huh...?
+            return false;
+        }
+
+        if (null != textPart.getPlainText()) {
+            return true;
+        }
+
+        return textPart.containsContentType() && textPart.getContentType().startsWith("text/plain");
+    }
+
+    @Override
     public List<MailPart> getAllParts() {
         List<MailPart> parts = new LinkedList<>();
         parts.addAll(getReferencedParts());

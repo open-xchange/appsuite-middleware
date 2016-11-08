@@ -107,6 +107,12 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
         newInstance.mailBody = null == mailBody ? null : new StringBuilder(mailBody.toString());
         newInstance.plainText = null == plainText ? null : new StringBuilder(plainText.toString());
         newInstance.dataSource = null;
+        if (containsContentType()) {
+            newInstance.setContentType(getContentType());
+        }
+        if (containsContentDisposition()) {
+            newInstance.setContentDisposition(getContentDisposition());
+        }
     }
 
     /**
