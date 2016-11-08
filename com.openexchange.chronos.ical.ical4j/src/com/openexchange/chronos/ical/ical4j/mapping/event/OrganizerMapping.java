@@ -51,17 +51,18 @@ package com.openexchange.chronos.ical.ical4j.mapping.event;
 
 import java.net.URISyntaxException;
 import java.util.List;
-import net.fortuna.ical4j.model.Parameter;
-import net.fortuna.ical4j.model.Property;
-import net.fortuna.ical4j.model.component.VEvent;
-import net.fortuna.ical4j.model.parameter.Cn;
-import net.fortuna.ical4j.model.parameter.SentBy;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.ical.ICalParameters;
 import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import net.fortuna.ical4j.model.Parameter;
+import net.fortuna.ical4j.model.Property;
+import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.parameter.Cn;
+import net.fortuna.ical4j.model.parameter.SentBy;
 
 /**
  * {@link OrganizerMapping}
@@ -107,8 +108,8 @@ public class OrganizerMapping extends AbstractICalMapping<VEvent, Event> {
         } else {
             property.getParameters().removeAll(Parameter.CN);
         }
-        if (Strings.isNotEmpty(organizer.getSentBy())) {
-            property.getParameters().replace(new SentBy(organizer.getSentBy()));
+        if (null != organizer.getSentBy() && Strings.isNotEmpty(organizer.getSentBy().getUri())) {
+            property.getParameters().replace(new SentBy(organizer.getSentBy().getUri()));
         } else {
             property.getParameters().removeAll(Parameter.SENT_BY);
         }
@@ -128,8 +129,13 @@ public class OrganizerMapping extends AbstractICalMapping<VEvent, Event> {
         }
         Parameter cnParameter = property.getParameter(Parameter.CN);
         organizer.setCn(null != cnParameter ? cnParameter.getValue() : null);
+
         Parameter sentByParameter = property.getParameter(Parameter.SENT_BY);
-        organizer.setSentBy(null != sentByParameter ? sentByParameter.getValue() : null);
+        if (null != sentByParameter && Strings.isNotEmpty(sentByParameter.getValue())) {
+            CalendarUser sentByUser = new CalendarUser();
+            sentByUser.setUri(property.getValue());
+            organizer.setSentBy(sentByUser);
+        }
         return organizer;
     }
 

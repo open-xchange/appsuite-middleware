@@ -131,6 +131,7 @@ public class Attendee extends CalendarUser {
      *
      * @return The common name
      */
+    @Override
     public String getCn() {
         return cn;
     }
@@ -140,6 +141,7 @@ public class Attendee extends CalendarUser {
      *
      * @param value The common name to set
      */
+    @Override
     public void setCn(String value) {
         cn = value;
         setFields.add(AttendeeField.CN);
@@ -206,7 +208,7 @@ public class Attendee extends CalendarUser {
      * @return The user who is acting on behalf
      */
     @Override
-    public String getSentBy() {
+    public CalendarUser getSentBy() {
         return sentBy;
     }
 
@@ -216,7 +218,7 @@ public class Attendee extends CalendarUser {
      * @param value The user who is acting on behalf to set
      */
     @Override
-    public void setSentBy(String value) {
+    public void setSentBy(CalendarUser value) {
         sentBy = value;
         setFields.add(AttendeeField.SENT_BY);
     }

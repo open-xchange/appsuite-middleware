@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.exception.OXException;
 
 /**
@@ -110,6 +111,16 @@ public interface EntityResolver {
      * @return The prepared attendee
      */
     Attendee prepareResourceAttendee(int resourceID) throws OXException;
+
+    /**
+     * Applies the default set of static properties for the supplied internal calendar user based on the underlying groupware object.
+     * This typically includes the calendar user's common name and calendar user address for the supplied internal entity.
+     *
+     * @param attendee The calendar user to apply the static entity data for
+     * @param userID The identifier of the user to prepare the attendee for
+     * @return The passed calendar user reference, enriched by the resolved static entity data
+     */
+    <T extends CalendarUser> T applyEntityData(T calendarUser, int userID) throws OXException;
 
     /**
      * Applies the default set of static properties for the supplied internal attendee entity based on the underlying groupware object.

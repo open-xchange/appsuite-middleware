@@ -54,6 +54,17 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.CalendarUserType;
+import com.openexchange.chronos.Event;
+import com.openexchange.chronos.ParticipantRole;
+import com.openexchange.chronos.ParticipationStatus;
+import com.openexchange.chronos.ical.ICalParameters;
+import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Enums;
+import com.openexchange.java.Strings;
 import net.fortuna.ical4j.extensions.caldav.parameter.CalendarServerAttendeeRef;
 import net.fortuna.ical4j.extensions.caldav.property.CalendarServerAttendeeComment;
 import net.fortuna.ical4j.model.Parameter;
@@ -66,16 +77,6 @@ import net.fortuna.ical4j.model.parameter.PartStat;
 import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
 import net.fortuna.ical4j.model.parameter.SentBy;
-import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarUserType;
-import com.openexchange.chronos.Event;
-import com.openexchange.chronos.ParticipantRole;
-import com.openexchange.chronos.ParticipationStatus;
-import com.openexchange.chronos.ical.ICalParameters;
-import com.openexchange.chronos.ical.ical4j.mapping.AbstractICalMapping;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Enums;
-import com.openexchange.java.Strings;
 
 /**
  * {@link AttendeeMapping}
@@ -147,8 +148,8 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
         } else {
             property.getParameters().removeAll(Parameter.CN);
         }
-        if (Strings.isNotEmpty(attendee.getSentBy())) {
-            property.getParameters().replace(new SentBy(attendee.getSentBy()));
+        if (null != attendee.getSentBy() && Strings.isNotEmpty(attendee.getSentBy().getUri())) {
+            property.getParameters().replace(new SentBy(attendee.getSentBy().getUri()));
         } else {
             property.getParameters().removeAll(Parameter.SENT_BY);
         }
@@ -192,8 +193,13 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
                 attendee.setUri("mailto:" + property.getValue());
             }
         }
+        Parameter sentByParameter = property.getParameter(Parameter.SENT_BY);
+        if (null != sentByParameter && Strings.isNotEmpty(sentByParameter.getValue())) {
+            CalendarUser sentByUser = new CalendarUser();
+            sentByUser.setUri(property.getValue());
+            attendee.setSentBy(sentByUser);
+        }
         attendee.setCn(optParameterValue(property, Parameter.CN));
-        attendee.setSentBy(optParameterValue(property, Parameter.SENT_BY));
         attendee.setPartStat(Enums.parse(ParticipationStatus.class, optParameterValue(property, Parameter.PARTSTAT), null));
         attendee.setRole(Enums.parse(ParticipantRole.class, optParameterValue(property, Parameter.ROLE), null));
         attendee.setCuType(Enums.parse(CalendarUserType.class, optParameterValue(property, Parameter.CUTYPE), null));
@@ -203,7 +209,7 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
 
     /**
      * Gets an attendee property from the supplied property list whose calendar address matches a specific URI.
-     * 
+     *
      * @param properties The property list to check
      * @param uri The URI to match the calendar user address against
      * @return The matching attendee, or <code>null</code> if not found
@@ -221,7 +227,7 @@ public class AttendeeMapping extends AbstractICalMapping<VEvent, Event> {
 
     /**
      * Gets an attendee property from the supplied property list whose calendar address matches a specific URI.
-     * 
+     *
      * @param properties The property list to check
      * @param uri The URI to match the calendar user address against
      * @return The matching attendee, or <code>null</code> if not found

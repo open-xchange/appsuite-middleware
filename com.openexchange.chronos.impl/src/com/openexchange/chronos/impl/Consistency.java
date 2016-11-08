@@ -49,17 +49,11 @@
 
 package com.openexchange.chronos.impl;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.TimeZone;
-import com.openexchange.chronos.Attendee;
-import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
-import com.openexchange.chronos.Organizer;
-import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.common.CalendarUtils;
 import com.openexchange.chronos.service.CalendarService;
 import com.openexchange.exception.OXException;
@@ -72,58 +66,6 @@ import com.openexchange.groupware.ldap.User;
  * @since v7.10.0
  */
 public class Consistency {
-
-    public static Attendee addUserAttendeeIfMissing(Event event, int userID, int folderID) {
-        List<Attendee> attendees = event.getAttendees();
-        if (null == attendees) {
-            attendees = new ArrayList<Attendee>();
-            event.setAttendees(attendees);
-        }
-        Attendee attendee = CalendarUtils.find(attendees, userID);
-        if (null == attendee) {
-            attendee = new Attendee();
-            attendee.setEntity(userID);
-            attendees.add(attendee);
-        }
-        attendee.setCuType(CalendarUserType.INDIVIDUAL);
-        attendee.setFolderID(folderID);
-        if (null == attendee.getPartStat()) {
-            attendee.setPartStat(ParticipationStatus.ACCEPTED);
-        }
-        return attendee;
-    }
-
-    /**
-     * Sets an event's organizer to a specific calendar user.
-     *
-     * @param event The event to set the organizer for
-     * @param user The user to become the organizer
-     * @return The organizer, as added to the event
-     */
-    public static Organizer setOrganizer(Event event, User user) {
-        return setOrganizer(event, user, null);
-    }
-
-    /**
-     * Sets an event's organizer to a specific calendar user.
-     *
-     * @param event The event to set the organizer for
-     * @param user The user to become the organizer
-     * @param sentBy Another user who is acting on behalf of the organizer, or <code>null</code> if not set
-     * @return The organizer, as added to the event
-     */
-    public static Organizer setOrganizer(Event event, User user, User sentBy) {
-        Organizer organizer = event.getOrganizer();
-        if (null == organizer) {
-            organizer = new Organizer();
-            event.setOrganizer(organizer);
-        }
-        organizer = Utils.applyProperties(organizer, user);
-        if (null != sentBy && sentBy.getId() != user.getId()) {
-            organizer.setSentBy(Utils.getCalAddress(sentBy));
-        }
-        return organizer;
-    }
 
     /**
      * Sets the event's start- and end-timezones if not yet specified, falling back to the supplied user's default timezone.

@@ -58,6 +58,7 @@ import java.util.TimeZone;
 import com.openexchange.calendar.RecurrenceChecker;
 import com.openexchange.chronos.Attachment;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Organizer;
@@ -357,11 +358,9 @@ public class EventConverter {
             UserParticipant[] users = appointment.containsUserParticipants() ? appointment.getUsers() : null;
             event.setAttendees(getAttendees(appointment.getParticipants(), users));
         }
-        if (appointment.containsOrganizerId() || appointment.containsOrganizer()) {
-            event.setOrganizer(getOrganizer(appointment.getOrganizerId(), appointment.getOrganizer()));
+        if (appointment.containsOrganizerId() || appointment.containsOrganizer() || appointment.containsPrincipal() || appointment.containsPrincipalId()) {
+            event.setOrganizer(getOrganizer(appointment.getOrganizerId(), appointment.getOrganizer(), appointment.getPrincipalId(), appointment.getPrincipal()));
         }
-        //appointment.getPrincipal();
-        //appointment.getPrincipalId();
         if (appointment.containsUid()) {
             event.setUid(appointment.getUid());
         }
@@ -540,11 +539,20 @@ public class EventConverter {
 
         }
         if (event.containsOrganizer()) {
-            appointment.setOrganizer(null != event.getOrganizer() ? Event2Appointment.getEMailAddress(event.getOrganizer().getUri()) : null);
-            appointment.setOrganizerId(null != event.getOrganizer() ? event.getOrganizer().getEntity() : 0);
+            Organizer organizer = event.getOrganizer();
+            if (null == organizer) {
+                appointment.setOrganizer(null);
+                appointment.setOrganizerId(0);
+            } else if (null != organizer.getSentBy()) {
+                appointment.setOrganizer(Event2Appointment.getEMailAddress(organizer.getSentBy().getUri()));
+                appointment.setOrganizerId(organizer.getSentBy().getEntity());
+                appointment.setPrincipal(Event2Appointment.getEMailAddress(organizer.getUri()));
+                appointment.setPrincipalId(organizer.getEntity());
+            } else {
+                appointment.setOrganizer(Event2Appointment.getEMailAddress(organizer.getUri()));
+                appointment.setOrganizerId(organizer.getEntity());
+            }
         }
-        //appointment.setPrincipal(null);
-        //appointment.setPrincipalId(0);
         if (event.containsUid()) {
             appointment.setUid(event.getUid());
         }
@@ -642,13 +650,22 @@ public class EventConverter {
         return attendees;
     }
 
-    private static Organizer getOrganizer(int organizerId, String organizerMail) {
-        if (null == organizerMail && 0 == organizerId) {
+    private static Organizer getOrganizer(int organizerId, String organizerMail, int principalId, String principalMail) {
+        if (null == organizerMail && 0 == organizerId && 0 == principalId && null == principalMail) {
             return null;
         }
         Organizer organizer = new Organizer();
-        organizer.setEntity(organizerId);
-        organizer.setUri(Appointment2Event.getURI(organizerMail));
+        if (0 == principalId && null == principalMail) {
+            organizer.setEntity(organizerId);
+            organizer.setUri(Appointment2Event.getURI(organizerMail));
+        } else {
+            organizer.setEntity(principalId);
+            organizer.setUri(Appointment2Event.getURI(principalMail));
+            CalendarUser sentBy = new CalendarUser();
+            sentBy.setEntity(organizerId);
+            sentBy.setUri(Appointment2Event.getURI(organizerMail));
+            organizer.setSentBy(sentBy);
+        }
         return organizer;
     }
 

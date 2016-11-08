@@ -61,6 +61,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.ResourceId;
@@ -140,6 +141,15 @@ public class DefaultEntityResolver implements EntityResolver {
     @Override
     public Attendee prepareResourceAttendee(int resourceID) throws OXException {
         return applyEntityData(new Attendee(), getResource(resourceID), (AttendeeField[]) null);
+    }
+
+    @Override
+    public <T extends CalendarUser> T applyEntityData(T calendarUser, int userID) throws OXException {
+        User user = getUser(userID);
+        calendarUser.setEntity(user.getId());
+        calendarUser.setCn(user.getDisplayName());
+        calendarUser.setUri(getCalAddress(user));
+        return calendarUser;
     }
 
     @Override
@@ -268,8 +278,7 @@ public class DefaultEntityResolver implements EntityResolver {
             attendee.setCn(user.getDisplayName());
         }
         if (null == fields || Arrays.contains(fields, AttendeeField.URI)) {
-            attendee.setUri(ResourceId.forUser(context.getContextId(), user.getId()));
-            // attendee.setUri(Appointment2Event.getURI(user.getMail()));
+            attendee.setUri(getCalAddress(user));
         }
         return attendee;
     }
@@ -313,6 +322,16 @@ public class DefaultEntityResolver implements EntityResolver {
             attendee.setUri(ResourceId.forResource(context.getContextId(), resource.getIdentifier()));
         }
         return attendee;
+    }
+
+    /**
+     * Gets the calendar address for a user (as mailto URI).
+     *
+     * @param user The user
+     * @return The calendar address
+     */
+    private static String getCalAddress(User user) {
+        return "mailto:" + user.getMail(); // TODO: IDNA.toACE
     }
 
 }

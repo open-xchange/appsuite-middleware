@@ -63,12 +63,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.chronos.AttendeeField;
-import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.Period;
-import com.openexchange.chronos.ResourceId;
 import com.openexchange.chronos.common.DefaultRecurrenceData;
 import com.openexchange.chronos.compat.Recurrence;
 import com.openexchange.chronos.impl.osgi.Services;
@@ -83,10 +81,8 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
-import com.openexchange.group.Group;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.mappings.Mapping;
-import com.openexchange.resource.Resource;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
@@ -212,53 +208,6 @@ public class Utils {
         }
         fields.addAll(Arrays.asList(requestedFields));
         return fields.toArray(new EventField[fields.size()]);
-    }
-
-    /**
-     * Gets the calendar address for a user (as mailto URI).
-     *
-     * @param contextID The context identifier
-     * @param user The user
-     * @return The calendar address
-     */
-    public static String getCalAddress(User user) {
-        return "mailto:" + user.getMail();
-    }
-
-    /**
-     * Gets the calendar address for a resource (as uniform resource name URI).
-     *
-     * @param contextID The context identifier
-     * @param resource The resource
-     * @return The calendar address
-     */
-    public static String getCalAddress(int contextID, Resource resource) {
-        return ResourceId.forResource(contextID, resource.getIdentifier());
-    }
-
-    /**
-     * Gets the calendar address for a group (as uniform resource name URI).
-     *
-     * @param contextID The context identifier
-     * @param group The group
-     * @return The calendar address
-     */
-    public static String getCalAddress(int contextID, Group group) {
-        return ResourceId.forGroup(contextID, group.getIdentifier());
-    }
-
-    /**
-     * Applies common properties of a specific user to a calendar user instance.
-     *
-     * @param calendarUser The calendar user to apply the properties to
-     * @param user The user to get the properties from
-     * @return The passed calendar user reference
-     */
-    public static <T extends CalendarUser> T applyProperties(T calendarUser, User user) {
-        calendarUser.setEntity(user.getId());
-        calendarUser.setCn(user.getDisplayName());
-        calendarUser.setUri(getCalAddress(user));
-        return calendarUser;
     }
 
     /**

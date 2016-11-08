@@ -62,6 +62,7 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
@@ -752,25 +753,37 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
         });
         // EventField.STATUS
         mappings.put(EventField.ORGANIZER, new DefaultDbMultiMapping<Organizer, Event>(
-            new String[] { "organizer", "organizerId" }, "Organizer") {
+            new String[] { "organizer", "organizerId", "principal", "principalId" }, "Organizer") {
 
             @Override
             public Organizer get(ResultSet resultSet, String[] columnLabels) throws SQLException {
-                String email = resultSet.getString(columnLabels[0]);
-                int entity = resultSet.getInt(columnLabels[1]);
-                if (resultSet.wasNull()) {
-                    if (null == email) {
-                        return null;
-                    }
-                    Organizer organizer = new Organizer();
-                    organizer.setUri(Appointment2Event.getURI(email));
-                    return organizer;
+                Organizer organizer = new Organizer();
+                String storedOrganizer = resultSet.getString(columnLabels[0]);
+                int storedOrganizerId = resultSet.getInt(columnLabels[1]);
+                String storedPrincipal = resultSet.getString(columnLabels[2]);
+                int storedPrincipalId = resultSet.getInt(columnLabels[3]);
+                if (0 < storedOrganizerId && storedOrganizerId == storedPrincipalId ||
+                    0 == storedOrganizerId && null != storedOrganizer && storedOrganizer.equals(storedPrincipal) ||
+                    0 == storedPrincipalId && null == storedPrincipal) {
+                    /*
+                     * no different "sent-by" user, take over stored values
+                     */
+                    organizer.setEntity(storedOrganizerId);
+                    organizer.setUri(Appointment2Event.getURI(storedOrganizer));
                 } else {
-                    Organizer organizer = new Organizer();
-                    organizer.setEntity(entity);
-                    organizer.setUri(Appointment2Event.getURI(email));
-                    return organizer;
+                    /*
+                     * organizer with sent-by, use stored principal as organizer and stored organizer as "sent-by":
+                     * database/legacy: organizer ~ acting user , principal ~ calendar owner
+                     * iCal/chronos:    organizer ~ calendar owner , sent-by ~ user acting on behalf of organizer
+                     */
+                    organizer.setEntity(storedPrincipalId);
+                    organizer.setUri(Appointment2Event.getURI(storedPrincipal));
+                    CalendarUser sentBy = new CalendarUser();
+                    sentBy.setEntity(storedOrganizerId);
+                    sentBy.setUri(Appointment2Event.getURI(storedOrganizer));
+                    organizer.setSentBy(sentBy);
                 }
+                return null == organizer.getUri() && 0 == organizer.getEntity() ? null : organizer;
             }
 
             @Override
@@ -779,11 +792,28 @@ public class EventMapper extends DefaultDbMapper<Event, EventField> {
                 if (null == value) {
                     statement.setNull(parameterIndex, Types.VARCHAR);
                     statement.setNull(1 + parameterIndex, Types.INTEGER);
+                    statement.setNull(2 + parameterIndex, Types.VARCHAR);
+                    statement.setNull(3 + parameterIndex, Types.INTEGER);
+                } else if (null != value.getSentBy()) {
+                    /*
+                     * organizer with sent-by, store organizer as principal and "sent-by" in organizer columns
+                     * database/legacy: organizer ~ acting user , principal ~ calendar owner
+                     * iCal/chronos:    organizer ~ calendar owner , sent-by ~ user acting on behalf of organizer
+                     */
+                    statement.setString(parameterIndex, Event2Appointment.getEMailAddress(value.getSentBy().getUri()));
+                    statement.setInt(1 + parameterIndex, value.getSentBy().getEntity());
+                    statement.setString(2 + parameterIndex, Event2Appointment.getEMailAddress(value.getUri()));
+                    statement.setInt(3 + parameterIndex, value.getEntity());
                 } else {
+                    /*
+                     * no different "sent-by" user, store in organizer columns
+                     */
                     statement.setString(parameterIndex, Event2Appointment.getEMailAddress(value.getUri()));
                     statement.setInt(1 + parameterIndex, value.getEntity());
+                    statement.setNull(2 + parameterIndex, Types.VARCHAR);
+                    statement.setNull(3 + parameterIndex, Types.INTEGER);
                 }
-                return 2;
+                return 4;
             }
 
             @Override

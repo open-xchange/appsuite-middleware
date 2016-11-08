@@ -71,13 +71,13 @@ import java.util.Map.Entry;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.RecurrenceId;
 import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.impl.AttendeeMapper;
 import com.openexchange.chronos.impl.Check;
 import com.openexchange.chronos.impl.EventMapper;
-import com.openexchange.chronos.impl.Utils;
 import com.openexchange.chronos.service.CalendarSession;
 import com.openexchange.chronos.storage.CalendarStorage;
 import com.openexchange.exception.OXException;
@@ -285,7 +285,7 @@ public class UpdateAttendeeOperation extends AbstractOperation {
          */
         AttendeeMapper.getInstance().copy(originalAttendee, attendeeUpdate, AttendeeField.ENTITY, AttendeeField.MEMBER, AttendeeField.CU_TYPE, AttendeeField.URI);
         if (session.getUser().getId() != calendarUser.getId() && false == attendeeUpdate.containsSentBy()) {
-            attendeeUpdate.setSentBy(Utils.getCalAddress(session.getUser()));
+            attendeeUpdate.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUser().getId()));
         }
         return attendeeUpdate;
     }

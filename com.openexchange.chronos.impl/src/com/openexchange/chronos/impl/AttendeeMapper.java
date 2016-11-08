@@ -56,6 +56,7 @@ import java.util.EnumMap;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ParticipantRole;
 import com.openexchange.chronos.ParticipationStatus;
@@ -232,7 +233,7 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
                 object.removeEntity();
             }
         });
-        mappings.put(AttendeeField.SENT_BY, new DefaultMapping<String, Attendee>() {
+        mappings.put(AttendeeField.SENT_BY, new DefaultMapping<CalendarUser, Attendee>() {
 
             @Override
             public boolean isSet(Attendee object) {
@@ -240,12 +241,12 @@ public class AttendeeMapper extends DefaultMapper<Attendee, AttendeeField> {
             }
 
             @Override
-            public void set(Attendee object, String value) throws OXException {
+            public void set(Attendee object, CalendarUser value) throws OXException {
                 object.setSentBy(value);
             }
 
             @Override
-            public String get(Attendee object) {
+            public CalendarUser get(Attendee object) {
                 return object.getSentBy();
             }
 

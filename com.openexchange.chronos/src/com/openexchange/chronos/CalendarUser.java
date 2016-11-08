@@ -58,43 +58,42 @@ package com.openexchange.chronos;
  */
 public class CalendarUser {
 
-    String uri;
-    String cn;
-    int entity;
-    String sentBy;
-    String email;
+    protected String uri;
+    protected String cn;
+    protected int entity;
+    protected CalendarUser sentBy;
 
     /**
-     * Gets the uri
+     * Gets the address URI identifying the calendar user.
      *
-     * @return The uri
+     * @return The calendar user address URI
      */
     public String getUri() {
         return uri;
     }
 
     /**
-     * Sets the uri
+     * Sets the calendar user address URI
      *
-     * @param uri The uri to set
+     * @param uri The calendar user address URI to set
      */
     public void setUri(String uri) {
         this.uri = uri;
     }
 
     /**
-     * Gets the commonName
+     * Gets the common name associated with the calendar user.
      *
-     * @return The commonName
+     * @return The common name
      */
     public String getCn() {
         return cn;
     }
 
     /**
-     * Sets the commonName
+     * Sets the common name associated with the calendar user.
      *
-     * @param cn The commonName to set
+     * @param cn The common name to set
      */
     public void setCn(String cn) {
         this.cn = cn;
@@ -119,20 +118,20 @@ public class CalendarUser {
     }
 
     /**
-     * Gets the sentBy
+     * Gets the calendar user that is acting on behalf of this calendar user.
      *
-     * @return The sentBy
+     * @return The calendar user that is acting on behalf of this calendar user.
      */
-    public String getSentBy() {
+    public CalendarUser getSentBy() {
         return sentBy;
     }
 
     /**
-     * Sets the sentBy
+     * Sets the calendar user that is acting on behalf of this calendar user.
      *
-     * @param sentBy The sentBy to set
+     * @param sentBy The "sent-by" calendar user to set
      */
-    public void setSentBy(String sentBy) {
+    public void setSentBy(CalendarUser sentBy) {
         this.sentBy = sentBy;
     }
 

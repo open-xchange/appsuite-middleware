@@ -52,7 +52,6 @@ package com.openexchange.chronos.impl;
 import static com.openexchange.chronos.common.CalendarUtils.contains;
 import static com.openexchange.chronos.common.CalendarUtils.filter;
 import static com.openexchange.chronos.common.CalendarUtils.find;
-import static com.openexchange.chronos.impl.Utils.getCalAddress;
 import static com.openexchange.chronos.impl.Utils.getCalendarUser;
 import static com.openexchange.chronos.impl.Utils.i;
 import static com.openexchange.java.Autoboxing.I;
@@ -61,6 +60,7 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.compat.Appointment2Event;
@@ -290,10 +290,10 @@ public class AttendeeHelper {
         User calendarUser = getCalendarUser(folder);
         Attendee defaultAttendee = session.getEntityResolver().prepareUserAttendee(calendarUser.getId());
         defaultAttendee.setPartStat(ParticipationStatus.ACCEPTED);
-        if (session.getUser().getId() != defaultAttendee.getEntity()) {
-            defaultAttendee.setSentBy(getCalAddress(calendarUser));
-        }
         defaultAttendee.setFolderID(PublicType.getInstance().equals(folder.getType()) ? ATTENDEE_PUBLIC_FOLDER_ID : i(folder));
+        if (session.getUser().getId() != calendarUser.getId()) {
+            defaultAttendee.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUser().getId()));
+        }
         /*
          * take over additional properties from corresponding requested attendee
          */

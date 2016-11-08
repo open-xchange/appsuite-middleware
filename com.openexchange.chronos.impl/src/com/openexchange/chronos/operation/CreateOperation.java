@@ -58,10 +58,12 @@ import java.util.List;
 import java.util.UUID;
 import com.openexchange.chronos.Alarm;
 import com.openexchange.chronos.Attendee;
+import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.Classification;
 import com.openexchange.chronos.Event;
 import com.openexchange.chronos.EventField;
 import com.openexchange.chronos.EventStatus;
+import com.openexchange.chronos.Organizer;
 import com.openexchange.chronos.TimeTransparency;
 import com.openexchange.chronos.impl.AttendeeHelper;
 import com.openexchange.chronos.impl.Check;
@@ -166,13 +168,8 @@ public class CreateOperation extends AbstractOperation {
          * creation/modification metadata, organizer
          */
         Consistency.setCreated(timestamp, event, calendarUser.getId());
-        Consistency.setModified(timestamp, event, session.getUser().getId());
-        if (eventData.containsOrganizer() && null != eventData.getOrganizer()) {
-            //TODO: check/overwrite client-supplied organizer?
-            event.setOrganizer(eventData.getOrganizer());
-        } else {
-            Consistency.setOrganizer(event, calendarUser, session.getUser());
-        }
+        Consistency.setModified(timestamp, event, calendarUser.getId());
+        event.setOrganizer(prepareOrganizer(eventData.getOrganizer()));
         /*
          * date/time related properties
          */
@@ -207,6 +204,33 @@ public class CreateOperation extends AbstractOperation {
          */
         EventMapper.getInstance().copy(eventData, event, EventField.SUMMARY, EventField.LOCATION, EventField.DESCRIPTION, EventField.CATEGORIES);
         return event;
+    }
+
+    /**
+     * Prepares the organizer for a new event, taking over an external organizer if specified.
+     *
+     * @param organizerData The organizer as defined by the client
+     * @return The prepared organizer
+     */
+    private Organizer prepareOrganizer(Organizer organizerData) throws OXException {
+        if (null != organizerData && 0 == organizerData.getEntity() && null != organizerData.getUri()) {
+            /*
+             * take over external organizer as-is
+             */
+            return organizerData;
+        } else if (null != organizerData && 0 < organizerData.getEntity()) {
+            /*
+             * internal organizer must match the calendar user if specified
+             */
+            if (organizerData.getEntity() != calendarUser.getId()) {
+                throw OXException.general("Wrong organizer id " + organizerData.getEntity()); // TODO
+            }
+        }
+        Organizer organizer = session.getEntityResolver().applyEntityData(new Organizer(), calendarUser.getId());
+        if (calendarUser.getId() != session.getUser().getId()) {
+            organizer.setSentBy(session.getEntityResolver().applyEntityData(new CalendarUser(), session.getUser().getId()));
+        }
+        return organizer;
     }
 
 }
