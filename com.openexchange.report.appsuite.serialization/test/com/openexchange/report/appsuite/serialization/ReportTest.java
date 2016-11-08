@@ -57,9 +57,8 @@ public class ReportTest {
         assertTrue("Report content was not composed. ",result.exists());
         File expected = new File(STORAGE_PATH + "expected.result");
         try {
-            byte[] resultBytes = Files.readAllBytes(result.toPath());
-            byte[] expectedBytes = Files.readAllBytes(expected.toPath());
-            assertTrue("Composed report-content is not like expected.", Arrays.equals(resultBytes, expectedBytes));
+            assertTrue("Composed report-content is not like expected. Actual result: " + "\n" + Files.readAllLines(result.toPath()) + "\n" + "expectedResult" + "\n" + Files.readAllLines(expected.toPath()), 
+                Files.readAllLines(result.toPath()).equals(Files.readAllLines(expected.toPath())));
         } catch (IOException e) {
             e.printStackTrace();
         }
