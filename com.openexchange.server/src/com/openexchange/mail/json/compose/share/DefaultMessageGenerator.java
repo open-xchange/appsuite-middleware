@@ -85,6 +85,11 @@ import com.openexchange.mail.json.compose.Utilities;
 import com.openexchange.mail.json.compose.share.spi.MessageGenerator;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountExceptionCodes;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.TransportAccount;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.notification.service.CommonNotificationVariables;
 import com.openexchange.notification.service.FullNameBuilderService;
 import com.openexchange.server.ServiceExceptionCode;
@@ -480,8 +485,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
         // Intro
         {
             String translated = translator.translate(items.size() > 1 ? ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_MULTI : ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_SINGLE);
-            FullNameBuilderService fullNameBuilderService = ServerServiceRegistry.getInstance().getService(FullNameBuilderService.class);
-            String fullName = fullNameBuilderService.buildFullName(shareReference.getUserId(), shareReference.getContextId(), translator);
+            String fullName = getFullName(info, shareReference, translator);
             translated = String.format(translated, fullName);
             textBuilder.append(htmlFormat(translated)).append("<br>");
         }
@@ -570,8 +574,7 @@ public class DefaultMessageGenerator implements MessageGenerator {
         // Intro
         {
             String translated = translator.translate(items.size() > 1 ? ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_MULTI : ShareComposeStrings.SHARED_ATTACHMENTS_INTRO_SINGLE);
-            FullNameBuilderService fullNameBuilderService = ServerServiceRegistry.getInstance().getService(FullNameBuilderService.class);
-            String fullName = StringEscapeUtils.escapeHtml(fullNameBuilderService.buildFullName(shareReference.getUserId(), shareReference.getContextId(), translator));
+            String fullName = getFullName(info, shareReference, translator);
             translated = String.format(translated, fullName);
             vars.put(VARIABLE_INTRO, translated);
         }
@@ -619,6 +622,63 @@ public class DefaultMessageGenerator implements MessageGenerator {
         }
 
         return compileTemplate(getTemplateName(), vars, templateService);
+    }
+
+    /**
+     * Gets the full name to use
+     *
+     * @param info The message info
+     * @param shareReference The share reference
+     * @param translator The translator
+     * @return The full name to use
+     * @throws OXException If full name cannot be determined
+     */
+    protected String getFullName(ShareComposeMessageInfo info, ShareReference shareReference, Translator translator) throws OXException {
+        // Check by "From" address
+        InternetAddress[] from = info.getSource().getFrom();
+        if (null != from) {
+            for (InternetAddress fromAddr : from) {
+                String personal = fromAddr.getPersonal();
+                if (false == Strings.isEmpty(personal)) {
+                    return StringEscapeUtils.escapeHtml(personal);
+                }
+            }
+        }
+
+        // Try to determine by account
+        int accountId = info.getSource().getAccountId();
+        if (accountId > 0) {
+            // Ensure account identifier does not point to Unified Mail account
+            ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
+            UnifiedInboxManagement management = registry.getService(UnifiedInboxManagement.class);
+            if ((null != management) && (accountId != management.getUnifiedINBOXAccountID(info.getComposeContext().getSession()))) {
+                MailAccountStorageService storageService = registry.getService(MailAccountStorageService.class);
+
+                String personal;
+                String address;
+                try {
+                    MailAccount mailAccount = storageService.getMailAccount(accountId, shareReference.getUserId(), shareReference.getContextId());
+                    personal = mailAccount.getPersonal();
+                    address = mailAccount.getPrimaryAddress();
+                } catch (OXException e) {
+                    if (false == MailAccountExceptionCodes.NOT_FOUND.equals(e)) {
+                        throw e;
+
+                    }
+
+                    // Retry with transport account
+                    TransportAccount transportAccount = storageService.getTransportAccount(accountId, shareReference.getUserId(), shareReference.getContextId());
+                    personal = transportAccount.getPersonal();
+                    address = transportAccount.getPrimaryAddress();
+                }
+
+                return StringEscapeUtils.escapeHtml(Strings.isEmpty(personal) ? address : personal);
+            }
+        }
+
+        // Last but not least, build the full name from associated user
+        FullNameBuilderService fullNameBuilderService = ServerServiceRegistry.getInstance().getService(FullNameBuilderService.class);
+        return StringEscapeUtils.escapeHtml(fullNameBuilderService.buildFullName(shareReference.getUserId(), shareReference.getContextId(), translator));
     }
 
     /**
