@@ -369,15 +369,30 @@ public class DefaultMessageGenerator implements MessageGenerator {
 
         if (composeContext.isPlainText()) {
             String plainText = textPart.getPlainText();
-            StringBuilder plainTextBuilder = new StringBuilder(plainText.length() + 512);
+            if (null == plainText) {
+                String text = (String) textPart.getContent();
+                StringBuilder textBuilder = new StringBuilder(text.length() + 512);
 
-            // Append the prefix that notifies about to access the message's attachment via provided share link
-            plainTextBuilder.append(generatePrefix(locale, info, shareReference, loadPrefixFromTemplate(), cidMapping, moreFiles, true));
+                // Append the prefix that notifies about to access the message's attachment via provided share link
+                textBuilder.append(generatePrefix(locale, info, shareReference, false, cidMapping, moreFiles, false));
 
-            plainTextBuilder.append(plainText);
+                // Append actual text
+                textBuilder.append(text);
 
-            textPart.setPlainText(plainTextBuilder.toString());
-            composedMessage.setBodyPart(textPart);
+                // Replace text with composed one
+                textPart.setText(textBuilder.toString());
+                composedMessage.setBodyPart(textPart);
+            } else {
+                StringBuilder plainTextBuilder = new StringBuilder(plainText.length() + 512);
+
+                // Append the prefix that notifies about to access the message's attachment via provided share link
+                plainTextBuilder.append(generatePrefix(locale, info, shareReference, loadPrefixFromTemplate(), cidMapping, moreFiles, true));
+
+                plainTextBuilder.append(plainText);
+
+                textPart.setPlainText(plainTextBuilder.toString());
+                composedMessage.setBodyPart(textPart);
+            }
         } else {
             String text = (String) textPart.getContent();
             StringBuilder textBuilder = new StringBuilder(text.length() + 512);
