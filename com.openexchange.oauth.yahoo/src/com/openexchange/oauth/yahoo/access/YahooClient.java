@@ -63,6 +63,7 @@ import org.scribe.model.Response;
 import org.scribe.model.Token;
 import org.scribe.model.Verb;
 import org.scribe.oauth.OAuthService;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
@@ -92,8 +93,8 @@ public class YahooClient {
     private final OAuthAccount oauthAccount;
 
     /**
-     * Initialises a new {@link YahooClient}.
-     * 
+     * Initializes a new {@link YahooClient}.
+     *
      * @throws OXException
      */
     public YahooClient(OAuthAccount oauthAccount, Session session) throws OXException {
@@ -103,8 +104,34 @@ public class YahooClient {
     }
 
     /**
+     * Executes specified request and returns its response.
+     *
+     * @param request The request
+     * @return The response
+     * @throws OXException If executing request fails
+     */
+    private Response execute(OAuthRequest request) throws OXException {
+        try {
+            return request.send(YahooRequestTuner.getInstance());
+        } catch (org.scribe.exceptions.OAuthException e) {
+            // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
+            if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
+                throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create("social.yahooapis.com");
+            }
+
+            Throwable cause = e.getCause();
+            if (cause instanceof java.net.SocketTimeoutException) {
+                // A socket timeout
+                throw OAuthExceptionCodes.CONNECT_ERROR.create(cause, new Object[0]);
+            }
+
+            throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
      * Pings the account
-     * 
+     *
      * @return <code>true</code> if the account was successfully pinged; <code>false</code> otherwise
      * @throws OXException if a connection error is occurred
      */
@@ -114,29 +141,14 @@ public class YahooClient {
 
     /**
      * Retrieves the GUID for the account
-     * 
+     *
      * @return The GUID of the account or an empty string if no GUID was returned from the provider
      * @throws OXException if a connection error is occurred
      */
     public String getGUID() throws OXException {
         OAuthRequest guidRequest = new OAuthRequest(Verb.GET, "https://social.yahooapis.com/v1/me/guid?format=xml");
         scribeService.signRequest(new Token(oauthAccount.getToken(), oauthAccount.getSecret()), guidRequest);
-        Response guidResponse;
-        try {
-            guidResponse = guidRequest.send(YahooRequestTuner.getInstance());
-        } catch (org.scribe.exceptions.OAuthException e) {
-            // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
-            Throwable cause = e.getCause();
-            if (SSLHandshakeException.class.isInstance(cause)) {
-                throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create("social.yahooapis.com");
-            }
-            if (cause instanceof java.net.SocketTimeoutException) {
-                // A socket timeout
-                throw OAuthExceptionCodes.CONNECT_ERROR.create(cause, new Object[0]);
-            }
-
-            throw OAuthExceptionCodes.OAUTH_ERROR.create(cause, e.getMessage());
-        }
+        Response guidResponse = execute(guidRequest);
         String contentType = guidResponse.getHeader("Content-Type");
         if (null == contentType || false == contentType.toLowerCase().contains("application/xml")) {
             throw OAuthExceptionCodes.NOT_A_VALID_RESPONSE.create();
@@ -148,7 +160,7 @@ public class YahooClient {
 
     /**
      * Gets all contacts in a single request
-     * 
+     *
      * @return
      * @throws OXException
      */
@@ -160,7 +172,7 @@ public class YahooClient {
         // Now get the ids of all the users contacts
         OAuthRequest request = new OAuthRequest(Verb.GET, ALL_CONTACT_IDS_URL.replace("GUID", guid));
         scribeService.signRequest(accessToken, request);
-        final Response response = request.send(YahooRequestTuner.getInstance());
+        final Response response = execute(request);
         if (response.getCode() == 403) {
             throw OAuthExceptionCodes.NO_SCOPE_PERMISSION.create(API.YAHOO.getShortName(), OXScope.contacts_ro.getDisplayName());
         }
@@ -173,7 +185,7 @@ public class YahooClient {
 
     /**
      * Gets the contact with the specified identifier
-     * 
+     *
      * @param contactId The contact identifier
      * @return
      * @throws OXException
@@ -184,10 +196,10 @@ public class YahooClient {
         // Request
         final OAuthRequest singleContactRequest = new OAuthRequest(Verb.GET, singleContactUrl);
         scribeService.signRequest(accessToken, singleContactRequest);
-        final Response singleContactResponse = singleContactRequest.send(YahooRequestTuner.getInstance());
+        final Response singleContactResponse = execute(singleContactRequest);
         return extractJson(singleContactResponse);
     }
-    
+
     /**
      * Get the account's display name
      * @return the account's display name
@@ -198,7 +210,7 @@ public class YahooClient {
 
     /**
      * Extracts JSON out of given response
-     * 
+     *
      * @param response
      * @return
      * @throws OXException

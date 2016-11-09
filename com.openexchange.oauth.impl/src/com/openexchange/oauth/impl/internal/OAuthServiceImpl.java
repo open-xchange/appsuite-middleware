@@ -81,7 +81,6 @@ import org.scribe.builder.api.TwitterApi;
 import org.scribe.builder.api.VkontakteApi;
 import org.scribe.builder.api.XingApi;
 import org.scribe.builder.api.YahooApi;
-import org.scribe.exceptions.OAuthConnectionException;
 import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
@@ -89,6 +88,7 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.html.HtmlService;
@@ -531,7 +531,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
              */
             return account;
         } catch (final OXException x) {
-            if (null != x.getCause() && OAuthConnectionException.class.isInstance(x.getCause()) && null != x.getCause().getCause() && SSLHandshakeException.class.isInstance(x.getCause().getCause())) {
+            if (ExceptionUtils.isEitherOf(x, SSLHandshakeException.class)) {
                 String url = (String) arguments.get(OAuthConstants.ARGUMENT_AUTH_URL);
                 if (Strings.isNotEmpty(url)) {
                     try {

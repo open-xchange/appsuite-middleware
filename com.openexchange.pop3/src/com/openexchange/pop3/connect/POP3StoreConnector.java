@@ -69,7 +69,6 @@ import javax.mail.AuthenticationFailedException;
 import javax.mail.Folder;
 import javax.mail.MessagingException;
 import javax.mail.internet.idn.IDNA;
-import javax.net.ssl.SSLHandshakeException;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.log.audit.AuditLogService;
@@ -460,11 +459,12 @@ public final class POP3StoreConnector {
                 }
                 throw e;
             } catch (final MessagingException e) {
+                if (MimeMailException.isSSLHandshakeException(e)) {
+                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(server);
+                }
+                
                 final Exception nested = e.getNextException();
                 if (nested != null) {
-                    if (SSLHandshakeException.class.isInstance(nested)) {
-                        throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(server);
-                    }
                     if (nested instanceof IOException) {
                         throw MimeMailExceptionCode.CONNECT_ERROR.create(e, pop3Config.getServer(), pop3Config.getLogin());
                     } else if (tmpDownEnabled && SocketTimeoutException.class.isInstance(e.getNextException())) {
