@@ -110,7 +110,7 @@ public class ResourceId {
                 UUID uuid = UUID.fromString(uuidString);
                 return new ResourceId(decodeContextID(uuid), decodeEntity(uuid), decodeType(uuid));
             } catch (IllegalArgumentException e) {
-                org.slf4j.LoggerFactory.getLogger(ResourceId.class).debug("Error parsing resource ID", e);
+                // org.slf4j.LoggerFactory.getLogger(ResourceId.class).debug("Error parsing resource ID", e);
             }
         }
         return null;

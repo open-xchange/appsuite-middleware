@@ -86,7 +86,6 @@ public class AttendeeHelper {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AttendeeHelper.class);
 
-
     private final CalendarSession session;
     private final UserizedFolder folder;
     private final List<Attendee> attendeesToInsert;
@@ -160,6 +159,7 @@ public class AttendeeHelper {
 
     private void processNewEvent(List<Attendee> requestedAttendees) throws OXException {
         session.getEntityResolver().prefetch(requestedAttendees);
+        requestedAttendees = session.getEntityResolver().prepare(requestedAttendees);
         /*
          * always add attendee for default calendar user in folder
          */
@@ -177,8 +177,9 @@ public class AttendeeHelper {
     }
 
     private void processUpdatedEvent(List<Attendee> originalAttendees, List<Attendee> updatedAttendees) throws OXException {
+        session.getEntityResolver().prefetch(updatedAttendees);
+        updatedAttendees = session.getEntityResolver().prepare(updatedAttendees);
         AbstractCollectionUpdate<Attendee, AttendeeField> attendeeDiff = AttendeeMapper.getInstance().getAttendeeUpdate(originalAttendees, updatedAttendees);
-        session.getEntityResolver().prefetch(attendeeDiff.getAddedItems());
         List<Attendee> attendeeList = new ArrayList<Attendee>(originalAttendees);
         /*
          * delete removed attendees

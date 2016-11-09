@@ -53,6 +53,7 @@ import static com.openexchange.chronos.exception.CalendarExceptionMessages.ATTEN
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.CONCURRENT_MODIFICATION_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.END_BEFORE_START_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.EVENT_NOT_FOUND_MSG;
+import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_CALENDAR_USER_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.INVALID_RRULE_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MANDATORY_FIELD_MSG;
 import static com.openexchange.chronos.exception.CalendarExceptionMessages.MOVE_OCCURRENCE_NOT_SUPPORTED_MSG;
@@ -119,6 +120,11 @@ public enum CalendarExceptionCodes implements DisplayableOXExceptionCode {
      * <li>Forbidden attendee change [id %1$d, attendee %2$s, field %3$s]</li>
      */
     FORBIDDEN_ATTENDEE_CHANGE("Forbidden attendee change [id %1$d, attendee %2$s, field %3$s]", NO_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 4033),
+    /**
+     * <li>The calendar user \"%1$s\" is invalid.</li>
+     * <li>Invalid calendar user [uri %1$s, id %1$d, type %1$s]</li>
+     */
+    INVALID_CALENDAR_USER("Invalid calendar user [uri %1$s, id %1$d, type %1$s]", INVALID_CALENDAR_USER_MSG, Category.CATEGORY_USER_INPUT, 4034),
     /**
      * <li>The operation could not be completed due to a concurrent modification. Please reload the data and try again.</li>
      * <li>Concurrent modification [id %1$d, client timestamp %2$d, actual timestamp %3$d]</li>

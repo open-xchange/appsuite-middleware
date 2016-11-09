@@ -53,6 +53,8 @@ import static com.openexchange.chronos.common.CalendarUtils.isInternal;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.i2I;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -65,6 +67,8 @@ import com.openexchange.chronos.CalendarUser;
 import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.ResourceId;
+import com.openexchange.chronos.common.CalendarUtils;
+import com.openexchange.chronos.exception.CalendarExceptionCodes;
 import com.openexchange.chronos.service.EntityResolver;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
@@ -72,6 +76,7 @@ import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.server.ServiceLookup;
@@ -110,6 +115,41 @@ public class DefaultEntityResolver implements EntityResolver {
         knownUsers.put(I(session.getUserId()), session.getUser());
         knownGroups = new HashMap<Integer, Group>();
         knownResources = new HashMap<Integer, Resource>();
+    }
+
+    @Override
+    public Attendee prepare(Attendee attendee) throws OXException {
+        return prepare(attendee, attendee.getCuType());
+    }
+
+    @Override
+    public List<Attendee> prepare(List<Attendee> attendees) throws OXException {
+        if (null != attendees) {
+            for (Attendee attendee : attendees) {
+                prepare(attendee);
+            }
+        }
+        return attendees;
+    }
+
+    @Override
+    public <T extends CalendarUser> T prepare(T calendarUser, CalendarUserType cuType) throws OXException {
+        if (null == calendarUser) {
+            return null;
+        }
+        calendarUser = resolveExternals(calendarUser, cuType);
+        if (0 < calendarUser.getEntity() || 0 == calendarUser.getEntity() && CalendarUserType.GROUP.equals(cuType)) {
+            /*
+             * internal entity, ensure it exists & enhance with static properties
+             */
+            checkExistence(calendarUser.getEntity(), cuType);
+            applyEntityData(calendarUser, cuType);
+            return calendarUser;
+        }
+        /*
+         * external entity otherwise, take over as-is
+         */
+        return calendarUser;
     }
 
     @Override
@@ -159,7 +199,7 @@ public class DefaultEntityResolver implements EntityResolver {
 
     @Override
     public Attendee applyEntityData(Attendee attendee, AttendeeField... fields) throws OXException {
-        if (null == attendee || 0 >= attendee.getEntity()) {
+        if (null == attendee || false == CalendarUtils.isInternal(attendee)) {
             LOG.warn("Ignoring attempt to apply internal entity data for non-internal attendee {}", attendee);
             return attendee;
         }
@@ -172,6 +212,28 @@ public class DefaultEntityResolver implements EntityResolver {
             default:
                 return applyEntityData(attendee, getUser(attendee.getEntity()), fields);
         }
+    }
+
+    private <T extends CalendarUser> T applyEntityData(T calendarUser, CalendarUserType cuType) throws OXException {
+        switch (cuType) {
+            case GROUP:
+                Group group = getGroup(calendarUser.getEntity());
+                calendarUser.setCn(group.getDisplayName());
+                calendarUser.setUri(ResourceId.forGroup(context.getContextId(), group.getIdentifier()));
+                break;
+            case RESOURCE:
+            case ROOM:
+                Resource resource = getResource(calendarUser.getEntity());
+                calendarUser.setCn(resource.getDisplayName());
+                calendarUser.setUri(ResourceId.forResource(context.getContextId(), resource.getIdentifier()));
+                break;
+            default:
+                User user = getUser(calendarUser.getEntity());
+                calendarUser.setCn(user.getDisplayName());
+                calendarUser.setUri(getCalAddress(user));
+                break;
+        }
+        return calendarUser;
     }
 
     @Override
@@ -203,22 +265,19 @@ public class DefaultEntityResolver implements EntityResolver {
             }
         }
         if (0 < resourcesToLoad.size()) {
-            ResourceService resourceService = services.getService(ResourceService.class);
             for (Integer resourceID : resourcesToLoad) {
-                knownResources.put(resourceID, resourceService.getResource(resourceID.intValue(), context));
+                knownResources.put(resourceID, loadResource(resourceID.intValue()));
             }
         }
         if (0 < groupsToLoad.size()) {
-            GroupService groupService = services.getService(GroupService.class);
             for (Integer groupID : groupsToLoad) {
-                Group group = groupService.getGroup(context, groupID.intValue());
+                Group group = loadGroup(groupID.intValue());
                 knownGroups.put(groupID, group);
                 usersToLoad.addAll(java.util.Arrays.asList(i2I(group.getMember())));
             }
         }
         if (0 < usersToLoad.size()) {
-            UserService userService = services.getService(UserService.class);
-            User[] users = userService.getUser(context, I2i(usersToLoad));
+            User[] users = loadUsers(I2i(usersToLoad));
             for (User user : users) {
                 knownUsers.put(I(user.getId()), user);
             }
@@ -241,7 +300,7 @@ public class DefaultEntityResolver implements EntityResolver {
         int id = I(entity);
         Group group = knownGroups.get(id);
         if (null == group) {
-            group = services.getService(GroupService.class).getGroup(context, entity);
+            group = loadGroup(entity);
             knownGroups.put(id, group);
         }
         return group;
@@ -251,7 +310,7 @@ public class DefaultEntityResolver implements EntityResolver {
         int id = I(entity);
         User user = knownUsers.get(id);
         if (null == user) {
-            user = services.getService(UserService.class).getUser(entity, context);
+            user = loadUser(entity);
             knownUsers.put(id, user);
         }
         return user;
@@ -261,7 +320,7 @@ public class DefaultEntityResolver implements EntityResolver {
         int id = I(entity);
         Resource resource = knownResources.get(id);
         if (null == resource) {
-            resource = services.getService(ResourceService.class).getResource(entity, context);
+            resource = loadResource(entity);
             knownResources.put(id, resource);
         }
         return resource;
@@ -324,6 +383,125 @@ public class DefaultEntityResolver implements EntityResolver {
         return attendee;
     }
 
+    private <T extends CalendarUser> T resolveExternals(T calendarUser, CalendarUserType cuType) throws OXException {
+        if (null != calendarUser) {
+            if (0 < calendarUser.getEntity() || 0 == calendarUser.getEntity() && CalendarUserType.GROUP.equals(cuType)) {
+                // already resolved
+            } else {
+                ResourceId resourceId = resolve(calendarUser.getUri());
+                if (null != resourceId) {
+                    if (false == resourceId.getCalendarUserType().equals(cuType)) {
+                        throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(calendarUser.getUri(), I(calendarUser.getEntity()), cuType);
+                    }
+                    calendarUser.setEntity(resourceId.getEntity());
+                }
+            }
+            resolveExternals(calendarUser.getSentBy(), CalendarUserType.INDIVIDUAL);
+        }
+        return calendarUser;
+    }
+
+    private void checkExistence(int entity, CalendarUserType type) throws OXException {
+        switch (type) {
+            case GROUP:
+                getGroup(entity);
+                break;
+            case RESOURCE:
+            case ROOM:
+                getResource(entity);
+                break;
+            default:
+                getUser(entity);
+                break;
+        }
+    }
+
+    private ResourceId resolve(String uri) throws OXException {
+        return resolve(uri, true);
+    }
+
+    private ResourceId resolve(String uri, boolean considerAliases) throws OXException {
+        if (Strings.isEmpty(uri)) {
+            return null;
+        }
+        /*
+         * try to interpret directly as resource id first
+         */
+        ResourceId resourceId = ResourceId.parse(uri);
+        if (null != resourceId) {
+            return resourceId;
+        }
+        /*
+         * try lookup by e-mail address, otherwise
+         */
+        String mail = extractMail(uri);
+        for (User knownUser : knownUsers.values()) {
+            if (mail.equals(knownUser.getMail()) || considerAliases && Arrays.contains(knownUser.getAliases(), mail)) {
+                return new ResourceId(context.getContextId(), knownUser.getId(), CalendarUserType.INDIVIDUAL);
+            }
+        }
+        User user;
+        try {
+            user = services.getService(UserService.class).searchUser(mail, context, considerAliases);
+        } catch (OXException e) {
+            if ("USR-0014".equals(e.getErrorCode())) {
+                user = null;
+            } else {
+                throw e;
+            }
+        }
+        return null != user ? new ResourceId(context.getContextId(), user.getId(), CalendarUserType.INDIVIDUAL) : null;
+    }
+
+    private Resource loadResource(int entity) throws OXException {
+        try {
+            return services.getService(ResourceService.class).getResource(entity, context);
+        } catch (OXException e) {
+            if ("RES-0012".equals(e.getErrorCode())) {
+                throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(String.valueOf(entity), I(entity), CalendarUserType.RESOURCE);
+            }
+            throw e;
+        }
+    }
+
+    private Group loadGroup(int entity) throws OXException {
+        try {
+            return services.getService(GroupService.class).getGroup(context, entity);
+        } catch (OXException e) {
+            if ("GRP-0017".equals(e.getErrorCode())) {
+                throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(String.valueOf(entity), I(entity), CalendarUserType.GROUP);
+            }
+            throw e;
+        }
+    }
+
+    private User loadUser(int entity) throws OXException {
+        try {
+            return services.getService(UserService.class).getUser(entity, context);
+        } catch (OXException e) {
+            if ("USR-0010".equals(e.getErrorCode())) {
+                throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(String.valueOf(entity), I(entity), CalendarUserType.GROUP);
+            }
+            throw e;
+        }
+    }
+
+    private User[] loadUsers(int[] entities) throws OXException {
+        try {
+            return services.getService(UserService.class).getUser(context, entities);
+        } catch (OXException e) {
+            if ("USR-0010".equals(e.getErrorCode())) {
+                if (null != e.getLogArgs() && 0 < e.getLogArgs().length) {
+                    Object arg = e.getLogArgs()[0];
+                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(arg, arg, CalendarUserType.INDIVIDUAL);
+                } else {
+                    throw CalendarExceptionCodes.INVALID_CALENDAR_USER.create(java.util.Arrays.toString(entities), I(0), CalendarUserType.INDIVIDUAL);
+                }
+            }
+            throw e;
+        }
+    }
+
     /**
      * Gets the calendar address for a user (as mailto URI).
      *
@@ -331,7 +509,27 @@ public class DefaultEntityResolver implements EntityResolver {
      * @return The calendar address
      */
     private static String getCalAddress(User user) {
-        return "mailto:" + user.getMail(); // TODO: IDNA.toACE
+        return "mailto:" + user.getMail(); // TODO: IDNA.toACE?
+    }
+
+    private static String extractMail(String value) {
+        URI uri;
+        try {
+            uri = new URI(value);
+        } catch (URISyntaxException e) {
+            LOG.debug("Error parsing URI \"{}\", assuming \"mailto:\" protocol as fallback.", value, e);
+            try {
+                uri = new URI("mailto", value, null);
+            } catch (URISyntaxException e2) {
+                LOG.debug("Error constructing \"mailto:\" URI for \"{}\", interpreting directly as fallback.", value, e2);
+                return value;
+            }
+        }
+        String specificPart = uri.getSchemeSpecificPart();
+        if (Strings.isNotEmpty(specificPart) && "mailto".equalsIgnoreCase(uri.getScheme())) {
+            return uri.getSchemeSpecificPart();
+        }
+        return value;
     }
 
 }

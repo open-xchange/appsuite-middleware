@@ -83,6 +83,8 @@ public class CalendarExceptionMessages implements LocalizableStrings {
 
     public static final String MOVE_OCCURRENCE_NOT_SUPPORTED_MSG = "Moving an occurrence of an event series into another folder is not supported.";
 
+    public static final String INVALID_CALENDAR_USER_MSG = "The calendar user \"%1$s\" is invalid.";
+
     /**
      * Initializes a new {@link CalendarExceptionMessages}.
      */

@@ -54,6 +54,7 @@ import java.util.TimeZone;
 import com.openexchange.chronos.Attendee;
 import com.openexchange.chronos.AttendeeField;
 import com.openexchange.chronos.CalendarUser;
+import com.openexchange.chronos.CalendarUserType;
 import com.openexchange.exception.OXException;
 
 /**
@@ -63,6 +64,49 @@ import com.openexchange.exception.OXException;
  * @since v7.10.0
  */
 public interface EntityResolver {
+
+    /**
+     * Prepares a client-supplied calendar user. This includes:
+     * <ul>
+     * <li>Resolving external entities to their corresponding internal entities, if a matching calendar user is found by the URI value</li>
+     * <li>Verifying the existence of internal calendar user entities</li>
+     * <li>Applying further static properties of internal calendar users, which typically includes the calendar user's common name and the
+     * actual calendar user address</li>
+     * </ul>
+     *
+     * @param calendarUser The calendar user to prepare
+     * @param cuType The expected calendar user type
+     * @return The passed calendar user reference, possibly enriched by the resolved static entity data if a matching internal calendar user was found
+     */
+    <T extends CalendarUser> T prepare(T calendarUser, CalendarUserType cuType) throws OXException;
+
+    /**
+     * Prepares a client-supplied attendee. This includes:
+     * <ul>
+     * <li>Resolving external entities to their corresponding internal entities, if a matching calendar user is found by the URI value</li>
+     * <li>Verifying the existence of internal calendar user entities</li>
+     * <li>Applying further static properties of internal calendar users, which typically includes the calendar user's common name and the
+     * actual calendar user address</li>
+     * </ul>
+     *
+     * @param attendee The attendee to prepare
+     * @return The passed attendee reference, possibly enriched by the resolved static entity data if a matching internal attendee was found
+     */
+    Attendee prepare(Attendee attendee) throws OXException;
+
+    /**
+     * Prepares a list of client-supplied attendees. This includes:
+     * <ul>
+     * <li>Resolving external entities to their corresponding internal entities, if a matching calendar user is found by the URI value</li>
+     * <li>Verifying the existence of internal calendar user entities</li>
+     * <li>Applying further static properties of internal calendar users, which typically includes the calendar user's common name and the
+     * actual calendar user address</li>
+     * </ul>
+     *
+     * @param attendees The attendees to prepare
+     * @return The passed attendee list, with each entry being possibly enriched by the resolved static entity data if a matching internal attendee was found
+     */
+    List<Attendee> prepare(List<Attendee> attendees) throws OXException;
 
     /**
      * Gets the user identifiers of the members of a specific internal group.
@@ -116,7 +160,7 @@ public interface EntityResolver {
      * Applies the default set of static properties for the supplied internal calendar user based on the underlying groupware object.
      * This typically includes the calendar user's common name and calendar user address for the supplied internal entity.
      *
-     * @param attendee The calendar user to apply the static entity data for
+     * @param calendarUser The calendar user to apply the static entity data for
      * @param userID The identifier of the user to prepare the attendee for
      * @return The passed calendar user reference, enriched by the resolved static entity data
      */
