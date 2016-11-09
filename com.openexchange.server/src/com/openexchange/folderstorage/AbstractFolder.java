@@ -459,6 +459,22 @@ public abstract class AbstractFolder implements Folder, Serializable {
     }
 
     /**
+     * Adds specified capability identifiers.
+     *
+     * @param capabilities The capability identifiers to add
+     */
+    public void addSupportedCapabilities(final Set<String> capabilities) {
+        if (null != capabilities && !capabilities.isEmpty()) {
+            if (null == this.supportedCapabilities) {
+                this.supportedCapabilities = new LinkedHashSet<String>(8);
+            }
+            for (String capability : capabilities) {
+                this.supportedCapabilities.add(capability);
+            }
+        }
+    }
+
+    /**
      * Adds specified capability identifier.
      *
      * @param capability The capability identifier to add

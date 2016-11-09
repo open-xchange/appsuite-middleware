@@ -197,7 +197,7 @@ public class RequestWatcherServiceImpl implements RequestWatcherService {
 
         private boolean handleEntry(RequestRegistryEntry entry, StringBuilder logBuilder) {
             // Get trace for associated thread's trace
-            Throwable trace = new RequestTrace();
+            Throwable trace = new RequestTrace((int) entry.getAge(), requestMaxAge, entry.getThread().getName());
             boolean interrupt;
             {
                 StackTraceElement[] stackTrace = entry.getStackTrace();

@@ -49,12 +49,14 @@
 
 package com.openexchange.imap;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.SecureRandom;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Random;
 import org.apache.commons.lang.RandomStringUtils;
-import com.openexchange.imap.util.Counter;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 import com.openexchange.version.Version;
 import com.sun.mail.imap.IMAPStore;
@@ -157,6 +159,17 @@ public enum IMAPClientParameters {
         }
     }
 
+    private static final String LOCAL_HOST;
+    static {
+        String fbHost;
+        try {
+            fbHost = InetAddress.getLocalHost().getHostAddress();
+        } catch (final UnknownHostException e) {
+            fbHost = "127.0.0.1";
+        }
+        LOCAL_HOST = fbHost;
+    }
+
     /**
      * Sets the default client parameters.
      *
@@ -169,7 +182,8 @@ public enum IMAPClientParameters {
 
         // Generate & set client parameters
         Map<String, String> clientParams = new LinkedHashMap<String, String>(6);
-        clientParams.put(IMAPClientParameters.ORIGINATING_IP.getParamName(), session.getLocalIp());
+        String localIp = session.getLocalIp();
+        clientParams.put(IMAPClientParameters.ORIGINATING_IP.getParamName(), Strings.isEmpty(localIp) ? LOCAL_HOST : localIp);
         clientParams.put(IMAPClientParameters.NAME.getParamName(), "Open-Xchange");
         clientParams.put(IMAPClientParameters.VERSION.getParamName(), Version.getInstance().getVersionString());
         imapStore.setClientParameters(clientParams);

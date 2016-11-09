@@ -552,7 +552,7 @@ public final class DatabaseFolderConverter {
         /*
          * assume all supported capabilities for database folders
          */
-        databaseFolder.setSupportedCapabilities(FileStorageFolder.ALL_CAPABILITIES);
+        databaseFolder.addSupportedCapabilities(FileStorageFolder.ALL_CAPABILITIES);
         return databaseFolder;
     }
 

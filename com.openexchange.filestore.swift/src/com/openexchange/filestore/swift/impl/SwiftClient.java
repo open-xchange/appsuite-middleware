@@ -213,6 +213,7 @@ public class SwiftClient {
                 for (int i = length, c = 0; i-- > 0;) {
                     ids.add(jResponse.getJSONObject(c++).getString("name"));
                 }
+                return ids;
             }
             if (HttpServletResponse.SC_NO_CONTENT == status) {
                 // Successful, but empty

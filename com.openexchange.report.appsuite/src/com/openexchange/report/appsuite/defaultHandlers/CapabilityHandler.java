@@ -428,7 +428,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         } finally {
             informationService.closeAllDBConnections();
         }
-        driveUserMetrics.put("users", driveUserMetrics.get("file-count-overall-users"));
+        driveUserMetrics.put("users", driveUserMetrics.get("file-count-overall-users") == null ? 0 : driveUserMetrics.get("file-count-overall-users"));
         driveUserMetrics.remove("file-count-overall-users");
         capSMap.put(Report.DRIVE_USER, driveUserMetrics);
         capSMap.put(Report.DRIVE_OVERALL, driveMetrics);
@@ -439,15 +439,17 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
         for (Entry<String, Integer> entry : driveUserMetrics.entrySet()) {
             Long value = totalDrive.get(entry.getKey());
+            Long newValue = entry.getValue() == null ? 0l : entry.getValue().longValue();
             if (value == null) {
-                totalDrive.put(entry.getKey(), entry.getValue().longValue());
+                totalDrive.put(entry.getKey(), newValue);
             } else {
-                if (entry.getKey().contains("min") && entry.getValue() < value) {
-                    totalDrive.put(entry.getKey(), entry.getValue().longValue());
-                } else if (entry.getKey().contains("max") && entry.getValue() > value) {
-                    totalDrive.put(entry.getKey(), entry.getValue().longValue());
-                } else if (entry.getKey().contains("total") || entry.getKey().contains("sum") || entry.getKey().contains("users"))
-                    totalDrive.put(entry.getKey(), totalDrive.get(entry.getKey()) + entry.getValue());
+                if (entry.getKey().contains("min") && newValue < value) {
+                    totalDrive.put(entry.getKey(), newValue);
+                } else if (entry.getKey().contains("max") && newValue > value) {
+                    totalDrive.put(entry.getKey(), newValue);
+                } else if (entry.getKey().contains("total") || entry.getKey().contains("sum") || entry.getKey().contains("users")) {
+                    totalDrive.put(entry.getKey(), totalDrive.get(entry.getKey()) + newValue);
+                }
             }
 
         }

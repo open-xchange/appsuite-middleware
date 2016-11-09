@@ -409,15 +409,16 @@ public final class FileStorageFolderStorage implements FolderStorage {
             throw FolderExceptionErrorMessage.UNSUPPORTED_STORAGE_TYPE.create(storageType);
         }
         FolderID fid = new FolderID(folderId);
-        FileStorageFolder fsFolder = getFolderAccess(storageParameters).getFolder(fid);
+        IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
+        FileStorageFolder fsFolder = folderAccess.getFolder(fid);
         boolean altNames = StorageParametersUtility.getBoolParameter("altNames", storageParameters);
         String accountID = FileStorageAccounts.getQualifiedID(fid.getService(), fid.getAccountId());
         Session session = storageParameters.getSession();
         FileStorageFolderImpl retval;
         if (session == null) {
-            retval = new FileStorageFolderImpl(fsFolder, accountID, storageParameters.getUserId(), storageParameters.getContextId(), altNames);
+            retval = new FileStorageFolderImpl(fsFolder, accountID, storageParameters.getUserId(), storageParameters.getContextId(), altNames, folderAccess);
         } else {
-            retval = new FileStorageFolderImpl(fsFolder, accountID, session, altNames);
+            retval = new FileStorageFolderImpl(fsFolder, accountID, session, altNames, folderAccess);
         }
         boolean hasSubfolders = fsFolder.hasSubfolders();
         retval.setTreeID(treeId);

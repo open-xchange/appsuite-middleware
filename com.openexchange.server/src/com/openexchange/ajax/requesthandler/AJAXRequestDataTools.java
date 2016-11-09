@@ -50,6 +50,8 @@
 package com.openexchange.ajax.requesthandler;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -429,6 +431,14 @@ public class AJAXRequestDataTools {
         }
 
         String pathInfo = req.getRequestURI();
+        if (pathInfo.contains("%")) {
+            try {
+                pathInfo = URLDecoder.decode(pathInfo, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                // Should never happen
+                LOG.error(e.getMessage(), e);
+            }
+        }
         final int lastIndex = pathInfo.lastIndexOf(';');
         if (lastIndex > 0) {
             pathInfo = pathInfo.substring(0, lastIndex);
