@@ -580,6 +580,9 @@ specific field data of single or multiple objects.
 | 1043 | transport_auth | String | Available since v7.6.1 Specifies the source for mail transport (SMTP) credentials. See [Credential source](#credential-source).|
 | 1044 | mail_starttls | Boolean | Available since v7.8.2 Whether to establish a secure connection to mail server via STARTTLS. |
 | 1045 | transport_starttls | Boolean | Available since v7.8.2 Whether to establish a secure connection to transport server via STARTTLS. |
+| 1046 | root_folder | String | Available since v7.8.3 Specifies the identifier of an account's root folder |
+| 1047 | mail_oauth | Integer | Available since v7.8.3 Specifies the identifier of the associated OAuth account for mail access |
+| 1048 | transport_oauth | Integer | Available since v7.8.3 Specifies the identifier of the associated OAuth account for mail transport |
 
 ### Credential source
 
