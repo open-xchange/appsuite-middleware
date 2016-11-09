@@ -85,6 +85,10 @@ public class ICalResource {
 		this(iCalString, null, null);
 	}
 
+    public Component getVCalendar() {
+        return vCalendar;
+    }
+
     public Component getVEvent() {
         List<Component> components = vCalendar.getComponents(VEVENT);
         return 0 < components.size() ? components.get(0) : null;
