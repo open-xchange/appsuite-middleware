@@ -118,18 +118,18 @@ public class BulkFolderField implements AdditionalFolderField {
     @Override
     public List<Object> getValues(List<FolderObject> folders, ServerSession session) {
         if (values.isEmpty()) {
-            warmUp(folders, session);
-        } else {
-            List<FolderObject> fl = new ArrayList<FolderObject>(folders.size());
-            for (FolderObject f : folders) {
-                Object key = f.getFullName();
-                if (!values.containsKey(key == null ? Integer.valueOf(f.getObjectID()) : key)) {
-                    fl.add(f);
-                }
+            return warmUp(folders, session);
+        }
+
+        List<FolderObject> fl = new ArrayList<FolderObject>(folders.size());
+        for (FolderObject f : folders) {
+            Object key = f.getFullName();
+            if (!values.containsKey(key == null ? Integer.valueOf(f.getObjectID()) : key)) {
+                fl.add(f);
             }
-            if (!fl.isEmpty()) {
-                warmUp(fl, session);
-            }
+        }
+        if (!fl.isEmpty()) {
+            warmUp(fl, session);
         }
         List<Object> vals = new ArrayList<Object>(folders.size());
         for (FolderObject f : folders) {
@@ -151,7 +151,7 @@ public class BulkFolderField implements AdditionalFolderField {
      * @param folders The folders
      * @param session The session
      */
-    public void warmUp(List<FolderObject> folders, ServerSession session) {
+    public List<Object> warmUp(List<FolderObject> folders, ServerSession session) {
         List<Object> vals = delegate.getValues(folders, session);
         int i = 0;
         for (FolderObject f : folders) {
@@ -159,6 +159,7 @@ public class BulkFolderField implements AdditionalFolderField {
             Object value = vals.get(i++);
             values.put(key == null ? Integer.valueOf(f.getObjectID()) : key, null == value ? NULL : value);
         }
+        return vals;
     }
 
 }
