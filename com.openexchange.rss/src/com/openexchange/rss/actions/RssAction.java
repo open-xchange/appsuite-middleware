@@ -275,7 +275,7 @@ public class RssAction implements AJAXActionService {
             } catch (IOException e) {
                 OXException oxe;
                 if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
-                    oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(url.getHost());
+                    oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, url.getHost());
                 } else {
                     oxe = RssExceptionCodes.IO_ERROR.create(e, e.getMessage(), url.toString());
                 }

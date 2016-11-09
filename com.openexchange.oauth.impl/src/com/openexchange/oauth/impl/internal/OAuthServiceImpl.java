@@ -539,7 +539,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                     } catch (URISyntaxException e) {
                         // will not happen here
                     }
-                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(url);
+                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(x.getCause(), url);
                 }
             }
             throw x;

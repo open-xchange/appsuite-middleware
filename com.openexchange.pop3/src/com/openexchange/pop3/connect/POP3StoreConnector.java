@@ -460,9 +460,9 @@ public final class POP3StoreConnector {
                 throw e;
             } catch (final MessagingException e) {
                 if (MimeMailException.isSSLHandshakeException(e)) {
-                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(server);
+                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), server);
                 }
-                
+
                 final Exception nested = e.getNextException();
                 if (nested != null) {
                     if (nested instanceof IOException) {

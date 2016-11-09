@@ -116,7 +116,7 @@ public class YahooClient {
         } catch (org.scribe.exceptions.OAuthException e) {
             // Handle Scribe's org.scribe.exceptions.OAuthException (inherits from RuntimeException)
             if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
-                throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create("social.yahooapis.com");
+                throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, "social.yahooapis.com");
             }
 
             Throwable cause = e.getCause();

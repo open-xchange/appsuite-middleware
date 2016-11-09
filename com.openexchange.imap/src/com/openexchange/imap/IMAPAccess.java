@@ -660,11 +660,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 throw MimeMailException.handleMessagingException(e, config, session);
             } catch (final MessagingException e) {
                 if (MimeMailException.isSSLHandshakeException(e)) {
-                    OXException oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(config.getServer(), e);
+                    OXException oxe = SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), config.getServer());
                     warnings.add(oxe);
                     throw oxe;
                 }
-                
+
                 Exception cause = e.getNextException();
                 if (com.sun.mail.iap.ConnectionException.class.isInstance(cause)) {
                     OXException oxe = MimeMailException.handleMessagingException(e, config, session);
@@ -678,7 +678,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     OXException oxe = MailExceptionCode.NON_SECURE_DENIED.create(config.getServer());
                     warnings.add(oxe);
                     throw oxe;
-                } 
+                }
                 warnings.add(MailExceptionCode.PING_FAILED.create(e, config.getServer(), config.getLogin(), e.getMessage()));
                 throw MimeMailException.handleMessagingException(e, config, session);
             } finally {
@@ -822,7 +822,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     }
                 }
                 if (MimeMailException.isSSLHandshakeException(e)) {
-                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(server);
+                    throw SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e.getCause(), server);
                 }
                 {
                     Exception next = e.getNextException();

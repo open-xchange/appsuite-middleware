@@ -313,7 +313,7 @@ public class GoogleApiClients {
 
     static OXException handleScribeOAuthException(OAuthException e, OAuthAccount googleAccount) {
         if (ExceptionUtils.isEitherOf(e, SSLHandshakeException.class)) {
-            return SSLExceptionCode.UNTRUSTED_CERTIFICATE.create("www.googleapis.com");
+            return SSLExceptionCode.UNTRUSTED_CERTIFICATE.create(e, "www.googleapis.com");
         }
 
         String exMessage = e.getMessage();
